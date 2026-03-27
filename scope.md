@@ -27,6 +27,12 @@ For the state, we want to make debugging easier, and persistent (if the user ref
 
 I want to use Google Drive (https://rxdb.info/replication-google-drive.html) and/or OneDrive (https://rxdb.info/replication-microsoft-onedrive.html) to sync, so users can sync without paying for a cloud. My top choice is to use rxdb.info which is offline first, can sync with the cloud, and works well with react. We need to have a safe way to store the users tokens as an offline first approach.
 
+**OAuth2 PKCE architecture note**: OneDrive supports standard PKCE for SPAs via MSAL.js (no backend needed). Google Drive non-standardly requires a `client_secret` even with PKCE, so a lightweight Cloudflare Worker (free tier: 100K requests/day) acts as an OAuth proxy for Google's token exchange only. This keeps the app fully static on GitHub Pages while securely handling Google auth at zero cost. See `docs/prd-plan.md` Architecture section for full details.
+
 We want to reuse as much components as we can. For example, we'll have multiple games with drag and drop, speech to text, and text to speech, so those should be reusable components. React Composition is a must. It should be easy to extend components.
+
+Each gameplay session should record a chronological, step-by-step history of events (e.g., game started, answer given, hint used, score awarded, game completed), like a timeline. This is useful for troubleshooting during game development, and for parents and teachers to review the performance of their students/children.
+
+Since all IndexedDB data syncs via RxDB to Google Drive/OneDrive, session histories must not grow into large files. Histories should be broken into small, bounded chunks so that sync payloads stay small and incremental. If the user needs more space in their drive, they should be able to clear old data explicitly, with separate controls for gameplay progress (scores, streaks, badges) and session history (event timelines), so clearing history to free space does not reset a child's learning progress.
 
 Every baby step of the project should have it's on commit with CI/CD working on github pages. As open-source, it shouldn't be limited to github pages only.
