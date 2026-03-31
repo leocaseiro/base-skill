@@ -80,12 +80,12 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 **Multi-child household on a single device.** Quick profile switching without separate accounts.
 
 
-| Attribute  | Description                                                                                                |
-| ---------- | ---------------------------------------------------------------------------------------------------------- |
-| Scenario   | Multiple children share one tablet/laptop (no limit on number of profiles)                                  |
+| Attribute  | Description                                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------------------------- |
+| Scenario   | Multiple children share one tablet/laptop (no limit on number of profiles)                                          |
 | Goals      | Each child has their own progress, themes, and settings; settings can optionally be shared across the entire family |
-| Key flows  | Switch profiles from the home screen; no login required                                                    |
-| Constraint | Parent PIN protects settings from children                                                                 |
+| Key flows  | Switch profiles from the home screen; no login required                                                             |
+| Constraint | Parent PIN protects settings from children                                                                          |
 
 
 ---
@@ -95,35 +95,35 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 ### Child Stories
 
 
-| ID   | As a child… | I want to…                            | So that…                                       |
-| ---- | ----------- | ------------------------------------- | ---------------------------------------------- |
-| C-01 | Pre-K child | Hear the instructions read aloud      | I can play even if I can't read                |
-| C-02 | Any child   | Pick a game from pictures/icons       | I can find a game without reading              |
-| C-03 | Any child   | See my stars and progress             | I feel rewarded for learning                   |
-| C-04 | Any child   | Bookmark my favorite games            | I can find them quickly next time              |
-| C-05 | Any child   | See my recently played games          | I can continue where I left off                |
-| C-06 | Any child   | Choose my theme (ocean, space, etc.)  | The app feels like mine                        |
-| C-07 | Any child   | Play games offline on a plane         | Learning doesn't stop without Wi-Fi (games may require individual download depending on size) |
-| C-08 | Any child   | Hear "Great job!" when I get it right | I stay motivated                               |
-| C-09 | Any child   | Try again after a wrong answer        | I don't feel punished for mistakes             |
-| C-10 | Any child   | Read instructions as text or listen to audio | I can choose how I learn; parents can disable audio to encourage reading practice |
+| ID   | As a child… | I want to…                                   | So that…                                                                                      |
+| ---- | ----------- | -------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| C-01 | Pre-K child | Hear the instructions read aloud             | I can play even if I can't read                                                               |
+| C-02 | Any child   | Pick a game from pictures/icons              | I can find a game without reading                                                             |
+| C-03 | Any child   | See my stars and progress                    | I feel rewarded for learning                                                                  |
+| C-04 | Any child   | Bookmark my favorite games                   | I can find them quickly next time                                                             |
+| C-05 | Any child   | See my recently played games                 | I can continue where I left off                                                               |
+| C-06 | Any child   | Choose my theme (ocean, space, etc.)         | The app feels like mine                                                                       |
+| C-07 | Any child   | Play games offline on a plane                | Learning doesn't stop without Wi-Fi (games may require individual download depending on size) |
+| C-08 | Any child   | Hear "Great job!" when I get it right        | I stay motivated                                                                              |
+| C-09 | Any child   | Try again after a wrong answer               | I don't feel punished for mistakes                                                            |
+| C-10 | Any child   | Read instructions as text or listen to audio | I can choose how I learn; parents can disable audio to encourage reading practice             |
 
 
 ### Parent/Guardian Stories
 
 
-| ID   | As a parent… | I want to…                                  | So that…                                     |
-| ---- | ------------ | ------------------------------------------- | -------------------------------------------- |
-| P-01 | Parent       | Set up separate profiles per child          | Each child has independent progress          |
-| P-02 | Parent       | Protect settings with a PIN                 | Children can't change the difficulty         |
-| P-03 | Parent       | Review my child's session history           | I understand their learning patterns         |
-| P-04 | Parent       | Set retries, timer, and difficulty per game | I customise for each child's needs           |
+| ID   | As a parent… | I want to…                                              | So that…                                     |
+| ---- | ------------ | ------------------------------------------------------- | -------------------------------------------- |
+| P-01 | Parent       | Set up separate profiles per child                      | Each child has independent progress          |
+| P-02 | Parent       | Protect settings with a PIN                             | Children can't change the difficulty         |
+| P-03 | Parent       | Review my child's session history                       | I understand their learning patterns         |
+| P-04 | Parent       | Set retries, timer, and difficulty per game             | I customise for each child's needs           |
 | P-05 | Parent       | Connect to cloud storage (e.g., Google Drive, OneDrive) | Progress syncs across our devices            |
-| P-06 | Parent       | Select a TTS voice per language             | I can pick a voice that my child responds to |
-| P-07 | Parent       | Clear old session history                   | I free up cloud storage space                |
-| P-08 | Parent       | Reset a child's progress independently      | Without losing session event history         |
-| P-09 | Parent       | See when data was last synced               | I know sync is working                       |
-| P-10 | Parent       | Change a child's theme                      | I help my child personalise their app        |
+| P-06 | Parent       | Select a TTS voice per language                         | I can pick a voice that my child responds to |
+| P-07 | Parent       | Clear old session history                               | I free up cloud storage space                |
+| P-08 | Parent       | Reset a child's progress independently                  | Without losing session event history         |
+| P-09 | Parent       | See when data was last synced                           | I know sync is working                       |
+| P-10 | Parent       | Change a child's theme                                  | I help my child personalise their app        |
 
 
 ### Family (Shared Device) Stories
@@ -221,6 +221,17 @@ Overrides stored in `game_config_overrides` collection, per profile.
 
 - **4–6 pre-defined themes**: Ocean, Forest, Space, Rainbow, Sunset, Night. Each defines color palette, typography weight, icon style, and background pattern.
 - **Default typography**: [Edu NSW ACT Foundation](https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation) — a handwriting font designed for Australian school children. Young children can be confused by unfamiliar letterforms, so the default font is consistent with what they learn in school. All games use this font by default to maintain visual consistency.
+  - **Alternative fonts**:  (TODO: verify license)
+    - [Andika](https://fonts.google.com/specimen/Andika)
+    - [All Australian fonts from Tina Anderson and Corey Anderson](https://fonts.google.com/?preview.script=Latn&query=Corey+Anderson)
+    - Comic Sans
+    - Century Gothic
+    - KG Neatly Printed
+    - [Open Sans](https://fonts.google.com/specimen/Open+Sans)
+    - [Gill Sans Infant](https://freefonts.co/fonts/gill-sans-infant-std-regular)
+    - [OpenDyslexic](https://opendyslexic.org/#)
+    - [Sylexiad](https://www.sylexiad.com/)
+    - [Lexend](https://fonts.google.com/specimen/Lexend?preview.script=Latn)
 - **Parent font override**: Parents can change the font family per profile or per family from a curated list of child-friendly fonts. This is useful for families in regions with different handwriting standards.
 - **Clone and modify**: Any pre-defined theme can be cloned. Clone owner can change colors and fonts.
 - **Scope**: Theme can be set per child profile or per family (shared across all profiles).
@@ -313,13 +324,13 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 ### 6.1 Performance
 
 
-| Metric                                       | Target                                        |
-| -------------------------------------------- | --------------------------------------------- |
-| Time to Interactive (first load, warm cache) | < 2 seconds                                   |
-| Time to Interactive (cold cache, 3G)         | < 5 seconds                                   |
+| Metric                                       | Target                                                           |
+| -------------------------------------------- | ---------------------------------------------------------------- |
+| Time to Interactive (first load, warm cache) | < 2 seconds                                                      |
+| Time to Interactive (cold cache, 3G)         | < 5 seconds                                                      |
 | Game frame rate                              | 60fps animations (CSS/DOM for UI, canvas only for drawing games) |
-| Bundle size (initial JS, gzipped)            | < 200KB                                       |
-| Lighthouse Performance score                 | ≥ 90                                          |
+| Bundle size (initial JS, gzipped)            | < 200KB                                                          |
+| Lighthouse Performance score                 | ≥ 90                                                             |
 
 
 - Lazy-load game assets (images, audio) at game load time, not app start.
@@ -346,13 +357,13 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 ### 6.4 Compatibility
 
 
-| Platform         | Requirement                                      |
-| ---------------- | ------------------------------------------------ |
-| Desktop browsers | Chrome 100+, Firefox 100+, Safari 15+, Edge 100+ |
-| Mobile browsers  | iOS Safari 15+, Android Chrome 100+              |
-| Screen sizes     | 320px wide minimum; optimized for 768px+         |
+| Platform         | Requirement                                                                            |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| Desktop browsers | Chrome 100+, Firefox 100+, Safari 15+, Edge 100+                                       |
+| Mobile browsers  | iOS Safari 15+, Android Chrome 100+                                                    |
+| Screen sizes     | 320px wide minimum; optimized for 768px+                                               |
 | Zoom             | Users can zoom in/out via pinch or UI controls if game layout doesn't fit their device |
-| Touch            | Pointer Events API for consistent mouse + touch  |
+| Touch            | Pointer Events API for consistent mouse + touch                                        |
 
 
 ### 6.5 Privacy and Data
@@ -376,15 +387,15 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 ## 7. Constraints
 
 
-| Constraint                 | Detail                                                                                                                                       |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **JAMstack only**          | No backend server. All logic runs client-side.                                                                                               |
-| **Static hosting**         | Primary deployment target: GitHub Pages. Output is static HTML/JS/CSS.                                                                       |
-| **No server-side auth**    | OAuth2 via PKCE only. OneDrive: MSAL.js client-side. Google Drive: Cloudflare Worker proxy for `client_secret` (see `docs/architecture.md`). |
-| **Free cloud sync only**   | Cloud storage providers with free personal tiers (initially Google Drive and OneDrive). No paid sync service.                                 |
-| **GPL v3**                 | All app code in this repo must remain GPL v3.                                                                                                |
-| **No ads**                 | Hard requirement. No advertising SDK, no monetization via ads.                                                                               |
-| **No `any` in TypeScript** | Strict TypeScript everywhere. CI enforces this.                                                                                              |
+| Constraint                 | Detail                                                                                                                                                                              |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **JAMstack only**          | No backend server. All logic runs client-side.                                                                                                                                      |
+| **Static hosting**         | Primary deployment target: GitHub Pages. Output is static HTML/JS/CSS.                                                                                                              |
+| **No server-side auth**    | OAuth2 via PKCE only. OneDrive: MSAL.js client-side. Google Drive: Cloudflare Worker proxy for `client_secret` (see `docs/architecture.md`).                                        |
+| **Free cloud sync only**   | Cloud storage providers with free personal tiers (initially Google Drive and OneDrive). No paid sync service.                                                                       |
+| **GPL v3**                 | All app code in this repo must remain GPL v3.                                                                                                                                       |
+| **No ads**                 | Hard requirement. No advertising SDK, no monetization via ads.                                                                                                                      |
+| **No `any` in TypeScript** | Strict TypeScript everywhere. CI enforces this.                                                                                                                                     |
 | **CSS/DOM for UI**         | No canvas/WebGL for UI — CSS/DOM is preferred for accessibility, responsive layout, and tooling. Canvas reserved for drawing-input games (e.g., `LetterTracer`). See 6.1 rationale. |
 
 
@@ -393,15 +404,15 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 ## 8. Competitors Analysis
 
 
-| Product                        | Strengths                       | Weaknesses                            | Differentiation                            |
-| ------------------------------ | ------------------------------- | ------------------------------------- | ------------------------------------------ |
+| Product                        | Strengths                                                                   | Weaknesses                                        | Differentiation                                 |
+| ------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------- |
 | **ABCya**                      | Large game library, free tier, has offline app, ads removed for subscribers | Subscription-based for ad-free/offline experience | BaseSkill: fully free, no ads ever, open-source |
-| **Starfall**                   | Structured reading curriculum   | Subscription required for full access | BaseSkill: fully free                      |
-| **Khan Academy Kids**          | High quality, structured        | Requires account, cloud-dependent     | BaseSkill: no account, offline-first       |
-| **Duolingo Kids / LingoKids**  | Fun UX, gamified                | Language learning only, subscription  | BaseSkill: broader subjects, free          |
-| **ABC Education (abc.net.au)** | Australian curriculum-aligned   | Browser-only, no offline, limited     | BaseSkill: offline, sync, customizable     |
-| **readabilitytutor.com**       | AI-powered reading assessment   | Paid, requires connectivity           | BaseSkill: STT-based reading, offline      |
-| **iTrace**                     | Excellent letter tracing on iOS | iOS only, paid                        | BaseSkill: web-based, free, cross-platform |
+| **Starfall**                   | Structured reading curriculum                                               | Subscription required for full access             | BaseSkill: fully free                           |
+| **Khan Academy Kids**          | High quality, structured                                                    | Requires account, cloud-dependent                 | BaseSkill: no account, offline-first            |
+| **Duolingo Kids / LingoKids**  | Fun UX, gamified                                                            | Language learning only, subscription              | BaseSkill: broader subjects, free               |
+| **ABC Education (abc.net.au)** | Australian curriculum-aligned                                               | Browser-only, no offline, limited                 | BaseSkill: offline, sync, customizable          |
+| **readabilitytutor.com**       | AI-powered reading assessment                                               | Paid, requires connectivity                       | BaseSkill: STT-based reading, offline           |
+| **iTrace**                     | Excellent letter tracing on iOS                                             | iOS only, paid                                    | BaseSkill: web-based, free, cross-platform      |
 
 
 **BaseSkill's unique position:** The only free, open-source, offline-first, privacy-respecting educational PWA with family sharing, cloud sync, and full accessibility support.
@@ -445,5 +456,3 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 | **PKCE**            | Proof Key for Code Exchange — OAuth2 extension for SPAs without client secrets.                 |
 | **BFF**             | Backend-for-Frontend — a lightweight proxy (Cloudflare Worker) for Google OAuth token exchange. |
 | **Event Bus**       | Pub/sub system for in-app events, used by session recorder and plugin hooks.                    |
-
-
