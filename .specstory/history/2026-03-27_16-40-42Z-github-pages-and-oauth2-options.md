@@ -814,3 +814,237 @@ mkdir -p /Users/leocaseiro/Sites/base-skill/docs
 <summary>Tool use: **run_terminal_command_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+Now I'll copy the PRD content into the repo, stripping the Cursor plan frontmatter metadata since that's tooling-specific and not part of the actual document.
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/docs/prd-plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<think><details><summary>Thought Process</summary>
+Good, I've written the PRD file. I noticed that the original PRD had a statement about "OAuth2 with PKCE (no server needed)" in the architecture section. I've updated that section in the copy to reflect the new finding about Google requiring a BFF. Now let me also update the Constraints section in the PRD to match.
+
+Wait, actually - looking at the plan more carefully, the plan says:
+1. Copy the PRD plan file into the repo at `docs/prd-plan.md` - I did this, and I also updated the architecture section to reflect the OAuth findings
+2. Note in `scope.md` or PRD that Google Drive OAuth requires a free Cloudflare Worker BFF
+
+
+Let me mark the first todo as complete and move on to the second. Looking back at what I wrote in the Architecture section, I already incorporated the OAuth BFF details there - I simplified the original description about PKCE to focus on the core flow without the "no server needed" claim, since Google actually does require that BFF layer.
+
+Now I need to check scope.md since that's where the main project description lives in the repo, and I should make sure the OAuth architecture notes are reflected there too.</details></think>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+The PRD has been copied with the OAuth architecture findings already incorporated into the Architecture section. Now let me mark the first todo done and move to the second.
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Copy the PRD plan file into the repo at docs/prd-plan.md (not symlink) for proper version control",
+      "id": "copy-prd",
+      "status": "completed"
+    },
+    {
+      "content": "Note in scope.md or PRD that Google Drive OAuth requires a free Cloudflare Worker BFF, while OneDrive works with pure PKCE",
+      "id": "update-arch-notes",
+      "status": "in_progress"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Copy the PRD plan file into the repo at docs/prd-plan.md (not symlink) for proper version control",
+      "id": "copy-prd",
+      "status": "in_progress"
+    },
+    {
+      "content": "Note in scope.md or PRD that Google Drive OAuth requires a free Cloudflare Worker BFF, while OneDrive works with pure PKCE",
+      "id": "update-arch-notes",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/scope.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+Now I'll update `scope.md` to add the OAuth architecture clarification in the cloud sync paragraph.
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/scope.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Copy the PRD plan file into the repo at docs/prd-plan.md (not symlink) for proper version control",
+      "id": "copy-prd",
+      "status": "completed"
+    },
+    {
+      "content": "Note in scope.md or PRD that Google Drive OAuth requires a free Cloudflare Worker BFF, while OneDrive works with pure PKCE",
+      "id": "update-arch-notes",
+      "status": "completed"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Copy the PRD plan file into the repo at docs/prd-plan.md (not symlink) for proper version control",
+      "id": "copy-prd",
+      "status": "completed"
+    },
+    {
+      "content": "Note in scope.md or PRD that Google Drive OAuth requires a free Cloudflare Worker BFF, while OneDrive works with pure PKCE",
+      "id": "update-arch-notes",
+      "status": "in_progress"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+Let me verify both files look correct.
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/scope.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: wc -l /Users/leocaseiro/Sites/base-skill/docs/prd-plan.md && head -5 /Users/leocaseiro/Sites/base-skill/docs/prd-plan.md</summary>
+
+```bash
+wc -l /Users/leocaseiro/Sites/base-skill/docs/prd-plan.md && head -5 /Users/leocaseiro/Sites/base-skill/docs/prd-plan.md
+```
+
+```
+     231 /Users/leocaseiro/Sites/base-skill/docs/prd-plan.md
+# BaseSkill PRD and Design Documents
+
+## License
+
+**GPL v3** for the open-source PWA repository. All derivative works of this codebase must also be open-sourced under GPL v3.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+Both tasks are complete. Here's a summary of what was done:
+
+1. **Copied the PRD into `docs/prd-plan.md`** -- The full PRD content is now in the repo for version control (without the Cursor plan metadata frontmatter). I also incorporated the OAuth PKCE findings directly into the Architecture section of the copy, adding a new "OAuth Architecture (Google Drive BFF)" subsection that documents the Cloudflare Worker pattern and the difference between Google and Microsoft's PKCE support.
+
+2. **Updated `scope.md`** -- Added an "OAuth2 PKCE architecture note" paragraph after the cloud sync description, summarizing that OneDrive works with pure client-side PKCE while Google Drive requires a free Cloudflare Worker proxy, and pointing to the full details in `docs/prd-plan.md`.

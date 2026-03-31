@@ -381,4 +381,552 @@ Now I need to update the plan document with all the session history feature chan
 1. **Frontmatter todos** - Update the prd, data-model, architecture, game-engine, and ui-ux todo descriptions
 2. **Section 1 (PRD)** - Add session history and data cleanup to functional requirements
 3. **Section 2 (Architecture)** - Add chunking strategy and session recorder
-4. **Section 3 (Data Model)** - Add session_history, session_history_index collections and chun</details></think>
+4. **Section 3 (Data Model)** - Add session_history, session_history_index collections and chunking rules
+
+
+5. **Section 4 (Game Engine)** - Add session recorder hook
+6. **Section 5 (UI/UX)** - Add session history viewer and data management screens
+7. **Section 8 (Testing)** - Add session history tests
+
+Let me work through all of these edits now.</details></think>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+Now I'll update all the relevant sections. Let me make the edits across the plan.
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Add gameplay session history, chunked sync storage, and data lifecycle management paragraphs to scope.md",
+      "id": "update-scope",
+      "status": "completed"
+    },
+    {
+      "content": "Update PRD section of the plan with session history and data cleanup functional requirements",
+      "id": "update-plan-prd",
+      "status": "in_progress"
+    },
+    {
+      "content": "Update data model section with session_history, session_history_index collections and chunking rules",
+      "id": "update-plan-data-model",
+      "status": "pending"
+    },
+    {
+      "content": "Update architecture section with chunking strategy for sync and session recorder middleware",
+      "id": "update-plan-architecture",
+      "status": "pending"
+    },
+    {
+      "content": "Update game engine section with session recorder hook in the game lifecycle",
+      "id": "update-plan-game-engine",
+      "status": "pending"
+    },
+    {
+      "content": "Update UI/UX section with session history viewer and data management screens",
+      "id": "update-plan-ui-ux",
+      "status": "pending"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Add gameplay session history, chunked sync storage, and data lifecycle management paragraphs to scope.md",
+      "id": "update-scope",
+      "status": "completed"
+    },
+    {
+      "content": "Update PRD section of the plan with session history and data cleanup functional requirements",
+      "id": "update-plan-prd",
+      "status": "pending"
+    },
+    {
+      "content": "Update data model section with session_history, session_history_index collections and chunking rules",
+      "id": "update-plan-data-model",
+      "status": "pending"
+    },
+    {
+      "content": "Update architecture section with chunking strategy for sync and session recorder middleware",
+      "id": "update-plan-architecture",
+      "status": "pending"
+    },
+    {
+      "content": "Update game engine section with session recorder hook in the game lifecycle",
+      "id": "update-plan-game-engine",
+      "status": "pending"
+    },
+    {
+      "content": "Update UI/UX section with session history viewer and data management screens",
+      "id": "update-plan-ui-ux",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+Good, frontmatter updated. Now the body sections. Let me update them all.
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Add gameplay session history, chunked sync storage, and data lifecycle management paragraphs to scope.md",
+      "id": "update-scope",
+      "status": "completed"
+    },
+    {
+      "content": "Update PRD section of the plan with session history and data cleanup functional requirements",
+      "id": "update-plan-prd",
+      "status": "completed"
+    },
+    {
+      "content": "Update data model section with session_history, session_history_index collections and chunking rules",
+      "id": "update-plan-data-model",
+      "status": "pending"
+    },
+    {
+      "content": "Update architecture section with chunking strategy for sync and session recorder middleware",
+      "id": "update-plan-architecture",
+      "status": "in_progress"
+    },
+    {
+      "content": "Update game engine section with session recorder hook in the game lifecycle",
+      "id": "update-plan-game-engine",
+      "status": "pending"
+    },
+    {
+      "content": "Update UI/UX section with session history viewer and data management screens",
+      "id": "update-plan-ui-ux",
+      "status": "pending"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Add gameplay session history, chunked sync storage, and data lifecycle management paragraphs to scope.md",
+      "id": "update-scope",
+      "status": "completed"
+    },
+    {
+      "content": "Update PRD section of the plan with session history and data cleanup functional requirements",
+      "id": "update-plan-prd",
+      "status": "in_progress"
+    },
+    {
+      "content": "Update data model section with session_history, session_history_index collections and chunking rules",
+      "id": "update-plan-data-model",
+      "status": "pending"
+    },
+    {
+      "content": "Update architecture section with chunking strategy for sync and session recorder middleware",
+      "id": "update-plan-architecture",
+      "status": "pending"
+    },
+    {
+      "content": "Update game engine section with session recorder hook in the game lifecycle",
+      "id": "update-plan-game-engine",
+      "status": "pending"
+    },
+    {
+      "content": "Update UI/UX section with session history viewer and data management screens",
+      "id": "update-plan-ui-ux",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+Now the data model section.
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+Now the game engine section.
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+Now the UI/UX section.
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+Finally, update the testing section and mark all todos complete.
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/alphanumbers_prd_documents_d9b0c171.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Add gameplay session history, chunked sync storage, and data lifecycle management paragraphs to scope.md",
+      "id": "update-scope",
+      "status": "completed"
+    },
+    {
+      "content": "Update PRD section of the plan with session history and data cleanup functional requirements",
+      "id": "update-plan-prd",
+      "status": "completed"
+    },
+    {
+      "content": "Update data model section with session_history, session_history_index collections and chunking rules",
+      "id": "update-plan-data-model",
+      "status": "completed"
+    },
+    {
+      "content": "Update architecture section with chunking strategy for sync and session recorder middleware",
+      "id": "update-plan-architecture",
+      "status": "completed"
+    },
+    {
+      "content": "Update game engine section with session recorder hook in the game lifecycle",
+      "id": "update-plan-game-engine",
+      "status": "completed"
+    },
+    {
+      "content": "Update UI/UX section with session history viewer and data management screens",
+      "id": "update-plan-ui-ux",
+      "status": "completed"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Add gameplay session history, chunked sync storage, and data lifecycle management paragraphs to scope.md",
+      "id": "update-scope",
+      "status": "completed"
+    },
+    {
+      "content": "Update PRD section of the plan with session history and data cleanup functional requirements",
+      "id": "update-plan-prd",
+      "status": "completed"
+    },
+    {
+      "content": "Update data model section with session_history, session_history_index collections and chunking rules",
+      "id": "update-plan-data-model",
+      "status": "pending"
+    },
+    {
+      "content": "Update architecture section with chunking strategy for sync and session recorder middleware",
+      "id": "update-plan-architecture",
+      "status": "in_progress"
+    },
+    {
+      "content": "Update game engine section with session recorder hook in the game lifecycle",
+      "id": "update-plan-game-engine",
+      "status": "pending"
+    },
+    {
+      "content": "Update UI/UX section with session history viewer and data management screens",
+      "id": "update-plan-ui-ux",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-max-thinking)**_
+
+All done. Here's a summary of everything that was updated in the PRD plan:
+
+**Section 1 (PRD)** -- Added two new functional requirements: Gameplay Session History (chronological event timeline per session, reviewable by parents/teachers) and Data Cleanup Controls (separate clear options for progress vs. history, with date-range filter and confirmation dialogs).
+
+**Section 2 (Architecture)** -- Added chunked session history sync strategy under Cloud Sync Architecture: documents capped at ~200 events / ~50KB, automatic rollover to new chunks, lightweight index collection for fast listing without pulling full event data.
+
+**Section 3 (Data Model)** -- Added two new collections (`session_history` with chunking fields, `session_history_index` with summary fields), chunking rules, data lifecycle/cleanup with cascading deletes, and noted that session history is append-only (no conflict resolution needed).
+
+**Section 4 (Game Engine)** -- Added Session Recorder middleware that subscribes to the game event bus, handles chunking transparently, and writes the index summary at session end.
+
+**Section 5 (UI/UX)** -- Added Session History Viewer (timeline view, filterable, lazy-loads chunks) and Data Management Screen (storage estimates, separate clear buttons, date-range picker).
+
+**Section 8 (Testing)** -- Added session history tests (event recording, chunk rollover, index accuracy, cleanup cascade) and updated test data fixtures.
