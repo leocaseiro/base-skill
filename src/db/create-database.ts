@@ -6,6 +6,7 @@ import type { BaseSkillDatabase } from './types'
 
 const DB_NAME = 'baseskill-data-test'
 
+/** Memory storage for unit tests; production path uses Dexie (Task 5). */
 export async function createTestDatabase(): Promise<BaseSkillDatabase> {
   const db = await createRxDatabase<BaseSkillDatabase>({
     name: `${DB_NAME}-${nanoid()}`,
