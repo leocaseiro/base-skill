@@ -12,4 +12,23 @@ describe('createTestDatabase', () => {
     db = await createTestDatabase()
     expect(db.app_meta).toBeDefined()
   })
+
+  it('adds all collections', async () => {
+    db = await createTestDatabase()
+    const names = [
+      'app_meta',
+      'profiles',
+      'progress',
+      'settings',
+      'game_config_overrides',
+      'bookmarks',
+      'themes',
+      'session_history',
+      'session_history_index',
+      'sync_meta',
+    ] as const
+    for (const name of names) {
+      expect(db[name]).toBeDefined()
+    }
+  })
 })
