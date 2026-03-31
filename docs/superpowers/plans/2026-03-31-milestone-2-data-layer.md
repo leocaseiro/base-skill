@@ -18,10 +18,9 @@
 
 ## File structure (create / modify)
 
-
 | Path                                            | Responsibility                                                                                                                                                                |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `package.json`                                  | Add `rxdb`, `dexie`, `react-i18next`, `i18next`; devDeps `fake-indexeddb`, `@types/`* if needed; `nanoid` if missing.                                                         |
+| `package.json`                                  | Add `rxdb`, `dexie`, `react-i18next`, `i18next`; devDeps `fake-indexeddb`, `@types/`\* if needed; `nanoid` if missing.                                                        |
 | `src/db/types.ts`                               | Exported `BaseSkillDatabase` / collection name union.                                                                                                                         |
 | `src/db/schemas/*.ts`                           | One module per collection: RxDB-compatible `RxJsonSchema` literals transcribed from `docs/data-model.md` §2.1–2.10.                                                           |
 | `src/db/schemas/index.ts`                       | Re-exports + `MAX_SCHEMA_VERSION` helper (see data-model §6).                                                                                                                 |
@@ -56,7 +55,6 @@
 | `src/test-setup.ts`                             | Register `fake-indexeddb/auto` before tests.                                                                                                                                  |
 | `vitest.config.ts`                              | Unchanged unless test globs need `src/db/**/*.test.ts`.                                                                                                                       |
 | `e2e/smoke.spec.ts`                             | Assert navigation under `#/en/...` (hash router).                                                                                                                             |
-
 
 ---
 
@@ -233,7 +231,9 @@ export async function createTestDatabase(): Promise<BaseSkillDatabase> {
   return db
 }
 
-export async function destroyTestDatabase(db?: BaseSkillDatabase): Promise<void> {
+export async function destroyTestDatabase(
+  db?: BaseSkillDatabase,
+): Promise<void> {
   if (db) await db.remove()
 }
 ```
@@ -509,7 +509,7 @@ Expected: **PASS** (commit fixes if any).
 - Create: `src/routes/index.tsx`
 - Create: `src/routes/$locale/route.tsx`
 - Move: `src/routes/_app.tsx` → `src/routes/$locale/_app.tsx`
-- Move: `src/routes/_app/`** → `src/routes/$locale/_app/**`
+- Move: `src/routes/_app/`** → `src/routes/$locale/\_app/**`
 - Delete: empty `src/routes/_app/` if unused
 - Modify: every moved route’s `createFileRoute(...)` path (TanStack will error until paths match; use `yarn dev` to see expected ids)
 - Test: update `src/routes/_app/index.test.tsx` path → `src/routes/$locale/_app/index.test.tsx`; fix imports
@@ -567,7 +567,7 @@ git add 'src/routes/$locale/route.tsx'
 git commit -m "feat(router): locale layout and i18n sync"
 ```
 
-- **Step 3: Move `src/routes/_app/**` → `src/routes/$locale/_app/**`**; fix every `createFileRoute('…')` id; update tests (`__root.test.tsx`, etc.); run `yarn dev` to regenerate `routeTree.gen.ts`.
+- **Step 3: Move `src/routes/\_app/**`→`src/routes/$locale/\_app/**`**; fix every `createFileRoute('…')` id; update tests (`__root.test.tsx`, etc.); run `yarn dev` to regenerate `routeTree.gen.ts`.
 
 **Commit:**
 
@@ -807,4 +807,3 @@ Expected: all **PASS** (commit any lint/type fixes immediately if needed).
 - **RxDB API drift:** If imports fail, consult current RxDB docs (`rxdb` version in `yarn.lock`) and adjust `create-database.ts` in one focused commit.
 - **Dexie vs premium IndexedDB:** Do not adopt RxDB’s premium IndexedDB-only adapter; Dexie + `storage-dexie` is the supported **free** persistence path for this repo.
 - **Regenerated files:** Never hand-edit `src/routeTree.gen.ts`; fix file-route paths and run dev/build.
-

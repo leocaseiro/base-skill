@@ -37,7 +37,10 @@ export const sessionHistorySchema: RxJsonSchema<SessionHistoryDoc> = {
           payload: { type: 'object', additionalProperties: true },
           result: {
             oneOf: [
-              { type: 'string', enum: ['correct', 'incorrect', 'skipped', 'timeout'] },
+              {
+                type: 'string',
+                enum: ['correct', 'incorrect', 'skipped', 'timeout'],
+              },
               { type: 'null' },
             ],
           },
@@ -49,6 +52,14 @@ export const sessionHistorySchema: RxJsonSchema<SessionHistoryDoc> = {
     },
     createdAt: { type: 'string', format: 'date-time' },
   },
-  required: ['id', 'sessionId', 'profileId', 'gameId', 'chunkIndex', 'events', 'createdAt'],
+  required: [
+    'id',
+    'sessionId',
+    'profileId',
+    'gameId',
+    'chunkIndex',
+    'events',
+    'createdAt',
+  ],
   additionalProperties: false,
 }

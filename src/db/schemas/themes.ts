@@ -49,7 +49,14 @@ export const themesSchema: RxJsonSchema<ThemeDoc> = {
         text: { type: 'string', pattern: '^#[0-9A-Fa-f]{6}$' },
         accent: { type: 'string', pattern: '^#[0-9A-Fa-f]{6}$' },
       },
-      required: ['primary', 'secondary', 'background', 'surface', 'text', 'accent'],
+      required: [
+        'primary',
+        'secondary',
+        'background',
+        'surface',
+        'text',
+        'accent',
+      ],
       additionalProperties: false,
     },
     typography: {
@@ -71,6 +78,14 @@ export const themesSchema: RxJsonSchema<ThemeDoc> = {
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
   },
-  required: ['id', 'name', 'isPreset', 'colors', 'typography', 'createdAt', 'updatedAt'],
+  required: [
+    'id',
+    'name',
+    'isPreset',
+    'colors',
+    'typography',
+    'createdAt',
+    'updatedAt',
+  ],
   additionalProperties: false,
 }
