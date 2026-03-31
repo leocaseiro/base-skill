@@ -1,7 +1,7 @@
 # CI/CD Design Document — BaseSkill
 
-**Project:** BaseSkill — free, open-source, offline-first educational PWA for children  
-**Stack:** TanStack Start · TanStack Router · React · TypeScript (strict) · Vite · GitHub Actions · GitHub Pages  
+**Project:** BaseSkill — free, open-source, offline-first educational PWA for children
+**Stack:** TanStack Start · TanStack Router · React · TypeScript (strict) · Vite · GitHub Actions · GitHub Pages
 **License:** GPL v3
 
 ---
@@ -69,7 +69,7 @@ All workflow files live in `.github/workflows/`.
 
 ### a) `ci.yml` — Pull Request / Push CI
 
-**Triggers:** push to any branch, pull request targeting `main`.  
+**Triggers:** push to any branch, pull request targeting `main`.
 **Purpose:** gate every PR; all four jobs must pass before merge is allowed.
 
 ```yaml
@@ -80,7 +80,7 @@ on:
   push:
     branches: ['**']
   pull_request:
-    branches: [main]
+    branches: [master]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -197,7 +197,7 @@ export default defineConfig({
 
 ### b) `e2e.yml` — E2E Tests
 
-**Triggers:** push to `main`, pull request to `main`, scheduled weekly (Sunday midnight UTC).  
+**Triggers:** push to `main`, pull request to `main`, scheduled weekly (Sunday midnight UTC).
 **Purpose:** cross-browser functional tests and accessibility audits.
 
 ```yaml
@@ -206,9 +206,9 @@ name: E2E Tests
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
   schedule:
     - cron: '0 0 * * 0' # weekly — Sunday at 00:00 UTC
   workflow_dispatch:
@@ -279,7 +279,7 @@ test('@a11y Home page has no accessibility violations', async ({ page }) => {
 
 ### c) `deploy.yml` — Deploy to GitHub Pages
 
-**Triggers:** push to `main` (after CI passes via `needs`).  
+**Triggers:** push to `main` (after CI passes via `needs`).
 **Purpose:** build, stamp version metadata, and deploy `dist/` to GitHub Pages.
 
 ```yaml
@@ -288,7 +288,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 concurrency:
@@ -366,7 +366,7 @@ jobs:
 
 ### d) `visual-regression.yml` — Visual Regression
 
-**Triggers:** pull request to `main`, manual dispatch (`workflow_dispatch`).  
+**Triggers:** pull request to `main`, manual dispatch (`workflow_dispatch`).
 **Purpose:** screenshot comparison against committed baselines to catch unintended UI changes.
 
 ```yaml
@@ -375,7 +375,7 @@ name: Visual Regression
 
 on:
   pull_request:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 concurrency:
