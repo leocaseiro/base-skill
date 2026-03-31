@@ -105,7 +105,7 @@ Set up RxDB and the foundational systems that everything else depends on.
 
 - **Event bus / plugin hook system** -- pub/sub for app events, extension point registration
 - **i18n setup** -- react-i18next (or lighter alternative), `en` + `pt-BR` translation files, namespace structure (common, games, settings, encouragements); integrate with TanStack Router for locale-aware routes if needed
-- **Theme engine** -- load themes from RxDB `themes` collection, 4-6 pre-defined theme seed data, CSS variable injection, clone-and-modify logic
+- **Theme engine** -- load themes from RxDB `themes` collection, **two** pre-defined theme seeds for M2 (more presets later), CSS variable injection, clone-and-modify logic
 - **Speech services** -- TTS wrapper (`SpeechOutput`), STT wrapper (`SpeechInput`), voice enumeration, fallback handling
 
 ---
