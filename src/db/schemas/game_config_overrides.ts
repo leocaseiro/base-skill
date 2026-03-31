@@ -30,10 +30,7 @@ export const gameConfigOverridesSchema: RxJsonSchema<GameConfigOverridesDoc> = {
       ],
     },
     timerDuration: {
-      oneOf: [
-        { type: 'integer', minimum: 0, multipleOf: 1 },
-        { type: 'null' },
-      ],
+      oneOf: [{ type: 'integer', minimum: 0, multipleOf: 1 }, { type: 'null' }],
     },
     alwaysWin: {
       oneOf: [{ type: 'boolean' }, { type: 'null' }],

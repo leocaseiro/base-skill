@@ -32,6 +32,14 @@ export const profilesSchema: RxJsonSchema<ProfileDoc> = {
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
   },
-  required: ['id', 'name', 'gradeLevel', 'language', 'isActive', 'createdAt', 'updatedAt'],
+  required: [
+    'id',
+    'name',
+    'gradeLevel',
+    'language',
+    'isActive',
+    'createdAt',
+    'updatedAt',
+  ],
   additionalProperties: false,
 }
