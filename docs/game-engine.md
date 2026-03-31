@@ -32,14 +32,14 @@ The BaseSkill game engine is a **reusable, config-driven framework** that decoup
 
 ### Architectural Principles
 
-| Principle | Detail |
-|-----------|--------|
-| Config-driven | Games are described as JSON configs; the engine renders the correct component |
-| Offline-first | All game assets and configs are bundled or cached via Service Worker; RxDB is the persistent store |
-| No `any` | All TypeScript is strict; `any` is forbidden |
-| Accessibility-first | WCAG 2.1 AA minimum; every interactive element is keyboard navigable and has ARIA attributes |
-| Language-aware | All user-visible strings live in localized config objects keyed by locale (`en`, `pt-BR`) |
-| Agent-observable | Every meaningful game event is emitted on the event bus for session recording and future AI agents |
+| Principle           | Detail                                                                                             |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| Config-driven       | Games are described as JSON configs; the engine renders the correct component                      |
+| Offline-first       | All game assets and configs are bundled or cached via Service Worker; RxDB is the persistent store |
+| No `any`            | All TypeScript is strict; `any` is forbidden                                                       |
+| Accessibility-first | WCAG 2.1 AA minimum; every interactive element is keyboard navigable and has ARIA attributes       |
+| Language-aware      | All user-visible strings live in localized config objects keyed by locale (`en`, `pt-BR`)          |
+| Agent-observable    | Every meaningful game event is emitted on the event bus for session recording and future AI agents |
 
 ### High-Level Data Flow
 
@@ -108,39 +108,39 @@ stateDiagram-v2
 
 ### Transition Functions
 
-| Function | From State | To State | Description |
-|----------|-----------|---------|-------------|
-| `load(gameId)` | Idle | Loading | Fetch game config from RxDB / bundle; preload assets |
-| `showInstructions()` | Loading | Instructions | Assets ready; TTS reads instructions |
-| `startPlay()` | Instructions | Playing | Child taps "Start" or instructions complete |
-| `submitAnswer(payload)` | Playing | Evaluating | Child submits an answer |
-| `evaluate(result)` | Evaluating | Scoring | Engine scores the answer |
-| `scoreRound(score)` | Scoring | NextRound \| Retry \| GameOver | Engine decides next state |
-| `nextRound()` | NextRound | Playing | Advance to next question/round |
-| `retry()` | Retry | Playing | Replay current round |
-| `endGame()` | GameOver | Idle | Clean up; navigate back to game select |
+| Function                | From State   | To State                       | Description                                          |
+| ----------------------- | ------------ | ------------------------------ | ---------------------------------------------------- |
+| `load(gameId)`          | Idle         | Loading                        | Fetch game config from RxDB / bundle; preload assets |
+| `showInstructions()`    | Loading      | Instructions                   | Assets ready; TTS reads instructions                 |
+| `startPlay()`           | Instructions | Playing                        | Child taps "Start" or instructions complete          |
+| `submitAnswer(payload)` | Playing      | Evaluating                     | Child submits an answer                              |
+| `evaluate(result)`      | Evaluating   | Scoring                        | Engine scores the answer                             |
+| `scoreRound(score)`     | Scoring      | NextRound \| Retry \| GameOver | Engine decides next state                            |
+| `nextRound()`           | NextRound    | Playing                        | Advance to next question/round                       |
+| `retry()`               | Retry        | Playing                        | Replay current round                                 |
+| `endGame()`             | GameOver     | Idle                           | Clean up; navigate back to game select               |
 
 ### TypeScript State Types
 
 ```typescript
 export type GameState =
-  | "Idle"
-  | "Loading"
-  | "Instructions"
-  | "Playing"
-  | "Evaluating"
-  | "Scoring"
-  | "NextRound"
-  | "Retry"
-  | "GameOver";
+  | 'Idle'
+  | 'Loading'
+  | 'Instructions'
+  | 'Playing'
+  | 'Evaluating'
+  | 'Scoring'
+  | 'NextRound'
+  | 'Retry'
+  | 'GameOver'
 
 export interface GameLifecycleContext {
-  gameId: string;
-  state: GameState;
-  roundIndex: number;
-  retryCount: number;
-  score: number;
-  maxRetries: number;
+  gameId: string
+  state: GameState
+  roundIndex: number
+  retryCount: number
+  score: number
+  maxRetries: number
 }
 ```
 
@@ -154,77 +154,77 @@ The event bus is a **typed publish/subscribe singleton**. Game components emit e
 
 ```typescript
 export type GameEventType =
-  | "game:start"
-  | "game:instructions_shown"
-  | "game:action"
-  | "game:evaluate"
-  | "game:score"
-  | "game:hint"
-  | "game:retry"
-  | "game:time_up"
-  | "game:end";
+  | 'game:start'
+  | 'game:instructions_shown'
+  | 'game:action'
+  | 'game:evaluate'
+  | 'game:score'
+  | 'game:hint'
+  | 'game:retry'
+  | 'game:time_up'
+  | 'game:end'
 
 export interface BaseGameEvent {
-  type: GameEventType;
-  gameId: string;
-  sessionId: string;
-  profileId: string;
-  timestamp: number; // Date.now()
-  roundIndex: number;
+  type: GameEventType
+  gameId: string
+  sessionId: string
+  profileId: string
+  timestamp: number // Date.now()
+  roundIndex: number
 }
 
 export interface GameStartEvent extends BaseGameEvent {
-  type: "game:start";
-  locale: string;
-  difficulty: string;
-  gradeBand: GradeBand;
+  type: 'game:start'
+  locale: string
+  difficulty: string
+  gradeBand: GradeBand
 }
 
 export interface GameInstructionsShownEvent extends BaseGameEvent {
-  type: "game:instructions_shown";
+  type: 'game:instructions_shown'
 }
 
 export interface GameActionEvent extends BaseGameEvent {
-  type: "game:action";
-  actionType: string; // e.g. "drag_drop", "tap", "trace_stroke"
-  payload: Record<string, string | number | boolean>;
+  type: 'game:action'
+  actionType: string // e.g. "drag_drop", "tap", "trace_stroke"
+  payload: Record<string, string | number | boolean>
 }
 
 export interface GameEvaluateEvent extends BaseGameEvent {
-  type: "game:evaluate";
-  answer: string | string[] | number;
-  correct: boolean;
-  nearMiss: boolean; // within 1 of correct, partial match, etc.
+  type: 'game:evaluate'
+  answer: string | string[] | number
+  correct: boolean
+  nearMiss: boolean // within 1 of correct, partial match, etc.
 }
 
 export interface GameScoreEvent extends BaseGameEvent {
-  type: "game:score";
-  pointsAwarded: number;
-  totalScore: number;
-  streak: number;
+  type: 'game:score'
+  pointsAwarded: number
+  totalScore: number
+  streak: number
 }
 
 export interface GameHintEvent extends BaseGameEvent {
-  type: "game:hint";
-  hintType: string;
+  type: 'game:hint'
+  hintType: string
 }
 
 export interface GameRetryEvent extends BaseGameEvent {
-  type: "game:retry";
-  retryCount: number;
+  type: 'game:retry'
+  retryCount: number
 }
 
 export interface GameTimeUpEvent extends BaseGameEvent {
-  type: "game:time_up";
-  roundIndex: number;
+  type: 'game:time_up'
+  roundIndex: number
 }
 
 export interface GameEndEvent extends BaseGameEvent {
-  type: "game:end";
-  finalScore: number;
-  totalRounds: number;
-  correctCount: number;
-  durationMs: number;
+  type: 'game:end'
+  finalScore: number
+  totalRounds: number
+  correctCount: number
+  durationMs: number
 }
 
 export type GameEvent =
@@ -236,14 +236,14 @@ export type GameEvent =
   | GameHintEvent
   | GameRetryEvent
   | GameTimeUpEvent
-  | GameEndEvent;
+  | GameEndEvent
 
 export interface GameEventBus {
-  emit(event: GameEvent): void;
+  emit(event: GameEvent): void
   subscribe(
-    type: GameEventType | "game:*",
-    handler: (event: GameEvent) => void
-  ): () => void; // returns unsubscribe fn
+    type: GameEventType | 'game:*',
+    handler: (event: GameEvent) => void,
+  ): () => void // returns unsubscribe fn
 }
 ```
 
@@ -252,7 +252,7 @@ export interface GameEventBus {
 ```typescript
 // Inside MultipleChoice component after child selects answer
 eventBus.emit({
-  type: "game:evaluate",
+  type: 'game:evaluate',
   gameId: config.id,
   sessionId: currentSession.id,
   profileId: profile.id,
@@ -261,7 +261,7 @@ eventBus.emit({
   answer: selectedOption,
   correct: selectedOption === correctAnswer,
   nearMiss: false,
-});
+})
 ```
 
 ### Wildcard Subscription
@@ -269,9 +269,9 @@ eventBus.emit({
 The session recorder and `EncouragementAnnouncer` subscribe with `"game:*"` to receive all game events:
 
 ```typescript
-const unsubscribe = eventBus.subscribe("game:*", (event) => {
-  sessionRecorder.record(event);
-});
+const unsubscribe = eventBus.subscribe('game:*', (event) => {
+  sessionRecorder.record(event)
+})
 ```
 
 ---
@@ -294,16 +294,16 @@ The session recorder is a **side-effect middleware** that persists every game ev
 
 ```typescript
 export interface SessionHistoryChunk {
-  id: string; // `${sessionId}_chunk_${chunkIndex}`
-  sessionId: string;
-  profileId: string;
-  gameId: string;
-  chunkIndex: number;
-  events: GameEvent[];
-  eventCount: number;
-  byteSize: number; // approximate JSON byte length
-  createdAt: number;
-  updatedAt: number;
+  id: string // `${sessionId}_chunk_${chunkIndex}`
+  sessionId: string
+  profileId: string
+  gameId: string
+  chunkIndex: number
+  events: GameEvent[]
+  eventCount: number
+  byteSize: number // approximate JSON byte length
+  createdAt: number
+  updatedAt: number
 }
 ```
 
@@ -311,21 +311,21 @@ export interface SessionHistoryChunk {
 
 ```typescript
 export interface SessionHistoryIndex {
-  id: string; // `${sessionId}_index`
-  sessionId: string;
-  profileId: string;
-  gameId: string;
-  startedAt: number;
-  endedAt: number;
-  durationMs: number;
-  totalChunks: number;
-  totalEvents: number;
-  finalScore: number;
-  correctCount: number;
-  totalRounds: number;
-  locale: string;
-  difficulty: string;
-  gradeBand: GradeBand;
+  id: string // `${sessionId}_index`
+  sessionId: string
+  profileId: string
+  gameId: string
+  startedAt: number
+  endedAt: number
+  durationMs: number
+  totalChunks: number
+  totalEvents: number
+  finalScore: number
+  correctCount: number
+  totalRounds: number
+  locale: string
+  difficulty: string
+  gradeBand: GradeBand
 }
 ```
 
@@ -383,7 +383,17 @@ class SessionRecorder {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "GameConfig",
   "type": "object",
-  "required": ["id", "title", "subject", "gradeBands", "component", "instructions", "defaultSettings", "content", "sessionRecorder"],
+  "required": [
+    "id",
+    "title",
+    "subject",
+    "gradeBands",
+    "component",
+    "instructions",
+    "defaultSettings",
+    "content",
+    "sessionRecorder"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -529,43 +539,49 @@ class SessionRecorder {
 ### TypeScript Types
 
 ```typescript
-export type Subject = "letters" | "reading" | "math" | "science" | "art" | "music";
-export type GradeBand = "pre-k" | "k" | "year1-2" | "year3-4" | "year5-6";
-export type Difficulty = "easy" | "medium" | "hard";
-export type Locale = "en" | "pt-BR";
+export type Subject =
+  | 'letters'
+  | 'reading'
+  | 'math'
+  | 'science'
+  | 'art'
+  | 'music'
+export type GradeBand = 'pre-k' | 'k' | 'year1-2' | 'year3-4' | 'year5-6'
+export type Difficulty = 'easy' | 'medium' | 'hard'
+export type Locale = 'en' | 'pt-BR'
 
-export type LocalizedString = Record<string, string> & { en: string };
+export type LocalizedString = Record<string, string> & { en: string }
 
 export interface GameDefaultSettings {
-  retries: number;
-  timerDuration: number | null;
-  alwaysWin: boolean;
-  difficulty: Difficulty;
+  retries: number
+  timerDuration: number | null
+  alwaysWin: boolean
+  difficulty: Difficulty
 }
 
 export interface DifficultyLevel {
-  contentSubset?: Record<string, unknown>;
-  parameterOverrides?: Partial<GameDefaultSettings>;
+  contentSubset?: Record<string, unknown>
+  parameterOverrides?: Partial<GameDefaultSettings>
 }
 
 export interface GameConfig {
-  id: string;
-  title: LocalizedString;
-  subject: Subject;
-  gradeBands: GradeBand[];
-  component: string;
+  id: string
+  title: LocalizedString
+  subject: Subject
+  gradeBands: GradeBand[]
+  component: string
   assets: {
-    images: string[];
-    audio: string[];
-  };
-  instructions: LocalizedString;
-  defaultSettings: GameDefaultSettings;
-  content: Record<string, Record<string, unknown>>;
-  difficultyProgression?: Record<Difficulty, DifficultyLevel>;
-  gradeBandDefaults?: Partial<Record<GradeBand, Difficulty>>;
+    images: string[]
+    audio: string[]
+  }
+  instructions: LocalizedString
+  defaultSettings: GameDefaultSettings
+  content: Record<string, Record<string, unknown>>
+  difficultyProgression?: Record<Difficulty, DifficultyLevel>
+  gradeBandDefaults?: Partial<Record<GradeBand, Difficulty>>
   sessionRecorder: {
-    enabled: boolean;
-  };
+    enabled: boolean
+  }
 }
 ```
 
@@ -683,27 +699,27 @@ Parents can override game settings at multiple granularities. The engine resolve
 ### TypeScript Pseudocode
 
 ```typescript
-export type SettingsOverride = Partial<GameDefaultSettings>;
+export type SettingsOverride = Partial<GameDefaultSettings>
 
 export interface ParentProfile {
-  id: string;
-  globalOverride?: SettingsOverride;
-  gradeBandOverrides?: Partial<Record<GradeBand, SettingsOverride>>;
-  gameOverrides?: Record<string, SettingsOverride>; // keyed by gameId
+  id: string
+  globalOverride?: SettingsOverride
+  gradeBandOverrides?: Partial<Record<GradeBand, SettingsOverride>>
+  gameOverrides?: Record<string, SettingsOverride> // keyed by gameId
 }
 
 export async function resolveGameConfig(
   gameId: string,
   gradeBand: GradeBand,
   profileId: string,
-  db: RxDatabase
+  db: RxDatabase,
 ): Promise<GameConfig> {
   // 1. Fetch base config
-  const baseConfig = await db.game_configs.findOne(gameId).exec();
-  if (!baseConfig) throw new Error(`Game config not found: ${gameId}`);
+  const baseConfig = await db.game_configs.findOne(gameId).exec()
+  if (!baseConfig) throw new Error(`Game config not found: ${gameId}`)
 
   // 2. Fetch parent profile
-  const parentProfile = await db.parent_profiles.findOne(profileId).exec();
+  const parentProfile = await db.parent_profiles.findOne(profileId).exec()
 
   // 3. Build override layers (lowest to highest priority)
   const layers: SettingsOverride[] = [
@@ -711,24 +727,25 @@ export async function resolveGameConfig(
     parentProfile?.globalOverride ?? {},
     parentProfile?.gradeBandOverrides?.[gradeBand] ?? {},
     parentProfile?.gameOverrides?.[gameId] ?? {},
-  ];
+  ]
 
   // 4. Merge layers left-to-right (later entries win)
   const mergedSettings = layers.reduce<GameDefaultSettings>(
     (acc, override) => ({ ...acc, ...override }),
-    baseConfig.defaultSettings
-  );
+    baseConfig.defaultSettings,
+  )
 
   return {
     ...baseConfig,
     defaultSettings: mergedSettings,
-  };
+  }
 }
 ```
 
 ### Example
 
 Given `math_facts` with `defaultSettings.timerDuration = null`:
+
 - Global override: `{ alwaysWin: false }`
 - Grade-band override for `year1-2`: `{ timerDuration: 60 }`
 - Per-game override for `math_facts`: `{ timerDuration: 30, retries: 3 }`
@@ -751,30 +768,30 @@ All components are in `src/components/game/`. They are **presentation components
 
 ```typescript
 export interface DragItem {
-  id: string;
-  label: string;
-  imageUrl?: string;
-  ariaLabel: string;
+  id: string
+  label: string
+  imageUrl?: string
+  ariaLabel: string
 }
 
 export interface DropZone {
-  id: string;
-  label: string;
-  acceptsItemId?: string; // if set, only this item can snap here
-  ariaLabel: string;
+  id: string
+  label: string
+  acceptsItemId?: string // if set, only this item can snap here
+  ariaLabel: string
 }
 
 export interface DragAndDropProps {
-  gameId: string;
-  sessionId: string;
-  profileId: string;
-  roundIndex: number;
-  items: DragItem[];
-  dropZones: DropZone[];
-  snapThreshold?: number; // px, default 60
-  showGhostPreview?: boolean; // default true
-  onDrop: (itemId: string, zoneId: string) => void;
-  disabled?: boolean;
+  gameId: string
+  sessionId: string
+  profileId: string
+  roundIndex: number
+  items: DragItem[]
+  dropZones: DropZone[]
+  snapThreshold?: number // px, default 60
+  showGhostPreview?: boolean // default true
+  onDrop: (itemId: string, zoneId: string) => void
+  disabled?: boolean
 }
 ```
 
@@ -797,8 +814,8 @@ export interface DragAndDropProps {
 
 #### Event Bus Interactions
 
-| Trigger | Event Emitted |
-|---------|--------------|
+| Trigger              | Event Emitted                             |
+| -------------------- | ----------------------------------------- |
 | Item dropped on zone | `game:action` (`actionType: "drag_drop"`) |
 
 ---
@@ -811,15 +828,15 @@ export interface DragAndDropProps {
 
 ```typescript
 export interface LetterTracerProps {
-  gameId: string;
-  sessionId: string;
-  profileId: string;
-  roundIndex: number;
-  letter: string; // single character, upper or lower case
-  showGuide?: boolean; // default true — show faint letter outline
-  strokeCoverageThreshold?: number; // 0.0–1.0, default 0.7
-  tapToPlaceEnabled?: boolean; // accessibility mode, default false
-  onStrokeComplete: (coverage: number, directionCorrect: boolean) => void;
+  gameId: string
+  sessionId: string
+  profileId: string
+  roundIndex: number
+  letter: string // single character, upper or lower case
+  showGuide?: boolean // default true — show faint letter outline
+  strokeCoverageThreshold?: number // 0.0–1.0, default 0.7
+  tapToPlaceEnabled?: boolean // accessibility mode, default false
+  onStrokeComplete: (coverage: number, directionCorrect: boolean) => void
 }
 ```
 
@@ -843,8 +860,8 @@ export interface LetterTracerProps {
 
 #### Event Bus Interactions
 
-| Trigger | Event Emitted |
-|---------|--------------|
+| Trigger                  | Event Emitted                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------- |
 | Stroke drawn (each lift) | `game:action` (`actionType: "trace_stroke"`, `payload: { coverage, directionCorrect }`) |
 
 ---
@@ -857,24 +874,24 @@ export interface LetterTracerProps {
 
 ```typescript
 export interface ChoiceOption {
-  id: string;
-  label: string;
-  imageUrl?: string;
-  ariaLabel: string;
+  id: string
+  label: string
+  imageUrl?: string
+  ariaLabel: string
 }
 
 export interface MultipleChoiceProps {
-  gameId: string;
-  sessionId: string;
-  profileId: string;
-  roundIndex: number;
-  question: string;
-  questionImageUrl?: string;
-  options: ChoiceOption[];
-  correctOptionId: string;
-  onSelect: (optionId: string) => void;
-  evaluationResult?: "correct" | "incorrect" | null; // set after evaluation
-  disabled?: boolean;
+  gameId: string
+  sessionId: string
+  profileId: string
+  roundIndex: number
+  question: string
+  questionImageUrl?: string
+  options: ChoiceOption[]
+  correctOptionId: string
+  onSelect: (optionId: string) => void
+  evaluationResult?: 'correct' | 'incorrect' | null // set after evaluation
+  disabled?: boolean
 }
 ```
 
@@ -897,8 +914,8 @@ export interface MultipleChoiceProps {
 
 #### Event Bus Interactions
 
-| Trigger | Event Emitted |
-|---------|--------------|
+| Trigger         | Event Emitted                                                                   |
+| --------------- | ------------------------------------------------------------------------------- |
 | Option selected | `game:action` (`actionType: "multiple_choice_select"`, `payload: { optionId }`) |
 
 ---
@@ -911,14 +928,14 @@ export interface MultipleChoiceProps {
 
 ```typescript
 export interface SpeechInputProps {
-  gameId: string;
-  sessionId: string;
-  profileId: string;
-  roundIndex: number;
-  language: string; // BCP 47, e.g. "en-US", "pt-BR"
-  onTranscript: (transcript: string, confidence: number) => void;
-  onUnavailable: () => void; // called when STT not supported
-  disabled?: boolean;
+  gameId: string
+  sessionId: string
+  profileId: string
+  roundIndex: number
+  language: string // BCP 47, e.g. "en-US", "pt-BR"
+  onTranscript: (transcript: string, confidence: number) => void
+  onUnavailable: () => void // called when STT not supported
+  disabled?: boolean
 }
 ```
 
@@ -941,8 +958,8 @@ export interface SpeechInputProps {
 
 #### Event Bus Interactions
 
-| Trigger | Event Emitted |
-|---------|--------------|
+| Trigger             | Event Emitted                                                                       |
+| ------------------- | ----------------------------------------------------------------------------------- |
 | Transcript captured | `game:action` (`actionType: "speech_input"`, `payload: { transcript, confidence }`) |
 
 ---
@@ -955,19 +972,19 @@ export interface SpeechInputProps {
 
 ```typescript
 export interface SpeechOutputProps {
-  text: string;
-  language: string; // BCP 47
-  voiceURI?: string; // from profile's selected voice
-  rate?: number; // default 0.9 (slightly slower for children)
-  pitch?: number; // default 1.0
-  autoPlay?: boolean; // default false — call speak() imperatively
-  onEnd?: () => void;
-  onError?: () => void;
+  text: string
+  language: string // BCP 47
+  voiceURI?: string // from profile's selected voice
+  rate?: number // default 0.9 (slightly slower for children)
+  pitch?: number // default 1.0
+  autoPlay?: boolean // default false — call speak() imperatively
+  onEnd?: () => void
+  onError?: () => void
 }
 
 export interface SpeechOutputRef {
-  speak: () => void;
-  cancel: () => void;
+  speak: () => void
+  cancel: () => void
 }
 ```
 
@@ -998,14 +1015,14 @@ None — TTS is a passive output component. The game lifecycle emits events befo
 
 ```typescript
 export interface TimerProps {
-  gameId: string;
-  sessionId: string;
-  profileId: string;
-  roundIndex: number;
-  durationSeconds: number;
-  hidden?: boolean; // parent override can hide timer
-  onTimeUp: () => void;
-  paused?: boolean;
+  gameId: string
+  sessionId: string
+  profileId: string
+  roundIndex: number
+  durationSeconds: number
+  hidden?: boolean // parent override can hide timer
+  onTimeUp: () => void
+  paused?: boolean
 }
 ```
 
@@ -1024,8 +1041,8 @@ export interface TimerProps {
 
 #### Event Bus Interactions
 
-| Trigger | Event Emitted |
-|---------|--------------|
+| Trigger            | Event Emitted  |
+| ------------------ | -------------- |
 | Timer reaches zero | `game:time_up` |
 
 ---
@@ -1038,11 +1055,11 @@ export interface TimerProps {
 
 ```typescript
 export interface EncouragementAnnouncerProps {
-  gameId: string;
-  sessionId: string;
-  profileId: string;
-  language: string;
-  characterImageUrl: string; // mascot image
+  gameId: string
+  sessionId: string
+  profileId: string
+  language: string
+  characterImageUrl: string // mascot image
 }
 ```
 
@@ -1063,8 +1080,8 @@ export interface EncouragementAnnouncerProps {
 
 #### Event Bus Interactions
 
-| Trigger | Reaction |
-|---------|---------|
+| Trigger                  | Reaction                           |
+| ------------------------ | ---------------------------------- |
 | Receives `game:evaluate` | Plays TTS and shows animated popup |
 
 ---
@@ -1077,10 +1094,10 @@ export interface EncouragementAnnouncerProps {
 
 ```typescript
 export interface ScoreAnimationProps {
-  trigger: boolean; // set to true to play animation
-  type: "confetti" | "star_burst" | "simple_flash";
-  pointsAwarded: number;
-  onComplete?: () => void;
+  trigger: boolean // set to true to play animation
+  type: 'confetti' | 'star_burst' | 'simple_flash'
+  pointsAwarded: number
+  onComplete?: () => void
 }
 ```
 
@@ -1122,9 +1139,9 @@ The engine tracks a **streak counter** within each session:
 
 ```typescript
 interface SessionAdaptiveState {
-  streak: number;        // consecutive correct answers
-  streakThreshold: number; // default 3
-  currentDifficulty: Difficulty;
+  streak: number // consecutive correct answers
+  streakThreshold: number // default 3
+  currentDifficulty: Difficulty
 }
 ```
 
@@ -1157,18 +1174,18 @@ On first load, `resolveGameConfig` uses `gradeBandDefaults[gradeBand]` as the in
 
 ### 9a. Letter Tracing
 
-| Property | Value |
-|----------|-------|
-| Game ID | `letter_tracing` |
-| Subject | `letters` |
-| Grade Bands | `pre-k`, `k` |
-| Component | `LetterTracingGame` |
-| Primary Sub-component | `LetterTracer` |
+| Property              | Value               |
+| --------------------- | ------------------- |
+| Game ID               | `letter_tracing`    |
+| Subject               | `letters`           |
+| Grade Bands           | `pre-k`, `k`        |
+| Component             | `LetterTracingGame` |
+| Primary Sub-component | `LetterTracer`      |
 
 #### Game Sequence
 
 1. **Loading**: preload letter SVG outlines; session recorder subscribes
-2. **Instructions**: TTS reads: *"Trace the letter with your finger!"*; `game:instructions_shown` emitted
+2. **Instructions**: TTS reads: _"Trace the letter with your finger!"_; `game:instructions_shown` emitted
 3. **Playing**:
    - TTS says the letter name (e.g., "Capital A")
    - Show letter outline on canvas (`showGuide: true`)
@@ -1181,8 +1198,8 @@ On first load, `resolveGameConfig` uses `gradeBandDefaults[gradeBand]` as the in
 
 ```typescript
 interface LetterTracingContent {
-  sequence: string[]; // e.g. ["A", "B", "C", ...] or custom subset
-  caseMode: "uppercase" | "lowercase" | "both";
+  sequence: string[] // e.g. ["A", "B", "C", ...] or custom subset
+  caseMode: 'uppercase' | 'lowercase' | 'both'
 }
 ```
 
@@ -1218,17 +1235,69 @@ correct = strokeCoverage >= strokeCoverageThreshold AND directionCorrect
   },
   "content": {
     "en": {
-      "sequence": ["A","B","C","D","E","F","G","H","I","J","K","L","M",
-                   "N","O","P","Q","R","S","T","U","V","W","X","Y","Z"],
+      "sequence": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z"
+      ],
       "caseMode": "uppercase",
-      "strokeCoverageThreshold": 0.70,
+      "strokeCoverageThreshold": 0.7,
       "showGuide": true
     },
     "pt-BR": {
-      "sequence": ["A","B","C","D","E","F","G","H","I","J","K","L","M",
-                   "N","O","P","Q","R","S","T","U","V","W","X","Y","Z"],
+      "sequence": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z"
+      ],
       "caseMode": "uppercase",
-      "strokeCoverageThreshold": 0.70,
+      "strokeCoverageThreshold": 0.7,
       "showGuide": true
     }
   },
@@ -1241,18 +1310,18 @@ correct = strokeCoverage >= strokeCoverageThreshold AND directionCorrect
 
 ### 9b. Number Match
 
-| Property | Value |
-|----------|-------|
-| Game ID | `number_match` |
-| Subject | `math` |
-| Grade Bands | `pre-k`, `k` |
-| Component | `NumberMatchGame` |
-| Primary Sub-component | `DragAndDrop` |
+| Property              | Value             |
+| --------------------- | ----------------- |
+| Game ID               | `number_match`    |
+| Subject               | `math`            |
+| Grade Bands           | `pre-k`, `k`      |
+| Component             | `NumberMatchGame` |
+| Primary Sub-component | `DragAndDrop`     |
 
 #### Game Sequence
 
 1. **Loading**: preload object images (apples, stars, etc.); session recorder subscribes
-2. **Instructions**: TTS reads: *"Drag the number card to match the group of objects!"*
+2. **Instructions**: TTS reads: _"Drag the number card to match the group of objects!"_
 3. **Playing**:
    - Display a group of object images (e.g., 3 apples) with a drop zone below the group
    - Display shuffled number cards (e.g., 1–5) as draggable items
@@ -1264,9 +1333,9 @@ correct = strokeCoverage >= strokeCoverageThreshold AND directionCorrect
 
 ```typescript
 interface NumberMatchContent {
-  range: { min: number; max: number }; // pre-k: 1-10, k: 1-20
-  objectCategories: string[]; // e.g. ["apples", "stars", "balls", "cars"]
-  cardsPerRound: number; // number of distractor cards shown, default 4
+  range: { min: number; max: number } // pre-k: 1-10, k: 1-20
+  objectCategories: string[] // e.g. ["apples", "stars", "balls", "cars"]
+  cardsPerRound: number // number of distractor cards shown, default 4
 }
 ```
 
@@ -1280,24 +1349,24 @@ correct = droppedItemId === `number_${objectCount}`
 
 #### Snap Zone Assignment
 
-Each object group `<div>` has a corresponding `DropZone` with `acceptsItemId: \`number_${count}\``. The snap zone visually pulses when the correct card is within threshold.
+Each object group `<div>` has a corresponding `DropZone` with `acceptsItemId: \`number\_${count}\``. The snap zone visually pulses when the correct card is within threshold.
 
 ---
 
 ### 9c. Word Builder
 
-| Property | Value |
-|----------|-------|
-| Game ID | `word_builder` |
-| Subject | `reading` |
-| Grade Bands | `k`, `year1-2` |
-| Component | `WordBuilderGame` |
+| Property               | Value                         |
+| ---------------------- | ----------------------------- |
+| Game ID                | `word_builder`                |
+| Subject                | `reading`                     |
+| Grade Bands            | `k`, `year1-2`                |
+| Component              | `WordBuilderGame`             |
 | Primary Sub-components | `DragAndDrop`, `SpeechOutput` |
 
 #### Game Sequence
 
 1. **Loading**: preload word images; session recorder subscribes
-2. **Instructions**: TTS reads: *"Drag the letters into the boxes to spell the word!"*
+2. **Instructions**: TTS reads: _"Drag the letters into the boxes to spell the word!"_
 3. **Playing**:
    - Show a picture of the target word (e.g., a cat for "CAT")
    - Display scrambled letter tiles as draggable items
@@ -1311,8 +1380,8 @@ Each object group `<div>` has a corresponding `DropZone` with `acceptsItemId: \`
 
 ```typescript
 interface WordBuilderContent {
-  words: string[]; // word list for this locale + grade band
-  letterCount: { min: number; max: number }; // k: 3-4, year1-2: 3-6
+  words: string[] // word list for this locale + grade band
+  letterCount: { min: number; max: number } // k: 3-4, year1-2: 3-6
 }
 ```
 
@@ -1336,18 +1405,18 @@ correct = spelledWord.toUpperCase() === targetWord.toUpperCase()
 
 ### 9d. Read Aloud
 
-| Property | Value |
-|----------|-------|
-| Game ID | `read_aloud` |
-| Subject | `reading` |
-| Grade Bands | `year1-2`, `year3-4` |
-| Component | `ReadAloudGame` |
+| Property               | Value                         |
+| ---------------------- | ----------------------------- |
+| Game ID                | `read_aloud`                  |
+| Subject                | `reading`                     |
+| Grade Bands            | `year1-2`, `year3-4`          |
+| Component              | `ReadAloudGame`               |
 | Primary Sub-components | `SpeechInput`, `SpeechOutput` |
 
 #### Game Sequence
 
 1. **Loading**: preload sentence set; session recorder subscribes
-2. **Instructions**: TTS reads: *"Listen to the sentence, then read it aloud!"*
+2. **Instructions**: TTS reads: _"Listen to the sentence, then read it aloud!"_
 3. **Playing**:
    - Display sentence on screen in large, readable font
    - TTS reads the sentence first (SpeechOutput)
@@ -1360,8 +1429,8 @@ correct = spelledWord.toUpperCase() === targetWord.toUpperCase()
 
 ```typescript
 interface ReadAloudContent {
-  sentences: string[]; // grade-appropriate sentences for this locale
-  readingLevel: "grade1" | "grade2" | "grade3"; // mapped from gradeBand
+  sentences: string[] // grade-appropriate sentences for this locale
+  readingLevel: 'grade1' | 'grade2' | 'grade3' // mapped from gradeBand
 }
 ```
 
@@ -1370,15 +1439,21 @@ interface ReadAloudContent {
 ```typescript
 function evaluateReadAloud(transcript: string, target: string): boolean {
   const normalize = (s: string) =>
-    s.toLowerCase().replace(/[^a-z\s]/g, "").trim().split(/\s+/);
+    s
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, '')
+      .trim()
+      .split(/\s+/)
 
-  const targetWords = normalize(target);
-  const transcriptWords = normalize(transcript);
+  const targetWords = normalize(target)
+  const transcriptWords = normalize(transcript)
 
-  const matchCount = targetWords.filter((w) => transcriptWords.includes(w)).length;
-  const matchRatio = matchCount / targetWords.length;
+  const matchCount = targetWords.filter((w) =>
+    transcriptWords.includes(w),
+  ).length
+  const matchRatio = matchCount / targetWords.length
 
-  return matchRatio >= 0.80;
+  return matchRatio >= 0.8
 }
 ```
 
@@ -1393,18 +1468,18 @@ function evaluateReadAloud(transcript: string, target: string): boolean {
 
 ### 9e. Math Facts
 
-| Property | Value |
-|----------|-------|
-| Game ID | `math_facts` |
-| Subject | `math` |
-| Grade Bands | `year1-2`, `year3-4` |
-| Component | `MathFactsGame` |
+| Property               | Value                     |
+| ---------------------- | ------------------------- |
+| Game ID                | `math_facts`              |
+| Subject                | `math`                    |
+| Grade Bands            | `year1-2`, `year3-4`      |
+| Component              | `MathFactsGame`           |
 | Primary Sub-components | `MultipleChoice`, `Timer` |
 
 #### Game Sequence
 
 1. **Loading**: generate problem set algorithmically; session recorder subscribes
-2. **Instructions**: TTS reads: *"Look at the math problem and choose the correct answer!"*
+2. **Instructions**: TTS reads: _"Look at the math problem and choose the correct answer!"_
 3. **Playing**:
    - Display arithmetic problem (e.g., `7 + 5 = ?`) in large centered text
    - Display 4 answer choices via `MultipleChoice`
@@ -1420,7 +1495,7 @@ function evaluateReadAloud(transcript: string, target: string): boolean {
 function generateProblem(
   operations: string[],
   range: { min: number; max: number },
-  difficulty: Difficulty
+  difficulty: Difficulty,
 ): { question: string; answer: number; distractors: number[] } {
   // Select random operation and operands within range
   // Generate 3 plausible distractors (near the correct answer, not duplicates)
@@ -1442,11 +1517,11 @@ function generateProblem(
 
 #### Distractor Strategy
 
-| Difficulty | Distractor Range |
-|------------|-----------------|
-| `easy` | ±1 or ±2 from correct answer |
-| `medium` | ±1 to ±5; one common error (e.g., off-by-ten) |
-| `hard` | ±1 to ±10; one plausible wrong operation result |
+| Difficulty | Distractor Range                                |
+| ---------- | ----------------------------------------------- |
+| `easy`     | ±1 or ±2 from correct answer                    |
+| `medium`   | ±1 to ±5; one common error (e.g., off-by-ten)   |
+| `hard`     | ±1 to ±10; one plausible wrong operation result |
 
 ---
 
@@ -1501,4 +1576,4 @@ public/
 
 ---
 
-*This document is the authoritative game engine design for BaseSkill. Update this document when making structural changes to the game framework before implementing.*
+_This document is the authoritative game engine design for BaseSkill. Update this document when making structural changes to the game framework before implementing._

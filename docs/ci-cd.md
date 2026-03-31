@@ -210,7 +210,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 0 * * 0'   # weekly — Sunday at 00:00 UTC
+    - cron: '0 0 * * 0' # weekly — Sunday at 00:00 UTC
   workflow_dispatch:
 
 concurrency:
@@ -293,7 +293,7 @@ on:
 
 concurrency:
   group: deploy-production
-  cancel-in-progress: false   # never cancel an in-flight deploy
+  cancel-in-progress: false # never cancel an in-flight deploy
 
 permissions:
   contents: read
@@ -389,7 +389,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium]   # extend to firefox/webkit when baselines exist
+        browser: [chromium] # extend to firefox/webkit when baselines exist
 
     steps:
       - uses: actions/checkout@v4
@@ -461,7 +461,7 @@ export default defineConfig({
 Usage in app code:
 
 ```typescript
-const appVersion = import.meta.env.VITE_APP_VERSION  // e.g., "1.2.3"
+const appVersion = import.meta.env.VITE_APP_VERSION // e.g., "1.2.3"
 ```
 
 ### Deploy-Time Stamping
@@ -531,7 +531,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(`baseskill-v${APP_VERSION}`).then((cache) => {
       return cache.addAll(PRECACHE_MANIFEST)
-    })
+    }),
   )
 })
 ```
@@ -543,16 +543,19 @@ On activation, the SW deletes all caches that do not match the current version p
 ```javascript
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames
-          .filter((name) => !name.startsWith(`baseskill-v${APP_VERSION}`))
-          .map((name) => caches.delete(name))
+    caches
+      .keys()
+      .then((cacheNames) =>
+        Promise.all(
+          cacheNames
+            .filter((name) => !name.startsWith(`baseskill-v${APP_VERSION}`))
+            .map((name) => caches.delete(name)),
+        ),
       )
-    ).then(() => {
-      self.skipWaiting()
-      return self.clients.claim()
-    })
+      .then(() => {
+        self.skipWaiting()
+        return self.clients.claim()
+      }),
   )
 })
 ```
@@ -585,12 +588,12 @@ export function registerUpdateHandler(db: RxDatabase) {
 
 ### Repository Setup
 
-| Setting | Value |
-|---------|-------|
-| Repository | `github.com/[owner]/base-skill` |
-| Pages source | **GitHub Actions** (not a branch) |
-| Default URL | `https://[owner].github.io/base-skill/` |
-| Base path | `/base-skill/` |
+| Setting      | Value                                   |
+| ------------ | --------------------------------------- |
+| Repository   | `github.com/[owner]/base-skill`         |
+| Pages source | **GitHub Actions** (not a branch)       |
+| Default URL  | `https://[owner].github.io/base-skill/` |
+| Base path    | `/base-skill/`                          |
 
 ### Routing on GitHub Pages
 
@@ -698,13 +701,13 @@ Key properties of the build output:
 
 The `dist/` output is a standard static SPA. All SPAs require the host to serve `index.html` for any path that does not match a static file (SPA fallback).
 
-| Host | Steps |
-|------|-------|
-| **Netlify** | Connect GitHub repo or drag-drop `dist/`. Add `public/_redirects`: `/* /index.html 200`. Build command: `npm run build`. Publish directory: `dist`. |
-| **Vercel** | `npx vercel --prod` or connect GitHub repo. Add `vercel.json`: `{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }`. Framework preset: `Vite`. |
-| **Cloudflare Pages** | Connect GitHub repo. Build command: `npm run build`. Output directory: `dist`. Add `public/_redirects`: `/* /index.html 200`. |
-| **AWS S3 + CloudFront** | Upload `dist/` to S3 bucket. Configure CloudFront error pages: 403/404 → `/index.html` with 200 status. Set `index.html` to `no-cache`. |
-| **Any static host** | Serve `dist/`. Configure the host to return `index.html` (HTTP 200) for all requests that don't match a file. This is the SPA fallback / "try_files" pattern. |
+| Host                    | Steps                                                                                                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Netlify**             | Connect GitHub repo or drag-drop `dist/`. Add `public/_redirects`: `/* /index.html 200`. Build command: `npm run build`. Publish directory: `dist`.               |
+| **Vercel**              | `npx vercel --prod` or connect GitHub repo. Add `vercel.json`: `{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }`. Framework preset: `Vite`. |
+| **Cloudflare Pages**    | Connect GitHub repo. Build command: `npm run build`. Output directory: `dist`. Add `public/_redirects`: `/* /index.html 200`.                                     |
+| **AWS S3 + CloudFront** | Upload `dist/` to S3 bucket. Configure CloudFront error pages: 403/404 → `/index.html` with 200 status. Set `index.html` to `no-cache`.                           |
+| **Any static host**     | Serve `dist/`. Configure the host to return `index.html` (HTTP 200) for all requests that don't match a file. This is the SPA fallback / "try_files" pattern.     |
 
 ### `_redirects` file (Netlify / Cloudflare Pages)
 
@@ -717,9 +720,7 @@ The `dist/` output is a standard static SPA. All SPAs require the host to serve 
 
 ```json
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
 ```
 
@@ -742,18 +743,19 @@ BaseSkill uses **trunk-based development**:
 
 All commits follow [Conventional Commits](https://www.conventionalcommits.org/):
 
-| Prefix | When to use |
-|--------|-------------|
-| `feat:` | New feature or user-visible functionality |
-| `fix:` | Bug fix |
-| `docs:` | Documentation only |
-| `test:` | Adding or updating tests |
-| `chore:` | Build, tooling, dependency updates |
+| Prefix      | When to use                                             |
+| ----------- | ------------------------------------------------------- |
+| `feat:`     | New feature or user-visible functionality               |
+| `fix:`      | Bug fix                                                 |
+| `docs:`     | Documentation only                                      |
+| `test:`     | Adding or updating tests                                |
+| `chore:`    | Build, tooling, dependency updates                      |
 | `refactor:` | Code change that neither adds a feature nor fixes a bug |
-| `perf:` | Performance improvement |
-| `ci:` | CI/CD configuration changes |
+| `perf:`     | Performance improvement                                 |
+| `ci:`       | CI/CD configuration changes                             |
 
 Examples:
+
 ```
 feat: add number recognition game for ages 3-5
 fix: correct score persistence after SW cache clear
@@ -787,18 +789,18 @@ npx conventional-changelog-cli -p angular -i CHANGELOG.md -s
 
 Configure in **GitHub › Repository › Settings › Branches › Add branch protection rule** for `main`:
 
-| Rule | Setting |
-|------|---------|
-| Require pull request before merging | ✅ Enabled |
-| Required approving reviews | 1 (for community PRs; maintainers may self-merge) |
-| Dismiss stale pull request approvals when new commits are pushed | ✅ Enabled |
-| Require status checks to pass before merging | ✅ Enabled |
-| Required status checks | `lint`, `typecheck`, `unit-test`, `build` |
-| Require branches to be up to date before merging | ✅ Enabled |
-| Require conversation resolution before merging | ✅ Enabled |
-| Do not allow bypassing the above settings | ✅ Enabled (enforce for admins too) |
-| Allow force pushes | ❌ Disabled |
-| Allow deletions | ❌ Disabled |
+| Rule                                                             | Setting                                           |
+| ---------------------------------------------------------------- | ------------------------------------------------- |
+| Require pull request before merging                              | ✅ Enabled                                        |
+| Required approving reviews                                       | 1 (for community PRs; maintainers may self-merge) |
+| Dismiss stale pull request approvals when new commits are pushed | ✅ Enabled                                        |
+| Require status checks to pass before merging                     | ✅ Enabled                                        |
+| Required status checks                                           | `lint`, `typecheck`, `unit-test`, `build`         |
+| Require branches to be up to date before merging                 | ✅ Enabled                                        |
+| Require conversation resolution before merging                   | ✅ Enabled                                        |
+| Do not allow bypassing the above settings                        | ✅ Enabled (enforce for admins too)               |
+| Allow force pushes                                               | ❌ Disabled                                       |
+| Allow deletions                                                  | ❌ Disabled                                       |
 
 ### Status Checks Reference
 
@@ -819,13 +821,13 @@ E2E and visual-regression jobs are **not** required checks (they run post-merge 
 
 All `VITE_*` variables are **embedded in the client bundle at build time**. They are visible to anyone who inspects the JavaScript bundle. Do not store secrets here. Only store public client IDs, public URLs, and feature flags.
 
-| Variable | Where set | Purpose |
-|----------|-----------|---------|
-| `VITE_APP_VERSION` | Injected by Vite from `package.json` | App version string — available as `import.meta.env.VITE_APP_VERSION` |
-| `VITE_GOOGLE_CLIENT_ID` | GitHub Actions secret → CI env | Google OAuth client ID (public; safe to embed in bundle) |
-| `VITE_ONEDRIVE_CLIENT_ID` | GitHub Actions secret → CI env | OneDrive / MSAL.js client ID (public; safe to embed) |
-| `VITE_CF_WORKER_URL` | GitHub Actions secret → CI env | Cloudflare Worker OAuth proxy URL |
-| `VITE_ANALYTICS_PROVIDER` | GitHub Actions variable (optional) | Analytics provider selection; defaults to `noop` (no analytics) |
+| Variable                  | Where set                            | Purpose                                                              |
+| ------------------------- | ------------------------------------ | -------------------------------------------------------------------- |
+| `VITE_APP_VERSION`        | Injected by Vite from `package.json` | App version string — available as `import.meta.env.VITE_APP_VERSION` |
+| `VITE_GOOGLE_CLIENT_ID`   | GitHub Actions secret → CI env       | Google OAuth client ID (public; safe to embed in bundle)             |
+| `VITE_ONEDRIVE_CLIENT_ID` | GitHub Actions secret → CI env       | OneDrive / MSAL.js client ID (public; safe to embed)                 |
+| `VITE_CF_WORKER_URL`      | GitHub Actions secret → CI env       | Cloudflare Worker OAuth proxy URL                                    |
+| `VITE_ANALYTICS_PROVIDER` | GitHub Actions variable (optional)   | Analytics provider selection; defaults to `noop` (no analytics)      |
 
 ### Local Development
 
@@ -873,4 +875,4 @@ interface ImportMeta {
 
 ---
 
-*This document is the authoritative reference for BaseSkill's CI/CD pipeline. Update it when workflows, deployment targets, or versioning strategies change.*
+_This document is the authoritative reference for BaseSkill's CI/CD pipeline. Update it when workflows, deployment targets, or versioning strategies change._

@@ -8,7 +8,9 @@ function CloudSync() {
   return (
     <main className="p-8">
       <h1 className="text-2xl font-bold">Cloud Sync</h1>
-      <p className="mt-2 text-muted-foreground">Sync learner data across devices.</p>
+      <p className="mt-2 text-muted-foreground">
+        Sync learner data across devices.
+      </p>
     </main>
   )
 }

@@ -168,14 +168,14 @@ Unit tests live in `tests/unit/` and test pure logic functions in isolation from
 
 ### Coverage Targets
 
-| Module | Target |
-|--------|--------|
-| Game logic (override merging, session recorder, chunking) | 100% |
-| RxDB schema definitions | 100% |
-| Event bus (emit, on, off, cleanup) | 100% |
-| Theme engine (CSS variable injection, clone logic) | 90% |
-| i18n utilities (language detection, grade formatting) | 90% |
-| Speech utilities (voice selection, fallback) | 85% |
+| Module                                                    | Target |
+| --------------------------------------------------------- | ------ |
+| Game logic (override merging, session recorder, chunking) | 100%   |
+| RxDB schema definitions                                   | 100%   |
+| Event bus (emit, on, off, cleanup)                        | 100%   |
+| Theme engine (CSS variable injection, clone logic)        | 90%    |
+| i18n utilities (language detection, grade formatting)     | 90%    |
+| Speech utilities (voice selection, fallback)              | 85%    |
 
 ### Key Test Files
 
@@ -185,13 +185,27 @@ Tests the 4-level override merging hierarchy: `global-defaults → game-defaults
 
 ```typescript
 describe('resolveGameConfig', () => {
-  it('returns global defaults when no overrides exist', () => { /* ... */ })
-  it('game-default overrides win over global defaults', () => { /* ... */ })
-  it('grade-level overrides win over game defaults', () => { /* ... */ })
-  it('profile overrides win over grade-level', () => { /* ... */ })
-  it('profile overrides win over all other levels', () => { /* ... */ })
-  it('partial profile override only replaces specified keys', () => { /* ... */ })
-  it('null override values are preserved (intentional unset)', () => { /* ... */ })
+  it('returns global defaults when no overrides exist', () => {
+    /* ... */
+  })
+  it('game-default overrides win over global defaults', () => {
+    /* ... */
+  })
+  it('grade-level overrides win over game defaults', () => {
+    /* ... */
+  })
+  it('profile overrides win over grade-level', () => {
+    /* ... */
+  })
+  it('profile overrides win over all other levels', () => {
+    /* ... */
+  })
+  it('partial profile override only replaces specified keys', () => {
+    /* ... */
+  })
+  it('null override values are preserved (intentional unset)', () => {
+    /* ... */
+  })
 })
 ```
 
@@ -201,13 +215,27 @@ Tests event recording, chunk rollover, and session index creation.
 
 ```typescript
 describe('SessionRecorder', () => {
-  it('records events published on the event bus', () => { /* ... */ })
-  it('creates a new chunk doc when 200 events are reached', () => { /* ... */ })
-  it('creates a new chunk doc when serialised size reaches ~50KB', () => { /* ... */ })
-  it('increments chunkIndex correctly across rollovers', () => { /* ... */ })
-  it('writes session_history_index doc on game:end', () => { /* ... */ })
-  it('totalChunks in index matches actual chunk count', () => { /* ... */ })
-  it('stops recording and unsubscribes on teardown', () => { /* ... */ })
+  it('records events published on the event bus', () => {
+    /* ... */
+  })
+  it('creates a new chunk doc when 200 events are reached', () => {
+    /* ... */
+  })
+  it('creates a new chunk doc when serialised size reaches ~50KB', () => {
+    /* ... */
+  })
+  it('increments chunkIndex correctly across rollovers', () => {
+    /* ... */
+  })
+  it('writes session_history_index doc on game:end', () => {
+    /* ... */
+  })
+  it('totalChunks in index matches actual chunk count', () => {
+    /* ... */
+  })
+  it('stops recording and unsubscribes on teardown', () => {
+    /* ... */
+  })
 })
 ```
 
@@ -217,12 +245,24 @@ Tests the typed event bus used throughout the app.
 
 ```typescript
 describe('EventBus', () => {
-  it('delivers event to subscriber', () => { /* ... */ })
-  it('delivers to multiple subscribers for same event', () => { /* ... */ })
-  it('does not deliver after unsubscribe', () => { /* ... */ })
-  it('does not leak after off() removes the last subscriber', () => { /* ... */ })
-  it('cleanup() removes all subscribers', () => { /* ... */ })
-  it('type-safe: cannot emit unknown event keys (compile-time check)', () => { /* ... */ })
+  it('delivers event to subscriber', () => {
+    /* ... */
+  })
+  it('delivers to multiple subscribers for same event', () => {
+    /* ... */
+  })
+  it('does not deliver after unsubscribe', () => {
+    /* ... */
+  })
+  it('does not leak after off() removes the last subscriber', () => {
+    /* ... */
+  })
+  it('cleanup() removes all subscribers', () => {
+    /* ... */
+  })
+  it('type-safe: cannot emit unknown event keys (compile-time check)', () => {
+    /* ... */
+  })
 })
 ```
 
@@ -245,10 +285,18 @@ const collections = [
 ]
 
 describe.each(collections)('RxDB schema: %s', (collection) => {
-  it('is a valid JSON Schema Draft-7 document', () => { /* validate schema itself */ })
-  it('accepts a conforming sample document', () => { /* validate fixture doc */ })
-  it('rejects a document missing required fields', () => { /* ... */ })
-  it('rejects a document with wrong field types', () => { /* ... */ })
+  it('is a valid JSON Schema Draft-7 document', () => {
+    /* validate schema itself */
+  })
+  it('accepts a conforming sample document', () => {
+    /* validate fixture doc */
+  })
+  it('rejects a document missing required fields', () => {
+    /* ... */
+  })
+  it('rejects a document with wrong field types', () => {
+    /* ... */
+  })
 })
 ```
 
@@ -267,78 +315,140 @@ Component tests live in `tests/components/` and mirror the structure of `app/com
 #### `DragAndDrop.test.tsx`
 
 ```typescript
-it('renders draggable items', () => { /* ... */ })
-it('simulates pointer down + move + up (drag gesture)', async () => { /* ... */ })
-it('snaps to drop zone when within threshold', async () => { /* ... */ })
-it('does not snap when outside threshold', async () => { /* ... */ })
-it('emits drop event with correct item id and zone id', async () => { /* ... */ })
-it('is accessible: draggable items have aria-grabbed attribute', () => { /* ... */ })
+it('renders draggable items', () => {
+  /* ... */
+})
+it('simulates pointer down + move + up (drag gesture)', async () => {
+  /* ... */
+})
+it('snaps to drop zone when within threshold', async () => {
+  /* ... */
+})
+it('does not snap when outside threshold', async () => {
+  /* ... */
+})
+it('emits drop event with correct item id and zone id', async () => {
+  /* ... */
+})
+it('is accessible: draggable items have aria-grabbed attribute', () => {
+  /* ... */
+})
 ```
 
 #### `MultipleChoice.test.tsx`
 
 ```typescript
-it('renders all options', () => { /* ... */ })
-it('selects option on click', async () => { /* ... */ })
-it('navigates options with arrow keys', async () => { /* ... */ })
-it('confirms selection with Enter key', async () => { /* ... */ })
-it('announces selection via aria-live region', async () => { /* ... */ })
-it('correct ARIA role on option buttons (role="radio")', () => { /* ... */ })
-it('aria-checked reflects selected state', async () => { /* ... */ })
+it('renders all options', () => {
+  /* ... */
+})
+it('selects option on click', async () => {
+  /* ... */
+})
+it('navigates options with arrow keys', async () => {
+  /* ... */
+})
+it('confirms selection with Enter key', async () => {
+  /* ... */
+})
+it('announces selection via aria-live region', async () => {
+  /* ... */
+})
+it('correct ARIA role on option buttons (role="radio")', () => {
+  /* ... */
+})
+it('aria-checked reflects selected state', async () => {
+  /* ... */
+})
 ```
 
 #### `LetterTracer.test.tsx`
 
 ```typescript
-it('renders canvas element with accessible label', () => { /* ... */ })
-it('activates tap-to-place mode when prop is set', async () => { /* ... */ })
-it('canvas has aria-label describing the current letter', () => { /* ... */ })
+it('renders canvas element with accessible label', () => {
+  /* ... */
+})
+it('activates tap-to-place mode when prop is set', async () => {
+  /* ... */
+})
+it('canvas has aria-label describing the current letter', () => {
+  /* ... */
+})
 ```
 
 #### `Timer.test.tsx`
 
 ```typescript
-it('counts down from initial value', async () => { /* vi.useFakeTimers() */ })
-it('does not render when hidden prop is true', () => { /* ... */ })
-it('emits time_up event when countdown reaches zero', async () => { /* ... */ })
-it('pauses when paused prop is set', async () => { /* ... */ })
+it('counts down from initial value', async () => {
+  /* vi.useFakeTimers() */
+})
+it('does not render when hidden prop is true', () => {
+  /* ... */
+})
+it('emits time_up event when countdown reaches zero', async () => {
+  /* ... */
+})
+it('pauses when paused prop is set', async () => {
+  /* ... */
+})
 ```
 
 #### `EncouragementAnnouncer.test.tsx`
 
 ```typescript
-it('renders correct message on correct answer', async () => { /* ... */ })
-it('renders near-miss message when near-miss prop is set', async () => { /* ... */ })
-it('calls window.speechSynthesis.speak with message text', async () => { /* ... */ })
-it('does not call TTS when speech is disabled in settings', async () => { /* ... */ })
+it('renders correct message on correct answer', async () => {
+  /* ... */
+})
+it('renders near-miss message when near-miss prop is set', async () => {
+  /* ... */
+})
+it('calls window.speechSynthesis.speak with message text', async () => {
+  /* ... */
+})
+it('does not call TTS when speech is disabled in settings', async () => {
+  /* ... */
+})
 ```
 
 #### `OfflineIndicator.test.tsx`
 
 ```typescript
-it('does not render when navigator.onLine is true', () => { /* ... */ })
-it('renders offline banner when navigator.onLine is false', () => { /* ... */ })
-it('hides banner when online event fires', async () => { /* ... */ })
-it('banner has role="status" and aria-live="polite"', () => { /* ... */ })
+it('does not render when navigator.onLine is true', () => {
+  /* ... */
+})
+it('renders offline banner when navigator.onLine is false', () => {
+  /* ... */
+})
+it('hides banner when online event fires', async () => {
+  /* ... */
+})
+it('banner has role="status" and aria-live="polite"', () => {
+  /* ... */
+})
 ```
 
 #### `ProfilePicker.test.tsx`
 
 ```typescript
-it('renders profiles from RxDB fixture', async () => { /* uses db-factory */ })
-it('selects profile on click and redirects to dashboard', async () => { /* ... */ })
-it('renders add-profile button', () => { /* ... */ })
+it('renders profiles from RxDB fixture', async () => {
+  /* uses db-factory */
+})
+it('selects profile on click and redirects to dashboard', async () => {
+  /* ... */
+})
+it('renders add-profile button', () => {
+  /* ... */
+})
 ```
 
 ### Mocking Strategy
 
-| Dependency | Strategy |
-|------------|----------|
-| Web Speech API | Mocked globally in `tests/setup.ts` |
-| RxDB | Real RxDB with `rxdb-adapter-memory` — never mocked |
-| TanStack Router | `createMemoryRouter` / `RouterProvider` with test routes |
-| `navigator.onLine` | `Object.defineProperty` per test to control value |
-| Timers | `vi.useFakeTimers()` / `vi.useRealTimers()` per test |
+| Dependency         | Strategy                                                 |
+| ------------------ | -------------------------------------------------------- |
+| Web Speech API     | Mocked globally in `tests/setup.ts`                      |
+| RxDB               | Real RxDB with `rxdb-adapter-memory` — never mocked      |
+| TanStack Router    | `createMemoryRouter` / `RouterProvider` with test routes |
+| `navigator.onLine` | `Object.defineProperty` per test to control value        |
+| Timers             | `vi.useFakeTimers()` / `vi.useRealTimers()` per test     |
 
 ---
 
@@ -374,39 +484,51 @@ export default defineConfig({
 ### Critical User Flows (one file per flow)
 
 #### `tests/e2e/profile-creation.spec.ts`
+
 Create a new profile, select an avatar, set grade level, verify the dashboard loads for that profile.
 
 #### `tests/e2e/game-play.spec.ts`
+
 Select a game from the dashboard, play through one full round, verify a `progress` document is written to RxDB with the correct score.
 
 #### `tests/e2e/progress-saving.spec.ts`
+
 Play a game, hard-refresh the page, verify that progress (score, last played timestamp) persists from IndexedDB.
 
 #### `tests/e2e/profile-switching.spec.ts`
+
 Create two profiles, accumulate progress on profile A, switch to profile B, verify profile B has no progress, switch back to A, verify progress is intact.
 
 #### `tests/e2e/bookmarks.spec.ts`
+
 Bookmark a game via the star button, verify the game appears in the "Bookmarked" row on the dashboard, unbookmark it, verify it disappears.
 
 #### `tests/e2e/recents.spec.ts`
+
 Play a game, return to the dashboard, verify the game appears in the "Recently Played" row with a last-played timestamp.
 
 #### `tests/e2e/offline-mode.spec.ts`
+
 Load the app fully, call `context.setOffline(true)`, verify the offline banner appears within 500ms, navigate to a game, verify the game is playable without network access.
 
 #### `tests/e2e/online-restore.spec.ts`
+
 Simulate going offline, then call `context.setOffline(false)`, verify the offline banner dismisses automatically.
 
 #### `tests/e2e/parent-pin.spec.ts`
+
 Navigate to parent settings, enter the correct PIN, verify access is granted. Enter an incorrect PIN, verify access is denied with an error message.
 
 #### `tests/e2e/session-history.spec.ts`
+
 Play a game to completion, navigate to Parent > History, verify the session appears as the most recent entry with correct game name and timestamp. Expand the row and verify event data is loaded.
 
 #### `tests/e2e/data-cleanup.spec.ts`
+
 Accumulate session history over several games, trigger "Clear History" in parent settings, verify all session_history_chunks and session_history_index documents are removed, verify profile and progress documents are unaffected.
 
 #### `tests/e2e/theme-change.spec.ts`
+
 Switch from the default theme to a different theme in child settings, verify the correct CSS custom properties are applied to `:root` in the DOM.
 
 ---
@@ -420,6 +542,7 @@ Visual regression tests are Playwright screenshot comparisons that detect uninte
 Screenshots are captured for the following screens × theme combinations:
 
 **Screens:**
+
 - Profile Picker
 - Dashboard
 - Game Shell (Letter Tracing loaded)
@@ -432,6 +555,7 @@ Screenshots are captured for the following screens × theme combinations:
 **Themes:** Ocean · Forest · Space · Rainbow · Sunset · Night
 
 **Viewports:**
+
 - `1280x800` — desktop
 - `768x1024` — iPad portrait
 - `390x844` — iPhone 14
@@ -497,7 +621,13 @@ All E2E test files import `test` from `tests/e2e/fixtures.ts` rather than from `
 `tests/e2e/accessibility.spec.ts` runs a thorough axe audit on every named route:
 
 ```typescript
-const routes = ['/', '/dashboard', '/settings', '/settings/parent', '/game/letter-tracing']
+const routes = [
+  '/',
+  '/dashboard',
+  '/settings',
+  '/settings/parent',
+  '/game/letter-tracing',
+]
 
 for (const route of routes) {
   test(`no axe violations on ${route}`, async ({ page }) => {
@@ -513,12 +643,16 @@ for (const route of routes) {
 ### Keyboard Navigation Tests
 
 ```typescript
-test('can tab through all interactive elements on Dashboard', async ({ page }) => {
+test('can tab through all interactive elements on Dashboard', async ({
+  page,
+}) => {
   await page.goto('/dashboard')
   // Tab through all focusable elements and verify each receives visible focus
 })
 
-test('can tab through all interactive elements on Game Shell', async ({ page }) => {
+test('can tab through all interactive elements on Game Shell', async ({
+  page,
+}) => {
   await page.goto('/game/letter-tracing')
   // Tab through game controls and verify focus order is logical
 })
@@ -533,10 +667,15 @@ Offline simulation uses Playwright's built-in network control via `context.setOf
 ### Test: Offline Banner Timing
 
 ```typescript
-test('offline banner appears within 500ms of going offline', async ({ context, page }) => {
+test('offline banner appears within 500ms of going offline', async ({
+  context,
+  page,
+}) => {
   await page.goto('/dashboard')
   await context.setOffline(true)
-  await expect(page.getByRole('status', { name: /offline/i })).toBeVisible({ timeout: 500 })
+  await expect(page.getByRole('status', { name: /offline/i })).toBeVisible({
+    timeout: 500,
+  })
 })
 ```
 
@@ -570,7 +709,10 @@ test('score is saved to RxDB while offline', async ({ context, page }) => {
 ### Test: Sync Queue Has Pending Mutations While Offline
 
 ```typescript
-test('sync queue accumulates mutations while offline', async ({ context, page }) => {
+test('sync queue accumulates mutations while offline', async ({
+  context,
+  page,
+}) => {
   await page.goto('/dashboard')
   await context.setOffline(true)
   // Trigger a write operation (e.g. bookmark a game)
@@ -585,12 +727,17 @@ test('sync queue accumulates mutations while offline', async ({ context, page })
 ### Test: Banner Dismisses and Sync Resumes
 
 ```typescript
-test('banner dismisses and sync resumes on going online', async ({ context, page }) => {
+test('banner dismisses and sync resumes on going online', async ({
+  context,
+  page,
+}) => {
   await page.goto('/dashboard')
   await context.setOffline(true)
   await expect(page.getByRole('status', { name: /offline/i })).toBeVisible()
   await context.setOffline(false)
-  await expect(page.getByRole('status', { name: /offline/i })).toBeHidden({ timeout: 2000 })
+  await expect(page.getByRole('status', { name: /offline/i })).toBeHidden({
+    timeout: 2000,
+  })
 })
 ```
 
@@ -625,7 +772,13 @@ A Node.js script runs in CI to compare translation files and fail if any key pre
 import enKeys from '../app/i18n/locales/en.json'
 import ptBrKeys from '../app/i18n/locales/pt-BR.json'
 
-function getMissingKeys(reference: object, target: object, prefix = ''): string[] { /* ... */ }
+function getMissingKeys(
+  reference: object,
+  target: object,
+  prefix = '',
+): string[] {
+  /* ... */
+}
 
 const missing = getMissingKeys(enKeys, ptBrKeys)
 if (missing.length > 0) {
@@ -716,7 +869,9 @@ describe('SessionRecorder — session index', () => {
 ### E2E Tests (`tests/e2e/session-history.spec.ts`)
 
 ```typescript
-test('history viewer shows sessions in newest-first order', async ({ page }) => {
+test('history viewer shows sessions in newest-first order', async ({
+  page,
+}) => {
   // Play two games, navigate to parent > history
   // Verify second game appears above first
 })
@@ -731,7 +886,9 @@ test('filtering by game narrows results', async ({ page }) => {
   // Verify only that game's sessions are shown
 })
 
-test('cascade delete: clearing history removes all chunks', async ({ page }) => {
+test('cascade delete: clearing history removes all chunks', async ({
+  page,
+}) => {
   // Play game that produces 3 chunks (>400 events)
   // Clear history in parent settings
   // Verify session_history_chunks and session_history_index are empty
@@ -747,17 +904,17 @@ All fixtures live in `tests/fixtures/`. They export typed constant objects that 
 
 ### Files
 
-| File | Contents |
-|------|----------|
-| `profiles.ts` | 3 profiles: alice (Pre-K), bob (Year 2), parent account |
-| `progress.ts` | Sample progress docs for multiple games per profile |
-| `settings.ts` | Sample settings per profile |
-| `game_config_overrides.ts` | Sample overrides at each scope level |
-| `bookmarks.ts` | Sample bookmarks |
-| `themes.ts` | All 6 preset themes + 1 cloned custom theme |
-| `session_history.ts` | 2 sessions: one with 1 chunk, one with 3 chunks |
-| `session_history_index.ts` | Corresponding index documents |
-| `db-factory.ts` | Helper that creates an in-memory RxDB instance pre-seeded with all fixture data |
+| File                       | Contents                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| `profiles.ts`              | 3 profiles: alice (Pre-K), bob (Year 2), parent account                         |
+| `progress.ts`              | Sample progress docs for multiple games per profile                             |
+| `settings.ts`              | Sample settings per profile                                                     |
+| `game_config_overrides.ts` | Sample overrides at each scope level                                            |
+| `bookmarks.ts`             | Sample bookmarks                                                                |
+| `themes.ts`                | All 6 preset themes + 1 cloned custom theme                                     |
+| `session_history.ts`       | 2 sessions: one with 1 chunk, one with 3 chunks                                 |
+| `session_history_index.ts` | Corresponding index documents                                                   |
+| `db-factory.ts`            | Helper that creates an in-memory RxDB instance pre-seeded with all fixture data |
 
 ### Fixture Format
 
@@ -838,19 +995,19 @@ export async function createTestDb() {
 
 ## 13. Coverage Targets Summary
 
-| Category | Target |
-|----------|--------|
-| Game logic (override merging, session recorder) | 100% |
-| RxDB schemas | 100% |
-| Event bus | 100% |
-| Theme engine | 90% |
-| i18n utilities | 90% |
-| Speech utilities | 85% |
-| UI components (`app/components/`) | 85% line |
-| E2E critical flows | 100% flow coverage |
-| Accessibility (axe) | Zero violations |
-| i18n completeness | Zero missing keys |
-| Visual regression | Pixel-perfect baselines (< 0.1% diff) |
+| Category                                        | Target                                |
+| ----------------------------------------------- | ------------------------------------- |
+| Game logic (override merging, session recorder) | 100%                                  |
+| RxDB schemas                                    | 100%                                  |
+| Event bus                                       | 100%                                  |
+| Theme engine                                    | 90%                                   |
+| i18n utilities                                  | 90%                                   |
+| Speech utilities                                | 85%                                   |
+| UI components (`app/components/`)               | 85% line                              |
+| E2E critical flows                              | 100% flow coverage                    |
+| Accessibility (axe)                             | Zero violations                       |
+| i18n completeness                               | Zero missing keys                     |
+| Visual regression                               | Pixel-perfect baselines (< 0.1% diff) |
 
 ---
 

@@ -6,23 +6,23 @@
 
 ## 1. Tech Stack
 
-| Layer | Technology | Rationale |
-|-------|-----------|-----------|
-| **Meta-framework** | TanStack Start | Vite-native, type-safe routing, static SPA + future server upgrade path |
-| **Router** | TanStack Router (file-based) | End-to-end type safety for routes, params, search, loaders |
-| **UI library** | React 19 | Component model; hooks for RxDB reactive queries |
-| **Language** | TypeScript (strict mode) | `noImplicitAny`, no `any` ESLint rule, CI enforcement |
-| **UI components** | shadcn/ui | Accessible, unstyled base; extended for kid-friendly defaults |
-| **Styling** | Tailwind CSS v4 | Utility-first; CSS variable injection for theme engine |
-| **Local database** | RxDB | Offline-first, reactive, IndexedDB backend, sync plugins |
-| **Build tool** | Vite (via TanStack Start) | Fast HMR, static SPA preset via Nitro |
-| **Service Worker** | Workbox via vite-plugin-pwa | Pre-caches app shell and game assets |
-| **Cloud sync** | RxDB replication plugins | Cloud storage (initially Google Drive + OneDrive) via PKCE OAuth |
-| **Auth (OneDrive)** | MSAL.js | Native PKCE SPA flow, no backend needed |
-| **Auth (Google Drive)** | Cloudflare Worker BFF | Proxy for `client_secret` (Google non-standard PKCE requirement) |
-| **i18n** | react-i18next | Translation namespaces, TTS language routing |
-| **Testing** | Vitest + React Testing Library + Playwright | Unit, component, E2E, visual regression |
-| **CI/CD** | GitHub Actions | Lint, type-check, test, build, deploy to GitHub Pages |
+| Layer                   | Technology                                  | Rationale                                                               |
+| ----------------------- | ------------------------------------------- | ----------------------------------------------------------------------- |
+| **Meta-framework**      | TanStack Start                              | Vite-native, type-safe routing, static SPA + future server upgrade path |
+| **Router**              | TanStack Router (file-based)                | End-to-end type safety for routes, params, search, loaders              |
+| **UI library**          | React 19                                    | Component model; hooks for RxDB reactive queries                        |
+| **Language**            | TypeScript (strict mode)                    | `noImplicitAny`, no `any` ESLint rule, CI enforcement                   |
+| **UI components**       | shadcn/ui                                   | Accessible, unstyled base; extended for kid-friendly defaults           |
+| **Styling**             | Tailwind CSS v4                             | Utility-first; CSS variable injection for theme engine                  |
+| **Local database**      | RxDB                                        | Offline-first, reactive, IndexedDB backend, sync plugins                |
+| **Build tool**          | Vite (via TanStack Start)                   | Fast HMR, static SPA preset via Nitro                                   |
+| **Service Worker**      | Workbox via vite-plugin-pwa                 | Pre-caches app shell and game assets                                    |
+| **Cloud sync**          | RxDB replication plugins                    | Cloud storage (initially Google Drive + OneDrive) via PKCE OAuth        |
+| **Auth (OneDrive)**     | MSAL.js                                     | Native PKCE SPA flow, no backend needed                                 |
+| **Auth (Google Drive)** | Cloudflare Worker BFF                       | Proxy for `client_secret` (Google non-standard PKCE requirement)        |
+| **i18n**                | react-i18next                               | Translation namespaces, TTS language routing                            |
+| **Testing**             | Vitest + React Testing Library + Playwright | Unit, component, E2E, visual regression                                 |
+| **CI/CD**               | GitHub Actions                              | Lint, type-check, test, build, deploy to GitHub Pages                   |
 
 ---
 
@@ -66,6 +66,7 @@ graph TD
 ```
 
 **Key properties:**
+
 - All application logic runs in the browser. No server required.
 - RxDB is the single source of truth. State persists across refreshes automatically.
 - Each game is its own code-split bundle. The app shell loads instantly; game bundles are downloaded on first play or when the parent explicitly triggers a download. A "Download All Games" option exists in parent settings but is not triggered on first load.
@@ -170,7 +171,12 @@ export const Route = createFileRoute('/_app/game/$gameId')({
   loader: async ({ params, context }) => {
     const config = await context.gameLoader.load(params.gameId)
     const overrides = await context.db.game_config_overrides
-      .findOne({ selector: { profileId: context.activeProfile.id, gameId: params.gameId } })
+      .findOne({
+        selector: {
+          profileId: context.activeProfile.id,
+          gameId: params.gameId,
+        },
+      })
       .exec()
     return { config, overrides }
   },
@@ -212,19 +218,19 @@ __root.tsx
 
 These components are game-framework-level and used across multiple games:
 
-| Component | Description | Used By |
-|-----------|-------------|---------|
-| `DragAndDrop` | Pointer events, magnetic snap, ghost preview | Number Match, Word Builder |
-| `LetterTracer` | Canvas tracing with touch/mouse | Letter Tracing |
-| `MultipleChoice` | Tap/click answer selection | Math Facts |
-| `SpeechInput` | STT with animated visual indicator (GIF) | Read Aloud |
-| `SpeechOutput` | TTS wrapper with voice selection | All games |
-| `Timer` | Configurable, hideable per parent settings | Math Facts (optional all) |
-| `EncouragementAnnouncer` | TTS + visual popup, event-triggered | All games |
-| `ScoreAnimation` | CSS confetti/stars reward animations | All games |
-| `ProgressBar` | In-game progress display | All games |
-| `ScoreBoard` | Current score display | All games |
-| `OfflineIndicator` | `navigator.onLine` banner | App shell |
+| Component                | Description                                  | Used By                    |
+| ------------------------ | -------------------------------------------- | -------------------------- |
+| `DragAndDrop`            | Pointer events, magnetic snap, ghost preview | Number Match, Word Builder |
+| `LetterTracer`           | Canvas tracing with touch/mouse              | Letter Tracing             |
+| `MultipleChoice`         | Tap/click answer selection                   | Math Facts                 |
+| `SpeechInput`            | STT with animated visual indicator (GIF)     | Read Aloud                 |
+| `SpeechOutput`           | TTS wrapper with voice selection             | All games                  |
+| `Timer`                  | Configurable, hideable per parent settings   | Math Facts (optional all)  |
+| `EncouragementAnnouncer` | TTS + visual popup, event-triggered          | All games                  |
+| `ScoreAnimation`         | CSS confetti/stars reward animations         | All games                  |
+| `ProgressBar`            | In-game progress display                     | All games                  |
+| `ScoreBoard`             | Current score display                        | All games                  |
+| `OfflineIndicator`       | `navigator.onLine` banner                    | App shell                  |
 
 ---
 
@@ -238,15 +244,14 @@ All persistent state lives in RxDB. Components subscribe to reactive queries; UI
 // Example: reactive profile hook
 function useActiveProfile() {
   const [profile, setProfile] = useState<Profile | null>(null)
-  
+
   useEffect(() => {
     const sub = db.profiles
       .findOne({ selector: { isActive: true } })
-      .$
-      .subscribe(setProfile)
+      .$.subscribe(setProfile)
     return () => sub.unsubscribe()
   }, [])
-  
+
   return profile
 }
 ```
@@ -366,18 +371,18 @@ Each synced record includes a `deviceId` field (generated once per device, store
 
 ### Conflict Resolution
 
-| Collection | Strategy |
-|-----------|----------|
-| `profiles` | Last-write-wins (by `updatedAt` timestamp) |
-| `progress` | Merge: take max score, sum stars, extend streaks |
-| `settings` | Last-write-wins (per profile) |
-| `game_config_overrides` | Last-write-wins (by `updatedAt`) |
-| `bookmarks` | Union (all bookmarks from all devices kept) |
-| `themes` | Last-write-wins (by `updatedAt`) |
-| `session_history` | Append-only; no conflicts (chunks are immutable once written) |
-| `session_history_index` | Append-only; no conflicts |
-| `sync_meta` | Device-local; not cross-device synced |
-| `app_meta` | Device-local; not cross-device synced |
+| Collection              | Strategy                                                      |
+| ----------------------- | ------------------------------------------------------------- |
+| `profiles`              | Last-write-wins (by `updatedAt` timestamp)                    |
+| `progress`              | Merge: take max score, sum stars, extend streaks              |
+| `settings`              | Last-write-wins (per profile)                                 |
+| `game_config_overrides` | Last-write-wins (by `updatedAt`)                              |
+| `bookmarks`             | Union (all bookmarks from all devices kept)                   |
+| `themes`                | Last-write-wins (by `updatedAt`)                              |
+| `session_history`       | Append-only; no conflicts (chunks are immutable once written) |
+| `session_history_index` | Append-only; no conflicts                                     |
+| `sync_meta`             | Device-local; not cross-device synced                         |
+| `app_meta`              | Device-local; not cross-device synced                         |
 
 ---
 
@@ -403,13 +408,13 @@ stateDiagram-v2
 
 ### Cache Strategy (Workbox)
 
-| Asset Type | Strategy | TTL |
-|-----------|----------|-----|
-| App shell (HTML, core JS/CSS) | Cache-first, update on install | SW version |
-| Game bundles (JS per game) | Cache-first, code-split per game, downloaded on first play or parent-triggered | SW version |
-| Game assets (images, audio) | Cache-first, lazy-loaded per game | SW version |
-| API calls (future) | Network-first with fallback | 5 minutes |
-| Google Fonts (if used) | Stale-while-revalidate | 30 days |
+| Asset Type                    | Strategy                                                                       | TTL        |
+| ----------------------------- | ------------------------------------------------------------------------------ | ---------- |
+| App shell (HTML, core JS/CSS) | Cache-first, update on install                                                 | SW version |
+| Game bundles (JS per game)    | Cache-first, code-split per game, downloaded on first play or parent-triggered | SW version |
+| Game assets (images, audio)   | Cache-first, lazy-loaded per game                                              | SW version |
+| API calls (future)            | Network-first with fallback                                                    | 5 minutes  |
+| Google Fonts (if used)        | Stale-while-revalidate                                                         | 30 days    |
 
 ### App Versioning
 
@@ -426,7 +431,7 @@ Every CD deploy stamps a semver version:
 // Global hook — used by OfflineIndicator and RxDB sync
 function useOnlineStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
-  
+
   useEffect(() => {
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
@@ -437,7 +442,7 @@ function useOnlineStatus() {
       window.removeEventListener('offline', handleOffline)
     }
   }, [])
-  
+
   return isOnline
 }
 ```
@@ -459,7 +464,10 @@ A typed pub/sub system used for:
 interface AppEvents {
   'game:start': { gameId: string; profileId: string; sessionId: string }
   'game:action': { sessionId: string; action: string; payload: unknown }
-  'game:evaluate': { sessionId: string; result: 'correct' | 'incorrect' | 'near-miss' }
+  'game:evaluate': {
+    sessionId: string
+    result: 'correct' | 'incorrect' | 'near-miss'
+  }
   'game:score': { sessionId: string; score: number; total: number }
   'game:hint': { sessionId: string; hintType: string }
   'game:end': { sessionId: string; finalScore: number; duration: number }
@@ -471,8 +479,14 @@ interface AppEvents {
 
 interface EventBus {
   emit<K extends keyof AppEvents>(event: K, payload: AppEvents[K]): void
-  on<K extends keyof AppEvents>(event: K, handler: (payload: AppEvents[K]) => void): () => void
-  off<K extends keyof AppEvents>(event: K, handler: (payload: AppEvents[K]) => void): void
+  on<K extends keyof AppEvents>(
+    event: K,
+    handler: (payload: AppEvents[K]) => void,
+  ): () => void
+  off<K extends keyof AppEvents>(
+    event: K,
+    handler: (payload: AppEvents[K]) => void,
+  ): void
 }
 ```
 
@@ -482,14 +496,14 @@ External plugins (from separate repos) register via a public API exposed on `win
 
 ```typescript
 interface PluginAPI {
-  eventBus: Pick<EventBus, 'on' | 'off'>  // subscribe only, not emit
+  eventBus: Pick<EventBus, 'on' | 'off'> // subscribe only, not emit
   registerUISlot: (slot: UISlot, component: React.ComponentType) => () => void
   getConfig: () => ReadonlyAppConfig
 }
 
 type UISlot =
-  | 'dashboard:banner'        // Above game grid
-  | 'game:overlay'            // Floating overlay during gameplay
+  | 'dashboard:banner' // Above game grid
+  | 'game:overlay' // Floating overlay during gameplay
   | 'parent:settings:section' // Additional section in parent settings
 ```
 
@@ -501,7 +515,7 @@ Plugins cannot `emit` events — they can only subscribe. This ensures app state
 interface AnalyticsAdapter {
   trackEvent(name: string, properties?: Record<string, unknown>): void
   trackPageView(path: string): void
-  identify(profileId: string): void  // pseudonymous — no PII
+  identify(profileId: string): void // pseudonymous — no PII
   reset(): void
 }
 
@@ -602,11 +616,11 @@ base-skill/
 
 ## 12. Security Considerations
 
-| Risk | Mitigation |
-|------|-----------|
-| OAuth `client_secret` exposure | Stored only in Cloudflare Worker env vars; never in client bundle |
-| Token storage in browser | Encrypted IndexedDB; keys derived from device entropy; never in `localStorage` |
-| XSS via game content | Game configs are JSON (no eval); content rendered as text nodes or via sanitized JSX |
-| Plugin injection from external repos | Plugins receive read-only event bus (subscribe only); cannot emit events or modify RxDB directly |
-| Personal data in session history | Session history contains gameplay events only — no PII. ProfileId is a UUID with no link to real identity. |
-| Dependency supply chain | `npm audit` in CI; pin major versions; Dependabot alerts |
+| Risk                                 | Mitigation                                                                                                 |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| OAuth `client_secret` exposure       | Stored only in Cloudflare Worker env vars; never in client bundle                                          |
+| Token storage in browser             | Encrypted IndexedDB; keys derived from device entropy; never in `localStorage`                             |
+| XSS via game content                 | Game configs are JSON (no eval); content rendered as text nodes or via sanitized JSX                       |
+| Plugin injection from external repos | Plugins receive read-only event bus (subscribe only); cannot emit events or modify RxDB directly           |
+| Personal data in session history     | Session history contains gameplay events only — no PII. ProfileId is a UUID with no link to real identity. |
+| Dependency supply chain              | `npm audit` in CI; pin major versions; Dependabot alerts                                                   |

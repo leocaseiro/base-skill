@@ -11,6 +11,8 @@ describe('Profile Picker route', () => {
       )
     }
     render(<ProfilePicker />)
-    expect(screen.getByRole('heading', { name: /profile picker/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /profile picker/i }),
+    ).toBeInTheDocument()
   })
 })
