@@ -33,12 +33,12 @@ Every screen, gesture, and piece of copy is designed for the child's current gra
 
 Grade bands and their UX tier:
 
-| Grade Band | Ages (approx.) | UX Tier |
-|---|---|---|
-| Pre-K / Prep | 3–5 | Icon + TTS only |
-| Year 1–2 | 5–8 | Icon + short text label |
-| Year 3–4 | 8–10 | Text navigation, simple search |
-| Year 5–6+ | 10–12 | Full text UI, advanced filters |
+| Grade Band   | Ages (approx.) | UX Tier                        |
+| ------------ | -------------- | ------------------------------ |
+| Pre-K / Prep | 3–5            | Icon + TTS only                |
+| Year 1–2     | 5–8            | Icon + short text label        |
+| Year 3–4     | 8–10           | Text navigation, simple search |
+| Year 5–6+    | 10–12          | Full text UI, advanced filters |
 
 ### 1.2 Touch Target Sizes
 
@@ -91,17 +91,18 @@ BaseSkill uses [shadcn/ui](https://ui.shadcn.com/) as its component library — 
 
 **Key modifications to shadcn defaults**:
 
-| Token | shadcn default | BaseSkill override |
-|---|---|---|
-| Border radius | `rounded-md` (6px) | `rounded-3xl` (24px) for cards, `rounded-2xl` for buttons |
-| Button height | 36px | 48px minimum, 56px for primary actions |
-| Font family | system-ui | [Edu NSW ACT Foundation](https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation) (Google Fonts), fallback: Nunito, system-ui. Parents can override font per profile. |
-| Font size base | 14px | 16px (mobile), 18px (tablet), 20px (desktop) |
-| Shadow | `shadow-sm` | `shadow-md` with softer spread for card depth |
+| Token          | shadcn default     | BaseSkill override                                                                                                                                                     |
+| -------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Border radius  | `rounded-md` (6px) | `rounded-3xl` (24px) for cards, `rounded-2xl` for buttons                                                                                                              |
+| Button height  | 36px               | 48px minimum, 56px for primary actions                                                                                                                                 |
+| Font family    | system-ui          | [Edu NSW ACT Foundation](https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation) (Google Fonts), fallback: Nunito, system-ui. Parents can override font per profile. |
+| Font size base | 14px               | 16px (mobile), 18px (tablet), 20px (desktop)                                                                                                                           |
+| Shadow         | `shadow-sm`        | `shadow-md` with softer spread for card depth                                                                                                                          |
 
 ### 2.2 Typography
 
 **Font stack**:
+
 ```css
 --font-body: 'Edu NSW ACT Foundation', 'Nunito', system-ui, sans-serif;
 --font-display: 'Edu NSW ACT Foundation', 'Nunito', system-ui, sans-serif;
@@ -111,16 +112,16 @@ BaseSkill uses [shadcn/ui](https://ui.shadcn.com/) as its component library — 
 
 **Type scale** (rem-based, scales with root font size):
 
-| Role | Size | Weight | Usage |
-|---|---|---|---|
-| `display` | 2.5rem | 700 | Game titles, celebration messages |
-| `heading-1` | 2rem | 700 | Screen titles |
-| `heading-2` | 1.5rem | 600 | Section headings |
-| `heading-3` | 1.25rem | 600 | Card titles |
-| `body-lg` | 1.125rem | 400 | Game instructions |
-| `body` | 1rem | 400 | General text |
-| `body-sm` | 0.875rem | 400 | Badges, timestamps |
-| `label` | 0.75rem | 600 | Form labels, metadata |
+| Role        | Size     | Weight | Usage                             |
+| ----------- | -------- | ------ | --------------------------------- |
+| `display`   | 2.5rem   | 700    | Game titles, celebration messages |
+| `heading-1` | 2rem     | 700    | Screen titles                     |
+| `heading-2` | 1.5rem   | 600    | Section headings                  |
+| `heading-3` | 1.25rem  | 600    | Card titles                       |
+| `body-lg`   | 1.125rem | 400    | Game instructions                 |
+| `body`      | 1rem     | 400    | General text                      |
+| `body-sm`   | 0.875rem | 400    | Badges, timestamps                |
+| `label`     | 0.75rem  | 600    | Form labels, metadata             |
 
 ### 2.3 CSS Custom Properties (Tailwind CSS v4 Theme Injection)
 
@@ -161,36 +162,37 @@ All color values are hex. All themes have been checked for WCAG AA contrast rati
 
 **Concept**: Calm underwater world — blue skies above, turquoise seas, sandy details. Relaxing but stimulating.
 
-| Variable | Hex | Role |
-|---|---|---|
-| `--bs-primary` | `#0077B6` | Buttons, links, focus rings |
-| `--bs-secondary` | `#00B4D8` | Secondary buttons, highlights |
-| `--bs-background` | `#EAF6FB` | Page background |
-| `--bs-surface` | `#FFFFFF` | Cards, dialogs |
-| `--bs-text` | `#023E57` | Primary text (9.2:1 on background) |
-| `--bs-accent` | `#FFB703` | Accent, star icons, badges |
-| `--bs-success` | `#2DC653` | Correct answer indicator |
-| `--bs-warning` | `#F4A261` | Timer warning, caution |
-| `--bs-error` | `#E63946` | Validation error (never used alone) |
+| Variable          | Hex       | Role                                |
+| ----------------- | --------- | ----------------------------------- |
+| `--bs-primary`    | `#0077B6` | Buttons, links, focus rings         |
+| `--bs-secondary`  | `#00B4D8` | Secondary buttons, highlights       |
+| `--bs-background` | `#EAF6FB` | Page background                     |
+| `--bs-surface`    | `#FFFFFF` | Cards, dialogs                      |
+| `--bs-text`       | `#023E57` | Primary text (9.2:1 on background)  |
+| `--bs-accent`     | `#FFB703` | Accent, star icons, badges          |
+| `--bs-success`    | `#2DC653` | Correct answer indicator            |
+| `--bs-warning`    | `#F4A261` | Timer warning, caution              |
+| `--bs-error`      | `#E63946` | Validation error (never used alone) |
 
 **Typography weight**: 600 (semi-bold default for readability on light background)
 
 **Background pattern**: Subtle repeating wave SVG pattern at 5% opacity on `--bs-background`; gentle undulation suggesting water without distraction.
 
 **CSS variable block**:
+
 ```css
-[data-theme="ocean"] {
-  --bs-primary: #0077B6;
-  --bs-secondary: #00B4D8;
-  --bs-background: #EAF6FB;
-  --bs-surface: #FFFFFF;
-  --bs-text: #023E57;
-  --bs-accent: #FFB703;
-  --bs-success: #2DC653;
-  --bs-warning: #F4A261;
-  --bs-error: #E63946;
+[data-theme='ocean'] {
+  --bs-primary: #0077b6;
+  --bs-secondary: #00b4d8;
+  --bs-background: #eaf6fb;
+  --bs-surface: #ffffff;
+  --bs-text: #023e57;
+  --bs-accent: #ffb703;
+  --bs-success: #2dc653;
+  --bs-warning: #f4a261;
+  --bs-error: #e63946;
   --bs-font-weight-default: 600;
-  --bs-pattern: url("data:image/svg+xml,...wave...");
+  --bs-pattern: url('data:image/svg+xml,...wave...');
 }
 ```
 
@@ -200,36 +202,37 @@ All color values are hex. All themes have been checked for WCAG AA contrast rati
 
 **Concept**: Lush woodland — earthy greens, warm browns, dappled sunlight. Grounding and natural.
 
-| Variable | Hex | Role |
-|---|---|---|
-| `--bs-primary` | `#2D6A4F` | Buttons, links |
-| `--bs-secondary` | `#52B788` | Secondary actions |
-| `--bs-background` | `#F0F7F0` | Page background |
-| `--bs-surface` | `#FFFFFF` | Cards, dialogs |
-| `--bs-text` | `#1A3A2A` | Primary text (8.7:1 on background) |
-| `--bs-accent` | `#D4A017` | Acorns, star icons, gold |
-| `--bs-success` | `#40C057` | Correct answer indicator |
-| `--bs-warning` | `#E07B39` | Caution states |
-| `--bs-error` | `#C62828` | Validation errors |
+| Variable          | Hex       | Role                               |
+| ----------------- | --------- | ---------------------------------- |
+| `--bs-primary`    | `#2D6A4F` | Buttons, links                     |
+| `--bs-secondary`  | `#52B788` | Secondary actions                  |
+| `--bs-background` | `#F0F7F0` | Page background                    |
+| `--bs-surface`    | `#FFFFFF` | Cards, dialogs                     |
+| `--bs-text`       | `#1A3A2A` | Primary text (8.7:1 on background) |
+| `--bs-accent`     | `#D4A017` | Acorns, star icons, gold           |
+| `--bs-success`    | `#40C057` | Correct answer indicator           |
+| `--bs-warning`    | `#E07B39` | Caution states                     |
+| `--bs-error`      | `#C62828` | Validation errors                  |
 
 **Typography weight**: 600
 
 **Background pattern**: Tiny repeating leaf silhouettes at 4% opacity. Pattern tile: 40×40px, leafy scatter using CSS `background-image`.
 
 **CSS variable block**:
+
 ```css
-[data-theme="forest"] {
-  --bs-primary: #2D6A4F;
-  --bs-secondary: #52B788;
-  --bs-background: #F0F7F0;
-  --bs-surface: #FFFFFF;
-  --bs-text: #1A3A2A;
-  --bs-accent: #D4A017;
-  --bs-success: #40C057;
-  --bs-warning: #E07B39;
-  --bs-error: #C62828;
+[data-theme='forest'] {
+  --bs-primary: #2d6a4f;
+  --bs-secondary: #52b788;
+  --bs-background: #f0f7f0;
+  --bs-surface: #ffffff;
+  --bs-text: #1a3a2a;
+  --bs-accent: #d4a017;
+  --bs-success: #40c057;
+  --bs-warning: #e07b39;
+  --bs-error: #c62828;
   --bs-font-weight-default: 600;
-  --bs-pattern: url("data:image/svg+xml,...leaves...");
+  --bs-pattern: url('data:image/svg+xml,...leaves...');
 }
 ```
 
@@ -239,36 +242,37 @@ All color values are hex. All themes have been checked for WCAG AA contrast rati
 
 **Concept**: Deep cosmos — stars, planets, nebulae. Sparks curiosity and wonder. Popular with Year 3–6.
 
-| Variable | Hex | Role |
-|---|---|---|
-| `--bs-primary` | `#7C3AED` | Buttons, links (purple) |
-| `--bs-secondary` | `#A78BFA` | Secondary buttons, highlights |
-| `--bs-background` | `#0D0D2B` | Deep space navy |
-| `--bs-surface` | `#1A1A4E` | Cards, dialogs (slightly lighter) |
-| `--bs-text` | `#E8E8FF` | Primary text (13.4:1 on background) |
-| `--bs-accent` | `#FCD34D` | Stars, gold, highlights |
-| `--bs-success` | `#34D399` | Correct answer (teal — distinct from purple) |
-| `--bs-warning` | `#FBBF24` | Timer warning, caution |
-| `--bs-error` | `#F87171` | Validation error (soft red on dark) |
+| Variable          | Hex       | Role                                         |
+| ----------------- | --------- | -------------------------------------------- |
+| `--bs-primary`    | `#7C3AED` | Buttons, links (purple)                      |
+| `--bs-secondary`  | `#A78BFA` | Secondary buttons, highlights                |
+| `--bs-background` | `#0D0D2B` | Deep space navy                              |
+| `--bs-surface`    | `#1A1A4E` | Cards, dialogs (slightly lighter)            |
+| `--bs-text`       | `#E8E8FF` | Primary text (13.4:1 on background)          |
+| `--bs-accent`     | `#FCD34D` | Stars, gold, highlights                      |
+| `--bs-success`    | `#34D399` | Correct answer (teal — distinct from purple) |
+| `--bs-warning`    | `#FBBF24` | Timer warning, caution                       |
+| `--bs-error`      | `#F87171` | Validation error (soft red on dark)          |
 
 **Typography weight**: 700 (bold — ensures legibility on dark background)
 
 **Background pattern**: Procedural star field — 80 tiny white dots (1–2px) scattered via SVG `<circle>` elements, static (no animation), at full opacity on `--bs-background`. A single large planet silhouette (soft purple) appears bottom-right at 8% opacity.
 
 **CSS variable block**:
+
 ```css
-[data-theme="space"] {
-  --bs-primary: #7C3AED;
-  --bs-secondary: #A78BFA;
-  --bs-background: #0D0D2B;
-  --bs-surface: #1A1A4E;
-  --bs-text: #E8E8FF;
-  --bs-accent: #FCD34D;
-  --bs-success: #34D399;
-  --bs-warning: #FBBF24;
-  --bs-error: #F87171;
+[data-theme='space'] {
+  --bs-primary: #7c3aed;
+  --bs-secondary: #a78bfa;
+  --bs-background: #0d0d2b;
+  --bs-surface: #1a1a4e;
+  --bs-text: #e8e8ff;
+  --bs-accent: #fcd34d;
+  --bs-success: #34d399;
+  --bs-warning: #fbbf24;
+  --bs-error: #f87171;
   --bs-font-weight-default: 700;
-  --bs-pattern: url("data:image/svg+xml,...stars...");
+  --bs-pattern: url('data:image/svg+xml,...stars...');
 }
 ```
 
@@ -278,36 +282,37 @@ All color values are hex. All themes have been checked for WCAG AA contrast rati
 
 **Concept**: Bright, playful, multi-color celebration. Best for Pre-K/K. High energy.
 
-| Variable | Hex | Role |
-|---|---|---|
-| `--bs-primary` | `#E63946` | Buttons, links (vivid red) |
-| `--bs-secondary` | `#F4A261` | Secondary (warm orange) |
-| `--bs-background` | `#FFFDE7` | Warm cream white |
-| `--bs-surface` | `#FFFFFF` | Cards, dialogs |
-| `--bs-text` | `#2D2D2D` | Primary text (16.8:1 on background) |
-| `--bs-accent` | `#6A4C93` | Purple accent, badges |
-| `--bs-success` | `#2DC653` | Correct answer (green) |
-| `--bs-warning` | `#FF6D00` | Caution states (deep orange) |
-| `--bs-error` | `#C62828` | Validation errors |
+| Variable          | Hex       | Role                                |
+| ----------------- | --------- | ----------------------------------- |
+| `--bs-primary`    | `#E63946` | Buttons, links (vivid red)          |
+| `--bs-secondary`  | `#F4A261` | Secondary (warm orange)             |
+| `--bs-background` | `#FFFDE7` | Warm cream white                    |
+| `--bs-surface`    | `#FFFFFF` | Cards, dialogs                      |
+| `--bs-text`       | `#2D2D2D` | Primary text (16.8:1 on background) |
+| `--bs-accent`     | `#6A4C93` | Purple accent, badges               |
+| `--bs-success`    | `#2DC653` | Correct answer (green)              |
+| `--bs-warning`    | `#FF6D00` | Caution states (deep orange)        |
+| `--bs-error`      | `#C62828` | Validation errors                   |
 
 **Typography weight**: 700
 
 **Background pattern**: Rainbow arc gradient at the top of `--bs-background` (15% opacity gradient strip, 80px tall). Game surface area and cards use solid white. The arc is decorative only, not interactive.
 
 **CSS variable block**:
+
 ```css
-[data-theme="rainbow"] {
-  --bs-primary: #E63946;
-  --bs-secondary: #F4A261;
-  --bs-background: #FFFDE7;
-  --bs-surface: #FFFFFF;
-  --bs-text: #2D2D2D;
-  --bs-accent: #6A4C93;
-  --bs-success: #2DC653;
-  --bs-warning: #FF6D00;
-  --bs-error: #C62828;
+[data-theme='rainbow'] {
+  --bs-primary: #e63946;
+  --bs-secondary: #f4a261;
+  --bs-background: #fffde7;
+  --bs-surface: #ffffff;
+  --bs-text: #2d2d2d;
+  --bs-accent: #6a4c93;
+  --bs-success: #2dc653;
+  --bs-warning: #ff6d00;
+  --bs-error: #c62828;
   --bs-font-weight-default: 700;
-  --bs-pattern: url("data:image/svg+xml,...rainbow-arc...");
+  --bs-pattern: url('data:image/svg+xml,...rainbow-arc...');
 }
 ```
 
@@ -317,36 +322,37 @@ All color values are hex. All themes have been checked for WCAG AA contrast rati
 
 **Concept**: Warm golden-hour sky — oranges, pinks, and peach tones. Cozy and inviting. Good for wind-down sessions.
 
-| Variable | Hex | Role |
-|---|---|---|
-| `--bs-primary` | `#D62839` | Buttons, links (deep rose) |
-| `--bs-secondary` | `#FF8C42` | Secondary (vivid orange) |
-| `--bs-background` | `#FFF3E8` | Warm peach white |
-| `--bs-surface` | `#FFFFFF` | Cards, dialogs |
-| `--bs-text` | `#3B1F14` | Primary text (dark brown, 12.1:1) |
-| `--bs-accent` | `#FF6B6B` | Coral accent, badges |
-| `--bs-success` | `#27AE60` | Correct answer (green — distinct from warm palette) |
-| `--bs-warning` | `#E67E22` | Timer warning |
-| `--bs-error` | `#C0392B` | Validation errors |
+| Variable          | Hex       | Role                                                |
+| ----------------- | --------- | --------------------------------------------------- |
+| `--bs-primary`    | `#D62839` | Buttons, links (deep rose)                          |
+| `--bs-secondary`  | `#FF8C42` | Secondary (vivid orange)                            |
+| `--bs-background` | `#FFF3E8` | Warm peach white                                    |
+| `--bs-surface`    | `#FFFFFF` | Cards, dialogs                                      |
+| `--bs-text`       | `#3B1F14` | Primary text (dark brown, 12.1:1)                   |
+| `--bs-accent`     | `#FF6B6B` | Coral accent, badges                                |
+| `--bs-success`    | `#27AE60` | Correct answer (green — distinct from warm palette) |
+| `--bs-warning`    | `#E67E22` | Timer warning                                       |
+| `--bs-error`      | `#C0392B` | Validation errors                                   |
 
 **Typography weight**: 600
 
 **Background pattern**: Soft radial gradient in bottom-right corner (sunset glow: orange → pink at 10% opacity) overlaid on solid `--bs-background`. No tile pattern — single-element gradient.
 
 **CSS variable block**:
+
 ```css
-[data-theme="sunset"] {
-  --bs-primary: #D62839;
-  --bs-secondary: #FF8C42;
-  --bs-background: #FFF3E8;
-  --bs-surface: #FFFFFF;
-  --bs-text: #3B1F14;
-  --bs-accent: #FF6B6B;
-  --bs-success: #27AE60;
-  --bs-warning: #E67E22;
-  --bs-error: #C0392B;
+[data-theme='sunset'] {
+  --bs-primary: #d62839;
+  --bs-secondary: #ff8c42;
+  --bs-background: #fff3e8;
+  --bs-surface: #ffffff;
+  --bs-text: #3b1f14;
+  --bs-accent: #ff6b6b;
+  --bs-success: #27ae60;
+  --bs-warning: #e67e22;
+  --bs-error: #c0392b;
   --bs-font-weight-default: 600;
-  --bs-pattern: url("data:image/svg+xml,...sunset-glow...");
+  --bs-pattern: url('data:image/svg+xml,...sunset-glow...');
 }
 ```
 
@@ -356,36 +362,37 @@ All color values are hex. All themes have been checked for WCAG AA contrast rati
 
 **Concept**: Calm, low-stimulation dark theme for evening use. Deep navy with soft purple accents. Does not cause eye strain. Explicit user choice only.
 
-| Variable | Hex | Role |
-|---|---|---|
-| `--bs-primary` | `#818CF8` | Buttons, links (soft indigo) |
-| `--bs-secondary` | `#A5B4FC` | Secondary (lighter indigo) |
-| `--bs-background` | `#0F172A` | Deep navy |
-| `--bs-surface` | `#1E293B` | Cards, dialogs (slate) |
-| `--bs-text` | `#E2E8F0` | Primary text (12.8:1 on background) |
-| `--bs-accent` | `#F472B6` | Pink accent, badges |
-| `--bs-success` | `#4ADE80` | Correct answer (bright green) |
-| `--bs-warning` | `#FBBF24` | Timer warning (amber) |
-| `--bs-error` | `#FB7185` | Validation error (soft pink-red on dark) |
+| Variable          | Hex       | Role                                     |
+| ----------------- | --------- | ---------------------------------------- |
+| `--bs-primary`    | `#818CF8` | Buttons, links (soft indigo)             |
+| `--bs-secondary`  | `#A5B4FC` | Secondary (lighter indigo)               |
+| `--bs-background` | `#0F172A` | Deep navy                                |
+| `--bs-surface`    | `#1E293B` | Cards, dialogs (slate)                   |
+| `--bs-text`       | `#E2E8F0` | Primary text (12.8:1 on background)      |
+| `--bs-accent`     | `#F472B6` | Pink accent, badges                      |
+| `--bs-success`    | `#4ADE80` | Correct answer (bright green)            |
+| `--bs-warning`    | `#FBBF24` | Timer warning (amber)                    |
+| `--bs-error`      | `#FB7185` | Validation error (soft pink-red on dark) |
 
 **Typography weight**: 600
 
 **Background pattern**: Very subtle repeating dot grid at 3% opacity (white dots, 1px, 24px spacing). Provides gentle texture without distraction on dark background.
 
 **CSS variable block**:
+
 ```css
-[data-theme="night"] {
-  --bs-primary: #818CF8;
-  --bs-secondary: #A5B4FC;
-  --bs-background: #0F172A;
-  --bs-surface: #1E293B;
-  --bs-text: #E2E8F0;
-  --bs-accent: #F472B6;
-  --bs-success: #4ADE80;
-  --bs-warning: #FBBF24;
-  --bs-error: #FB7185;
+[data-theme='night'] {
+  --bs-primary: #818cf8;
+  --bs-secondary: #a5b4fc;
+  --bs-background: #0f172a;
+  --bs-surface: #1e293b;
+  --bs-text: #e2e8f0;
+  --bs-accent: #f472b6;
+  --bs-success: #4ade80;
+  --bs-warning: #fbbf24;
+  --bs-error: #fb7185;
   --bs-font-weight-default: 600;
-  --bs-pattern: url("data:image/svg+xml,...dot-grid...");
+  --bs-pattern: url('data:image/svg+xml,...dot-grid...');
 }
 ```
 
@@ -398,6 +405,7 @@ All color values are hex. All themes have been checked for WCAG AA contrast rati
 Any pre-defined theme can be cloned and modified. Custom themes are stored in the RxDB `themes` collection and can be scoped per-child-profile or per-family (all profiles share the theme).
 
 **Customizable properties**:
+
 - `primary` — primary brand color (button fills, focus rings)
 - `secondary` — secondary action color
 - `background` — page background color
@@ -429,20 +437,20 @@ Each swatch previews the font weight in real time. Default pre-selected based on
 ```typescript
 // RxDB document schema for themes collection
 interface ThemeDocument {
-  id: string;                       // nanoid
-  name: string;                     // User-given name, e.g. "Mia's Pink Theme"
-  baseTheme: string;                // slug of pre-defined theme used as base
-  scope: 'profile' | 'family';
-  profileId?: string;               // only when scope === 'profile'
+  id: string // nanoid
+  name: string // User-given name, e.g. "Mia's Pink Theme"
+  baseTheme: string // slug of pre-defined theme used as base
+  scope: 'profile' | 'family'
+  profileId?: string // only when scope === 'profile'
   colors: {
-    primary: string;                // hex
-    secondary: string;              // hex
-    background: string;             // hex
-    accent: string;                 // hex
-  };
-  fontWeightDefault: 400 | 500 | 600 | 700;
-  createdAt: string;                // ISO 8601
-  updatedAt: string;
+    primary: string // hex
+    secondary: string // hex
+    background: string // hex
+    accent: string // hex
+  }
+  fontWeightDefault: 400 | 500 | 600 | 700
+  createdAt: string // ISO 8601
+  updatedAt: string
 }
 ```
 
@@ -464,6 +472,7 @@ interface ThemeDocument {
 **Purpose**: Entry point. Child selects their profile; no authentication required.
 
 **Structure**:
+
 ```
 ┌─────────────────────────────────────┐
 │         BaseSkill Logo              │  ← centered, top, 48px tall
@@ -480,6 +489,7 @@ interface ThemeDocument {
 ```
 
 **Key elements**:
+
 - Profile avatar card: 120×140px (mobile), 160×200px (tablet+). Rounded avatar image (80px circle) + name label below.
 - Tap area: entire card is tappable
 - "Add Profile" card: same dimensions, dashed border, `+` icon centered, "Add Profile" label below
@@ -489,6 +499,7 @@ interface ThemeDocument {
 **Grade-level UX**: profile names use a larger, bolder font. Avatar images (emoji-style illustrations, not photos) are the primary identifier for Pre-K children.
 
 **Behavior**:
+
 - Tapping a profile card navigates immediately to that child's Dashboard
 - Active profile is stored in `localStorage` / RxDB session context — no URL parameter needed
 - Profiles load from RxDB `profiles` collection; if empty, "Add Profile" is the only card shown
@@ -500,6 +511,7 @@ interface ThemeDocument {
 **Purpose**: Child's home base after profile selection. Surfaces relevant games and recent activity.
 
 **Structure**:
+
 ```
 ┌─────────────────────────────────────┐
 │ [Avatar] Mia (Year 2) [⚙ Settings] │  ← sticky header, 56px tall
@@ -522,6 +534,7 @@ interface ThemeDocument {
 ```
 
 **Header** (sticky):
+
 - Left: avatar thumbnail (32px circle) + child name + grade band label
 - Right: settings gear icon → navigates to Child Settings
 - Background: `--bs-surface` with a bottom border `1px solid --bs-primary/20`
@@ -541,6 +554,7 @@ interface ThemeDocument {
 **Purpose**: Wraps any game module. Provides minimal chrome so the game can focus on learning.
 
 **Structure**:
+
 ```
 ┌─────────────────────────────────────┐
 │ [←] Counting Bears    ⭐ 3  ⏱ 0:42 │  ← header, 48px tall, always visible
@@ -555,6 +569,7 @@ interface ThemeDocument {
 ```
 
 **Header**:
+
 - Back arrow (`←`) left — navigates back to Dashboard with a confirmation dialog if a session is in progress
 - Game title centered (truncated to 1 line)
 - Score (star icon + number) right of title
@@ -562,6 +577,7 @@ interface ThemeDocument {
 - No bottom navigation bar in this layout
 
 **Game content area**:
+
 - Height: `calc(100dvh - 48px)` (dynamic viewport height minus header)
 - Width: 100vw
 - Overflow: hidden (games manage their own scroll if needed)
@@ -579,6 +595,7 @@ interface ThemeDocument {
 **Purpose**: Simple, child-appropriate settings. Accessible from the Dashboard header.
 
 **Structure**:
+
 ```
 ┌─────────────────────────────────────┐
 │ [← Back]   My Settings              │
@@ -602,6 +619,7 @@ interface ThemeDocument {
 ```
 
 **Behavior**:
+
 - All settings save immediately to RxDB `settings` collection (no "Save" button needed)
 - Volume slider: range 0–100, step 10. Changes reflected in game audio immediately
 - Voice speed: Slow (0.75×), Normal (1.0×), Fast (1.25×) — maps to TTS rate
@@ -617,6 +635,7 @@ interface ThemeDocument {
 **Access**: triggered by "Parent Settings" link on Home screen (or via header gear → "Parent Settings" option). A modal PIN entry overlay appears before any parent content is displayed.
 
 **Structure**:
+
 ```
 ┌─────────────────────────────────────┐
 │ [← Exit Parent Mode]  Parent Panel  │
@@ -652,12 +671,12 @@ interface ThemeDocument {
 
 Navigation affordances are determined by the active profile's grade band:
 
-| Grade Band | Navigation Style | Text Labels | TTS on Focus |
-|---|---|---|---|
-| Pre-K / Prep | Icons only, very large | No | Yes — reads label |
-| Year 1–2 | Icons + short labels | Yes (≤8 chars) | Yes — optional |
-| Year 3–4 | Icons + labels | Yes (full) | Optional |
-| Year 5–6+ | Text navigation, search | Yes (full) | Optional |
+| Grade Band   | Navigation Style        | Text Labels    | TTS on Focus      |
+| ------------ | ----------------------- | -------------- | ----------------- |
+| Pre-K / Prep | Icons only, very large  | No             | Yes — reads label |
+| Year 1–2     | Icons + short labels    | Yes (≤8 chars) | Yes — optional    |
+| Year 3–4     | Icons + labels          | Yes (full)     | Optional          |
+| Year 5–6+    | Text navigation, search | Yes (full)     | Optional          |
 
 Implementation: a `useGradeNavMode()` hook returns `'icon-only' | 'icon-label' | 'text'` based on the active profile. All navigation components consume this hook and render conditionally.
 
@@ -678,6 +697,7 @@ Implementation: a `useGradeNavMode()` hook returns `'icon-only' | 'icon-label' |
 - Selecting a profile switches context immediately (updates RxDB session store, re-renders Dashboard)
 
 **Bottom sheet structure**:
+
 ```
 ───────────────────────
   Mia (Year 2)   ✓      ← current
@@ -695,7 +715,7 @@ Implementation: a `useGradeNavMode()` hook returns `'icon-only' | 'icon-label' |
   - Title: "Parent Settings"
   - Subtitle: "Enter your 4-digit PIN"
   - Display: 4 dot indicators (● ● ● ●), filled as digits are entered
-  - Numeric keypad: 3×4 grid (1–9, *, 0, backspace)
+  - Numeric keypad: 3×4 grid (1–9, \*, 0, backspace)
   - Button size: 72×72px minimum
   - On success: modal closes, parent content becomes accessible (stored in React context, cleared on exit)
   - On 3 failed attempts: 30-second lockout with countdown timer shown
@@ -708,11 +728,11 @@ Implementation: a `useGradeNavMode()` hook returns `'icon-only' | 'icon-label' |
 
 ### 7.1 Card Dimensions
 
-| Screen | Card Size |
-|---|---|
-| Mobile (< 640px) | 160×200px |
+| Screen              | Card Size |
+| ------------------- | --------- |
+| Mobile (< 640px)    | 160×200px |
 | Tablet (640–1023px) | 180×225px |
-| Desktop (≥ 1024px) | 200×250px |
+| Desktop (≥ 1024px)  | 200×250px |
 
 ### 7.2 Card Anatomy
 
@@ -747,11 +767,11 @@ Implementation: a `useGradeNavMode()` hook returns `'icon-only' | 'icon-label' |
 
 ### 7.3 Visual States
 
-| State | Appearance |
-|---|---|
-| **Unplayed** | Normal card, no stars, no progress badge |
-| **In-Progress** | Small "Continue" badge (bottom-left, `--bs-warning` background) |
-| **Completed** (1–3 stars) | Star row visible, no progress badge |
+| State                               | Appearance                                                                                      |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Unplayed**                        | Normal card, no stars, no progress badge                                                        |
+| **In-Progress**                     | Small "Continue" badge (bottom-left, `--bs-warning` background)                                 |
+| **Completed** (1–3 stars)           | Star row visible, no progress badge                                                             |
 | **Locked** (future: grade too high) | Card desaturated 50%, lock icon overlay at center — not shown by default; configurable per game |
 
 ### 7.4 Hover / Focus States
@@ -792,6 +812,7 @@ The `0.3` multiplier creates a "pull" feeling without fully locking the item unt
 **Behavior**: While dragging, a semi-transparent copy of the item (the "ghost") appears at the current drop zone target position, showing where the item will land if released.
 
 **Implementation**:
+
 - Ghost element is a clone of the draggable item with `opacity: 0.4` and `pointer-events: none`
 - Ghost is rendered inside the drop zone, positioned at the zone's snap target point
 - Ghost appears only when the dragged item is within `SNAP_THRESHOLD` of a valid zone
@@ -802,10 +823,18 @@ The `0.3` multiplier creates a "pull" feeling without fully locking the item unt
 **Behavior**: All valid drop zones pulsate (scale + opacity animation) while a drag is in progress, guiding young children to the correct areas.
 
 **CSS animation**:
+
 ```css
 @keyframes drop-zone-pulse {
-  0%, 100% { transform: scale(1);    opacity: 0.7; }
-  50%       { transform: scale(1.06); opacity: 1;   }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
 }
 
 .drop-zone--active {
@@ -822,13 +851,13 @@ Animation starts when drag begins (`onPointerDown` on any draggable), stops when
 ```typescript
 // Shared drag state managed via React ref (not state — avoids re-renders during drag)
 interface DragState {
-  isDragging: boolean;
-  itemId: string | null;
-  startX: number;
-  startY: number;
-  currentX: number;
-  currentY: number;
-  activeZoneId: string | null;
+  isDragging: boolean
+  itemId: string | null
+  startX: number
+  startY: number
+  currentX: number
+  currentY: number
+  activeZoneId: string | null
 }
 ```
 
@@ -870,14 +899,14 @@ interface DragState {
 
 ### 9.3 Message Triggers and Copy
 
-| Trigger | English | Portuguese (pt-BR) |
-|---|---|---|
-| Correct answer | "Amazing!", "You got it!", "Brilliant!", "Keep going!" | "Incrível!", "Acertou!", "Brilhante!", "Continue assim!" |
-| Near-miss (1 wrong attempt) | "So close! Try once more!", "Almost there!" | "Quase lá! Tente mais uma vez!" |
-| Wrong answer (2nd+ attempt) | "Keep trying, you're doing great!" | "Continue tentando, você está indo bem!" |
-| Idle 15 seconds | "You're doing great, keep going!", "Take your time!" | "Você está indo bem, continue!", "Sem pressa!" |
-| Session complete | "Brilliant work today!", "You're a star!" | "Ótimo trabalho hoje!", "Você é uma estrela!" |
-| Milestone (10 correct in session) | "10 in a row! Incredible!" | "10 seguidos! Incrível!" |
+| Trigger                           | English                                                | Portuguese (pt-BR)                                       |
+| --------------------------------- | ------------------------------------------------------ | -------------------------------------------------------- |
+| Correct answer                    | "Amazing!", "You got it!", "Brilliant!", "Keep going!" | "Incrível!", "Acertou!", "Brilhante!", "Continue assim!" |
+| Near-miss (1 wrong attempt)       | "So close! Try once more!", "Almost there!"            | "Quase lá! Tente mais uma vez!"                          |
+| Wrong answer (2nd+ attempt)       | "Keep trying, you're doing great!"                     | "Continue tentando, você está indo bem!"                 |
+| Idle 15 seconds                   | "You're doing great, keep going!", "Take your time!"   | "Você está indo bem, continue!", "Sem pressa!"           |
+| Session complete                  | "Brilliant work today!", "You're a star!"              | "Ótimo trabalho hoje!", "Você é uma estrela!"            |
+| Milestone (10 correct in session) | "10 in a row! Incredible!"                             | "10 seguidos! Incrível!"                                 |
 
 Messages are randomly selected from the pool for each trigger to avoid repetition. Selection is seeded per session so the same message doesn't repeat within 3 triggers.
 
@@ -885,14 +914,29 @@ Messages are randomly selected from the pool for each trigger to avoid repetitio
 
 ```css
 @keyframes mascot-bounce-in {
-  0%   { transform: scale(0) translateY(20px); opacity: 0; }
-  60%  { transform: scale(1.1) translateY(-4px); opacity: 1; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
+  0% {
+    transform: scale(0) translateY(20px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1) translateY(-4px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes bubble-slide-out {
-  0%   { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(-12px); opacity: 0; }
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
 }
 ```
 
@@ -908,6 +952,7 @@ Messages are randomly selected from the pool for each trigger to avoid repetitio
 ### 9.5 Reduced Motion
 
 When `prefers-reduced-motion: reduce` is active:
+
 - Mascot appears/disappears instantly (no scale animation)
 - Speech bubble fades in/out only (no translate)
 - TTS still fires — the message is still communicated
@@ -972,6 +1017,7 @@ Parent Panel > Session History
 ### 10.6 Empty State
 
 Centered in the list area:
+
 - Illustration: friendly owl holding a magnifying glass (SVG)
 - Heading: "No sessions yet"
 - Subtext: "Session history will appear here after [child name] plays a game."
@@ -1004,9 +1050,10 @@ Storage Usage
 **Button**: "Clear Session History" (`variant="outline"`, `--bs-warning` border)
 
 **Confirmation dialog**:
+
 > **Clear Session History?**
 > This will delete all recorded events and session logs. Your child's progress, scores, and stars are not affected.
-> [Cancel]  [Clear History]
+> [Cancel] [Clear History]
 
 On confirm: deletes all documents from RxDB `sessions` and `sessionEvents` collections for the active profile. Shows a toast: "Session history cleared."
 
@@ -1015,9 +1062,10 @@ On confirm: deletes all documents from RxDB `sessions` and `sessionEvents` colle
 **Button**: "Clear All Progress" (`variant="outline"`, `--bs-error` border)
 
 **Confirmation dialog**:
+
 > **Clear All Progress?**
 > This will reset all scores, star ratings, and badges for [child name]. This cannot be undone.
-> [Cancel]  [Clear Progress]
+> [Cancel] [Clear Progress]
 
 On confirm: deletes all documents from RxDB `gameProgress` and `badges` collections for the active profile.
 
@@ -1036,9 +1084,10 @@ Dropdown options: 30 days, 90 days, 180 days, Custom Date.
 On "Custom Date": a date picker appears. Preview text updates reactively as date changes (queries RxDB for count/size estimate of matching records).
 
 **Confirmation dialog** (same pattern as §11.2 but with date context):
+
 > **Delete history older than March 1, 2026?**
 > This will delete 47 session logs (~18.4 MB). Progress and scores are not affected.
-> [Cancel]  [Delete]
+> [Cancel] [Delete]
 
 ### 11.5 General Behavior
 
@@ -1059,13 +1108,13 @@ Never write styles that need to be overridden for small screens — start from t
 
 ### 12.2 Breakpoints
 
-| Prefix | Min-width | Target |
-|---|---|---|
-| (base) | 0px | Mobile phones, portrait |
-| `sm:` | 640px | Large phones, landscape / small tablets |
-| `md:` | 768px | Tablets portrait |
-| `lg:` | 1024px | Tablets landscape / small desktop |
-| `xl:` | 1280px | Desktop |
+| Prefix | Min-width | Target                                  |
+| ------ | --------- | --------------------------------------- |
+| (base) | 0px       | Mobile phones, portrait                 |
+| `sm:`  | 640px     | Large phones, landscape / small tablets |
+| `md:`  | 768px     | Tablets portrait                        |
+| `lg:`  | 1024px    | Tablets landscape / small desktop       |
+| `xl:`  | 1280px    | Desktop                                 |
 
 ### 12.3 Game Area
 
@@ -1077,11 +1126,11 @@ Never write styles that need to be overridden for small screens — start from t
 
 ### 12.4 Grid Columns
 
-| Component | Mobile | Tablet (md) | Desktop (lg) |
-|---|---|---|---|
-| Dashboard game grid | 2 columns | 3 columns | 4 columns |
-| Profile picker grid | 2 columns | 4 per row | 4–6 per row |
-| Parent Settings list | 1 column | 1 column (wider) | 2 columns |
+| Component            | Mobile    | Tablet (md)      | Desktop (lg) |
+| -------------------- | --------- | ---------------- | ------------ |
+| Dashboard game grid  | 2 columns | 3 columns        | 4 columns    |
+| Profile picker grid  | 2 columns | 4 per row        | 4–6 per row  |
+| Parent Settings list | 1 column  | 1 column (wider) | 2 columns    |
 
 ### 12.5 Font Scaling
 
@@ -1089,16 +1138,22 @@ Root font size changes at breakpoints via Tailwind CSS v4 `@theme`:
 
 ```css
 /* Mobile default */
-:root { font-size: 16px; }
+:root {
+  font-size: 16px;
+}
 
 /* Tablet */
 @media (min-width: 768px) {
-  :root { font-size: 18px; }
+  :root {
+    font-size: 18px;
+  }
 }
 
 /* Desktop */
 @media (min-width: 1024px) {
-  :root { font-size: 20px; }
+  :root {
+    font-size: 20px;
+  }
 }
 ```
 
@@ -1141,13 +1196,13 @@ All UI animations use CSS keyframes. No JavaScript animation libraries (no Frame
 
 Only animate `transform` and `opacity`. Never animate layout-triggering properties:
 
-| ✅ Allowed | ❌ Never animate |
-|---|---|
-| `transform: scale()` | `width` / `height` |
-| `transform: translate()` | `top` / `left` / `right` / `bottom` |
-| `transform: rotate()` | `margin` / `padding` |
-| `opacity` | `font-size` |
-| `filter: blur()` (sparingly) | `border-width` |
+| ✅ Allowed                   | ❌ Never animate                    |
+| ---------------------------- | ----------------------------------- |
+| `transform: scale()`         | `width` / `height`                  |
+| `transform: translate()`     | `top` / `left` / `right` / `bottom` |
+| `transform: rotate()`        | `margin` / `padding`                |
+| `opacity`                    | `font-size`                         |
+| `filter: blur()` (sparingly) | `border-width`                      |
 
 Use `will-change: transform` only on elements that animate on every frame (e.g. dragged items). Remove `will-change` after animation ends.
 
@@ -1157,7 +1212,9 @@ Every non-essential animation must be wrapped in a `@media (prefers-reduced-moti
 
 ```css
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -1174,9 +1231,18 @@ Essential animations (e.g. focus ring visibility, progress indicators): not disa
 
 ```css
 @keyframes confetti-burst {
-  0%   { clip-path: polygon(50% 50%, 50% 50%, 50% 50%); opacity: 1; }
-  60%  { clip-path: polygon(50% 0%, 100% 100%, 0% 100%); opacity: 0.8; }
-  100% { clip-path: polygon(50% -50%, 150% 150%, -50% 150%); opacity: 0; }
+  0% {
+    clip-path: polygon(50% 50%, 50% 50%, 50% 50%);
+    opacity: 1;
+  }
+  60% {
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    opacity: 0.8;
+  }
+  100% {
+    clip-path: polygon(50% -50%, 150% 150%, -50% 150%);
+    opacity: 0;
+  }
 }
 ```
 
@@ -1186,9 +1252,18 @@ Render 12–16 pseudo-elements (or small `<span>` elements) around the center of
 
 ```css
 @keyframes star-burst {
-  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
-  50%  { transform: scale(1.3) rotate(5deg);  opacity: 1; }
-  100% { transform: scale(1)   rotate(0deg);  opacity: 1; }
+  0% {
+    transform: scale(0) rotate(-15deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3) rotate(5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
 ```
 
@@ -1198,9 +1273,18 @@ Duration: 600ms. Applied to the star icon in the game header when score incremen
 
 ```css
 @keyframes emoji-pop {
-  0%   { transform: scale(0); opacity: 0; }
-  70%  { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 ```
 
@@ -1208,15 +1292,15 @@ Duration: 300ms. Used for ✓ / ✗ feedback overlay on answer submission. Auto-
 
 ### 13.5 Animation Duration Reference
 
-| Context | Duration | Easing |
-|---|---|---|
-| Reward (confetti, star burst) | 600ms | `ease-out` |
-| Encouragement mascot bounce | 300ms | `cubic-bezier(0.34, 1.56, 0.64, 1)` (spring-like) |
-| UI transitions (route, panel) | 150ms | `ease-in-out` |
-| Hover/focus state | 150ms | `ease-out` |
-| Drop zone pulse | 1200ms | `ease-in-out`, infinite |
-| Toast / notification | 200ms in, 150ms out | `ease-out` / `ease-in` |
-| Modal / sheet open | 200ms | `ease-out` |
+| Context                       | Duration            | Easing                                            |
+| ----------------------------- | ------------------- | ------------------------------------------------- |
+| Reward (confetti, star burst) | 600ms               | `ease-out`                                        |
+| Encouragement mascot bounce   | 300ms               | `cubic-bezier(0.34, 1.56, 0.64, 1)` (spring-like) |
+| UI transitions (route, panel) | 150ms               | `ease-in-out`                                     |
+| Hover/focus state             | 150ms               | `ease-out`                                        |
+| Drop zone pulse               | 1200ms              | `ease-in-out`, infinite                           |
+| Toast / notification          | 200ms in, 150ms out | `ease-out` / `ease-in`                            |
+| Modal / sheet open            | 200ms               | `ease-out`                                        |
 
 ---
 
@@ -1226,24 +1310,24 @@ Duration: 300ms. Used for ✓ / ✗ feedback overlay on answer submission. Auto-
 
 All themes meet WCAG 2.1 AA minimum contrast ratios:
 
-| Text Type | Minimum Ratio | Verified Against |
-|---|---|---|
-| Normal text (< 18px, non-bold) | 4.5:1 | `--bs-text` on `--bs-background` and `--bs-surface` |
-| Large text (≥ 18px, or ≥ 14px bold) | 3:1 | `--bs-text` on `--bs-background` |
-| UI components (buttons, inputs, focus rings) | 3:1 | Component color on adjacent background |
-| Placeholder text | 4.5:1 | Placeholder on input background |
+| Text Type                                    | Minimum Ratio | Verified Against                                    |
+| -------------------------------------------- | ------------- | --------------------------------------------------- |
+| Normal text (< 18px, non-bold)               | 4.5:1         | `--bs-text` on `--bs-background` and `--bs-surface` |
+| Large text (≥ 18px, or ≥ 14px bold)          | 3:1           | `--bs-text` on `--bs-background`                    |
+| UI components (buttons, inputs, focus rings) | 3:1           | Component color on adjacent background              |
+| Placeholder text                             | 4.5:1         | Placeholder on input background                     |
 
 ### 14.2 Color-Independent Game Mechanics
 
 Game questions and mechanics must never use color as the only differentiator. Always pair color with at least one additional indicator:
 
-| Color usage | Required pairing |
-|---|---|
+| Color usage            | Required pairing                   |
+| ---------------------- | ---------------------------------- |
 | Correct answer (green) | ✓ checkmark icon + "Correct!" text |
-| Incorrect answer (red) | ✗ cross icon + "Try again!" text |
-| Category grouping | Shape or pattern fill + color |
-| Drag zone type | Zone label or icon + border color |
-| Progress indicator | Percentage number + color bar |
+| Incorrect answer (red) | ✗ cross icon + "Try again!" text   |
+| Category grouping      | Shape or pattern fill + color      |
+| Drag zone type         | Zone label or icon + border color  |
+| Progress indicator     | Percentage number + color bar      |
 
 ### 14.3 Badge and Label Contrast
 
@@ -1283,5 +1367,5 @@ The Night and Space themes use `--bs-success: #4ADE80` (bright green) and `--bs-
 
 ---
 
-*Document version: 1.0.0 — March 2026*
-*Maintained alongside the BaseSkill codebase in `docs/ui-ux.md`*
+_Document version: 1.0.0 — March 2026_
+_Maintained alongside the BaseSkill codebase in `docs/ui-ux.md`_

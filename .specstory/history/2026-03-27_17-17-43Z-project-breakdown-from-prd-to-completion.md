@@ -24,6 +24,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -34,35 +35,40 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 Now I have a thorough understanding of the PRD. Let me break this down into logical milestones/steps that can be worked on either async (in parallel) or sync (sequentially, with dependencies). Let me think about what depends on what:
 
 **Foundation layer** (must come first):
+
 - Project scaffolding (Vite + React + TypeScript strict)
 - RxDB setup and data model
 - Basic routing and layout shell
 - CI/CD pipeline
 
 **Core infrastructure** (depends on foundation):
+
 - PWA / Service Worker / Workbox
 - Theme system (shadcn/ui + kid-friendly theming)
 - i18n framework setup
-
 
 - Profile system with local profiles, PIN management, and switching
 - Event bus and plugin architecture
 
 **Game engine** (depends on core infra):
+
 - Game lifecycle framework
 - Session recorder middleware
 - Reusable game components (DragDrop, LetterTracer, MultipleChoice, etc.)
 - Parent override system
 
 **Reference games** (depends on game engine):
+
 - The 5 reference games
 
 **Cloud sync** (can be partially parallel with game engine):
+
 - OAuth2 PKCE flows
 - RxDB replication to Google Drive / OneDrive
 - Cloudflare Worker for Google OAuth proxy
 
 **Parent/guardian features** (depends on profiles and cloud sync):
+
 - Still mapping out the remaining dependencies here
 
 ...</details></think>
@@ -76,7 +82,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <tool-use data-tool-type="unknown" data-tool-name="create_plan">
 <details>
 <summary>Tool use: **create_plan**</summary>
-
 
 Parameters:
 
@@ -134,6 +139,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -147,6 +153,7 @@ Additional data:
   }
 }
 ```
+
 Result:
 
 ```json
@@ -154,13 +161,14 @@ Result:
   "rejected": {}
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="create_plan"><details>
+
 <summary>Tool use: **create_plan**</summary>
 
 </details></tool-use>
@@ -179,13 +187,13 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 The user is asking about meta frameworks for this project - a kids' educational PWA that's offline-first, deployed to GitHub Pages (static hosting), uses RxDB for client-side data, and needs to be a PWA. Let me think through the main contenders and give honest pros/cons in the context of this specific project.
 
 The key constraints from the PRD:
+
 - JAMstack only (no backend server)
 - GitHub Pages hosting (static output)
 - PWA with service worker
 - Offline-first with RxDB
 - React + TypeScript + shadcn/ui already chosen
 - Client-side only (all logic runs in browser)
-
 
 Vite is already in the PRD as the bundler, so I'm really comparing whether to add a meta framework on top of it. The main options are Next.js, Remix, Astro, and TanStack Start, but here's the thing - most of these are built for server-side rendering and full-stack applications, which doesn't fit a purely client-side SPA architecture.
 
@@ -214,6 +222,7 @@ Here are the three serious contenders:
 ## 1. Next.js (with `output: 'export'`)
 
 **Pros:**
+
 - Largest ecosystem and community -- easiest to find answers, libraries, and examples
 - Mature file-based routing with layouts (App Router nested layouts map well to Game Shell / Dashboard / Settings)
 - Excellent TypeScript support out of the box
@@ -221,6 +230,7 @@ Here are the three serious contenders:
 - Good image optimization story (though static export disables `next/image` server optimization)
 
 **Cons:**
+
 - **Fighting the framework.** App Router defaults to Server Components -- you'd be writing `"use client"` on nearly every file since the entire app is client-side. The framework's core value prop (server rendering) is unused.
 - Static export (`output: 'export'`) disables many Next.js features: no API routes, no middleware, no ISR, no server actions. You're paying the complexity cost without the benefits.
 - PWA/service worker support is manual and awkward -- Next.js doesn't have built-in Workbox integration; you'd add `next-pwa` or roll your own, and it's known to have rough edges with App Router.
@@ -233,6 +243,7 @@ Here are the three serious contenders:
 ## 2. React Router v7 (Framework Mode) -- **My Recommendation**
 
 **Pros:**
+
 - **Built on Vite natively** -- aligns with the PRD's existing tech decision, fast HMR, simple config.
 - Has an explicit **SPA mode** designed for exactly this use case -- no server required, outputs static files.
 - File-based routing with nested layouts (similar to Next.js App Router, but without the server component complexity).
@@ -245,6 +256,7 @@ Here are the three serious contenders:
 - GitHub Pages deployment is trivial -- it outputs a static `dist/` folder.
 
 **Cons:**
+
 - Smaller community than Next.js -- fewer blog posts, tutorials, and Stack Overflow answers.
 - The Remix-to-React-Router-v7 transition created some documentation fragmentation -- some guides reference Remix patterns that have been renamed.
 - Less "batteries included" than Next.js (no built-in image component, no built-in font optimization).
@@ -256,6 +268,7 @@ Here are the three serious contenders:
 ## 3. TanStack Start
 
 **Pros:**
+
 - Most modern architecture -- built from scratch on Vite, designed for full-stack but works as SPA.
 - TanStack Router is arguably the best type-safe router in the React ecosystem -- fully typesafe route params, search params, and loaders.
 - Pairs naturally with TanStack Query, which could complement RxDB for async state management.
@@ -263,6 +276,7 @@ Here are the three serious contenders:
 - No server component baggage.
 
 **Cons:**
+
 - **Maturity risk.** Still relatively young compared to Next.js and React Router. API surface may shift.
 - Smallest community of the three -- fewer resources, fewer battle-tested production deployments.
 - shadcn/ui works but isn't specifically tested against it (minor concern).
@@ -305,6 +319,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 The user wants to go with TanStack Start as the meta framework, with the rationale that they plan to use cloud/server features in the future. This is a reasonable choice -- TanStack Start's full-stack capabilities will be useful when they add server-side features later, and TanStack Router's type-safe routing is excellent.
 
 Let me update the plan to reflect this change. I need to:
+
 1. Read the current plan file
 2. Update it to incorporate TanStack Start instead of plain Vite
 
@@ -325,6 +340,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -344,6 +360,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -359,6 +376,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -374,6 +392,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -389,6 +408,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -404,6 +424,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -419,6 +440,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -438,6 +460,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -453,6 +476,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -475,8 +499,7 @@ The plan is updated. Here's a summary of what changed:
 
 _**User**_
 
-Should we use the https://tanstack.com/builder  ? or some other generator?
-
+Should we use the https://tanstack.com/builder ? or some other generator?
 
 ---
 
@@ -495,7 +518,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **web_fetch**</summary>
 
-
 Parameters:
 
 ```json
@@ -503,6 +525,7 @@ Parameters:
   "url": "https://tanstack.com/builder"
 }
 ```
+
 Result:
 
 ```json
@@ -511,15 +534,16 @@ Result:
   "url": "https://tanstack.com/builder"
 }
 ```
+
 User decision: **accepted**
 
 Status: **completed**
-
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="web_fetch"><details>
+
 <summary>Tool use: **web_fetch**</summary>
 
 </details></tool-use>
@@ -530,7 +554,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **web_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -538,6 +561,7 @@ Parameters:
   "searchTerm": "TanStack Builder alpha 2026 what is it"
 }
 ```
+
 Result:
 
 ```json
@@ -552,15 +576,16 @@ Result:
   "rejected": false
 }
 ```
+
 User decision: **accepted**
 
 Status: **completed**
-
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+
 <summary>Tool use: **web_search**</summary>
 
 </details></tool-use>
@@ -571,7 +596,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **web_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -579,6 +603,7 @@ Parameters:
   "searchTerm": "TanStack Builder visual page builder drag drop component"
 }
 ```
+
 Result:
 
 ```json
@@ -593,15 +618,16 @@ Result:
   "rejected": false
 }
 ```
+
 User decision: **accepted**
 
 Status: **completed**
-
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+
 <summary>Tool use: **web_search**</summary>
 
 </details></tool-use>
@@ -612,7 +638,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **web_fetch**</summary>
 
-
 Parameters:
 
 ```json
@@ -620,6 +645,7 @@ Parameters:
   "url": "https://tanstack.com/start/latest/docs/framework/react/quick-start"
 }
 ```
+
 Result:
 
 ```json
@@ -628,15 +654,16 @@ Result:
   "url": "https://tanstack.com/start/latest/docs/framework/react/quick-start"
 }
 ```
+
 User decision: **accepted**
 
 Status: **completed**
-
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="web_fetch"><details>
+
 <summary>Tool use: **web_fetch**</summary>
 
 </details></tool-use>
@@ -680,7 +707,7 @@ The recommended approach for Milestone 1 would be:
 
 This gives you the cleanest starting point with all the TanStack conventions already in place, rather than trying to manually wire up TanStack Start from scratch.
 
-As for TanStack Builder -- it *could* become useful later if you want to let parents or teachers visually customize game layouts, but that's well beyond current scope and it's still in alpha. I'd skip it entirely for now.
+As for TanStack Builder -- it _could_ become useful later if you want to let parents or teachers visually customize game layouts, but that's well beyond current scope and it's still in alpha. I'd skip it entirely for now.
 
 Want me to update the plan to specify the TanStack CLI as the scaffolding method in Milestone 1?
 
@@ -701,6 +728,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -716,6 +744,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -725,6 +754,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 The string to replace was not found in the file.
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -738,6 +768,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>

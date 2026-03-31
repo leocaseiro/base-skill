@@ -3,31 +3,31 @@ name: BaseSkill Milestone Breakdown
 overview: Break the BaseSkill PRD into sequential milestones and identify which work streams within each milestone can proceed in parallel (async) versus which must be completed sequentially (sync).
 todos:
   - id: m0-design-docs
-    content: "Milestone 0: Author all 8+ design docs in docs/ folder (prd.md, architecture.md, data-model.md, game-engine.md, ui-ux.md, i18n.md, accessibility.md, testing-strategy.md, ci-cd.md)"
+    content: 'Milestone 0: Author all 8+ design docs in docs/ folder (prd.md, architecture.md, data-model.md, game-engine.md, ui-ux.md, i18n.md, accessibility.md, testing-strategy.md, ci-cd.md)'
     status: pending
   - id: m1-scaffolding
-    content: "Milestone 1: TanStack Start + TanStack Router + React + TS strict + shadcn/ui + Tailwind v4 + ESLint + Vitest + Playwright + GitHub Actions CI/CD + static SPA output + vite-plugin-pwa + GPL v3 LICENSE"
+    content: 'Milestone 1: TanStack Start + TanStack Router + React + TS strict + shadcn/ui + Tailwind v4 + ESLint + Vitest + Playwright + GitHub Actions CI/CD + static SPA output + vite-plugin-pwa + GPL v3 LICENSE'
     status: pending
   - id: m2-data-layer
-    content: "Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services"
+    content: 'Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services'
     status: pending
   - id: m3-app-shell
-    content: "Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents"
+    content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents'
     status: pending
   - id: m4-game-engine
-    content: "Milestone 4: Game lifecycle, game shell UI, config loader + override merging, session recorder, 7 reusable game components"
+    content: 'Milestone 4: Game lifecycle, game shell UI, config loader + override merging, session recorder, 7 reusable game components'
     status: pending
   - id: m5-reference-games
-    content: "Milestone 5: 5 reference games (Letter Tracing, Number Match, Word Builder, Read Aloud, Math Facts)"
+    content: 'Milestone 5: 5 reference games (Letter Tracing, Number Match, Word Builder, Read Aloud, Math Facts)'
     status: pending
   - id: m6-cloud-sync
-    content: "Milestone 6: OneDrive MSAL.js PKCE, Google Drive PKCE + CF Worker proxy, token management, device-aware sync, conflict resolution"
+    content: 'Milestone 6: OneDrive MSAL.js PKCE, Google Drive PKCE + CF Worker proxy, token management, device-aware sync, conflict resolution'
     status: pending
   - id: m7-parent-features
-    content: "Milestone 7: Parent settings (game overrides, session history viewer, data management, cloud sync config, TTS voice selector)"
+    content: 'Milestone 7: Parent settings (game overrides, session history viewer, data management, cloud sync config, TTS voice selector)'
     status: pending
   - id: m8-polish
-    content: "Milestone 8: Accessibility audit, offline hardening, visual regression, i18n verification, performance, analytics abstraction, PWA install prompt, SW migration testing"
+    content: 'Milestone 8: Accessibility audit, offline hardening, visual regression, i18n verification, performance, analytics abstraction, PWA install prompt, SW migration testing'
     status: pending
 isProject: false
 ---
@@ -238,12 +238,9 @@ graph TD
     M7 --> M8
 ```
 
-
-
 ---
 
 ## Summary: What Can Run in Parallel
-
 
 | Phase | Parallel Streams                                |
 | ----- | ----------------------------------------------- |
@@ -255,7 +252,6 @@ graph TD
 | M6    | OneDrive plugin, Google Drive plugin, CF Worker |
 | M7    | All 5 parent settings screens                   |
 | M8    | All 8 polish work streams                       |
-
 
 The critical path is: **M0 -> M1 -> M2 -> M4 -> M5 -> M8**, with M3, M6, and M7 as parallel branches off M2.
 

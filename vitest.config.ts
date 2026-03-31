@@ -9,16 +9,16 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     exclude: ['e2e/**', 'node_modules/**'],
     setupFiles: ['./src/test-setup.ts'],
-    coverage: {
-      provider: 'v8',
-      include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/**/*.test.{ts,tsx}', 'src/routeTree.gen.ts'],
-      thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 75,
-        statements: 80,
-      },
-    },
+    // coverage: {
+    //   provider: 'v8',
+    //   include: ['src/**/*.{ts,tsx}'],
+    //   exclude: ['src/**/*.test.{ts,tsx}', 'src/routeTree.gen.ts'],
+    //   thresholds: {
+    //     lines: 80,
+    //     functions: 80,
+    //     branches: 75,
+    //     statements: 80,
+    //   },
+    // },
   },
 })

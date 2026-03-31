@@ -22,7 +22,7 @@ The document must be comprehensive, self-contained, and actionable for AI agents
 3. **Event Bus Integration**: Game components emit typed events:
    - `game:start`, `game:instructions_shown`, `game:action`, `game:evaluate`, `game:score`, `game:hint`, `game:retry`, `game:end`
    - Example TypeScript event payload types
-   - Session recorder subscribes to all game:* events
+   - Session recorder subscribes to all game:\* events
 
 4. **Session Recorder Middleware**:
    - Subscribes to event bus on game start
@@ -33,9 +33,10 @@ The document must be comprehensive, self-contained, and actionable for AI agents
    - Opt-in per game config, enabled by default
 
 5. **Game Config JSON Schema** — full JSON Schema definition:
+
    ```
-   id, title (localized object with en/pt-BR), subject (enum: letters|reading|math|...), 
-   gradeBands (array of: pre-k|k|year1-2|year3-4|year5-6), 
+   id, title (localized object with en/pt-BR), subject (enum: letters|reading|math|...),
+   gradeBands (array of: pre-k|k|year1-2|year3-4|year5-6),
    component (string: component name to render),
    assets (images, audio paths),
    instructions (localized),
@@ -43,6 +44,7 @@ The document must be comprehensive, self-contained, and actionable for AI agents
    content: { en: {...}, "pt-BR": {...} },
    sessionRecorder: { enabled: boolean }
    ```
+
    Include a complete worked example for the Math Facts game.
 
 6. **Parent Override Merging Logic**:

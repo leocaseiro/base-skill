@@ -7,6 +7,7 @@
     "#/*": "./src/*"
   },
   "scripts": {
+    "start": "yarn dev",
     "dev": "vite dev --port 3000",
     "build": "vite build",
     "preview": "vite preview",
@@ -17,7 +18,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --check .",
-    "check": "prettier --write . && eslint --fix"
+    "fix": "prettier --write . && eslint --fix"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
@@ -54,6 +55,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "3.2.4",
     "eslint": "^10.1.0",
     "jsdom": "^28.1.0",
     "prettier": "^3.8.1",
@@ -61,15 +63,11 @@
     "vite": "^7.3.1",
     "vite-plugin-pwa": "^1.2.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.5"
+    "vitest": "^3.0.5",
+    "workbox-build": "^7.4.0",
+    "workbox-window": "^7.4.0"
   },
   "engines": {
     "node": ">=22.12.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "lightningcss"
-    ]
   }
 }

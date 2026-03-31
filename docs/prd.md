@@ -8,7 +8,7 @@
 
 **BaseSkill** is a free, open-source, offline-first educational PWA for children from Pre-K through Year 6+. It delivers gamified learning across subjects — letters, reading, and math — with a kid-first UX that adapts to the child's grade level. The app runs on any device browser, works without an internet connection, and syncs progress to cloud storage (e.g., Google Drive, OneDrive) at no cost to the family.
 
-**One-liner:** *A free, open-source educational game platform that children love and parents trust.*
+**One-liner:** _A free, open-source educational game platform that children love and parents trust._
 
 ### Design Philosophy
 
@@ -38,7 +38,6 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 
 **Primary user.** The child interacts with games directly.
 
-
 | Attribute    | Description                                                                |
 | ------------ | -------------------------------------------------------------------------- |
 | Age range    | ~3–12 years old                                                            |
@@ -46,7 +45,6 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 | Device usage | Supervised tablet or desktop; occasional unsupervised mobile               |
 | Tech comfort | Varies widely; Pre-K/K needs icon-only navigation and TTS (text-to-speech) |
 | Motivation   | Play, earn stars, see progress, hear encouragement                         |
-
 
 **UX adaptation by grade level:**
 
@@ -58,14 +56,12 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 
 **Configurator and supervisor.** Sets up profiles, customises game settings, and monitors progress.
 
-
 | Attribute    | Description                                                          |
 | ------------ | -------------------------------------------------------------------- |
 | Tech comfort | Average smartphone/tablet user                                       |
 | Goals        | See child's progress, customise difficulty, manage data, set up sync |
 | Pain points  | Complicated settings, confusing data, sync failures                  |
 | Access       | Behind a PIN gate in the app, and/or behind math/wording puzzles     |
-
 
 **Key needs:**
 
@@ -79,7 +75,6 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 
 **Multi-child household on a single device.** Quick profile switching without separate accounts.
 
-
 | Attribute  | Description                                                                                                         |
 | ---------- | ------------------------------------------------------------------------------------------------------------------- |
 | Scenario   | Multiple children share one tablet/laptop (no limit on number of profiles)                                          |
@@ -87,13 +82,11 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 | Key flows  | Switch profiles from the home screen; no login required                                                             |
 | Constraint | Parent PIN protects settings from children                                                                          |
 
-
 ---
 
 ## 4. User Stories
 
 ### Child Stories
-
 
 | ID   | As a child… | I want to…                                   | So that…                                                                                      |
 | ---- | ----------- | -------------------------------------------- | --------------------------------------------------------------------------------------------- |
@@ -108,9 +101,7 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 | C-09 | Any child   | Try again after a wrong answer               | I don't feel punished for mistakes                                                            |
 | C-10 | Any child   | Read instructions as text or listen to audio | I can choose how I learn; parents can disable audio to encourage reading practice             |
 
-
 ### Parent/Guardian Stories
-
 
 | ID   | As a parent… | I want to…                                              | So that…                                     |
 | ---- | ------------ | ------------------------------------------------------- | -------------------------------------------- |
@@ -125,16 +116,13 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 | P-09 | Parent       | See when data was last synced                           | I know sync is working                       |
 | P-10 | Parent       | Change a child's theme                                  | I help my child personalise their app        |
 
-
 ### Family (Shared Device) Stories
-
 
 | ID   | As a family… | We want to…                                 | So that…                                  |
 | ---- | ------------ | ------------------------------------------- | ----------------------------------------- |
 | F-01 | Family       | Switch profiles from the home screen        | Each child goes directly to their profile |
 | F-02 | Family       | Share one device without separate accounts  | Setup is simple                           |
 | F-03 | Family       | Each child has their own theme and settings | The app feels personalised per child      |
-
 
 ---
 
@@ -154,7 +142,7 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 - **Categories**: Organized by **grade** (Pre-K, K, Year 1–2, Year 3–4, Year 5–6+) and **subject** (Letters, Reading, Math, etc.).
 - **Game cards**: Each game shown as a large card with illustration, title (TTS-readable), subject badge, and grade badge.
 - **Filtering/browsing**: Grade filter on dashboard; subject filter; search (text + TTS for younger children).
-- **Game catalog format**: Games are defined by JSON config files that describe the game's metadata and content, **not** the game logic itself. The JSON config specifies: game ID, title, description, subject, grade band, asset references (images, audio), content data (word lists, number ranges, sentences per locale), difficulty levels, evaluation criteria, and default settings (retries, timer, win-mode). The actual game **logic and UI** lives in reusable React game components (e.g., `LetterTracer`, `MultipleChoice`, `DragAndDrop`, `WordBuilder`). A JSON config tells an existing component *what content to render*. This means the community can add new games that use existing mechanics (e.g., a new spelling word list) by contributing only a JSON file and assets. Truly new game *mechanics* require a new React component, but new *content variations* within existing mechanics are JSON-only contributions.
+- **Game catalog format**: Games are defined by JSON config files that describe the game's metadata and content, **not** the game logic itself. The JSON config specifies: game ID, title, description, subject, grade band, asset references (images, audio), content data (word lists, number ranges, sentences per locale), difficulty levels, evaluation criteria, and default settings (retries, timer, win-mode). The actual game **logic and UI** lives in reusable React game components (e.g., `LetterTracer`, `MultipleChoice`, `DragAndDrop`, `WordBuilder`). A JSON config tells an existing component _what content to render_. This means the community can add new games that use existing mechanics (e.g., a new spelling word list) by contributing only a JSON file and assets. Truly new game _mechanics_ require a new React component, but new _content variations_ within existing mechanics are JSON-only contributions.
 
 ### 5.3 Bookmarks and Recents
 
@@ -198,13 +186,11 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 
 Parents can override per-game defaults at three levels (most specific wins):
 
-
 | Level                       | Scope                                                                           |
 | --------------------------- | ------------------------------------------------------------------------------- |
 | **Per-game override**       | Settings for one specific game                                                  |
 | **Per-grade-band override** | Settings for all games in a grade band (Pre-K, K, Year 1–2, Year 3–4, Year 5–6) |
 | **Global override**         | Settings for all games                                                          |
-
 
 **Override fields:**
 
@@ -221,7 +207,7 @@ Overrides stored in `game_config_overrides` collection, per profile.
 
 - **4–6 pre-defined themes**: Ocean, Forest, Space, Rainbow, Sunset, Night. Each defines color palette, typography weight, icon style, and background pattern.
 - **Default typography**: [Edu NSW ACT Foundation](https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation) — a handwriting font designed for Australian school children. Young children can be confused by unfamiliar letterforms, so the default font is consistent with what they learn in school. All games use this font by default to maintain visual consistency.
-  - **Alternative fonts**:  (TODO: verify license)
+  - **Alternative fonts**: (TODO: verify license)
     - [Andika](https://fonts.google.com/specimen/Andika)
     - [All Australian fonts from Tina Anderson and Corey Anderson](https://fonts.google.com/?preview.script=Latn&query=Corey+Anderson)
     - Comic Sans
@@ -296,14 +282,12 @@ Analytics provider selection is deferred. The requirement is to build an **analy
 
 **Options evaluated:**
 
-
 | Provider                  | Cost                           | Privacy | Notes                                          |
 | ------------------------- | ------------------------------ | ------- | ---------------------------------------------- |
 | Google Analytics 4        | Free                           | Low     | Blocked by ~30–40% of users in 2026            |
 | Cloudflare Web Analytics  | Free                           | High    | Privacy-first, rarely blocked, traffic-focused |
 | PostHog Cloud (free tier) | Free up to 1M events/month     | Medium  | Open source, product analytics + errors        |
 | Plausible Analytics       | Free self-hosted / $9/mo cloud | High    | GDPR-compliant, ~1KB script                    |
-
 
 **Recommendation**: Implement a `AnalyticsAdapter` interface. Ship with a no-op implementation. Connect a provider via config without touching core logic. See `docs/architecture.md` for the interface spec.
 
@@ -323,7 +307,6 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 
 ### 6.1 Performance
 
-
 | Metric                                       | Target                                                           |
 | -------------------------------------------- | ---------------------------------------------------------------- |
 | Time to Interactive (first load, warm cache) | < 2 seconds                                                      |
@@ -331,7 +314,6 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 | Game frame rate                              | 60fps animations (CSS/DOM for UI, canvas only for drawing games) |
 | Bundle size (initial JS, gzipped)            | < 200KB                                                          |
 | Lighthouse Performance score                 | ≥ 90                                                             |
-
 
 - Lazy-load game assets (images, audio) at game load time, not app start.
 - CSS/DOM animations for rewards (confetti, stars). No heavy animation libraries.
@@ -356,7 +338,6 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 
 ### 6.4 Compatibility
 
-
 | Platform         | Requirement                                                                            |
 | ---------------- | -------------------------------------------------------------------------------------- |
 | Desktop browsers | Chrome 100+, Firefox 100+, Safari 15+, Edge 100+                                       |
@@ -364,7 +345,6 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 | Screen sizes     | 320px wide minimum; optimized for 768px+                                               |
 | Zoom             | Users can zoom in/out via pinch or UI controls if game layout doesn't fit their device |
 | Touch            | Pointer Events API for consistent mouse + touch                                        |
-
 
 ### 6.5 Privacy and Data
 
@@ -386,7 +366,6 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 
 ## 7. Constraints
 
-
 | Constraint                 | Detail                                                                                                                                                                              |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **JAMstack only**          | No backend server. All logic runs client-side.                                                                                                                                      |
@@ -398,11 +377,9 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 | **No `any` in TypeScript** | Strict TypeScript everywhere. CI enforces this.                                                                                                                                     |
 | **CSS/DOM for UI**         | No canvas/WebGL for UI — CSS/DOM is preferred for accessibility, responsive layout, and tooling. Canvas reserved for drawing-input games (e.g., `LetterTracer`). See 6.1 rationale. |
 
-
 ---
 
 ## 8. Competitors Analysis
-
 
 | Product                        | Strengths                                                                   | Weaknesses                                        | Differentiation                                 |
 | ------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------- |
@@ -413,7 +390,6 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 | **ABC Education (abc.net.au)** | Australian curriculum-aligned                                               | Browser-only, no offline, limited                 | BaseSkill: offline, sync, customizable          |
 | **readabilitytutor.com**       | AI-powered reading assessment                                               | Paid, requires connectivity                       | BaseSkill: STT-based reading, offline           |
 | **iTrace**                     | Excellent letter tracing on iOS                                             | iOS only, paid                                    | BaseSkill: web-based, free, cross-platform      |
-
 
 **BaseSkill's unique position:** The only free, open-source, offline-first, privacy-respecting educational PWA with family sharing, cloud sync, and full accessibility support.
 
@@ -437,7 +413,6 @@ No GPL code flows into plugin implementations. Plugins communicate only through 
 ---
 
 ## 10. Glossary
-
 
 | Term                | Definition                                                                                      |
 | ------------------- | ----------------------------------------------------------------------------------------------- |
