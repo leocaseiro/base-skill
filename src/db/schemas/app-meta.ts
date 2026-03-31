@@ -8,5 +8,32 @@ export type AppMetaDoc = {
   installId: string
 }
 
-/** Placeholder until schema is implemented in the next commit. */
-export const appMetaSchema = {} as RxJsonSchema<AppMetaDoc>
+export const appMetaSchema: RxJsonSchema<AppMetaDoc> = {
+  version: 0,
+  primaryKey: 'id',
+  type: 'object',
+  properties: {
+    id: {
+      type: 'string',
+      maxLength: 36,
+    },
+    appVersion: {
+      type: 'string',
+      pattern: '^\\d+\\.\\d+\\.\\d+$',
+    },
+    rxdbSchemaVersion: {
+      type: 'integer',
+      minimum: 0,
+      multipleOf: 1,
+    },
+    lastMigrationAt: {
+      oneOf: [{ type: 'string', format: 'date-time' }, { type: 'null' }],
+    },
+    installId: {
+      type: 'string',
+      maxLength: 64,
+    },
+  },
+  required: ['id', 'appVersion', 'rxdbSchemaVersion', 'installId'],
+  additionalProperties: false,
+}
