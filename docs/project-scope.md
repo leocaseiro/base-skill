@@ -44,7 +44,7 @@ The core document. Contains:
   - Account system (device-local profiles, sub-accounts for family sharing, no server-side auth, parent PIN for settings)
   - Game catalog (categories by grade: pre-K, K, years 1-6+; subjects: letters, math, reading, etc.)
   - Game bookmarks and recents (children can bookmark favorite games; recently played games appear at the top of the dashboard)
-  - Offline-first gameplay with cloud sync (Google Drive / OneDrive via RxDB)
+  - Offline-first gameplay with cloud sync (cloud storage providers, e.g. Google Drive / OneDrive, via RxDB)
   - Offline/online indicator (visible warning banner when offline; auto-detects reconnection and dismisses)
   - Speech integration (text-to-speech for instructions, speech-to-text for answers; parent-selectable voice per language per profile)
   - Progress tracking and gamification (stars, streaks, badges)
@@ -72,7 +72,7 @@ The core document. Contains:
 - **System Architecture Diagram**: JAMstack PWA -- static build deployed to GitHub Pages, all logic client-side
 - **Component Architecture**: Top-level layout, routing (React Router), game shell, reusable components (DragDrop with magnetic/snap, SpeechBubble, TextToSpeech, SpeechToText, ProgressBar, ScoreBoard, OfflineIndicator, EncouragementAnnouncer)
 - **State Management**: RxDB as single source of truth, reactive queries via RxDB + React hooks; state persists across refreshes automatically
-- **Data Flow**: User action -> RxDB mutation -> reactive UI update -> background sync to Google Drive/OneDrive
+- **Data Flow**: User action -> RxDB mutation -> reactive UI update -> background sync to cloud storage (e.g. Google Drive/OneDrive)
 - **Cloud Sync Architecture**:
   - RxDB replication plugins for Google Drive and OneDrive
   - **OAuth2 with PKCE**: The SPA generates PKCE code verifier + challenge, redirects to provider consent screen, and exchanges the authorization code for tokens. **OneDrive**: MSAL.js handles the full PKCE flow client-side (no backend needed). **Google Drive**: Google non-standardly requires a `client_secret` even with PKCE, so a lightweight serverless OAuth proxy (Cloudflare Worker, free tier) handles the token exchange securely -- see the OAuth Architecture section below. Tokens are stored encrypted in IndexedDB.
@@ -88,7 +88,7 @@ The core document. Contains:
   - The Worker is deployed separately and is NOT part of the GPL-licensed app codebase
   - OneDrive does NOT need this proxy -- MSAL.js handles PKCE natively without a client_secret
 - **PWA / Offline Strategy**:
-  - Service worker pre-caches app shell + game assets via Workbox
+  - Service worker pre-caches app shell; each game is its own code-split bundle downloaded on first play or parent-triggered download. A "Download All Games" option exists in parent settings but is not triggered on first load.
   - **App versioning**: every CD deploy stamps a semver version into the build; on load, the app compares its version against the cached version
   - **SW migration/purge**: on version mismatch, the new SW activates immediately (`skipWaiting` + `clientsClaim`), purges stale caches, and triggers RxDB schema migration if needed
   - **Offline/online detection**: `navigator.onLine` + `online`/`offline` event listeners; global `OfflineIndicator` component shows/hides a warning banner
@@ -136,7 +136,7 @@ The core document. Contains:
   - **DragAndDrop**: supports mouse + touch (pointer events), magnetic/snap effect (items snap to drop zone when within threshold distance), visual guides showing valid drop zones, haptic-style feedback via animation
   - **LetterTracer** (canvas): trace letters/numbers with finger or mouse
   - **MultipleChoice**: tap/click answer options
-  - **SpeechInput**: speech-to-text with visual waveform feedback
+  - **SpeechInput**: speech-to-text with simple animated visual indicator (e.g., animated GIF)
   - **SpeechOutput**: text-to-speech using selected voice
   - **Timer**: configurable, optional, can be hidden per parent settings
   - **EncouragementAnnouncer**: contextual audio + visual encouragement ("Great job!", "Almost there!", "Try again!") triggered by game events (correct answer, near-miss, retry); TTS-driven, language-aware
@@ -155,6 +155,7 @@ The core document. Contains:
 - **Theming System**:
   - shadcn/ui as base, extended with kid-friendly defaults (rounded corners, playful typography, larger sizes)
   - **4-6 pre-defined themes** (e.g., Ocean, Forest, Space, Rainbow, Sunset, Night) -- each defines color palette, typography weight, icon style, and background patterns
+  - **Default typography**: [Edu NSW ACT Foundation](https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation) — a handwriting font designed for Australian school children. Parents can override font per profile or per family from a curated list.
   - Users can **clone any theme and modify** it (color picker, font selector)
   - Theme can be set **per child** (each profile has its own theme) or **per family** (shared theme across all profiles)
   - Themes stored in RxDB `themes` collection, synced across devices
@@ -169,8 +170,8 @@ The core document. Contains:
 - **Session History Viewer** (Parent Settings): Timeline view of a child's past gameplay sessions. Filterable by game, date range, and grade. Each session shows summary (game, date, duration, score) with expandable detail showing the full event timeline. Lazy-loads chunk data only when a session is expanded.
 - **Data Management Screen** (Parent Settings): Displays storage usage estimates per collection (progress, session history). Separate "Clear History" and "Clear Progress" buttons with confirmation dialogs. Optional date-range picker for selective cleanup (e.g., "clear history older than 30 days"). Shows how much drive space will be freed.
 - **Offline Indicator**: Persistent but non-intrusive banner when `navigator.onLine` is false; auto-dismisses on reconnection; optionally shows last-sync timestamp
-- **Responsive Strategy**: Mobile-first, games adapt to portrait/landscape; minimum touch target 48x48px
-- **Animations**: Lightweight reward animations (confetti, star burst) using CSS animations (no heavy libraries)
+- **Responsive Strategy**: Mobile-first, games adapt to portrait/landscape; minimum touch target 48x48px; zoom controls (pinch-to-zoom + UI controls) for device compatibility
+- **Animations**: Lightweight reward animations (confetti, star burst) using CSS/DOM animations (no heavy libraries; CSS/DOM preferred over canvas for UI — see PRD §6.1 for rationale)
 - **Color Palette**: All pre-defined themes use colorblind-safe palettes (all color-based info also conveyed via shape/text/pattern)
 
 ## 6. Internationalization (`docs/i18n.md`)
@@ -224,7 +225,6 @@ New document covering multi-language support:
 
 ## What we are NOT writing yet (deferred to after scope is confirmed)
 
-- Cursor rules / `.cursor/rules/`
 - Technology-specific skill files
 - Mermaid diagrams (will be embedded in the architecture doc during implementation)
 - Game asset specifications (art, sound)
