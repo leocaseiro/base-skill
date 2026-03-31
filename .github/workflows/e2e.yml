@@ -28,17 +28,17 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version-file: '.nvmrc'
+          cache: yarn
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Build app
-        run: npm run build
+        run: yarn build
 
       - name: Copy shell to index.html
         run: cp dist/client/_shell.html dist/client/index.html
