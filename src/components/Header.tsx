@@ -29,23 +29,6 @@ const LOCALES = [
 
 type HeaderLocale = (typeof LOCALES)[number]['code'];
 
-const HeaderFiltersPanel = ({
-  filtersTitle,
-  subjectsAll,
-}: {
-  filtersTitle: string;
-  subjectsAll: string;
-}) => (
-  <SheetContent side="right">
-    <SheetHeader>
-      <SheetTitle>{filtersTitle}</SheetTitle>
-    </SheetHeader>
-    <div className="p-4">
-      <p className="text-muted-foreground text-sm">{subjectsAll}</p>
-    </div>
-  </SheetContent>
-);
-
 const HeaderMenuPanel = ({
   appName,
   locale,
@@ -71,17 +54,26 @@ const HeaderMenuPanel = ({
   </SheetContent>
 );
 
-const FiltersSheetTrigger = ({
+const FiltersDropdown = ({
   filtersLabel,
+  subjectsAll,
 }: {
   filtersLabel: string;
+  subjectsAll: string;
 }) => (
-  <SheetTrigger asChild>
-    <Button variant="outline" size="sm" aria-label={filtersLabel}>
-      <SlidersHorizontalIcon size={16} />
-      <span className="hidden sm:inline">{filtersLabel}</span>
-    </Button>
-  </SheetTrigger>
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="outline" size="sm" aria-label={filtersLabel}>
+        <SlidersHorizontalIcon size={16} />
+        <span className="hidden sm:inline">{filtersLabel}</span>
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-56">
+      <div className="text-muted-foreground px-2 py-1.5 text-sm">
+        {subjectsAll}
+      </div>
+    </DropdownMenuContent>
+  </DropdownMenu>
 );
 
 const MenuSheetTrigger = () => (
@@ -154,13 +146,10 @@ export const Header = () => {
             />
           </div>
 
-          <Sheet>
-            <FiltersSheetTrigger filtersLabel={t('search.filters')} />
-            <HeaderFiltersPanel
-              filtersTitle={t('search.filters')}
-              subjectsAll={t('subjects.all')}
-            />
-          </Sheet>
+          <FiltersDropdown
+            filtersLabel={t('search.filters')}
+            subjectsAll={t('subjects.all')}
+          />
         </div>
 
         <DropdownMenu>
