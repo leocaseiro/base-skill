@@ -22,7 +22,10 @@ Return a complete picture of the current repo state - list all files and directo
 
 _**Agent (composer-2-fast)**_
 
+
 Exploring the repository structure and key files.
+
+
 
 _**Agent (composer-2-fast)**_
 
@@ -32,77 +35,76 @@ _**Agent (composer-2-fast)**_
 
 Directory: **/Users/leocaseiro/Sites/base-skill** (63 files)
 
-| File                                                                                            |
-| ----------------------------------------------------------------------------------------------- |
-| `.specstory/history/2026-03-31_09-53-23Z-milestone-breakdown-plan-discussion.md`                |
-| `.specstory/statistics.json`                                                                    |
-| `.git/logs/refs/heads/master`                                                                   |
-| `.git/logs/HEAD`                                                                                |
-| `.git/refs/heads/master`                                                                        |
-| `.git/COMMIT_EDITMSG`                                                                           |
-| `docs/prd.md`                                                                                   |
-| `.git/gk/config`                                                                                |
-| `.git/objects/ad/64f8dcd112db6312778f5fa813e9b7e73b4796`                                        |
-| `.specstory/history/2026-03-31_09-02-54Z-prd-adjustments-and-feature-discussions.md`            |
-| `docs/accessibility.md`                                                                         |
-| `docs/project-scope.md`                                                                         |
-| `docs/ui-ux.md`                                                                                 |
-| `docs/game-engine.md`                                                                           |
-| `docs/data-model.md`                                                                            |
-| `docs/architecture.md`                                                                          |
-| `docs/i18n.md`                                                                                  |
-| `docs/ci-cd.md`                                                                                 |
-| `docs/testing-strategy.md`                                                                      |
-| `.specstory/history/2026-03-31_08-03-41Z-testing-strategy-document-for-baseskill.md`            |
+| File |
+|------|
+| `.specstory/history/2026-03-31_09-53-23Z-milestone-breakdown-plan-discussion.md` |
+| `.specstory/statistics.json` |
+| `.git/logs/refs/heads/master` |
+| `.git/logs/HEAD` |
+| `.git/refs/heads/master` |
+| `.git/COMMIT_EDITMSG` |
+| `docs/prd.md` |
+| `.git/gk/config` |
+| `.git/objects/ad/64f8dcd112db6312778f5fa813e9b7e73b4796` |
+| `.specstory/history/2026-03-31_09-02-54Z-prd-adjustments-and-feature-discussions.md` |
+| `docs/accessibility.md` |
+| `docs/project-scope.md` |
+| `docs/ui-ux.md` |
+| `docs/game-engine.md` |
+| `docs/data-model.md` |
+| `docs/architecture.md` |
+| `docs/i18n.md` |
+| `docs/ci-cd.md` |
+| `docs/testing-strategy.md` |
+| `.specstory/history/2026-03-31_08-03-41Z-testing-strategy-document-for-baseskill.md` |
 | `.specstory/history/2026-03-31_08-02-06Z-internationalization-design-document-for-baseskill.md` |
-| `.specstory/history/2026-03-31_08-00-50Z-game-engine-design-document-for-baseskill.md`          |
-| `.specstory/history/2026-03-31_08-00-09Z-rxdb-data-model-design-document.md`                    |
-| `.specstory/history/2026-03-31_07-50-40Z-milestone-0-design-documents.md`                       |
-| `.specstory/history/2026-03-31_07-52-49Z-codebase-exploration-and-file-summary.md`              |
-| `.git/objects/a9/1465dbb2564b06d2f122d26cfbf516befc9edc`                                        |
-| `.git/objects/2b/1fb29c9ba9aa297c0c6b6431fe38728de8600e`                                        |
-| `.git/objects/cb/2057702bfe8aaf6020b32ac5fd56bd51e4adae`                                        |
-| `docs/baseskill_milestone_breakdown_85146c93.plan.md`                                           |
-| `.specstory/history/2026-03-27_17-17-43Z-project-breakdown-from-prd-to-completion.md`           |
-| `.specstory/.project.json`                                                                      |
-| `.vscode/settings.json`                                                                         |
-| `.specstory/history/2026-03-26_15-39-46Z-gameplay-session-history-and-data-management.md`       |
-| `.specstory/history/2026-03-27_16-40-42Z-github-pages-and-oauth2-options.md`                    |
-| `.git/logs/refs/remotes/origin/master`                                                          |
-| `.git/refs/remotes/origin/master`                                                               |
-| `.git/objects/93/e5883c05603398c06b04b47537642bf68e1ddd`                                        |
-| `scope.md`                                                                                      |
-| `.specstory/history/2026-03-27_16-41-18Z-repository-exploration-details.md`                     |
-| `.git/config`                                                                                   |
-| `.git/objects/24/9ad37354260ab1444b9201cf01857e69407753`                                        |
-| `.git/cursor/crepe/2be200fed365bc2ad21e7b7b47c8c932b3ad7f25/metadata.json`                      |
-| `.git/objects/2b/e200fed365bc2ad21e7b7b47c8c932b3ad7f25`                                        |
-| `.specstory/history/2026-03-26_13-04-36Z-prd-for-ai-agents-and-licensing.md`                    |
-| `.git/objects/24/ed95ea86199276ccc7d38904e137ce9f5b26e5`                                        |
-| `.git/HEAD`                                                                                     |
-| `.git/hooks/push-to-checkout.sample`                                                            |
-| `.git/hooks/update.sample`                                                                      |
-| `.git/hooks/pre-push.sample`                                                                    |
-| `.git/hooks/pre-applypatch.sample`                                                              |
-| `.git/hooks/pre-merge-commit.sample`                                                            |
-| `.git/hooks/post-update.sample`                                                                 |
-| `.git/hooks/prepare-commit-msg.sample`                                                          |
-| `.git/hooks/pre-receive.sample`                                                                 |
-| `.git/hooks/fsmonitor-watchman.sample`                                                          |
-| `.git/hooks/applypatch-msg.sample`                                                              |
-| `.git/hooks/pre-commit.sample`                                                                  |
-| `.git/hooks/sendemail-validate.sample`                                                          |
-| `.git/hooks/pre-rebase.sample`                                                                  |
-| `.git/hooks/commit-msg.sample`                                                                  |
-| `.git/description`                                                                              |
-| `.git/info/exclude`                                                                             |
-| `.specstory/cli/config.toml`                                                                    |
+| `.specstory/history/2026-03-31_08-00-50Z-game-engine-design-document-for-baseskill.md` |
+| `.specstory/history/2026-03-31_08-00-09Z-rxdb-data-model-design-document.md` |
+| `.specstory/history/2026-03-31_07-50-40Z-milestone-0-design-documents.md` |
+| `.specstory/history/2026-03-31_07-52-49Z-codebase-exploration-and-file-summary.md` |
+| `.git/objects/a9/1465dbb2564b06d2f122d26cfbf516befc9edc` |
+| `.git/objects/2b/1fb29c9ba9aa297c0c6b6431fe38728de8600e` |
+| `.git/objects/cb/2057702bfe8aaf6020b32ac5fd56bd51e4adae` |
+| `docs/baseskill_milestone_breakdown_85146c93.plan.md` |
+| `.specstory/history/2026-03-27_17-17-43Z-project-breakdown-from-prd-to-completion.md` |
+| `.specstory/.project.json` |
+| `.vscode/settings.json` |
+| `.specstory/history/2026-03-26_15-39-46Z-gameplay-session-history-and-data-management.md` |
+| `.specstory/history/2026-03-27_16-40-42Z-github-pages-and-oauth2-options.md` |
+| `.git/logs/refs/remotes/origin/master` |
+| `.git/refs/remotes/origin/master` |
+| `.git/objects/93/e5883c05603398c06b04b47537642bf68e1ddd` |
+| `scope.md` |
+| `.specstory/history/2026-03-27_16-41-18Z-repository-exploration-details.md` |
+| `.git/config` |
+| `.git/objects/24/9ad37354260ab1444b9201cf01857e69407753` |
+| `.git/cursor/crepe/2be200fed365bc2ad21e7b7b47c8c932b3ad7f25/metadata.json` |
+| `.git/objects/2b/e200fed365bc2ad21e7b7b47c8c932b3ad7f25` |
+| `.specstory/history/2026-03-26_13-04-36Z-prd-for-ai-agents-and-licensing.md` |
+| `.git/objects/24/ed95ea86199276ccc7d38904e137ce9f5b26e5` |
+| `.git/HEAD` |
+| `.git/hooks/push-to-checkout.sample` |
+| `.git/hooks/update.sample` |
+| `.git/hooks/pre-push.sample` |
+| `.git/hooks/pre-applypatch.sample` |
+| `.git/hooks/pre-merge-commit.sample` |
+| `.git/hooks/post-update.sample` |
+| `.git/hooks/prepare-commit-msg.sample` |
+| `.git/hooks/pre-receive.sample` |
+| `.git/hooks/fsmonitor-watchman.sample` |
+| `.git/hooks/applypatch-msg.sample` |
+| `.git/hooks/pre-commit.sample` |
+| `.git/hooks/sendemail-validate.sample` |
+| `.git/hooks/pre-rebase.sample` |
+| `.git/hooks/commit-msg.sample` |
+| `.git/description` |
+| `.git/info/exclude` |
+| `.specstory/cli/config.toml` |
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -119,7 +121,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -136,7 +137,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -153,7 +153,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -170,7 +169,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -187,12 +185,16 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2-fast)**_
+
+
+
+
+
 
 _**Agent (composer-2-fast)**_
 
@@ -206,24 +208,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
-<summary>Tool use: **glob_file_search**</summary>
-
-</details></tool-use>
-
-_**Agent (composer-2-fast)**_
-
-<tool-use data-tool-type="search" data-tool-name="glob_file_search">
-<details>
-<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **1** directory</summary>
-
-Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
-
-</details>
-</tool-use>
-
-<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -240,7 +224,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -257,7 +240,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -274,7 +256,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -291,7 +272,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -308,7 +288,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -325,7 +304,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -342,7 +320,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -359,18 +336,39 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2-fast)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+
+
+
+
 
 _**Agent (composer-2-fast)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
+
 
 Parameters:
 
@@ -383,7 +381,6 @@ Parameters:
   "pattern": "."
 }
 ```
-
 Additional data:
 
 ```json
@@ -397,14 +394,13 @@ Additional data:
   "totalMatches": 0
 }
 ```
-
 Status: **completed**
+
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
-
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
 </details></tool-use>
@@ -417,25 +413,24 @@ _**Agent (composer-2-fast)**_
 
 Directory: **/Users/leocaseiro/Sites/base-skill/docs** (11 files)
 
-| File                                             |
-| ------------------------------------------------ |
-| `prd.md`                                         |
-| `accessibility.md`                               |
-| `project-scope.md`                               |
-| `ui-ux.md`                                       |
-| `game-engine.md`                                 |
-| `data-model.md`                                  |
-| `architecture.md`                                |
-| `i18n.md`                                        |
-| `ci-cd.md`                                       |
-| `testing-strategy.md`                            |
+| File |
+|------|
+| `prd.md` |
+| `accessibility.md` |
+| `project-scope.md` |
+| `ui-ux.md` |
+| `game-engine.md` |
+| `data-model.md` |
+| `architecture.md` |
+| `i18n.md` |
+| `ci-cd.md` |
+| `testing-strategy.md` |
 | `baseskill_milestone_breakdown_85146c93.plan.md` |
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -448,15 +443,14 @@ _**Agent (composer-2-fast)**_
 
 Directory: **/Users/leocaseiro/Sites/base-skill/.vscode** (1 file)
 
-| File            |
-| --------------- |
+| File |
+|------|
 | `settings.json` |
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -469,35 +463,39 @@ _**Agent (composer-2-fast)**_
 
 Directory: **/Users/leocaseiro/Sites/base-skill/.specstory** (16 files)
 
-| File                                                                                 |
-| ------------------------------------------------------------------------------------ |
-| `history/2026-03-31_09-53-23Z-milestone-breakdown-plan-discussion.md`                |
-| `statistics.json`                                                                    |
-| `history/2026-03-31_09-02-54Z-prd-adjustments-and-feature-discussions.md`            |
-| `history/2026-03-31_08-03-41Z-testing-strategy-document-for-baseskill.md`            |
+| File |
+|------|
+| `history/2026-03-31_09-53-23Z-milestone-breakdown-plan-discussion.md` |
+| `statistics.json` |
+| `history/2026-03-31_09-02-54Z-prd-adjustments-and-feature-discussions.md` |
+| `history/2026-03-31_08-03-41Z-testing-strategy-document-for-baseskill.md` |
 | `history/2026-03-31_08-02-06Z-internationalization-design-document-for-baseskill.md` |
-| `history/2026-03-31_08-00-50Z-game-engine-design-document-for-baseskill.md`          |
-| `history/2026-03-31_08-00-09Z-rxdb-data-model-design-document.md`                    |
-| `history/2026-03-31_07-50-40Z-milestone-0-design-documents.md`                       |
-| `history/2026-03-31_07-52-49Z-codebase-exploration-and-file-summary.md`              |
-| `history/2026-03-27_17-17-43Z-project-breakdown-from-prd-to-completion.md`           |
-| `.project.json`                                                                      |
-| `history/2026-03-26_15-39-46Z-gameplay-session-history-and-data-management.md`       |
-| `history/2026-03-27_16-40-42Z-github-pages-and-oauth2-options.md`                    |
-| `history/2026-03-27_16-41-18Z-repository-exploration-details.md`                     |
-| `history/2026-03-26_13-04-36Z-prd-for-ai-agents-and-licensing.md`                    |
-| `cli/config.toml`                                                                    |
+| `history/2026-03-31_08-00-50Z-game-engine-design-document-for-baseskill.md` |
+| `history/2026-03-31_08-00-09Z-rxdb-data-model-design-document.md` |
+| `history/2026-03-31_07-50-40Z-milestone-0-design-documents.md` |
+| `history/2026-03-31_07-52-49Z-codebase-exploration-and-file-summary.md` |
+| `history/2026-03-27_17-17-43Z-project-breakdown-from-prd-to-completion.md` |
+| `.project.json` |
+| `history/2026-03-26_15-39-46Z-gameplay-session-history-and-data-management.md` |
+| `history/2026-03-27_16-40-42Z-github-pages-and-oauth2-options.md` |
+| `history/2026-03-27_16-41-18Z-repository-exploration-details.md` |
+| `history/2026-03-26_13-04-36Z-prd-for-ai-agents-and-licensing.md` |
+| `cli/config.toml` |
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2-fast)**_
+
+
+
+
+
 
 _**Agent (composer-2-fast)**_
 
@@ -508,7 +506,6 @@ _**Agent (composer-2-fast)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -518,6 +515,7 @@ _**Agent (composer-2-fast)**_
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
+
 
 Parameters:
 
@@ -530,7 +528,6 @@ Parameters:
   "pattern": "."
 }
 ```
-
 Additional data:
 
 ```json
@@ -549,14 +546,13 @@ Additional data:
   "totalMatches": 1
 }
 ```
-
 Status: **completed**
+
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
-
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
 </details></tool-use>
@@ -566,6 +562,7 @@ _**Agent (composer-2-fast)**_
 <tool-use data-tool-type="unknown" data-tool-name="semantic_search_full">
 <details>
 <summary>Tool use: **semantic_search_full**</summary>
+
 
 Parameters:
 
@@ -577,7 +574,6 @@ Parameters:
   "topK": 10
 }
 ```
-
 Result:
 
 ```json
@@ -1376,19 +1372,23 @@ Result:
   ]
 }
 ```
-
 Status: **completed**
+
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="semantic_search_full"><details>
-
 <summary>Tool use: **semantic_search_full**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2-fast)**_
+
+
+
+
+
 
 _**Agent (composer-2-fast)**_
 
@@ -1399,7 +1399,6 @@ _**Agent (composer-2-fast)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -1409,6 +1408,7 @@ _**Agent (composer-2-fast)**_
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
+
 
 Parameters:
 
@@ -1421,7 +1421,6 @@ Parameters:
   "pattern": "."
 }
 ```
-
 Additional data:
 
 ```json
@@ -1435,14 +1434,13 @@ Additional data:
   "totalMatches": 0
 }
 ```
-
 Status: **completed**
+
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
-
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
 </details></tool-use>
@@ -1459,7 +1457,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -1476,7 +1473,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -1489,6 +1485,7 @@ _**Agent (composer-2-fast)**_
 I've mapped the project structure and confirmed it's a minimal setup with no standard configuration files. </details></think>
 
 _**Agent (composer-2-fast)**_
+
 
 Here is a concise repo report based on glob search, targeted reads, and doc cross-checks.
 
@@ -1504,13 +1501,13 @@ This is a **documentation-first** repo. There is **no application source tree**,
 
 **Root (tracked / visible content)**
 
-| Path                    | Role                                                                          |
-| ----------------------- | ----------------------------------------------------------------------------- |
-| `scope.md`              | High-level product/stack notes (React + TS, shadcn, RxDB, GitHub Pages, etc.) |
-| `docs/`                 | 11 Markdown design/spec documents (see below)                                 |
-| `.vscode/settings.json` | VS Code: `specstory.cloudSync.enabled`: `"ask"`                               |
-| `.specstory/`           | SpecStory CLI config, project metadata, statistics, chat history exports      |
-| `.git/`                 | Standard Git metadata (refs, objects, hooks samples, etc.)                    |
+| Path | Role |
+|------|------|
+| `scope.md` | High-level product/stack notes (React + TS, shadcn, RxDB, GitHub Pages, etc.) |
+| `docs/` | 11 Markdown design/spec documents (see below) |
+| `.vscode/settings.json` | VS Code: `specstory.cloudSync.enabled`: `"ask"` |
+| `.specstory/` | SpecStory CLI config, project metadata, statistics, chat history exports |
+| `.git/` | Standard Git metadata (refs, objects, hooks samples, etc.) |
 
 **`docs/` (11 files)**
 
