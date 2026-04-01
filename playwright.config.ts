@@ -18,7 +18,7 @@ export default defineConfig({
   ],
   webServer: {
     command:
-      'npm run build && cp dist/client/_shell.html dist/client/index.html && npx serve dist/client -p 3000 -s',
+      'APP_BASE_URL=/ yarn build && cp dist/client/_shell.html dist/client/index.html && npx serve dist/client -p 3000 -s',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env['CI'],
     timeout: 120 * 1000,
