@@ -30,4 +30,5 @@ void i18n.use(initReactI18next).init({
   },
 });
 
-export { default } from 'i18next';
+// eslint-disable-next-line unicorn/prefer-export-from -- cannot use re-export syntax; i18n.use().init() must run on the local binding first
+export { i18n };

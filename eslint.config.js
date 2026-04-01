@@ -47,6 +47,7 @@ export default [
       // Applies to every `eslint-disable-*` / `eslint-enable` line, including `unicorn/…` rules.
       'eslint-comments/require-description': 'error',
 
+      'import/no-default-export': 'error',
       'import/no-cycle': 'off',
       '@typescript-eslint/array-type': 'off',
       '@typescript-eslint/require-await': 'off',
@@ -121,6 +122,19 @@ export default [
           overrides: { '|': 'ignore', '&': 'ignore' },
         },
       ],
+    },
+  },
+  {
+    // Framework config files require `export default` by convention (Vite, Vitest,
+    // Playwright, Knip); allow it only in these root-level config files.
+    files: [
+      'vite.config.ts',
+      'vitest.config.ts',
+      'playwright.config.ts',
+      'knip.config.ts',
+    ],
+    rules: {
+      'import/no-default-export': 'off',
     },
   },
   {
