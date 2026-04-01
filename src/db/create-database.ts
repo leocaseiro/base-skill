@@ -51,6 +51,23 @@ export async function createTestDatabase(): Promise<BaseSkillDatabase> {
   return addBaseSkillCollections(db);
 }
 
+const STORYBOOK_DB_PREFIX = 'baseskill-storybook';
+
+/**
+ * Ephemeral in-memory DB for Storybook. Browsers do not allow replacing native
+ * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
+ */
+export async function createStorybookDatabase(): Promise<BaseSkillDatabase> {
+  const db = await createRxDatabase<BaseSkillDatabase>({
+    name: `${STORYBOOK_DB_PREFIX}-${nanoid()}`,
+    storage: getRxStorageMemory(),
+    multiInstance: false,
+  });
+  const withCols = await addBaseSkillCollections(db);
+  await checkVersionAndMigrate(withCols);
+  return withCols;
+}
+
 let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
 
 /** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
