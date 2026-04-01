@@ -20,23 +20,31 @@ The defining requirement beyond the milestone plan: the engine supports **parent
 Three layers, cleanly separated:
 
 ```
-GameShell  (route: /$locale/_app/game/$gameId)
-└── GameEngineProvider          ← Redux-style context provider
-    ├── GameStateContext         ← state only (re-renders consumers)
-    ├── GameDispatchContext      ← stable dispatch ref (no re-renders)
-    └── <game component>        ← useGameState() + useGameDispatch()
+Route loader (/$locale/_app/game/$gameId)
+  ├── loadGameConfig()           ← override merging (RxDB read, runs once)
+  └── findInProgressSession()    ← silent resume check (RxDB read, runs once)
+        │
+        ▼
+GameShell
+└── GameEngineProvider           ← Redux-style context provider
+    ├── GameStateContext          ← state only (re-renders consumers)
+    ├── GameDispatchContext       ← stable dispatch ref (no re-renders)
+    ├── useGameLifecycle          ← state machine, no RxDB
+    ├── useMoveLog                ← in-memory append-only log, no RxDB
+    ├── useSessionRecorder        ← RxDB writes on every move + flush on hide/unload
+    └── <game component>         ← useGameState() + useGameDispatch()
 
-replayToStep(log, stepIndex)    ← standalone pure function
-                                   used by: live undo + M7 parent viewer
+replayToStep(log, stepIndex)     ← standalone pure fn, no React
+                                    used by: live undo + silent resume + M7 viewer
 ```
 
 ### Provider internals — three composed hooks
 
-| Hook                          | Responsibility                                                           |
-| ----------------------------- | ------------------------------------------------------------------------ |
-| `useGameLifecycle(config)`    | Lifecycle state machine (8 phases, 9 transitions). No RxDB, no move log. |
-| `useMoveLog(maxUndoDepth)`    | Append-only move log + undo enforcement. No RxDB.                        |
-| `useSessionRecorder(moveLog)` | RxDB chunked writes. Subscribes to log. Emits `game:end` on bus.         |
+| Hook                        | Responsibility                                                                                                                          |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `useGameLifecycle(config)`  | Lifecycle state machine (8 phases, 9 transitions). No RxDB, no move log.                                                                |
+| `useMoveLog(maxUndoDepth)`  | Append-only in-memory move log + undo enforcement. No RxDB — fast synchronous access only.                                              |
+| `useSessionRecorder(moves)` | Writes to RxDB **on every move** and on `visibilitychange`/`beforeunload`. Chunks at 200 moves / 50 KB. Emits `game:end` on bus at end. |
 
 ---
 
