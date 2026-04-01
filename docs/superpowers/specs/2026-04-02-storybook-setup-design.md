@@ -7,13 +7,13 @@
 
 ## Overview
 
-Set up Storybook 8 as a fully integrated component documentation and visual regression testing tool for BaseSkill. Storybook deploys as a static site at `/base-skill/docs/` alongside the main app on GitHub Pages, sharing the same GitHub Actions deploy pipeline.
+Set up Storybook 10 as a fully integrated component documentation and visual regression testing tool for BaseSkill. Storybook deploys as a static site at `/base-skill/docs/` alongside the main app on GitHub Pages, sharing the same GitHub Actions deploy pipeline.
 
 ---
 
 ## Architecture & Deployment
 
-Storybook 8 uses the `@storybook/react-vite` builder. It is a fully separate static site that merges into the main app's GitHub Pages deploy artifact.
+Storybook 10 uses the `@storybook/react-vite` builder. It is a fully separate static site that merges into the main app's GitHub Pages deploy artifact.
 
 **Config structure:**
 
@@ -251,12 +251,49 @@ Two additions to the GitHub Actions workflow:
 
 ## Addons
 
-| Addon                         | Purpose                                                  |
-| ----------------------------- | -------------------------------------------------------- |
-| `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars |
-| `@storybook/addon-a11y`       | Accessibility panel + CI assertions                      |
-| `@storybook/addon-themes`     | Theme toolbar integration                                |
-| `@storybook/test-runner`      | Playwright-based story test runner (VR + a11y CI)        |
+| Addon                         | Purpose                                                      |
+| ----------------------------- | ------------------------------------------------------------ |
+| `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars     |
+| `@storybook/addon-a11y`       | Accessibility panel + CI assertions                          |
+| `@storybook/addon-themes`     | Theme toolbar integration                                    |
+| `@storybook/test-runner`      | Playwright-based story test runner (VR + a11y CI)            |
+| `@storybook/addon-mcp`        | MCP server for AI-assisted story authoring (Storybook 10.3+) |
+
+---
+
+## MCP Developer Tooling
+
+Two MCP servers are configured to enable AI-assisted development with Claude Code against the running Storybook instance.
+
+**`@storybook/addon-mcp`** — installed as a Storybook addon. When `yarn storybook` runs, it auto-starts an MCP server at `http://localhost:6006/mcp`. Claude Code can use it to query the component catalog, inspect story metadata, and trigger test execution without leaving the editor. Install via:
+
+```bash
+npx storybook add @storybook/addon-mcp
+```
+
+**`@playwright/mcp`** — configured in the project's `.mcp.json` as a local MCP server. Gives Claude Code a live browser to navigate Storybook, interact with Controls, take screenshots, and replay failing VR tests visually. Config:
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    }
+  }
+}
+```
+
+**How they complement each other during development:**
+
+| Task                                   | Tool                                                      |
+| -------------------------------------- | --------------------------------------------------------- |
+| "What props does `GameCard` accept?"   | Storybook MCP — queries story metadata                    |
+| "Show me the Bookmarked variant"       | Storybook MCP — previews story live                       |
+| "Why is this VR test failing?"         | Playwright MCP — navigates browser, takes screenshot      |
+| "Write a story for this new component" | Storybook MCP — provides component context for generation |
+
+Neither MCP server is used in CI — they are local dev tooling only.
 
 ---
 
