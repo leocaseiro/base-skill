@@ -26,7 +26,7 @@ Milestone 2 establishes the **local-first data plane** and **cross-cutting servi
 
 **Repo reality today:** No `rxdb` in `package.json` yet; `src/routes/__root.tsx` and `ThemeToggle` use `localStorage` for light/dark. `docs/data-model.md` states user-facing data must go through RxDB — M2 should **replace or narrow** localStorage usage so it does not contradict the authoritative data model (system/bootstrap exceptions should be explicit and minimal).
 
-**Product constraint (pre-profile):** Users are **not** required to pick a profile (“signed in”) to see a **usable homepage with the full game list**. Locale and theme must have **sensible defaults** so that screen is fully styled and translated. Profile (and RxDB-backed settings) gate **per-child** features (progress, bookmarks, parent overrides), not casual browsing. *Note:* `docs/baseskill_milestone_breakdown_85146c93.plan.md` / `docs/ui-ux.md` currently lean profile-first in places; **Milestone 3 routing and guards** should be updated during planning so they match this constraint.
+**Product constraint (pre-profile):** Users are **not** required to pick a profile (“signed in”) to see a **usable homepage with the full game list**. Locale and theme must have **sensible defaults** so that screen is fully styled and translated. Profile (and RxDB-backed settings) gate **per-child** features (progress, bookmarks, parent overrides), not casual browsing. _Note:_ `docs/baseskill_milestone_breakdown_85146c93.plan.md` / `docs/ui-ux.md` currently lean profile-first in places; **Milestone 3 routing and guards** should be updated during planning so they match this constraint.
 
 ---
 
@@ -40,11 +40,11 @@ Milestone 2 establishes the **local-first data plane** and **cross-cutting servi
 
 ## Approaches: TanStack Query vs RxDB-Only (M2 decision)
 
-| Approach | Summary | Pros | Cons | Best when |
-| -------- | ------- | ---- | ---- | ---------- |
-| **A — RxDB-first hooks** | Custom hooks wrap observables / `toObservable` patterns; components subscribe via React state or small `useSyncExternalStore` adapters. | Fewer deps; model matches “live” data; no duplicate cache layer; aligns with `data-model.md`. | Team must own hook patterns and testing recipes. | **Default recommendation** for BaseSkill through M5: almost all state is local and reactive. |
-| **B — TanStack Query as façade** | `useQuery` + `queryFn` snapshots from RxDB, or experimental observable integration where available. | Familiar async/cache API for developers coming from server-first apps. | RxDB is already reactive; double bookkeeping and stale closure bugs unless carefully designed; poor fit for high-frequency session events. | Large app with heavy server fetch mix **after** M6; not needed for pure local RxDB in M2–M5. |
-| **C — Hybrid boundary** | RxDB hooks for local collections; TanStack Query reserved for **network** (OAuth, Drive/OneDrive metadata later). | Clear separation: local reactive vs remote request/response. | Two mental models; need lint/docs so local data never goes only through Query. | **Adopt at M6** when cloud APIs land; optionally add `@tanstack/react-query` then, not as a prerequisite in M2. |
+| Approach                         | Summary                                                                                                                                 | Pros                                                                                          | Cons                                                                                                                                       | Best when                                                                                                       |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| **A — RxDB-first hooks**         | Custom hooks wrap observables / `toObservable` patterns; components subscribe via React state or small `useSyncExternalStore` adapters. | Fewer deps; model matches “live” data; no duplicate cache layer; aligns with `data-model.md`. | Team must own hook patterns and testing recipes.                                                                                           | **Default recommendation** for BaseSkill through M5: almost all state is local and reactive.                    |
+| **B — TanStack Query as façade** | `useQuery` + `queryFn` snapshots from RxDB, or experimental observable integration where available.                                     | Familiar async/cache API for developers coming from server-first apps.                        | RxDB is already reactive; double bookkeeping and stale closure bugs unless carefully designed; poor fit for high-frequency session events. | Large app with heavy server fetch mix **after** M6; not needed for pure local RxDB in M2–M5.                    |
+| **C — Hybrid boundary**          | RxDB hooks for local collections; TanStack Query reserved for **network** (OAuth, Drive/OneDrive metadata later).                       | Clear separation: local reactive vs remote request/response.                                  | Two mental models; need lint/docs so local data never goes only through Query.                                                             | **Adopt at M6** when cloud APIs land; optionally add `@tanstack/react-query` then, not as a prerequisite in M2. |
 
 **Recommendation:** **Approach A** for Milestone 2–5; capture the decision in a short ADR or `docs/architecture.md` delta. Revisit **C** when implementing Milestone 6 cloud sync if remote calls benefit from Query’s request deduplication and status surfaces.
 
@@ -64,7 +64,7 @@ Milestone 2 establishes the **local-first data plane** and **cross-cutting servi
 
 ## Open Questions
 
-*None.*
+_None._
 
 ---
 

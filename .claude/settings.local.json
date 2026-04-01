@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/leocaseiro/Sites/base-skill -maxdepth 2 -name app.config.*)"
+    ]
+  }
+}
