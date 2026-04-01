@@ -7,3 +7,6 @@ yarn.lock
 .cursor/
 .husky/
 .vscode/
+
+# Git worktrees — run `yarn fix` inside the worktree, not from root
+worktrees/

@@ -210,8 +210,15 @@ Overrides stored in `game_config_overrides` collection, per profile.
   - **Alternative fonts**: (TODO: verify license)
     - [Andika](https://fonts.google.com/specimen/Andika)
     - [All Australian fonts from Tina Anderson and Corey Anderson](https://fonts.google.com/?preview.script=Latn&query=Corey+Anderson)
+    - Brazil (<https://primarium.info/countries/brazil/>)
+      - <https://fonts.google.com/specimen/Playwrite+BR?preview.script=Latn>
+    - [Chilanka](https://fonts.google.com/specimen/Chilanka)
     - Comic Sans
+    - [Comic Neue](https://fonts.google.com/specimen/Comic+Neue)
     - Century Gothic
+    - [Delius](https://fonts.google.com/specimen/Delius?preview.text=Ardijup%20kans%20queby&preview.lang=en_Latn&lang=en_Latn)
+    - [Playpen Sans](https://fonts.google.com/specimen/Playpen+Sans)
+    - [Farsan](https://fonts.google.com/specimen/Farsan)
     - KG Neatly Printed
     - [Open Sans](https://fonts.google.com/specimen/Open+Sans)
     - [Gill Sans Infant](https://freefonts.co/fonts/gill-sans-infant-std-regular)
