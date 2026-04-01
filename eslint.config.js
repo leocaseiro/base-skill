@@ -141,6 +141,17 @@ export default [
     },
   },
   {
+    // Storybook CSF and preview use default exports; co-located demos are story support files.
+    files: [
+      '**/*.stories.tsx',
+      '.storybook/**/*.{ts,tsx}',
+      'src/**/*.demo.tsx',
+    ],
+    rules: {
+      'import/no-default-export': 'off',
+    },
+  },
+  {
     // TanStack Router output; ships with undescribed blanket eslint-disable
     ignores: [
       'eslint.config.js',
@@ -150,6 +161,7 @@ export default [
       '.lintstagedrc.mjs',
       // Git worktrees are separate checkouts; fix/lint from repo root targets main tree only.
       'worktrees/**',
+      'storybook-static/**',
     ],
   },
 ];
