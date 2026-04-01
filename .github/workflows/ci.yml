@@ -103,3 +103,40 @@ jobs:
           name: dist-ci
           path: dist/
           retention-days: 1
+
+  storybook-test:
+    name: Storybook Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build Storybook
+        run: yarn build-storybook --output-dir storybook-static
+
+      - name: Serve Storybook
+        run: npx http-server storybook-static --port 6006 &
+
+      - name: Wait for Storybook
+        run: npx wait-on http://localhost:6006 --timeout 60000
+
+      - name: Run Storybook tests
+        run: yarn test:storybook --url http://localhost:6006
+
+      - name: Upload Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-playwright-traces
+          path: test-results/
+          retention-days: 7

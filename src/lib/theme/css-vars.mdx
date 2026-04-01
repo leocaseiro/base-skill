@@ -1,0 +1,35 @@
+{/* eslint-disable */}
+
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Theme/CSS Variables" />
+
+# CSS Variables
+
+Utilities for applying theme CSS custom properties to DOM elements.
+
+## API
+
+### `themeDocToCssVars(doc: ThemeDoc): Record<string, string>`
+
+Converts a RxDB `ThemeDoc` (user-defined colors) into a CSS vars map, filling in
+static tokens (`--bs-success`, `--bs-warning`, `--bs-error`) from `defaultThemeCssVars`.
+
+### `applyThemeCssVars(element: HTMLElement, vars: Record<string, string>): void`
+
+Calls `element.style.setProperty(key, value)` for each entry. Used by the app's theme
+init script and the Storybook `withTheme` decorator.
+
+## Token Reference
+
+| Variable | Default (light) | Role |
+| --- | --- | --- |
+| `--bs-primary` | `#0077B6` | Primary action colour |
+| `--bs-secondary` | `#00B4D8` | Secondary / accent |
+| `--bs-background` | `#EAF6FB` | Page background |
+| `--bs-surface` | `#FFFFFF` | Card / panel surface |
+| `--bs-text` | `#023E57` | Body text |
+| `--bs-accent` | `#FFB703` | Highlight / badge |
+| `--bs-success` | `#2DC653` | Success state |
+| `--bs-warning` | `#F4A261` | Warning state |
+| `--bs-error` | `#E63946` | Error / destructive |
