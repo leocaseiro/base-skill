@@ -1,12 +1,100 @@
-import { createFileRoute } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  useNavigate,
+  useParams,
+} from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { useSettings } from '@/db/hooks/useSettings';
 
-const Settings = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold">Settings</h1>
-    <p className="mt-2 text-muted-foreground">App settings.</p>
-  </div>
-);
+const LOCALES = [
+  { code: 'en', label: '🇬🇧 English' },
+  { code: 'pt-BR', label: '🇧🇷 Português' },
+] as const;
+
+type SettingsLocale = (typeof LOCALES)[number]['code'];
+
+const SettingsScreen = () => {
+  const { t } = useTranslation('settings');
+  const { locale } = useParams({ from: '/$locale' });
+  const navigate = useNavigate();
+  const { settings, update } = useSettings();
+
+  const handleLocaleChange = (newLocale: string) => {
+    void navigate({
+      to: '/$locale/settings',
+      params: { locale: newLocale as SettingsLocale },
+    });
+  };
+
+  const volume = settings.volume ?? 0.8;
+  const speechRate = settings.speechRate ?? 1;
+
+  return (
+    <div className="mx-auto max-w-md px-4 py-8">
+      <h1 className="mb-6 text-2xl font-bold">{t('title')}</h1>
+
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="volume">
+            {t('volume', { percent: Math.round(volume * 100) })}
+          </Label>
+          <Slider
+            id="volume"
+            min={0}
+            max={1}
+            step={0.05}
+            value={[volume]}
+            onValueChange={([v]) => {
+              void update({ volume: v });
+            }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="speechRate">
+            {t('speechRate', { rate: speechRate })}
+          </Label>
+          <Slider
+            id="speechRate"
+            min={0.5}
+            max={2}
+            step={0.1}
+            value={[speechRate]}
+            onValueChange={([v]) => {
+              void update({ speechRate: v });
+            }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="language">{t('language')}</Label>
+          <Select value={locale} onValueChange={handleLocaleChange}>
+            <SelectTrigger id="language">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LOCALES.map(({ code, label }) => (
+                <SelectItem key={code} value={code}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const Route = createFileRoute('/$locale/_app/settings')({
-  component: Settings,
+  component: SettingsScreen,
 });

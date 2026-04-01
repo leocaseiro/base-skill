@@ -2,5 +2,40 @@
   "appName": "BaseSkill",
   "home": {
     "title": "Home"
+  },
+  "nav": {
+    "settings": "Settings",
+    "language": "Language"
+  },
+  "search": {
+    "placeholder": "Search games...",
+    "filters": "Filters"
+  },
+  "levels": {
+    "all": "All",
+    "PK": "Pre-K",
+    "K": "K",
+    "1": "Year 1",
+    "2": "Year 2",
+    "3": "Year 3",
+    "4": "Year 4"
+  },
+  "subjects": {
+    "all": "All subjects",
+    "math": "Math",
+    "reading": "Reading",
+    "letters": "Letters"
+  },
+  "offline": {
+    "banner": "You're offline. Playing from saved data."
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{total}}"
+  },
+  "bookmark": {
+    "add": "Bookmark",
+    "remove": "Remove bookmark"
   }
 }

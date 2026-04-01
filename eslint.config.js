@@ -1,12 +1,15 @@
 //  @ts-check
 
 import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
-import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import stylisticPlugin from '@stylistic/eslint-plugin';
 import { tanstackConfig } from '@tanstack/eslint-config';
 import eslintConfigPrettier from 'eslint-config-prettier/flat';
+import importPlugin from 'eslint-plugin-import-x';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
+import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import tseslint from 'typescript-eslint';
 
 // Note: eslint-plugin-tailwindcss v3 is incompatible with Tailwind CSS v4
 // Tailwind v4 removed the `./resolveConfig` subpath export that this plugin requires.
@@ -29,6 +32,16 @@ export default [
   },
   jsxA11y.flatConfigs.recommended,
   eslintPluginUnicorn.configs.recommended,
+  // Global plugin registry — makes plugins available to all subsequent config objects.
+  // ESLint v9 flat config requires plugins to be declared in each config object that
+  // uses their rules; registering here (no rules) satisfies that requirement globally.
+  {
+    plugins: {
+      import: importPlugin,
+      '@stylistic': stylisticPlugin,
+      '@typescript-eslint': tseslint.plugin,
+    },
+  },
   {
     settings: {
       react: { version: 'detect' },
@@ -37,7 +50,7 @@ export default [
       // Unicorn `recommended` is on above; these rules clash with React (PascalCase files,
       // `props`), TanStack Router (`$param` routes), and routine TS/React naming (`db`, `doc`).
       // Do not rename/destructure around third-party typings (e.g. `React.ComponentProps`,
-      // Radix); disable rules instead of “fixing” imports or prop shapes to satisfy ESLint.
+      // Radix); disable rules instead of "fixing" imports or prop shapes to satisfy ESLint.
       'unicorn/filename-case': 'off',
       'unicorn/prevent-abbreviations': 'off',
       'unicorn/no-null': 'off',
@@ -49,11 +62,7 @@ export default [
 
       'import/no-default-export': 'error',
       'import/no-cycle': 'off',
-      '@typescript-eslint/array-type': 'off',
-      '@typescript-eslint/require-await': 'off',
       'pnpm/json-enforce-catalog': 'off',
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-unsafe-assignment': 'error',
 
       'import/order': [
         'error',
@@ -90,7 +99,17 @@ export default [
       // enforcing no-spread would require per-file disables or unnatural APIs.
       'react/jsx-props-no-spreading': 'off',
       'react/no-unknown-property': 'error',
-
+    },
+  },
+  // TypeScript-specific rules scoped to TS/TSX files — these require the TypeScript
+  // parser (set up by tanstackConfig) and must not run on plain JS or config files.
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/array-type': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unsafe-assignment': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -109,12 +128,13 @@ export default [
   eslintConfigPrettier,
   {
     // Framework config files require `export default` by convention (Vite, Vitest,
-    // Playwright, Knip); allow it only in these root-level config files.
+    // Playwright, Knip, lint-staged); allow it only in these root-level config files.
     files: [
       'vite.config.ts',
       'vitest.config.ts',
       'playwright.config.ts',
       'knip.config.ts',
+      '.lintstagedrc.mjs',
     ],
     rules: {
       'import/no-default-export': 'off',
@@ -127,6 +147,7 @@ export default [
       'prettier.config.js',
       '**/routeTree.gen.ts',
       '.specstory/**',
+      '.lintstagedrc.mjs',
     ],
   },
 ];
