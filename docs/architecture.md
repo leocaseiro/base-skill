@@ -184,6 +184,27 @@ export const Route = createFileRoute('/_app/game/$gameId')({
 })
 ```
 
+### Route Tree Diagram
+
+```mermaid
+flowchart LR
+    root["__root.tsx\n(HTML shell)"]
+    root --> idx["index.tsx\n/ → redirect /en"]
+    root --> locale["$locale/route.tsx\n/$locale\nvalidates locale,\nsyncs i18n language"]
+    locale --> app["$locale/_app.tsx\nDbProvider +\nI18nextProvider +\nThemeRuntimeProvider"]
+    app --> home["_app/index.tsx\n/ (home catalog)"]
+    app --> dashboard["_app/dashboard.tsx\n/dashboard"]
+    app --> settings["_app/settings.tsx\n/settings"]
+    app --> game["_app/game/$gameId.tsx\n/game/:gameId"]
+    app --> parent["_app/parent.tsx\n/parent (PIN-gated)"]
+    parent --> parentIdx["parent/index.tsx\n/parent/"]
+    parent --> overrides["parent/overrides.tsx\n/parent/overrides"]
+    parent --> history["parent/history.tsx\n/parent/history"]
+    parent --> data["parent/data.tsx\n/parent/data"]
+    parent --> sync["parent/sync.tsx\n/parent/sync"]
+    parent --> voices["parent/voices.tsx\n/parent/voices"]
+```
+
 ---
 
 ## 5. Component Architecture
@@ -213,6 +234,32 @@ __root.tsx
             ├── DataManagementScreen
             ├── CloudSyncScreen
             └── VoiceSelectorScreen
+```
+
+### React Provider Hierarchy
+
+```mermaid
+graph TD
+    Root["__root.tsx\n(HTML shell, devtools, THEME_INIT_SCRIPT)"]
+    Root --> LocaleRoute["$locale/route.tsx\nbeforeLoad: validate locale\nsyncs i18n.changeLanguage"]
+    LocaleRoute --> AppShell["$locale/_app.tsx"]
+
+    subgraph providers ["Providers (nested, outermost first)"]
+        DbProvider["DbProvider\n— initialises RxDB\n— seeds themes on ready\n— exposes db via context"]
+        I18nProvider["I18nextProvider\n— provides t() and useTranslation\n— language driven by $locale param"]
+        ThemeProvider["ThemeRuntimeProvider\n— subscribes to themes collection\n— injects --bs-* CSS variables"]
+    end
+
+    AppShell --> DbProvider
+    DbProvider --> I18nProvider
+    I18nProvider --> ThemeProvider
+    ThemeProvider --> Outlet["<Outlet />\n(child routes)"]
+
+    Outlet --> HomeCatalog["_app/index\nHomeCatalog"]
+    Outlet --> Dashboard["_app/dashboard\nDashboard"]
+    Outlet --> GameShell["_app/game/$gameId\nGameShell"]
+    Outlet --> ChildSettings["_app/settings\nChildSettings"]
+    Outlet --> ParentSettings["_app/parent\nParentSettings (PIN-gated)"]
 ```
 
 ### Reusable Game Components
@@ -270,6 +317,38 @@ During Milestone 2, evaluate whether TanStack Query should wrap RxDB observables
 ### Non-Persistent UI State
 
 Non-persistent state (modal open/closed, current game step, animation state) uses React's `useState`/`useReducer` co-located with the component that owns it. No global UI state store.
+
+### RxDB Provider and Hooks Setup
+
+```mermaid
+sequenceDiagram
+    participant App as App mount
+    participant DbP as DbProvider
+    participant DB as RxDB (IndexedDB)
+    participant Seed as seedThemesOnce()
+    participant Hook as useRxQuery / useRxDB
+    participant Comp as Component
+
+    App->>DbP: render <DbProvider>
+    DbP->>DB: getOrCreateDatabase()
+    DB-->>DbP: db instance
+    DbP->>DB: checkVersionAndMigrate(db)
+    DbP->>Seed: seedThemesOnce(db)
+    Seed->>DB: upsert preset themes (if missing)
+    DbP-->>App: isReady = true
+
+    Note over Hook,Comp: Hooks used anywhere inside DbProvider
+    Comp->>Hook: useRxDB()
+    Hook-->>Comp: db instance from context
+
+    Comp->>Hook: useRxQuery(db.themes.find().$)
+    Hook->>DB: subscribe to Observable
+    DB-->>Hook: current docs
+    Hook-->>Comp: docs[] (re-renders on change)
+
+    Note over Hook,DB: On unmount
+    Hook->>DB: subscription.unsubscribe()
+```
 
 ---
 
