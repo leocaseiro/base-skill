@@ -26,6 +26,7 @@
     "fix": "prettier --write . && eslint --fix .",
     "fix:css": "stylelint --fix 'src/**/*.css' && prettier --write 'src/**/*.css'",
     "fix:md": "markdownlint-cli2 --fix '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees' && prettier --write '**/*.md'",
+    "preinstall": "node scripts/check-node-version.mjs",
     "prepare": "husky"
   },
   "dependencies": {
@@ -106,6 +107,6 @@
     "workbox-window": "^7.4.0"
   },
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.12.0 <23"
   }
 }
