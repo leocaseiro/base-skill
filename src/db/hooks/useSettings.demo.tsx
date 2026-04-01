@@ -1,13 +1,8 @@
-import { IDBFactory } from 'fake-indexeddb';
 import { useSettings } from './useSettings';
-import { getOrCreateDatabase } from '#/db';
+import { createStorybookDatabase } from '#/db';
 import { DbProvider } from '#/providers/DbProvider';
 
-const openFakeDatabase = () => {
-  (globalThis as unknown as { indexedDB: IDBFactory }).indexedDB =
-    new IDBFactory();
-  return getOrCreateDatabase();
-};
+const openStorybookDatabase = () => createStorybookDatabase();
 
 const SettingsInner = () => {
   const { settings } = useSettings();
@@ -23,7 +18,7 @@ const SettingsInner = () => {
 };
 
 export const UseSettingsDemo = () => (
-  <DbProvider openDatabase={openFakeDatabase}>
+  <DbProvider openDatabase={openStorybookDatabase}>
     <SettingsInner />
   </DbProvider>
 );

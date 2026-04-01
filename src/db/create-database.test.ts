@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  createStorybookDatabase,
   createTestDatabase,
   destroyTestDatabase,
 } from './create-database';
@@ -33,5 +34,21 @@ describe('createTestDatabase', () => {
     for (const name of names) {
       expect(db[name]).toBeDefined();
     }
+  });
+});
+
+describe('createStorybookDatabase', () => {
+  let db:
+    | Awaited<ReturnType<typeof createStorybookDatabase>>
+    | undefined;
+  afterEach(async () => {
+    if (db) await destroyTestDatabase(db);
+    db = undefined;
+  });
+
+  it('uses memory storage and runs migrations', async () => {
+    db = await createStorybookDatabase();
+    const meta = await db.app_meta.findOne('singleton').exec();
+    expect(meta).not.toBeNull();
   });
 });
