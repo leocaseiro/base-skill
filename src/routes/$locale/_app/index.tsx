@@ -1,6 +1,15 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useTranslation } from 'react-i18next';
+import {
+  createFileRoute,
+  useNavigate,
+  useParams,
+} from '@tanstack/react-router';
+import { useMemo } from 'react';
+import type { GameLevel, GameSubject } from '@/games/registry';
 import type { ValidatorAdapter } from '@tanstack/react-router';
+import { GameGrid } from '@/components/GameGrid';
+import { LevelRow } from '@/components/LevelRow';
+import { useBookmarks } from '@/db/hooks/useBookmarks';
+import { filterCatalog, paginateCatalog } from '@/games/catalog-utils';
 import { GAME_CATALOG } from '@/games/registry';
 
 type CatalogSearchInput = {
@@ -27,40 +36,88 @@ const catalogSearchValidator: ValidatorAdapter<
   },
   parse: (input: unknown) => {
     const raw = (input ?? {}) as Record<string, unknown>;
+    const pageRaw =
+      typeof raw.page === 'number' && Number.isFinite(raw.page)
+        ? raw.page
+        : Number.parseInt(String(raw.page ?? '1'), 10) || 1;
     return {
       search: typeof raw.search === 'string' ? raw.search : '',
       level: typeof raw.level === 'string' ? raw.level : '',
       subject: typeof raw.subject === 'string' ? raw.subject : '',
-      page:
-        typeof raw.page === 'number' && Number.isFinite(raw.page)
-          ? raw.page
-          : Number.parseInt(String(raw.page ?? '1'), 10) || 1,
+      page: Math.max(1, pageRaw),
     };
   },
 };
 
-const HomeCatalog = () => {
-  const { t } = useTranslation('games');
+const PAGE_SIZE = 12;
+
+const HomeScreen = () => {
+  const { level, subject, search, page } = Route.useSearch();
+  const { locale } = useParams({ from: '/$locale' });
+  const navigate = useNavigate({ from: '/$locale/' });
+  const { bookmarkedIds, toggle } = useBookmarks();
+
+  const filtered = useMemo(
+    () =>
+      filterCatalog(GAME_CATALOG, {
+        search,
+        level: level as GameLevel | '',
+        subject: subject as GameSubject | '',
+      }),
+    [search, level, subject],
+  );
+
+  const {
+    items,
+    page: safePage,
+    totalPages,
+  } = useMemo(
+    () => paginateCatalog(filtered, page, PAGE_SIZE),
+    [filtered, page],
+  );
+
+  const updateSearch = (
+    patch: Partial<{
+      level: string;
+      subject: string;
+      search: string;
+      page: number;
+    }>,
+  ) => {
+    void navigate({
+      search: (prev) => ({ ...prev, ...patch }),
+    });
+  };
+
+  const handlePlay = (gameId: string) => {
+    void navigate({
+      to: '/$locale/game/$gameId',
+      params: { locale, gameId },
+    });
+  };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold">Profile Picker</h1>
-      <p className="mt-2 text-muted-foreground">
-        Select or create a learner profile.
-      </p>
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold">Games</h2>
-        <ul className="mt-3 list-inside list-disc space-y-1">
-          {GAME_CATALOG.map((g) => (
-            <li key={g.id}>{t(g.titleKey)}</li>
-          ))}
-        </ul>
-      </section>
+    <div className="px-4 py-2">
+      <LevelRow
+        currentLevel={level as GameLevel | ''}
+        onLevelChange={(l) => updateSearch({ level: l, page: 1 })}
+      />
+      <div className="mt-4">
+        <GameGrid
+          entries={items}
+          bookmarkedIds={bookmarkedIds}
+          onBookmarkToggle={toggle}
+          onPlay={handlePlay}
+          page={safePage}
+          totalPages={totalPages}
+          onPageChange={(p) => updateSearch({ page: p })}
+        />
+      </div>
     </div>
   );
 };
 
 export const Route = createFileRoute('/$locale/_app/')({
   validateSearch: catalogSearchValidator,
-  component: HomeCatalog,
+  component: HomeScreen,
 });
