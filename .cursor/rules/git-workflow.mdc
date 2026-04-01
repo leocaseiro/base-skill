@@ -1,0 +1,30 @@
+---
+description: Git workflow rules — enforce branch-based development via worktrees
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Git Workflow
+
+**Never commit directly to `master`.** All work must happen on a branch via a git worktree.
+
+## Worktree Workflow
+
+```bash
+# Create a worktree
+git worktree add ./worktrees/<branch-name> -b <branch-name>
+
+# Work in the worktree
+cd ./worktrees/<branch-name>
+
+# Remove after merging
+git worktree remove ./worktrees/<branch-name>
+```
+
+Worktrees live in `./worktrees/` (project root). Name branches after the milestone or feature, e.g. `milestone-3-app-shell`.
+
+## Rules
+
+- `master` is read-only — never edit files or commit on it directly
+- Every task starts with `git worktree add ./worktrees/<name>` from the project root
+- PRs merge into `master`; remove the worktree after the PR is merged
