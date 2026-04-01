@@ -197,6 +197,14 @@ Baseline screenshots are committed to `src/**/__snapshots__/` alongside stories,
 
 **Accessibility:** `@storybook/addon-a11y` runs in the browser during development. In CI, `@storybook/test-runner` asserts zero `axe-core` violations per story, using the same `axe-core` library already present via `@axe-core/playwright`.
 
+**Trace recording:** Playwright traces are enabled with `trace: 'retain-on-failure'` in `playwright.config.ts`. The test-runner respects this config, so any failed story test (VR diff, a11y violation, crash) produces a `.zip` trace file. Traces are uploaded as a CI artifact and can be replayed locally with:
+
+```bash
+npx playwright show-trace trace.zip
+```
+
+This allows step-by-step reproduction of any failing test without needing to re-run CI.
+
 ---
 
 ## CI Integration
@@ -221,6 +229,14 @@ Two additions to the GitHub Actions workflow:
 
 - name: Run Storybook tests
   run: yarn test-storybook --url http://localhost:6006
+
+- name: Upload Playwright traces on failure
+  if: failure()
+  uses: actions/upload-artifact@v4
+  with:
+    name: storybook-playwright-traces
+    path: test-results/
+    retention-days: 7
 ```
 
 **New `package.json` scripts:**
