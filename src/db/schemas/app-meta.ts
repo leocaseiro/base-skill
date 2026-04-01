@@ -1,12 +1,12 @@
 import type { RxJsonSchema } from 'rxdb';
 
 export type AppMetaDoc = {
-  id: 'singleton'
-  appVersion: string
-  rxdbSchemaVersion: number
-  lastMigrationAt: string | null
-  installId: string
-}
+  id: 'singleton';
+  appVersion: string;
+  rxdbSchemaVersion: number;
+  lastMigrationAt: string | null;
+  installId: string;
+};
 
 export const appMetaSchema: RxJsonSchema<AppMetaDoc> = {
   version: 0,
@@ -19,6 +19,7 @@ export const appMetaSchema: RxJsonSchema<AppMetaDoc> = {
     },
     appVersion: {
       type: 'string',
+      // eslint-disable-next-line unicorn/prefer-string-raw -- regex is not a string
       pattern: '^\\d+\\.\\d+\\.\\d+$',
     },
     rxdbSchemaVersion: {
@@ -27,13 +28,16 @@ export const appMetaSchema: RxJsonSchema<AppMetaDoc> = {
       multipleOf: 1,
     },
     lastMigrationAt: {
-      oneOf: [ { type: 'string', format: 'date-time' }, { type: 'null' } ],
+      oneOf: [
+        { type: 'string', format: 'date-time' },
+        { type: 'null' },
+      ],
     },
     installId: {
       type: 'string',
       maxLength: 64,
     },
   },
-  required: [ 'id', 'appVersion', 'rxdbSchemaVersion', 'installId' ],
+  required: ['id', 'appVersion', 'rxdbSchemaVersion', 'installId'],
   additionalProperties: false,
 };

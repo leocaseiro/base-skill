@@ -132,15 +132,15 @@ export type GameState =
   | 'Scoring'
   | 'NextRound'
   | 'Retry'
-  | 'GameOver'
+  | 'GameOver';
 
 export interface GameLifecycleContext {
-  gameId: string
-  state: GameState
-  roundIndex: number
-  retryCount: number
-  score: number
-  maxRetries: number
+  gameId: string;
+  state: GameState;
+  roundIndex: number;
+  retryCount: number;
+  score: number;
+  maxRetries: number;
 }
 ```
 
@@ -162,69 +162,69 @@ export type GameEventType =
   | 'game:hint'
   | 'game:retry'
   | 'game:time_up'
-  | 'game:end'
+  | 'game:end';
 
 export interface BaseGameEvent {
-  type: GameEventType
-  gameId: string
-  sessionId: string
-  profileId: string
-  timestamp: number // Date.now()
-  roundIndex: number
+  type: GameEventType;
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  timestamp: number; // Date.now()
+  roundIndex: number;
 }
 
 export interface GameStartEvent extends BaseGameEvent {
-  type: 'game:start'
-  locale: string
-  difficulty: string
-  gradeBand: GradeBand
+  type: 'game:start';
+  locale: string;
+  difficulty: string;
+  gradeBand: GradeBand;
 }
 
 export interface GameInstructionsShownEvent extends BaseGameEvent {
-  type: 'game:instructions_shown'
+  type: 'game:instructions_shown';
 }
 
 export interface GameActionEvent extends BaseGameEvent {
-  type: 'game:action'
-  actionType: string // e.g. "drag_drop", "tap", "trace_stroke"
-  payload: Record<string, string | number | boolean>
+  type: 'game:action';
+  actionType: string; // e.g. "drag_drop", "tap", "trace_stroke"
+  payload: Record<string, string | number | boolean>;
 }
 
 export interface GameEvaluateEvent extends BaseGameEvent {
-  type: 'game:evaluate'
-  answer: string | string[] | number
-  correct: boolean
-  nearMiss: boolean // within 1 of correct, partial match, etc.
+  type: 'game:evaluate';
+  answer: string | string[] | number;
+  correct: boolean;
+  nearMiss: boolean; // within 1 of correct, partial match, etc.
 }
 
 export interface GameScoreEvent extends BaseGameEvent {
-  type: 'game:score'
-  pointsAwarded: number
-  totalScore: number
-  streak: number
+  type: 'game:score';
+  pointsAwarded: number;
+  totalScore: number;
+  streak: number;
 }
 
 export interface GameHintEvent extends BaseGameEvent {
-  type: 'game:hint'
-  hintType: string
+  type: 'game:hint';
+  hintType: string;
 }
 
 export interface GameRetryEvent extends BaseGameEvent {
-  type: 'game:retry'
-  retryCount: number
+  type: 'game:retry';
+  retryCount: number;
 }
 
 export interface GameTimeUpEvent extends BaseGameEvent {
-  type: 'game:time_up'
-  roundIndex: number
+  type: 'game:time_up';
+  roundIndex: number;
 }
 
 export interface GameEndEvent extends BaseGameEvent {
-  type: 'game:end'
-  finalScore: number
-  totalRounds: number
-  correctCount: number
-  durationMs: number
+  type: 'game:end';
+  finalScore: number;
+  totalRounds: number;
+  correctCount: number;
+  durationMs: number;
 }
 
 export type GameEvent =
@@ -236,14 +236,14 @@ export type GameEvent =
   | GameHintEvent
   | GameRetryEvent
   | GameTimeUpEvent
-  | GameEndEvent
+  | GameEndEvent;
 
 export interface GameEventBus {
-  emit(event: GameEvent): void
+  emit(event: GameEvent): void;
   subscribe(
     type: GameEventType | 'game:*',
     handler: (event: GameEvent) => void,
-  ): () => void // returns unsubscribe fn
+  ): () => void; // returns unsubscribe fn
 }
 ```
 
@@ -261,7 +261,7 @@ eventBus.emit({
   answer: selectedOption,
   correct: selectedOption === correctAnswer,
   nearMiss: false,
-})
+});
 ```
 
 ### Wildcard Subscription
@@ -270,8 +270,8 @@ The session recorder and `EncouragementAnnouncer` subscribe with `"game:*"` to r
 
 ```typescript
 const unsubscribe = eventBus.subscribe('game:*', (event) => {
-  sessionRecorder.record(event)
-})
+  sessionRecorder.record(event);
+});
 ```
 
 ---
@@ -294,16 +294,16 @@ The session recorder is a **side-effect middleware** that persists every game ev
 
 ```typescript
 export interface SessionHistoryChunk {
-  id: string // `${sessionId}_chunk_${chunkIndex}`
-  sessionId: string
-  profileId: string
-  gameId: string
-  chunkIndex: number
-  events: GameEvent[]
-  eventCount: number
-  byteSize: number // approximate JSON byte length
-  createdAt: number
-  updatedAt: number
+  id: string; // `${sessionId}_chunk_${chunkIndex}`
+  sessionId: string;
+  profileId: string;
+  gameId: string;
+  chunkIndex: number;
+  events: GameEvent[];
+  eventCount: number;
+  byteSize: number; // approximate JSON byte length
+  createdAt: number;
+  updatedAt: number;
 }
 ```
 
@@ -311,21 +311,21 @@ export interface SessionHistoryChunk {
 
 ```typescript
 export interface SessionHistoryIndex {
-  id: string // `${sessionId}_index`
-  sessionId: string
-  profileId: string
-  gameId: string
-  startedAt: number
-  endedAt: number
-  durationMs: number
-  totalChunks: number
-  totalEvents: number
-  finalScore: number
-  correctCount: number
-  totalRounds: number
-  locale: string
-  difficulty: string
-  gradeBand: GradeBand
+  id: string; // `${sessionId}_index`
+  sessionId: string;
+  profileId: string;
+  gameId: string;
+  startedAt: number;
+  endedAt: number;
+  durationMs: number;
+  totalChunks: number;
+  totalEvents: number;
+  finalScore: number;
+  correctCount: number;
+  totalRounds: number;
+  locale: string;
+  difficulty: string;
+  gradeBand: GradeBand;
 }
 ```
 
@@ -499,11 +499,23 @@ class SessionRecorder {
       "type": "object",
       "description": "Default difficulty per grade band for this game",
       "properties": {
-        "pre-k": { "type": "string", "enum": ["easy", "medium", "hard"] },
+        "pre-k": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard"]
+        },
         "k": { "type": "string", "enum": ["easy", "medium", "hard"] },
-        "year1-2": { "type": "string", "enum": ["easy", "medium", "hard"] },
-        "year3-4": { "type": "string", "enum": ["easy", "medium", "hard"] },
-        "year5-6": { "type": "string", "enum": ["easy", "medium", "hard"] }
+        "year1-2": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard"]
+        },
+        "year3-4": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard"]
+        },
+        "year5-6": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard"]
+        }
       }
     },
     "sessionRecorder": {
@@ -545,43 +557,48 @@ export type Subject =
   | 'math'
   | 'science'
   | 'art'
-  | 'music'
-export type GradeBand = 'pre-k' | 'k' | 'year1-2' | 'year3-4' | 'year5-6'
-export type Difficulty = 'easy' | 'medium' | 'hard'
-export type Locale = 'en' | 'pt-BR'
+  | 'music';
+export type GradeBand =
+  | 'pre-k'
+  | 'k'
+  | 'year1-2'
+  | 'year3-4'
+  | 'year5-6';
+export type Difficulty = 'easy' | 'medium' | 'hard';
+export type Locale = 'en' | 'pt-BR';
 
-export type LocalizedString = Record<string, string> & { en: string }
+export type LocalizedString = Record<string, string> & { en: string };
 
 export interface GameDefaultSettings {
-  retries: number
-  timerDuration: number | null
-  alwaysWin: boolean
-  difficulty: Difficulty
+  retries: number;
+  timerDuration: number | null;
+  alwaysWin: boolean;
+  difficulty: Difficulty;
 }
 
 export interface DifficultyLevel {
-  contentSubset?: Record<string, unknown>
-  parameterOverrides?: Partial<GameDefaultSettings>
+  contentSubset?: Record<string, unknown>;
+  parameterOverrides?: Partial<GameDefaultSettings>;
 }
 
 export interface GameConfig {
-  id: string
-  title: LocalizedString
-  subject: Subject
-  gradeBands: GradeBand[]
-  component: string
+  id: string;
+  title: LocalizedString;
+  subject: Subject;
+  gradeBands: GradeBand[];
+  component: string;
   assets: {
-    images: string[]
-    audio: string[]
-  }
-  instructions: LocalizedString
-  defaultSettings: GameDefaultSettings
-  content: Record<string, Record<string, unknown>>
-  difficultyProgression?: Record<Difficulty, DifficultyLevel>
-  gradeBandDefaults?: Partial<Record<GradeBand, Difficulty>>
+    images: string[];
+    audio: string[];
+  };
+  instructions: LocalizedString;
+  defaultSettings: GameDefaultSettings;
+  content: Record<string, Record<string, unknown>>;
+  difficultyProgression?: Record<Difficulty, DifficultyLevel>;
+  gradeBandDefaults?: Partial<Record<GradeBand, Difficulty>>;
   sessionRecorder: {
-    enabled: boolean
-  }
+    enabled: boolean;
+  };
 }
 ```
 
@@ -699,13 +716,13 @@ Parents can override game settings at multiple granularities. The engine resolve
 ### TypeScript Pseudocode
 
 ```typescript
-export type SettingsOverride = Partial<GameDefaultSettings>
+export type SettingsOverride = Partial<GameDefaultSettings>;
 
 export interface ParentProfile {
-  id: string
-  globalOverride?: SettingsOverride
-  gradeBandOverrides?: Partial<Record<GradeBand, SettingsOverride>>
-  gameOverrides?: Record<string, SettingsOverride> // keyed by gameId
+  id: string;
+  globalOverride?: SettingsOverride;
+  gradeBandOverrides?: Partial<Record<GradeBand, SettingsOverride>>;
+  gameOverrides?: Record<string, SettingsOverride>; // keyed by gameId
 }
 
 export async function resolveGameConfig(
@@ -715,11 +732,13 @@ export async function resolveGameConfig(
   db: RxDatabase,
 ): Promise<GameConfig> {
   // 1. Fetch base config
-  const baseConfig = await db.game_configs.findOne(gameId).exec()
-  if (!baseConfig) throw new Error(`Game config not found: ${gameId}`)
+  const baseConfig = await db.game_configs.findOne(gameId).exec();
+  if (!baseConfig) throw new Error(`Game config not found: ${gameId}`);
 
   // 2. Fetch parent profile
-  const parentProfile = await db.parent_profiles.findOne(profileId).exec()
+  const parentProfile = await db.parent_profiles
+    .findOne(profileId)
+    .exec();
 
   // 3. Build override layers (lowest to highest priority)
   const layers: SettingsOverride[] = [
@@ -727,18 +746,18 @@ export async function resolveGameConfig(
     parentProfile?.globalOverride ?? {},
     parentProfile?.gradeBandOverrides?.[gradeBand] ?? {},
     parentProfile?.gameOverrides?.[gameId] ?? {},
-  ]
+  ];
 
   // 4. Merge layers left-to-right (later entries win)
   const mergedSettings = layers.reduce<GameDefaultSettings>(
     (acc, override) => ({ ...acc, ...override }),
     baseConfig.defaultSettings,
-  )
+  );
 
   return {
     ...baseConfig,
     defaultSettings: mergedSettings,
-  }
+  };
 }
 ```
 
@@ -768,30 +787,30 @@ All components are in `src/components/game/`. They are **presentation components
 
 ```typescript
 export interface DragItem {
-  id: string
-  label: string
-  imageUrl?: string
-  ariaLabel: string
+  id: string;
+  label: string;
+  imageUrl?: string;
+  ariaLabel: string;
 }
 
 export interface DropZone {
-  id: string
-  label: string
-  acceptsItemId?: string // if set, only this item can snap here
-  ariaLabel: string
+  id: string;
+  label: string;
+  acceptsItemId?: string; // if set, only this item can snap here
+  ariaLabel: string;
 }
 
 export interface DragAndDropProps {
-  gameId: string
-  sessionId: string
-  profileId: string
-  roundIndex: number
-  items: DragItem[]
-  dropZones: DropZone[]
-  snapThreshold?: number // px, default 60
-  showGhostPreview?: boolean // default true
-  onDrop: (itemId: string, zoneId: string) => void
-  disabled?: boolean
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  roundIndex: number;
+  items: DragItem[];
+  dropZones: DropZone[];
+  snapThreshold?: number; // px, default 60
+  showGhostPreview?: boolean; // default true
+  onDrop: (itemId: string, zoneId: string) => void;
+  disabled?: boolean;
 }
 ```
 
@@ -828,15 +847,18 @@ export interface DragAndDropProps {
 
 ```typescript
 export interface LetterTracerProps {
-  gameId: string
-  sessionId: string
-  profileId: string
-  roundIndex: number
-  letter: string // single character, upper or lower case
-  showGuide?: boolean // default true — show faint letter outline
-  strokeCoverageThreshold?: number // 0.0–1.0, default 0.7
-  tapToPlaceEnabled?: boolean // accessibility mode, default false
-  onStrokeComplete: (coverage: number, directionCorrect: boolean) => void
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  roundIndex: number;
+  letter: string; // single character, upper or lower case
+  showGuide?: boolean; // default true — show faint letter outline
+  strokeCoverageThreshold?: number; // 0.0–1.0, default 0.7
+  tapToPlaceEnabled?: boolean; // accessibility mode, default false
+  onStrokeComplete: (
+    coverage: number,
+    directionCorrect: boolean,
+  ) => void;
 }
 ```
 
@@ -874,24 +896,24 @@ export interface LetterTracerProps {
 
 ```typescript
 export interface ChoiceOption {
-  id: string
-  label: string
-  imageUrl?: string
-  ariaLabel: string
+  id: string;
+  label: string;
+  imageUrl?: string;
+  ariaLabel: string;
 }
 
 export interface MultipleChoiceProps {
-  gameId: string
-  sessionId: string
-  profileId: string
-  roundIndex: number
-  question: string
-  questionImageUrl?: string
-  options: ChoiceOption[]
-  correctOptionId: string
-  onSelect: (optionId: string) => void
-  evaluationResult?: 'correct' | 'incorrect' | null // set after evaluation
-  disabled?: boolean
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  roundIndex: number;
+  question: string;
+  questionImageUrl?: string;
+  options: ChoiceOption[];
+  correctOptionId: string;
+  onSelect: (optionId: string) => void;
+  evaluationResult?: 'correct' | 'incorrect' | null; // set after evaluation
+  disabled?: boolean;
 }
 ```
 
@@ -928,14 +950,14 @@ export interface MultipleChoiceProps {
 
 ```typescript
 export interface SpeechInputProps {
-  gameId: string
-  sessionId: string
-  profileId: string
-  roundIndex: number
-  language: string // BCP 47, e.g. "en-US", "pt-BR"
-  onTranscript: (transcript: string, confidence: number) => void
-  onUnavailable: () => void // called when STT not supported
-  disabled?: boolean
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  roundIndex: number;
+  language: string; // BCP 47, e.g. "en-US", "pt-BR"
+  onTranscript: (transcript: string, confidence: number) => void;
+  onUnavailable: () => void; // called when STT not supported
+  disabled?: boolean;
 }
 ```
 
@@ -972,19 +994,19 @@ export interface SpeechInputProps {
 
 ```typescript
 export interface SpeechOutputProps {
-  text: string
-  language: string // BCP 47
-  voiceURI?: string // from profile's selected voice
-  rate?: number // default 0.9 (slightly slower for children)
-  pitch?: number // default 1.0
-  autoPlay?: boolean // default false — call speak() imperatively
-  onEnd?: () => void
-  onError?: () => void
+  text: string;
+  language: string; // BCP 47
+  voiceURI?: string; // from profile's selected voice
+  rate?: number; // default 0.9 (slightly slower for children)
+  pitch?: number; // default 1.0
+  autoPlay?: boolean; // default false — call speak() imperatively
+  onEnd?: () => void;
+  onError?: () => void;
 }
 
 export interface SpeechOutputRef {
-  speak: () => void
-  cancel: () => void
+  speak: () => void;
+  cancel: () => void;
 }
 ```
 
@@ -1015,14 +1037,14 @@ None — TTS is a passive output component. The game lifecycle emits events befo
 
 ```typescript
 export interface TimerProps {
-  gameId: string
-  sessionId: string
-  profileId: string
-  roundIndex: number
-  durationSeconds: number
-  hidden?: boolean // parent override can hide timer
-  onTimeUp: () => void
-  paused?: boolean
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  roundIndex: number;
+  durationSeconds: number;
+  hidden?: boolean; // parent override can hide timer
+  onTimeUp: () => void;
+  paused?: boolean;
 }
 ```
 
@@ -1055,11 +1077,11 @@ export interface TimerProps {
 
 ```typescript
 export interface EncouragementAnnouncerProps {
-  gameId: string
-  sessionId: string
-  profileId: string
-  language: string
-  characterImageUrl: string // mascot image
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  language: string;
+  characterImageUrl: string; // mascot image
 }
 ```
 
@@ -1094,10 +1116,10 @@ export interface EncouragementAnnouncerProps {
 
 ```typescript
 export interface ScoreAnimationProps {
-  trigger: boolean // set to true to play animation
-  type: 'confetti' | 'star_burst' | 'simple_flash'
-  pointsAwarded: number
-  onComplete?: () => void
+  trigger: boolean; // set to true to play animation
+  type: 'confetti' | 'star_burst' | 'simple_flash';
+  pointsAwarded: number;
+  onComplete?: () => void;
 }
 ```
 
@@ -1139,9 +1161,9 @@ The engine tracks a **streak counter** within each session:
 
 ```typescript
 interface SessionAdaptiveState {
-  streak: number // consecutive correct answers
-  streakThreshold: number // default 3
-  currentDifficulty: Difficulty
+  streak: number; // consecutive correct answers
+  streakThreshold: number; // default 3
+  currentDifficulty: Difficulty;
 }
 ```
 
@@ -1198,8 +1220,8 @@ On first load, `resolveGameConfig` uses `gradeBandDefaults[gradeBand]` as the in
 
 ```typescript
 interface LetterTracingContent {
-  sequence: string[] // e.g. ["A", "B", "C", ...] or custom subset
-  caseMode: 'uppercase' | 'lowercase' | 'both'
+  sequence: string[]; // e.g. ["A", "B", "C", ...] or custom subset
+  caseMode: 'uppercase' | 'lowercase' | 'both';
 }
 ```
 
@@ -1333,9 +1355,9 @@ correct = strokeCoverage >= strokeCoverageThreshold AND directionCorrect
 
 ```typescript
 interface NumberMatchContent {
-  range: { min: number; max: number } // pre-k: 1-10, k: 1-20
-  objectCategories: string[] // e.g. ["apples", "stars", "balls", "cars"]
-  cardsPerRound: number // number of distractor cards shown, default 4
+  range: { min: number; max: number }; // pre-k: 1-10, k: 1-20
+  objectCategories: string[]; // e.g. ["apples", "stars", "balls", "cars"]
+  cardsPerRound: number; // number of distractor cards shown, default 4
 }
 ```
 
@@ -1380,8 +1402,8 @@ Each object group `<div>` has a corresponding `DropZone` with `acceptsItemId: \`
 
 ```typescript
 interface WordBuilderContent {
-  words: string[] // word list for this locale + grade band
-  letterCount: { min: number; max: number } // k: 3-4, year1-2: 3-6
+  words: string[]; // word list for this locale + grade band
+  letterCount: { min: number; max: number }; // k: 3-4, year1-2: 3-6
 }
 ```
 
@@ -1429,31 +1451,34 @@ correct = spelledWord.toUpperCase() === targetWord.toUpperCase()
 
 ```typescript
 interface ReadAloudContent {
-  sentences: string[] // grade-appropriate sentences for this locale
-  readingLevel: 'grade1' | 'grade2' | 'grade3' // mapped from gradeBand
+  sentences: string[]; // grade-appropriate sentences for this locale
+  readingLevel: 'grade1' | 'grade2' | 'grade3'; // mapped from gradeBand
 }
 ```
 
 #### Evaluation Logic
 
 ```typescript
-function evaluateReadAloud(transcript: string, target: string): boolean {
+function evaluateReadAloud(
+  transcript: string,
+  target: string,
+): boolean {
   const normalize = (s: string) =>
     s
       .toLowerCase()
       .replace(/[^a-z\s]/g, '')
       .trim()
-      .split(/\s+/)
+      .split(/\s+/);
 
-  const targetWords = normalize(target)
-  const transcriptWords = normalize(transcript)
+  const targetWords = normalize(target);
+  const transcriptWords = normalize(transcript);
 
   const matchCount = targetWords.filter((w) =>
     transcriptWords.includes(w),
-  ).length
-  const matchRatio = matchCount / targetWords.length
+  ).length;
+  const matchRatio = matchCount / targetWords.length;
 
-  return matchRatio >= 0.8
+  return matchRatio >= 0.8;
 }
 ```
 

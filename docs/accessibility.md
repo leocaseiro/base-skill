@@ -337,7 +337,7 @@ All feedback text follows a positive, encouraging tone. The following words and 
 **Detection:**
 
 ```js
-const ttsAvailable = 'speechSynthesis' in window
+const ttsAvailable = 'speechSynthesis' in window;
 ```
 
 **When unavailable:**
@@ -352,7 +352,7 @@ const ttsAvailable = 'speechSynthesis' in window
 
 ```js
 const sttAvailable =
-  'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
+  'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
 ```
 
 **When unavailable:**
@@ -376,12 +376,13 @@ When the user denies microphone permission:
 ```ts
 function useSpeechFeatures() {
   const ttsAvailable =
-    typeof window !== 'undefined' && 'speechSynthesis' in window
+    typeof window !== 'undefined' && 'speechSynthesis' in window;
   const sttAvailable =
     typeof window !== 'undefined' &&
-    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
+    ('SpeechRecognition' in window ||
+      'webkitSpeechRecognition' in window);
 
-  return { ttsAvailable, sttAvailable }
+  return { ttsAvailable, sttAvailable };
 }
 ```
 
@@ -413,15 +414,15 @@ it('has no accessibility violations', async () => {
 Each Playwright end-to-end spec includes an accessibility audit:
 
 ```ts
-import { checkA11y } from 'axe-playwright'
+import { checkA11y } from 'axe-playwright';
 
 test('home page has no accessibility violations', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/');
   await checkA11y(page, undefined, {
     detailedReport: true,
     detailedReportOptions: { html: true },
-  })
-})
+  });
+});
 ```
 
 Audits run on: Home, Profile selector, Game menu, each game screen, Settings, Results screen.

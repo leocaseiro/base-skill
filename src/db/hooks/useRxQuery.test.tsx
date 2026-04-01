@@ -4,7 +4,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { useRxQuery } from './useRxQuery';
 import type { ThemeDoc } from '@/db/schemas/themes';
 import type { BaseSkillDatabase } from '@/db/types';
-import { createTestDatabase, destroyTestDatabase } from '@/db/create-database';
+import {
+  createTestDatabase,
+  destroyTestDatabase,
+} from '@/db/create-database';
 
 const now = '2024-01-01T00:00:00.000Z';
 
@@ -31,7 +34,7 @@ function oceanPreset(id: string, name: string): ThemeDoc {
 }
 
 const ThemeCount = ({ db }: { db: BaseSkillDatabase }) => {
-  const obs = useMemo(() => db.themes.find().$, [ db ]);
+  const obs = useMemo(() => db.themes.find().$, [db]);
   const docs = useRxQuery(obs, [] as ThemeDoc[]);
   return <span data-testid="count">{docs.length}</span>;
 };

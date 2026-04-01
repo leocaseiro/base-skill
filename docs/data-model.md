@@ -537,8 +537,14 @@ Visual themes. Two types:
       "type": "object",
       "properties": {
         "primary": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
-        "secondary": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
-        "background": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "secondary": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "background": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
         "surface": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
         "text": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
         "accent": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
@@ -607,7 +613,10 @@ Visual themes. Two types:
       "text": "#03045E",
       "accent": "#F77F00"
     },
-    "typography": { "fontFamily": "Edu NSW ACT Foundation", "baseSize": 18 },
+    "typography": {
+      "fontFamily": "Edu NSW ACT Foundation",
+      "baseSize": 18
+    },
     "backgroundPattern": "waves",
     "createdAt": "2024-01-01T00:00:00.000Z",
     "updatedAt": "2024-01-01T00:00:00.000Z"
@@ -626,7 +635,10 @@ Visual themes. Two types:
       "text": "#03045E",
       "accent": "#FFB703"
     },
-    "typography": { "fontFamily": "Edu NSW ACT Foundation", "baseSize": 20 },
+    "typography": {
+      "fontFamily": "Edu NSW ACT Foundation",
+      "baseSize": 20
+    },
     "backgroundPattern": "stars",
     "createdAt": "2024-03-10T10:00:00.000Z",
     "updatedAt": "2024-03-14T08:30:00.000Z"
@@ -808,7 +820,13 @@ One summary document per play session, regardless of how many `session_history` 
       "description": "Grade band at time of play, e.g. '1-2', '3-4'"
     }
   },
-  "required": ["sessionId", "profileId", "gameId", "startedAt", "gradeBand"],
+  "required": [
+    "sessionId",
+    "profileId",
+    "gameId",
+    "startedAt",
+    "gradeBand"
+  ],
   "additionalProperties": false
 }
 ```
@@ -1100,9 +1118,9 @@ Once a chunk is sealed (either because it hit the threshold or the session ended
 const chunks = await db.session_history
   .find({ selector: { sessionId: 'sess_Rq4bHjK2mX' } })
   .sort({ chunkIndex: 'asc' })
-  .exec()
+  .exec();
 
-const allEvents = chunks.flatMap((chunk) => chunk.events)
+const allEvents = chunks.flatMap((chunk) => chunk.events);
 ```
 
 ---
@@ -1125,19 +1143,26 @@ When a profile is deleted, all associated data must be deleted atomically in thi
 **Implementation pattern:**
 
 ```typescript
-async function deleteProfile(db: RxDatabase, profileId: string): Promise<void> {
-  await db.session_history.find({ selector: { profileId } }).remove()
-  await db.session_history_index.find({ selector: { profileId } }).remove()
-  await db.progress.find({ selector: { profileId } }).remove()
-  await db.settings.findOne(profileId).remove()
-  await db.game_config_overrides.find({ selector: { profileId } }).remove()
-  await db.bookmarks.find({ selector: { profileId } }).remove()
+async function deleteProfile(
+  db: RxDatabase,
+  profileId: string,
+): Promise<void> {
+  await db.session_history.find({ selector: { profileId } }).remove();
+  await db.session_history_index
+    .find({ selector: { profileId } })
+    .remove();
+  await db.progress.find({ selector: { profileId } }).remove();
+  await db.settings.findOne(profileId).remove();
+  await db.game_config_overrides
+    .find({ selector: { profileId } })
+    .remove();
+  await db.bookmarks.find({ selector: { profileId } }).remove();
   await db.themes
     .find({
       selector: { ownedByProfileId: profileId, isPreset: false },
     })
-    .remove()
-  await db.profiles.findOne(profileId).remove()
+    .remove();
+  await db.profiles.findOne(profileId).remove();
 }
 ```
 
@@ -1146,9 +1171,12 @@ async function deleteProfile(db: RxDatabase, profileId: string): Promise<void> {
 Deleting a `session_history_index` document should trigger deletion of all its `session_history` chunks:
 
 ```typescript
-async function deleteSession(db: RxDatabase, sessionId: string): Promise<void> {
-  await db.session_history.find({ selector: { sessionId } }).remove()
-  await db.session_history_index.findOne(sessionId).remove()
+async function deleteSession(
+  db: RxDatabase,
+  sessionId: string,
+): Promise<void> {
+  await db.session_history.find({ selector: { sessionId } }).remove();
+  await db.session_history_index.findOne(sessionId).remove();
 }
 ```
 
@@ -1169,10 +1197,10 @@ async function deleteSessionsBefore(
         startedAt: { $lt: beforeDate },
       },
     })
-    .exec()
+    .exec();
 
   for (const session of oldSessions) {
-    await deleteSession(db, session.sessionId)
+    await deleteSession(db, session.sessionId);
   }
 }
 ```
@@ -1187,22 +1215,22 @@ async function estimateStorageUsage(db: RxDatabase, profileId: string) {
     db.session_history_index.count({ selector: { profileId } }).exec(),
     db.session_history.count({ selector: { profileId } }).exec(),
     db.progress.count({ selector: { profileId } }).exec(),
-  ])
+  ]);
 
   return {
     sessionCount,
     estimatedSessionHistoryKB: chunkCount * 25, // ~25KB average per chunk
     progressCount,
     estimatedTotalKB: chunkCount * 25 + progressCount * 1,
-  }
+  };
 }
 ```
 
 For accurate measurement, use the Storage API:
 
 ```typescript
-const estimate = await navigator.storage.estimate()
-const usedMB = ((estimate.usage ?? 0) / 1024 / 1024).toFixed(1)
+const estimate = await navigator.storage.estimate();
+const usedMB = ((estimate.usage ?? 0) / 1024 / 1024).toFixed(1);
 ```
 
 ---
@@ -1215,9 +1243,9 @@ On every app boot, before rendering any UI:
 
 ```typescript
 async function checkVersionAndMigrate(db: RxDatabase): Promise<void> {
-  const meta = await db.app_meta.findOne('singleton').exec()
-  const currentAppVersion = APP_VERSION // from build-time env
-  const currentSchemaVersion = MAX_SCHEMA_VERSION // from collection definitions
+  const meta = await db.app_meta.findOne('singleton').exec();
+  const currentAppVersion = APP_VERSION; // from build-time env
+  const currentSchemaVersion = MAX_SCHEMA_VERSION; // from collection definitions
 
   if (!meta) {
     // First install
@@ -1227,21 +1255,25 @@ async function checkVersionAndMigrate(db: RxDatabase): Promise<void> {
       rxdbSchemaVersion: currentSchemaVersion,
       lastMigrationAt: null,
       installId: generateInstallId(),
-    })
-    return
+    });
+    return;
   }
 
   const needsMigration =
     meta.rxdbSchemaVersion < currentSchemaVersion ||
-    isBreakingVersionChange(meta.appVersion, currentAppVersion)
+    isBreakingVersionChange(meta.appVersion, currentAppVersion);
 
   if (needsMigration) {
-    await runMigrations(db, meta.rxdbSchemaVersion, currentSchemaVersion)
+    await runMigrations(
+      db,
+      meta.rxdbSchemaVersion,
+      currentSchemaVersion,
+    );
     await meta.atomicPatch({
       appVersion: currentAppVersion,
       rxdbSchemaVersion: currentSchemaVersion,
       lastMigrationAt: new Date().toISOString(),
-    })
+    });
   }
 }
 ```
@@ -1281,7 +1313,7 @@ The document with the most recent `updatedAt` timestamp wins. On conflict:
 
 ```typescript
 function resolveLastWriteWins(local: RxDocument, remote: any): any {
-  return local.updatedAt >= remote.updatedAt ? local.toJSON() : remote
+  return local.updatedAt >= remote.updatedAt ? local.toJSON() : remote;
 }
 ```
 
@@ -1290,13 +1322,19 @@ function resolveLastWriteWins(local: RxDocument, remote: any): any {
 On conflict, retain the best outcome for the child:
 
 ```typescript
-function mergeProgress(local: ProgressDoc, remote: ProgressDoc): ProgressDoc {
+function mergeProgress(
+  local: ProgressDoc,
+  remote: ProgressDoc,
+): ProgressDoc {
   return {
     ...local,
     bestScore: Math.max(local.bestScore, remote.bestScore),
     totalStars: Math.max(local.totalStars, remote.totalStars),
     streakDays: Math.max(local.streakDays, remote.streakDays),
-    completionCount: Math.max(local.completionCount, remote.completionCount),
+    completionCount: Math.max(
+      local.completionCount,
+      remote.completionCount,
+    ),
     lastScore:
       local.lastPlayedAt >= remote.lastPlayedAt
         ? local.lastScore
@@ -1307,7 +1345,7 @@ function mergeProgress(local: ProgressDoc, remote: ProgressDoc): ProgressDoc {
         : remote.lastPlayedAt,
     badges: unionBadges(local.badges, remote.badges),
     updatedAt: new Date().toISOString(),
-  }
+  };
 }
 ```
 
@@ -1320,15 +1358,15 @@ function mergeBookmarks(
   localSet: BookmarkDoc[],
   remoteSet: BookmarkDoc[],
 ): BookmarkDoc[] {
-  const seen = new Set(localSet.map((b) => b.id))
-  const merged = [...localSet]
+  const seen = new Set(localSet.map((b) => b.id));
+  const merged = [...localSet];
   for (const bookmark of remoteSet) {
     if (!seen.has(bookmark.id)) {
-      merged.push(bookmark)
-      seen.add(bookmark.id)
+      merged.push(bookmark);
+      seen.add(bookmark.id);
     }
   }
-  return merged
+  return merged;
 }
 ```
 
@@ -1353,10 +1391,13 @@ function resolveVoice(
     settings.preferredVoiceDeviceId === deviceId &&
     settings.preferredVoiceURI
   ) {
-    const voices = speechSynthesis.getVoices()
-    return voices.find((v) => v.voiceURI === settings.preferredVoiceURI) ?? null
+    const voices = speechSynthesis.getVoices();
+    return (
+      voices.find((v) => v.voiceURI === settings.preferredVoiceURI) ??
+      null
+    );
   }
-  return null // caller should pick best available for settings.activeLanguage
+  return null; // caller should pick best available for settings.activeLanguage
 }
 ```
 
@@ -1396,7 +1437,7 @@ async function generateEncryptionKey(): Promise<CryptoKey> {
     { name: 'AES-GCM', length: 256 },
     false, // non-extractable
     ['encrypt', 'decrypt'],
-  )
+  );
 }
 ```
 
@@ -1407,18 +1448,20 @@ async function encryptTokens(
   tokens: OAuthTokens,
   key: CryptoKey,
 ): Promise<string> {
-  const iv = crypto.getRandomValues(new Uint8Array(12))
-  const encoded = new TextEncoder().encode(JSON.stringify(tokens))
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(JSON.stringify(tokens));
   const ciphertext = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv },
     key,
     encoded,
-  )
+  );
   // Combine iv + ciphertext, encode as base64
-  const combined = new Uint8Array(iv.byteLength + ciphertext.byteLength)
-  combined.set(iv, 0)
-  combined.set(new Uint8Array(ciphertext), iv.byteLength)
-  return btoa(String.fromCharCode(...combined))
+  const combined = new Uint8Array(
+    iv.byteLength + ciphertext.byteLength,
+  );
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(ciphertext), iv.byteLength);
+  return btoa(String.fromCharCode(...combined));
 }
 
 async function decryptTokens(
@@ -1427,15 +1470,15 @@ async function decryptTokens(
 ): Promise<OAuthTokens> {
   const combined = Uint8Array.from(atob(encryptedBase64), (c) =>
     c.charCodeAt(0),
-  )
-  const iv = combined.slice(0, 12)
-  const ciphertext = combined.slice(12)
+  );
+  const iv = combined.slice(0, 12);
+  const ciphertext = combined.slice(12);
   const plaintext = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv },
     key,
     ciphertext,
-  )
-  return JSON.parse(new TextDecoder().decode(plaintext))
+  );
+  return JSON.parse(new TextDecoder().decode(plaintext));
 }
 ```
 
@@ -1456,7 +1499,7 @@ Every RxDB collection has a `version` integer in its schema definition, starting
 **Example — adding a field to `profiles` (version 0 → 1):**
 
 ```typescript
-import { createRxDatabase } from 'rxdb'
+import { createRxDatabase } from 'rxdb';
 
 const profilesSchemaV1 = {
   version: 1, // bumped from 0
@@ -1493,12 +1536,12 @@ const profilesSchemaV1 = {
     'updatedAt',
   ],
   additionalProperties: false,
-}
+};
 
 const db = await createRxDatabase({
   name: 'baseskill-data',
   storage: getRxStorageIndexedDB(),
-})
+});
 
 await db.addCollections({
   profiles: {
@@ -1509,11 +1552,11 @@ await db.addCollections({
         return {
           ...oldDoc,
           colorBlindMode: 'none', // default for all existing profiles
-        }
+        };
       },
     },
   },
-})
+});
 ```
 
 ### Migration Rules
@@ -1538,7 +1581,7 @@ const MAX_SCHEMA_VERSION = Math.max(
   sessionHistoryIndexSchema.version, // 0
   syncMetaSchema.version, // 0
   appMetaSchema.version, // 0
-)
+);
 // result: 1
 ```
 
@@ -1556,19 +1599,19 @@ async function initDatabase(): Promise<RxDatabase> {
     storage: getRxStorageIndexedDB(),
     multiInstance: false,
     ignoreDuplicate: false,
-  })
+  });
 
   // 2. Add all collections with their schemas and migration strategies
   await db.addCollections({
     /* ... all 10 collections ... */
-  })
+  });
 
   // 3. Check and run version migrations
-  await checkVersionAndMigrate(db)
+  await checkVersionAndMigrate(db);
 
   // 4. Ensure singleton app_meta exists (already handled in checkVersionAndMigrate)
 
-  return db
+  return db;
 }
 ```
 
@@ -1600,7 +1643,9 @@ Add these indexes to improve query performance:
 
 ```typescript
 // Active profile (used app-wide)
-const activeProfile$ = db.profiles.findOne({ selector: { isActive: true } }).$ // RxJS Observable
+const activeProfile$ = db.profiles.findOne({
+  selector: { isActive: true },
+}).$; // RxJS Observable
 
 // All bookmarks for active profile
 const bookmarks$ = activeProfile$.pipe(
@@ -1609,10 +1654,10 @@ const bookmarks$ = activeProfile$.pipe(
       ? db.bookmarks.find({ selector: { profileId: profile.id } }).$
       : of([]),
   ),
-)
+);
 
 // Progress for a specific game
-const gameProgress$ = db.progress.findOne(`${profileId}_${gameId}`).$
+const gameProgress$ = db.progress.findOne(`${profileId}_${gameId}`).$;
 ```
 
 ### Storage Quota Handling
@@ -1621,11 +1666,11 @@ If IndexedDB writes fail due to quota exceeded, catch the error and show a stora
 
 ```typescript
 try {
-  await db.session_history.insert(chunkDoc)
+  await db.session_history.insert(chunkDoc);
 } catch (err) {
   if (err.name === 'QuotaExceededError') {
     // Emit a storage-full event; UI shows "Clear old sessions" prompt
-    storageEvents.emit('quota-exceeded')
+    storageEvents.emit('quota-exceeded');
   }
 }
 ```
@@ -1634,7 +1679,7 @@ Consider requesting persistent storage at install time:
 
 ```typescript
 if (navigator.storage?.persist) {
-  const granted = await navigator.storage.persist()
+  const granted = await navigator.storage.persist();
   // If true, data won't be evicted under storage pressure
 }
 ```

@@ -1,6 +1,9 @@
-export function getVoicesForLanguage(lang: string): SpeechSynthesisVoice[] {
-  const synth = (globalThis as unknown as { speechSynthesis?: SpeechSynthesis })
-    .speechSynthesis;
+export function getVoicesForLanguage(
+  lang: string,
+): SpeechSynthesisVoice[] {
+  const synth = (
+    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+  ).speechSynthesis;
   if (!synth) {
     return [];
   }

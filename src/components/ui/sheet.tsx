@@ -52,8 +52,8 @@ const SheetContent = ({
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
-  side?: 'top' | 'right' | 'bottom' | 'left'
-  showCloseButton?: boolean
+  side?: 'top' | 'right' | 'bottom' | 'left';
+  showCloseButton?: boolean;
 }) => (
   <SheetPortal>
     <SheetOverlay />
@@ -83,7 +83,10 @@ const SheetContent = ({
   </SheetPortal>
 );
 
-const SheetHeader = ({ className, ...props }: React.ComponentProps<'div'>) => (
+const SheetHeader = ({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) => (
   <div
     data-slot="sheet-header"
     className={cn('flex flex-col gap-0.5 p-4', className)}
@@ -91,7 +94,10 @@ const SheetHeader = ({ className, ...props }: React.ComponentProps<'div'>) => (
   />
 );
 
-const SheetFooter = ({ className, ...props }: React.ComponentProps<'div'>) => (
+const SheetFooter = ({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) => (
   <div
     data-slot="sheet-footer"
     className={cn('mt-auto flex flex-col gap-2 p-4', className)}

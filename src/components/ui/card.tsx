@@ -18,7 +18,10 @@ const Card = ({
   />
 );
 
-const CardHeader = ({ className, ...props }: React.ComponentProps<'div'>) => (
+const CardHeader = ({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) => (
   <div
     data-slot="card-header"
     className={cn(
@@ -29,7 +32,10 @@ const CardHeader = ({ className, ...props }: React.ComponentProps<'div'>) => (
   />
 );
 
-const CardTitle = ({ className, ...props }: React.ComponentProps<'div'>) => (
+const CardTitle = ({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) => (
   <div
     data-slot="card-title"
     className={cn(
@@ -51,7 +57,10 @@ const CardDescription = ({
   />
 );
 
-const CardAction = ({ className, ...props }: React.ComponentProps<'div'>) => (
+const CardAction = ({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) => (
   <div
     data-slot="card-action"
     className={cn(
@@ -62,7 +71,10 @@ const CardAction = ({ className, ...props }: React.ComponentProps<'div'>) => (
   />
 );
 
-const CardContent = ({ className, ...props }: React.ComponentProps<'div'>) => (
+const CardContent = ({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) => (
   <div
     data-slot="card-content"
     className={cn('px-4 group-data-[size=sm]/card:px-3', className)}
@@ -70,7 +82,10 @@ const CardContent = ({ className, ...props }: React.ComponentProps<'div'>) => (
   />
 );
 
-const CardFooter = ({ className, ...props }: React.ComponentProps<'div'>) => (
+const CardFooter = ({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) => (
   <div
     data-slot="card-footer"
     className={cn(

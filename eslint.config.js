@@ -1,9 +1,12 @@
 //  @ts-check
 
-import { tanstackConfig } from '@tanstack/eslint-config'
-import jsxA11y from 'eslint-plugin-jsx-a11y'
-import reactPlugin from 'eslint-plugin-react'
-import reactHooks from 'eslint-plugin-react-hooks'
+import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
+import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import { tanstackConfig } from '@tanstack/eslint-config';
+import eslintConfigPrettier from 'eslint-config-prettier/flat';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import reactPlugin from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 // Note: eslint-plugin-tailwindcss v3 is incompatible with Tailwind CSS v4
 // Tailwind v4 removed the `./resolveConfig` subpath export that this plugin requires.
@@ -17,12 +20,33 @@ export default [
   // but the top-level recommended-latest still uses the legacy string array format,
   // so we construct the flat config object manually here.
   {
-    plugins: { 'react-hooks': reactHooks },
+    plugins: {
+      'react-hooks': reactHooks,
+      // Only `require-description`: unicorn has no equivalent for mandatory `-- <why>` on disables.
+      'eslint-comments': eslintComments,
+    },
     rules: reactHooks.configs['recommended-latest'].rules,
   },
   jsxA11y.flatConfigs.recommended,
+  eslintPluginUnicorn.configs.recommended,
   {
+    settings: {
+      react: { version: 'detect' },
+    },
     rules: {
+      // Unicorn `recommended` is on above; these rules clash with React (PascalCase files,
+      // `props`), TanStack Router (`$param` routes), and routine TS/React naming (`db`, `doc`).
+      // Do not rename/destructure around third-party typings (e.g. `React.ComponentProps`,
+      // Radix); disable rules instead of “fixing” imports or prop shapes to satisfy ESLint.
+      'unicorn/filename-case': 'off',
+      'unicorn/prevent-abbreviations': 'off',
+      'unicorn/no-null': 'off',
+      // Prefer explicit `./` in `new URL(..., import.meta.url)` (unicorn default is `never`).
+      'unicorn/relative-url-style': ['error', 'always'],
+
+      // Applies to every `eslint-disable-*` / `eslint-enable` line, including `unicorn/…` rules.
+      'eslint-comments/require-description': 'error',
+
       'import/no-cycle': 'off',
       '@typescript-eslint/array-type': 'off',
       '@typescript-eslint/require-await': 'off',
@@ -47,13 +71,8 @@ export default [
         },
       ],
 
-      semi: ['error', 'always'],
-      quotes: ['error', 'single'],
-      'comma-dangle': ['error', 'always-multiline'],
-      'object-curly-spacing': ['error', 'always'],
-      'array-bracket-spacing': ['error', 'always'],
-      'arrow-parens': ['error', 'always'],
-      'arrow-spacing': ['error', { before: true, after: true }],
+      // Layout (semicolons, quotes, commas, spacing, arrows) is handled by Prettier +
+      // eslint-config-prettier. Trailing commas: `trailingComma: 'all'` in prettier.config.js.
       'arrow-body-style': ['error', 'as-needed'],
 
       'react/function-component-definition': [
@@ -66,14 +85,9 @@ export default [
       'react/jsx-max-depth': ['warn', { max: 5 }],
       'react/no-unstable-nested-components': 'error',
       'react/no-array-index-key': 'warn',
-      'react/jsx-props-no-spreading': [
-        'warn',
-        {
-          html: 'enforce',
-          custom: 'enforce',
-          explicitSpread: 'ignore',
-        },
-      ],
+      // Shadcn/Radix wrappers use `{...props}` with `ComponentProps<typeof Primitive>`;
+      // enforcing no-spread would require per-file disables or unnatural APIs.
+      'react/jsx-props-no-spreading': 'off',
       'react/no-unknown-property': 'error',
 
       '@typescript-eslint/no-unused-vars': [
@@ -91,7 +105,30 @@ export default [
       '@typescript-eslint/explicit-module-boundary-types': 'warn',
     },
   },
+  eslintConfigPrettier,
+  // Prettier disables these in eslint-config-prettier; we re-enable after it.
+  // For operator-linebreak, use `null` as the position so the rule’s built-in default
+  // applies: `?` / `:` → "before" only; other operators use "after" (Prettier-friendly).
+  // Passing `"before"` globally fights Prettier on `=`, `&&`, `&` in types, etc.
   {
-    ignores: ['eslint.config.js', 'prettier.config.js'],
+    rules: {
+      '@stylistic/multiline-ternary': ['error', 'always-multiline'],
+      '@stylistic/operator-linebreak': [
+        'error',
+        null,
+        {
+          // Prettier often puts leading `|` / `&` in multiline union/intersection types.
+          overrides: { '|': 'ignore', '&': 'ignore' },
+        },
+      ],
+    },
   },
-]
+  {
+    // TanStack Router output; ships with undescribed blanket eslint-disable
+    ignores: [
+      'eslint.config.js',
+      'prettier.config.js',
+      '**/routeTree.gen.ts',
+    ],
+  },
+];

@@ -22,9 +22,11 @@ function ssrMemoryInitialPath(): string {
 
 export function getRouter() {
   const history =
-    typeof window !== 'undefined'
+    'window' in globalThis
       ? createBrowserHistory()
-      : createMemoryHistory({ initialEntries: [ ssrMemoryInitialPath() ] });
+      : createMemoryHistory({
+          initialEntries: [ssrMemoryInitialPath()],
+        });
 
   const router = createTanStackRouter({
     routeTree,
@@ -40,6 +42,6 @@ export function getRouter() {
 
 declare module '@tanstack/react-router' {
   interface Register {
-    router: ReturnType<typeof getRouter>
+    router: ReturnType<typeof getRouter>;
   }
 }

@@ -4,7 +4,7 @@ import type {
   GameEventType,
 } from '@/types/game-events';
 
-type Handler = (event: GameEvent) => void
+type Handler = (event: GameEvent) => void;
 
 export class TypedGameEventBus implements GameEventBus {
   private readonly byType = new Map<GameEventType, Set<Handler>>();
@@ -22,7 +22,10 @@ export class TypedGameEventBus implements GameEventBus {
     }
   }
 
-  subscribe(type: GameEventType | 'game:*', handler: Handler): () => void {
+  subscribe(
+    type: GameEventType | 'game:*',
+    handler: Handler,
+  ): () => void {
     if (type === 'game:*') {
       this.wildcards.add(handler);
       return () => {

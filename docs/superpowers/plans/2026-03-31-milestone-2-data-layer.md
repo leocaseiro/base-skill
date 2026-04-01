@@ -96,8 +96,8 @@ git commit -m "chore(deps): add rxdb, dexie, i18n, nanoid, fake-indexeddb"
 In `src/test-setup.ts`, prepend:
 
 ```typescript
-import 'fake-indexeddb/auto'
-import '@testing-library/jest-dom'
+import 'fake-indexeddb/auto';
+import '@testing-library/jest-dom';
 ```
 
 **Commit:**
@@ -112,13 +112,13 @@ git commit -m "chore(test): register fake-indexeddb in vitest setup"
 Create `src/db/setup-validation.test.ts`:
 
 ```typescript
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vitest';
 
 describe('test environment', () => {
   it('indexedDB is available', () => {
-    expect(indexedDB).toBeDefined()
-  })
-})
+    expect(indexedDB).toBeDefined();
+  });
+});
 ```
 
 **Commit:**
@@ -152,21 +152,24 @@ Use **memory storage** in this task. **Dexie** is wired in **Task 5** for produc
 `src/db/create-database.test.ts`:
 
 ```typescript
-import { afterEach, describe, expect, it } from 'vitest'
-import { createTestDatabase, destroyTestDatabase } from './create-database'
+import { afterEach, describe, expect, it } from 'vitest';
+import {
+  createTestDatabase,
+  destroyTestDatabase,
+} from './create-database';
 
 describe('createTestDatabase', () => {
-  let db: Awaited<ReturnType<typeof createTestDatabase>> | undefined
+  let db: Awaited<ReturnType<typeof createTestDatabase>> | undefined;
   afterEach(async () => {
-    if (db) await destroyTestDatabase(db)
-    db = undefined
-  })
+    if (db) await destroyTestDatabase(db);
+    db = undefined;
+  });
 
   it('creates app_meta collection', async () => {
-    db = await createTestDatabase()
-    expect(db.app_meta).toBeDefined()
-  })
-})
+    db = await createTestDatabase();
+    expect(db.app_meta).toBeDefined();
+  });
+});
 ```
 
 Export `createTestDatabase` / `destroyTestDatabase` from `create-database.ts` using **memory storage** for unit tests only; production path uses Dexie.
@@ -197,26 +200,30 @@ git commit -m "feat(db): add app_meta RxJSON schema"
 `src/db/create-database.ts` skeleton:
 
 ```typescript
-import { createRxDatabase, type RxDatabase, type RxCollection } from 'rxdb'
-import { getRxStorageMemory } from 'rxdb/plugins/storage-memory'
-import { appMetaSchema } from './schemas/app-meta'
+import {
+  createRxDatabase,
+  type RxDatabase,
+  type RxCollection,
+} from 'rxdb';
+import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
+import { appMetaSchema } from './schemas/app-meta';
 
 export type AppMetaDoc = {
-  id: 'singleton'
-  appVersion: string
-  rxdbSchemaVersion: number
-  lastMigrationAt: string | null
-  installId: string
-}
+  id: 'singleton';
+  appVersion: string;
+  rxdbSchemaVersion: number;
+  lastMigrationAt: string | null;
+  installId: string;
+};
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- RxDB collection map
 type Collections = {
-  app_meta: RxCollection<AppMetaDoc>
-}
+  app_meta: RxCollection<AppMetaDoc>;
+};
 
-export type BaseSkillDatabase = RxDatabase<Collections>
+export type BaseSkillDatabase = RxDatabase<Collections>;
 
-const DB_NAME = 'baseskill-data-test'
+const DB_NAME = 'baseskill-data-test';
 
 export async function createTestDatabase(): Promise<BaseSkillDatabase> {
   const db = await createRxDatabase<BaseSkillDatabase>({
@@ -224,17 +231,17 @@ export async function createTestDatabase(): Promise<BaseSkillDatabase> {
     storage: getRxStorageMemory(),
     multiInstance: false,
     ignoreDuplicate: true,
-  })
+  });
   await db.addCollections({
     app_meta: { schema: appMetaSchema },
-  })
-  return db
+  });
+  return db;
 }
 
 export async function destroyTestDatabase(
   db?: BaseSkillDatabase,
 ): Promise<void> {
-  if (db) await db.remove()
+  if (db) await db.remove();
 }
 ```
 
@@ -519,13 +526,17 @@ Expected: **PASS** (commit fixes if any).
 `src/routes/index.tsx`:
 
 ```typescript
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/')({
   beforeLoad: () => {
-    throw redirect({ to: '/$locale', params: { locale: 'en' }, replace: true })
+    throw redirect({
+      to: '/$locale',
+      params: { locale: 'en' },
+      replace: true,
+    });
   },
-})
+});
 ```
 
 **Commit:**

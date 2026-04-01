@@ -1,22 +1,22 @@
 import type { RxJsonSchema } from 'rxdb';
 
 export type ProgressBadge = {
-  badgeId: string
-  earnedAt: string
-}
+  badgeId: string;
+  earnedAt: string;
+};
 
 export type ProgressDoc = {
-  id: string
-  profileId: string
-  gameId: string
-  lastScore?: number
-  bestScore?: number
-  totalStars?: number
-  streakDays?: number
-  lastPlayedAt?: string
-  completionCount?: number
-  badges?: ProgressBadge[]
-}
+  id: string;
+  profileId: string;
+  gameId: string;
+  lastScore?: number;
+  bestScore?: number;
+  totalStars?: number;
+  streakDays?: number;
+  lastPlayedAt?: string;
+  completionCount?: number;
+  badges?: ProgressBadge[];
+};
 
 export const progressSchema: RxJsonSchema<ProgressDoc> = {
   version: 0,
@@ -55,12 +55,12 @@ export const progressSchema: RxJsonSchema<ProgressDoc> = {
           badgeId: { type: 'string' },
           earnedAt: { type: 'string', format: 'date-time' },
         },
-        required: [ 'badgeId', 'earnedAt' ],
+        required: ['badgeId', 'earnedAt'],
         additionalProperties: false,
       },
       default: [],
     },
   },
-  required: [ 'id', 'profileId', 'gameId' ],
+  required: ['id', 'profileId', 'gameId'],
   additionalProperties: false,
 };

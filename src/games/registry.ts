@@ -1,7 +1,7 @@
 export type GameCatalogEntry = {
-  id: string
-  titleKey: string
-}
+  id: string;
+  titleKey: string;
+};
 
 export const GAME_CATALOG: GameCatalogEntry[] = [
   { id: 'math-addition', titleKey: 'math-addition' },

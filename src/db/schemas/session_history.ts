@@ -1,21 +1,21 @@
 import type { RxJsonSchema } from 'rxdb';
 
 export type SessionHistoryEvent = {
-  timestamp: string
-  action: string
-  payload?: Record<string, unknown>
-  result?: 'correct' | 'incorrect' | 'skipped' | 'timeout' | null
-}
+  timestamp: string;
+  action: string;
+  payload?: Record<string, unknown>;
+  result?: 'correct' | 'incorrect' | 'skipped' | 'timeout' | null;
+};
 
 export type SessionHistoryDoc = {
-  id: string
-  sessionId: string
-  profileId: string
-  gameId: string
-  chunkIndex: number
-  events: SessionHistoryEvent[]
-  createdAt: string
-}
+  id: string;
+  sessionId: string;
+  profileId: string;
+  gameId: string;
+  chunkIndex: number;
+  events: SessionHistoryEvent[];
+  createdAt: string;
+};
 
 export const sessionHistorySchema: RxJsonSchema<SessionHistoryDoc> = {
   version: 0,
@@ -39,13 +39,13 @@ export const sessionHistorySchema: RxJsonSchema<SessionHistoryDoc> = {
             oneOf: [
               {
                 type: 'string',
-                enum: [ 'correct', 'incorrect', 'skipped', 'timeout' ],
+                enum: ['correct', 'incorrect', 'skipped', 'timeout'],
               },
               { type: 'null' },
             ],
           },
         },
-        required: [ 'timestamp', 'action' ],
+        required: ['timestamp', 'action'],
         additionalProperties: false,
       },
       default: [],

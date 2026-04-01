@@ -1,32 +1,38 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import type { BaseSkillDatabase } from '@/db/types';
 import type { ReactNode } from 'react';
 import { getOrCreateDatabase } from '@/db';
 
 export type DbContextValue = {
-  db: BaseSkillDatabase | undefined
-  error: Error | undefined
-  isReady: boolean
-}
+  db: BaseSkillDatabase | undefined;
+  error: Error | undefined;
+  isReady: boolean;
+};
 
 export const DbContext = createContext<DbContextValue | null>(null);
 
 type DbProviderProps = {
-  children: ReactNode
+  children: ReactNode;
   /** Tests can inject a factory instead of opening IndexedDB */
-  openDatabase?: () => Promise<BaseSkillDatabase>
+  openDatabase?: () => Promise<BaseSkillDatabase>;
   /** Optional hook after DB is ready (e.g. theme seed) */
-  onDatabaseReady?: (db: BaseSkillDatabase) => void | Promise<void>
-}
+  onDatabaseReady?: (db: BaseSkillDatabase) => void | Promise<void>;
+};
 
 export const DbProvider = ({
   children,
   openDatabase = getOrCreateDatabase,
   onDatabaseReady,
 }: DbProviderProps) => {
-  const [ db, setDb ] = useState<BaseSkillDatabase | undefined>();
-  const [ error, setError ] = useState<Error | undefined>();
-  const [ isReady, setIsReady ] = useState(false);
+  const [db, setDb] = useState<BaseSkillDatabase | undefined>();
+  const [error, setError] = useState<Error | undefined>();
+  const [isReady, setIsReady] = useState(false);
 
   const runReady = useCallback(
     async (instance: BaseSkillDatabase) => {
@@ -34,7 +40,7 @@ export const DbProvider = ({
         await onDatabaseReady(instance);
       }
     },
-    [ onDatabaseReady ],
+    [onDatabaseReady],
   );
 
   useEffect(() => {
@@ -52,18 +58,27 @@ export const DbProvider = ({
         }
         setIsReady(true);
       })
-      .catch((err: unknown) => {
+      .catch((error_: unknown) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err : new Error(String(err)));
+          setError(
+            error_ instanceof Error
+              ? error_
+              : new Error(String(error_)),
+          );
           setIsReady(true);
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [ openDatabase, runReady ]);
+  }, [openDatabase, runReady]);
 
-  const value = useMemo(() => ({ db, error, isReady }), [ db, error, isReady ]);
+  const value = useMemo(
+    () => ({ db, error, isReady }),
+    [db, error, isReady],
+  );
 
-  return <DbContext.Provider value={value}>{children}</DbContext.Provider>;
+  return (
+    <DbContext.Provider value={value}>{children}</DbContext.Provider>
+  );
 };

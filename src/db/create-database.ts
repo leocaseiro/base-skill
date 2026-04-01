@@ -55,8 +55,8 @@ let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
 
 /** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
 export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
-  if (typeof window === 'undefined' || typeof indexedDB === 'undefined') {
-    throw new Error(
+  if (typeof indexedDB === 'undefined') {
+    throw new TypeError(
       'getOrCreateDatabase is only available in a browser with IndexedDB',
     );
   }

@@ -21,18 +21,18 @@ describe('TypedGameEventBus', () => {
     const bus = createGameEventBus();
     const seen: GameEvent[] = [];
     bus.subscribe('game:evaluate', (e) => seen.push(e));
-    const ev = evaluateEvent();
-    bus.emit(ev);
-    expect(seen).toEqual([ ev ]);
+    const event_ = evaluateEvent();
+    bus.emit(event_);
+    expect(seen).toEqual([event_]);
   });
 
   it('delivers all events to game:*', () => {
     const bus = createGameEventBus();
     const seen: GameEvent[] = [];
     bus.subscribe('game:*', (e) => seen.push(e));
-    const ev = evaluateEvent();
-    bus.emit(ev);
-    expect(seen).toEqual([ ev ]);
+    const event_ = evaluateEvent();
+    bus.emit(event_);
+    expect(seen).toEqual([event_]);
   });
 
   it('unsubscribe stops delivery', () => {
