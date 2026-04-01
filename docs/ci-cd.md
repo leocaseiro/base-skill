@@ -597,50 +597,11 @@ export function registerUpdateHandler(db: RxDatabase) {
 
 ### Routing on GitHub Pages
 
-GitHub Pages serves only static files; there is no server to redirect unknown paths to `index.html`. Two options are supported:
+GitHub Pages serves only static files; there is no server to rewrite unknown paths to `index.html`. This app uses **browser history** (`createBrowserHistory`) with a **router `basepath`** derived from Vite’s `import.meta.env.BASE_URL` (same value as `vite.config.ts` `base`), so URLs look like `https://[owner].github.io/base-skill/en` instead of hash URLs.
 
-#### Option A: Hash-Based Routing (recommended for simplest setup)
+For deep links and refresh on non-root paths, the deploy workflow copies the built `index.html` to **`404.html`** as well. GitHub Pages serves that file for missing paths; the SPA loads and TanStack Router reads the real pathname.
 
-Use TanStack Router's `createHashHistory()`. All navigation uses the URL hash (`/#/route`), which never hits the server:
-
-```typescript
-// src/router.ts
-import { createHashHistory, createRouter } from '@tanstack/react-router'
-
-const hashHistory = createHashHistory()
-
-export const router = createRouter({
-  routeTree,
-  history: hashHistory,
-})
-```
-
-#### Option B: Clean URLs via 404 Redirect
-
-Add a `public/404.html` that mirrors `index.html`. GitHub Pages serves `404.html` for unknown paths; the SPA then handles routing client-side. This enables clean URLs (`/games/math`) at the cost of an extra redirect:
-
-```html
-<!-- public/404.html -->
-<!doctype html>
-<html>
-  <head>
-    <script>
-      // Redirect to index with path encoded as query param
-      const path = location.pathname
-      location.replace('/?redirect=' + encodeURIComponent(path) + location.hash)
-    </script>
-  </head>
-</html>
-```
-
-```typescript
-// src/main.tsx — decode redirect on load
-const params = new URLSearchParams(window.location.search)
-const redirect = params.get('redirect')
-if (redirect) {
-  window.history.replaceState(null, '', redirect)
-}
-```
+**Why hash URLs used to show `/base-skill` twice:** with `createHashHistory()`, each in-app URL is written as `pathname + '#' + routePath`. If the router also prefixes routes with the same public base (`/base-skill`), you get `…/base-skill/#/base-skill/en`. Moving the route into the real pathname removes the duplication.
 
 ### Custom Domain
 

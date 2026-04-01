@@ -6,23 +6,23 @@
 
 ## 1. Tech Stack
 
-| Layer                   | Technology                                  | Rationale                                                               |
-| ----------------------- | ------------------------------------------- | ----------------------------------------------------------------------- |
-| **Meta-framework**      | TanStack Start                              | Vite-native, type-safe routing, static SPA + future server upgrade path |
-| **Router**              | TanStack Router (file-based)                | End-to-end type safety for routes, params, search, loaders              |
-| **UI library**          | React 19                                    | Component model; hooks for RxDB reactive queries                        |
-| **Language**            | TypeScript (strict mode)                    | `noImplicitAny`, no `any` ESLint rule, CI enforcement                   |
-| **UI components**       | shadcn/ui                                   | Accessible, unstyled base; extended for kid-friendly defaults           |
-| **Styling**             | Tailwind CSS v4                             | Utility-first; CSS variable injection for theme engine                  |
-| **Local database**      | RxDB                                        | Offline-first, reactive, IndexedDB backend, sync plugins                |
-| **Build tool**          | Vite (via TanStack Start)                   | Fast HMR, static SPA preset via Nitro                                   |
-| **Service Worker**      | Workbox via vite-plugin-pwa                 | Pre-caches app shell and game assets                                    |
-| **Cloud sync**          | RxDB replication plugins                    | Cloud storage (initially Google Drive + OneDrive) via PKCE OAuth        |
-| **Auth (OneDrive)**     | MSAL.js                                     | Native PKCE SPA flow, no backend needed                                 |
-| **Auth (Google Drive)** | Cloudflare Worker BFF                       | Proxy for `client_secret` (Google non-standard PKCE requirement)        |
-| **i18n**                | react-i18next                               | Translation namespaces, TTS language routing                            |
-| **Testing**             | Vitest + React Testing Library + Playwright | Unit, component, E2E, visual regression                                 |
-| **CI/CD**               | GitHub Actions                              | Lint, type-check, test, build, deploy to GitHub Pages                   |
+| Layer                   | Technology                                  | Rationale                                                                                                                                |
+| ----------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Meta-framework**      | TanStack Start                              | Vite-native, type-safe routing, static SPA + future server upgrade path                                                                  |
+| **Router**              | TanStack Router (file-based)                | End-to-end type safety for routes, params, search, loaders                                                                               |
+| **UI library**          | React 19                                    | Component model; hooks for RxDB reactive queries                                                                                         |
+| **Language**            | TypeScript (strict mode)                    | `noImplicitAny`, no `any` ESLint rule, CI enforcement                                                                                    |
+| **UI components**       | shadcn/ui                                   | Accessible, unstyled base; extended for kid-friendly defaults                                                                            |
+| **Styling**             | Tailwind CSS v4                             | Utility-first; CSS variable injection for theme engine                                                                                   |
+| **Local database**      | RxDB (Dexie storage)                        | Offline-first, reactive; IndexedDB via **Dexie-backed** RxStorage (free tier). See [ADR 0001](adrs/0001-rxdb-without-tanstack-query.md). |
+| **Build tool**          | Vite (via TanStack Start)                   | Fast HMR, static SPA preset via Nitro                                                                                                    |
+| **Service Worker**      | Workbox via vite-plugin-pwa                 | Pre-caches app shell and game assets                                                                                                     |
+| **Cloud sync**          | RxDB replication plugins                    | Cloud storage (initially Google Drive + OneDrive) via PKCE OAuth                                                                         |
+| **Auth (OneDrive)**     | MSAL.js                                     | Native PKCE SPA flow, no backend needed                                                                                                  |
+| **Auth (Google Drive)** | Cloudflare Worker BFF                       | Proxy for `client_secret` (Google non-standard PKCE requirement)                                                                         |
+| **i18n**                | react-i18next                               | Translation namespaces, TTS language routing                                                                                             |
+| **Testing**             | Vitest + React Testing Library + Playwright | Unit, component, E2E, visual regression                                                                                                  |
+| **CI/CD**               | GitHub Actions                              | Lint, type-check, test, build, deploy to GitHub Pages                                                                                    |
 
 ---
 
@@ -69,6 +69,7 @@ graph TD
 
 - All application logic runs in the browser. No server required.
 - RxDB is the single source of truth. State persists across refreshes automatically.
+- **Data access (M2):** React hooks subscribe to RxDB queries; `@tanstack/react-query` is [deferred until M6](adrs/0001-rxdb-without-tanstack-query.md) when network sync arrives, to avoid a duplicate cache for local data.
 - Each game is its own code-split bundle. The app shell loads instantly; game bundles are downloaded on first play or when the parent explicitly triggers a download. A "Download All Games" option exists in parent settings but is not triggered on first load.
 - Service worker pre-caches the app shell. Game assets are cached per game on first play.
 - Cloud sync is opt-in. The app functions identically without it.
