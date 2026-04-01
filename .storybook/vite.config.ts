@@ -14,7 +14,11 @@ const workspaceRoot = fileURLToPath(new URL('..', import.meta.url));
  */
 export default defineConfig({
   plugins: [
-    tsconfigPaths({ projects: ['../tsconfig.json'] }),
+    // Resolve from this file’s project root — not `process.cwd()` — so `yarn storybook`
+    // works from git worktrees (otherwise `../tsconfig.json` becomes `worktrees/tsconfig.json`).
+    tsconfigPaths({
+      projects: [path.resolve(workspaceRoot, 'tsconfig.json')],
+    }),
     tailwindcss(),
     react(),
   ],
