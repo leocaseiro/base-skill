@@ -20,9 +20,9 @@ jobs:
         browser: [chromium] # extend to firefox/webkit when baselines exist
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: yarn
@@ -46,7 +46,7 @@ jobs:
 
       - name: Upload diff images
         if: steps.visual.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: visual-regression-diffs-${{ matrix.browser }}
           path: test-results/
