@@ -27,7 +27,7 @@ function plainSettingsFromQuery(
   ) {
     return (doc as { toJSON: () => SettingsDoc }).toJSON();
   }
-  return doc;
+  return doc as SettingsDoc;
 }
 
 type UseSettingsResult = {

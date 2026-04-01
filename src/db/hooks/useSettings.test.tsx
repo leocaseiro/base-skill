@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { createElement, useCallback } from 'react';
+import { useCallback } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { useRxDB } from './useRxDB';
 import { useSettings } from './useSettings';
@@ -21,11 +21,10 @@ function useSettingsUnderTest() {
 
 const makeWrapper = (testDb: BaseSkillDatabase) => {
   const TestProviders = ({ children }: { children: ReactNode }) => {
-    const openDatabase = useCallback(
-      () => Promise.resolve(testDb),
-      [testDb],
+    const openDatabase = useCallback(() => Promise.resolve(testDb), []);
+    return (
+      <DbProvider openDatabase={openDatabase}>{children}</DbProvider>
     );
-    return createElement(DbProvider, { openDatabase }, children);
   };
   return TestProviders;
 };
