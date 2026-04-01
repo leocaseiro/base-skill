@@ -14,7 +14,7 @@
 
 Before starting any task:
 
-- [ ] Create worktree and install dependencies:
+- Create worktree and install dependencies:
 
 ```bash
 git worktree add ./worktrees/milestone-3-app-shell -b milestone-3-app-shell
@@ -66,8 +66,7 @@ All subsequent commands run from `./worktrees/milestone-3-app-shell/`.
 
 - Modify: `src/games/registry.ts`
 - Modify: `src/games/registry.test.ts`
-
-- [ ] **Step 1: Update the test to require `levels` and `subject`**
+- **Step 1: Update the test to require `levels` and `subject`**
 
 In `src/games/registry.test.ts`, replace the existing test body:
 
@@ -105,7 +104,7 @@ describe('GAME_CATALOG', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test — expect failure**
+- **Step 2: Run the test — expect failure**
 
 ```bash
 yarn test src/games/registry.test.ts
@@ -113,7 +112,7 @@ yarn test src/games/registry.test.ts
 
 Expected: FAIL — `g.levels is not iterable` or `Cannot read properties of undefined`.
 
-- [ ] **Step 3: Update `registry.ts` with new types and extended entries**
+- **Step 3: Update `registry.ts` with new types and extended entries**
 
 Replace `src/games/registry.ts` entirely:
 
@@ -150,7 +149,7 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
 ];
 ```
 
-- [ ] **Step 4: Run the test — expect pass**
+- **Step 4: Run the test — expect pass**
 
 ```bash
 yarn test src/games/registry.test.ts
@@ -158,7 +157,7 @@ yarn test src/games/registry.test.ts
 
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/games/registry.ts src/games/registry.test.ts
@@ -173,8 +172,7 @@ git commit -m "feat(catalog): add level and subject fields to GameCatalogEntry"
 
 - Create: `src/games/catalog-utils.ts`
 - Create: `src/games/catalog-utils.test.ts`
-
-- [ ] **Step 1: Write the failing tests**
+- **Step 1: Write the failing tests**
 
 Create `src/games/catalog-utils.test.ts`:
 
@@ -279,7 +277,7 @@ describe('paginateCatalog', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- **Step 2: Run — expect failure**
 
 ```bash
 yarn test src/games/catalog-utils.test.ts
@@ -287,7 +285,7 @@ yarn test src/games/catalog-utils.test.ts
 
 Expected: FAIL — `Cannot find module './catalog-utils'`.
 
-- [ ] **Step 3: Implement `catalog-utils.ts`**
+- **Step 3: Implement `catalog-utils.ts`**
 
 Create `src/games/catalog-utils.ts`:
 
@@ -343,7 +341,7 @@ export function paginateCatalog<T>(
 }
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- **Step 4: Run — expect pass**
 
 ```bash
 yarn test src/games/catalog-utils.test.ts
@@ -351,7 +349,7 @@ yarn test src/games/catalog-utils.test.ts
 
 Expected: PASS (9 tests).
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/games/catalog-utils.ts src/games/catalog-utils.test.ts
@@ -366,8 +364,7 @@ git commit -m "feat(catalog): add filterCatalog and paginateCatalog utilities"
 
 - Modify: `src/lib/i18n/locales/en/common.json`
 - Modify: `src/lib/i18n/locales/pt-BR/common.json`
-
-- [ ] **Step 1: Replace `src/lib/i18n/locales/en/common.json`**
+- **Step 1: Replace `src/lib/i18n/locales/en/common.json`**
 
 ```json
 {
@@ -413,7 +410,7 @@ git commit -m "feat(catalog): add filterCatalog and paginateCatalog utilities"
 }
 ```
 
-- [ ] **Step 2: Replace `src/lib/i18n/locales/pt-BR/common.json`**
+- **Step 2: Replace `src/lib/i18n/locales/pt-BR/common.json`**
 
 ```json
 {
@@ -459,7 +456,7 @@ git commit -m "feat(catalog): add filterCatalog and paginateCatalog utilities"
 }
 ```
 
-- [ ] **Step 3: Verify i18n resolves the new keys**
+- **Step 3: Verify i18n resolves the new keys**
 
 Run the existing i18n test to confirm the module still loads cleanly:
 
@@ -469,7 +466,7 @@ yarn test src/lib/i18n/i18n.test.ts
 
 Expected: PASS (1 test).
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add src/lib/i18n/locales/en/common.json src/lib/i18n/locales/pt-BR/common.json
@@ -486,8 +483,7 @@ git commit -m "feat(i18n): add app shell UI strings to common namespace"
 - Create: `src/components/ui/dropdown-menu.tsx`
 - Create: `src/components/ui/slider.tsx`
 - Create: `src/components/ui/select.tsx`
-
-- [ ] **Step 1: Add required shadcn components**
+- **Step 1: Add required shadcn components**
 
 ```bash
 npx shadcn@latest add input dropdown-menu slider select
@@ -495,7 +491,7 @@ npx shadcn@latest add input dropdown-menu slider select
 
 Expected: four new files created in `src/components/ui/`.
 
-- [ ] **Step 2: Verify types pass**
+- **Step 2: Verify types pass**
 
 ```bash
 yarn typecheck
@@ -503,7 +499,7 @@ yarn typecheck
 
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add src/components/ui/input.tsx src/components/ui/dropdown-menu.tsx \
@@ -519,14 +515,13 @@ git commit -m "chore(ui): add input, dropdown-menu, slider, select shadcn compon
 
 - Create: `src/components/GameCard.tsx`
 - Create: `src/components/GameCard.test.tsx`
-
-- [ ] **Step 0: Install `@testing-library/user-event`**
+- **Step 0: Install `@testing-library/user-event`**
 
 ```bash
 yarn add -D @testing-library/user-event
 ```
 
-- [ ] **Step 1: Write the failing tests**
+- **Step 1: Write the failing tests**
 
 Create `src/components/GameCard.test.tsx`:
 
@@ -634,7 +629,7 @@ Note: `userEvent` comes from `@testing-library/user-event`. Check if it is insta
 yarn add -D @testing-library/user-event
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- **Step 2: Run — expect failure**
 
 ```bash
 yarn test src/components/GameCard.test.tsx
@@ -642,7 +637,7 @@ yarn test src/components/GameCard.test.tsx
 
 Expected: FAIL — `Cannot find module './GameCard'`.
 
-- [ ] **Step 3: Implement `GameCard.tsx`**
+- **Step 3: Implement `GameCard.tsx`**
 
 Create `src/components/GameCard.tsx`:
 
@@ -718,7 +713,7 @@ export const GameCard = ({
 };
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- **Step 4: Run — expect pass**
 
 ```bash
 yarn test src/components/GameCard.test.tsx
@@ -726,7 +721,7 @@ yarn test src/components/GameCard.test.tsx
 
 Expected: PASS (5 tests).
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/components/GameCard.tsx src/components/GameCard.test.tsx
@@ -741,8 +736,7 @@ git commit -m "feat(ui): add GameCard component with bookmark and play callbacks
 
 - Create: `src/components/LevelRow.tsx`
 - Create: `src/components/LevelRow.test.tsx`
-
-- [ ] **Step 1: Write the failing tests**
+- **Step 1: Write the failing tests**
 
 Create `src/components/LevelRow.test.tsx`:
 
@@ -811,7 +805,7 @@ describe('LevelRow', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- **Step 2: Run — expect failure**
 
 ```bash
 yarn test src/components/LevelRow.test.tsx
@@ -819,7 +813,7 @@ yarn test src/components/LevelRow.test.tsx
 
 Expected: FAIL — `Cannot find module './LevelRow'`.
 
-- [ ] **Step 3: Implement `LevelRow.tsx`**
+- **Step 3: Implement `LevelRow.tsx`**
 
 Create `src/components/LevelRow.tsx`:
 
@@ -871,7 +865,7 @@ export const LevelRow = ({
 };
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- **Step 4: Run — expect pass**
 
 ```bash
 yarn test src/components/LevelRow.test.tsx
@@ -879,7 +873,7 @@ yarn test src/components/LevelRow.test.tsx
 
 Expected: PASS (4 tests).
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/components/LevelRow.tsx src/components/LevelRow.test.tsx
@@ -894,8 +888,7 @@ git commit -m "feat(ui): add LevelRow grade-level filter component"
 
 - Create: `src/components/GameGrid.tsx`
 - Create: `src/components/GameGrid.test.tsx`
-
-- [ ] **Step 1: Write the failing tests**
+- **Step 1: Write the failing tests**
 
 Create `src/components/GameGrid.test.tsx`:
 
@@ -1020,7 +1013,7 @@ describe('GameGrid', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- **Step 2: Run — expect failure**
 
 ```bash
 yarn test src/components/GameGrid.test.tsx
@@ -1028,7 +1021,7 @@ yarn test src/components/GameGrid.test.tsx
 
 Expected: FAIL — `Cannot find module './GameGrid'`.
 
-- [ ] **Step 3: Implement `GameGrid.tsx`**
+- **Step 3: Implement `GameGrid.tsx`**
 
 Create `src/components/GameGrid.tsx`:
 
@@ -1124,7 +1117,7 @@ export const GameGrid = ({
 };
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- **Step 4: Run — expect pass**
 
 ```bash
 yarn test src/components/GameGrid.test.tsx
@@ -1132,7 +1125,7 @@ yarn test src/components/GameGrid.test.tsx
 
 Expected: PASS (5 tests).
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/components/GameGrid.tsx src/components/GameGrid.test.tsx
@@ -1147,8 +1140,7 @@ git commit -m "feat(ui): add GameGrid component with pagination"
 
 - Create: `src/components/OfflineIndicator.tsx`
 - Create: `src/components/OfflineIndicator.test.tsx`
-
-- [ ] **Step 1: Write the failing tests**
+- **Step 1: Write the failing tests**
 
 Create `src/components/OfflineIndicator.test.tsx`:
 
@@ -1217,7 +1209,7 @@ describe('OfflineIndicator', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- **Step 2: Run — expect failure**
 
 ```bash
 yarn test src/components/OfflineIndicator.test.tsx
@@ -1225,7 +1217,7 @@ yarn test src/components/OfflineIndicator.test.tsx
 
 Expected: FAIL — `Cannot find module './OfflineIndicator'`.
 
-- [ ] **Step 3: Implement `OfflineIndicator.tsx`**
+- **Step 3: Implement `OfflineIndicator.tsx`**
 
 Create `src/components/OfflineIndicator.tsx`:
 
@@ -1264,7 +1256,7 @@ export const OfflineIndicator = () => {
 };
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- **Step 4: Run — expect pass**
 
 ```bash
 yarn test src/components/OfflineIndicator.test.tsx
@@ -1272,7 +1264,11 @@ yarn test src/components/OfflineIndicator.test.tsx
 
 Expected: PASS (4 tests).
 
-- [ ] **Step 5: Commit**
+- **Step 4: e2e tests**
+
+- [ ] TODO: write playwright tests for offline display with stubs for offline, and going back online (can be done after M3)
+
+- **Step 5: Commit**
 
 ```bash
 git add src/components/OfflineIndicator.tsx src/components/OfflineIndicator.test.tsx
@@ -1290,7 +1286,7 @@ git commit -m "feat(ui): add OfflineIndicator component"
 
 These components use TanStack Router (`Link`, `useParams`, `useNavigate`), so unit tests are kept minimal (smoke rendering). Full behavior is covered by E2E.
 
-- [ ] **Step 1: Replace `src/components/Header.tsx`**
+- **Step 1: Replace `src/components/Header.tsx`**
 
 ```tsx
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
@@ -1458,7 +1454,7 @@ export const Header = () => {
 };
 ```
 
-- [ ] **Step 2: Replace `src/components/Footer.tsx`**
+- **Step 2: Replace `src/components/Footer.tsx`**
 
 ```tsx
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
@@ -1528,7 +1524,7 @@ export const Footer = () => {
 };
 ```
 
-- [ ] **Step 3: Run typecheck**
+- **Step 3: Run typecheck**
 
 ```bash
 yarn typecheck
@@ -1536,7 +1532,7 @@ yarn typecheck
 
 Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add src/components/Header.tsx src/components/Footer.tsx
@@ -1550,8 +1546,7 @@ git commit -m "feat(ui): rebuild Header and Footer for app shell"
 **Files:**
 
 - Modify: `src/routes/$locale/_app.tsx`
-
-- [ ] **Step 1: Update `_app.tsx` to include Header, OfflineIndicator, Footer**
+- **Step 1: Update `_app.tsx` to include Header, OfflineIndicator, Footer**
 
 Replace the contents of `src/routes/$locale/_app.tsx`:
 
@@ -1588,7 +1583,7 @@ export const Route = createFileRoute('/$locale/_app')({
 });
 ```
 
-- [ ] **Step 2: Run typecheck**
+- **Step 2: Run typecheck**
 
 ```bash
 yarn typecheck
@@ -1596,7 +1591,7 @@ yarn typecheck
 
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add src/routes/\$locale/_app.tsx
@@ -1611,8 +1606,7 @@ git commit -m "feat(layout): wire Header, OfflineIndicator, Footer into app layo
 
 - Modify: `src/routes/$locale/_app/index.tsx`
 - Modify: `src/routes/$locale/_app/index.test.tsx`
-
-- [ ] **Step 1: Update the test for the new home screen**
+- **Step 1: Update the test for the new home screen**
 
 Replace `src/routes/$locale/_app/index.test.tsx`:
 
@@ -1629,7 +1623,7 @@ describe('Home screen', () => {
 });
 ```
 
-- [ ] **Step 2: Run existing test — expect pass**
+- **Step 2: Run existing test — expect pass**
 
 ```bash
 yarn test src/routes/\$locale/_app/index.test.tsx
@@ -1637,7 +1631,7 @@ yarn test src/routes/\$locale/_app/index.test.tsx
 
 Expected: PASS.
 
-- [ ] **Step 3: Replace `index.tsx` with search-param-driven home screen**
+- **Step 3: Replace `index.tsx` with search-param-driven home screen**
 
 Replace `src/routes/$locale/_app/index.tsx`:
 
@@ -1734,7 +1728,7 @@ export const Route = createFileRoute('/$locale/_app/')({
 });
 ```
 
-- [ ] **Step 4: Run typecheck**
+- **Step 4: Run typecheck**
 
 ```bash
 yarn typecheck
@@ -1742,7 +1736,7 @@ yarn typecheck
 
 Expected: no errors. Fix any type errors before proceeding.
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/routes/\$locale/_app/index.tsx src/routes/\$locale/_app/index.test.tsx
@@ -1757,8 +1751,7 @@ git commit -m "feat(home): game grid with search params, level filter, and pagin
 
 - Create: `src/db/hooks/useBookmarks.ts`
 - Create: `src/db/hooks/useBookmarks.test.ts`
-
-- [ ] **Step 1: Write the failing tests**
+- **Step 1: Write the failing tests**
 
 Create `src/db/hooks/useBookmarks.test.ts`:
 
@@ -1835,7 +1828,7 @@ describe('useBookmarks', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- **Step 2: Run — expect failure**
 
 ```bash
 yarn test src/db/hooks/useBookmarks.test.ts
@@ -1843,7 +1836,7 @@ yarn test src/db/hooks/useBookmarks.test.ts
 
 Expected: FAIL — `Cannot find module './useBookmarks'`.
 
-- [ ] **Step 3: Implement `useBookmarks.ts`**
+- **Step 3: Implement `useBookmarks.ts`**
 
 Create `src/db/hooks/useBookmarks.ts`:
 
@@ -1983,7 +1976,7 @@ export function useBookmarks(): UseBookmarksResult {
 }
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- **Step 4: Run — expect pass**
 
 ```bash
 yarn test src/db/hooks/useBookmarks.test.ts
@@ -1991,7 +1984,7 @@ yarn test src/db/hooks/useBookmarks.test.ts
 
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/db/hooks/useBookmarks.ts src/db/hooks/useBookmarks.test.ts
@@ -2006,8 +1999,7 @@ git commit -m "feat(db): add useBookmarks hook with anonymous profile support"
 
 - Create: `src/db/hooks/useSettings.ts`
 - Create: `src/db/hooks/useSettings.test.ts`
-
-- [ ] **Step 1: Write the failing tests**
+- **Step 1: Write the failing tests**
 
 Create `src/db/hooks/useSettings.test.ts`:
 
@@ -2079,7 +2071,7 @@ describe('useSettings', () => {
 });
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- **Step 2: Run — expect failure**
 
 ```bash
 yarn test src/db/hooks/useSettings.test.ts
@@ -2087,7 +2079,7 @@ yarn test src/db/hooks/useSettings.test.ts
 
 Expected: FAIL — `Cannot find module './useSettings'`.
 
-- [ ] **Step 3: Implement `useSettings.ts`**
+- **Step 3: Implement `useSettings.ts`**
 
 Create `src/db/hooks/useSettings.ts`:
 
@@ -2154,7 +2146,7 @@ export function useSettings(): UseSettingsResult {
 }
 ```
 
-- [ ] **Step 4: Run — expect pass**
+- **Step 4: Run — expect pass**
 
 ```bash
 yarn test src/db/hooks/useSettings.test.ts
@@ -2162,7 +2154,7 @@ yarn test src/db/hooks/useSettings.test.ts
 
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/db/hooks/useSettings.ts src/db/hooks/useSettings.test.ts
@@ -2176,8 +2168,7 @@ git commit -m "feat(db): add useSettings hook with anonymous defaults and patch 
 **Files:**
 
 - Modify: `src/routes/$locale/_app/settings.tsx`
-
-- [ ] **Step 1: Replace `settings.tsx` with a functional settings screen**
+- **Step 1: Replace `settings.tsx` with a functional settings screen**
 
 ```tsx
 import {
@@ -2283,7 +2274,7 @@ Note: `Label` component may need to be added via shadcn:
 npx shadcn@latest add label
 ```
 
-- [ ] **Step 2: Run typecheck**
+- **Step 2: Run typecheck**
 
 ```bash
 yarn typecheck
@@ -2291,7 +2282,7 @@ yarn typecheck
 
 Expected: no errors. If `Label` is missing, run the `npx shadcn add label` command first.
 
-- [ ] **Step 3: Run all tests**
+- **Step 3: Run all tests**
 
 ```bash
 yarn test
@@ -2299,7 +2290,7 @@ yarn test
 
 Expected: all tests pass. Fix any regressions before committing.
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add src/routes/\$locale/_app/settings.tsx
@@ -2310,7 +2301,7 @@ git commit -m "feat(settings): wire volume, speech rate, and language to RxDB"
 
 ## Task 15: Final verification
 
-- [ ] **Step 1: Run full test suite**
+- **Step 1: Run full test suite**
 
 ```bash
 yarn test
@@ -2318,7 +2309,7 @@ yarn test
 
 Expected: all tests pass.
 
-- [ ] **Step 2: Run typecheck**
+- **Step 2: Run typecheck**
 
 ```bash
 yarn typecheck
@@ -2326,7 +2317,7 @@ yarn typecheck
 
 Expected: no errors.
 
-- [ ] **Step 3: Run linter**
+- **Step 3: Run linter**
 
 ```bash
 yarn lint
@@ -2334,7 +2325,7 @@ yarn lint
 
 Expected: no warnings or errors. If `knip` flags new unused exports, either use them or remove them.
 
-- [ ] **Step 4: Smoke-test in browser**
+- **Step 4: Smoke-test in browser**
 
 ```bash
 yarn dev
@@ -2350,8 +2341,7 @@ Open `http://localhost:3000/en/` and verify:
 - Clicking bookmark icon toggles the filled/unfilled state
 - Footer mirrors header menu
 - Navigating to `/en/settings` shows volume, speech rate, and language controls
-
-- [ ] **Step 5: Open a PR**
+- **Step 5: Open a PR**
 
 ```bash
 cd ../..

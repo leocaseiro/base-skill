@@ -107,23 +107,6 @@ export default [
     },
   },
   eslintConfigPrettier,
-  // Prettier disables these in eslint-config-prettier; we re-enable after it.
-  // For operator-linebreak, use `null` as the position so the rule’s built-in default
-  // applies: `?` / `:` → "before" only; other operators use "after" (Prettier-friendly).
-  // Passing `"before"` globally fights Prettier on `=`, `&&`, `&` in types, etc.
-  {
-    rules: {
-      '@stylistic/multiline-ternary': ['error', 'always-multiline'],
-      '@stylistic/operator-linebreak': [
-        'error',
-        null,
-        {
-          // Prettier often puts leading `|` / `&` in multiline union/intersection types.
-          overrides: { '|': 'ignore', '&': 'ignore' },
-        },
-      ],
-    },
-  },
   {
     // Framework config files require `export default` by convention (Vite, Vitest,
     // Playwright, Knip); allow it only in these root-level config files.
