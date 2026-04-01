@@ -252,10 +252,44 @@ export function useSessionRecorder(
 ): void;
 ```
 
-- Watches `moves` array reference (pass `moveLog.moves` directly; effect re-runs on new array ref after each dispatch)
-- Writes to `session_history` chunks: max 200 events or 50 KB per chunk
-- On `game-over` phase: writes `session_history_index` summary, emits `game:end` on `TypedGameEventBus`
-- Move log stored as-is (includes seed + initialContent + all moves including UNDOs)
+**Write triggers (all must flush to RxDB):**
+
+1. **Every move** — write the latest move to the current in-progress chunk immediately
+2. **`visibilitychange` → hidden** — flush in-progress buffer; browser may be closed
+3. **`beforeunload`** — synchronous flush via `navigator.sendBeacon` or `indexedDB` direct write
+4. **Chunk boundary** — open a new chunk document when current exceeds 200 moves or 50 KB
+5. **`game-over` phase** — flush final chunk, write `session_history_index` summary, emit `game:end` on `TypedGameEventBus`
+
+**`session_history_index` status field:**
+
+The index document gains a `status` field to distinguish complete from interrupted sessions:
+
+```ts
+status: 'in-progress' | 'completed' | 'abandoned';
+// 'in-progress'  → game started, not yet finished (browser close mid-session)
+// 'completed'    → game:end reached normally
+// 'abandoned'    → child exited via the Exit button before game-over
+```
+
+Move log stored as-is (includes seed + initialContent + all moves including UNDOs).
+
+---
+
+## 9a. Silent Resume
+
+When a child navigates to a game, the TanStack Router `loader` checks for an `in-progress` session for this `(profileId, gameId)` pair in `session_history_index`. If found, the move log is loaded from `session_history` chunks and `replayToStep` reconstructs the state at the last recorded move. The child lands directly back in the game at the correct round — no prompt.
+
+```ts
+// In the loader for /$locale/_app/game/$gameId
+const resumeLog = await findInProgressSession(profileId, gameId, db);
+// resumeLog is null (no resume) or a fully hydrated MoveLog
+
+// Passed into GameEngineProvider as optional initialLog prop:
+// If present → engine calls replayToStep(resumeLog, resumeLog.moves.length - 1)
+// If absent  → engine starts fresh, generates new sessionId + seed
+```
+
+**Edge case:** If the in-progress session is more than 24 hours old, treat it as `abandoned` (update status, start fresh). Stale sessions should not silently resume days later.
 
 ---
 
@@ -329,8 +363,9 @@ src/
 
 ### Modified
 
-- `src/routes/$locale/_app/game/$gameId.tsx` — replace placeholder with real GameShell + loader
+- `src/routes/$locale/_app/game/$gameId.tsx` — replace placeholder with real GameShell + loader; add resume logic in `loader`
 - `src/types/game-events.ts` — verify `GameEventType` covers all move-triggered bus events
+- `src/db/schemas/session_history_index.ts` — add `status: 'in-progress' | 'completed' | 'abandoned'` field + schema version bump
 
 ---
 
@@ -353,6 +388,8 @@ src/
 - Full game session: instructions → 3 rounds → game-over
 - Undo during play: move log contains `UNDO` entries, state rolls back correctly
 - Config override: `maxUndoDepth: 0` hides undo button; `timerVisible: false` hides timer
+- Silent resume: play 2 rounds → simulate browser close (clear in-memory state) → reload game route → child lands on round 3 with correct score
+- Stale resume: in-progress session older than 24 h → marked `abandoned`, fresh session starts
 
 ### Verification
 
