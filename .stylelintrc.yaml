@@ -13,6 +13,7 @@ rules:
         - utility
         - variant
         - source
+  import-notation: string
   property-no-unknown: true
   color-no-invalid-hex: true
   declaration-block-no-duplicate-properties: true
