@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { applyThemeCssVars } from '../../src/lib/theme/css-vars';
 import { defaultThemeCssVars } from '../../src/lib/theme/default-tokens';
-import type { Decorator, StoryFn } from '@storybook/react';
+import type { Decorator } from '@storybook/react';
+
+type DecoratorStory = Parameters<Decorator>[0];
 
 const THEME_VARS: Record<string, Record<string, string>> = {
   light: defaultThemeCssVars,
@@ -33,7 +35,7 @@ const WithThemeInner = ({
   Story,
   themeKey,
 }: {
-  Story: StoryFn;
+  Story: DecoratorStory;
   themeKey: string | undefined;
 }) => {
   const theme = themeKey ?? 'light';
@@ -48,7 +50,7 @@ const WithThemeInner = ({
     );
   }, [theme]);
 
-  return <Story />;
+  return Story();
 };
 
 export const withTheme: Decorator = (Story, context) => (
