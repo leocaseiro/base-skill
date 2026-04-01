@@ -20,7 +20,10 @@ const oceanPreset: ThemeDoc = {
     text: '#03045E',
     accent: '#F77F00',
   },
-  typography: { fontFamily: 'Edu NSW ACT Foundation', baseSize: 18 },
+  typography: {
+    fontFamily: 'Andika, Edu NSW ACT Foundation, Nunito, Manrope',
+    baseSize: 18,
+  },
   backgroundPattern: 'waves',
   createdAt: now,
   updatedAt: now,
