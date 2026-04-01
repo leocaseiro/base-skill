@@ -10,7 +10,7 @@ todos:
     status: pending
   - id: m2-data-layer
     content: 'Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services'
-    status: pending
+    status: completed
   - id: m3-app-shell
     content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents'
     status: pending
