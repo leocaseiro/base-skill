@@ -1,13 +1,13 @@
-import i18n from 'i18next'
-import { initReactI18next } from 'react-i18next'
-import enCommon from './locales/en/common.json'
-import enEncouragements from './locales/en/encouragements.json'
-import enGames from './locales/en/games.json'
-import enSettings from './locales/en/settings.json'
-import ptCommon from './locales/pt-BR/common.json'
-import ptEncouragements from './locales/pt-BR/encouragements.json'
-import ptGames from './locales/pt-BR/games.json'
-import ptSettings from './locales/pt-BR/settings.json'
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import enCommon from './locales/en/common.json';
+import enEncouragements from './locales/en/encouragements.json';
+import enGames from './locales/en/games.json';
+import enSettings from './locales/en/settings.json';
+import ptCommon from './locales/pt-BR/common.json';
+import ptEncouragements from './locales/pt-BR/encouragements.json';
+import ptGames from './locales/pt-BR/games.json';
+import ptSettings from './locales/pt-BR/settings.json';
 
 void i18n.use(initReactI18next).init({
   lng: 'en',
@@ -28,6 +28,6 @@ void i18n.use(initReactI18next).init({
       encouragements: ptEncouragements,
     },
   },
-})
+});
 
-export default i18n
+export default i18n;

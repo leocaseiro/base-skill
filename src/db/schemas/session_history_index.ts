@@ -1,4 +1,4 @@
-import type { RxJsonSchema } from 'rxdb'
+import type { RxJsonSchema } from 'rxdb';
 
 export type SessionHistoryIndexDoc = {
   sessionId: string
@@ -23,18 +23,18 @@ export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> = {
     gameId: { type: 'string', maxLength: 64 },
     startedAt: { type: 'string', format: 'date-time' },
     endedAt: {
-      oneOf: [{ type: 'string', format: 'date-time' }, { type: 'null' }],
+      oneOf: [ { type: 'string', format: 'date-time' }, { type: 'null' } ],
     },
     duration: {
-      oneOf: [{ type: 'number', minimum: 0 }, { type: 'null' }],
+      oneOf: [ { type: 'number', minimum: 0 }, { type: 'null' } ],
     },
     finalScore: {
-      oneOf: [{ type: 'number' }, { type: 'null' }],
+      oneOf: [ { type: 'number' }, { type: 'null' } ],
     },
     totalEvents: { type: 'integer', minimum: 0, default: 0, multipleOf: 1 },
     totalChunks: { type: 'integer', minimum: 1, default: 1, multipleOf: 1 },
     gradeBand: { type: 'string' },
   },
-  required: ['sessionId', 'profileId', 'gameId', 'startedAt', 'gradeBand'],
+  required: [ 'sessionId', 'profileId', 'gameId', 'startedAt', 'gradeBand' ],
   additionalProperties: false,
-}
+};

@@ -1,8 +1,8 @@
-import { Link, useParams } from '@tanstack/react-router'
-import ThemeToggle from './ThemeToggle'
+import { Link, useParams } from '@tanstack/react-router';
+import ThemeToggle from './ThemeToggle';
 
 export default function Header() {
-  const { locale } = useParams({ from: '/$locale' })
+  const { locale } = useParams({ from: '/$locale' });
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg">
@@ -66,5 +66,5 @@ export default function Header() {
         </div>
       </nav>
     </header>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import type { RxJsonSchema } from 'rxdb'
+import type { RxJsonSchema } from 'rxdb';
 
 export type ProgressBadge = {
   badgeId: string
@@ -55,12 +55,12 @@ export const progressSchema: RxJsonSchema<ProgressDoc> = {
           badgeId: { type: 'string' },
           earnedAt: { type: 'string', format: 'date-time' },
         },
-        required: ['badgeId', 'earnedAt'],
+        required: [ 'badgeId', 'earnedAt' ],
         additionalProperties: false,
       },
       default: [],
     },
   },
-  required: ['id', 'profileId', 'gameId'],
+  required: [ 'id', 'profileId', 'gameId' ],
   additionalProperties: false,
-}
+};

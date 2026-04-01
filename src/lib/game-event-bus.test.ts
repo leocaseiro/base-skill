@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { createGameEventBus } from './game-event-bus'
-import type { GameEvaluateEvent, GameEvent } from '@/types/game-events'
+import { describe, expect, it } from 'vitest';
+import { createGameEventBus } from './game-event-bus';
+import type { GameEvaluateEvent, GameEvent } from '@/types/game-events';
 
 function evaluateEvent(): GameEvaluateEvent {
   return {
@@ -13,34 +13,34 @@ function evaluateEvent(): GameEvaluateEvent {
     answer: 7,
     correct: true,
     nearMiss: false,
-  }
+  };
 }
 
 describe('TypedGameEventBus', () => {
   it('delivers emit to exact-type subscribers', () => {
-    const bus = createGameEventBus()
-    const seen: GameEvent[] = []
-    bus.subscribe('game:evaluate', (e) => seen.push(e))
-    const ev = evaluateEvent()
-    bus.emit(ev)
-    expect(seen).toEqual([ev])
-  })
+    const bus = createGameEventBus();
+    const seen: GameEvent[] = [];
+    bus.subscribe('game:evaluate', (e) => seen.push(e));
+    const ev = evaluateEvent();
+    bus.emit(ev);
+    expect(seen).toEqual([ ev ]);
+  });
 
   it('delivers all events to game:*', () => {
-    const bus = createGameEventBus()
-    const seen: GameEvent[] = []
-    bus.subscribe('game:*', (e) => seen.push(e))
-    const ev = evaluateEvent()
-    bus.emit(ev)
-    expect(seen).toEqual([ev])
-  })
+    const bus = createGameEventBus();
+    const seen: GameEvent[] = [];
+    bus.subscribe('game:*', (e) => seen.push(e));
+    const ev = evaluateEvent();
+    bus.emit(ev);
+    expect(seen).toEqual([ ev ]);
+  });
 
   it('unsubscribe stops delivery', () => {
-    const bus = createGameEventBus()
-    const seen: GameEvent[] = []
-    const off = bus.subscribe('game:evaluate', (e) => seen.push(e))
-    off()
-    bus.emit(evaluateEvent())
-    expect(seen).toEqual([])
-  })
-})
+    const bus = createGameEventBus();
+    const seen: GameEvent[] = [];
+    const off = bus.subscribe('game:evaluate', (e) => seen.push(e));
+    off();
+    bus.emit(evaluateEvent());
+    expect(seen).toEqual([]);
+  });
+});

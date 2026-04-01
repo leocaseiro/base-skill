@@ -1,14 +1,14 @@
-import type { RxCollection, RxDatabase } from 'rxdb'
-import type { AppMetaDoc } from './schemas/app-meta'
-import type { BookmarkDoc } from './schemas/bookmarks'
-import type { GameConfigOverridesDoc } from './schemas/game_config_overrides'
-import type { ProfileDoc } from './schemas/profiles'
-import type { ProgressDoc } from './schemas/progress'
-import type { SessionHistoryIndexDoc } from './schemas/session_history_index'
-import type { SessionHistoryDoc } from './schemas/session_history'
-import type { SettingsDoc } from './schemas/settings'
-import type { SyncMetaDoc } from './schemas/sync_meta'
-import type { ThemeDoc } from './schemas/themes'
+import type { AppMetaDoc } from './schemas/app-meta';
+import type { BookmarkDoc } from './schemas/bookmarks';
+import type { GameConfigOverridesDoc } from './schemas/game_config_overrides';
+import type { ProfileDoc } from './schemas/profiles';
+import type { ProgressDoc } from './schemas/progress';
+import type { SessionHistoryDoc } from './schemas/session_history';
+import type { SessionHistoryIndexDoc } from './schemas/session_history_index';
+import type { SettingsDoc } from './schemas/settings';
+import type { SyncMetaDoc } from './schemas/sync_meta';
+import type { ThemeDoc } from './schemas/themes';
+import type { RxCollection, RxDatabase } from 'rxdb';
 
 export type BaseSkillCollections = {
   app_meta: RxCollection<AppMetaDoc>

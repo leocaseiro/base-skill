@@ -1,4 +1,4 @@
-import type { RxJsonSchema } from 'rxdb'
+import type { RxJsonSchema } from 'rxdb';
 
 export type AppMetaDoc = {
   id: 'singleton'
@@ -27,13 +27,13 @@ export const appMetaSchema: RxJsonSchema<AppMetaDoc> = {
       multipleOf: 1,
     },
     lastMigrationAt: {
-      oneOf: [{ type: 'string', format: 'date-time' }, { type: 'null' }],
+      oneOf: [ { type: 'string', format: 'date-time' }, { type: 'null' } ],
     },
     installId: {
       type: 'string',
       maxLength: 64,
     },
   },
-  required: ['id', 'appVersion', 'rxdbSchemaVersion', 'installId'],
+  required: [ 'id', 'appVersion', 'rxdbSchemaVersion', 'installId' ],
   additionalProperties: false,
-}
+};

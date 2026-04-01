@@ -1,7 +1,7 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
-import type { ReactNode } from 'react'
-import { getOrCreateDatabase } from '@/db'
-import type { BaseSkillDatabase } from '@/db/types'
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import type { BaseSkillDatabase } from '@/db/types';
+import type { ReactNode } from 'react';
+import { getOrCreateDatabase } from '@/db';
 
 export type DbContextValue = {
   db: BaseSkillDatabase | undefined
@@ -9,7 +9,7 @@ export type DbContextValue = {
   isReady: boolean
 }
 
-export const DbContext = createContext<DbContextValue | null>(null)
+export const DbContext = createContext<DbContextValue | null>(null);
 
 type DbProviderProps = {
   children: ReactNode
@@ -19,51 +19,51 @@ type DbProviderProps = {
   onDatabaseReady?: (db: BaseSkillDatabase) => void | Promise<void>
 }
 
-export function DbProvider({
+export const DbProvider = ({
   children,
   openDatabase = getOrCreateDatabase,
   onDatabaseReady,
-}: DbProviderProps) {
-  const [db, setDb] = useState<BaseSkillDatabase | undefined>()
-  const [error, setError] = useState<Error | undefined>()
-  const [isReady, setIsReady] = useState(false)
+}: DbProviderProps) => {
+  const [ db, setDb ] = useState<BaseSkillDatabase | undefined>();
+  const [ error, setError ] = useState<Error | undefined>();
+  const [ isReady, setIsReady ] = useState(false);
 
   const runReady = useCallback(
     async (instance: BaseSkillDatabase) => {
       if (onDatabaseReady) {
-        await onDatabaseReady(instance)
+        await onDatabaseReady(instance);
       }
     },
-    [onDatabaseReady],
-  )
+    [ onDatabaseReady ],
+  );
 
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false;
     openDatabase()
       .then(async (instance) => {
         if (cancelled) {
-          return
+          return;
         }
-        setDb(instance)
-        await runReady(instance)
+        setDb(instance);
+        await runReady(instance);
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- cleanup can run during await
         if (cancelled) {
-          return
+          return;
         }
-        setIsReady(true)
+        setIsReady(true);
       })
       .catch((err: unknown) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err : new Error(String(err)))
-          setIsReady(true)
+          setError(err instanceof Error ? err : new Error(String(err)));
+          setIsReady(true);
         }
-      })
+      });
     return () => {
-      cancelled = true
-    }
-  }, [openDatabase, runReady])
+      cancelled = true;
+    };
+  }, [ openDatabase, runReady ]);
 
-  const value = useMemo(() => ({ db, error, isReady }), [db, error, isReady])
+  const value = useMemo(() => ({ db, error, isReady }), [ db, error, isReady ]);
 
-  return <DbContext.Provider value={value}>{children}</DbContext.Provider>
-}
+  return <DbContext.Provider value={value}>{children}</DbContext.Provider>;
+};

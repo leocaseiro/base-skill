@@ -9,4 +9,4 @@ export const defaultThemeCssVars: Record<string, string> = {
   '--bs-success': '#2DC653',
   '--bs-warning': '#F4A261',
   '--bs-error': '#E63946',
-}
+};

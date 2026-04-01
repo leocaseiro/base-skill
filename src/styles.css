@@ -167,16 +167,8 @@ body::before {
   z-index: -1;
   opacity: 0.28;
   background:
-    radial-gradient(
-      circle at 20% 15%,
-      rgb(255 255 255 / 80%),
-      transparent 34%
-    ),
-    radial-gradient(
-      circle at 78% 26%,
-      rgb(79 184 178 / 20%),
-      transparent 42%
-    ),
+    radial-gradient(circle at 20% 15%, rgb(255 255 255 / 80%), transparent 34%),
+    radial-gradient(circle at 78% 26%, rgb(79 184 178 / 20%), transparent 42%),
     radial-gradient(circle at 42% 82%, rgb(47 106 74 / 14%), transparent 36%);
 }
 
