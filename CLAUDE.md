@@ -12,8 +12,8 @@ Always use a git worktree inside `./worktrees/` (relative to project root):
 # Create a worktree for a feature branch
 git worktree add ./worktrees/<branch-name> -b <branch-name>
 
-# Work inside the worktree
-cd ./worktrees/<branch-name>
+# Install dependencies (each worktree has its own node_modules for isolation)
+cd ./worktrees/<branch-name> && yarn install
 
 # Remove when done (after merging)
 git worktree remove ./worktrees/<branch-name>

@@ -3,6 +3,6 @@
     "superpowers@claude-plugins-official": true
   },
   "worktree": {
-    "symlinkDirectories": ["node_modules"]
+    "symlinkDirectories": []
   }
 }
