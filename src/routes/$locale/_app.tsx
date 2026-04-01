@@ -1,7 +1,7 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router';
 import { I18nextProvider } from 'react-i18next';
 import { seedThemesOnce } from '@/db/seed-themes';
-import i18n from '@/lib/i18n/i18n';
+import { i18n } from '@/lib/i18n/i18n';
 import { DbProvider } from '@/providers/DbProvider';
 import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
 

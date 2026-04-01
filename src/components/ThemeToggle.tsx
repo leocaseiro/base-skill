@@ -20,7 +20,7 @@ function applyThemeMode(mode: ThemeMode) {
   document.documentElement.style.colorScheme = resolved;
 }
 
-const ThemeToggle = () => {
+export const ThemeToggle = () => {
   const [mode, setMode] = useState<ThemeMode>('auto');
 
   useEffect(() => {
@@ -65,5 +65,3 @@ const ThemeToggle = () => {
     </button>
   );
 };
-
-export default ThemeToggle;

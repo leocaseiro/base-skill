@@ -4,7 +4,7 @@ import {
   redirect,
 } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import i18n from '@/lib/i18n/i18n';
+import { i18n } from '@/lib/i18n/i18n';
 
 const LOCALES = ['en', 'pt-BR'] as const;
 export type AppLocale = (typeof LOCALES)[number];

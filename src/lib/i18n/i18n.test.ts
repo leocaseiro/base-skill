@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import i18n from './i18n';
+import { i18n } from './i18n';
 
 describe('i18n', () => {
   it('resolves common:appName for en and pt-BR', async () => {

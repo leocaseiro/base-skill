@@ -1,7 +1,7 @@
 import { Link, useParams } from '@tanstack/react-router';
-import ThemeToggle from './ThemeToggle';
+import { ThemeToggle } from './ThemeToggle';
 
-const Header = () => {
+export const Header = () => {
   const { locale } = useParams({ from: '/$locale' });
 
   return (
@@ -73,5 +73,3 @@ const Header = () => {
     </header>
   );
 };
-
-export default Header;
