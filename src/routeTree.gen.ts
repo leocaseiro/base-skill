@@ -8,140 +8,143 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as LocaleRouteRouteImport } from './routes/$locale/route'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as LocaleAppRouteImport } from './routes/$locale/_app'
-import { Route as LocaleAppIndexRouteImport } from './routes/$locale/_app/index'
-import { Route as LocaleAppSettingsRouteImport } from './routes/$locale/_app/settings'
-import { Route as LocaleAppParentRouteImport } from './routes/$locale/_app/parent'
-import { Route as LocaleAppDashboardRouteImport } from './routes/$locale/_app/dashboard'
-import { Route as LocaleAppParentIndexRouteImport } from './routes/$locale/_app/parent/index'
-import { Route as LocaleAppParentVoicesRouteImport } from './routes/$locale/_app/parent/voices'
-import { Route as LocaleAppParentSyncRouteImport } from './routes/$locale/_app/parent/sync'
-import { Route as LocaleAppParentOverridesRouteImport } from './routes/$locale/_app/parent/overrides'
-import { Route as LocaleAppParentHistoryRouteImport } from './routes/$locale/_app/parent/history'
-import { Route as LocaleAppParentDataRouteImport } from './routes/$locale/_app/parent/data'
-import { Route as LocaleAppGameGameIdRouteImport } from './routes/$locale/_app/game/$gameId'
+import { Route as rootRouteImport } from './routes/__root';
+import { Route as LocaleRouteRouteImport } from './routes/$locale/route';
+import { Route as IndexRouteImport } from './routes/index';
+import { Route as LocaleAppRouteImport } from './routes/$locale/_app';
+import { Route as LocaleAppIndexRouteImport } from './routes/$locale/_app/index';
+import { Route as LocaleAppSettingsRouteImport } from './routes/$locale/_app/settings';
+import { Route as LocaleAppParentRouteImport } from './routes/$locale/_app/parent';
+import { Route as LocaleAppDashboardRouteImport } from './routes/$locale/_app/dashboard';
+import { Route as LocaleAppParentIndexRouteImport } from './routes/$locale/_app/parent/index';
+import { Route as LocaleAppParentVoicesRouteImport } from './routes/$locale/_app/parent/voices';
+import { Route as LocaleAppParentSyncRouteImport } from './routes/$locale/_app/parent/sync';
+import { Route as LocaleAppParentOverridesRouteImport } from './routes/$locale/_app/parent/overrides';
+import { Route as LocaleAppParentHistoryRouteImport } from './routes/$locale/_app/parent/history';
+import { Route as LocaleAppParentDataRouteImport } from './routes/$locale/_app/parent/data';
+import { Route as LocaleAppGameGameIdRouteImport } from './routes/$locale/_app/game/$gameId';
 
 const LocaleRouteRoute = LocaleRouteRouteImport.update({
   id: '/$locale',
   path: '/$locale',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const LocaleAppRoute = LocaleAppRouteImport.update({
   id: '/_app',
   getParentRoute: () => LocaleRouteRoute,
-} as any)
+} as any);
 const LocaleAppIndexRoute = LocaleAppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LocaleAppRoute,
-} as any)
+} as any);
 const LocaleAppSettingsRoute = LocaleAppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => LocaleAppRoute,
-} as any)
+} as any);
 const LocaleAppParentRoute = LocaleAppParentRouteImport.update({
   id: '/parent',
   path: '/parent',
   getParentRoute: () => LocaleAppRoute,
-} as any)
+} as any);
 const LocaleAppDashboardRoute = LocaleAppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => LocaleAppRoute,
-} as any)
-const LocaleAppParentIndexRoute = LocaleAppParentIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => LocaleAppParentRoute,
-} as any)
-const LocaleAppParentVoicesRoute = LocaleAppParentVoicesRouteImport.update({
-  id: '/voices',
-  path: '/voices',
-  getParentRoute: () => LocaleAppParentRoute,
-} as any)
+} as any);
+const LocaleAppParentIndexRoute =
+  LocaleAppParentIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => LocaleAppParentRoute,
+  } as any);
+const LocaleAppParentVoicesRoute =
+  LocaleAppParentVoicesRouteImport.update({
+    id: '/voices',
+    path: '/voices',
+    getParentRoute: () => LocaleAppParentRoute,
+  } as any);
 const LocaleAppParentSyncRoute = LocaleAppParentSyncRouteImport.update({
   id: '/sync',
   path: '/sync',
   getParentRoute: () => LocaleAppParentRoute,
-} as any)
+} as any);
 const LocaleAppParentOverridesRoute =
   LocaleAppParentOverridesRouteImport.update({
     id: '/overrides',
     path: '/overrides',
     getParentRoute: () => LocaleAppParentRoute,
-  } as any)
-const LocaleAppParentHistoryRoute = LocaleAppParentHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => LocaleAppParentRoute,
-} as any)
+  } as any);
+const LocaleAppParentHistoryRoute =
+  LocaleAppParentHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => LocaleAppParentRoute,
+  } as any);
 const LocaleAppParentDataRoute = LocaleAppParentDataRouteImport.update({
   id: '/data',
   path: '/data',
   getParentRoute: () => LocaleAppParentRoute,
-} as any)
+} as any);
 const LocaleAppGameGameIdRoute = LocaleAppGameGameIdRouteImport.update({
   id: '/game/$gameId',
   path: '/game/$gameId',
   getParentRoute: () => LocaleAppRoute,
-} as any)
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/$locale': typeof LocaleAppRouteWithChildren
-  '/$locale/dashboard': typeof LocaleAppDashboardRoute
-  '/$locale/parent': typeof LocaleAppParentRouteWithChildren
-  '/$locale/settings': typeof LocaleAppSettingsRoute
-  '/$locale/': typeof LocaleAppIndexRoute
-  '/$locale/game/$gameId': typeof LocaleAppGameGameIdRoute
-  '/$locale/parent/data': typeof LocaleAppParentDataRoute
-  '/$locale/parent/history': typeof LocaleAppParentHistoryRoute
-  '/$locale/parent/overrides': typeof LocaleAppParentOverridesRoute
-  '/$locale/parent/sync': typeof LocaleAppParentSyncRoute
-  '/$locale/parent/voices': typeof LocaleAppParentVoicesRoute
-  '/$locale/parent/': typeof LocaleAppParentIndexRoute
+  '/': typeof IndexRoute;
+  '/$locale': typeof LocaleAppRouteWithChildren;
+  '/$locale/dashboard': typeof LocaleAppDashboardRoute;
+  '/$locale/parent': typeof LocaleAppParentRouteWithChildren;
+  '/$locale/settings': typeof LocaleAppSettingsRoute;
+  '/$locale/': typeof LocaleAppIndexRoute;
+  '/$locale/game/$gameId': typeof LocaleAppGameGameIdRoute;
+  '/$locale/parent/data': typeof LocaleAppParentDataRoute;
+  '/$locale/parent/history': typeof LocaleAppParentHistoryRoute;
+  '/$locale/parent/overrides': typeof LocaleAppParentOverridesRoute;
+  '/$locale/parent/sync': typeof LocaleAppParentSyncRoute;
+  '/$locale/parent/voices': typeof LocaleAppParentVoicesRoute;
+  '/$locale/parent/': typeof LocaleAppParentIndexRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/$locale': typeof LocaleAppIndexRoute
-  '/$locale/dashboard': typeof LocaleAppDashboardRoute
-  '/$locale/settings': typeof LocaleAppSettingsRoute
-  '/$locale/game/$gameId': typeof LocaleAppGameGameIdRoute
-  '/$locale/parent/data': typeof LocaleAppParentDataRoute
-  '/$locale/parent/history': typeof LocaleAppParentHistoryRoute
-  '/$locale/parent/overrides': typeof LocaleAppParentOverridesRoute
-  '/$locale/parent/sync': typeof LocaleAppParentSyncRoute
-  '/$locale/parent/voices': typeof LocaleAppParentVoicesRoute
-  '/$locale/parent': typeof LocaleAppParentIndexRoute
+  '/': typeof IndexRoute;
+  '/$locale': typeof LocaleAppIndexRoute;
+  '/$locale/dashboard': typeof LocaleAppDashboardRoute;
+  '/$locale/settings': typeof LocaleAppSettingsRoute;
+  '/$locale/game/$gameId': typeof LocaleAppGameGameIdRoute;
+  '/$locale/parent/data': typeof LocaleAppParentDataRoute;
+  '/$locale/parent/history': typeof LocaleAppParentHistoryRoute;
+  '/$locale/parent/overrides': typeof LocaleAppParentOverridesRoute;
+  '/$locale/parent/sync': typeof LocaleAppParentSyncRoute;
+  '/$locale/parent/voices': typeof LocaleAppParentVoicesRoute;
+  '/$locale/parent': typeof LocaleAppParentIndexRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/$locale': typeof LocaleRouteRouteWithChildren
-  '/$locale/_app': typeof LocaleAppRouteWithChildren
-  '/$locale/_app/dashboard': typeof LocaleAppDashboardRoute
-  '/$locale/_app/parent': typeof LocaleAppParentRouteWithChildren
-  '/$locale/_app/settings': typeof LocaleAppSettingsRoute
-  '/$locale/_app/': typeof LocaleAppIndexRoute
-  '/$locale/_app/game/$gameId': typeof LocaleAppGameGameIdRoute
-  '/$locale/_app/parent/data': typeof LocaleAppParentDataRoute
-  '/$locale/_app/parent/history': typeof LocaleAppParentHistoryRoute
-  '/$locale/_app/parent/overrides': typeof LocaleAppParentOverridesRoute
-  '/$locale/_app/parent/sync': typeof LocaleAppParentSyncRoute
-  '/$locale/_app/parent/voices': typeof LocaleAppParentVoicesRoute
-  '/$locale/_app/parent/': typeof LocaleAppParentIndexRoute
+  __root__: typeof rootRouteImport;
+  '/': typeof IndexRoute;
+  '/$locale': typeof LocaleRouteRouteWithChildren;
+  '/$locale/_app': typeof LocaleAppRouteWithChildren;
+  '/$locale/_app/dashboard': typeof LocaleAppDashboardRoute;
+  '/$locale/_app/parent': typeof LocaleAppParentRouteWithChildren;
+  '/$locale/_app/settings': typeof LocaleAppSettingsRoute;
+  '/$locale/_app/': typeof LocaleAppIndexRoute;
+  '/$locale/_app/game/$gameId': typeof LocaleAppGameGameIdRoute;
+  '/$locale/_app/parent/data': typeof LocaleAppParentDataRoute;
+  '/$locale/_app/parent/history': typeof LocaleAppParentHistoryRoute;
+  '/$locale/_app/parent/overrides': typeof LocaleAppParentOverridesRoute;
+  '/$locale/_app/parent/sync': typeof LocaleAppParentSyncRoute;
+  '/$locale/_app/parent/voices': typeof LocaleAppParentVoicesRoute;
+  '/$locale/_app/parent/': typeof LocaleAppParentIndexRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | '/'
     | '/$locale'
@@ -155,8 +158,8 @@ export interface FileRouteTypes {
     | '/$locale/parent/overrides'
     | '/$locale/parent/sync'
     | '/$locale/parent/voices'
-    | '/$locale/parent/'
-  fileRoutesByTo: FileRoutesByTo
+    | '/$locale/parent/';
+  fileRoutesByTo: FileRoutesByTo;
   to:
     | '/'
     | '/$locale'
@@ -168,7 +171,7 @@ export interface FileRouteTypes {
     | '/$locale/parent/overrides'
     | '/$locale/parent/sync'
     | '/$locale/parent/voices'
-    | '/$locale/parent'
+    | '/$locale/parent';
   id:
     | '__root__'
     | '/'
@@ -184,124 +187,124 @@ export interface FileRouteTypes {
     | '/$locale/_app/parent/overrides'
     | '/$locale/_app/parent/sync'
     | '/$locale/_app/parent/voices'
-    | '/$locale/_app/parent/'
-  fileRoutesById: FileRoutesById
+    | '/$locale/_app/parent/';
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  LocaleRouteRoute: typeof LocaleRouteRouteWithChildren
+  IndexRoute: typeof IndexRoute;
+  LocaleRouteRoute: typeof LocaleRouteRouteWithChildren;
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/$locale': {
-      id: '/$locale'
-      path: '/$locale'
-      fullPath: '/$locale'
-      preLoaderRoute: typeof LocaleRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/$locale';
+      path: '/$locale';
+      fullPath: '/$locale';
+      preLoaderRoute: typeof LocaleRouteRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/';
+      path: '/';
+      fullPath: '/';
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/$locale/_app': {
-      id: '/$locale/_app'
-      path: ''
-      fullPath: '/$locale'
-      preLoaderRoute: typeof LocaleAppRouteImport
-      parentRoute: typeof LocaleRouteRoute
-    }
+      id: '/$locale/_app';
+      path: '';
+      fullPath: '/$locale';
+      preLoaderRoute: typeof LocaleAppRouteImport;
+      parentRoute: typeof LocaleRouteRoute;
+    };
     '/$locale/_app/': {
-      id: '/$locale/_app/'
-      path: '/'
-      fullPath: '/$locale/'
-      preLoaderRoute: typeof LocaleAppIndexRouteImport
-      parentRoute: typeof LocaleAppRoute
-    }
+      id: '/$locale/_app/';
+      path: '/';
+      fullPath: '/$locale/';
+      preLoaderRoute: typeof LocaleAppIndexRouteImport;
+      parentRoute: typeof LocaleAppRoute;
+    };
     '/$locale/_app/settings': {
-      id: '/$locale/_app/settings'
-      path: '/settings'
-      fullPath: '/$locale/settings'
-      preLoaderRoute: typeof LocaleAppSettingsRouteImport
-      parentRoute: typeof LocaleAppRoute
-    }
+      id: '/$locale/_app/settings';
+      path: '/settings';
+      fullPath: '/$locale/settings';
+      preLoaderRoute: typeof LocaleAppSettingsRouteImport;
+      parentRoute: typeof LocaleAppRoute;
+    };
     '/$locale/_app/parent': {
-      id: '/$locale/_app/parent'
-      path: '/parent'
-      fullPath: '/$locale/parent'
-      preLoaderRoute: typeof LocaleAppParentRouteImport
-      parentRoute: typeof LocaleAppRoute
-    }
+      id: '/$locale/_app/parent';
+      path: '/parent';
+      fullPath: '/$locale/parent';
+      preLoaderRoute: typeof LocaleAppParentRouteImport;
+      parentRoute: typeof LocaleAppRoute;
+    };
     '/$locale/_app/dashboard': {
-      id: '/$locale/_app/dashboard'
-      path: '/dashboard'
-      fullPath: '/$locale/dashboard'
-      preLoaderRoute: typeof LocaleAppDashboardRouteImport
-      parentRoute: typeof LocaleAppRoute
-    }
+      id: '/$locale/_app/dashboard';
+      path: '/dashboard';
+      fullPath: '/$locale/dashboard';
+      preLoaderRoute: typeof LocaleAppDashboardRouteImport;
+      parentRoute: typeof LocaleAppRoute;
+    };
     '/$locale/_app/parent/': {
-      id: '/$locale/_app/parent/'
-      path: '/'
-      fullPath: '/$locale/parent/'
-      preLoaderRoute: typeof LocaleAppParentIndexRouteImport
-      parentRoute: typeof LocaleAppParentRoute
-    }
+      id: '/$locale/_app/parent/';
+      path: '/';
+      fullPath: '/$locale/parent/';
+      preLoaderRoute: typeof LocaleAppParentIndexRouteImport;
+      parentRoute: typeof LocaleAppParentRoute;
+    };
     '/$locale/_app/parent/voices': {
-      id: '/$locale/_app/parent/voices'
-      path: '/voices'
-      fullPath: '/$locale/parent/voices'
-      preLoaderRoute: typeof LocaleAppParentVoicesRouteImport
-      parentRoute: typeof LocaleAppParentRoute
-    }
+      id: '/$locale/_app/parent/voices';
+      path: '/voices';
+      fullPath: '/$locale/parent/voices';
+      preLoaderRoute: typeof LocaleAppParentVoicesRouteImport;
+      parentRoute: typeof LocaleAppParentRoute;
+    };
     '/$locale/_app/parent/sync': {
-      id: '/$locale/_app/parent/sync'
-      path: '/sync'
-      fullPath: '/$locale/parent/sync'
-      preLoaderRoute: typeof LocaleAppParentSyncRouteImport
-      parentRoute: typeof LocaleAppParentRoute
-    }
+      id: '/$locale/_app/parent/sync';
+      path: '/sync';
+      fullPath: '/$locale/parent/sync';
+      preLoaderRoute: typeof LocaleAppParentSyncRouteImport;
+      parentRoute: typeof LocaleAppParentRoute;
+    };
     '/$locale/_app/parent/overrides': {
-      id: '/$locale/_app/parent/overrides'
-      path: '/overrides'
-      fullPath: '/$locale/parent/overrides'
-      preLoaderRoute: typeof LocaleAppParentOverridesRouteImport
-      parentRoute: typeof LocaleAppParentRoute
-    }
+      id: '/$locale/_app/parent/overrides';
+      path: '/overrides';
+      fullPath: '/$locale/parent/overrides';
+      preLoaderRoute: typeof LocaleAppParentOverridesRouteImport;
+      parentRoute: typeof LocaleAppParentRoute;
+    };
     '/$locale/_app/parent/history': {
-      id: '/$locale/_app/parent/history'
-      path: '/history'
-      fullPath: '/$locale/parent/history'
-      preLoaderRoute: typeof LocaleAppParentHistoryRouteImport
-      parentRoute: typeof LocaleAppParentRoute
-    }
+      id: '/$locale/_app/parent/history';
+      path: '/history';
+      fullPath: '/$locale/parent/history';
+      preLoaderRoute: typeof LocaleAppParentHistoryRouteImport;
+      parentRoute: typeof LocaleAppParentRoute;
+    };
     '/$locale/_app/parent/data': {
-      id: '/$locale/_app/parent/data'
-      path: '/data'
-      fullPath: '/$locale/parent/data'
-      preLoaderRoute: typeof LocaleAppParentDataRouteImport
-      parentRoute: typeof LocaleAppParentRoute
-    }
+      id: '/$locale/_app/parent/data';
+      path: '/data';
+      fullPath: '/$locale/parent/data';
+      preLoaderRoute: typeof LocaleAppParentDataRouteImport;
+      parentRoute: typeof LocaleAppParentRoute;
+    };
     '/$locale/_app/game/$gameId': {
-      id: '/$locale/_app/game/$gameId'
-      path: '/game/$gameId'
-      fullPath: '/$locale/game/$gameId'
-      preLoaderRoute: typeof LocaleAppGameGameIdRouteImport
-      parentRoute: typeof LocaleAppRoute
-    }
+      id: '/$locale/_app/game/$gameId';
+      path: '/game/$gameId';
+      fullPath: '/$locale/game/$gameId';
+      preLoaderRoute: typeof LocaleAppGameGameIdRouteImport;
+      parentRoute: typeof LocaleAppRoute;
+    };
   }
 }
 
 interface LocaleAppParentRouteChildren {
-  LocaleAppParentDataRoute: typeof LocaleAppParentDataRoute
-  LocaleAppParentHistoryRoute: typeof LocaleAppParentHistoryRoute
-  LocaleAppParentOverridesRoute: typeof LocaleAppParentOverridesRoute
-  LocaleAppParentSyncRoute: typeof LocaleAppParentSyncRoute
-  LocaleAppParentVoicesRoute: typeof LocaleAppParentVoicesRoute
-  LocaleAppParentIndexRoute: typeof LocaleAppParentIndexRoute
+  LocaleAppParentDataRoute: typeof LocaleAppParentDataRoute;
+  LocaleAppParentHistoryRoute: typeof LocaleAppParentHistoryRoute;
+  LocaleAppParentOverridesRoute: typeof LocaleAppParentOverridesRoute;
+  LocaleAppParentSyncRoute: typeof LocaleAppParentSyncRoute;
+  LocaleAppParentVoicesRoute: typeof LocaleAppParentVoicesRoute;
+  LocaleAppParentIndexRoute: typeof LocaleAppParentIndexRoute;
 }
 
 const LocaleAppParentRouteChildren: LocaleAppParentRouteChildren = {
@@ -311,18 +314,17 @@ const LocaleAppParentRouteChildren: LocaleAppParentRouteChildren = {
   LocaleAppParentSyncRoute: LocaleAppParentSyncRoute,
   LocaleAppParentVoicesRoute: LocaleAppParentVoicesRoute,
   LocaleAppParentIndexRoute: LocaleAppParentIndexRoute,
-}
+};
 
-const LocaleAppParentRouteWithChildren = LocaleAppParentRoute._addFileChildren(
-  LocaleAppParentRouteChildren,
-)
+const LocaleAppParentRouteWithChildren =
+  LocaleAppParentRoute._addFileChildren(LocaleAppParentRouteChildren);
 
 interface LocaleAppRouteChildren {
-  LocaleAppDashboardRoute: typeof LocaleAppDashboardRoute
-  LocaleAppParentRoute: typeof LocaleAppParentRouteWithChildren
-  LocaleAppSettingsRoute: typeof LocaleAppSettingsRoute
-  LocaleAppIndexRoute: typeof LocaleAppIndexRoute
-  LocaleAppGameGameIdRoute: typeof LocaleAppGameGameIdRoute
+  LocaleAppDashboardRoute: typeof LocaleAppDashboardRoute;
+  LocaleAppParentRoute: typeof LocaleAppParentRouteWithChildren;
+  LocaleAppSettingsRoute: typeof LocaleAppSettingsRoute;
+  LocaleAppIndexRoute: typeof LocaleAppIndexRoute;
+  LocaleAppGameGameIdRoute: typeof LocaleAppGameGameIdRoute;
 }
 
 const LocaleAppRouteChildren: LocaleAppRouteChildren = {
@@ -331,37 +333,37 @@ const LocaleAppRouteChildren: LocaleAppRouteChildren = {
   LocaleAppSettingsRoute: LocaleAppSettingsRoute,
   LocaleAppIndexRoute: LocaleAppIndexRoute,
   LocaleAppGameGameIdRoute: LocaleAppGameGameIdRoute,
-}
+};
 
 const LocaleAppRouteWithChildren = LocaleAppRoute._addFileChildren(
   LocaleAppRouteChildren,
-)
+);
 
 interface LocaleRouteRouteChildren {
-  LocaleAppRoute: typeof LocaleAppRouteWithChildren
+  LocaleAppRoute: typeof LocaleAppRouteWithChildren;
 }
 
 const LocaleRouteRouteChildren: LocaleRouteRouteChildren = {
   LocaleAppRoute: LocaleAppRouteWithChildren,
-}
+};
 
 const LocaleRouteRouteWithChildren = LocaleRouteRoute._addFileChildren(
   LocaleRouteRouteChildren,
-)
+);
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LocaleRouteRoute: LocaleRouteRouteWithChildren,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();
 
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { getRouter } from './router.tsx';
+import type { createStart } from '@tanstack/react-start';
 declare module '@tanstack/react-start' {
   interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
+    ssr: true;
+    router: Awaited<ReturnType<typeof getRouter>>;
   }
 }

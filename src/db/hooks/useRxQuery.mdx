@@ -12,7 +12,7 @@ Generic hook that subscribes to an RxJS `Observable<T>` and returns the latest e
 ## Signature
 
 ```ts
-function useRxQuery<T>(source: Observable<T>, initialValue: T): T
+function useRxQuery<T>(source: Observable<T>, initialValue: T): T;
 ```
 
 Unsubscribes automatically on unmount or when `source` changes.
