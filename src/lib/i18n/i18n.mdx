@@ -1,0 +1,38 @@
+{/* eslint-disable */}
+
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Utils/i18n" />
+
+# i18n
+
+Internationalisation setup using `i18next` + `react-i18next`.
+
+## Supported locales
+
+| Code    | Language             |
+| ------- | -------------------- |
+| `en`    | English (default)    |
+| `pt-BR` | Brazilian Portuguese |
+
+## Namespaces
+
+| Namespace        | Keys                                                             |
+| ---------------- | ---------------------------------------------------------------- |
+| `common`         | App name, nav labels, pagination, search, levels, offline banner |
+| `games`          | Game title keys (e.g. `math-addition`)                           |
+| `settings`       | Settings page labels                                             |
+| `encouragements` | Positive feedback messages                                       |
+
+## Usage in components
+
+```tsx
+import { useTranslation } from 'react-i18next';
+
+const { t } = useTranslation('common');
+// t('appName') → 'BaseSkill'
+// t('levels.K') → 'Kindergarten'
+```
+
+The locale is driven by the URL parameter `/$locale`. Components call `useTranslation` directly;
+they do not read the locale from i18next config at runtime — the router renders the right locale subtree.

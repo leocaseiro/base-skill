@@ -1,0 +1,25 @@
+{/* eslint-disable */}
+
+import { Meta } from '@storybook/blocks';
+import { UseBookmarksDemo } from './useBookmarks.demo';
+
+<Meta title="DB Hooks/useBookmarks" />
+
+# useBookmarks
+
+Reactive hook that tracks the anonymous profile's bookmarked game IDs in RxDB.
+
+## Return value
+
+```ts
+type UseBookmarksResult = {
+  bookmarkedIds: Set<string>;
+  toggle: (gameId: string) => Promise<void>;
+};
+```
+
+## Interactive Demo
+
+Click the buttons to toggle bookmarks. State is reactive — changes persist within the demo session and are reflected immediately via RxDB's observable queries. Uses `fake-indexeddb` (no real storage).
+
+<UseBookmarksDemo />
