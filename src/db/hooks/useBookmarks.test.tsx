@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { createElement, useCallback } from 'react';
+import { useCallback } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { afterEach, describe, expect, it } from 'vitest';
 import { useBookmarks } from './useBookmarks';
@@ -23,14 +23,11 @@ function useBookmarksUnderTest() {
 
 const makeWrapper = (testDb: BaseSkillDatabase) => {
   const TestProviders = ({ children }: { children: ReactNode }) => {
-    const openDatabase = useCallback(
-      () => Promise.resolve(testDb),
-      [testDb],
-    );
-    return createElement(
-      DbProvider,
-      { openDatabase },
-      createElement(I18nextProvider, { i18n }, children),
+    const openDatabase = useCallback(() => Promise.resolve(testDb), []);
+    return (
+      <DbProvider openDatabase={openDatabase}>
+        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+      </DbProvider>
     );
   };
   return TestProviders;
