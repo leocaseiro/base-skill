@@ -47,8 +47,10 @@ const forestPreset: ThemeDoc = {
 };
 
 /** Inserts the two M2 preset themes if missing (stable ids). */
-export async function seedThemesOnce(db: BaseSkillDatabase): Promise<void> {
-  for (const doc of [ oceanPreset, forestPreset ]) {
+export async function seedThemesOnce(
+  db: BaseSkillDatabase,
+): Promise<void> {
+  for (const doc of [oceanPreset, forestPreset]) {
     const existing = await db.themes.findOne(doc.id).exec();
     if (!existing) {
       await db.themes.insert(doc);

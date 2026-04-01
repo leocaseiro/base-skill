@@ -18,11 +18,12 @@ const config = defineConfig({
   },
   plugins: [
     devtools(),
-    tsconfigPaths({ projects: [ './tsconfig.json' ] }),
+    tsconfigPaths({ projects: ['./tsconfig.json'] }),
     tailwindcss(),
     tanstackStart({
       spa: { enabled: true },
       router: {
+        // eslint-disable-next-line unicorn/prefer-string-raw -- vite config file
         routeFileIgnorePattern: '(test|spec)\\.(ts|tsx)$',
       },
     }),
@@ -32,15 +33,18 @@ const config = defineConfig({
       strategies: 'generateSW',
       injectRegister: 'auto',
       workbox: {
-        globPatterns: [ '**/*.{js,css,html,ico,png,svg,woff2}' ],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'google-fonts-cache',
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [ 0, 200 ] },
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
@@ -48,8 +52,11 @@ const config = defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'gstatic-fonts-cache',
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [ 0, 200 ] },
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
         ],

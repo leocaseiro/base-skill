@@ -3,7 +3,7 @@ import { MAX_SCHEMA_VERSION } from './schemas';
 import type { BaseSkillDatabase } from './types';
 
 function getAppVersion(): string {
-  const v = import.meta.env.VITE_APP_VERSION;
+  const v: string = import.meta.env.VITE_APP_VERSION;
   if (typeof v === 'string' && /^\d+\.\d+\.\d+$/.test(v)) {
     return v;
   }

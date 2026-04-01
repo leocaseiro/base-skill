@@ -1,17 +1,17 @@
 import type { RxJsonSchema } from 'rxdb';
 
 export type ProfileDoc = {
-  id: string
-  name: string
-  avatar?: string
-  gradeLevel: 'pre-k' | 'k' | '1' | '2' | '3' | '4' | '5' | '6'
-  language: string
-  themeId?: string
-  parentPinHash?: string
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-}
+  id: string;
+  name: string;
+  avatar?: string;
+  gradeLevel: 'pre-k' | 'k' | '1' | '2' | '3' | '4' | '5' | '6';
+  language: string;
+  themeId?: string;
+  parentPinHash?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export const profilesSchema: RxJsonSchema<ProfileDoc> = {
   version: 0,
@@ -23,7 +23,7 @@ export const profilesSchema: RxJsonSchema<ProfileDoc> = {
     avatar: { type: 'string' },
     gradeLevel: {
       type: 'string',
-      enum: [ 'pre-k', 'k', '1', '2', '3', '4', '5', '6' ],
+      enum: ['pre-k', 'k', '1', '2', '3', '4', '5', '6'],
     },
     language: { type: 'string' },
     themeId: { type: 'string' },

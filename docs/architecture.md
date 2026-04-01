@@ -84,7 +84,7 @@ TanStack Start is configured with the Nitro static preset for GitHub Pages deplo
 
 ```typescript
 // app.config.ts
-import { defineConfig } from '@tanstack/start/config'
+import { defineConfig } from '@tanstack/start/config';
 
 export default defineConfig({
   server: {
@@ -95,7 +95,7 @@ export default defineConfig({
       // vite-plugin-pwa added here
     ],
   },
-})
+});
 ```
 
 **Output:** A `dist/` directory of static HTML/JS/CSS files. Deployable to GitHub Pages, Netlify, Vercel, Cloudflare Pages, or any static host.
@@ -137,7 +137,7 @@ routes/
 export const Route = createFileRoute('/_app/dashboard')({
   beforeLoad: ({ context }) => {
     if (!context.activeProfile) {
-      throw redirect({ to: '/_app/' })
+      throw redirect({ to: '/_app/' });
     }
   },
   loader: async ({ context }) => {
@@ -147,18 +147,21 @@ export const Route = createFileRoute('/_app/dashboard')({
       bookmarks: await context.db.bookmarks
         .find({ selector: { profileId: context.activeProfile.id } })
         .exec(),
-    }
+    };
   },
-})
+});
 
 // _app/parent.tsx — PIN gate
 export const Route = createFileRoute('/_app/parent')({
   beforeLoad: ({ context }) => {
     if (!context.parentUnlocked) {
-      throw redirect({ to: '/_app/dashboard', search: { pinRequired: true } })
+      throw redirect({
+        to: '/_app/dashboard',
+        search: { pinRequired: true },
+      });
     }
   },
-})
+});
 ```
 
 ### Type-Safe Route Parameters
@@ -170,7 +173,7 @@ export const Route = createFileRoute('/_app/game/$gameId')({
     parse: (params) => ({ gameId: params.gameId }), // typed string
   },
   loader: async ({ params, context }) => {
-    const config = await context.gameLoader.load(params.gameId)
+    const config = await context.gameLoader.load(params.gameId);
     const overrides = await context.db.game_config_overrides
       .findOne({
         selector: {
@@ -178,10 +181,10 @@ export const Route = createFileRoute('/_app/game/$gameId')({
           gameId: params.gameId,
         },
       })
-      .exec()
-    return { config, overrides }
+      .exec();
+    return { config, overrides };
   },
-})
+});
 ```
 
 ### Route Tree Diagram
@@ -291,16 +294,16 @@ All persistent state lives in RxDB. Components subscribe to reactive queries; UI
 ```typescript
 // Example: reactive profile hook
 function useActiveProfile() {
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     const sub = db.profiles
       .findOne({ selector: { isActive: true } })
-      .$.subscribe(setProfile)
-    return () => sub.unsubscribe()
-  }, [])
+      .$.subscribe(setProfile);
+    return () => sub.unsubscribe();
+  }, []);
 
-  return profile
+  return profile;
 }
 ```
 
@@ -510,20 +513,20 @@ Every CD deploy stamps a semver version:
 ```typescript
 // Global hook — used by OfflineIndicator and RxDB sync
 function useOnlineStatus() {
-  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [])
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
-  return isOnline
+  return isOnline;
 }
 ```
 
@@ -542,31 +545,55 @@ A typed pub/sub system used for:
 ```typescript
 // Event type definitions
 interface AppEvents {
-  'game:start': { gameId: string; profileId: string; sessionId: string }
-  'game:action': { sessionId: string; action: string; payload: unknown }
+  'game:start': {
+    gameId: string;
+    profileId: string;
+    sessionId: string;
+  };
+  'game:action': {
+    sessionId: string;
+    action: string;
+    payload: unknown;
+  };
   'game:evaluate': {
-    sessionId: string
-    result: 'correct' | 'incorrect' | 'near-miss'
-  }
-  'game:score': { sessionId: string; score: number; total: number }
-  'game:hint': { sessionId: string; hintType: string }
-  'game:end': { sessionId: string; finalScore: number; duration: number }
-  'profile:switch': { fromProfileId: string | null; toProfileId: string }
-  'sync:start': { provider: 'google-drive' | 'onedrive' }
-  'sync:complete': { provider: 'google-drive' | 'onedrive'; timestamp: number }
-  'sync:error': { provider: 'google-drive' | 'onedrive'; error: string }
+    sessionId: string;
+    result: 'correct' | 'incorrect' | 'near-miss';
+  };
+  'game:score': { sessionId: string; score: number; total: number };
+  'game:hint': { sessionId: string; hintType: string };
+  'game:end': {
+    sessionId: string;
+    finalScore: number;
+    duration: number;
+  };
+  'profile:switch': {
+    fromProfileId: string | null;
+    toProfileId: string;
+  };
+  'sync:start': { provider: 'google-drive' | 'onedrive' };
+  'sync:complete': {
+    provider: 'google-drive' | 'onedrive';
+    timestamp: number;
+  };
+  'sync:error': {
+    provider: 'google-drive' | 'onedrive';
+    error: string;
+  };
 }
 
 interface EventBus {
-  emit<K extends keyof AppEvents>(event: K, payload: AppEvents[K]): void
+  emit<K extends keyof AppEvents>(
+    event: K,
+    payload: AppEvents[K],
+  ): void;
   on<K extends keyof AppEvents>(
     event: K,
     handler: (payload: AppEvents[K]) => void,
-  ): () => void
+  ): () => void;
   off<K extends keyof AppEvents>(
     event: K,
     handler: (payload: AppEvents[K]) => void,
-  ): void
+  ): void;
 }
 ```
 
@@ -576,15 +603,18 @@ External plugins (from separate repos) register via a public API exposed on `win
 
 ```typescript
 interface PluginAPI {
-  eventBus: Pick<EventBus, 'on' | 'off'> // subscribe only, not emit
-  registerUISlot: (slot: UISlot, component: React.ComponentType) => () => void
-  getConfig: () => ReadonlyAppConfig
+  eventBus: Pick<EventBus, 'on' | 'off'>; // subscribe only, not emit
+  registerUISlot: (
+    slot: UISlot,
+    component: React.ComponentType,
+  ) => () => void;
+  getConfig: () => ReadonlyAppConfig;
 }
 
 type UISlot =
   | 'dashboard:banner' // Above game grid
   | 'game:overlay' // Floating overlay during gameplay
-  | 'parent:settings:section' // Additional section in parent settings
+  | 'parent:settings:section'; // Additional section in parent settings
 ```
 
 Plugins cannot `emit` events — they can only subscribe. This ensures app state integrity.
@@ -593,10 +623,10 @@ Plugins cannot `emit` events — they can only subscribe. This ensures app state
 
 ```typescript
 interface AnalyticsAdapter {
-  trackEvent(name: string, properties?: Record<string, unknown>): void
-  trackPageView(path: string): void
-  identify(profileId: string): void // pseudonymous — no PII
-  reset(): void
+  trackEvent(name: string, properties?: Record<string, unknown>): void;
+  trackPageView(path: string): void;
+  identify(profileId: string): void; // pseudonymous — no PII
+  reset(): void;
 }
 
 // Default: no-op implementation
@@ -605,7 +635,7 @@ const noopAnalytics: AnalyticsAdapter = {
   trackPageView: () => {},
   identify: () => {},
   reset: () => {},
-}
+};
 ```
 
 Provider is injected at app initialization via config. Swap providers by changing the config, not the code.

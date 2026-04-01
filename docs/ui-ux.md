@@ -105,7 +105,8 @@ BaseSkill uses [shadcn/ui](https://ui.shadcn.com/) as its component library — 
 
 ```css
 --font-body: 'Edu NSW ACT Foundation', 'Nunito', system-ui, sans-serif;
---font-display: 'Edu NSW ACT Foundation', 'Nunito', system-ui, sans-serif;
+--font-display:
+  'Edu NSW ACT Foundation', 'Nunito', system-ui, sans-serif;
 ```
 
 **Why Edu NSW ACT Foundation**: A handwriting font designed for Australian school children. Young children can be confused by unfamiliar letterforms, so the default font is consistent with what they learn in school. Parents can override the font family per profile or per family from a curated list of child-friendly fonts (useful for families in regions with different handwriting standards).
@@ -437,20 +438,20 @@ Each swatch previews the font weight in real time. Default pre-selected based on
 ```typescript
 // RxDB document schema for themes collection
 interface ThemeDocument {
-  id: string // nanoid
-  name: string // User-given name, e.g. "Mia's Pink Theme"
-  baseTheme: string // slug of pre-defined theme used as base
-  scope: 'profile' | 'family'
-  profileId?: string // only when scope === 'profile'
+  id: string; // nanoid
+  name: string; // User-given name, e.g. "Mia's Pink Theme"
+  baseTheme: string; // slug of pre-defined theme used as base
+  scope: 'profile' | 'family';
+  profileId?: string; // only when scope === 'profile'
   colors: {
-    primary: string // hex
-    secondary: string // hex
-    background: string // hex
-    accent: string // hex
-  }
-  fontWeightDefault: 400 | 500 | 600 | 700
-  createdAt: string // ISO 8601
-  updatedAt: string
+    primary: string; // hex
+    secondary: string; // hex
+    background: string; // hex
+    accent: string; // hex
+  };
+  fontWeightDefault: 400 | 500 | 600 | 700;
+  createdAt: string; // ISO 8601
+  updatedAt: string;
 }
 ```
 
@@ -851,13 +852,13 @@ Animation starts when drag begins (`onPointerDown` on any draggable), stops when
 ```typescript
 // Shared drag state managed via React ref (not state — avoids re-renders during drag)
 interface DragState {
-  isDragging: boolean
-  itemId: string | null
-  startX: number
-  startY: number
-  currentX: number
-  currentY: number
-  activeZoneId: string | null
+  isDragging: boolean;
+  itemId: string | null;
+  startX: number;
+  startY: number;
+  currentX: number;
+  currentY: number;
+  activeZoneId: string | null;
 }
 ```
 

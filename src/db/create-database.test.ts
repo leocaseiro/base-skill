@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { createTestDatabase, destroyTestDatabase } from './create-database';
+import {
+  createTestDatabase,
+  destroyTestDatabase,
+} from './create-database';
 
 describe('createTestDatabase', () => {
   let db: Awaited<ReturnType<typeof createTestDatabase>> | undefined;

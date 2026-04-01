@@ -1,29 +1,30 @@
 import { useEffect, useState } from 'react';
 
-type ThemeMode = 'light' | 'dark' | 'auto'
+type ThemeMode = 'light' | 'dark' | 'auto';
 
 function applyThemeMode(mode: ThemeMode) {
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const resolved = mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode;
+  const prefersDark = globalThis.matchMedia(
+    '(prefers-color-scheme: dark)',
+  ).matches;
+  const resolved =
+    mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode;
 
   document.documentElement.classList.remove('light', 'dark');
   document.documentElement.classList.add(resolved);
 
   if (mode === 'auto') {
-    document.documentElement.removeAttribute('data-theme');
+    delete document.documentElement.dataset.theme;
   } else {
-    document.documentElement.setAttribute('data-theme', mode);
+    document.documentElement.dataset.theme = mode;
   }
-
   document.documentElement.style.colorScheme = resolved;
 }
 
-export default function ThemeToggle() {
-  const [ mode, setMode ] = useState<ThemeMode>('auto');
+const ThemeToggle = () => {
+  const [mode, setMode] = useState<ThemeMode>('auto');
 
   useEffect(() => {
     applyThemeMode('auto');
-    setMode('auto');
   }, []);
 
   useEffect(() => {
@@ -31,14 +32,14 @@ export default function ThemeToggle() {
       return;
     }
 
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const media = globalThis.matchMedia('(prefers-color-scheme: dark)');
     const onChange = () => applyThemeMode('auto');
 
     media.addEventListener('change', onChange);
     return () => {
       media.removeEventListener('change', onChange);
     };
-  }, [ mode ]);
+  }, [mode]);
 
   function toggleMode() {
     const nextMode: ThemeMode =
@@ -63,4 +64,6 @@ export default function ThemeToggle() {
       {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light'}
     </button>
   );
-}
+};
+
+export default ThemeToggle;

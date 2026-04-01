@@ -7,8 +7,12 @@ test.describe('@a11y accessibility', () => {
   }) => {
     await page.goto('/en/');
     await page.getByRole('main').waitFor({ state: 'visible' });
-    await page.getByRole('heading', { level: 1 }).waitFor({ state: 'visible' });
-    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+    await page
+      .getByRole('heading', { level: 1 })
+      .waitFor({ state: 'visible' });
+    const accessibilityScanResults = await new AxeBuilder({
+      page,
+    }).analyze();
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 });

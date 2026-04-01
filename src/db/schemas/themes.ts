@@ -1,31 +1,37 @@
 import type { RxJsonSchema } from 'rxdb';
 
 export type ThemeColors = {
-  primary: string
-  secondary: string
-  background: string
-  surface: string
-  text: string
-  accent: string
-}
+  primary: string;
+  secondary: string;
+  background: string;
+  surface: string;
+  text: string;
+  accent: string;
+};
 
 export type ThemeTypography = {
-  fontFamily: string
-  baseSize: number
-}
+  fontFamily: string;
+  baseSize: number;
+};
 
 export type ThemeDoc = {
-  id: string
-  name: string
-  isPreset: boolean
-  ownedByProfileId?: string | null
-  ownedByFamily?: boolean
-  colors: ThemeColors
-  typography: ThemeTypography
-  backgroundPattern?: 'dots' | 'stars' | 'waves' | 'clouds' | 'none' | null
-  createdAt: string
-  updatedAt: string
-}
+  id: string;
+  name: string;
+  isPreset: boolean;
+  ownedByProfileId?: string | null;
+  ownedByFamily?: boolean;
+  colors: ThemeColors;
+  typography: ThemeTypography;
+  backgroundPattern?:
+    | 'dots'
+    | 'stars'
+    | 'waves'
+    | 'clouds'
+    | 'none'
+    | null;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export const themesSchema: RxJsonSchema<ThemeDoc> = {
   version: 0,
@@ -36,7 +42,7 @@ export const themesSchema: RxJsonSchema<ThemeDoc> = {
     name: { type: 'string', minLength: 1, maxLength: 64 },
     isPreset: { type: 'boolean', default: false },
     ownedByProfileId: {
-      oneOf: [ { type: 'string' }, { type: 'null' } ],
+      oneOf: [{ type: 'string' }, { type: 'null' }],
     },
     ownedByFamily: { type: 'boolean', default: false },
     colors: {
@@ -65,12 +71,15 @@ export const themesSchema: RxJsonSchema<ThemeDoc> = {
         fontFamily: { type: 'string' },
         baseSize: { type: 'number', minimum: 12, maximum: 32 },
       },
-      required: [ 'fontFamily', 'baseSize' ],
+      required: ['fontFamily', 'baseSize'],
       additionalProperties: false,
     },
     backgroundPattern: {
       oneOf: [
-        { type: 'string', enum: [ 'dots', 'stars', 'waves', 'clouds', 'none' ] },
+        {
+          type: 'string',
+          enum: ['dots', 'stars', 'waves', 'clouds', 'none'],
+        },
         { type: 'null' },
       ],
       default: 'none',

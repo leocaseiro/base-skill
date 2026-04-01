@@ -190,7 +190,7 @@ export default defineConfig({
       },
     },
   },
-})
+});
 ```
 
 ---
@@ -265,14 +265,16 @@ Accessibility tests use `@axe-core/playwright` tagged with `@a11y`:
 
 ```typescript
 // tests/a11y/home.spec.ts
-import { test, expect } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
-test('@a11y Home page has no accessibility violations', async ({ page }) => {
-  await page.goto('/')
-  const results = await new AxeBuilder({ page }).analyze()
-  expect(results.violations).toHaveLength(0)
-})
+test('@a11y Home page has no accessibility violations', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toHaveLength(0);
+});
 ```
 
 ---
@@ -448,20 +450,20 @@ Vite injects the version at build time so it is accessible anywhere in the app a
 
 ```typescript
 // vite.config.ts
-import { defineConfig } from 'vite'
-import { version } from './package.json'
+import { defineConfig } from 'vite';
+import { version } from './package.json';
 
 export default defineConfig({
   define: {
     'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
   },
-})
+});
 ```
 
 Usage in app code:
 
 ```typescript
-const appVersion = import.meta.env.VITE_APP_VERSION // e.g., "1.2.3"
+const appVersion = import.meta.env.VITE_APP_VERSION; // e.g., "1.2.3"
 ```
 
 ### Deploy-Time Stamping
@@ -489,19 +491,19 @@ On app load, the app reads from the `app_meta` RxDB collection. If the stored ve
 ```typescript
 // src/lib/versionCheck.ts
 export async function checkVersion(db: RxDatabase) {
-  const meta = await db.app_meta.findOne().exec()
-  const runningVersion = import.meta.env.VITE_APP_VERSION
+  const meta = await db.app_meta.findOne().exec();
+  const runningVersion = import.meta.env.VITE_APP_VERSION;
 
   if (meta?.version !== runningVersion) {
     // Trigger SW update check
-    const reg = await navigator.serviceWorker.getRegistration()
-    await reg?.update()
+    const reg = await navigator.serviceWorker.getRegistration();
+    await reg?.update();
 
     // Run RxDB migrations if schema version changed
-    await runPendingMigrations(db)
+    await runPendingMigrations(db);
 
     // Persist updated version
-    await db.app_meta.upsert({ id: 'meta', version: runningVersion })
+    await db.app_meta.upsert({ id: 'meta', version: runningVersion });
   }
 }
 ```
@@ -530,10 +532,10 @@ The new SW pre-caches all hashed assets under the versioned cache name:
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(`baseskill-v${APP_VERSION}`).then((cache) => {
-      return cache.addAll(PRECACHE_MANIFEST)
+      return cache.addAll(PRECACHE_MANIFEST);
     }),
-  )
-})
+  );
+});
 ```
 
 ### `activate` Event
@@ -548,16 +550,18 @@ self.addEventListener('activate', (event) => {
       .then((cacheNames) =>
         Promise.all(
           cacheNames
-            .filter((name) => !name.startsWith(`baseskill-v${APP_VERSION}`))
+            .filter(
+              (name) => !name.startsWith(`baseskill-v${APP_VERSION}`),
+            )
             .map((name) => caches.delete(name)),
         ),
       )
       .then(() => {
-        self.skipWaiting()
-        return self.clients.claim()
+        self.skipWaiting();
+        return self.clients.claim();
       }),
-  )
-})
+  );
+});
 ```
 
 ### App-Side Update Detection
@@ -567,11 +571,14 @@ The app listens for `controllerchange` to detect when a new SW has taken control
 ```typescript
 // src/lib/serviceWorker.ts
 export function registerUpdateHandler(db: RxDatabase) {
-  navigator.serviceWorker.addEventListener('controllerchange', async () => {
-    // New SW is now active — check version and run migrations
-    await checkVersion(db)
-    // No forced reload: update applies on next route navigation
-  })
+  navigator.serviceWorker.addEventListener(
+    'controllerchange',
+    async () => {
+      // New SW is now active — check version and run migrations
+      await checkVersion(db);
+      // No forced reload: update applies on next route navigation
+    },
+  );
 }
 ```
 
@@ -616,7 +623,7 @@ For deep links and refresh on non-root paths, the deploy workflow copies the bui
 // vite.config.ts
 export default defineConfig({
   base: process.env.APP_BASE_URL ?? '/base-skill/',
-})
+});
 ```
 
 For the default GitHub Pages deploy, `APP_BASE_URL` is not set and defaults to `/base-skill/`. For a custom domain deploy, set `APP_BASE_URL=/` in the workflow.
@@ -822,15 +829,15 @@ Declare env vars in `src/vite-env.d.ts` for TypeScript autocompletion:
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_APP_VERSION: string
-  readonly VITE_GOOGLE_CLIENT_ID: string
-  readonly VITE_ONEDRIVE_CLIENT_ID: string
-  readonly VITE_CF_WORKER_URL: string
-  readonly VITE_ANALYTICS_PROVIDER: 'noop' | 'plausible' | 'umami'
+  readonly VITE_APP_VERSION: string;
+  readonly VITE_GOOGLE_CLIENT_ID: string;
+  readonly VITE_ONEDRIVE_CLIENT_ID: string;
+  readonly VITE_CF_WORKER_URL: string;
+  readonly VITE_ANALYTICS_PROVIDER: 'noop' | 'plausible' | 'umami';
 }
 
 interface ImportMeta {
-  readonly env: ImportMetaEnv
+  readonly env: ImportMetaEnv;
 }
 ```
 

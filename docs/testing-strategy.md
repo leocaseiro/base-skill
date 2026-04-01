@@ -23,8 +23,8 @@ Vitest is the unit and component test runner. It is chosen over Jest because it 
 **`vitest.config.ts`**
 
 ```typescript
-import { defineConfig, mergeConfig } from 'vitest/config'
-import viteConfig from './vite.config'
+import { defineConfig, mergeConfig } from 'vitest/config';
+import viteConfig from './vite.config';
 
 export default mergeConfig(
   viteConfig,
@@ -47,7 +47,7 @@ export default mergeConfig(
       },
     },
   }),
-)
+);
 ```
 
 ### React Testing Library
@@ -63,7 +63,7 @@ pnpm add -D @testing-library/react @testing-library/user-event @testing-library/
 **`tests/setup.ts`** — imported by Vitest before every test file:
 
 ```typescript
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
 
 // Web Speech API
 Object.defineProperty(window, 'speechSynthesis', {
@@ -75,12 +75,12 @@ Object.defineProperty(window, 'speechSynthesis', {
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
   },
-})
+});
 
 Object.defineProperty(window, 'SpeechSynthesisUtterance', {
   writable: true,
   value: vi.fn().mockImplementation(() => ({})),
-})
+});
 
 Object.defineProperty(window, 'SpeechRecognition', {
   writable: true,
@@ -91,10 +91,10 @@ Object.defineProperty(window, 'SpeechRecognition', {
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
   })),
-})
+});
 
 // IndexedDB — provided by fake-indexeddb for RxDB memory adapter
-import 'fake-indexeddb/auto'
+import 'fake-indexeddb/auto';
 
 // matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -109,7 +109,7 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
-})
+});
 ```
 
 ---
@@ -187,26 +187,26 @@ Tests the 4-level override merging hierarchy: `global-defaults → game-defaults
 describe('resolveGameConfig', () => {
   it('returns global defaults when no overrides exist', () => {
     /* ... */
-  })
+  });
   it('game-default overrides win over global defaults', () => {
     /* ... */
-  })
+  });
   it('grade-level overrides win over game defaults', () => {
     /* ... */
-  })
+  });
   it('profile overrides win over grade-level', () => {
     /* ... */
-  })
+  });
   it('profile overrides win over all other levels', () => {
     /* ... */
-  })
+  });
   it('partial profile override only replaces specified keys', () => {
     /* ... */
-  })
+  });
   it('null override values are preserved (intentional unset)', () => {
     /* ... */
-  })
-})
+  });
+});
 ```
 
 #### `tests/unit/session-recorder.test.ts`
@@ -217,26 +217,26 @@ Tests event recording, chunk rollover, and session index creation.
 describe('SessionRecorder', () => {
   it('records events published on the event bus', () => {
     /* ... */
-  })
+  });
   it('creates a new chunk doc when 200 events are reached', () => {
     /* ... */
-  })
+  });
   it('creates a new chunk doc when serialised size reaches ~50KB', () => {
     /* ... */
-  })
+  });
   it('increments chunkIndex correctly across rollovers', () => {
     /* ... */
-  })
+  });
   it('writes session_history_index doc on game:end', () => {
     /* ... */
-  })
+  });
   it('totalChunks in index matches actual chunk count', () => {
     /* ... */
-  })
+  });
   it('stops recording and unsubscribes on teardown', () => {
     /* ... */
-  })
-})
+  });
+});
 ```
 
 #### `tests/unit/event-bus.test.ts`
@@ -247,23 +247,23 @@ Tests the typed event bus used throughout the app.
 describe('EventBus', () => {
   it('delivers event to subscriber', () => {
     /* ... */
-  })
+  });
   it('delivers to multiple subscribers for same event', () => {
     /* ... */
-  })
+  });
   it('does not deliver after unsubscribe', () => {
     /* ... */
-  })
+  });
   it('does not leak after off() removes the last subscriber', () => {
     /* ... */
-  })
+  });
   it('cleanup() removes all subscribers', () => {
     /* ... */
-  })
+  });
   it('type-safe: cannot emit unknown event keys (compile-time check)', () => {
     /* ... */
-  })
-})
+  });
+});
 ```
 
 #### `tests/unit/rxdb-schemas.test.ts`
@@ -282,22 +282,22 @@ const collections = [
   'session_history_index',
   'sync_queue',
   'parent_settings',
-]
+];
 
 describe.each(collections)('RxDB schema: %s', (collection) => {
   it('is a valid JSON Schema Draft-7 document', () => {
     /* validate schema itself */
-  })
+  });
   it('accepts a conforming sample document', () => {
     /* validate fixture doc */
-  })
+  });
   it('rejects a document missing required fields', () => {
     /* ... */
-  })
+  });
   it('rejects a document with wrong field types', () => {
     /* ... */
-  })
-})
+  });
+});
 ```
 
 ---
@@ -317,22 +317,22 @@ Component tests live in `tests/components/` and mirror the structure of `app/com
 ```typescript
 it('renders draggable items', () => {
   /* ... */
-})
+});
 it('simulates pointer down + move + up (drag gesture)', async () => {
   /* ... */
-})
+});
 it('snaps to drop zone when within threshold', async () => {
   /* ... */
-})
+});
 it('does not snap when outside threshold', async () => {
   /* ... */
-})
+});
 it('emits drop event with correct item id and zone id', async () => {
   /* ... */
-})
+});
 it('is accessible: draggable items have aria-grabbed attribute', () => {
   /* ... */
-})
+});
 ```
 
 #### `MultipleChoice.test.tsx`
@@ -340,25 +340,25 @@ it('is accessible: draggable items have aria-grabbed attribute', () => {
 ```typescript
 it('renders all options', () => {
   /* ... */
-})
+});
 it('selects option on click', async () => {
   /* ... */
-})
+});
 it('navigates options with arrow keys', async () => {
   /* ... */
-})
+});
 it('confirms selection with Enter key', async () => {
   /* ... */
-})
+});
 it('announces selection via aria-live region', async () => {
   /* ... */
-})
+});
 it('correct ARIA role on option buttons (role="radio")', () => {
   /* ... */
-})
+});
 it('aria-checked reflects selected state', async () => {
   /* ... */
-})
+});
 ```
 
 #### `LetterTracer.test.tsx`
@@ -366,13 +366,13 @@ it('aria-checked reflects selected state', async () => {
 ```typescript
 it('renders canvas element with accessible label', () => {
   /* ... */
-})
+});
 it('activates tap-to-place mode when prop is set', async () => {
   /* ... */
-})
+});
 it('canvas has aria-label describing the current letter', () => {
   /* ... */
-})
+});
 ```
 
 #### `Timer.test.tsx`
@@ -380,16 +380,16 @@ it('canvas has aria-label describing the current letter', () => {
 ```typescript
 it('counts down from initial value', async () => {
   /* vi.useFakeTimers() */
-})
+});
 it('does not render when hidden prop is true', () => {
   /* ... */
-})
+});
 it('emits time_up event when countdown reaches zero', async () => {
   /* ... */
-})
+});
 it('pauses when paused prop is set', async () => {
   /* ... */
-})
+});
 ```
 
 #### `EncouragementAnnouncer.test.tsx`
@@ -397,16 +397,16 @@ it('pauses when paused prop is set', async () => {
 ```typescript
 it('renders correct message on correct answer', async () => {
   /* ... */
-})
+});
 it('renders near-miss message when near-miss prop is set', async () => {
   /* ... */
-})
+});
 it('calls window.speechSynthesis.speak with message text', async () => {
   /* ... */
-})
+});
 it('does not call TTS when speech is disabled in settings', async () => {
   /* ... */
-})
+});
 ```
 
 #### `OfflineIndicator.test.tsx`
@@ -414,16 +414,16 @@ it('does not call TTS when speech is disabled in settings', async () => {
 ```typescript
 it('does not render when navigator.onLine is true', () => {
   /* ... */
-})
+});
 it('renders offline banner when navigator.onLine is false', () => {
   /* ... */
-})
+});
 it('hides banner when online event fires', async () => {
   /* ... */
-})
+});
 it('banner has role="status" and aria-live="polite"', () => {
   /* ... */
-})
+});
 ```
 
 #### `ProfilePicker.test.tsx`
@@ -431,13 +431,13 @@ it('banner has role="status" and aria-live="polite"', () => {
 ```typescript
 it('renders profiles from RxDB fixture', async () => {
   /* uses db-factory */
-})
+});
 it('selects profile on click and redirects to dashboard', async () => {
   /* ... */
-})
+});
 it('renders add-profile button', () => {
   /* ... */
-})
+});
 ```
 
 ### Mocking Strategy
@@ -459,7 +459,7 @@ E2E tests live in `tests/e2e/` and exercise complete user flows against a runnin
 ### `playwright.config.ts`
 
 ```typescript
-import { defineConfig, devices } from '@playwright/test'
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -478,7 +478,7 @@ export default defineConfig({
     { name: 'mobile-chrome', use: { ...devices['iPhone 12'] } },
     { name: 'mobile-safari', use: { ...devices['iPad (gen 7)'] } },
   ],
-})
+});
 ```
 
 ### Critical User Flows (one file per flow)
@@ -568,12 +568,15 @@ Visual regression tests live in `tests/e2e/visual/`. Each file loads a page, set
 // tests/e2e/visual/dashboard.spec.ts
 for (const theme of THEMES) {
   test(`dashboard - ${theme} - desktop`, async ({ page }) => {
-    await page.goto('/')
-    await page.evaluate((t) => setTheme(t), theme)
-    await expect(page).toHaveScreenshot(`dashboard-${theme}-desktop.png`, {
-      maxDiffPixelRatio: 0.001,
-    })
-  })
+    await page.goto('/');
+    await page.evaluate((t) => setTheme(t), theme);
+    await expect(page).toHaveScreenshot(
+      `dashboard-${theme}-desktop.png`,
+      {
+        maxDiffPixelRatio: 0.001,
+      },
+    );
+  });
 }
 ```
 
@@ -601,17 +604,17 @@ Pixel diff threshold: **0.1%** (`maxDiffPixelRatio: 0.001`). Any diff above this
 
 ```typescript
 // tests/e2e/fixtures.ts
-import AxeBuilder from '@axe-core/playwright'
-import { test as base } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright';
+import { test as base } from '@playwright/test';
 
 export const test = base.extend({
   page: async ({ page }, use) => {
-    await use(page)
+    await use(page);
     // Run axe audit after every test
-    const results = await new AxeBuilder({ page }).analyze()
-    expect(results.violations).toEqual([])
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations).toEqual([]);
   },
-})
+});
 ```
 
 All E2E test files import `test` from `tests/e2e/fixtures.ts` rather than from `@playwright/test` directly.
@@ -627,16 +630,16 @@ const routes = [
   '/settings',
   '/settings/parent',
   '/game/letter-tracing',
-]
+];
 
 for (const route of routes) {
   test(`no axe violations on ${route}`, async ({ page }) => {
-    await page.goto(route)
+    await page.goto(route);
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-      .analyze()
-    expect(results.violations).toEqual([])
-  })
+      .analyze();
+    expect(results.violations).toEqual([]);
+  });
 }
 ```
 
@@ -646,16 +649,16 @@ for (const route of routes) {
 test('can tab through all interactive elements on Dashboard', async ({
   page,
 }) => {
-  await page.goto('/dashboard')
+  await page.goto('/dashboard');
   // Tab through all focusable elements and verify each receives visible focus
-})
+});
 
 test('can tab through all interactive elements on Game Shell', async ({
   page,
 }) => {
-  await page.goto('/game/letter-tracing')
+  await page.goto('/game/letter-tracing');
   // Tab through game controls and verify focus order is logical
-})
+});
 ```
 
 ---
@@ -671,39 +674,46 @@ test('offline banner appears within 500ms of going offline', async ({
   context,
   page,
 }) => {
-  await page.goto('/dashboard')
-  await context.setOffline(true)
-  await expect(page.getByRole('status', { name: /offline/i })).toBeVisible({
+  await page.goto('/dashboard');
+  await context.setOffline(true);
+  await expect(
+    page.getByRole('status', { name: /offline/i }),
+  ).toBeVisible({
     timeout: 500,
-  })
-})
+  });
+});
 ```
 
 ### Test: Game Playable Offline
 
 ```typescript
 test('game plays without network access', async ({ context, page }) => {
-  await page.goto('/game/multiple-choice')
-  await context.setOffline(true)
+  await page.goto('/game/multiple-choice');
+  await context.setOffline(true);
   // Interact with game — expect no error state, expect answer submission works
-  await page.getByRole('button', { name: 'Cat' }).click()
-  await expect(page.getByRole('status', { name: /correct/i })).toBeVisible()
-})
+  await page.getByRole('button', { name: 'Cat' }).click();
+  await expect(
+    page.getByRole('status', { name: /correct/i }),
+  ).toBeVisible();
+});
 ```
 
 ### Test: Score Saved While Offline
 
 ```typescript
-test('score is saved to RxDB while offline', async ({ context, page }) => {
-  await page.goto('/game/multiple-choice')
-  await context.setOffline(true)
+test('score is saved to RxDB while offline', async ({
+  context,
+  page,
+}) => {
+  await page.goto('/game/multiple-choice');
+  await context.setOffline(true);
   // Complete one round
   await page.evaluate(async () => {
-    const db = await getDb()
-    const progress = await db.progress.findOne().exec()
-    expect(progress).not.toBeNull()
-  })
-})
+    const db = await getDb();
+    const progress = await db.progress.findOne().exec();
+    expect(progress).not.toBeNull();
+  });
+});
 ```
 
 ### Test: Sync Queue Has Pending Mutations While Offline
@@ -713,15 +723,15 @@ test('sync queue accumulates mutations while offline', async ({
   context,
   page,
 }) => {
-  await page.goto('/dashboard')
-  await context.setOffline(true)
+  await page.goto('/dashboard');
+  await context.setOffline(true);
   // Trigger a write operation (e.g. bookmark a game)
   await page.evaluate(async () => {
-    const db = await getDb()
-    const queueItems = await db.sync_queue.find().exec()
-    expect(queueItems.length).toBeGreaterThan(0)
-  })
-})
+    const db = await getDb();
+    const queueItems = await db.sync_queue.find().exec();
+    expect(queueItems.length).toBeGreaterThan(0);
+  });
+});
 ```
 
 ### Test: Banner Dismisses and Sync Resumes
@@ -731,14 +741,18 @@ test('banner dismisses and sync resumes on going online', async ({
   context,
   page,
 }) => {
-  await page.goto('/dashboard')
-  await context.setOffline(true)
-  await expect(page.getByRole('status', { name: /offline/i })).toBeVisible()
-  await context.setOffline(false)
-  await expect(page.getByRole('status', { name: /offline/i })).toBeHidden({
+  await page.goto('/dashboard');
+  await context.setOffline(true);
+  await expect(
+    page.getByRole('status', { name: /offline/i }),
+  ).toBeVisible();
+  await context.setOffline(false);
+  await expect(
+    page.getByRole('status', { name: /offline/i }),
+  ).toBeHidden({
     timeout: 2000,
-  })
-})
+  });
+});
 ```
 
 ---
@@ -769,8 +783,8 @@ A Node.js script runs in CI to compare translation files and fail if any key pre
 
 ```typescript
 // scripts/check-i18n-completeness.ts
-import enKeys from '../app/i18n/locales/en.json'
-import ptBrKeys from '../app/i18n/locales/pt-BR.json'
+import enKeys from '../app/i18n/locales/en.json';
+import ptBrKeys from '../app/i18n/locales/pt-BR.json';
 
 function getMissingKeys(
   reference: object,
@@ -780,10 +794,10 @@ function getMissingKeys(
   /* ... */
 }
 
-const missing = getMissingKeys(enKeys, ptBrKeys)
+const missing = getMissingKeys(enKeys, ptBrKeys);
 if (missing.length > 0) {
-  console.error('Missing pt-BR keys:', missing)
-  process.exit(1)
+  console.error('Missing pt-BR keys:', missing);
+  process.exit(1);
 }
 ```
 
@@ -799,15 +813,15 @@ CI step:
 ```typescript
 describe('formatGrade', () => {
   it('formats pre-k correctly in en', () => {
-    expect(formatGrade('pre-k', 'en')).toBe('Pre-K')
-  })
+    expect(formatGrade('pre-k', 'en')).toBe('Pre-K');
+  });
   it('formats year-2 correctly in en', () => {
-    expect(formatGrade('year-2', 'en')).toBe('Year 2')
-  })
+    expect(formatGrade('year-2', 'en')).toBe('Year 2');
+  });
   it('formats pre-k correctly in pt-BR', () => {
-    expect(formatGrade('pre-k', 'pt-BR')).toBe('Pré-K')
-  })
-})
+    expect(formatGrade('pre-k', 'pt-BR')).toBe('Pré-K');
+  });
+});
 ```
 
 ---
@@ -819,51 +833,57 @@ describe('formatGrade', () => {
 ```typescript
 describe('SessionRecorder — event recording', () => {
   it('records events published on the event bus', async () => {
-    const { recorder, eventBus, db } = await createTestRecorder()
-    eventBus.emit('answer:submitted', { isCorrect: true, itemId: 'q1' })
-    await waitForDbWrite()
-    const chunks = await db.session_history_chunks.find().exec()
-    expect(chunks[0].events).toHaveLength(1)
-  })
-})
+    const { recorder, eventBus, db } = await createTestRecorder();
+    eventBus.emit('answer:submitted', {
+      isCorrect: true,
+      itemId: 'q1',
+    });
+    await waitForDbWrite();
+    const chunks = await db.session_history_chunks.find().exec();
+    expect(chunks[0].events).toHaveLength(1);
+  });
+});
 
 describe('SessionRecorder — chunk rollover', () => {
   it('creates a new chunk after 200 events', async () => {
-    const { recorder, eventBus, db } = await createTestRecorder()
+    const { recorder, eventBus, db } = await createTestRecorder();
     for (let i = 0; i < 201; i++) {
-      eventBus.emit('answer:submitted', { isCorrect: true, itemId: `q${i}` })
+      eventBus.emit('answer:submitted', {
+        isCorrect: true,
+        itemId: `q${i}`,
+      });
     }
-    await waitForDbWrite()
-    const chunks = await db.session_history_chunks.find().exec()
-    expect(chunks).toHaveLength(2)
-    expect(chunks[1].chunkIndex).toBe(1)
-  })
+    await waitForDbWrite();
+    const chunks = await db.session_history_chunks.find().exec();
+    expect(chunks).toHaveLength(2);
+    expect(chunks[1].chunkIndex).toBe(1);
+  });
 
   it('creates a new chunk when serialised size reaches ~50KB', async () => {
-    const { recorder, eventBus, db } = await createTestRecorder()
+    const { recorder, eventBus, db } = await createTestRecorder();
     // Emit events with large payloads until ~50KB
     // Verify second chunk is created before 200 event threshold
-  })
+  });
 
   it('increments chunkIndex correctly across multiple rollovers', async () => {
     // Emit 600+ events, verify chunks have chunkIndex 0, 1, 2
-  })
-})
+  });
+});
 
 describe('SessionRecorder — session index', () => {
   it('writes session_history_index doc on game:end', async () => {
-    const { recorder, eventBus, db } = await createTestRecorder()
-    eventBus.emit('game:end', { score: 10, totalItems: 10 })
-    await waitForDbWrite()
-    const index = await db.session_history_index.findOne().exec()
-    expect(index).not.toBeNull()
-    expect(index!.gameId).toBeDefined()
-  })
+    const { recorder, eventBus, db } = await createTestRecorder();
+    eventBus.emit('game:end', { score: 10, totalItems: 10 });
+    await waitForDbWrite();
+    const index = await db.session_history_index.findOne().exec();
+    expect(index).not.toBeNull();
+    expect(index!.gameId).toBeDefined();
+  });
 
   it('totalChunks in index matches actual chunk count', async () => {
     // Overflow past 200 events, emit game:end, verify index.totalChunks === chunks.length
-  })
-})
+  });
+});
 ```
 
 ### E2E Tests (`tests/e2e/session-history.spec.ts`)
@@ -874,17 +894,19 @@ test('history viewer shows sessions in newest-first order', async ({
 }) => {
   // Play two games, navigate to parent > history
   // Verify second game appears above first
-})
+});
 
-test('expanding a session row lazy-loads event data', async ({ page }) => {
+test('expanding a session row lazy-loads event data', async ({
+  page,
+}) => {
   // Play game, navigate to history, click expand on session row
   // Verify event list is shown and correct
-})
+});
 
 test('filtering by game narrows results', async ({ page }) => {
   // Play two different games, filter by one game's name
   // Verify only that game's sessions are shown
-})
+});
 
 test('cascade delete: clearing history removes all chunks', async ({
   page,
@@ -893,7 +915,7 @@ test('cascade delete: clearing history removes all chunks', async ({
   // Clear history in parent settings
   // Verify session_history_chunks and session_history_index are empty
   // Verify profiles and progress are unaffected
-})
+});
 ```
 
 ---
@@ -920,7 +942,7 @@ All fixtures live in `tests/fixtures/`. They export typed constant objects that 
 
 ```typescript
 // tests/fixtures/profiles.ts
-import type { Profile } from '../../app/db/schemas/profiles'
+import type { Profile } from '../../app/db/schemas/profiles';
 
 export const aliceProfile = {
   id: 'profile-alice-001',
@@ -933,7 +955,7 @@ export const aliceProfile = {
   isActive: true,
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
-} as const satisfies Profile
+} as const satisfies Profile;
 
 export const bobProfile = {
   id: 'profile-bob-001',
@@ -946,7 +968,7 @@ export const bobProfile = {
   isActive: false,
   createdAt: '2026-01-02T00:00:00.000Z',
   updatedAt: '2026-01-02T00:00:00.000Z',
-} as const satisfies Profile
+} as const satisfies Profile;
 
 export const parentProfile = {
   id: 'profile-parent-001',
@@ -959,35 +981,35 @@ export const parentProfile = {
   isActive: false,
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
-} as const satisfies Profile
+} as const satisfies Profile;
 
-export const allProfiles = [aliceProfile, bobProfile, parentProfile]
+export const allProfiles = [aliceProfile, bobProfile, parentProfile];
 ```
 
 ### `db-factory.ts`
 
 ```typescript
 // tests/fixtures/db-factory.ts
-import { createRxDatabase, addRxPlugin } from 'rxdb'
-import { getRxStorageMemory } from 'rxdb/plugins/storage-memory'
-import { allCollections } from '../../app/db/collections'
-import { allProfiles } from './profiles'
-import { allProgress } from './progress'
+import { createRxDatabase, addRxPlugin } from 'rxdb';
+import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
+import { allCollections } from '../../app/db/collections';
+import { allProfiles } from './profiles';
+import { allProgress } from './progress';
 // ... other fixture imports
 
 export async function createTestDb() {
   const db = await createRxDatabase({
     name: `test-db-${Math.random()}`,
     storage: getRxStorageMemory(),
-  })
+  });
 
-  await db.addCollections(allCollections)
+  await db.addCollections(allCollections);
 
-  await db.profiles.bulkInsert(allProfiles)
-  await db.progress.bulkInsert(allProgress)
+  await db.profiles.bulkInsert(allProfiles);
+  await db.progress.bulkInsert(allProgress);
   // ... seed other collections
 
-  return db
+  return db;
 }
 ```
 

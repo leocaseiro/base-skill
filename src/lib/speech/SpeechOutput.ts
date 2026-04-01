@@ -1,6 +1,7 @@
 export function speak(text: string): void {
-  const synth = (globalThis as unknown as { speechSynthesis?: SpeechSynthesis })
-    .speechSynthesis;
+  const synth = (
+    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+  ).speechSynthesis;
   if (!synth) {
     return;
   }
@@ -10,8 +11,9 @@ export function speak(text: string): void {
 }
 
 export function cancelSpeech(): void {
-  const synth = (globalThis as unknown as { speechSynthesis?: SpeechSynthesis })
-    .speechSynthesis;
+  const synth = (
+    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+  ).speechSynthesis;
   if (!synth) {
     return;
   }
@@ -19,6 +21,7 @@ export function cancelSpeech(): void {
 }
 
 export function isSpeechOutputAvailable(): boolean {
-  return !!(globalThis as unknown as { speechSynthesis?: SpeechSynthesis })
-    .speechSynthesis;
+  return !!(
+    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+  ).speechSynthesis;
 }
