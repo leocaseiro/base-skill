@@ -27,14 +27,14 @@ flowchart LR
 
 ### Event Types
 
-| Event | Emitted when | Key payload fields |
-|---|---|---|
-| `game:start` | First round begins | `gameId`, `profileId`, `timestamp` |
-| `game:instructions_shown` | TTS instructions play | `gameId` |
-| `game:action` | Any user interaction | `action`, `data` |
-| `game:evaluate` | Answer submitted for evaluation | `answer`, `correct`, `durationMs` |
-| `game:score` | Round scored | `score`, `streak`, `stars` |
-| `game:hint` | Hint requested | `hintType` |
-| `game:retry` | Retry triggered | `attempt` |
-| `game:time_up` | Timer expired | — |
-| `game:end` | Session ends | `finalScore`, `totalStars`, `durationMs` |
+| Event                     | Emitted when                    | Key payload fields                       |
+| ------------------------- | ------------------------------- | ---------------------------------------- |
+| `game:start`              | First round begins              | `gameId`, `profileId`, `timestamp`       |
+| `game:instructions_shown` | TTS instructions play           | `gameId`                                 |
+| `game:action`             | Any user interaction            | `action`, `data`                         |
+| `game:evaluate`           | Answer submitted for evaluation | `answer`, `correct`, `durationMs`        |
+| `game:score`              | Round scored                    | `score`, `streak`, `stars`               |
+| `game:hint`               | Hint requested                  | `hintType`                               |
+| `game:retry`              | Retry triggered                 | `attempt`                                |
+| `game:time_up`            | Timer expired                   | —                                        |
+| `game:end`                | Session ends                    | `finalScore`, `totalStars`, `durationMs` |
