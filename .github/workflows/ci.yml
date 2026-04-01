@@ -32,6 +32,12 @@ jobs:
       - name: Prettier
         run: npx prettier --check .
 
+      - name: Stylelint
+        run: npx stylelint "src/**/*.css"
+
+      - name: Markdownlint
+        run: npx markdownlint-cli2 "**/*.md" "#node_modules" "#.specstory" "#.cursor" "#dist" "#worktrees"
+
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
