@@ -1,0 +1,26 @@
+{/* eslint-disable */}
+
+import { Meta } from '@storybook/blocks';
+import { GameEventBusDemo } from './game-event-bus.demo';
+
+<Meta title="Services/GameEventBus" />
+
+# GameEventBus
+
+A typed pub/sub event bus for coordinating game engine events.
+
+## API
+
+| Function             | Signature            | Description                        |
+| -------------------- | -------------------- | ---------------------------------- |
+| `createGameEventBus` | `() => GameEventBus` | Creates a new event bus instance   |
+| `getGameEventBus`    | `() => GameEventBus` | Returns the process-wide singleton |
+
+### `GameEventBus` interface
+
+- `emit(event: GameEvent): void` — broadcasts to all wildcard + type-specific subscribers
+- `subscribe(type: GameEventType | 'game:*', handler): () => void` — returns unsubscribe function
+
+## Interactive Demo
+
+<GameEventBusDemo />

@@ -1,0 +1,32 @@
+{/* eslint-disable */}
+
+import { Meta } from '@storybook/blocks';
+import { UseSettingsDemo } from './useSettings.demo';
+
+<Meta title="DB Hooks/useSettings" />
+
+# useSettings
+
+Reactive hook that subscribes to the anonymous profile's settings document in RxDB.
+
+## Return value
+
+Returns `{ settings, update }`. The `settings` object merges defaults with the RxDB document when present.
+
+```ts
+type SettingsDoc = {
+  id: string;
+  profileId: string;
+  volume: number;
+  speechRate: number;
+  ttsEnabled: boolean;
+  showSubtitles: boolean;
+  updatedAt: string;
+};
+```
+
+## Interactive Demo
+
+The demo below uses `fake-indexeddb` — no real IndexedDB storage is touched.
+
+<UseSettingsDemo />

@@ -131,6 +131,15 @@ export const Header = () => {
           {t('appName')}
         </Link>
 
+        <a
+          href="/base-skill/docs/"
+          className="flex-shrink-0 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Docs
+        </a>
+
         <div className="flex flex-1 items-center gap-2">
           <div className="relative flex-1">
             <SearchIcon

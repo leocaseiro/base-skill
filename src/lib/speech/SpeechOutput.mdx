@@ -1,0 +1,22 @@
+{/* eslint-disable */}
+
+import { Meta } from '@storybook/blocks';
+import { SpeechOutputDemo } from './SpeechOutput.demo';
+
+<Meta title="Services/SpeechOutput" />
+
+# SpeechOutput
+
+Wraps the browser's `SpeechSynthesis` API. Gracefully degrades when the API is unavailable.
+
+## API
+
+| Function                  | Signature                | Description                                            |
+| ------------------------- | ------------------------ | ------------------------------------------------------ |
+| `speak`                   | `(text: string) => void` | Cancels any current speech, then speaks the given text |
+| `cancelSpeech`            | `() => void`             | Stops any in-progress speech                           |
+| `isSpeechOutputAvailable` | `() => boolean`          | Returns `true` if `window.speechSynthesis` exists      |
+
+## Interactive Demo
+
+<SpeechOutputDemo />
