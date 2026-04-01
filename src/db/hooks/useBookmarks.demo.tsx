@@ -1,7 +1,6 @@
-import { IDBFactory } from 'fake-indexeddb';
 import { useBookmarks } from './useBookmarks';
 import { Button } from '#/components/ui/button';
-import { getOrCreateDatabase } from '#/db';
+import { createStorybookDatabase } from '#/db';
 import { DbProvider } from '#/providers/DbProvider';
 
 const GAME_IDS = [
@@ -10,11 +9,7 @@ const GAME_IDS = [
   'placeholder-game',
 ];
 
-const openFakeDatabase = () => {
-  (globalThis as unknown as { indexedDB: IDBFactory }).indexedDB =
-    new IDBFactory();
-  return getOrCreateDatabase();
-};
+const openStorybookDatabase = () => createStorybookDatabase();
 
 const BookmarksInner = () => {
   const { bookmarkedIds, toggle } = useBookmarks();
@@ -44,7 +39,7 @@ const BookmarksInner = () => {
 };
 
 export const UseBookmarksDemo = () => (
-  <DbProvider openDatabase={openFakeDatabase}>
+  <DbProvider openDatabase={openStorybookDatabase}>
     <BookmarksInner />
   </DbProvider>
 );
