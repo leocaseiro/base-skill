@@ -1,0 +1,36 @@
+{/* eslint-disable */}
+
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Utils/CatalogUtils" />
+
+# CatalogUtils
+
+Pure filter and pagination utilities for the game catalog. No side effects, no DB required.
+
+## API
+
+### `filterCatalog(catalog: GameCatalogEntry[], filter: CatalogFilter): GameCatalogEntry[]`
+
+Filters by `level`, `subject`, and `search` (case-insensitive substring match on `titleKey`).
+All filter fields are optional — empty string or empty value means "no filter".
+
+```ts
+type CatalogFilter = {
+  search: string;
+  level: GameLevel | '';
+  subject: GameSubject | '';
+};
+```
+
+### `paginateCatalog<T>(items: T[], page: number, pageSize: number): PaginateResult<T>`
+
+Returns a page slice. `page` is 1-indexed and clamped to `[1, totalPages]`.
+
+```ts
+type PaginateResult<T> = {
+  items: T[];
+  page: number;
+  totalPages: number;
+};
+```

@@ -1,0 +1,24 @@
+{/* eslint-disable */}
+
+import { Meta } from '@storybook/blocks';
+import { UseRxQueryDemo } from './useRxQuery.demo';
+
+<Meta title="DB Hooks/useRxQuery" />
+
+# useRxQuery
+
+Generic hook that subscribes to an RxJS `Observable<T>` and returns the latest emitted value.
+
+## Signature
+
+```ts
+function useRxQuery<T>(source: Observable<T>, initialValue: T): T
+```
+
+Unsubscribes automatically on unmount or when `source` changes.
+
+## Interactive Demo
+
+The counter below is driven by a `Subject<number>`. Clicking "Increment" emits a new value; `useRxQuery` re-renders with the latest count.
+
+<UseRxQueryDemo />

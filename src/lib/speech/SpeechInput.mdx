@@ -1,0 +1,21 @@
+{/* eslint-disable */}
+
+import { Meta } from '@storybook/blocks';
+import { SpeechInputDemo } from './SpeechInput.demo';
+
+<Meta title="Services/SpeechInput" />
+
+# SpeechInput
+
+Wraps the browser's `SpeechRecognition` / `webkitSpeechRecognition` API. Returns `null` when unavailable.
+
+## API
+
+| Function | Signature | Description |
+| --- | --- | --- |
+| `createSpeechRecognition` | `() => SpeechRecognitionLike \| null` | Creates a recognition instance, or `null` if API is missing |
+| `isSpeechInputAvailable` | `() => boolean` | Returns `true` if the API is available |
+
+## Interactive Demo
+
+<SpeechInputDemo />

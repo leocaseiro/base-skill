@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    },
+    "storybook": {
+      "url": "http://localhost:6006/mcp"
+    }
+  }
+}
