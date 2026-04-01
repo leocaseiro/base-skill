@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nextProvider } from 'react-i18next';
 import { describe, expect, it, vi } from 'vitest';
 import { GameCard } from './GameCard';
+import type { GameCatalogEntry } from '@/games/registry';
 import { i18n } from '@/lib/i18n/i18n';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -12,9 +13,9 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 const mockEntry = {
   id: 'math-addition',
   titleKey: 'math-addition',
-  levels: ['1', '2'] as const,
-  subject: 'math' as const,
-};
+  levels: ['1', '2'],
+  subject: 'math',
+} satisfies GameCatalogEntry;
 
 describe('GameCard', () => {
   it('renders the game title key as text', () => {
