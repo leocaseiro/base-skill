@@ -1,0 +1,18 @@
+extends:
+  - stylelint-config-standard
+rules:
+  at-rule-no-unknown:
+    - true
+    - ignoreAtRules:
+        - theme
+        - plugin
+        - custom-variant
+        - apply
+        - layer
+        - tailwind
+        - utility
+        - variant
+        - source
+  property-no-unknown: true
+  color-no-invalid-hex: true
+  declaration-block-no-duplicate-properties: true
