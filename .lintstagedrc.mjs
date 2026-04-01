@@ -21,5 +21,8 @@ export default {
     ...cmd('markdownlint-cli2 --fix', files),
     ...cmd('prettier --write', files),
   ],
+  // Storybook / docs MDX: Prettier formats fenced code (e.g. TS semicolons).
+  // Skip markdownlint here — it misparses JSX like `{/* eslint-disable */}` as emphasis (MD037).
+  '*.mdx': (files) => [...cmd('prettier --write', files)],
   '*.json': (files) => cmd('prettier --write', files),
 };

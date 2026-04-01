@@ -16,7 +16,14 @@ const config: KnipConfig = {
     'src/routeTree.gen.ts',
     'src/**/*.ts',
     'src/**/*.tsx',
+    'src/**/*.demo.tsx',
+    'src/**/*.stories.tsx',
+    'src/**/*.mdx',
     'src/styles.css',
+    '.storybook/main.ts',
+    '.storybook/preview.tsx',
+    '.storybook/**/*.ts',
+    '.storybook/**/*.tsx',
     'vite.config.ts',
     'vitest.config.ts',
     'playwright.config.ts',
@@ -37,6 +44,17 @@ const config: KnipConfig = {
     '@tanstack/router-plugin',
     // Vitest coverage provider (CLI-only).
     '@vitest/coverage-v8',
+    // Storybook / MDX (resolved via Storybook; not direct app imports).
+    '@storybook/react',
+    '@storybook/blocks',
+    '@mdx-js/react',
+    // CI / local Storybook test runner (shell scripts reference npx; keep as devDeps).
+    'http-server',
+    'wait-on',
+    // ESLint flat config imports (provided via @tanstack/eslint-config / peers).
+    '@stylistic/eslint-plugin',
+    'eslint-plugin-import-x',
+    'typescript-eslint',
   ],
 };
 

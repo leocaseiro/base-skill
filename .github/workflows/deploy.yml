@@ -51,6 +51,12 @@ jobs:
       - name: SPA fallback for GitHub Pages (history routing)
         run: cp dist/client/index.html dist/client/404.html
 
+      - name: Build Storybook
+        run: yarn build-storybook --output-dir storybook-static
+
+      - name: Merge Storybook into dist
+        run: mkdir -p dist/client/docs && cp -r storybook-static/. dist/client/docs
+
       - name: Stamp version.json
         run: |
           echo '{
