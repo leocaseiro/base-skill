@@ -248,4 +248,185 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Checking implementation**
 
-I'm verifying the import order and catalog length assertion match the plan. </details></think>
+I'm verifying the import order and catalog length assertion match the plan. I noted potential duplication between test arrays and union types, where compile-time type checks catch missing catalog entries but runtime tests ensure data alignment. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/games/registry.test.ts 2>&1</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/games/registry.test.ts 2>&1
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/games/registry.test.ts
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/games/registry.test.ts (3 tests) 4ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  21:03:43
+   Duration  828ms (transform 28ms, setup 86ms, collect 17ms, tests 4ms, environment 489ms, prepare 42ms)
+
+Done in 1.35s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "GameCatalogEntry|GAME_CATALOG"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "GameCatalogEntry|GAME_CATALOG",
+  "topFiles": [
+    {
+      "matchCount": 6,
+      "uri": "worktrees/milestone-3-app-shell/src/games/registry.test.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/games/registry.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/routes/$locale/_app/index.tsx"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 10
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/index.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Reviewing test duplication**
+
+I'm leaving duplicate literals in tests as intentional for runtime validation, aligning with YAGNI principle. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Here is the review.
+
+---
+
+## Code review: Task 1 — `GAME_CATALOG` levels + subject
+
+**Scope:** `4119aae..1e349a1` in `worktrees/milestone-3-app-shell` (`src/games/registry.ts`, `src/games/registry.test.ts`).
+
+**Verification:** `yarn test src/games/registry.test.ts` — 3 tests passed.
+
+---
+
+### Strengths
+
+- **Plan match:** `GameLevel` / `GameSubject` unions, `GameCatalogEntry` with `levels` and `subject`, and the three catalog rows match the milestone plan (ids, `titleKey`s, level sets, subjects).
+- **Tests:** Same three behaviors as the plan — stable `id`/`titleKey`, non-empty `levels` drawn from the allowed set, `subject` in the allowed set. Good fit for “catalog extension for filtering later”: the catalog stays constrained without pulling in filter utilities yet.
+- **Type safety:** Unions give compile-time checks on `GAME_CATALOG` literals; tests add a runtime guard on the static data.
+- **File roles:** `registry.ts` stays a thin module (types + constant array). No extra helpers or premature APIs.
+- **Call sites:** `GAME_CATALOG` usage (e.g. `_app/index.tsx`) only needs `id` / `titleKey`; extra fields are backward compatible.
+
+---
+
+### Issues
+
+**Critical**  
+- None.
+
+**Important**  
+- None relative to Task 1. The implementation does what the plan specifies.
+
+**Minor / suggestions**
+
+1. **Duplication vs unions:** `VALID_LEVELS` / `VALID_SUBJECTS` in tests mirror the string unions. That matches the plan and is reasonable for runtime checks, but it means two places to update when enums grow. A later refactor could use a single `as const` list and `typeof` / `satisfies` if you want one source of truth — not required for this task (YAGNI is fine here).
+2. **Catalog invariants not asserted:** The first test does not check unique `id`s or that `id` aligns with `titleKey` (the sample data matches, but tests wouldn’t catch duplicates or drift). Optional hardening if you care about catalog integrity beyond Task 1.
+3. **Import order:** Differs from the plan snippet (`GAME_CATALOG` before `import type`); you asked to ignore this when it follows lint — acceptable.
+
+---
+
+### Assessment
+
+**Approve.**
+
+The commit aligns with Milestone 3 Task 1, keeps scope tight, and the tests are clear and sufficient for the stated goal (validated catalog shape for later filtering). No changes are required for merge from a plan or quality standpoint; the minor points are optional follow-ups, not blockers.

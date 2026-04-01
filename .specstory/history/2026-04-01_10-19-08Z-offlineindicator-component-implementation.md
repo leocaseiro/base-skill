@@ -288,7 +288,20 @@ _**Agent (composer-2)**_
 
 <details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.tsx</summary>
 
-Status: **loading**
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.test.tsx</summary>
 
 </details>
 
@@ -298,3 +311,204 @@ Status: **loading**
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/components/OfflineIndicator.test.tsx --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/components/OfflineIndicator.test.tsx --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/components/OfflineIndicator.test.tsx --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 18ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  21:19:50
+   Duration  472ms (transform 28ms, setup 29ms, collect 70ms, tests 18ms, environment 193ms, prepare 32ms)
+
+Done in 0.90s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.tsx",
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.test.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.tsx"
+    },
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.test.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+All tests passed. Committing from the worktree.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/components/OfflineIndicator.tsx src/components/OfflineIndicator.test.tsx && git commit --trailer "Made-with: Cursor" -m "feat(ui): add OfflineIndicator component" && git rev-parse HEAD</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/components/OfflineIndicator.tsx src/components/OfflineIndicator.test.tsx && git commit --trailer "Made-with: Cursor" -m "feat(ui): add OfflineIndicator component" && git rev-parse HEAD
+```
+
+```
+[milestone-3-app-shell a923d07] feat(ui): add OfflineIndicator component
+ 2 files changed, 102 insertions(+)
+ create mode 100644 src/components/OfflineIndicator.test.tsx
+ create mode 100644 src/components/OfflineIndicator.tsx
+a923d079f2c404c9368e431ad282b18fc560953d
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (2e07c7a)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/OfflineIndicator.tsx
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 3ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/routes/__root.test.tsx (1 test) 15ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 48ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 130ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 20ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/migrations.test.ts (1 test) 45ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 59ms
+ ✓ src/db/create-database.test.ts (2 tests) 69ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 178ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 208ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 230ms
+
+ Test Files  17 passed (17)
+      Tests  46 passed (46)
+   Start at  21:19:57
+   Duration  1.58s (transform 502ms, setup 1.48s, collect 3.70s, tests 1.02s, environment 11.78s, prepare 1.42s)
+
+Done in 1.96s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+## Status: **Complete**
+
+### What was added
+- **`OfflineIndicator.tsx`** — `useState(navigator.onLine)`, `online` / `offline` listeners with cleanup, `null` when online, banner with `role="status"`, `aria-live="polite"`, `t('offline.banner')`, and the plan’s Tailwind classes.
+- **`OfflineIndicator.test.tsx`** — `I18nextProvider` + `i18n`, `navigator.onLine` getter mocks, **4 tests** including `/you're offline/i` (matches EN copy).
+
+### Verification
+```text
+yarn test src/components/OfflineIndicator.test.tsx --run
+✓ 4 tests passed
+```
+
+Pre-commit hook also ran the full suite: **46 tests passed**.
+
+### Commit
+- **Branch:** `milestone-3-app-shell` (worktree)
+- **SHA:** `a923d079f2c404c9368e431ad282b18fc560953d`
+- **Message:** `feat(ui): add OfflineIndicator component`
+
+Playwright offline E2E remains **unchecked** in the plan, as requested. Wiring `OfflineIndicator` into `_app.tsx` is still **Task 10** in the plan.

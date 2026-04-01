@@ -87,9 +87,96 @@ _**Agent (composer-2)**_
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search">
 <details>
-<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **0** directories</summary>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **83** results in **1** directory</summary>
 
-No results found
+Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell** (83 files)
+
+| File |
+|------|
+| `src/components/GameCard.tsx` |
+| `src/components/GameCard.test.tsx` |
+| `src/components/ui/slider.tsx` |
+| `src/components/ui/select.tsx` |
+| `src/components/ui/input.tsx` |
+| `src/components/ui/dropdown-menu.tsx` |
+| `src/games/catalog-utils.test.ts` |
+| `src/games/catalog-utils.ts` |
+| `src/games/registry.test.ts` |
+| `src/games/registry.ts` |
+| `vitest.config.ts` |
+| `vite.config.ts` |
+| `src/vite-env.d.ts` |
+| `src/types/game-events.ts` |
+| `src/test-setup.ts` |
+| `src/routes/index.tsx` |
+| `src/routes/__root.tsx` |
+| `src/routes/__root.test.tsx` |
+| `src/routes/$locale/route.tsx` |
+| `src/routes/$locale/_app/settings.tsx` |
+| `src/routes/$locale/_app/parent/voices.tsx` |
+| `src/routes/$locale/_app/parent/sync.tsx` |
+| `src/routes/$locale/_app/parent/overrides.tsx` |
+| `src/routes/$locale/_app/parent/index.tsx` |
+| `src/routes/$locale/_app/parent/history.tsx` |
+| `src/routes/$locale/_app/parent/data.tsx` |
+| `src/routes/$locale/_app/parent.tsx` |
+| `src/routes/$locale/_app/index.tsx` |
+| `src/routes/$locale/_app/index.test.tsx` |
+| `src/routes/$locale/_app/game/$gameId.tsx` |
+| `src/routes/$locale/_app/dashboard.tsx` |
+| `src/routes/$locale/_app.tsx` |
+| `src/router.tsx` |
+| `src/routeTree.gen.ts` |
+| `src/providers/ThemeRuntimeProvider.tsx` |
+| `src/providers/DbProvider.tsx` |
+| `src/providers/DbProvider.test.tsx` |
+| `src/lib/utils.ts` |
+| `src/lib/theme/default-tokens.ts` |
+| `src/lib/theme/css-vars.ts` |
+| `src/lib/theme/css-vars.test.ts` |
+| `src/lib/speech/voices.ts` |
+| `src/lib/speech/SpeechOutput.ts` |
+| `src/lib/speech/SpeechOutput.test.ts` |
+| `src/lib/speech/SpeechInput.ts` |
+| `src/lib/i18n/i18n.ts` |
+| `src/lib/i18n/i18n.test.ts` |
+| `src/lib/game-event-bus.ts` |
+| `src/lib/game-event-bus.test.ts` |
+| `src/db/types.ts` |
+| `src/db/setup-validation.test.ts` |
+| `src/db/seed-themes.ts` |
+| `src/db/schemas/themes.ts` |
+| `src/db/schemas/sync_meta.ts` |
+| `src/db/schemas/settings.ts` |
+| `src/db/schemas/session_history_index.ts` |
+| `src/db/schemas/session_history.ts` |
+| `src/db/schemas/progress.ts` |
+| `src/db/schemas/profiles.ts` |
+| `src/db/schemas/index.ts` |
+| `src/db/schemas/game_config_overrides.ts` |
+| `src/db/schemas/bookmarks.ts` |
+| `src/db/schemas/app-meta.ts` |
+| `src/db/migrations.ts` |
+| `src/db/migrations.test.ts` |
+| `src/db/index.ts` |
+| `src/db/hooks/useRxQuery.ts` |
+| `src/db/hooks/useRxQuery.test.tsx` |
+| `src/db/hooks/useRxDB.ts` |
+| `src/db/create-database.ts` |
+| `src/db/create-database.test.ts` |
+| `src/components/ui/sonner.tsx` |
+| `src/components/ui/sheet.tsx` |
+| `src/components/ui/card.tsx` |
+| `src/components/ui/button.tsx` |
+| `src/components/ui/alert-dialog.tsx` |
+| `src/components/ThemeToggle.tsx` |
+| `src/components/Header.tsx` |
+| `src/components/Footer.tsx` |
+| `playwright.config.ts` |
+| `knip.config.ts` |
+| `e2e/smoke.spec.ts` |
+| `e2e/a11y.spec.ts` |
+
 </details>
 </tool-use>
 
@@ -97,3 +184,427 @@ No results found
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/button.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "**/locales/**/*.json",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "level|grade|LevelRow|common\\."
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "level|grade|LevelRow|common\\.",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/common.json"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/common.json"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/common.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/tsconfig.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Creating files**
+
+I'm creating the files as specified, noting that aria-pressed needs explicit 'false' value for inactive buttons to match test expectations. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/i18n.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+Creating `LevelRow.test.tsx` and `LevelRow.tsx` per the plan.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.test.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/components/LevelRow.test.tsx --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/components/LevelRow.test.tsx --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/components/LevelRow.test.tsx --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/components/LevelRow.test.tsx (4 tests) 148ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  21:16:25
+   Duration  685ms (transform 35ms, setup 29ms, collect 121ms, tests 148ms, environment 212ms, prepare 45ms)
+
+Done in 1.32s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.tsx",
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.test.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.tsx"
+    },
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.test.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/components/LevelRow.tsx src/components/LevelRow.test.tsx && git commit --trailer "Made-with: Cursor" -m "feat(ui): add LevelRow grade-level filter component" && git rev-parse HEAD</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/components/LevelRow.tsx src/components/LevelRow.test.tsx && git commit --trailer "Made-with: Cursor" -m "feat(ui): add LevelRow grade-level filter component" && git rev-parse HEAD
+```
+
+```
+[milestone-3-app-shell 16a6328] feat(ui): add LevelRow grade-level filter component
+ 2 files changed, 107 insertions(+)
+ create mode 100644 src/components/LevelRow.test.tsx
+ create mode 100644 src/components/LevelRow.tsx
+16a63289ed2a6370099abf01d79278f36eb0ff9a
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (c1d1c71)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/LevelRow.tsx
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 3ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/routes/__root.test.tsx (1 test) 13ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 153ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 20ms
+ ✓ src/db/migrations.test.ts (1 test) 44ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/create-database.test.ts (2 tests) 72ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 64ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 204ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 179ms
+
+ Test Files  15 passed (15)
+      Tests  37 passed (37)
+   Start at  21:16:33
+   Duration  1.55s (transform 534ms, setup 1.27s, collect 3.23s, tests 767ms, environment 9.31s, prepare 1.37s)
+
+Done in 1.93s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+## Status
+
+**Done.** Task 6 is implemented in `worktrees/milestone-3-app-shell`, tests pass, and the commit is on branch `milestone-3-app-shell`.
+
+## Commit
+
+- **SHA:** `16a63289ed2a6370099abf01d79278f36eb0ff9a` (short: `16a6328`)
+- **Message:** `feat(ui): add LevelRow grade-level filter component`
+
+## Tests
+
+`yarn test src/components/LevelRow.test.tsx --run`: **4 tests passed** (1 file).
+
+Pre-commit also ran the full Vitest suite: **37 tests** across 15 files, all passed.
+
+## What was added
+
+- **`LevelRow.test.tsx`** — Matches the plan: All + Pre-K through Year 4, Pre-K → `onLevelChange('PK')`, All → `''`, `aria-pressed="true"` on active **K**.
+- **`LevelRow.tsx`** — `LEVELS` as `GameLevel[]`, `useTranslation('common')`, `Button` `default` / `outline` + `size="sm"`, `role="group"` and `aria-label="Filter by grade level"`.

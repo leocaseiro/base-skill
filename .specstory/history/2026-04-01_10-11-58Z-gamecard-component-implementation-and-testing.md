@@ -27,3 +27,803 @@ git commit -m "feat(ui): add GameCard component with bookmark and play callbacks
 ```
 
 Report: Status, SHA, note if you adjusted the first test as above.
+
+---
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Implementing gamecard**
+
+I'm implementing the GameCard component in the specified worktree path following the milestone plan. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Implementing GameCard in the milestone-3 worktree: reading the plan section, checking dependencies, and inspecting existing components.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/using-superpowers/SKILL.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "contextAfter": 3,
+  "contextBefore": 0,
+  "path": "/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md",
+  "pattern": "GameCard"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md",
+  "pattern": "GameCard",
+  "topFiles": [
+    {
+      "matchCount": 85,
+      "uri": "docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 25
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/package.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell** (0 files)
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **1** result in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell** (1 file)
+
+| File |
+|------|
+| `src/components/ui/card.tsx` |
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/card.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src",
+  "pattern": "GameCatalogEntry"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src",
+  "pattern": "GameCatalogEntry",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/src/games/catalog-utils.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/games/registry.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 5
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+File not found
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+File not found
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **2** results in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell** (2 files)
+
+| File |
+|------|
+| `src/lib/i18n/locales/pt-BR/games.json` |
+| `src/lib/i18n/locales/en/games.json` |
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/i18n.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/games.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/common.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/button.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.tsx",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src",
+  "pattern": "from '@/|from '#/"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src",
+  "pattern": "from '@/|from '#/",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/components/ui/slider.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/components/ui/select.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/components/ui/input.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/components/ui/dropdown-menu.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/routes/$locale/route.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/routes/$locale/_app/index.tsx"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/milestone-3-app-shell/src/routes/$locale/_app.tsx"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/milestone-3-app-shell/src/providers/ThemeRuntimeProvider.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/providers/DbProvider.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/providers/DbProvider.test.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/src/db/hooks/useRxQuery.test.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/components/ui/sheet.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/components/ui/card.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/components/ui/button.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/components/ui/alert-dialog.tsx"
+    }
+  ],
+  "totalFiles": 15,
+  "totalMatches": 27
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/tsconfig.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **4** results in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell** (4 files)
+
+| File |
+|------|
+| `src/routes/__root.test.tsx` |
+| `src/routes/$locale/_app/index.test.tsx` |
+| `src/providers/DbProvider.test.tsx` |
+| `src/db/hooks/useRxQuery.test.tsx` |
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/index.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+Installing `@testing-library/user-event` and creating `GameCard.tsx` and `GameCard.test.tsx`.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn add -D @testing-library/user-event</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn add -D @testing-library/user-event
+```
+
+```
+yarn add v1.22.22
+[1/5] Validating package.json...
+[2/5] Resolving packages...
+[3/5] Fetching packages...
+[4/5] Linking dependencies...
+[5/5] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ @testing-library/user-event@14.6.1
+info All dependencies
+└─ @testing-library/user-event@14.6.1
+$ husky
+Done in 2.21s.
+warning eciesjs@0.4.18: The engine "bun" appears to be invalid.
+warning eciesjs@0.4.18: The engine "deno" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "bun" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "deno" appears to be invalid.
+warning "@tanstack/react-devtools &gt; @tanstack/devtools@0.11.0" has unmet peer dependency "solid-js@&gt;=1.9.7".
+warning "@tanstack/react-devtools &gt; @tanstack/devtools &gt; goober@2.1.18" has unmet peer dependency "csstype@^3.0.10".
+warning "@tanstack/react-router-devtools &gt; @tanstack/router-devtools-core@1.167.1" has unmet peer dependency "@tanstack/router-core@^1.168.2".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/react-query@&gt;=5.90.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/router-core@&gt;=1.127.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @axe-core/playwright@4.11.1" has unmet peer dependency "playwright-core@&gt;= 1.0.0".
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/components/GameCard.test.tsx --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/components/GameCard.test.tsx --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/components/GameCard.test.tsx --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/components/GameCard.test.tsx (5 tests) 130ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  21:13:23
+   Duration  995ms (transform 49ms, setup 56ms, collect 213ms, tests 130ms, environment 362ms, prepare 34ms)
+
+Done in 1.46s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.tsx",
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.tsx"
+    },
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+All tests passed. Committing from the worktree.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/components/GameCard.tsx src/components/GameCard.test.tsx package.json yarn.lock && git commit --trailer "Made-with: Cursor" -m "feat(ui): add GameCard component with bookmark and play callbacks"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/components/GameCard.tsx src/components/GameCard.test.tsx package.json yarn.lock && git commit --trailer "Made-with: Cursor" -m "feat(ui): add GameCard component with bookmark and play callbacks"
+```
+
+```
+[milestone-3-app-shell 7397b1d] feat(ui): add GameCard component with bookmark and play callbacks
+ 4 files changed, 170 insertions(+)
+ create mode 100644 src/components/GameCard.test.tsx
+ create mode 100644 src/components/GameCard.tsx
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (01ca663)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 4 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.json — 1 file
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/package.json
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/package.json
+[COMPLETED] *.json — 1 file
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.tsx
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 4 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 3ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 6ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 4ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/routes/__root.test.tsx (1 test) 24ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 123ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 18ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/migrations.test.ts (1 test) 42ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 58ms
+ ✓ src/db/create-database.test.ts (2 tests) 68ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 157ms
+
+ Test Files  14 passed (14)
+      Tests  33 passed (33)
+   Start at  21:13:34
+   Duration  1.73s (transform 482ms, setup 1.35s, collect 2.97s, tests 512ms, environment 11.51s, prepare 1.06s)
+
+Done in 2.11s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git status && git rev-parse HEAD</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git status && git rev-parse HEAD
+```
+
+```
+On branch milestone-3-app-shell
+nothing to commit, working tree clean
+7397b1df96a409e012ab1cb81a90ddd50dcaa5a5
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+## Report
+
+**Status:** Done. `@testing-library/user-event` added, `GameCard` + tests added, `yarn test src/components/GameCard.test.tsx --run` passes (5 tests), full suite passes via pre-commit hook, commit created on `milestone-3-app-shell`.
+
+**SHA:** `7397b1d` (`7397b1df96a409e012ab1cb81a90ddd50dcaa5a5`)
+
+**First test:** Updated as requested: the plan’s `getByText('math-addition')` was replaced with `expect(screen.getByText('Addition practice')).toBeInTheDocument()` so it matches `en/games.json` and `t(entry.titleKey)`. The example name is still `renders the game title key as text` (plan wording); only the assertion changed.
+
+**Files:** `src/components/GameCard.tsx`, `src/components/GameCard.test.tsx`, `package.json`, `yarn.lock` — all included in the commit per your Step 4.

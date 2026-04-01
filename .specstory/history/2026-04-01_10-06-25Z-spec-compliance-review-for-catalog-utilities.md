@@ -23,4 +23,313 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Reviewing spec compliance**
 
-I'm comparing the actual implementation against the planned spec in the worktree at commit d03a10a29f55bc9a025450f4e8b47bceb155ac19. </details></think>
+I'm comparing the actual implementation against the planned spec in the worktree at commit d03a10a29f55bc9a025450f4e8b47bceb155ac19. I'm reading the spec file from the worktree at commit d03a10a using `git -C worktrees/milestone-3-app-shell show d03a10a:catalog-utils.ts`. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Gathering the Milestone 3 plan requirements and comparing them to the implementation at the specified commit.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md",
+  "pattern": "catalog-utils|CatalogFilter|filterCatalog|paginateCatalog|PaginateResult|Task 2"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md",
+  "pattern": "catalog-utils|CatalogFilter|filterCatalog|paginateCatalog|PaginateResult|Task 2",
+  "topFiles": [
+    {
+      "matchCount": 35,
+      "uri": "docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 35
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **2** results in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell** (2 files)
+
+| File |
+|------|
+| `src/games/catalog-utils.test.ts` |
+| `src/games/catalog-utils.ts` |
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Reading commit files**
+
+I'm using `git show` to read the exact file content at commit d03a10a for accurate reference. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && git show d03a10a29f55bc9a025450f4e8b47bceb155ac19:src/games/catalog-utils.ts && echo '---TEST---' && git show d03a10a29f55bc9a025450f4e8b47bceb155ac19:src/games/catalog-utils.test.ts</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && git show d03a10a29f55bc9a025450f4e8b47bceb155ac19:src/games/catalog-utils.ts && echo '---TEST---' && git show d03a10a29f55bc9a025450f4e8b47bceb155ac19:src/games/catalog-utils.test.ts
+```
+
+```
+import type {
+  GameCatalogEntry,
+  GameLevel,
+  GameSubject,
+} from './registry';
+
+export type CatalogFilter = {
+  search: string;
+  level: GameLevel | '';
+  subject: GameSubject | '';
+};
+
+export function filterCatalog(
+  catalog: GameCatalogEntry[],
+  filter: CatalogFilter,
+): GameCatalogEntry[] {
+  return catalog.filter((entry) =&gt; {
+    if (filter.level &amp;&amp; !entry.levels.includes(filter.level))
+      return false;
+    if (filter.subject &amp;&amp; entry.subject !== filter.subject)
+      return false;
+    if (filter.search) {
+      const q = filter.search.toLowerCase();
+      if (!entry.titleKey.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+export type PaginateResult&lt;T&gt; = {
+  items: T[];
+  page: number;
+  totalPages: number;
+};
+
+export function paginateCatalog&lt;T&gt;(
+  items: T[],
+  page: number,
+  pageSize: number,
+): PaginateResult&lt;T&gt; {
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const start = (safePage - 1) * pageSize;
+  return {
+    items: items.slice(start, start + pageSize),
+    page: safePage,
+    totalPages,
+  };
+}
+---TEST---
+import { describe, expect, it } from 'vitest';
+import { filterCatalog, paginateCatalog } from './catalog-utils';
+import { GAME_CATALOG } from './registry';
+
+describe('filterCatalog', () =&gt; {
+  it('returns all entries with empty filter', () =&gt; {
+    const result = filterCatalog(GAME_CATALOG, {
+      search: '',
+      level: '',
+      subject: '',
+    });
+    expect(result).toHaveLength(GAME_CATALOG.length);
+  });
+
+  it('filters by level — only entries that include the level', () =&gt; {
+    const result = filterCatalog(GAME_CATALOG, {
+      search: '',
+      level: 'PK',
+      subject: '',
+    });
+    expect(result.length).toBeGreaterThan(0);
+    for (const entry of result) {
+      expect(entry.levels).toContain('PK');
+    }
+  });
+
+  it('filters by subject', () =&gt; {
+    const result = filterCatalog(GAME_CATALOG, {
+      search: '',
+      level: '',
+      subject: 'math',
+    });
+    expect(result.length).toBeGreaterThan(0);
+    for (const entry of result) {
+      expect(entry.subject).toBe('math');
+    }
+  });
+
+  it('filters by search query (case-insensitive match on titleKey)', () =&gt; {
+    const result = filterCatalog(GAME_CATALOG, {
+      search: 'ADDITION',
+      level: '',
+      subject: '',
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe('math-addition');
+  });
+
+  it('returns empty array when nothing matches', () =&gt; {
+    const result = filterCatalog(GAME_CATALOG, {
+      search: 'zzznomatch',
+      level: '',
+      subject: '',
+    });
+    expect(result).toHaveLength(0);
+  });
+
+  it('combines level and subject filters', () =&gt; {
+    const result = filterCatalog(GAME_CATALOG, {
+      search: '',
+      level: '1',
+      subject: 'math',
+    });
+    for (const entry of result) {
+      expect(entry.levels).toContain('1');
+      expect(entry.subject).toBe('math');
+    }
+  });
+});
+
+describe('paginateCatalog', () =&gt; {
+  const items = Array.from({ length: 25 }, (_, i) =&gt; i);
+
+  it('returns first page with correct slice', () =&gt; {
+    const result = paginateCatalog(items, 1, 10);
+    expect(result.items).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(result.page).toBe(1);
+    expect(result.totalPages).toBe(3);
+  });
+
+  it('returns last partial page', () =&gt; {
+    const result = paginateCatalog(items, 3, 10);
+    expect(result.items).toHaveLength(5);
+    expect(result.items[0]).toBe(20);
+  });
+
+  it('clamps to last page when requested page exceeds total', () =&gt; {
+    const result = paginateCatalog(items, 99, 10);
+    expect(result.page).toBe(3);
+  });
+
+  it('handles empty array — totalPages is 1, items is empty', () =&gt; {
+    const result = paginateCatalog([], 1, 10);
+    expect(result.items).toHaveLength(0);
+    expect(result.totalPages).toBe(1);
+    expect(result.page).toBe(1);
+  });
+});
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Comparing implementations**
+
+The implementation at d03a10a is identical to the plan snippet for catalog-utils.ts. The import order differs from the plan but behavior remains identical; import order isn't part of the TypeScript snippet specification. 
+
+**Verifying implementation**
+
+The implementation matches the plan's TypeScript snippets with only cosmetic import reorderings. The implementation matches the plan exactly for catalog-ut. I'm checking if the test file's import order difference from the plan affects spec compliance. 
+
+The import order difference in the test file doesn't affect spec compliance. Import order changes don't affect spec compliance; edge case of pageSize 0 handled as non-spec failure. </details></think>
+
+_**Agent (composer-2)**_
+
+
+## Spec compliance: **Task 2**
+
+**Spec compliant**
+
+### `catalog-utils.ts` (commit `d03a10a`)
+
+Matches the plan’s snippet (lines 294–343 in `2026-04-01-milestone-3-app-shell.md`):
+
+- `CatalogFilter` with `search`, `level: GameLevel | ''`, `subject: GameSubject | ''`
+- `filterCatalog`: level via `levels.includes`, subject equality, search as lowercased substring on `titleKey`
+- `PaginateResult<T>` with `items`, `page`, `totalPages`
+- `paginateCatalog`: `totalPages = Math.max(1, ceil(n/pageSize))`, `safePage` clamped to `[1, totalPages]`, slice by `(safePage - 1) * pageSize`
+
+### `catalog-utils.test.ts`
+
+All **10** `it()` blocks from the plan are present with the same titles and expectations:
+
+**`filterCatalog`:** empty filter; level `PK`; subject `math`; search `ADDITION` → single `math-addition`; no match; level `1` + subject `math`.
+
+**`paginateCatalog`:** first page (10 items, `page` 1, `totalPages` 3); page 3 (5 items, starts at 20); page 99 clamps to 3; empty input (`totalPages` 1, `page` 1, empty `items`).
+
+### Note (not a failure)
+
+Import order in the test file is `catalog-utils` then `registry` instead of `registry` then `catalog-utils` as in the plan; behavior and coverage are unchanged.

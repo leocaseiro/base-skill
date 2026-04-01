@@ -31,8 +31,16 @@ Reviewing the GameCard changes in the specified commit range: gathering git hist
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
-<details><summary>Tool use: **run_terminal_command_v2**</summary>
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git log --oneline $(git rev-parse 7397b1df96a409e012ab1cb81a90ddd50dcaa5a5^)..7397b1df96a409e012ab1cb81a90ddd50dcaa5a5</summary>
 
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git log --oneline $(git rev-parse 7397b1df96a409e012ab1cb81a90ddd50dcaa5a5^)..7397b1df96a409e012ab1cb81a90ddd50dcaa5a5
+```
+
+```
+7397b1d feat(ui): add GameCard component with bookmark and play callbacks
+
+```
 </details>
 </tool-use>
 
@@ -40,3 +48,552 @@ _**Agent (composer-2)**_
 <summary>Tool use: **run_terminal_command_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git diff $(git rev-parse 7397b1df96a409e012ab1cb81a90ddd50dcaa5a5^)..7397b1df96a409e012ab1cb81a90ddd50dcaa5a5 --stat</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git diff $(git rev-parse 7397b1df96a409e012ab1cb81a90ddd50dcaa5a5^)..7397b1df96a409e012ab1cb81a90ddd50dcaa5a5 --stat
+```
+
+```
+ package.json                     |  1 +
+ src/components/GameCard.test.tsx | 95 ++++++++++++++++++++++++++++++++++++++++
+ src/components/GameCard.tsx      | 69 +++++++++++++++++++++++++++++
+ yarn.lock                        |  5 +++
+ 4 files changed, 170 insertions(+)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git show 7397b1df96a409e012ab1cb81a90ddd50dcaa5a5 --no-stat -p</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git show 7397b1df96a409e012ab1cb81a90ddd50dcaa5a5 --no-stat -p
+```
+
+```
+fatal: unrecognized argument: --no-stat
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md",
+  "pattern": "GameCard"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md",
+  "pattern": "GameCard",
+  "topFiles": [
+    {
+      "matchCount": 25,
+      "uri": "docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 25
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git show 7397b1df96a409e012ab1cb81a90ddd50dcaa5a5 -p</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git show 7397b1df96a409e012ab1cb81a90ddd50dcaa5a5 -p
+```
+
+```
+commit 7397b1df96a409e012ab1cb81a90ddd50dcaa5a5
+Author: leocaseiro &lt;leobok@gmail.com&gt;
+Date:   Wed Apr 1 21:13:30 2026 +1100
+
+    feat(ui): add GameCard component with bookmark and play callbacks
+    
+    Made-with: Cursor
+
+diff --git a/package.json b/package.json
+index 8b72ec9..0f99053 100644
+--- a/package.json
++++ b/package.json
+@@ -64,6 +64,7 @@
+     "@testing-library/dom": "^10.4.1",
+     "@testing-library/jest-dom": "^6.9.1",
+     "@testing-library/react": "^16.3.0",
++    "@testing-library/user-event": "^14.6.1",
+     "@types/node": "^22.10.2",
+     "@types/react": "^19.2.0",
+     "@types/react-dom": "^19.2.0",
+diff --git a/src/components/GameCard.test.tsx b/src/components/GameCard.test.tsx
+new file mode 100644
+index 0000000..7877ba3
+--- /dev/null
++++ b/src/components/GameCard.test.tsx
+@@ -0,0 +1,95 @@
++import { render, screen } from '@testing-library/react';
++import userEvent from '@testing-library/user-event';
++import { I18nextProvider } from 'react-i18next';
++import { describe, expect, it, vi } from 'vitest';
++import { GameCard } from './GameCard';
++import { i18n } from '@/lib/i18n/i18n';
++
++const wrapper = ({ children }: { children: React.ReactNode }) =&gt; (
++  &lt;I18nextProvider i18n={i18n}&gt;{children}&lt;/I18nextProvider&gt;
++);
++
++const mockEntry = {
++  id: 'math-addition',
++  titleKey: 'math-addition',
++  levels: ['1', '2'] as const,
++  subject: 'math' as const,
++};
++
++describe('GameCard', () =&gt; {
++  it('renders the game title key as text', () =&gt; {
++    render(
++      &lt;GameCard
++        entry={mockEntry}
++        isBookmarked={false}
++        onBookmarkToggle={vi.fn()}
++        onPlay={vi.fn()}
++      /&gt;,
++      { wrapper },
++    );
++    expect(screen.getByText('Addition practice')).toBeInTheDocument();
++  });
++
++  it('renders level badges', () =&gt; {
++    render(
++      &lt;GameCard
++        entry={mockEntry}
++        isBookmarked={false}
++        onBookmarkToggle={vi.fn()}
++        onPlay={vi.fn()}
++      /&gt;,
++      { wrapper },
++    );
++    expect(screen.getByText('Year 1')).toBeInTheDocument();
++    expect(screen.getByText('Year 2')).toBeInTheDocument();
++  });
++
++  it('calls onPlay with gameId when Play is clicked', async () =&gt; {
++    const onPlay = vi.fn();
++    render(
++      &lt;GameCard
++        entry={mockEntry}
++        isBookmarked={false}
++        onBookmarkToggle={vi.fn()}
++        onPlay={onPlay}
++      /&gt;,
++      { wrapper },
++    );
++    await userEvent.click(
++      screen.getByRole('button', { name: /play/i }),
++    );
++    expect(onPlay).toHaveBeenCalledWith('math-addition');
++  });
++
++  it('calls onBookmarkToggle with gameId when bookmark button is clicked', async () =&gt; {
++    const onBookmarkToggle = vi.fn();
++    render(
++      &lt;GameCard
++        entry={mockEntry}
++        isBookmarked={false}
++        onBookmarkToggle={onBookmarkToggle}
++        onPlay={vi.fn()}
++      /&gt;,
++      { wrapper },
++    );
++    await userEvent.click(
++      screen.getByRole('button', { name: /bookmark/i }),
++    );
++    expect(onBookmarkToggle).toHaveBeenCalledWith('math-addition');
++  });
++
++  it('shows "remove bookmark" aria-label when isBookmarked is true', () =&gt; {
++    render(
++      &lt;GameCard
++        entry={mockEntry}
++        isBookmarked={true}
++        onBookmarkToggle={vi.fn()}
++        onPlay={vi.fn()}
++      /&gt;,
++      { wrapper },
++    );
++    expect(
++      screen.getByRole('button', { name: /remove bookmark/i }),
++    ).toBeInTheDocument();
++  });
++});
+diff --git a/src/components/GameCard.tsx b/src/components/GameCard.tsx
+new file mode 100644
+index 0000000..887d553
+--- /dev/null
++++ b/src/components/GameCard.tsx
+@@ -0,0 +1,69 @@
++import { BookmarkIcon } from 'lucide-react';
++import { useTranslation } from 'react-i18next';
++import type { GameCatalogEntry } from '@/games/registry';
++import { Button } from '@/components/ui/button';
++import {
++  Card,
++  CardContent,
++  CardHeader,
++  CardTitle,
++} from '@/components/ui/card';
++
++type GameCardProps = {
++  entry: GameCatalogEntry;
++  isBookmarked: boolean;
++  onBookmarkToggle: (gameId: string) =&gt; void;
++  onPlay: (gameId: string) =&gt; void;
++};
++
++export const GameCard = ({
++  entry,
++  isBookmarked,
++  onBookmarkToggle,
++  onPlay,
++}: GameCardProps) =&gt; {
++  const { t } = useTranslation('games');
++  const { t: tCommon } = useTranslation('common');
++
++  return (
++    &lt;Card className="flex flex-col"&gt;
++      &lt;CardHeader className="flex-1"&gt;
++        &lt;div className="flex items-start justify-between gap-2"&gt;
++          &lt;CardTitle className="text-base leading-snug"&gt;
++            {t(entry.titleKey)}
++          &lt;/CardTitle&gt;
++          &lt;Button
++            variant="ghost"
++            size="icon"
++            aria-label={
++              isBookmarked
++                ? tCommon('bookmark.remove')
++                : tCommon('bookmark.add')
++            }
++            onClick={() =&gt; onBookmarkToggle(entry.id)}
++          &gt;
++            &lt;BookmarkIcon
++              size={16}
++              className={isBookmarked ? 'fill-current' : ''}
++            /&gt;
++          &lt;/Button&gt;
++        &lt;/div&gt;
++        &lt;div className="flex flex-wrap gap-1 pt-1"&gt;
++          {entry.levels.map((level) =&gt; (
++            &lt;span
++              key={level}
++              className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium"
++            &gt;
++              {tCommon(&#96;levels.${level}&#96;)}
++            &lt;/span&gt;
++          ))}
++        &lt;/div&gt;
++      &lt;/CardHeader&gt;
++      &lt;CardContent&gt;
++        &lt;Button className="w-full" onClick={() =&gt; onPlay(entry.id)}&gt;
++          Play
++        &lt;/Button&gt;
++      &lt;/CardContent&gt;
++    &lt;/Card&gt;
++  );
++};
+diff --git a/yarn.lock b/yarn.lock
+index 88ec25d..314e29d 100644
+--- a/yarn.lock
++++ b/yarn.lock
+@@ -3151,6 +3151,11 @@
+   dependencies:
+     "@babel/runtime" "^7.12.5"
+ 
++"@testing-library/user-event@^14.6.1":
++  version "14.6.1"
++  resolved "https://registry.yarnpkg.com/@testing-library/user-event/-/user-event-14.6.1.tgz#13e09a32d7a8b7060fe38304788ebf4197cd2149"
++  integrity sha512-vq7fv0rnt+QTXgPxr5Hjc210p6YKq2kmdziLgnsZGgLJ9e6VAShx1pACLuRjd/AS/sr7phAR58OIIpf0LlmQNw==
++
+ "@ts-morph/common@~0.27.0":
+   version "0.27.0"
+   resolved "https://registry.yarnpkg.com/@ts-morph/common/-/common-0.27.0.tgz#e83a1bd7cbac054045c6246a7c4c99eab7692d46"
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Checking button component**
+
+I'm verifying if the button component forwards aria-label correctly. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Checking locale keys and the Button component's accessibility behavior:
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.json",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "math-addition|bookmark\\.|play"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "math-addition|bookmark\\.|play",
+  "topFiles": [
+    {
+      "matchCount": 4,
+      "uri": "worktrees/milestone-3-app-shell/package.json"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/games.json"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/games.json"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/public/manifest.json"
+    }
+  ],
+  "totalFiles": 4,
+  "totalMatches": 7
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/button.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/i18n.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/common.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Reviewing test coverage**
+
+I'm verifying the test coverage includes title (i18n) and level props. I'm updating tests to assert rendered translated titles instead of raw i18n keys. I'm updating tests to verify translated titles using `t(entry.titleKey)` for the `useTranslation('games')` hook. 
+
+I'm considering using `userEvent.setup()` for more realistic user interactions in tests. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Here is a concise code review for commit `7397b1d` in `worktrees/milestone-3-app-shell` (parent..7397b1df96a409e012ab1cb81a90ddd50dcaa5a5).
+
+---
+
+## Strengths
+
+**Component API**  
+Props match the milestone plan: `entry: GameCatalogEntry`, `isBookmarked`, `onBookmarkToggle(gameId)`, `onPlay(gameId)`. The card stays presentational: no routing or bookmark storage inside the component.
+
+**Implementation**  
+Uses existing `Card` / `Button` primitives, `GameCatalogEntry` from the registry, and `useTranslation('games')` + `useTranslation('common')` in line with the plan snippet. Bookmark control is icon-only with `aria-label` driven by `tCommon('bookmark.add' | 'bookmark.remove')`, which matches `en/common.json` (“Bookmark” / “Remove bookmark”).
+
+**Tests**  
+Five behaviors are covered: resolved title, level badges (`levels.1` / `levels.2` → “Year 1” / “Year 2”), `onPlay` with id, `onBookmarkToggle` with id, and bookmarked-state accessible name. `I18nextProvider` + shared `i18n` mirror real wiring. `@testing-library/user-event` is added and used for clicks, as in the plan.
+
+**Intentional i18n assertion for the title**  
+The plan’s red-green example asserted the raw string `math-addition` in the DOM. The implementation correctly uses `t(entry.titleKey)`, so that assertion would be wrong. Expecting **`Addition practice`** (the `en` value for `games.math-addition`) is the right way to prove the title goes through the `games` namespace and the key resolves. That is a justified, beneficial deviation from the written plan.
+
+---
+
+## Issues
+
+| Severity | Topic | Detail |
+|----------|--------|--------|
+| **Suggestion** | Test description | `it('renders the game title key as text')` no longer matches behavior; the DOM shows the translated string, not the key. Renaming (e.g. “renders translated game title”) would avoid confusion. |
+| **Important** | a11y / i18n | The primary action label **`Play`** is hardcoded English (same as the plan). For localized UIs and screen readers in other languages, this should eventually use `t` (e.g. a `common` or `games` key). |
+| **Suggestion** | user-event | v14 prefers `const user = userEvent.setup()` (often in `beforeEach`) over bare `userEvent.click` for closer-to-user behavior. Current usage is still valid. |
+| **Suggestion** | Level chips | Level text is in plain `<span>`s. Not wrong; optional improvement would be a list pattern if you want stronger structure for assistive tech. |
+
+No **Critical** issues found for API, a11y basics, or test coverage in this range.
+
+---
+
+## Assessment
+
+The commit delivers Task 5 as specified: dumb `GameCard`, callbacks with `entry.id`, bookmark `aria-label`s, level badges from `common`, and tests that exercise i18n and interactions. The title test’s move from raw key to **translated English copy** is intentional and correct given `t(entry.titleKey)` and default `lng: 'en'` in `i18n` init.
+
+**Follow-ups (non-blocking):** align the test name with the i18n assertion; consider i18n for “Play”; optionally tighten user-event setup and plan doc Task 5 so the “title key as text” example matches the desired assertion (`Addition practice` or `i18n.t(...)`).
+
+---
+
+**Plan alignment note:** Implementation matches the plan’s `GameCard.tsx` snippet. Only the first test’s *expected string* differs from the plan’s TDD sketch; treat the sketch as outdated and keep the translated-title assertion unless you intentionally want to test missing-translation fallback (different scenario).

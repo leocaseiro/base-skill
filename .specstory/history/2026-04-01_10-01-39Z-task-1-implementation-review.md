@@ -169,4 +169,41 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Comparing registry files**
 
-I'm verifying that the import order in registry.test.ts matches the spec. </details></think>
+I'm verifying that the import order in registry.test.ts matches the spec. 
+
+**Verifying import order**
+
+I found a trivial import order mismatch in registry.test.ts where type imports should come before regular imports according to the spec. I'm reporting import order violation in registry.test.ts:2-3 per spec lines 77-78. Import order in registry.test.ts matches spec despite ESLint preferring grouped type imports. Import order matches spec exactly, prioritizing semantic correctness over ESLint preferences. </details></think>
+
+_**Agent (composer-2)**_
+
+
+## Verdict
+
+**Mostly spec-compliant; one snippet mismatch.**
+
+### ❌ `src/games/registry.test.ts:2-3`
+
+The plan shows **type import before** the `GAME_CATALOG` import:
+
+```75:78:docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md
+```ts
+import { describe, expect, it } from 'vitest';
+import type { GameLevel, GameSubject } from './registry';
+import { GAME_CATALOG } from './registry';
+```
+
+The worktree has the opposite order (`GAME_CATALOG` then `import type`). Behavior and the three `it()` blocks match the spec.
+
+### ✅ Everything else (static check)
+
+- **`registry.ts`**: `GameLevel`, `GameSubject`, `GameCatalogEntry` with `levels` + `subject`, and the three catalog entries (`math-addition`, `math-subtraction`, `placeholder-game`) match the plan text.
+- **`registry.test.ts`**: `VALID_LEVELS` / `VALID_SUBJECTS` and the three tests (`has stable ids…`, `every entry has at least one valid level`, `every entry has a valid subject`) match.
+- **No extra** types, catalog rows, or tests in those files.
+- **HEAD** is `1e349a1` with subject line `feat(catalog): add level and subject fields to GameCatalogEntry` (commit body also includes `Made-with: Cursor`, which the plan did not specify).
+
+**TDD (fail then pass)** cannot be confirmed from the files alone; that would need history or CI logs.
+
+---
+
+**Summary:** If “per exact snippets” includes import order → **not fully spec compliant** (`registry.test.ts:2-3`). If only behavior and structure matter → **spec compliant** aside from unverifiable TDD and optional commit-body extra line.

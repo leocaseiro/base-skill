@@ -125,3 +125,450 @@ If anything is unclear, ask. Otherwise implement, test, commit.
 - Concerns if any
 
 Do not edit files outside the worktree path above.
+
+---
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Implementing task 1**
+
+I'm working in the milestone-3-app-shell directory and replacing the test file and registry.ts as specified. 
+
+**Checking worktree state**
+
+I'm verifying the worktree setup and reading existing files before replacing them with the new content. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Implementing Task 1 in the milestone worktree: checking the repo state and `GAME_CATALOG` usages so we don't break other code.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.test.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "GAME_CATALOG|GameCatalogEntry|from ['\\\"].*registry"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "GAME_CATALOG|GameCatalogEntry|from ['\\\"].*registry",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/routes/$locale/_app/index.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/games/registry.ts"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/milestone-3-app-shell/src/games/registry.test.ts"
+    },
+    {
+      "matchCount": 34,
+      "uri": "worktrees/milestone-3-app-shell/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md"
+    },
+    {
+      "matchCount": 6,
+      "uri": "worktrees/milestone-3-app-shell/.specstory/history/2026-04-01_06-45-42Z-i-have-worked-myself.md"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/.specstory/history/2026-04-01_05-15-20Z-transition-to-eslint-plugin-unicorn-rules.md"
+    },
+    {
+      "matchCount": 14,
+      "uri": "worktrees/milestone-3-app-shell/.specstory/history/2026-04-01_02-02-32Z.md"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/.specstory/history/2026-04-01_01-40-40Z-claude-plugin-install-superpowers.md"
+    }
+  ],
+  "totalFiles": 9,
+  "totalMatches": 70
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Writing files**
+
+I'm writing the registry and index files as specified, following the TDD approach of updating tests first. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Applying TDD: updating the test first, running it (expect failure), then replacing `registry.ts` and re-running tests.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/games/registry.test.ts</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/games/registry.test.ts
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/games/registry.test.ts
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ❯ src/games/registry.test.ts (3 tests | 2 failed) 4ms
+   ✓ GAME_CATALOG &gt; has stable ids and title keys 1ms
+   × GAME_CATALOG &gt; every entry has at least one valid level 1ms
+     → Cannot read properties of undefined (reading 'length')
+   × GAME_CATALOG &gt; every entry has a valid subject 1ms
+     → expected [ 'math', 'reading', 'letters' ] to include undefined
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  21:00:46
+   Duration  627ms (transform 21ms, setup 60ms, collect 12ms, tests 4ms, environment 370ms, prepare 34ms)
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/games/registry.test.ts &gt; GAME_CATALOG &gt; every entry has at least one valid level
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/games/registry.test.ts:19:23
+     17|   it('every entry has at least one valid level', () =&gt; {
+     18|     for (const g of GAME_CATALOG) {
+     19|       expect(g.levels.length).toBeGreaterThan(0);
+       |                       ^
+     20|       for (const lvl of g.levels) {
+     21|         expect(VALID_LEVELS).toContain(lvl);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/games/registry.test.ts &gt; GAME_CATALOG &gt; every entry has a valid subject
+AssertionError: expected [ 'math', 'reading', 'letters' ] to include undefined
+ ❯ src/games/registry.test.ts:28:30
+     26|   it('every entry has a valid subject', () =&gt; {
+     27|     for (const g of GAME_CATALOG) {
+     28|       expect(VALID_SUBJECTS).toContain(g.subject);
+       |                              ^
+     29|     }
+     30|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+error Command failed with exit code 1.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+Implementing `registry.ts` as specified.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/games/registry.test.ts</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/games/registry.test.ts
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/games/registry.test.ts
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  21:00:59
+   Duration  592ms (transform 19ms, setup 52ms, collect 11ms, tests 2ms, environment 340ms, prepare 39ms)
+
+Done in 0.98s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts",
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.test.ts"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts"
+    },
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.test.ts"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/games/registry.ts src/games/registry.test.ts && git commit --trailer "Made-with: Cursor" -m "feat(catalog): add level and subject fields to GameCatalogEntry"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/games/registry.ts src/games/registry.test.ts && git commit --trailer "Made-with: Cursor" -m "feat(catalog): add level and subject fields to GameCatalogEntry"
+```
+
+```
+[milestone-3-app-shell 1e349a1] feat(catalog): add level and subject fields to GameCatalogEntry
+ 2 files changed, 42 insertions(+), 3 deletions(-)
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (4587c27)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/routes/__root.test.tsx (1 test) 14ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 105ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 20ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/migrations.test.ts (1 test) 41ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 61ms
+ ✓ src/db/create-database.test.ts (2 tests) 66ms
+
+ Test Files  12 passed (12)
+      Tests  18 passed (18)
+   Start at  21:01:09
+   Duration  1.41s (transform 323ms, setup 1.04s, collect 2.05s, tests 320ms, environment 8.20s, prepare 783ms)
+
+Done in 1.82s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+## Report
+
+**Status:** DONE
+
+### What was implemented
+- **`src/games/registry.ts`:** Added `GameLevel` and `GameSubject`, extended `GameCatalogEntry` with `levels` and `subject`, and set those fields on all three catalog entries per the spec.
+- **`src/games/registry.test.ts`:** Replaced tests with the three cases: stable ids/title keys, non-empty valid `levels`, and valid `subject`.
+
+### TDD / tests
+1. After test-only change: `yarn test src/games/registry.test.ts` — **2 failed, 1 passed** (`levels`/`subject` missing on old entries).
+2. After registry update: `yarn test src/games/registry.test.ts` — **3 passed**.
+
+Pre-commit hook also ran full `vitest run`: **12 files, 18 tests passed** (existing `act(...)` stderr in `useRxQuery` test; not from this task).
+
+### Files changed
+- `src/games/registry.ts`
+- `src/games/registry.test.ts`
+
+### Commit
+`1e349a1` — `feat(catalog): add level and subject fields to GameCatalogEntry`
+
+### Self-review
+- Matches the spec verbatim; `src/routes/$locale/_app/index.tsx` still only uses `id` / `titleKey`, so no route changes were required.
+- Lint-staged ran eslint/prettier on the two files; no new linter issues.
+
+### Concerns
+None.

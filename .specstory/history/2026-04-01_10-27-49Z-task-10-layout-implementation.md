@@ -267,3 +267,264 @@ I'm importing required components and providers for the layout structure. I'm im
 **Reordering imports**
 
 </details></think>
+
+_**Agent (composer-2)**_
+
+
+Implementing the layout and running verification.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn typecheck && yarn test --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn typecheck && yarn test --run
+```
+
+```
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 1.78s.
+yarn run v1.22.22
+$ vitest run --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/games/catalog-utils.test.ts (10 tests) 3ms
+ ✓ src/db/setup-validation.test.ts (1 test) 3ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 4ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 4ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/routes/__root.test.tsx (1 test) 13ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 36ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 114ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 26ms
+ ✓ src/db/migrations.test.ts (1 test) 47ms
+ ✓ src/db/create-database.test.ts (2 tests) 72ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 74ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 221ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 193ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 260ms
+
+ Test Files  17 passed (17)
+      Tests  46 passed (46)
+   Start at  21:28:19
+   Duration  1.82s (transform 564ms, setup 1.93s, collect 4.03s, tests 1.08s, environment 14.02s, prepare 1.43s)
+
+Done in 2.24s.
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add 'src/routes/$locale/_app.tsx' && git commit --trailer "Made-with: Cursor" -m "feat(layout): wire Header, OfflineIndicator, Footer into app layout"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add 'src/routes/$locale/_app.tsx' && git commit --trailer "Made-with: Cursor" -m "feat(layout): wire Header, OfflineIndicator, Footer into app layout"
+```
+
+```
+[milestone-3-app-shell a0746fc] feat(layout): wire Header, OfflineIndicator, Footer into app layout
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (d10ea6c)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/db/setup-validation.test.ts (1 test) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 3ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 5ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/routes/__root.test.tsx (1 test) 34ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 40ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 128ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 22ms
+ ✓ src/db/migrations.test.ts (1 test) 43ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/create-database.test.ts (2 tests) 67ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 67ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 181ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 222ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 239ms
+
+ Test Files  17 passed (17)
+      Tests  46 passed (46)
+   Start at  21:28:27
+   Duration  1.60s (transform 622ms, setup 1.60s, collect 3.74s, tests 1.06s, environment 11.66s, prepare 1.42s)
+
+Done in 1.98s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+## Status: **Done**
+
+**Task 10** is implemented in `worktrees/milestone-3-app-shell`: `_app.tsx` now wraps the shell in `DbProvider` → `I18nextProvider` → `ThemeRuntimeProvider`, then a `flex min-h-screen flex-col` column with `Header`, `OfflineIndicator`, `main.flex-1` + `Outlet`, and `Footer`.
+
+**Checks**
+
+- `yarn typecheck` — passed  
+- `yarn test --run` — passed (46 tests; existing `act(...)` warning in `useRxQuery.test.tsx` only)
+
+**Commit**
+
+- **SHA:** `a0746fc`  
+- **Message:** `feat(layout): wire Header, OfflineIndicator, Footer into app layout`  
+- **Branch:** `milestone-3-app-shell`

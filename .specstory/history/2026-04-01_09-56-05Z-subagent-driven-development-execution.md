@@ -4226,4 +4226,6 @@ git branch -d milestone-3-app-shell
 git worktree remove worktrees/milestone-3-app-shell
 ```
 
-`git branch -d` only removes the local branch name; the worktree directory is removed with `git worktree remove` (per your [CLAUDE.md]
+`git branch -d` only removes the local branch name; the worktree directory is removed with `git worktree remove` (per your [CLAUDE.md](file:///Users/leocaseiro/Sites/base-skill/CLAUDE.md) flow).
+
+If you track `origin/master`, finish with `git push origin master` when you’re ready to publish.

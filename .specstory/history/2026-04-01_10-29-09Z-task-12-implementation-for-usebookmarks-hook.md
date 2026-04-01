@@ -269,4 +269,1286 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Testing bookmark effects**
 
-I'm investigating why waitForBookmarkIds is unnecessary since bookmarkedIds is always defined. I realized waitForBookmarkIds is unnecessary because bookmarkedIds is always defined by the first render. </details></think>
+I'm investigating why waitForBookmarkIds is unnecessary since bookmarkedIds is always defined. I realized waitForBookmarkIds is unnecessary because bookmarkedIds is always defined by the first render. I confirmed that bookmarkedIds starts as an empty set even before db loads, matching test expectations. I found a race condition where toggle() returns early if db isn't ready yet, leaving bookmarkedIds empty. I found that useBookmarks doesn't wait for `isReady` from useRxDB, causing early returns when db isn't ready. 
+
+I'm implementing a test pattern that waits for the database to be fully initialized before running bookmark effects, addressing batching issues in React 18. I'm adding waitFor assertions to ensure database readiness before testing bookmark effects, preventing race conditions during React 18 rendering. I'm adjusting tests to wait for query subscriptions to be active instead of relying on `waitFor` assertions alone. I'm switching to a different test approach by ensuring db is defined before calling toggle in useBookmarks. 
+
+I'm implementing a race condition fix in tests using `waitFor` to ensure database readiness before testing bookmark toggling. I'm debugging the test setup to ensure database readiness before bookmark operations. I identified a race condition in waitFor's execution order involving useEffect and microtasks during database setup. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{tsx,ts}",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "DbProvider"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "DbProvider",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/src/routes/$locale/_app.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/src/providers/DbProvider.tsx"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/milestone-3-app-shell/src/providers/DbProvider.test.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/src/db/hooks/useRxDB.ts"
+    }
+  ],
+  "totalFiles": 4,
+  "totalMatches": 13
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/providers/DbProvider.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Implementing test plan**
+
+I'm implementing the test as specified in the Milestone 3 plan, using waitFor on bookmarkedIds and adding a race condition check for toggle. I'm adjusting the test implementation to match the Milestone 3 plan exactly, focusing on the race condition handling. 
+
+**Adjusting test implementation**
+
+I found a potential race condition where db is set before isReady becomes true, so I'm reviewing the order of operations. I'm investigating potential race conditions in test setup where db is set before isReady becomes true due to React 18's batching of setState calls. I found that React 18 batches setState calls, causing db and isReady updates to happen together after the promise resolves, leading to first render having undefined db. 
+
+**Checking render order**
+
+I'm investigating whether the test assertion runs before or after the DbProvider's useEffect completes. I found that renderHook uses act internally, so effects run synchronously after renderHook returns. I'm investigating how act's microtask handling affects promise callbacks in renderHook. 
+
+I'm implementing a fix to ensure act(toggle) runs after microtask 2 by enhancing useBookmarks to defer db usage until available. I'm running tests to verify the fix for act(toggle) timing issues. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Creating both files per the plan (refined implementation with `EMPTY`) and running tests.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useBookmarks.test.ts --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useBookmarks.test.ts --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/db/hooks/useBookmarks.test.ts --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  21:31:13
+   Duration  610ms (transform 15ms, setup 53ms, collect 0ms, tests 0ms, environment 365ms, prepare 45ms)
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/hooks/useBookmarks.test.ts [ src/db/hooks/useBookmarks.test.ts ]
+Error: Transform failed with 1 error:
+/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts:18:16: ERROR: Expected "&gt;" but found "openDatabase"
+  Plugin: vite:esbuild
+  File: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts:18:16
+  
+  Expected "&gt;" but found "openDatabase"
+  16 |  const makeWrapper = (testDb: BaseSkillDatabase) =&gt; {
+  17 |    return ({ children }: { children: ReactNode }) =&gt; (
+  18 |      &lt;DbProvider openDatabase={() =&gt; Promise.resolve(testDb)}&gt;
+     |                  ^
+  19 |        &lt;I18nextProvider i18n={i18n}&gt;{children}&lt;/I18nextProvider&gt;
+  20 |      &lt;/DbProvider&gt;
+  
+ ❯ failureErrorWithLog node_modules/esbuild/lib/main.js:1748:15
+ ❯ node_modules/esbuild/lib/main.js:1017:50
+ ❯ responseCallbacks.&lt;computed&gt; node_modules/esbuild/lib/main.js:884:9
+ ❯ handleIncomingPacket node_modules/esbuild/lib/main.js:939:12
+ ❯ Socket.readFromStdout node_modules/esbuild/lib/main.js:862:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+error Command failed with exit code 1.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts",
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts"
+    },
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Renaming test file**
+
+I'm renaming the test file to useBookmarks.test.tsx to match the codebase's JSX requirement and follow the useRxQuery.test.tsx pattern. 
+
+**Checking test configuration**
+
+I'm reviewing the vitest config to confirm JSX support in TypeScript files. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Keeping the `.test.ts` filename per the plan and replacing JSX with `createElement` so the file parses.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useBookmarks.test.ts --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useBookmarks.test.ts --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/db/hooks/useBookmarks.test.ts --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ❯ src/db/hooks/useBookmarks.test.ts (3 tests | 1 failed) 108ms
+   ✓ useBookmarks &gt; starts with an empty set of bookmarked ids 46ms
+   × useBookmarks &gt; adds a bookmark when toggle is called on an unbookmarked game 32ms
+     → expected false to be true // Object.is equality
+   ✓ useBookmarks &gt; removes the bookmark when toggle is called on an already-bookmarked game 30ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  21:31:35
+   Duration  1.23s (transform 75ms, setup 138ms, collect 407ms, tests 108ms, environment 406ms, prepare 44ms)
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+stderr | src/db/hooks/useBookmarks.test.ts &gt; useBookmarks &gt; starts with an empty set of bookmarked ids
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/hooks/useBookmarks.test.ts &gt; useBookmarks &gt; adds a bookmark when toggle is called on an unbookmarked game
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/db/hooks/useBookmarks.test.ts:51:63
+     49|     });
+     50| 
+     51|     expect(result.current.bookmarkedIds.has('math-addition')).toBe(tru…
+       |                                                               ^
+     52|   });
+     53| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+error Command failed with exit code 1.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Debugging test failures**
+
+I'm investigating why test 2 fails due to timing issues with bookmarkedIds updates. I found that test 2 fails because bookmarkedIds doesn't include 'math-addition' after the first toggle, suggesting a race condition with database readiness. Test 2 fails because toggle may return early before RxDB subscription emits, causing assertion to run before bookmark state updates. Test 2 might be flaky; adding waitFor after toggle could fix early assertion before RxDB subscription updates state. I'm adding waitFor after toggle for bookmark assertion in tests 2 and 3 to handle async state updates. I'm adding waitFor assertions for RxDB async emissions in tests 2 and 3 to handle asynchronous state updates. 
+
+**Adding waitFor assertions**
+
+I'm waiting for RxDB async emissions in hook tests using waitFor assertions. I'm adding waitFor assertions after db injection to handle async RxDB emissions in tests. I'm implementing waitFor assertions on bookmark toggle to fix db undefined error on first tick. 
+
+I'm adding waitFor assertions to tests to handle DbProvider state updates after useEffect. I'm adding waitFor assertions after toggle for bookmark state and will run tests again. I'm implementing waitFor assertions to handle setState warnings after DB load, replacing flaky setTimeout with proper waitFor logic. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Adding `waitFor` after toggles so assertions run after RxDB query emissions (test 2 failed due to synchronous checks).
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useBookmarks.test.ts --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useBookmarks.test.ts --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/db/hooks/useBookmarks.test.ts --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ❯ src/db/hooks/useBookmarks.test.ts (3 tests | 1 failed) 1123ms
+   ✓ useBookmarks &gt; starts with an empty set of bookmarked ids 47ms
+   × useBookmarks &gt; adds a bookmark when toggle is called on an unbookmarked game 1039ms
+     → expected false to be true // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+   ✓ useBookmarks &gt; removes the bookmark when toggle is called on an already-bookmarked game 36ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  21:32:36
+   Duration  2.10s (transform 74ms, setup 51ms, collect 384ms, tests 1.12s, environment 361ms, prepare 43ms)
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+stderr | src/db/hooks/useBookmarks.test.ts &gt; useBookmarks &gt; starts with an empty set of bookmarked ids
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/hooks/useBookmarks.test.ts &gt; useBookmarks &gt; adds a bookmark when toggle is called on an unbookmarked game
+AssertionError: expected false to be true // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/db/hooks/useBookmarks.test.ts:52:65
+     50| 
+     51|     await waitFor(() =&gt; {
+     52|       expect(result.current.bookmarkedIds.has('math-addition')).toBe(t…
+       |                                                                 ^
+     53|     });
+     54|   });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+error Command failed with exit code 1.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Investigating test failure**
+
+I'm investigating why test 2 fails while test 3 passes, despite similar toggle flows, considering potential variable scope issues. Vitest runs tests in parallel by default, causing test 2 and 3 to interfere through shared `db` variable. 
+
+**Fixing test interference**
+
+I'm implementing isolated database instances per test to eliminate race conditions from parallel execution. I'm replacing shared database instances with local ones per test to fix parallel execution issues. 
+
+**Cleaning up databases**
+
+I'm implementing per-test database cleanup using try-finally blocks to ensure isolation. I'm refactoring database cleanup to use afterEach with a shared array to avoid duplicate finally blocks. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **1** result in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell** (1 file)
+
+| File |
+|------|
+| `vitest.config.ts` |
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/vitest.config.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Debugging test failure**
+
+I'm investigating why test 2 times out on waitFor has true after toggle, checking if toggle is a no-op. I found that toggle is running on the wrong database in test 2, causing the query not to update the UI. The useEffect dependency array includes a new `openDatabase` function reference on each render, which likely causes unnecessary re-renders. The useEffect in DbProvider re-runs on every parent re-render due to a new `openDatabase` function reference, causing potential cancellation of database opening operations. 
+
+**Stabilizing database reference**
+
+I'm stabilizing the `openDatabase` reference in `makeWrapper` to prevent race conditions during tests. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Stabilizing `openDatabase`: a new inline function each render changes `DbProvider`'s `useEffect` dependency and can restart/cancel DB initialization.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useBookmarks.test.ts --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useBookmarks.test.ts --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/db/hooks/useBookmarks.test.ts --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ❯ src/db/hooks/useBookmarks.test.ts (3 tests | 1 failed) 1128ms
+   ✓ useBookmarks &gt; starts with an empty set of bookmarked ids 49ms
+   × useBookmarks &gt; adds a bookmark when toggle is called on an unbookmarked game 1040ms
+     → expected false to be true // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+   ✓ useBookmarks &gt; removes the bookmark when toggle is called on an already-bookmarked game 38ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  21:34:03
+   Duration  2.10s (transform 68ms, setup 53ms, collect 353ms, tests 1.13s, environment 360ms, prepare 36ms)
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+stderr | src/db/hooks/useBookmarks.test.ts &gt; useBookmarks &gt; starts with an empty set of bookmarked ids
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/hooks/useBookmarks.test.ts &gt; useBookmarks &gt; adds a bookmark when toggle is called on an unbookmarked game
+AssertionError: expected false to be true // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/db/hooks/useBookmarks.test.ts:58:65
+     56| 
+     57|     await waitFor(() =&gt; {
+     58|       expect(result.current.bookmarkedIds.has('math-addition')).toBe(t…
+       |                                                                 ^
+     59|     });
+     60|   });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+error Command failed with exit code 1.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn vitest run src/db/hooks/useBookmarks.test.ts -t "adds a bookmark"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn vitest run src/db/hooks/useBookmarks.test.ts -t "adds a bookmark"
+```
+
+```
+yarn run v1.22.22
+$ /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/node_modules/.bin/vitest run src/db/hooks/useBookmarks.test.ts -t 'adds a bookmark'
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ❯ src/db/hooks/useBookmarks.test.ts (3 tests | 1 failed | 2 skipped) 1064ms
+   ↓ useBookmarks &gt; starts with an empty set of bookmarked ids
+   × useBookmarks &gt; adds a bookmark when toggle is called on an unbookmarked game 1063ms
+     → expected false to be true // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+   ↓ useBookmarks &gt; removes the bookmark when toggle is called on an already-bookmarked game
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 skipped (3)
+   Start at  21:34:10
+   Duration  1.97s (transform 77ms, setup 57ms, collect 401ms, tests 1.06s, environment 293ms, prepare 38ms)
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/hooks/useBookmarks.test.ts &gt; useBookmarks &gt; adds a bookmark when toggle is called on an unbookmarked game
+AssertionError: expected false to be true // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/db/hooks/useBookmarks.test.ts:58:65
+     56| 
+     57|     await waitFor(() =&gt; {
+     58|       expect(result.current.bookmarkedIds.has('math-addition')).toBe(t…
+       |                                                                 ^
+     59|     });
+     60|   });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+error Command failed with exit code 1.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Comparing test cases**
+
+I'm investigating why test 2 fails while test 3 passes, focusing on the 'adds a bookmark' pattern difference. I'm examining the bookmark toggle behavior to understand why test 2 fails despite test 3 passing. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn vitest run src/db/hooks/useBookmarks.test.ts -t "removes the bookmark"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn vitest run src/db/hooks/useBookmarks.test.ts -t "removes the bookmark"
+```
+
+```
+yarn run v1.22.22
+$ /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/node_modules/.bin/vitest run src/db/hooks/useBookmarks.test.ts -t 'removes the bookmark'
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ❯ src/db/hooks/useBookmarks.test.ts (3 tests | 1 failed | 2 skipped) 1068ms
+   ↓ useBookmarks &gt; starts with an empty set of bookmarked ids
+   ↓ useBookmarks &gt; adds a bookmark when toggle is called on an unbookmarked game
+   × useBookmarks &gt; removes the bookmark when toggle is called on an already-bookmarked game 1067ms
+     → expected false to be true // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 skipped (3)
+   Start at  21:34:29
+   Duration  1.95s (transform 72ms, setup 71ms, collect 355ms, tests 1.07s, environment 286ms, prepare 33ms)
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/hooks/useBookmarks.test.ts &gt; useBookmarks &gt; removes the bookmark when toggle is called on an already-bookmarked game
+AssertionError: expected false to be true // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/db/hooks/useBookmarks.test.ts:73:65
+     71|     });
+     72|     await waitFor(() =&gt; {
+     73|       expect(result.current.bookmarkedIds.has('math-addition')).toBe(t…
+       |                                                                 ^
+     74|     });
+     75| 
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+error Command failed with exit code 1.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Investigating test ordering**
+
+Test 3 fails when run alone but passes when preceded by Test 1, suggesting Test 1's setup impacts Test 3's waitFor. Test 3 passes after Test 2 runs, suggesting Test 2's failure creates state that enables Test 3's waitFor to succeed. 
+
+Test 3 passes after Test 2 fails, suggesting Test 2's failure creates state that enables Test 3's waitFor to succeed. I'm checking if `db` is undefined in the renderHook and verifying if `result.current` is stale during re-renders. I'm investigating a potential bug where queries stay empty until first emission, causing stale data during re-renders. I'm checking if `toggle` might close over a stale `db` reference from the first render when `db` was undefined. The `toggle` function closes over `db` but gets recreated each render, so it uses the latest `db` from `useRxDB()`. The `toggle` function checks `db` at call time from its closure, so I need to ensure the hook re-renders with a valid `db` before calling `toggle` in tests. 
+
+I need to wait for `db` to be ready before calling `toggle` in tests, as `old db (undefined)!` indicates the db isn't initialized yet. The db readiness check is insufficient because bookmarkedIds can't distinguish between 'db not ready' and 'no bookmarks'. I need to add a probe for `isReady` from DbProvider. 
+
+**Updating tests to wait for isReady**
+
+I'm modifying tests to await `isReady` from useRxDB before proceeding with bookmark operations. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Waiting for `DbProvider` to finish opening: `toggle` can run while `db` is still undefined (same empty `bookmarkedIds` as an ready DB with no rows). Combining `useRxDB()` with `useBookmarks()` in the test hook and waiting for `isReady` before toggling.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Adding test hook**
+
+I'm adding a test hook that properly orders useRxDB before useBookmarks. I'm adding a test hook that waits for `isReady` before asserting bookmark size to avoid premature assertions. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useBookmarks.test.ts --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useBookmarks.test.ts --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/db/hooks/useBookmarks.test.ts --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/db/hooks/useBookmarks.test.ts (3 tests) 264ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  21:35:56
+   Duration  1.30s (transform 73ms, setup 74ms, collect 355ms, tests 264ms, environment 423ms, prepare 38ms)
+
+Done in 1.72s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn vitest run src/db/hooks/useBookmarks.test.ts -t "adds a bookmark"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn vitest run src/db/hooks/useBookmarks.test.ts -t "adds a bookmark"
+```
+
+```
+yarn run v1.22.22
+$ /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/node_modules/.bin/vitest run src/db/hooks/useBookmarks.test.ts -t 'adds a bookmark'
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/db/hooks/useBookmarks.test.ts (3 tests | 2 skipped) 106ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 2 skipped (3)
+   Start at  21:36:05
+   Duration  1.41s (transform 86ms, setup 76ms, collect 466ms, tests 106ms, environment 568ms, prepare 39ms)
+
+Done in 1.83s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts",
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts"
+    },
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/db/hooks/useBookmarks.ts src/db/hooks/useBookmarks.test.ts && git commit --trailer "Made-with: Cursor" -m "feat(db): add useBookmarks hook with anonymous profile support"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/db/hooks/useBookmarks.ts src/db/hooks/useBookmarks.test.ts && git commit --trailer "Made-with: Cursor" -m "feat(db): add useBookmarks hook with anonymous profile support"
+```
+
+```
+[milestone-3-app-shell d337ba6] feat(db): add useBookmarks hook with anonymous profile support
+ 2 files changed, 153 insertions(+)
+ create mode 100644 src/db/hooks/useBookmarks.test.ts
+ create mode 100644 src/db/hooks/useBookmarks.ts
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (89ff864)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 5ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 5ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 5ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/routes/__root.test.tsx (1 test) 80ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 45ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 119ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 24ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/migrations.test.ts (1 test) 43ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 70ms
+ ✓ src/db/create-database.test.ts (2 tests) 74ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 197ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 226ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 257ms
+ ✓ src/db/hooks/useBookmarks.test.ts (3 tests) 277ms
+
+ Test Files  18 passed (18)
+      Tests  49 passed (49)
+   Start at  21:36:24
+   Duration  2.09s (transform 755ms, setup 1.93s, collect 5.88s, tests 1.43s, environment 15.20s, prepare 1.56s)
+
+Done in 2.52s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git rev-parse HEAD</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git rev-parse HEAD
+```
+
+```
+d337ba62ddff851fde81565a4765400a58201f86
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+## Status: **Complete**
+
+**Commit:** `d337ba62ddff851fde81565a4765400a58201f86`  
+**Branch:** `milestone-3-app-shell` (worktree)
+
+**Tests:** `yarn test src/db/hooks/useBookmarks.test.ts --run` — **3 passed** (full suite **49 passed** after pre-commit hook).
+
+### Implementation
+
+- **`useBookmarks.ts`** — Plan’s refined version: `EMPTY` from `rxjs` when `db` is missing, `useRxQuery` on `query$`, `BookmarkDoc` from `@/db/schemas/bookmarks`, anonymous `profileId: 'anonymous'`, `toggle` insert/remove via `nanoid(21)` + ISO `createdAt`.
+
+### `DbProvider`
+
+- **`openDatabase`** is already supported (optional, default `getOrCreateDatabase`), same as `DbProvider.test.tsx`. No provider changes.
+
+### Test file vs plan (required fixes)
+
+1. **`.ts` + JSX** — Vite/esbuild won’t parse JSX in `.test.ts`. The plan’s JSX wrapper was implemented with **`createElement`** so the path stays `useBookmarks.test.ts`.
+
+2. **Stable `openDatabase`** — An inline `() => Promise.resolve(testDb)` on every render changes the `DbProvider` effect deps and can restart open. The wrapper uses **`useCallback(..., [testDb])`** inside a small inner component (Prettier renamed it to a `const` component).
+
+3. **Wait for DB before `toggle`** — With an empty bookmark set, you can’t tell “DB not open yet” from “no bookmarks.” `toggle` was running while `db` was still `undefined`, so it no-oped. Tests use **`useBookmarksUnderTest()`** (`useRxDB` + `useBookmarks`) and **`waitFor(() => expect(result.current.isReady).toBe(true))`** before toggling (and **`waitFor`** after toggles for RxDB query updates).
+
+4. **`db!` removed** — After lint/format, `makeWrapper(db)` uses the narrowed `db` from the test body (no non-null assertion).

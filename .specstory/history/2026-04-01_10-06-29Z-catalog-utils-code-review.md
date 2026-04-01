@@ -13,3 +13,412 @@ Compare git range: from `1e349a1bcd9b4e13bff8c4d04c2a2e9d49034e2e` to `d03a10a29
 Files: `src/games/catalog-utils.ts`, `src/games/catalog-utils.test.ts`
 
 Pure filter + pagination utilities for game catalog. Return Strengths, Issues (Critical/Important/Minor), Assessment.
+
+---
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Reviewing catalog-utils**
+
+I'm examining the catalog-utils changes in the worktree to understand the modifications between commits. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Reviewing catalog-utils: reading the implementation, tests, and git diff against the specified range.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.test.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git diff 1e349a1bcd9b4e13bff8c4d04c2a2e9d49034e2e..d03a10a29f55bc9a025450f4e8b47bceb155ac19 -- src/games/catalog-utils.ts src/games/catalog-utils.test.ts</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git diff 1e349a1bcd9b4e13bff8c4d04c2a2e9d49034e2e..d03a10a29f55bc9a025450f4e8b47bceb155ac19 -- src/games/catalog-utils.ts src/games/catalog-utils.test.ts
+```
+
+```
+diff --git a/src/games/catalog-utils.test.ts b/src/games/catalog-utils.test.ts
+new file mode 100644
+index 0000000..5c9a7f0
+--- /dev/null
++++ b/src/games/catalog-utils.test.ts
+@@ -0,0 +1,98 @@
++import { describe, expect, it } from 'vitest';
++import { filterCatalog, paginateCatalog } from './catalog-utils';
++import { GAME_CATALOG } from './registry';
++
++describe('filterCatalog', () =&gt; {
++  it('returns all entries with empty filter', () =&gt; {
++    const result = filterCatalog(GAME_CATALOG, {
++      search: '',
++      level: '',
++      subject: '',
++    });
++    expect(result).toHaveLength(GAME_CATALOG.length);
++  });
++
++  it('filters by level — only entries that include the level', () =&gt; {
++    const result = filterCatalog(GAME_CATALOG, {
++      search: '',
++      level: 'PK',
++      subject: '',
++    });
++    expect(result.length).toBeGreaterThan(0);
++    for (const entry of result) {
++      expect(entry.levels).toContain('PK');
++    }
++  });
++
++  it('filters by subject', () =&gt; {
++    const result = filterCatalog(GAME_CATALOG, {
++      search: '',
++      level: '',
++      subject: 'math',
++    });
++    expect(result.length).toBeGreaterThan(0);
++    for (const entry of result) {
++      expect(entry.subject).toBe('math');
++    }
++  });
++
++  it('filters by search query (case-insensitive match on titleKey)', () =&gt; {
++    const result = filterCatalog(GAME_CATALOG, {
++      search: 'ADDITION',
++      level: '',
++      subject: '',
++    });
++    expect(result).toHaveLength(1);
++    expect(result[0]?.id).toBe('math-addition');
++  });
++
++  it('returns empty array when nothing matches', () =&gt; {
++    const result = filterCatalog(GAME_CATALOG, {
++      search: 'zzznomatch',
++      level: '',
++      subject: '',
++    });
++    expect(result).toHaveLength(0);
++  });
++
++  it('combines level and subject filters', () =&gt; {
++    const result = filterCatalog(GAME_CATALOG, {
++      search: '',
++      level: '1',
++      subject: 'math',
++    });
++    for (const entry of result) {
++      expect(entry.levels).toContain('1');
++      expect(entry.subject).toBe('math');
++    }
++  });
++});
++
++describe('paginateCatalog', () =&gt; {
++  const items = Array.from({ length: 25 }, (_, i) =&gt; i);
++
++  it('returns first page with correct slice', () =&gt; {
++    const result = paginateCatalog(items, 1, 10);
++    expect(result.items).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
++    expect(result.page).toBe(1);
++    expect(result.totalPages).toBe(3);
++  });
++
++  it('returns last partial page', () =&gt; {
++    const result = paginateCatalog(items, 3, 10);
++    expect(result.items).toHaveLength(5);
++    expect(result.items[0]).toBe(20);
++  });
++
++  it('clamps to last page when requested page exceeds total', () =&gt; {
++    const result = paginateCatalog(items, 99, 10);
++    expect(result.page).toBe(3);
++  });
++
++  it('handles empty array — totalPages is 1, items is empty', () =&gt; {
++    const result = paginateCatalog([], 1, 10);
++    expect(result.items).toHaveLength(0);
++    expect(result.totalPages).toBe(1);
++    expect(result.page).toBe(1);
++  });
++});
+diff --git a/src/games/catalog-utils.ts b/src/games/catalog-utils.ts
+new file mode 100644
+index 0000000..9ab1735
+--- /dev/null
++++ b/src/games/catalog-utils.ts
+@@ -0,0 +1,49 @@
++import type {
++  GameCatalogEntry,
++  GameLevel,
++  GameSubject,
++} from './registry';
++
++export type CatalogFilter = {
++  search: string;
++  level: GameLevel | '';
++  subject: GameSubject | '';
++};
++
++export function filterCatalog(
++  catalog: GameCatalogEntry[],
++  filter: CatalogFilter,
++): GameCatalogEntry[] {
++  return catalog.filter((entry) =&gt; {
++    if (filter.level &amp;&amp; !entry.levels.includes(filter.level))
++      return false;
++    if (filter.subject &amp;&amp; entry.subject !== filter.subject)
++      return false;
++    if (filter.search) {
++      const q = filter.search.toLowerCase();
++      if (!entry.titleKey.toLowerCase().includes(q)) return false;
++    }
++    return true;
++  });
++}
++
++export type PaginateResult&lt;T&gt; = {
++  items: T[];
++  page: number;
++  totalPages: number;
++};
++
++export function paginateCatalog&lt;T&gt;(
++  items: T[],
++  page: number,
++  pageSize: number,
++): PaginateResult&lt;T&gt; {
++  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
++  const safePage = Math.min(Math.max(1, page), totalPages);
++  const start = (safePage - 1) * pageSize;
++  return {
++    items: items.slice(start, start + pageSize),
++    page: safePage,
++    totalPages,
++  };
++}
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md",
+  "pattern": "catalog-utils|Task 2|catalog utils"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md",
+  "pattern": "catalog-utils|Task 2|catalog utils",
+  "topFiles": [
+    {
+      "matchCount": 14,
+      "uri": "docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 14
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/games/catalog-utils.test.ts 2>&1</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/games/catalog-utils.test.ts 2>&1
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/games/catalog-utils.test.ts
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/games/catalog-utils.test.ts (10 tests) 2ms
+
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+   Start at  21:06:52
+   Duration  475ms (transform 21ms, setup 33ms, collect 14ms, tests 2ms, environment 253ms, prepare 26ms)
+
+Done in 0.86s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Counting tests**
+
+I counted 10 tests total, not 9 as the plan indicated. 
+
+**Reviewing implementation**
+
+The implementation matches the plan exactly with reusable generic functions and proper typing. 
+
+**Handling edge cases**
+
+I discovered that dividing by zero in JavaScript results in Infinity, which could break pagination calculations. I'm implementing validation for pageSize to prevent infinite totalPages and undefined behavior from negative or zero values. 
+
+I'm adding validation to clamp page values less than 1 to page 1. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Here is the review.
+
+---
+
+## Code review: Task 2 — `catalog-utils`
+
+**Scope:** `1e349a1..d03a10a` — `src/games/catalog-utils.ts`, `src/games/catalog-utils.test.ts`  
+**Plan:** [Task 2 in `2026-04-01-milestone-3-app-shell.md`](docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md) (lines 171–359)
+
+### Plan alignment
+
+Implementation matches the plan’s reference `catalog-utils.ts` byte-for-byte in behavior and shape (`CatalogFilter`, `filterCatalog`, `PaginateResult`, `paginateCatalog`). Tests match the plan’s spec; only import order differs (`./catalog-utils` before `./registry` vs the doc).  
+`yarn test src/games/catalog-utils.test.ts` passes in the worktree (Vitest reports **10** tests; the plan text says “9 tests” — that’s a **plan miscount**, not an implementation bug).
+
+---
+
+### Strengths
+
+- **Pure, focused API** — No I/O, matches “pure filter + pagination” intent; types come from `registry` and stay consistent with `GameCatalogEntry` / `GameLevel` / `GameSubject`.
+- **Filter semantics** — Level uses `includes`, subject is exact, search is case-insensitive substring on `titleKey`, combined filters are ANDed — all reasonable and as specified.
+- **Pagination UX** — Clamps page to `[1, totalPages]`, uses `Math.max(1, ceil(n/pageSize))` so empty lists get `totalPages === 1` and empty `items`, matching the tests.
+- **Generics** — `paginateCatalog<T>` and `PaginateResult<T>` are reusable beyond the catalog.
+- **Tests** — Cover empty filter, each dimension, no matches, combined filters, first/last/clamp/empty pagination; they run green against the current `GAME_CATALOG`.
+
+---
+
+### Issues
+
+#### Critical
+
+*None for the milestone as written.* The plan does not require handling invalid `pageSize`; call sites are expected to pass a positive size. If this module is treated as a general library, invalid `pageSize` yields bad math (`0` → `Infinity` pages in JS). That’s worth fixing or documenting only if the API is used without UI validation.
+
+#### Important
+
+1. **`page <= 0` is not covered by tests** — Implementation correctly clamps with `Math.max(1, page)`, but there is no test (e.g. `paginateCatalog(items, 0, 10)` → page `1`). Easy regression if someone refactors pagination.
+2. **Tests are tied to real catalog data** — Assertions like “exactly one hit for `ADDITION`” and `id === 'math-addition'` will break if `GAME_CATALOG` changes. Acceptable for the plan’s TDD recipe; for long-term stability, small inline fixtures would isolate `filterCatalog` behavior from catalog content.
+
+#### Minor
+
+1. **Search work** — Per entry: `toLowerCase()` on `titleKey` and the query each time; fine for a tiny catalog, only matters if the list grows large.
+2. **Plan doc** — Update expected test count from 9 → 10 if you want the doc to match Vitest.
+
+---
+
+### Assessment
+
+Task 2 is **complete and aligned with the milestone plan**: files, exports, and behaviors match the documented implementation. Code is small, readable, and appropriately typed. The only substantive follow-ups are **optional hardening** (invalid `pageSize`, test for `page < 1`) and **test isolation** if you want utilities decoupled from `GAME_CATALOG` contents — neither is required to satisfy the current task spec.
+
+**Verdict:** **Approve** for merge from a Task 2 / plan-compliance perspective; treat Important items as incremental quality improvements, not blockers.

@@ -148,3 +148,289 @@ Status: **completed**
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Verifying task implementation**
+
+I'm confirming the task implementation matches the plan with i18n and aria-labels. I'm checking that locale files contain the required strings for 'bookmark.add' and verifying i18n alignment. 
+
+**Verifying i18n alignment**
+
+I confirmed that the i18n implementation correctly uses `t(entry.titleKey)` for translated strings, aligning with the expected 'Addition practice' text instead of the raw key 'math-addition'. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.json",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "math-addition|bookmark\\.|levels\\."
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "math-addition|bookmark\\.|levels\\.",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/games.json"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/games.json"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/common.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/package.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Fixing test expectations**
+
+I'm updating the test expectation from `math-addition` to `Addition practice` to match the actual i18n implementation. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/i18n.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Updating aria-labels**
+
+I'm adding i18n-based aria-labels to the play button for consistency. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games",
+  "pattern": "GameCatalogEntry"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games",
+  "pattern": "GameCatalogEntry",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/src/games/catalog-utils.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/games/registry.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 5
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/registry.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Validating test expectations**
+
+The mock entry correctly matches GameCatalogEntry with levels ['1','2'] as const assignable to GameLevel[]. </details></think>
+
+_**Agent (composer-2)**_
+
+
+## ✅
+
+Task 5 is satisfied at `worktrees/milestone-3-app-shell` HEAD.
+
+| Check | Verdict |
+|--------|--------|
+| Dumb card (callbacks only, no internal bookmark state) | `onPlay` / `onBookmarkToggle` / `isBookmarked` from props — ```19:24:worktrees/milestone-3-app-shell/src/components/GameCard.tsx``` |
+| Props match plan (`entry`, `isBookmarked`, `onBookmarkToggle`, `onPlay`) | ```12:17:worktrees/milestone-3-app-shell/src/components/GameCard.tsx``` |
+| i18n: title via `games`, levels via `common` | ```25:57:worktrees/milestone-3-app-shell/src/components/GameCard.tsx``` |
+| Bookmark `aria-label` from `tCommon('bookmark.add' \| 'bookmark.remove')` | ```38:42:worktrees/milestone-3-app-shell/src/components/GameCard.tsx``` — aligns with ```37:40:worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/common.json``` |
+| Five tests + bookmark/play callbacks | ```19:94:worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx``` |
+| Title test uses **“Addition practice”** (not raw `math-addition`) | ```30:30:worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx``` matches ```2:2:worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/games.json``` — correct i18n alignment |
+
+**Note:** The written plan still shows the first test expecting `math-addition` while Step 3 uses `t(entry.titleKey)` — ```552:564:worktrees/milestone-3-app-shell/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md``` is internally inconsistent; the worktree tests match the implementation and `en` strings.
+
+**Small nit (not a fail):** The first test name still says “title **key**” while it asserts the translated string — ```20:20:worktrees/milestone-3-app-shell/src/components/GameCard.test.tsx```.
+
+**Play control:** No extra `aria-label`; accessible name is the visible “Play” text, same as the plan snippet — ```63:65:worktrees/milestone-3-app-shell/src/components/GameCard.tsx```.

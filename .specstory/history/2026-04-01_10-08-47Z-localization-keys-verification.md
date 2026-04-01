@@ -122,4 +122,10 @@ _**Agent (composer-2)**_
 
 **✅**
 
-Compared the worktree files to Task 3 Steps 1–2 in `docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md` (l
+Compared the worktree files to Task 3 Steps 1–2 in `docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md` (lines 371–458).
+
+**`en/common.json`** — All nine top-level keys are present (`appName`, `home`, `nav`, `search`, `levels`, `subjects`, `offline`, `pagination`, `bookmark`). Nested keys and English copy match the plan (including `pageOf`: `Page {{page}} of {{total}}`).
+
+**`pt-BR/common.json`** — Same structure and keys; Portuguese strings match the plan (including the offline banner and pagination interpolation).
+
+No missing keys, extra keys, or value mismatches relative to the Task 3 snippets.

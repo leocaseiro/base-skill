@@ -19,3 +19,1228 @@ Implement **Task 13** (`useSettings`) in `/Users/leocaseiro/Sites/base-skill/wor
 5. Commit: `feat(db): add useSettings hook with anonymous defaults and patch support`
 
 Report Status, SHA.
+
+---
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Reading task details**
+
+I'm reading the Milestone 3 plan for Task 13 (`useSettings`) to understand the implementation requirements. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Implementing `useSettings` per the Milestone 3 plan. Gathering the plan, schema, and patterns from similar hooks.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/using-superpowers/SKILL.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md",
+  "pattern": "Task 13|useSettings"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md",
+  "pattern": "Task 13|useSettings",
+  "topFiles": [
+    {
+      "matchCount": 23,
+      "uri": "docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 23
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **2** results in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell** (2 files)
+
+| File |
+|------|
+| `src/db/hooks/useBookmarks.test.ts` |
+| `src/db/hooks/useBookmarks.ts` |
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.ts",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "SettingsDoc|settings"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "SettingsDoc|settings",
+  "topFiles": [
+    {
+      "matchCount": 13,
+      "uri": "worktrees/milestone-3-app-shell/src/routeTree.gen.ts"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/milestone-3-app-shell/src/lib/i18n/i18n.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/db/types.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/settings.ts"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/index.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/db/create-database.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/create-database.test.ts"
+    }
+  ],
+  "totalFiles": 7,
+  "totalMatches": 28
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/schemas/settings.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Implementing useSettings**
+
+I'm fixing the useSettings hook to safely handle `doc === null` by only spreading DEFAULT_SETTINGS when doc is null. I confirmed that spreading null in object literals ignores it, so `{...DEFAULT_SETTINGS, ...doc}` when doc is null works correctly. I'll use a conditional spread to handle null doc values and avoid TypeScript errors. 
+
+**Updating settings logic**
+
+I'm adjusting the settings logic to handle null doc values with conditional spreading and removing updatedAt from DEFAULT_SETTINGS since it's set on insert. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useRxDB.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useRxQuery.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/providers/DbProvider.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Handling undefined db**
+
+I'm implementing explicit null handling for the settings merge to avoid merging with null values. I'm ensuring settings merge uses DEFAULT_SETTINGS when doc is null to avoid undefined behavior. I'm adjusting the type definition to make `updatedAt` optional in the merged settings view when no document exists. 
+
+I'm implementing edge case handling for patch operations to prevent overwriting primary keys. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "findOne\\("
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "findOne\\(",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/providers/ThemeRuntimeProvider.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/seed-themes.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/db/migrations.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/migrations.test.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/docs/testing-strategy.md"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/milestone-3-app-shell/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/docs/game-engine.md"
+    },
+    {
+      "matchCount": 7,
+      "uri": "worktrees/milestone-3-app-shell/docs/data-model.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/docs/ci-cd.md"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/docs/architecture.md"
+    },
+    {
+      "matchCount": 10,
+      "uri": "worktrees/milestone-3-app-shell/.specstory/history/2026-04-01_02-02-32Z.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/.specstory/history/2026-04-01_01-40-40Z-claude-plugin-install-superpowers.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/.specstory/history/2026-03-31_12-46-38Z-subagent-driven-development-milestone-plans.md"
+    }
+  ],
+  "totalFiles": 15,
+  "totalMatches": 37
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Testing flakiness**
+
+I'm adding a wait for `isReady` in tests to prevent flakiness. I realized that settings are available immediately with defaults, so tests might pass without waiting for `isReady`. 
+
+**Fixing test timing**
+
+I'm adding waitFor isReady before update calls in tests to prevent early returns due to unready database. I'm using createElement instead of JSX in the test file to avoid rendering issues, and adding waitFor isReady before update operations and assertions. I'm refactoring the test structure to use a wrapper component with I18nextProvider for tests requiring i18n, following the useBookmarks pattern. I'm implementing a minimal test wrapper with DbProvider and adding waitFor assertions for async state readiness. 
+
+**Updating test setup**
+
+I'm refactoring the test setup to use renderHook with useSettings and useRxDB, waiting for isReady before assertions. I'm implementing the settings merge logic with explicit null handling for the TypeScript spread. I'm refining the settings merge logic to handle union types properly with DEFAULT_SETTINGS and doc partials. 
+
+I'm aligning DEFAULT_SETTINGS with SettingsDoc required fields: id, profileId, updatedAt. I'm adjusting DEFAULT_SETTINGS to match the plan, ensuring updatedAt is handled properly during insertion. I'm using a type with default application values for SettingsDoc and verifying findOne(id).$ returns Observable<SettingsDoc | null>. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Implementing the hook and tests. Waiting for `isReady` before `update` (like `useBookmarks`) so updates aren't no-ops. Using `createElement` for the test wrapper.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useSettings.test.ts --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useSettings.test.ts --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/db/hooks/useSettings.test.ts --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ❯ src/db/hooks/useSettings.test.ts (3 tests | 2 failed) 2275ms
+   ✓ useSettings &gt; returns default volume 0.8 when no settings doc exists 95ms
+   × useSettings &gt; persists updated volume to RxDB 1092ms
+     → expected 0.8 to be 0.5 // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+   × useSettings &gt; merges partial updates — only changes the specified field 1088ms
+     → expected 1 to be 1.5 // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  21:39:13
+   Duration  3.21s (transform 61ms, setup 53ms, collect 308ms, tests 2.28s, environment 385ms, prepare 46ms)
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/hooks/useSettings.test.ts &gt; useSettings &gt; persists updated volume to RxDB
+AssertionError: expected 0.8 to be 0.5 // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+
+- Expected
++ Received
+
+- 0.5
++ 0.8
+
+ ❯ src/db/hooks/useSettings.test.ts:60:46
+     58| 
+     59|     await waitFor(() =&gt; {
+     60|       expect(result.current.settings.volume).toBe(0.5);
+       |                                              ^
+     61|     });
+     62|   });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/db/hooks/useSettings.test.ts &gt; useSettings &gt; merges partial updates — only changes the specified field
+AssertionError: expected 1 to be 1.5 // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m&lt;html&gt;[39m
+  [36m&lt;head /&gt;[39m
+  [36m&lt;body&gt;[39m
+    [36m&lt;div /&gt;[39m
+  [36m&lt;/body&gt;[39m
+[36m&lt;/html&gt;[39m
+
+- Expected
++ Received
+
+- 1.5
++ 1
+
+ ❯ src/db/hooks/useSettings.test.ts:76:50
+     74| 
+     75|     await waitFor(() =&gt; {
+     76|       expect(result.current.settings.speechRate).toBe(1.5);
+       |                                                  ^
+     77|       expect(result.current.settings.volume).toBe(0.8);
+     78|     });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+error Command failed with exit code 1.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts",
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts"
+    },
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Investigating patch behavior**
+
+I'm checking how RxDB's patch API works with undefined fields and whether merging defaults strips properties. I'm verifying whether insert is actually being called and checking if errors are being swallowed. I'm checking if insert failures are being silenced and verifying the observable subscription behavior. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "\\.insert\\("
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "\\.insert\\(",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/seed-themes.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/migrations.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/db/hooks/useRxQuery.test.tsx"
+    }
+  ],
+  "totalFiles": 5,
+  "totalMatches": 6
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/providers/ThemeRuntimeProvider.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Handling RxDocument spreads**
+
+I'm investigating if spreading RxDocument objects in useRxQuery could cause issues with volume updates due to RxDB's document structure. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useRxQuery.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Normalizing document data**
+
+I'm normalizing RxDB document objects to plain objects in useSettings. I'm adding a helper function to normalize RxDB documents to plain objects using toJSON(). I'm fixing the type definition to correctly handle RxDocument | null emissions from useRxQuery. 
+
+I'm refactoring the document normalization to handle RxDocument types more cleanly. I'm normalizing document data in useSettings after useRxQuery to avoid changing shared hooks. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Normalizing RxDB's `findOne().$` emissions: it emits `RxDocument` instances; spreading them doesn't reliably copy fields like `volume`. Converting with `toJSON()` before merging.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.d.ts",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/node_modules/rxdb",
+  "pattern": "RxDocument"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/node_modules/rxdb",
+  "pattern": "RxDocument",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/node_modules/rxdb/src/types/replication-protocol.d.ts"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/milestone-3-app-shell/node_modules/rxdb/src/types/rx-error.d.ts"
+    },
+    {
+      "matchCount": 13,
+      "uri": "worktrees/milestone-3-app-shell/node_modules/rxdb/src/types/rx-query.d.ts"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 123
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.ts",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src",
+  "pattern": "from 'rxdb'"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src",
+  "pattern": "from 'rxdb'",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/types.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/themes.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/sync_meta.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/settings.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/session_history_index.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/session_history.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/progress.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/profiles.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/game_config_overrides.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/bookmarks.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/db/schemas/app-meta.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/db/create-database.ts"
+    }
+  ],
+  "totalFiles": 12,
+  "totalMatches": 13
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Using duck typing**
+
+I'm implementing duck typing for toJSON to avoid importing RxDocument and keep dependencies minimal. 
+
+**Typing query results**
+
+I'm adding generics to useRxQuery to properly type the observable emissions as SettingsDoc | null. 
+
+**Combining useMemos**
+
+I'm combining two useMemos into one for settings to avoid redundant computations. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useSettings.test.ts --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/db/hooks/useSettings.test.ts --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/db/hooks/useSettings.test.ts --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/db/hooks/useSettings.test.ts (3 tests) 264ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  21:40:33
+   Duration  995ms (transform 63ms, setup 35ms, collect 229ms, tests 264ms, environment 279ms, prepare 39ms)
+
+Done in 1.45s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/db/hooks/useSettings.ts src/db/hooks/useSettings.test.ts && git commit --trailer "Made-with: Cursor" -m "feat(db): add useSettings hook with anonymous defaults and patch support"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/db/hooks/useSettings.ts src/db/hooks/useSettings.test.ts && git commit --trailer "Made-with: Cursor" -m "feat(db): add useSettings hook with anonymous defaults and patch support"
+```
+
+```
+[milestone-3-app-shell dbd9e48] feat(db): add useSettings hook with anonymous defaults and patch support
+ 2 files changed, 157 insertions(+)
+ create mode 100644 src/db/hooks/useSettings.test.ts
+ create mode 100644 src/db/hooks/useSettings.ts
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (65c6564)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/games/registry.test.ts (3 tests) 5ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 3ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 3ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/routes/__root.test.tsx (1 test) 14ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 27ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 130ms
+ ✓ src/db/migrations.test.ts (1 test) 43ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/providers/DbProvider.test.tsx (1 test) 21ms
+ ✓ src/db/create-database.test.ts (2 tests) 74ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 70ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 202ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 239ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 268ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/db/hooks/useSettings.test.ts (3 tests) 276ms
+ ✓ src/db/hooks/useBookmarks.test.ts (3 tests) 286ms
+
+ Test Files  19 passed (19)
+      Tests  52 passed (52)
+   Start at  21:40:42
+   Duration  2.05s (transform 683ms, setup 1.93s, collect 5.81s, tests 1.67s, environment 15.26s, prepare 1.59s)
+
+Done in 2.46s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git rev-parse HEAD</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git rev-parse HEAD
+```
+
+```
+dbd9e48a422cefd4b49aaaefc23a58c734464a78
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+## Status: **Complete**
+
+Task 13 is implemented in `worktrees/milestone-3-app-shell`, tests pass, and changes are committed.
+
+### What was done
+
+- **`useSettings.test.ts`** — Vitest + RTL with `createElement` for `DbProvider` (no JSX in `.ts`), `useSettingsUnderTest` + `waitFor(isReady)` so `update` runs after the DB is open (same idea as `useBookmarks`).
+- **`useSettings.ts`** — `EMPTY` when `db` is missing, `ANONYMOUS_SETTINGS_ID = 'settings:anonymous'`, `db.settings.findOne(ANONYMOUS_SETTINGS_ID).$` / `.exec()`, `DEFAULT_SETTINGS` aligned with `SettingsDoc` (required `id` / `profileId`; `updatedAt` only on insert/patch). Merging uses **`doc === null` → `{ ...DEFAULT_SETTINGS }` only**.
+- **RxDB detail** — `findOne().$` emits an `RxDocument`, so object spread did not pick up `volume` / `speechRate`. Added `plainSettingsFromQuery()` using `toJSON()` (same pattern as `ThemeRuntimeProvider`).
+
+### Verification
+
+```text
+yarn test src/db/hooks/useSettings.test.ts --run  →  3 passed
+```
+
+Pre-commit hook ran the full suite: **52 tests passed**.
+
+### Commit
+
+**SHA:** `dbd9e48a422cefd4b49aaaefc23a58c734464a78` (short: `dbd9e48`)
+
+**Message:** `feat(db): add useSettings hook with anonymous defaults and patch support`

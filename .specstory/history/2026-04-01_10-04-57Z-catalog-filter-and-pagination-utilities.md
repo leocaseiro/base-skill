@@ -228,9 +228,15 @@ _**Agent (composer-2)**_
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search">
 <details>
-<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **0** directories</summary>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **2** results in **1** directory</summary>
 
-No results found
+Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games** (2 files)
+
+| File |
+|------|
+| `registry.test.ts` |
+| `registry.ts` |
+
 </details>
 </tool-use>
 
@@ -238,3 +244,269 @@ No results found
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+Creating both files and running tests.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/games/catalog-utils.test.ts --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/games/catalog-utils.test.ts --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/games/catalog-utils.test.ts --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/games/catalog-utils.test.ts (10 tests) 4ms
+
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+   Start at  21:05:35
+   Duration  591ms (transform 33ms, setup 60ms, collect 17ms, tests 4ms, environment 334ms, prepare 46ms)
+
+Done in 1.32s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.ts",
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.test.ts"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.ts"
+    },
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.test.ts"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+All tests passed (10 tests: 6 + 4). Committing.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/games/catalog-utils.ts src/games/catalog-utils.test.ts && git commit --trailer "Made-with: Cursor" -m "feat(catalog): add filterCatalog and paginateCatalog utilities"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/games/catalog-utils.ts src/games/catalog-utils.test.ts && git commit --trailer "Made-with: Cursor" -m "feat(catalog): add filterCatalog and paginateCatalog utilities"
+```
+
+```
+[milestone-3-app-shell d03a10a] feat(catalog): add filterCatalog and paginateCatalog utilities
+ 2 files changed, 147 insertions(+)
+ create mode 100644 src/games/catalog-utils.test.ts
+ create mode 100644 src/games/catalog-utils.ts
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (49dd0ba)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.ts
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.ts
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.ts
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/games/catalog-utils.ts
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 3ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 3ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 5ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/routes/__root.test.tsx (1 test) 14ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 103ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 17ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/migrations.test.ts (1 test) 40ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 58ms
+ ✓ src/db/create-database.test.ts (2 tests) 66ms
+
+ Test Files  13 passed (13)
+      Tests  28 passed (28)
+   Start at  21:05:51
+   Duration  1.63s (transform 371ms, setup 1.23s, collect 2.23s, tests 319ms, environment 11.27s, prepare 919ms)
+
+Done in 2.09s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git status && git rev-parse HEAD</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git status && git rev-parse HEAD
+```
+
+```
+On branch milestone-3-app-shell
+nothing to commit, working tree clean
+d03a10a29f55bc9a025450f4e8b47bceb155ac19
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+## Report
+
+**Status:** DONE
+
+**Files changed**
+- `src/games/catalog-utils.ts` (new)
+- `src/games/catalog-utils.test.ts` (new)
+
+**Test output** (`yarn test src/games/catalog-utils.test.ts --run`):
+
+```
+✓ src/games/catalog-utils.test.ts (10 tests) 4ms
+Test Files  1 passed (1)
+```
+
+Pre-commit hook also ran the full suite: **13 files, 28 tests passed** (including an existing `act(...)` warning in `useRxQuery.test.tsx`, unrelated to this task).
+
+**Commit SHA:** `d03a10a29f55bc9a025450f4e8b47bceb155ac19`  
+Message: `feat(catalog): add filterCatalog and paginateCatalog utilities`
+
+**Concerns**
+- The spec text said “9 tests”; the provided suite is **10** cases (6 for `filterCatalog`, 4 for `paginateCatalog`). All pass.
+- Implementation and tests were added together (no separate “red” run); behavior matches the spec.

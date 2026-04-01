@@ -322,7 +322,7 @@ _**Agent (composer-2)**_
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
-<details><summary>Tool use: **read_file_v2** • Read file: </summary>
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/label.tsx</summary>
 
 </details>
 </tool-use>
@@ -331,3 +331,1628 @@ _**Agent (composer-2)**_
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/schemas/settings.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src",
+  "pattern": "navigate\\(\\{"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src",
+  "pattern": "navigate\\(\\{",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/components/Header.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/components/Footer.tsx"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/Header.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/slider.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/tsconfig.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Handling locale navigation**
+
+I'm implementing locale-aware navigation for settings using the navigate API with locale param. I'm adding minimal i18n keys for hardcoded labels like 'Language' to align with the existing locale structure. I'm adding translation keys for form labels like 'Language', 'Volume', and 'Speech rate' to support i18n. 
+
+I'm implementing i18n for the title using `t()` function while keeping labels in English for minimal scope. 
+
+**Adding i18n keys**
+
+I'm adding i18n keys for volume, speechRate, and language settings to support localization. I'm using separate i18n keys for volume label and number to support dynamic percentage display. I'm adding new i18n keys for volume and speech rate settings. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n",
+  "pattern": "settings"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n",
+  "pattern": "settings",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/common.json"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/common.json"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/milestone-3-app-shell/src/lib/i18n/i18n.ts"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 6
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Updating locale types**
+
+I'm narrowing the Select component's locale type from string to HeaderLocale and using LOCALES array for type safety. I'm defining the LOCALES array with strict typing for locale options. I'm refining the locale type definition to ensure strict typing for locale codes. I'm ensuring navigate params use `as const` for locale to maintain type safety. I'm adding i18n keys for volume, speechRate, and language to ensure full translation coverage. I'm verifying the useParams implementation for nested routes and ensuring type safety with speechRate handling. 
+
+**Checking label imports**
+
+I'm verifying the correct radix-ui import path for LabelPrimitive and checking if typecheck passes. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Implementing the settings screen with `to: '/$locale/settings'` for navigation and adding i18n keys for form labels. Verifying `label.tsx` and running checks.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/settings.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/settings.json</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/settings.json</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn typecheck && yarn test --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn typecheck && yarn test --run
+```
+
+```
+yarn run v1.22.22
+$ tsc --noEmit
+src/db/hooks/useBookmarks.test.ts(32,7): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '{ openDatabase: () =&gt; Promise&lt;BaseSkillDatabase&gt;; }' is not assignable to parameter of type 'Attributes &amp; DbProviderProps'.
+      Property 'children' is missing in type '{ openDatabase: () =&gt; Promise&lt;BaseSkillDatabase&gt;; }' but required in type 'DbProviderProps'.
+src/db/hooks/useSettings.test.ts(28,38): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '{ openDatabase: () =&gt; Promise&lt;BaseSkillDatabase&gt;; }' is not assignable to parameter of type 'Attributes &amp; DbProviderProps'.
+      Property 'children' is missing in type '{ openDatabase: () =&gt; Promise&lt;BaseSkillDatabase&gt;; }' but required in type 'DbProviderProps'.
+src/db/hooks/useSettings.ts(30,3): error TS2322: Type 'SettingsDoc | { toJSON: () =&gt; SettingsDoc; }' is not assignable to type 'SettingsDoc | null'.
+  Type '{ toJSON: () =&gt; SettingsDoc; }' is missing the following properties from type 'SettingsDoc': id, profileId, updatedAt
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+error Command failed with exit code 2.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/settings.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/settings.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Running typecheck**
+
+I'm addressing pre-existing type errors in test files to pass the typecheck as requested. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Investigating and fixing TypeScript errors so typecheck passes.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src",
+  "pattern": "DbProvider"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src",
+  "pattern": "DbProvider",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/src/routes/$locale/_app.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/src/providers/DbProvider.tsx"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/milestone-3-app-shell/src/providers/DbProvider.test.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/milestone-3-app-shell/src/db/hooks/useRxDB.ts"
+    }
+  ],
+  "totalFiles": 6,
+  "totalMatches": 17
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/providers/DbProvider.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Fixing type inference**
+
+I'm fixing the createElement call to include `children` in the props object to satisfy TypeScript's type checking. I'm addressing TypeScript errors in useSettings.ts where the function return type doesn't match the expected union type. I'm refining the type assertion in plainSettingsFromQuery to properly handle the union type. I'm fixing the type assertion to properly handle the union type where TypeScript narrows incorrectly after conditional checks. 
+
+I'm addressing TypeScript's incorrect narrowing in the else branch where doc should be narrowed to SettingsDoc but might still include toJSON due to union type ambiguity. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Fixing TypeScript errors: `createElement` must include `children` in the props object, and narrowing the return type in `useSettings.ts`.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn typecheck && yarn test --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn typecheck && yarn test --run
+```
+
+```
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 1.81s.
+yarn run v1.22.22
+$ vitest run --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 5ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/routes/__root.test.tsx (1 test) 32ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 28ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 142ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 22ms
+ ✓ src/db/migrations.test.ts (1 test) 53ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 72ms
+ ✓ src/db/create-database.test.ts (2 tests) 74ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 198ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 227ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 261ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/db/hooks/useSettings.test.ts (3 tests) 275ms
+ ✓ src/db/hooks/useBookmarks.test.ts (3 tests) 278ms
+
+ Test Files  19 passed (19)
+      Tests  52 passed (52)
+   Start at  21:43:38
+   Duration  1.90s (transform 770ms, setup 2.03s, collect 5.93s, tests 1.68s, environment 12.94s, prepare 1.50s)
+
+Done in 2.28s.
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Committing settings changes**
+
+I'm committing the settings screen wiring to RxDB sliders and locale select with all related files. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git status && git branch --show-current</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git status && git branch --show-current
+```
+
+```
+On branch milestone-3-app-shell
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   src/db/hooks/useBookmarks.test.ts
+	modified:   src/db/hooks/useSettings.test.ts
+	modified:   src/db/hooks/useSettings.ts
+	modified:   src/lib/i18n/locales/en/settings.json
+	modified:   src/lib/i18n/locales/pt-BR/settings.json
+	modified:   src/routeTree.gen.ts
+	modified:   src/routes/$locale/_app/settings.tsx
+
+Untracked files:
+  (use "git add &lt;file&gt;..." to include in what will be committed)
+	src/components/ui/label.tsx
+
+no changes added to commit (use "git add" and/or "git commit -a")
+milestone-3-app-shell
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git diff src/routeTree.gen.ts | head -80</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git diff src/routeTree.gen.ts | head -80
+```
+
+```
+diff --git a/src/routeTree.gen.ts b/src/routeTree.gen.ts
+index 85e6f20..078b12b 100644
+--- a/src/routeTree.gen.ts
++++ b/src/routeTree.gen.ts
+@@ -8,143 +8,140 @@
+ // You should NOT make any changes in this file as it will be overwritten.
+ // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
+ 
+-import { Route as rootRouteImport } from './routes/__root';
+-import { Route as LocaleRouteRouteImport } from './routes/$locale/route';
+-import { Route as IndexRouteImport } from './routes/index';
+-import { Route as LocaleAppRouteImport } from './routes/$locale/_app';
+-import { Route as LocaleAppIndexRouteImport } from './routes/$locale/_app/index';
+-import { Route as LocaleAppSettingsRouteImport } from './routes/$locale/_app/settings';
+-import { Route as LocaleAppParentRouteImport } from './routes/$locale/_app/parent';
+-import { Route as LocaleAppDashboardRouteImport } from './routes/$locale/_app/dashboard';
+-import { Route as LocaleAppParentIndexRouteImport } from './routes/$locale/_app/parent/index';
+-import { Route as LocaleAppParentVoicesRouteImport } from './routes/$locale/_app/parent/voices';
+-import { Route as LocaleAppParentSyncRouteImport } from './routes/$locale/_app/parent/sync';
+-import { Route as LocaleAppParentOverridesRouteImport } from './routes/$locale/_app/parent/overrides';
+-import { Route as LocaleAppParentHistoryRouteImport } from './routes/$locale/_app/parent/history';
+-import { Route as LocaleAppParentDataRouteImport } from './routes/$locale/_app/parent/data';
+-import { Route as LocaleAppGameGameIdRouteImport } from './routes/$locale/_app/game/$gameId';
++import { Route as rootRouteImport } from './routes/__root'
++import { Route as LocaleRouteRouteImport } from './routes/$locale/route'
++import { Route as IndexRouteImport } from './routes/index'
++import { Route as LocaleAppRouteImport } from './routes/$locale/_app'
++import { Route as LocaleAppIndexRouteImport } from './routes/$locale/_app/index'
++import { Route as LocaleAppSettingsRouteImport } from './routes/$locale/_app/settings'
++import { Route as LocaleAppParentRouteImport } from './routes/$locale/_app/parent'
++import { Route as LocaleAppDashboardRouteImport } from './routes/$locale/_app/dashboard'
++import { Route as LocaleAppParentIndexRouteImport } from './routes/$locale/_app/parent/index'
++import { Route as LocaleAppParentVoicesRouteImport } from './routes/$locale/_app/parent/voices'
++import { Route as LocaleAppParentSyncRouteImport } from './routes/$locale/_app/parent/sync'
++import { Route as LocaleAppParentOverridesRouteImport } from './routes/$locale/_app/parent/overrides'
++import { Route as LocaleAppParentHistoryRouteImport } from './routes/$locale/_app/parent/history'
++import { Route as LocaleAppParentDataRouteImport } from './routes/$locale/_app/parent/data'
++import { Route as LocaleAppGameGameIdRouteImport } from './routes/$locale/_app/game/$gameId'
+ 
+ const LocaleRouteRoute = LocaleRouteRouteImport.update({
+   id: '/$locale',
+   path: '/$locale',
+   getParentRoute: () =&gt; rootRouteImport,
+-} as any);
++} as any)
+ const IndexRoute = IndexRouteImport.update({
+   id: '/',
+   path: '/',
+   getParentRoute: () =&gt; rootRouteImport,
+-} as any);
++} as any)
+ const LocaleAppRoute = LocaleAppRouteImport.update({
+   id: '/_app',
+   getParentRoute: () =&gt; LocaleRouteRoute,
+-} as any);
++} as any)
+ const LocaleAppIndexRoute = LocaleAppIndexRouteImport.update({
+   id: '/',
+   path: '/',
+   getParentRoute: () =&gt; LocaleAppRoute,
+-} as any);
++} as any)
+ const LocaleAppSettingsRoute = LocaleAppSettingsRouteImport.update({
+   id: '/settings',
+   path: '/settings',
+   getParentRoute: () =&gt; LocaleAppRoute,
+-} as any);
++} as any)
+ const LocaleAppParentRoute = LocaleAppParentRouteImport.update({
+   id: '/parent',
+   path: '/parent',
+   getParentRoute: () =&gt; LocaleAppRoute,
+-} as any);
++} as any)
+ const LocaleAppDashboardRoute = LocaleAppDashboardRouteImport.update({
+   id: '/dashboard',
+   path: '/dashboard',
+   getParentRoute: () =&gt; LocaleAppRoute,
+-} as any);
+-const LocaleAppParentIndexRoute =
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+Restoring `routeTree.gen.ts` — formatting-only drift, unrelated to Task 14.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git restore src/routeTree.gen.ts</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git restore src/routeTree.gen.ts
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Committing settings wiring**
+
+I'm committing the settings screen wiring with RxDB sliders and locale select as specified by the user. I'm committing the settings screen wiring with RxDB sliders and locale select. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/routes/\$locale/_app/settings.tsx src/components/ui/label.tsx src/lib/i18n/locales/en/settings.json src/lib/i18n/locales/pt-BR/settings.json src/db/hooks/useSettings.ts src/db/hooks/useSettings.test.ts src/db/hooks/useBookmarks.test.ts && git commit --trailer "Made-with: Cursor" -m "feat(settings): wire settings screen to RxDB sliders and locale select" -m "Add shadcn Label, settings namespace strings for controls, and navigate via '/\$locale/settings'. Fix DbProvider createElement props and useSettings doc narrowing for tsc."</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/routes/\$locale/_app/settings.tsx src/components/ui/label.tsx src/lib/i18n/locales/en/settings.json src/lib/i18n/locales/pt-BR/settings.json src/db/hooks/useSettings.ts src/db/hooks/useSettings.test.ts src/db/hooks/useBookmarks.test.ts && git commit --trailer "Made-with: Cursor" -m "feat(settings): wire settings screen to RxDB sliders and locale select" -m "Add shadcn Label, settings namespace strings for controls, and navigate via '/\$locale/settings'. Fix DbProvider createElement props and useSettings doc narrowing for tsc."
+```
+
+```
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (45f7353)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 7 files
+[STARTED] *.{ts,tsx} — 5 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.json — 2 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/label.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/settings.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/settings.json /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/settings.json
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/settings.json /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/settings.json
+[COMPLETED] *.json — 2 files
+[FAILED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/label.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/settings.tsx [FAILED]
+[FAILED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/label.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/settings.tsx [FAILED]
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[SKIPPED] Skipped because of errors from tasks.
+[STARTED] Reverting to original state because of errors...
+[COMPLETED] Reverting to original state because of errors...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+
+✖ eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/label.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/settings.tsx:
+
+/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts
+  28:7   warning  React Hook useCallback has an unnecessary dependency: 'testDb'. Either exclude it or remove the dependency array. Outer scope values like 'testDb' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps
+  30:12  error    Do not pass children as props. Instead, pass them as additional arguments to React.createElement                                                                                                                                    react/no-children-prop
+
+/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts
+  26:7   warning  React Hook useCallback has an unnecessary dependency: 'testDb'. Either exclude it or remove the dependency array. Outer scope values like 'testDb' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps
+  28:12  error    Do not pass children as props. Instead, pass them as additional arguments to React.createElement                                                                                                                                    react/no-children-prop
+
+✖ 4 problems (2 errors, 2 warnings)
+husky - pre-commit script failed (code 1)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Fixing ts issues**
+
+I'm using JSX instead of createElement for DbProvider in tests to satisfy TypeScript while keeping the original structure. I'm adding a type assertion to bypass the props inference issue in tests since renaming to .tsx isn't feasible. 
+
+I'm using a type assertion on the props to bypass the children prop issue in the test file. I'm addressing the TypeScript error where `children` property is missing from DbProviderProps by adjusting the function component signature to match React's createElement overloads. 
+
+I'm converting the wrapper to JSX syntax to properly handle the children prop type. I'm renaming useSettings.test.ts to useSettings.test.tsx for consistency with JSX usage. I'm making `children` optional in `DbProviderProps` to align with how `createElement` handles children as a third argument. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Fixing the test wrappers: TypeScript required `children` in props, but ESLint forbids that. Using `Omit<DbProviderProps, 'children'>` for the props object and passing `children` as the third argument to `createElement`.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Importing types**
+
+I'm importing ComponentProps to reference DbProvider's props. 
+
+**Fixing auth middleware**
+
+I'm fixing the exhaustive-deps warning by using `[]` and capturing testDb from closure. I'm addressing the exhaustive-deps warning by using `[]` and capturing testDb from closure. I'm using useCallback with testDb dependency to stabilize the database reference in TestProviders. I'm stabilizing the database reference in TestProviders by using useCallback with an empty dependency array to avoid ESLint warnings. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn typecheck && yarn eslint src/db/hooks/useSettings.test.ts src/db/hooks/useBookmarks.test.ts --max-warnings 0 && yarn test --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn typecheck && yarn eslint src/db/hooks/useSettings.test.ts src/db/hooks/useBookmarks.test.ts --max-warnings 0 && yarn test --run
+```
+
+```
+yarn run v1.22.22
+$ tsc --noEmit
+src/db/hooks/useBookmarks.test.ts(29,7): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'Omit&lt;DbProviderProps, "children"&gt;' is not assignable to parameter of type 'Attributes &amp; DbProviderProps'.
+      Property 'children' is missing in type 'Omit&lt;DbProviderProps, "children"&gt;' but required in type 'DbProviderProps'.
+src/db/hooks/useSettings.test.ts(27,7): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'Omit&lt;DbProviderProps, "children"&gt;' is not assignable to parameter of type 'Attributes &amp; DbProviderProps'.
+      Property 'children' is missing in type 'Omit&lt;DbProviderProps, "children"&gt;' but required in type 'DbProviderProps'.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+error Command failed with exit code 2.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Renaming test files**
+
+I'm renaming test files to .tsx to enable JSX usage for cleaner createElement handling. I'm switching to JSX in .tsx files for cleaner component wrapper creation. I'm keeping .ts extension and using fragment-less approach with eslint-disable for TS + react/no-children-prop conflict. I'm renaming test files to .tsx extension and updating imports to use JSX syntax. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Renaming hook tests to `.tsx` and using JSX for `DbProvider` so TypeScript and ESLint agree.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="delete_file">
+<details><summary>Tool use: **delete_file**</summary>
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="delete_file"><details>
+<summary>Tool use: **delete_file**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="delete_file">
+<details><summary>Tool use: **delete_file**</summary>
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="delete_file"><details>
+<summary>Tool use: **delete_file**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "useSettings\\.test\\.ts|useBookmarks\\.test\\.ts"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell",
+  "pattern": "useSettings\\.test\\.ts|useBookmarks\\.test\\.ts",
+  "topFiles": [
+    {
+      "matchCount": 12,
+      "uri": "worktrees/milestone-3-app-shell/docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 12
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn typecheck && yarn eslint src/db/hooks/useSettings.test.tsx src/db/hooks/useBookmarks.test.tsx --max-warnings 0 && yarn test --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn typecheck && yarn eslint src/db/hooks/useSettings.test.tsx src/db/hooks/useBookmarks.test.tsx --max-warnings 0 && yarn test --run
+```
+
+```
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 1.84s.
+yarn run v1.22.22
+$ /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/node_modules/.bin/eslint src/db/hooks/useSettings.test.tsx src/db/hooks/useBookmarks.test.tsx --max-warnings 0
+
+/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.tsx
+  25:3  error  Function component is not an arrow function  react/function-component-definition
+
+/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.tsx
+  23:3  error  Function component is not an arrow function  react/function-component-definition
+
+✖ 2 problems (2 errors, 0 warnings)
+  2 errors and 0 warnings potentially fixable with the &#96;--fix&#96; option.
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+error Command failed with exit code 1.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn eslint src/db/hooks/useSettings.test.tsx src/db/hooks/useBookmarks.test.tsx --max-warnings 0 && yarn test --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn eslint src/db/hooks/useSettings.test.tsx src/db/hooks/useBookmarks.test.tsx --max-warnings 0 && yarn test --run
+```
+
+```
+yarn run v1.22.22
+$ /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/node_modules/.bin/eslint src/db/hooks/useSettings.test.tsx src/db/hooks/useBookmarks.test.tsx --max-warnings 0
+Done in 1.97s.
+yarn run v1.22.22
+$ vitest run --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 3ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 3ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/routes/__root.test.tsx (1 test) 24ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 45ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 140ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 19ms
+ ✓ src/db/migrations.test.ts (1 test) 42ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 63ms
+ ✓ src/db/create-database.test.ts (2 tests) 66ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 179ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 213ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 240ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 1ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 274ms
+ ✓ src/db/hooks/useBookmarks.test.tsx (3 tests) 272ms
+
+ Test Files  19 passed (19)
+      Tests  52 passed (52)
+   Start at  21:46:16
+   Duration  1.89s (transform 629ms, setup 1.87s, collect 5.70s, tests 1.59s, environment 13.12s, prepare 1.61s)
+
+Done in 2.29s.
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git status</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git status
+```
+
+```
+On branch milestone-3-app-shell
+Changes to be committed:
+  (use "git restore --staged &lt;file&gt;..." to unstage)
+	new file:   src/components/ui/label.tsx
+	modified:   src/db/hooks/useBookmarks.test.ts
+	modified:   src/db/hooks/useSettings.test.ts
+	modified:   src/db/hooks/useSettings.ts
+	modified:   src/lib/i18n/locales/en/settings.json
+	modified:   src/lib/i18n/locales/pt-BR/settings.json
+	modified:   src/routes/$locale/_app/settings.tsx
+
+Changes not staged for commit:
+  (use "git add/rm &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	deleted:    src/db/hooks/useBookmarks.test.ts
+	deleted:    src/db/hooks/useSettings.test.ts
+	modified:   src/routeTree.gen.ts
+
+Untracked files:
+  (use "git add &lt;file&gt;..." to include in what will be committed)
+	src/db/hooks/useBookmarks.test.tsx
+	src/db/hooks/useSettings.test.tsx
+
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Staging files**
+
+I'm resetting the staged state and staging the correct files, including restoring the modified `routeTree.gen.ts`. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git restore --staged . && git restore src/routeTree.gen.ts && git add src/components/ui/label.tsx src/db/hooks/useBookmarks.test.tsx src/db/hooks/useSettings.test.tsx src/db/hooks/useSettings.ts src/lib/i18n/locales/en/settings.json src/lib/i18n/locales/pt-BR/settings.json 'src/routes/$locale/_app/settings.tsx' && git add -u src/db/hooks/useBookmarks.test.ts src/db/hooks/useSettings.test.ts && git status</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git restore --staged . && git restore src/routeTree.gen.ts && git add src/components/ui/label.tsx src/db/hooks/useBookmarks.test.tsx src/db/hooks/useSettings.test.tsx src/db/hooks/useSettings.ts src/lib/i18n/locales/en/settings.json src/lib/i18n/locales/pt-BR/settings.json 'src/routes/$locale/_app/settings.tsx' && git add -u src/db/hooks/useBookmarks.test.ts src/db/hooks/useSettings.test.ts && git status
+```
+
+```
+On branch milestone-3-app-shell
+Changes to be committed:
+  (use "git restore --staged &lt;file&gt;..." to unstage)
+	new file:   src/components/ui/label.tsx
+	renamed:    src/db/hooks/useBookmarks.test.ts -&gt; src/db/hooks/useBookmarks.test.tsx
+	renamed:    src/db/hooks/useSettings.test.ts -&gt; src/db/hooks/useSettings.test.tsx
+	modified:   src/db/hooks/useSettings.ts
+	modified:   src/lib/i18n/locales/en/settings.json
+	modified:   src/lib/i18n/locales/pt-BR/settings.json
+	modified:   src/routes/$locale/_app/settings.tsx
+
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git commit --trailer "Made-with: Cursor" -m "feat(settings): wire settings screen to RxDB sliders and locale select" -m "Add shadcn Label, settings i18n strings, and navigate via '/\$locale/settings'. Fix useSettings doc narrowing for tsc. Move hook integration tests to .tsx with JSX DbProvider wrappers for tsc/eslint."</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git commit --trailer "Made-with: Cursor" -m "feat(settings): wire settings screen to RxDB sliders and locale select" -m "Add shadcn Label, settings i18n strings, and navigate via '/\$locale/settings'. Fix useSettings doc narrowing for tsc. Move hook integration tests to .tsx with JSX DbProvider wrappers for tsc/eslint."
+```
+
+```
+[milestone-3-app-shell 68a1f06] feat(settings): wire settings screen to RxDB sliders and locale select
+ 7 files changed, 135 insertions(+), 25 deletions(-)
+ create mode 100644 src/components/ui/label.tsx
+ rename src/db/hooks/{useBookmarks.test.ts =&gt; useBookmarks.test.tsx} (90%)
+ rename src/db/hooks/{useSettings.test.ts =&gt; useSettings.test.tsx} (91%)
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (bc2e543)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 7 files
+[STARTED] *.{ts,tsx} — 5 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.json — 2 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/label.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/settings.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/settings.json /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/settings.json
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/settings.json /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/settings.json
+[COMPLETED] *.json — 2 files
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/label.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/settings.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/label.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/settings.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/components/ui/label.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useBookmarks.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/db/hooks/useSettings.ts /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/routes/$locale/_app/settings.tsx
+[COMPLETED] *.{ts,tsx} — 5 files
+[COMPLETED] .lintstagedrc.mjs — 7 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 4ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/routes/__root.test.tsx (1 test) 33ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 30ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 100ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 23ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/migrations.test.ts (1 test) 50ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 72ms
+ ✓ src/db/create-database.test.ts (2 tests) 72ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 225ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 241ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 258ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 277ms
+ ✓ src/db/hooks/useBookmarks.test.tsx (3 tests) 279ms
+
+ Test Files  19 passed (19)
+      Tests  52 passed (52)
+   Start at  21:46:41
+   Duration  1.85s (transform 662ms, setup 1.82s, collect 5.38s, tests 1.68s, environment 13.17s, prepare 1.68s)
+
+Done in 2.27s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git status && git rev-parse HEAD</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git status && git rev-parse HEAD
+```
+
+```
+On branch milestone-3-app-shell
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   src/routeTree.gen.ts
+
+no changes added to commit (use "git add" and/or "git commit -a")
+68a1f06ffd54a534b4e77c689ed8330403935967
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git restore src/routeTree.gen.ts && git status</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git restore src/routeTree.gen.ts && git status
+```
+
+```
+On branch milestone-3-app-shell
+nothing to commit, working tree clean
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git show --stat HEAD</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git show --stat HEAD
+```
+
+```
+commit 68a1f06ffd54a534b4e77c689ed8330403935967
+Author: leocaseiro &lt;leobok@gmail.com&gt;
+Date:   Wed Apr 1 21:46:38 2026 +1100
+
+    feat(settings): wire settings screen to RxDB sliders and locale select
+    
+    Add shadcn Label, settings i18n strings, and navigate via '/$locale/settings'. Fix useSettings doc narrowing for tsc. Move hook integration tests to .tsx with JSX DbProvider wrappers for tsc/eslint.
+    
+    Made-with: Cursor
+
+ src/components/ui/label.tsx                        |  20 ++++
+ ...{useBookmarks.test.ts =&gt; useBookmarks.test.tsx} |  15 ++-
+ .../{useSettings.test.ts =&gt; useSettings.test.tsx}  |   9 +-
+ src/db/hooks/useSettings.ts                        |   2 +-
+ src/lib/i18n/locales/en/settings.json              |   5 +-
+ src/lib/i18n/locales/pt-BR/settings.json           |   5 +-
+ src/routes/$locale/_app/settings.tsx               | 104 +++++++++++++++++++--
+ 7 files changed, 135 insertions(+), 25 deletions(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+## Status: **Complete**
+
+### What changed
+- **`src/routes/$locale/_app/settings.tsx`** — `SettingsScreen` with `useTranslation('settings')`, `useSettings()`, volume/speech-rate **Sliders**, **Select** + same `LOCALES` as the header, `useParams({ from: '/$locale' })`, and `navigate({ to: '/$locale/settings', params: { locale } })`. Route registration remains `createFileRoute('/$locale/_app/settings')`.
+- **`src/components/ui/label.tsx`** — shadcn `Label` (committed).
+- **`src/lib/i18n/locales/en/settings.json`** & **`pt-BR/settings.json`** — `volume`, `speechRate`, `language` strings (with interpolation for percent/rate).
+- **`src/db/hooks/useSettings.ts`** — `plainSettingsFromQuery` final branch returns `doc as SettingsDoc` so `tsc` is satisfied.
+- **`useBookmarks.test.tsx` / `useSettings.test.tsx`** — renamed from `.ts`, wrappers use JSX `<DbProvider>` so TypeScript and `react/no-children-prop` both pass.
+
+### Verification
+- `yarn typecheck` — pass  
+- `yarn test --run` — pass (52 tests)
+
+### Commit
+- **SHA:** `68a1f06ffd54a534b4e77c689ed8330403935967` (short: `68a1f06`)  
+- **Branch:** `milestone-3-app-shell`  
+- **Message:** `feat(settings): wire settings screen to RxDB sliders and locale select`
+
+`src/routeTree.gen.ts` was left unstaged; it only picked up prettier-style churn when hooks touched the tree—restored to match `HEAD` so the worktree stays clean.

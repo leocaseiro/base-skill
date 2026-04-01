@@ -180,7 +180,20 @@ _**Agent (composer-2)**_
 
 <details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/common.json</summary>
 
-Status: **loading**
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/common.json</summary>
 
 </details>
 
@@ -190,3 +203,166 @@ Status: **loading**
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/lib/i18n/i18n.test.ts --run</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && yarn test src/lib/i18n/i18n.test.ts --run
+```
+
+```
+yarn run v1.22.22
+$ vitest run src/lib/i18n/i18n.test.ts --run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  21:08:22
+   Duration  448ms (transform 25ms, setup 34ms, collect 31ms, tests 2ms, environment 206ms, prepare 29ms)
+
+Done in 0.87s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/lib/i18n/locales/en/common.json src/lib/i18n/locales/pt-BR/common.json && git commit --trailer "Made-with: Cursor" -m "feat(i18n): add app shell UI strings to common namespace"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add src/lib/i18n/locales/en/common.json src/lib/i18n/locales/pt-BR/common.json && git commit --trailer "Made-with: Cursor" -m "feat(i18n): add app shell UI strings to common namespace"
+```
+
+```
+[milestone-3-app-shell c2885f8] feat(i18n): add app shell UI strings to common namespace
+ 2 files changed, 70 insertions(+)
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (d6ce182)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 0 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.json — 2 files
+[SKIPPED] *.{ts,tsx} — no files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/common.json /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/common.json
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/en/common.json /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/src/lib/i18n/locales/pt-BR/common.json
+[COMPLETED] *.json — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell
+
+ ✓ src/db/setup-validation.test.ts (1 test) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 1ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 4ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/routes/__root.test.tsx (1 test) 14ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 99ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 20ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/migrations.test.ts (1 test) 43ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 63ms
+ ✓ src/db/create-database.test.ts (2 tests) 67ms
+
+ Test Files  13 passed (13)
+      Tests  28 passed (28)
+   Start at  21:08:27
+   Duration  1.40s (transform 372ms, setup 940ms, collect 2.12s, tests 323ms, environment 8.78s, prepare 925ms)
+
+Done in 1.80s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Committing changes**
+
+I've committed the changes with SHA c2885f8 and verified the test suite passes. </details></think>
+
+_**Agent (composer-2)**_
+
+
+## Status
+
+**Done.** Task 3 is implemented in `worktrees/milestone-3-app-shell`, tests pass, and the change is committed.
+
+## Commit
+
+- **SHA:** `c2885f8`
+- **Message:** `feat(i18n): add app shell UI strings to common namespace`
+
+## Tests
+
+Requested command:
+
+```text
+yarn test src/lib/i18n/i18n.test.ts --run
+```
+
+Result: **1 test passed** (`common:appName` for `en` and `pt-BR`).
+
+The pre-commit hook also ran the full Vitest suite: **13 files, 28 tests passed** (including `i18n.test.ts`).
+
+## Merge / extra keys
+
+**None.** `en/common.json` and `pt-BR/common.json` only had `appName` and `home.title`, which are already in your snippets, so the files were replaced with your JSON as given. No other keys were required by `i18n.test.ts` or the old files.
+
+**Note:** lint-staged ran Prettier on the staged JSON files; formatting may differ slightly from hand-edited JSON (e.g. line breaks), but the keys and values match your spec.
