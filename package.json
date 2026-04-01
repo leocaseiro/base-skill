@@ -17,8 +17,12 @@
     "test:e2e:a11y": "playwright test --grep @a11y",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0 && knip --no-config-hints",
+    "lint:css": "stylelint 'src/**/*.css'",
+    "lint:md": "markdownlint-cli2 '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees'",
     "format": "prettier --check .",
     "fix": "prettier --write . && eslint --fix .",
+    "fix:css": "stylelint --fix 'src/**/*.css' && prettier --write 'src/**/*.css'",
+    "fix:md": "markdownlint-cli2 --fix '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees' && prettier --write '**/*.md'",
     "prepare": "husky"
   },
   "dependencies": {
@@ -74,6 +78,8 @@
     "husky": "^9.1.7",
     "jsdom": "^28.1.0",
     "knip": "^6.1.1",
+    "lint-staged": "^16.4.0",
+    "markdownlint-cli2": "^0.22.0",
     "prettier": "^3.8.1",
     "stylelint": "^17.6.0",
     "stylelint-config-standard": "^40.0.0",
@@ -87,5 +93,22 @@
   },
   "engines": {
     "node": ">=22.12.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.css": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.md": [
+      "markdownlint-cli2 --fix",
+      "prettier --write"
+    ],
+    "*.json": [
+      "prettier --write"
+    ]
   }
 }
