@@ -2,10 +2,6 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { GAME_CATALOG } from '@/games/registry';
 
-export const Route = createFileRoute('/$locale/_app/')({
-  component: HomeCatalog,
-});
-
 const HomeCatalog = () => {
   const { t } = useTranslation('games');
 
@@ -26,3 +22,7 @@ const HomeCatalog = () => {
     </div>
   );
 };
+
+export const Route = createFileRoute('/$locale/_app/')({
+  component: HomeCatalog,
+});

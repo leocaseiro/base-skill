@@ -1,9 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/$locale/_app/parent/history')({
-  component: SessionHistory,
-});
-
 const SessionHistory = () => (
   <div className="p-8">
     <h1 className="text-2xl font-bold">Session History</h1>
@@ -12,3 +8,7 @@ const SessionHistory = () => (
     </p>
   </div>
 );
+
+export const Route = createFileRoute('/$locale/_app/parent/history')({
+  component: SessionHistory,
+});

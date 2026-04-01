@@ -1,9 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-  component: GameShell,
-});
-
 const GameShell = () => {
   const { gameId } = Route.useParams();
   return (
@@ -15,3 +11,7 @@ const GameShell = () => {
     </div>
   );
 };
+
+export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+  component: GameShell,
+});
