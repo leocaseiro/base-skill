@@ -2,15 +2,15 @@ import '../src/styles.css';
 import '../src/lib/i18n/i18n';
 import { ThemeProvider } from 'next-themes';
 import { withTheme } from './decorators/withTheme';
-import type { Preview } from '@storybook/react';
+import type { Decorator, Preview } from '@storybook/react';
 
-const withAppThemeProvider: Preview['decorators'][number] = (Story) => (
+const withAppThemeProvider: Decorator = (Story) => (
   <ThemeProvider
     attribute="class"
     defaultTheme="light"
     enableSystem={false}
   >
-    <Story />
+    {Story()}
   </ThemeProvider>
 );
 
