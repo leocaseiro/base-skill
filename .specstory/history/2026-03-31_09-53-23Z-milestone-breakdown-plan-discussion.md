@@ -984,4 +984,128 @@ This affects the plan, which currently specifies:
 - `tests/e2e/a11y.spec.ts` -- axe-core accessibility test
 
 The user wants unit/component tests co-located with components (e.g., `app/routes/__root.test.tsx` instead of `tests/unit/__root.test.tsx`).
-</details></think>
+
+
+E2E tests are different since they test the whole app rather than individual components. I should probably keep those in a dedicated folder since they're cross-cutting, but I could also organize them by feature if the user prefers. Let me update the plan to reflect co-located unit tests while keeping E2E tests in a separate directory for clarity.
+
+This means adjusting the Vitest configuration to pick up test files next to their source files, removing the separate `tests/unit/` folder entirely, and moving the smoke test to live alongside the root route. The E2E folder stays at the root level but can be organized by feature within it.</details></think>
+
+_**Agent (claude-4.6-sonnet-medium-thinking)**_
+
+Good call. That changes the test structure throughout the plan. Let me update it.
+
+_**Agent (claude-4.6-sonnet-medium-thinking)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/plans/milestone_1_scaffolding_ad0d1689.plan.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-sonnet-medium-thinking)**_
+
+<think><details><summary>Thought Process</summary>
+The user wants co-located tests - tests live next to their component files, not in a separate `tests/` folder.
+
+Here's how this changes things:
+
+**Unit/Component tests (Vitest):**
+- Co-located: `app/routes/__root.test.tsx` instead of `tests/unit/smoke.test.tsx`
+- Pattern: `app/**/*.test.{ts,tsx}` in vitest config
+- No separate `tests/unit/` directory
+
+**E2E tests (Playwright):**
+- E2E tests span the whole app and aren't tied to one component - they're typically kept in a dedicated folder since they test user flows, not units
+
+
+- For e2e, I'm weighing whether to keep a top-level `e2e/` folder separate from app code, or co-locate them with routes using an `.e2e.ts` suffix like `app/routes/_app/index.e2e.ts`
+- The "domain structure" preference suggests tests should live near their code, but e2e tests that span multiple flows across the app don't fit neatly into a single route file
+- So I'm settling on a hybrid: unit tests co-located as `*.test.tsx` files next to components, and e2e tests in a top-level `e2e/` folder organized by feature rather than component type
+- This means updating the Vitest config to pick up `app/**/*.test.{ts,tsx}`, removing the `tests/unit/` directory entirely, and keeping `e2e/` for cross-cutting flows
+- The smoke test would move to `app/routes/__root.test.tsx` to stay with its route, and I need to update the files summary to reflect this structure</details></think>
+
+_**Agent (claude-4.6-sonnet-medium-thinking)**_
+
+The change affects Step 8, the Vitest config, and the Files Summary. Here is the updated plan:
+
+_**Agent (claude-4.6-sonnet-medium-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/milestone_1_scaffolding_ad0d1689.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-sonnet-medium-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/milestone_1_scaffolding_ad0d1689.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-sonnet-medium-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/milestone_1_scaffolding_ad0d1689.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-sonnet-medium-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/.cursor/plans/milestone_1_scaffolding_ad0d1689.plan.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-sonnet-medium-thinking)**_
+
+Here is a summary of what changed:
+
+**Unit tests (Vitest)** — fully co-located:
+- `app/routes/__root.test.tsx` sits next to `__root.tsx`
+- `app/routes/_app/index.test.tsx` sits next to `index.tsx`
+- Every future component/route gets a `.test.tsx` file right beside it
+- `vitest.config.ts` uses `include: ['app/**/*.test.{ts,tsx}']` to find them all
+
+**E2E tests (Playwright)** — single `e2e/` folder at root:
+- `e2e/smoke.spec.ts`
+- `e2e/a11y.spec.ts`
+- E2E tests aren't co-locatable because they test full user flows that cross multiple routes and components — keeping them in one place makes them easy to find and run as a group
+
+**Removed** the separate `tests/unit/` and `tests/e2e/` structure entirely.

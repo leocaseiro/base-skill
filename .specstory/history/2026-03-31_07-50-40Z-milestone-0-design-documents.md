@@ -6,13 +6,13 @@
 
 _**User**_
 
-@/Users/leocaseiro/.cursor/plans/baseskill_milestone_breakdown_85146c93.plan.md
+@/Users/leocaseiro/.cursor/plans/baseskill_milestone_breakdown_85146c93.plan.md 
 
 Execute Milestone 0 -- Design Documents (SYNC prerequisite)
 
 ---
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants me to execute Milestone 0 from the plan. Let me first read the plan file to understand what Milestone 0 entails, and also check the existing docs and codebase structure.
@@ -21,15 +21,15 @@ Wait - I'm in plan mode, so I should NOT make any edits. But the user is asking 
 
 "Plan mode is active. The user indicated that they do not want you to execute yet -- you MUST NOT make any edits"
 
-But the user is explicitly saying "Execute Milestone 0". This seems contradictory. However, Milestone 0 is about "Design Documents" which are markdown files.
+But the user is explicitly saying "Execute Milestone 0". This seems contradictory. However, Milestone 0 is about "Design Documents" which are markdown files. 
 
 I need to clarify the constraints here - the plan mode guardrails allow editing markdown files, but the system reminder says I must present a plan first using CreatePlan before making any changes. Let me read the plan file to understand what Milestone 0 requires, then determine whether I should create a plan or proceed directly with the markdown edits.</details></think>
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 Let me start by reading the plan file and exploring the current codebase to understand what Milestone 0 requires.
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
 <details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/plans/baseskill_milestone_breakdown_85146c93.plan.md</summary>
@@ -38,12 +38,11 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
 <details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/prd-plan.md</summary>
@@ -52,16 +51,16 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="task_v2">
 <details>
 <summary>Tool use: **task_v2**</summary>
+
 
 Parameters:
 
@@ -74,7 +73,6 @@ Parameters:
   "subagentType": "explore"
 }
 ```
-
 Additional data:
 
 ```json
@@ -84,7 +82,6 @@ Additional data:
   "terminationReason": "completed"
 }
 ```
-
 Result:
 
 ```json
@@ -92,19 +89,18 @@ Result:
   "agentId": "167f613d-ebbf-49ab-9f0a-218a4fd3266c"
 }
 ```
-
 Status: **completed**
+
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="task_v2"><details>
-
 <summary>Tool use: **task_v2**</summary>
 
 </details></tool-use>
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 <think><details><summary>Thought Process</summary>
 Now I have a clear picture. Let me understand what Milestone 0 requires:
@@ -114,9 +110,9 @@ Now I have a clear picture. Let me understand what Milestone 0 requires:
 The plan says: Before any code is written, the 8 design docs outlined in `docs/prd-plan.md` must be authored. Several can be written in parallel.
 
 The 9 documents to create:
-
 1. `docs/prd.md` -- full PRD with user stories, feature requirements, constraints
 2. `docs/architecture.md` -- system diagram, TanStack Start app structure, TanStack Router route tree, component tree, state management, data flow, OAuth architecture, extension points
+
 
 3. `docs/data-model.md` -- RxDB schemas with JSON Schema definitions, relationships, sync strategy, conflict resolution, chunking rules, and token storage
 4. `docs/game-engine.md` -- game lifecycle, session recorder spec, config schema, parent override merging logic, and 5 reference game specs
@@ -132,11 +128,11 @@ I see that `docs/prd-plan.md` already has detailed section-by-section outlines f
 
 I'm also noticing that the architecture doc needs to reflect TanStack Start instead of just React Router, since that's what the milestone plan specifies. Let me make sure the plan accounts for that update.</details></think>
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 Now I have a clear picture of the current state and what needs to be done. Let me also read `scope.md` for additional context.
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
 <details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/scope.md</summary>
@@ -145,42 +141,41 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 <think><details><summary>Thought Process</summary>
 Now I have a complete picture. Let me create a plan for executing Milestone 0.
 
 The key things to consider:
-
 1. `docs/prd-plan.md` already contains detailed outlines for all 9 documents
 2. The milestone plan chose TanStack Start + TanStack Router (instead of React Router mentioned in prd-plan.md)
 3. SYNC dependency: prd.md and architecture.md should be drafted first
 4. The remaining 7 docs can be written in parallel (ASYNC)
 
 I need to create a plan that:
-
 - Describes what each document will contain
 - Notes the SYNC/ASYNC order
+
 
 - Highlights the key decision shift to TanStack Start and how that impacts the architecture documentation
 - Makes it clear I can execute this with parallel subagents handling the async documentation work once confirmed
 
 Let me structure this properly so it's actionable and ready to execute.</details></think>
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 I now have a complete picture of the codebase and what Milestone 0 requires. Let me create the execution plan.
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="create_plan">
 <details>
 <summary>Tool use: **create_plan**</summary>
+
 
 Parameters:
 
@@ -238,7 +233,6 @@ Parameters:
   ]
 }
 ```
-
 Additional data:
 
 ```json
@@ -252,7 +246,6 @@ Additional data:
   }
 }
 ```
-
 Result:
 
 ```json
@@ -260,14 +253,13 @@ Result:
   "rejected": {}
 }
 ```
-
 Status: **completed**
+
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="create_plan"><details>
-
 <summary>Tool use: **create_plan**</summary>
 
 </details></tool-use>
@@ -282,13 +274,12 @@ To-do's from the plan have already been created. Do not create them again. Mark 
 
 ---
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants me to execute the Milestone 0 Design Documents plan. Let me read the existing skill files that might be relevant and then start executing.
 
 The plan has two phases:
-
 1. Phase 1 (SYNC): Write `docs/prd.md` then `docs/architecture.md`
 2. Phase 2 (ASYNC): Write the remaining 7 docs in parallel
 
@@ -296,13 +287,15 @@ Let me start by reading the source material (prd-plan.md and scope.md) and then 
 
 Actually, I should read the executing-plans skill first since this is an implementation task with a plan. But I already have the plan. Let me just start executing.
 
+
 I'll mark the first todo as in_progress and begin writing the PRD document using the content from the source materials I've already reviewed.</details></think>
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="todo_write">
 <details>
 <summary>Tool use: **todo_write**</summary>
+
 
 Parameters:
 
@@ -311,7 +304,6 @@ Parameters:
   "merge": true
 }
 ```
-
 Result:
 
 ```json
@@ -414,36 +406,828 @@ Result:
   "wasMerge": true
 }
 ```
-
 Status: **completed**
+
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
-
 <summary>Tool use: **todo_write**</summary>
 
 </details></tool-use>
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 Writing `docs/prd.md` now -- the first SYNC prerequisite.
 
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
+_**Agent (claude-4.6-opus-high-thinking)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
 
 <details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/docs/prd.md</summary>
-
-Status: **loading**
 
 </details>
 
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
-
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+`docs/prd.md` is done. Now writing `docs/architecture.md` — the second SYNC prerequisite.
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Write docs/prd.md -- full PRD expanding prd-plan.md section 1 (personas, user stories, functional/non-functional requirements, constraints, analytics)",
+      "id": "prd",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/architecture.md -- system architecture expanding prd-plan.md section 2, updated for TanStack Start/Router (route tree, diagrams, OAuth, PWA, extension points)",
+      "id": "architecture",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/data-model.md -- RxDB schemas in JSON Schema format, relationships, sync strategy, chunking, cleanup, token storage (ASYNC)",
+      "id": "data-model",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/game-engine.md -- game lifecycle, session recorder, config schema, override merging, reusable components, 5 reference game specs (ASYNC)",
+      "id": "game-engine",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/ui-ux.md -- design system, themes, layouts, navigation, DnD helpers, encouragement, session viewer, responsive strategy (ASYNC)",
+      "id": "ui-ux",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/i18n.md -- i18n framework, translation structure, TTS voice selection, device-aware sync, locale formatting (ASYNC)",
+      "id": "i18n",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/accessibility.md -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech fallbacks (ASYNC)",
+      "id": "accessibility",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/testing-strategy.md -- Vitest/RTL/Playwright plan, coverage targets, visual regression, a11y tests, fixtures (ASYNC)",
+      "id": "testing",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/ci-cd.md -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection (ASYNC)",
+      "id": "cicd",
+      "status": "pending"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Write docs/prd.md -- full PRD expanding prd-plan.md section 1 (personas, user stories, functional/non-functional requirements, constraints, analytics)",
+      "id": "prd",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/architecture.md -- system architecture expanding prd-plan.md section 2, updated for TanStack Start/Router (route tree, diagrams, OAuth, PWA, extension points)",
+      "id": "architecture",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/data-model.md -- RxDB schemas in JSON Schema format, relationships, sync strategy, chunking, cleanup, token storage (ASYNC)",
+      "id": "data-model",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/game-engine.md -- game lifecycle, session recorder, config schema, override merging, reusable components, 5 reference game specs (ASYNC)",
+      "id": "game-engine",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/ui-ux.md -- design system, themes, layouts, navigation, DnD helpers, encouragement, session viewer, responsive strategy (ASYNC)",
+      "id": "ui-ux",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/i18n.md -- i18n framework, translation structure, TTS voice selection, device-aware sync, locale formatting (ASYNC)",
+      "id": "i18n",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/accessibility.md -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech fallbacks (ASYNC)",
+      "id": "accessibility",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/testing-strategy.md -- Vitest/RTL/Playwright plan, coverage targets, visual regression, a11y tests, fixtures (ASYNC)",
+      "id": "testing",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/ci-cd.md -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection (ASYNC)",
+      "id": "cicd",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/docs/architecture.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+Phase 1 (SYNC) is complete. Now dispatching all 7 Phase 2 docs in parallel.
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Write docs/prd.md -- full PRD expanding prd-plan.md section 1 (personas, user stories, functional/non-functional requirements, constraints, analytics)",
+      "id": "prd",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/architecture.md -- system architecture expanding prd-plan.md section 2, updated for TanStack Start/Router (route tree, diagrams, OAuth, PWA, extension points)",
+      "id": "architecture",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/data-model.md -- RxDB schemas in JSON Schema format, relationships, sync strategy, chunking, cleanup, token storage (ASYNC)",
+      "id": "data-model",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/game-engine.md -- game lifecycle, session recorder, config schema, override merging, reusable components, 5 reference game specs (ASYNC)",
+      "id": "game-engine",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/ui-ux.md -- design system, themes, layouts, navigation, DnD helpers, encouragement, session viewer, responsive strategy (ASYNC)",
+      "id": "ui-ux",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/i18n.md -- i18n framework, translation structure, TTS voice selection, device-aware sync, locale formatting (ASYNC)",
+      "id": "i18n",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/accessibility.md -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech fallbacks (ASYNC)",
+      "id": "accessibility",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/testing-strategy.md -- Vitest/RTL/Playwright plan, coverage targets, visual regression, a11y tests, fixtures (ASYNC)",
+      "id": "testing",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/ci-cd.md -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection (ASYNC)",
+      "id": "cicd",
+      "status": "in_progress"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Write docs/prd.md -- full PRD expanding prd-plan.md section 1 (personas, user stories, functional/non-functional requirements, constraints, analytics)",
+      "id": "prd",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/architecture.md -- system architecture expanding prd-plan.md section 2, updated for TanStack Start/Router (route tree, diagrams, OAuth, PWA, extension points)",
+      "id": "architecture",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/data-model.md -- RxDB schemas in JSON Schema format, relationships, sync strategy, chunking, cleanup, token storage (ASYNC)",
+      "id": "data-model",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/game-engine.md -- game lifecycle, session recorder, config schema, override merging, reusable components, 5 reference game specs (ASYNC)",
+      "id": "game-engine",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/ui-ux.md -- design system, themes, layouts, navigation, DnD helpers, encouragement, session viewer, responsive strategy (ASYNC)",
+      "id": "ui-ux",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/i18n.md -- i18n framework, translation structure, TTS voice selection, device-aware sync, locale formatting (ASYNC)",
+      "id": "i18n",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/accessibility.md -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech fallbacks (ASYNC)",
+      "id": "accessibility",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/testing-strategy.md -- Vitest/RTL/Playwright plan, coverage targets, visual regression, a11y tests, fixtures (ASYNC)",
+      "id": "testing",
+      "status": "pending"
+    },
+    {
+      "content": "Write docs/ci-cd.md -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection (ASYNC)",
+      "id": "cicd",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+Now writing all 7 Phase 2 docs in parallel:
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2">
+<details>
+<summary>Tool use: **task_v2**</summary>
+
+
+Parameters:
+
+```json
+{
+  "description": "Write docs/data-model.md",
+  "model": "claude-4.6-sonnet-medium-thinking",
+  "name": "general-purpose",
+  "prompt": "Write the file &#96;/Users/leocaseiro/Sites/base-skill/docs/data-model.md&#96; using the Write tool.\n\nThis is the RxDB data model design document for BaseSkill — a free, open-source, offline-first educational PWA for children. \n\nThe document must be comprehensive, self-contained, and actionable for AI agents implementing later milestones. It should cover:\n\n1. **Overview**: RxDB as single source of truth, IndexedDB backend, 10 collections\n2. **All 10 RxDB collection schemas in full JSON Schema format**:\n   - &#96;profiles&#96; — user profiles (name, avatar, gradeLevel, language, themeId, parentPinHash, isActive, createdAt, updatedAt)\n   - &#96;progress&#96; — per-game progress (profileId, gameId, lastScore, bestScore, totalStars, streakDays, lastPlayedAt, completionCount, badges)\n   - &#96;settings&#96; — app preferences (profileId, volume, speechRate, activeLanguage, showSubtitles, themeId, updatedAt)\n   - &#96;game_config_overrides&#96; — parent customizations (id, profileId, scope: 'game'|'grade-band'|'global', scopeValue: gameId|gradeBand|null, retries, timerDuration, alwaysWin, difficulty, updatedAt)\n   - &#96;bookmarks&#96; — bookmarked games (id, profileId, gameId, createdAt)\n   - &#96;themes&#96; — pre-defined + user-cloned (id, name, isPreset, ownedByProfileId, ownedByFamily, colors: {primary,secondary,background,surface,text,accent}, typography, backgroundPattern, createdAt, updatedAt)\n   - &#96;session_history&#96; — one doc per chunk (id, sessionId, profileId, gameId, chunkIndex, events: [{timestamp,action,payload,result}], createdAt)\n   - &#96;session_history_index&#96; — one summary per session (sessionId, profileId, gameId, startedAt, endedAt, duration, finalScore, totalEvents, totalChunks, gradeBand)\n   - &#96;sync_meta&#96; — cloud sync state (id, provider: 'google-drive'|'onedrive', deviceId, deviceName, lastSyncAt, checkpoint, encryptedTokens, status)\n   - &#96;app_meta&#96; — app metadata (id, appVersion, rxdbSchemaVersion, lastMigrationAt, installId)\n\n3. **JSON Schema examples** for each collection — include required fields, types, enum values, defaults\n\n4. **Relationships diagram** (Mermaid ER-style)\n\n5. **Chunking rules**: ~200 events or ~50KB per session_history doc; chunkIndex increments; session_history_index always one doc per session regardless of chunks\n\n6. **Data lifecycle and cleanup**: cascade delete (deleting session_history_index deletes all session_history docs for that sessionId), bulk delete by date range, per-profile scoped deletes, storage usage estimation\n\n7. **Version tracking**: app_meta tracks app semver and RxDB schema version; on version mismatch, migration runs before app render\n\n8. **Sync strategy**:\n   - What syncs: profiles, progress, settings, game_config_overrides, bookmarks, themes, session_history, session_history_index\n   - What does NOT sync (device-local): sync_meta, app_meta\n   - Conflict resolution per collection: last-write-wins for profiles/settings/overrides/themes; merge for progress (max score, sum stars); union for bookmarks; append-only for session_history (immutable chunks)\n   - Device-aware records: deviceId in sync_meta; voice preferences tagged with deviceId; on different device, fall back to default voice\n\n9. **Token storage**: Encrypted IndexedDB approach — AES-GCM encryption with key stored in a separate IndexedDB namespace; key derived from a random device-specific secret; never in localStorage; MSAL.js manages its own cache\n\n10. **RxDB schema versioning**: each collection has a &#96;version&#96; number in the schema definition; example of a migration function\n\nInclude realistic JSON Schema examples that an agent can implement directly. Use &#96;$schema&#96;, &#96;type: \"object\"&#96;, &#96;properties&#96;, &#96;required&#96;, &#96;additionalProperties: false&#96; patterns.\n\nAfter writing the file, return \"DONE: docs/data-model.md written successfully\".",
+  "subagentType": "unspecified"
+}
+```
+Additional data:
+
+```json
+{
+  "status": "success",
+  "subagentComposerId": "1d6bb5bd-fb0f-4421-877c-7f0ed62f5c62",
+  "terminationReason": "completed"
+}
+```
+Result:
+
+```json
+{
+  "agentId": "1d6bb5bd-fb0f-4421-877c-7f0ed62f5c62"
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2"><details>
+<summary>Tool use: **task_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2">
+<details>
+<summary>Tool use: **task_v2**</summary>
+
+
+Parameters:
+
+```json
+{
+  "description": "Write docs/game-engine.md",
+  "model": "claude-4.6-sonnet-medium-thinking",
+  "name": "general-purpose",
+  "prompt": "Write the file &#96;/Users/leocaseiro/Sites/base-skill/docs/game-engine.md&#96; using the Write tool.\n\nThis is the game engine design document for BaseSkill — a free, open-source, offline-first educational PWA for children. The app uses TanStack Start + TanStack Router + React + TypeScript (strict, no any).\n\nThe document must be comprehensive, self-contained, and actionable for AI agents implementing later milestones. Cover:\n\n1. **Overview**: Reusable game framework. Games are config-driven JSON + React components. Session events recorded via event bus.\n\n2. **Game Lifecycle State Machine** (Mermaid stateDiagram):\n   - States: Idle → Loading → Instructions → Playing → Evaluating → Scoring → (NextRound | Retry | GameOver)\n   - Transitions: load(), showInstructions(), startPlay(), submitAnswer(), evaluate(), scoreRound(), nextRound(), retry(), endGame()\n   - Entry actions: TTS on Instructions state, session recorder subscribes on Loading\n\n3. **Event Bus Integration**: Game components emit typed events:\n   - &#96;game:start&#96;, &#96;game:instructions_shown&#96;, &#96;game:action&#96;, &#96;game:evaluate&#96;, &#96;game:score&#96;, &#96;game:hint&#96;, &#96;game:retry&#96;, &#96;game:end&#96;\n   - Example TypeScript event payload types\n   - Session recorder subscribes to all game:* events\n\n4. **Session Recorder Middleware**:\n   - Subscribes to event bus on game start\n   - Writes events to current &#96;session_history&#96; chunk in RxDB\n   - Chunk rollover: when current chunk reaches 200 events or ~50KB, creates new doc with chunkIndex+1\n   - On &#96;game:end&#96;: writes &#96;session_history_index&#96; summary document\n   - Unsubscribes on game end\n   - Opt-in per game config, enabled by default\n\n5. **Game Config JSON Schema** — full JSON Schema definition:\n   &#96;&#96;&#96;\n   id, title (localized object with en/pt-BR), subject (enum: letters|reading|math|...), \n   gradeBands (array of: pre-k|k|year1-2|year3-4|year5-6), \n   component (string: component name to render),\n   assets (images, audio paths),\n   instructions (localized),\n   defaultSettings: { retries, timerDuration, alwaysWin, difficulty },\n   content: { en: {...}, \"pt-BR\": {...} },\n   sessionRecorder: { enabled: boolean }\n   &#96;&#96;&#96;\n   Include a complete worked example for the Math Facts game.\n\n6. **Parent Override Merging Logic**:\n   - Resolution order: per-game override \u003e grade-band override \u003e global override \u003e game default\n   - TypeScript pseudocode for &#96;resolveGameConfig(gameId, gradeBand, profileId, db)&#96; function\n   - Returns merged config\n\n7. **Reusable Game Components** — for each, document:\n   - Props interface (TypeScript)\n   - Key behaviors\n   - Accessibility notes\n   - Event bus interactions\n\n   Components:\n   - **DragAndDrop**: pointer events (not mouse/touch separately), magnetic snap threshold (configurable, default 60px), ghost preview element, visual pulse on drop zones, works on both mouse and touch, emits &#96;game:action&#96; on drop\n   - **LetterTracer**: HTML Canvas, touch/mouse drawing paths, stroke validation (direction + coverage), tap-to-place alternative for motor-impaired, shows traced letter outline to follow\n   - **MultipleChoice**: grid of answer cards, keyboard navigable (arrow keys, Enter), announces selection via aria-live, visual + audio feedback on evaluation\n   - **SpeechInput (STT)**: wraps Web Speech API SpeechRecognition, shows waveform animation during listening, language set from profile, graceful fallback to text input when STT unavailable\n   - **SpeechOutput (TTS)**: wraps SpeechSynthesis, uses profile's selected voice, queues utterances, cancels on unmount\n   - **Timer**: countdown bar + number, configurable duration, hideable via parent override, emits &#96;game:time_up&#96; event\n   - **EncouragementAnnouncer**: subscribes to game:evaluate events, TTS + animated popup (character + speech bubble), contextual messages per outcome (correct/near-miss/retry), language-aware\n   - **ScoreAnimation**: CSS keyframe animations (confetti via clip-path, star burst), triggered programmatically, no canvas/library dependency\n\n8. **Difficulty Progression**:\n   - Config-driven per game: each difficulty level defines content subset and parameter adjustments\n   - Adaptive within session: if child scores 3 correct in a row, suggest increasing difficulty\n   - Grade-band defaults: each game has a default difficulty per grade band\n\n9. **5 Reference Game Detailed Specs**:\n\n   **a) Letter Tracing** (Pre-K/K, Letters):\n   - Uses LetterTracer component\n   - Sequence: TTS says letter name → show letter outline on canvas → child traces → evaluate stroke coverage + direction → score → next letter\n   - Content: uppercase A-Z, lowercase a-z, configurable sequence\n   - Evaluation: stroke coverage ≥ 70% and correct direction = correct\n   - Config example: letters array, strokeCoverageThreshold, showGuide\n\n   **b) Number Match** (Pre-K/K, Math):\n   - Uses DragAndDrop component\n   - Sequence: show group of objects (e.g., 3 apples) + number cards → child drags correct number to match group → evaluate → score\n   - Content: numbers 1-10 (pre-K), 1-20 (K); random object images per number\n   - Evaluation: dragged number matches object count = correct\n   - Snap zones: each object group has a drop zone\n\n   **c) Word Builder** (K-Year 2, Reading):\n   - Uses DragAndDrop + SpeechOutput\n   - Sequence: show picture of word → scrambled letter tiles → child drags tiles into letter slots to spell word → TTS hint available → evaluate → score\n   - Content: per-language word lists (en word list, pt-BR word list), 3-6 letter words per grade band\n   - Evaluation: all tiles in correct slots = correct\n\n   **d) Read Aloud** (Year 1-3, Reading):\n   - Uses SpeechInput + SpeechOutput\n   - Sequence: display sentence → TTS reads it first → child reads aloud → STT captures → evaluate match → score\n   - Content: per-language sentence sets, grade-appropriate reading level\n   - Evaluation: STT transcript matches display sentence (normalized: lowercase, punctuation stripped, ≥ 80% word match)\n   - Fallback: text input when STT unavailable\n\n   **e) Math Facts** (Year 1-4, Math):\n   - Uses MultipleChoice + Timer\n   - Sequence: show arithmetic problem → 4 answer choices → child selects → evaluate → score\n   - Content: addition/subtraction (Year 1-2), multiplication/division (Year 3-4), generated algorithmically per difficulty\n   - Visual number line displayed for Year 1-2\n   - Timer optional (parent can disable)\n\nAfter writing the file, return \"DONE: docs/game-engine.md written successfully\".",
+  "subagentType": "unspecified"
+}
+```
+Additional data:
+
+```json
+{
+  "status": "success",
+  "subagentComposerId": "1e65caf9-461e-497d-b97f-e0be271c88b5",
+  "terminationReason": "completed"
+}
+```
+Result:
+
+```json
+{
+  "agentId": "1e65caf9-461e-497d-b97f-e0be271c88b5"
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2"><details>
+<summary>Tool use: **task_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2">
+<details>
+<summary>Tool use: **task_v2**</summary>
+
+
+Parameters:
+
+```json
+{
+  "description": "Write docs/ui-ux.md",
+  "model": "claude-4.6-sonnet-medium-thinking",
+  "name": "general-purpose",
+  "prompt": "Write the file &#96;/Users/leocaseiro/Sites/base-skill/docs/ui-ux.md&#96; using the Write tool.\n\nThis is the UI/UX design document for BaseSkill — a free, open-source, offline-first educational PWA for children (Pre-K through Year 6+). The app uses TanStack Start + TanStack Router + React + TypeScript + shadcn/ui + Tailwind CSS v4.\n\nThe document must be comprehensive and actionable for AI agents implementing the UI. Cover:\n\n1. **Design Principles**:\n   - Child-first: every interaction designed for the child's grade level\n   - Large touch targets (48x48px minimum, 64px preferred for Pre-K/K)\n   - Encouraging, never punitive: feedback always positive\n   - Distraction-free: no ads, no external links, no notifications\n   - Offline by default: no loading spinners for core gameplay\n   - Accessible: WCAG 2.1 AA; color never sole indicator\n\n2. **Design System Foundation**:\n   - shadcn/ui as the component base (Radix UI primitives + Tailwind)\n   - Extended for kid-friendly defaults: rounded-3xl corners, playful typography (Nunito or similar), larger default sizes\n   - CSS custom properties (variables) for theme injection via Tailwind CSS v4\n   - Dark mode: supported via the Night theme (not system dark mode — explicit theme choice)\n\n3. **6 Pre-Defined Theme Definitions** — for each theme, define:\n   - Name and concept\n   - Color palette: primary, secondary, background, surface, text, accent, success, warning, error (all hex values, colorblind-safe)\n   - Typography weight\n   - Background pattern description\n   - Example CSS variable block\n\n   Themes: Ocean (blues/teals), Forest (greens/browns), Space (deep blues/purples, stars), Rainbow (bright multi-color, playful), Sunset (oranges/pinks/warm), Night (dark mode, deep navy/purple)\n\n4. **Theme Customization System**:\n   - Clone any pre-defined theme\n   - Color picker for: primary, secondary, background, accent\n   - Font weight selector: regular, medium, bold\n   - Theme stored in RxDB &#96;themes&#96; collection\n   - Per-child profile or per-family scope\n   - Live preview before saving\n\n5. **Core Layouts** — for each, describe structure, key elements, and behavior:\n   - **Home (Profile Picker)**: grid of profile avatars + names, large tap targets, \"Add Profile\" card, no login. Grade-level UX: all icon/avatar driven.\n   - **Dashboard**: sticky header (profile avatar, grade, settings icon), bookmarked games row (horizontal scroll), recently played row (horizontal scroll), main game grid (by subject/grade), search bar for older children\n   - **Game Shell**: full-screen game area, minimal chrome header (back button + game title + score + timer), game area fills remaining viewport, no bottom nav\n   - **Child Settings**: volume slider, speech rate slider, language picker, theme selector, TTS on/off\n   - **Parent Settings**: PIN-gated navigation. Sections: Game Overrides, Session History, Data Management, Cloud Sync, Voice Selector, About\n\n6. **Navigation Patterns**:\n   - **Grade-adaptive**: Pre-K/K = icons only + TTS on hover/focus; Year 1-2 = icons + text labels; Year 3+ = text navigation\n   - **Back button**: always visible in game shell; breadcrumbs in parent settings\n   - **Profile switching**: tap avatar in header → dropdown sheet → select profile\n   - **Parent PIN entry**: modal overlay with numeric keypad (large buttons), accessible\n\n7. **Game Card Design**:\n   - 160x200px minimum card size (larger on tablet)\n   - Game illustration (top 60%), title (TTS-readable), subject badge, grade badge, bookmark icon (top-right corner), star count if played\n   - Hover/focus: scale up 1.05, border highlight\n   - Visual states: unplayed, in-progress, completed (star rating)\n\n8. **Drag-and-Drop UX Helpers**:\n   - **Magnetic snap**: draggable items \"pull toward\" valid drop zones within configurable threshold (default 60px). Visual: item accelerates toward zone.\n   - **Ghost preview**: semi-transparent copy of item at target position shows where it will land\n   - **Visual pulse**: active drop zones pulse (scale + opacity CSS animation) to guide young children\n   - **Pointer events**: uses Pointer Events API (not separate mouse + touch) for unified behavior\n   - **Drag handles**: large grab area (full item for young children); ARIA &#96;role=\"button\"&#96; with keyboard drag simulation\n\n9. **Encouragement System**:\n   - Animated character mascot (owl or friendly monster) in bottom-right of game area\n   - Speech bubble with contextual message + TTS\n   - Triggers: correct answer (\"Amazing!\", \"You got it!\"), near-miss (\"So close!\", \"Try one more time!\"), idle 15s (\"You're doing great, keep going!\"), session complete (\"Brilliant work today!\")\n   - CSS animation: bounce-in, hold 2s, slide-out\n   - Language-aware (en/pt-BR messages)\n   - Never blocks gameplay\n\n10. **Session History Viewer** (Parent Settings):\n    - Timeline of sessions, newest first\n    - Session row: game icon, game name, date, duration, final score, expand arrow\n    - Expanded: chronological event list with timestamps, action type, result\n    - Filters: game name (dropdown), date range (date pickers), grade band\n    - Lazy-load: only loads full event data when session row is expanded (fetches chunks from RxDB on demand)\n    - Empty state: friendly illustration + \"No sessions yet\"\n\n11. **Data Management Screen** (Parent Settings):\n    - Storage usage bar: shows IndexedDB usage (progress / session history / settings)\n    - \"Clear Session History\" button: confirmation dialog \"This will delete all event recordings. Progress and scores are not affected.\"\n    - \"Clear Progress\" button: confirmation dialog \"This will reset all scores, stars, and badges.\"\n    - Date-range filter: \"Clear history older than [30 / 90 / 180 days / custom date]\"\n    - Shows estimated bytes that will be freed\n\n12. **Responsive Strategy**:\n    - Mobile-first CSS (smallest screen first, expand up)\n    - Breakpoints: sm: 640px, md: 768px, lg: 1024px, xl: 1280px\n    - Game area: fills available viewport height after header. Portrait and landscape both supported.\n    - Dashboard grid: 2 columns (mobile) → 3 columns (tablet) → 4 columns (desktop)\n    - Profile picker: 2x2 grid (mobile) → 4 per row (tablet+)\n    - Font scaling: rem-based; root font size 16px mobile, 18px tablet, 20px desktop\n\n13. **Animation Guidelines**:\n    - CSS keyframes only — no JS animation libraries, no canvas for UI\n    - Performance: &#96;transform&#96; and &#96;opacity&#96; only (no layout-triggering properties)\n    - &#96;prefers-reduced-motion&#96;: all non-essential animations disable when user prefers reduced motion\n    - Reward animations: confetti (pseudo-element clip-path burst), star burst (radial scale + opacity), emoji pop (scale 0 → 1.2 → 1)\n    - Duration: reward = 600ms, encouragement bounce = 300ms, transition = 150ms\n\n14. **Color Accessibility**:\n    - All themes use WCAG AA contrast ratios (4.5:1 for normal text, 3:1 for large text)\n    - Game mechanics never use color as sole differentiator — always paired with shape, pattern, or label\n    - Color checker tool recommendation: Colour Contrast Analyser\n\nAfter writing the file, return \"DONE: docs/ui-ux.md written successfully\".",
+  "subagentType": "unspecified"
+}
+```
+Additional data:
+
+```json
+{
+  "status": "success",
+  "subagentComposerId": "82d4a0c9-4d68-40f2-afdc-5de13b6c9345",
+  "terminationReason": "completed"
+}
+```
+Result:
+
+```json
+{
+  "agentId": "82d4a0c9-4d68-40f2-afdc-5de13b6c9345"
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2"><details>
+<summary>Tool use: **task_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2">
+<details>
+<summary>Tool use: **task_v2**</summary>
+
+
+Parameters:
+
+```json
+{
+  "description": "Write docs/i18n.md",
+  "model": "claude-4.6-sonnet-medium-thinking",
+  "name": "general-purpose",
+  "prompt": "Write the file &#96;/Users/leocaseiro/Sites/base-skill/docs/i18n.md&#96; using the Write tool.\n\nThis is the internationalization design document for BaseSkill — a free, open-source, offline-first educational PWA for children. Uses TanStack Start + TanStack Router + React + TypeScript (strict, no any) + react-i18next.\n\nThe document must be comprehensive and actionable for AI agents. Cover:\n\n1. **Overview**: Multi-language support via react-i18next. Initial languages: English (en), Portuguese-Brazilian (pt-BR). Extensible architecture for adding new languages.\n\n2. **i18n Framework Choice: react-i18next**:\n   - Why react-i18next: most widely adopted, excellent React integration via hooks, supports namespaces, lazy-loading of translation bundles, TanStack Router compatible\n   - Configuration: &#96;i18n.ts&#96; initialization (language detection from profile settings, NOT browser/OS; fallback language = en)\n   - Important: language is per-profile setting, not a global app setting. Each child can have a different language.\n   - No server-side i18n needed (static SPA)\n\n3. **TanStack Router Locale Integration**:\n   - Language is stored per-profile in RxDB &#96;settings.activeLanguage&#96;\n   - On profile switch, i18next language changes via &#96;i18n.changeLanguage()&#96;\n   - No locale-based URL segments (e.g., no &#96;/en/dashboard&#96;) — language is profile-scoped, not URL-scoped\n   - TanStack Router context includes &#96;currentLanguage&#96; for type-safe access in loaders\n\n4. **Translation File Structure**:\n   &#96;&#96;&#96;\n   app/i18n/locales/\n     en/\n       common.json        # App-wide strings (nav, buttons, status messages)\n       games.json         # Game titles, categories, subject names\n       settings.json      # Settings labels and descriptions\n       encouragements.json # Contextual encouragement messages\n       errors.json        # Error messages\n     pt-BR/\n       common.json\n       games.json\n       settings.json\n       encouragements.json\n       errors.json\n   &#96;&#96;&#96;\n   \n   Include complete example JSON content for each namespace in both languages. Show nested key structure (e.g., &#96;games.letterTracing.title&#96;, &#96;encouragements.correct.0&#96;, &#96;encouragements.correct.1&#96;).\n\n5. **Namespace Examples** — provide full sample content:\n   - &#96;common.json&#96;: nav items (home, back, settings), actions (play, pause, exit, retry, save, cancel, confirm, delete), status (loading, offline, syncing, lastSync), profile (addProfile, switchProfile, parentSettings)\n   - &#96;games.json&#96;: game titles, subject names (letters, reading, math), grade bands (preK, kindergarten, year1to2, etc.), game instructions per game\n   - &#96;settings.json&#96;: volume, speechRate, language, theme, voice selector labels\n   - &#96;encouragements.json&#96;: arrays of messages per outcome — correct: [\"Amazing!\", \"You got it!\", \"Brilliant!\"], nearMiss: [\"So close!\", \"Almost there!\", \"One more try!\"], retry: [\"You can do it!\", \"Try again!\"], sessionComplete: [\"Brilliant work today!\", \"You're a star!\"]\n   - Both en and pt-BR versions\n\n6. **Language-Specific Game Content Strategy**:\n   - Game configs have a &#96;content&#96; map keyed by locale: &#96;{ \"en\": { words: [...], sentences: [...] }, \"pt-BR\": { words: [...], sentences: [...] } }&#96;\n   - Math games: content is language-neutral (number operations). Only instructions are localized.\n   - Word Builder: word lists per language (3-6 letter words appropriate for grade band)\n   - Read Aloud: sentence sets per language (grade-appropriate reading level)\n   - Letter Tracing: supports Latin alphabet (en + pt-BR share same alphabet)\n   - Fallback: if content not available in selected language, fall back to &#96;en&#96;\n\n7. **TTS Voice Selection**:\n   - Parents select TTS voice per language per profile in Parent Settings \u003e Voice Selector\n   - &#96;speechSynthesis.getVoices()&#96; enumerated on load; filtered by language prefix (e.g., &#96;en-&#96; voices for &#96;en&#96; language)\n   - Voice picker UI: language group headers, voice name + language tag, sample button (plays \"Hello!\" in that voice)\n   - Voice preference stored in RxDB: &#96;{ profileId, language, voiceName, deviceId }&#96;\n   - **Device-aware**: available voices differ per OS. Preference tagged with &#96;deviceId&#96;. On different device → fall back to &#96;getDefaultVoice(language)&#96;\n   - Default voice selection: prefer &#96;en-US&#96; for en, &#96;pt-BR&#96; for pt-BR if available, else first voice matching language prefix\n\n8. **STT Language Matching**:\n   - &#96;SpeechRecognition.lang&#96; is set from the profile's active language\n   - Language code mapping: &#96;en&#96; → &#96;en-US&#96;, &#96;pt-BR&#96; → &#96;pt-BR&#96;\n   - If STT not available for the language, fall back to text input\n\n9. **Locale-Specific Formatting**:\n   - Numbers: &#96;Intl.NumberFormat&#96; with locale\n   - Dates: &#96;Intl.DateTimeFormat&#96; with locale (used in session history viewer)\n   - Grade naming conventions:\n     - &#96;en&#96; (Australian/UK): Pre-K, Kindergarten, Year 1–6\n     - &#96;pt-BR&#96;: Pré-escola, Jardim, 1º Ano–6º Ano\n   - Show locale-specific grade names in UI when language is active\n   - TypeScript utility: &#96;formatGrade(gradeBand: GradeBand, locale: string): string&#96;\n\n10. **Adding a New Language** — step-by-step guide:\n    1. Create &#96;app/i18n/locales/[locale]/&#96; directory with all 5 namespace JSON files\n    2. Add game content entries for &#96;[locale]&#96; in relevant game configs\n    3. Add locale to &#96;SUPPORTED_LOCALES&#96; constant\n    4. Add TTS/STT language code mapping\n    5. Add grade naming convention mapping\n    6. Run i18n snapshot tests to verify completeness\n    7. (Optional) Add locale to Playwright E2E smoke test\n\n11. **Missing Translation Handling**:\n    - react-i18next automatically falls back to &#96;en&#96; for missing keys\n    - CI lint step: check for keys present in &#96;en&#96; but missing in other locales\n    - Missing key warning logged to console in development mode\n\nAfter writing the file, return \"DONE: docs/i18n.md written successfully\".",
+  "subagentType": "unspecified"
+}
+```
+Additional data:
+
+```json
+{
+  "status": "success",
+  "subagentComposerId": "80d2dcb6-30a2-46da-b66a-b38ac4e620ad",
+  "terminationReason": "completed"
+}
+```
+Result:
+
+```json
+{
+  "agentId": "80d2dcb6-30a2-46da-b66a-b38ac4e620ad"
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2"><details>
+<summary>Tool use: **task_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2">
+<details>
+<summary>Tool use: **task_v2**</summary>
+
+
+Parameters:
+
+```json
+{
+  "description": "Write docs/accessibility.md",
+  "model": "claude-4.6-sonnet-medium-thinking",
+  "name": "general-purpose",
+  "prompt": "Write the file &#96;/Users/leocaseiro/Sites/base-skill/docs/accessibility.md&#96; using the Write tool.\n\nThis is the accessibility design document for BaseSkill — a free, open-source, offline-first educational PWA for children (Pre-K through Year 6+). The app must comply with WCAG 2.1 AA.\n\nThe document must be comprehensive, specific, and actionable for AI agents implementing the app. Cover:\n\n1. **Overview and Commitment**:\n   - WCAG 2.1 AA compliance target\n   - Accessibility is a core feature, not an afterthought\n   - Key populations: pre-readers (rely on TTS), motor-impaired children (pointer limitations), colorblind users, screen reader users\n   - Testing: axe-core in component tests + Playwright accessibility audits\n\n2. **WCAG 2.1 AA Checklist** — Organize by POUR principles. For each applicable criterion, note the level (A or AA), a brief description, and BaseSkill implementation note:\n\n   **Perceivable:**\n   - 1.1.1 Non-text Content (A) — all images have meaningful alt text; decorative images have &#96;alt=\"\"&#96;; game illustrations described for screen readers\n   - 1.2.x Audio/Video — not applicable (no audio/video content; TTS is generated speech)\n   - 1.3.1 Info and Relationships (A) — semantic HTML; tables for data; headings in logical order; lists for list content\n   - 1.3.3 Sensory Characteristics (A) — instructions never rely on shape/color alone (\"the red button\"); use text labels\n   - 1.4.1 Use of Color (A) — color never sole differentiator in games; shape + label always accompany color\n   - 1.4.3 Contrast (Minimum) (AA) — 4.5:1 for normal text, 3:1 for large text; verified in all 6 themes\n   - 1.4.4 Resize Text (AA) — text scales to 200% without loss of content; em/rem units throughout\n   - 1.4.10 Reflow (AA) — content reflows at 320px width; no horizontal scroll except game canvas\n   - 1.4.11 Non-text Contrast (AA) — UI components (buttons, inputs, drag zones) have 3:1 contrast against background\n   - 1.4.13 Content on Hover or Focus (AA) — tooltips dismissable, persistent on hover\n\n   **Operable:**\n   - 2.1.1 Keyboard (A) — all interactive elements keyboard-accessible; games have keyboard alternatives\n   - 2.1.2 No Keyboard Trap (A) — modals/dialogs have focus trap with Escape to close\n   - 2.4.1 Bypass Blocks (A) — skip-to-main-content link at page top\n   - 2.4.3 Focus Order (A) — logical tab order matches visual order\n   - 2.4.4 Link Purpose (A) — link text describes destination; no \"click here\"\n   - 2.4.6 Headings and Labels (AA) — descriptive heading text; form inputs have associated labels\n   - 2.4.7 Focus Visible (AA) — custom focus indicator: 3px solid &#96;--color-accent&#96; with 2px offset\n   - 2.5.3 Label in Name (A) — visible label text is contained in accessible name\n   - 2.5.5 Target Size (AA) — minimum 44x44px (CSS), recommended 48x48px, Pre-K/K targets 64x64px\n\n   **Understandable:**\n   - 3.1.1 Language of Page (A) — &#96;\u003chtml lang=\"en\"\u003e&#96; (or active language code) set dynamically on profile language change\n   - 3.1.2 Language of Parts (AA) — &#96;lang&#96; attribute on content that differs from page language\n   - 3.2.1 On Focus (A) — focusing an element does not trigger unexpected context changes\n   - 3.2.2 On Input (A) — changing a setting doesn't auto-submit or navigate without warning\n   - 3.3.1 Error Identification (A) — errors identified in text (not just color); associated with field\n   - 3.3.2 Labels or Instructions (A) — form inputs have descriptive labels; complex inputs have instructions\n\n   **Robust:**\n   - 4.1.1 Parsing (A) — valid HTML; no duplicate IDs; proper nesting\n   - 4.1.2 Name, Role, Value (A) — all custom interactive elements have ARIA name, role, state\n   - 4.1.3 Status Messages (AA) — status messages (offline, sync complete, score) announced via &#96;aria-live&#96;\n\n3. **Screen Reader Support**:\n   - **ARIA live regions**: &#96;aria-live=\"polite\"&#96; for game state changes (score, encouragement), &#96;aria-live=\"assertive\"&#96; for critical alerts (offline, error)\n   - **ARIA roles for game elements**: drag items get &#96;role=\"button\"&#96; + &#96;aria-grabbed&#96;, drop zones get &#96;role=\"region\"&#96; + &#96;aria-dropeffect&#96;\n   - **Focus management**: on modal open, focus moves to modal first focusable element; on modal close, focus returns to trigger element; on game start, focus moves to game area\n   - **Game state announcements**: current question number, score, timer status announced via live region\n   - **LetterTracer**: canvas has &#96;role=\"img\"&#96; + descriptive &#96;aria-label&#96;; keyboard alternative: tap-to-place mode activated by Enter key\n\n4. **Colorblind Friendliness**:\n   - All 6 pre-defined themes use colorblind-safe palettes (tested against deuteranopia, protanopia, tritanopia simulations)\n   - Games never use color as the only differentiator:\n     - Number Match: numbers labeled as text, not just colored differently\n     - Word Builder: letter tiles differentiated by letter character + position, not color\n     - Math Facts: answer choices differentiated by position + number text, not color\n   - Progress indicators: use icons (stars, checkmarks) not just green/red\n   - Error states: icon + text, not just red color\n\n5. **Motor Accessibility**:\n   - **Large touch targets**: minimum 48x48px CSS (not just hit area). Pre-K/K: 64px. No dense menus.\n   - **Keyboard navigation for all games**:\n     - DragAndDrop: items selectable with Space, moved to zones with arrow keys, dropped with Enter\n     - MultipleChoice: arrow key navigation between options, Enter to select\n     - LetterTracer: Enter to switch to tap-to-place mode; Tab between placement points\n     - Timer: can be paused with P or Space (if enabled)\n   - **Tap-to-place alternative for LetterTracer**: child taps points along the letter outline instead of drawing; dots appear at tap locations\n   - **Magnetic snap for DragAndDrop**: 60px snap threshold assists children with limited motor precision\n   - **No time pressure** unless enabled: timer is off by default; parent enables if desired\n   - **Pointer Events API**: single unified handler for mouse, touch, and stylus\n\n6. **Cognitive Accessibility**:\n   - **Simple language**: instructions use grade-appropriate vocabulary; short sentences\n   - **TTS for all instructions**: no pre-reader needs to read to navigate or play\n   - **Consistent layouts**: same UI patterns across all games (back button top-left, score top-right, game area center)\n   - **Undo/retry always available**: children can always try again; no dead ends\n   - **Visual progress**: progress bar and star count always visible during gameplay\n   - **Encouraging tone**: all feedback text is positive; no \"Wrong!\" or \"Incorrect!\" — use \"Try again!\" or \"Almost!\"\n   - **Reduced cognitive load**: one task per screen; no simultaneous multiple choices requiring reading + listening\n\n7. **Speech API Fallbacks**:\n   When Web Speech API (TTS or STT) is unavailable or denied:\n   - **TTS fallback**: instructions displayed as visible text. For Pre-K/K games requiring TTS, a \"Read to me\" button appears for parent assistance.\n   - **STT fallback (Read Aloud game)**: text input field appears. Child can type the sentence. Grade-appropriate keyboard or on-screen keyboard hint.\n   - **Fallback detection**: check &#96;'speechSynthesis' in window&#96; and &#96;'SpeechRecognition' in window || 'webkitSpeechRecognition' in window&#96;\n   - **Permission denied**: show friendly message \"Please allow microphone access to use voice features\" with icon-based alternative\n\n8. **Testing and Verification**:\n   - axe-core in every component test via &#96;@axe-core/react&#96; or &#96;jest-axe&#96; — zero violations policy\n   - Playwright &#96;checkAccessibility()&#96; on all page routes (using &#96;@axe-core/playwright&#96;)\n   - Manual screen reader testing: VoiceOver (iOS/macOS), TalkBack (Android), NVDA (Windows)\n   - Color contrast verification: all themes verified with Colour Contrast Analyser\n   - Keyboard navigation smoke test in Playwright: Tab through all interactive elements on key pages\n\nAfter writing the file, return \"DONE: docs/accessibility.md written successfully\".",
+  "subagentType": "unspecified"
+}
+```
+Additional data:
+
+```json
+{
+  "status": "success",
+  "subagentComposerId": "6fc08141-062f-4357-86ba-8379acf54941",
+  "terminationReason": "completed"
+}
+```
+Result:
+
+```json
+{
+  "agentId": "6fc08141-062f-4357-86ba-8379acf54941"
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2"><details>
+<summary>Tool use: **task_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2">
+<details>
+<summary>Tool use: **task_v2**</summary>
+
+
+Parameters:
+
+```json
+{
+  "description": "Write docs/testing-strategy.md",
+  "model": "claude-4.6-sonnet-medium-thinking",
+  "name": "general-purpose",
+  "prompt": "Write the file &#96;/Users/leocaseiro/Sites/base-skill/docs/testing-strategy.md&#96; using the Write tool.\n\nThis is the testing strategy document for BaseSkill — a free, open-source, offline-first educational PWA for children. Stack: TanStack Start + TanStack Router + React + TypeScript (strict, no any) + RxDB + Vitest + React Testing Library + Playwright.\n\nThe document must be comprehensive and actionable. Cover:\n\n1. **Overview and Philosophy**:\n   - Every commit has passing CI (lint + type-check + unit + E2E)\n   - No &#96;any&#96; in TypeScript — CI enforces this\n   - Unit tests for logic, component tests for UI, E2E for user flows\n   - Test data fixtures for RxDB (not mocked — real RxDB in-memory for tests)\n   - Zero accessibility violations policy\n\n2. **Test Runner Setup**:\n   - **Vitest** (not Jest): native ESM, Vite-native, fast\n   - Config: &#96;vitest.config.ts&#96; extending &#96;vite.config.ts&#96;, jsdom environment, coverage via v8\n   - React Testing Library with &#96;@testing-library/user-event&#96; for realistic user interactions\n   - Setup file: &#96;tests/setup.ts&#96; — global mocks (Web Speech API, IndexedDB, matchMedia)\n\n3. **TypeScript Strictness Enforcement**:\n   - &#96;tsconfig.json&#96;: &#96;\"strict\": true&#96;, &#96;\"noImplicitAny\": true&#96;, &#96;\"exactOptionalPropertyTypes\": true&#96;\n   - ESLint: &#96;@typescript-eslint/no-explicit-any: \"error\"&#96;, &#96;@typescript-eslint/no-unsafe-assignment: \"error\"&#96;\n   - CI step: &#96;tsc --noEmit&#96; fails the build on type errors\n   - CI step: &#96;eslint . --max-warnings 0&#96; fails on any warning\n\n4. **Unit Tests (Vitest)**:\n   Coverage targets:\n   - Game logic (override merging, session recorder, chunking): 100%\n   - RxDB schema definitions (valid JSON Schema): 100%\n   - Event bus (emit, on, off, cleanup): 100%\n   - Theme engine (CSS variable injection, clone logic): 90%\n   - i18n utilities (language detection, grade formatting): 90%\n   - Speech utilities (voice selection, fallback): 85%\n\n   Key test files:\n   - &#96;tests/unit/game-config-resolver.test.ts&#96; — override merging for all 4 resolution levels\n   - &#96;tests/unit/session-recorder.test.ts&#96; — event recording, chunk rollover at 200 events, chunk rollover at 50KB, session index creation on game:end\n   - &#96;tests/unit/event-bus.test.ts&#96; — emit/subscribe/unsubscribe type safety\n   - &#96;tests/unit/rxdb-schemas.test.ts&#96; — validate all 10 collection schemas against sample documents using ajv or jsonschema\n\n5. **Component Tests (Vitest + RTL)**:\n   Coverage targets: 85% line coverage for all components in &#96;app/components/&#96;\n\n   Key component tests:\n   - &#96;DragAndDrop.test.tsx&#96; — pointer events simulation, snap threshold, drop event emission\n   - &#96;MultipleChoice.test.tsx&#96; — keyboard navigation (arrow keys, Enter), ARIA attributes, aria-live announcement on selection\n   - &#96;LetterTracer.test.tsx&#96; — canvas render, tap-to-place mode activation, accessibility label\n   - &#96;Timer.test.tsx&#96; — countdown, hidden state, time_up event\n   - &#96;EncouragementAnnouncer.test.tsx&#96; — message rendering on correct/near-miss, TTS call\n   - &#96;OfflineIndicator.test.tsx&#96; — shows/hides based on navigator.onLine, dismisses on online event\n   - &#96;ProfilePicker.test.tsx&#96; — renders profiles from RxDB fixture, selects profile, redirects\n\n   Mocking strategy:\n   - Web Speech API: mock &#96;window.speechSynthesis&#96; and &#96;window.SpeechRecognition&#96; in setup\n   - RxDB: use real RxDB with memory adapter in tests (not mocked)\n   - TanStack Router: use &#96;createMemoryRouter&#96; from TanStack Router test utilities\n\n6. **E2E Tests (Playwright)**:\n   Config: &#96;playwright.config.ts&#96; — Chromium, Firefox, WebKit; mobile viewports (iPhone 12, iPad); base URL from env\n\n   **Critical user flows** (one test file per flow):\n   - &#96;tests/e2e/profile-creation.spec.ts&#96; — create profile, select avatar, set grade, verify dashboard\n   - &#96;tests/e2e/game-play.spec.ts&#96; — select game from dashboard, play through one round, verify score recorded in RxDB\n   - &#96;tests/e2e/progress-saving.spec.ts&#96; — play game, refresh page, verify progress persists\n   - &#96;tests/e2e/profile-switching.spec.ts&#96; — create 2 profiles, switch between them, verify isolated progress\n   - &#96;tests/e2e/bookmarks.spec.ts&#96; — bookmark a game, verify it appears in bookmarks row, unbookmark\n   - &#96;tests/e2e/recents.spec.ts&#96; — play a game, verify it appears in recently played row\n   - &#96;tests/e2e/offline-mode.spec.ts&#96; — load app, go offline (Playwright network intercept), verify offline banner, verify game still playable\n   - &#96;tests/e2e/online-restore.spec.ts&#96; — go offline, go online, verify banner dismisses\n   - &#96;tests/e2e/parent-pin.spec.ts&#96; — access parent settings, enter PIN, verify access; wrong PIN rejected\n   - &#96;tests/e2e/session-history.spec.ts&#96; — play game, navigate to parent \u003e history, verify session appears with events\n   - &#96;tests/e2e/data-cleanup.spec.ts&#96; — create session history, clear history, verify progress unchanged\n   - &#96;tests/e2e/theme-change.spec.ts&#96; — switch theme in child settings, verify CSS variables applied\n\n7. **Visual Regression Tests**:\n   - Playwright screenshot baselines for all key screens\n   - Captured for all 6 themes (Ocean, Forest, Space, Rainbow, Sunset, Night)\n   - Screens: Profile Picker, Dashboard, Game Shell (Letter Tracing loaded), Child Settings, Parent Settings (each tab), Offline banner state\n   - Command: &#96;playwright test --update-snapshots&#96; to update baselines\n   - CI: fails on pixel diff \u003e 0.1%\n   - Viewports: 1280x800 (desktop), 768x1024 (iPad portrait), 390x844 (iPhone 14)\n\n8. **Accessibility Tests**:\n   - axe-core via &#96;@axe-core/playwright&#96; — runs on every E2E test after page load\n   - Zero violations policy: any axe violation fails the test\n   - Additional: &#96;tests/e2e/accessibility.spec.ts&#96; — dedicated a11y audit on all routes\n   - Keyboard navigation test: Tab through all interactive elements on Dashboard and Game Shell\n\n9. **Offline Tests**:\n   - Service worker testing: Playwright's &#96;context.setOffline(true)&#96; to simulate network loss\n   - Verify: offline banner appears within 500ms\n   - Verify: game play works without network\n   - Verify: score saved to RxDB while offline\n   - Verify: RxDB sync queue has pending mutations while offline\n   - Verify: on &#96;context.setOffline(false)&#96;, banner dismisses, sync resumes\n\n10. **i18n Tests**:\n    - Snapshot tests: render all app screens with &#96;en&#96; locale, snapshot. Render with &#96;pt-BR&#96;, snapshot. Both must match expected strings.\n    - Missing key check: Node.js script that compares en/ and pt-BR/ JSON files — fails CI if key present in en but missing in pt-BR\n    - Grade name formatting test: &#96;formatGrade()&#96; produces correct strings per locale\n\n11. **Session History Tests**:\n    - &#96;tests/unit/session-recorder.test.ts&#96;:\n      - Records events on event bus subscription\n      - Creates new chunk doc when 200 events reached\n      - Creates new chunk doc when ~50KB reached\n      - &#96;chunkIndex&#96; increments correctly\n      - Writes &#96;session_history_index&#96; on &#96;game:end&#96;\n      - &#96;totalChunks&#96; matches actual chunk count\n    - &#96;tests/e2e/session-history.spec.ts&#96;:\n      - History viewer shows sessions in newest-first order\n      - Expanding session row lazy-loads event data\n      - Filtering by game/date works\n      - Cascade delete: clearing history removes all chunks for each session\n\n12. **Test Data Fixtures**:\n    Location: &#96;tests/fixtures/&#96;\n\n    Files:\n    - &#96;profiles.ts&#96; — 3 sample profiles (alice: Pre-K, bob: Year 2, parent: parent account)\n    - &#96;progress.ts&#96; — sample progress docs for multiple games per profile\n    - &#96;settings.ts&#96; — sample settings per profile\n    - &#96;game_config_overrides.ts&#96; — sample overrides at each scope level\n    - &#96;bookmarks.ts&#96; — sample bookmarks\n    - &#96;themes.ts&#96; — all 6 preset themes + 1 cloned custom theme\n    - &#96;session_history.ts&#96; — 2 sessions: one with 1 chunk, one with 3 chunks (overflow test)\n    - &#96;session_history_index.ts&#96; — corresponding index documents\n    - &#96;db-factory.ts&#96; — helper that creates an in-memory RxDB instance pre-seeded with fixture data\n\n    Fixture format:\n    &#96;&#96;&#96;typescript\n    // tests/fixtures/profiles.ts\n    export const aliceProfile = {\n      id: 'profile-alice-001',\n      name: 'Alice',\n      avatar: 'owl',\n      gradeLevel: 'pre-k',\n      language: 'en',\n      themeId: 'theme-ocean',\n      parentPinHash: null,\n      isActive: true,\n      createdAt: '2026-01-01T00:00:00.000Z',\n      updatedAt: '2026-01-01T00:00:00.000Z',\n    } as const satisfies Profile\n    &#96;&#96;&#96;\n\n13. **Coverage Targets Summary**:\n\n    | Category | Target |\n    |----------|--------|\n    | Game logic (override merging, session recorder) | 100% |\n    | RxDB schemas | 100% |\n    | Event bus | 100% |\n    | UI components | 85% line |\n    | E2E critical flows | 100% flow coverage |\n    | Accessibility (axe) | Zero violations |\n    | i18n completeness | Zero missing keys |\n    | Visual regression | Pixel-perfect baselines |\n\nAfter writing the file, return \"DONE: docs/testing-strategy.md written successfully\".",
+  "subagentType": "unspecified"
+}
+```
+Additional data:
+
+```json
+{
+  "status": "success",
+  "subagentComposerId": "0d0058aa-8aec-4d9e-a723-459a9263390c",
+  "terminationReason": "completed"
+}
+```
+Result:
+
+```json
+{
+  "agentId": "0d0058aa-8aec-4d9e-a723-459a9263390c"
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2"><details>
+<summary>Tool use: **task_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2">
+<details>
+<summary>Tool use: **task_v2**</summary>
+
+
+Parameters:
+
+```json
+{
+  "description": "Write docs/ci-cd.md",
+  "model": "claude-4.6-sonnet-medium-thinking",
+  "name": "general-purpose",
+  "prompt": "Write the file &#96;/Users/leocaseiro/Sites/base-skill/docs/ci-cd.md&#96; using the Write tool.\n\nThis is the CI/CD design document for BaseSkill — a free, open-source, offline-first educational PWA for children. Stack: TanStack Start + TanStack Router + React + TypeScript (strict) + Vite + GitHub Actions + GitHub Pages.\n\nThe document must be comprehensive and actionable. Include complete GitHub Actions YAML snippets. Cover:\n\n1. **Overview**:\n   - Every incremental feature commit has passing CI\n   - Static SPA deployed to GitHub Pages automatically on merge to &#96;main&#96;\n   - Portability: same build output deploys to Netlify, Vercel, Cloudflare Pages, any static host\n   - GPL v3 open-source project — branch protection enables community contribution workflow\n\n2. **GitHub Actions Workflows**:\n\n   **a) &#96;ci.yml&#96; — Pull Request / Push CI** (triggered on: push to any branch, PR to main):\n   Include complete YAML with these jobs (each running in parallel where possible):\n   - &#96;lint&#96;: &#96;eslint . --max-warnings 0&#96; + &#96;prettier --check&#96;\n   - &#96;typecheck&#96;: &#96;tsc --noEmit&#96;\n   - &#96;unit-test&#96;: &#96;vitest run --coverage&#96; with coverage thresholds\n   - &#96;build&#96;: &#96;npm run build&#96; — verifies build succeeds\n   \n   All 4 jobs must pass for PR to be mergeable.\n\n   **b) &#96;e2e.yml&#96; — E2E Tests** (triggered on: push to main, PR to main, scheduled weekly):\n   - Installs Playwright browsers\n   - Runs &#96;playwright test&#96; on Chromium, Firefox, WebKit\n   - Uploads Playwright report as artifact on failure\n   - Runs accessibility audit (&#96;@axe-core/playwright&#96;)\n   - Matrix: &#96;[chromium, firefox, webkit]&#96; — each browser as parallel job\n\n   **c) &#96;deploy.yml&#96; — Deploy to GitHub Pages** (triggered on: push to main, after CI passes):\n   - Builds with &#96;npm run build&#96;\n   - Stamps semver version into build (see App Versioning section)\n   - Deploys &#96;dist/&#96; to GitHub Pages via &#96;actions/deploy-pages@v4&#96;\n   - Sets correct base URL for GitHub Pages (&#96;/base-skill/&#96; or custom domain)\n   - Uses &#96;permissions: pages: write, id-token: write&#96;\n\n   **d) &#96;visual-regression.yml&#96;** (triggered on: PR to main, manual dispatch):\n   - Runs Playwright screenshot comparison against baselines\n   - Uploads diff images as artifact on failure\n   - Note: baselines committed to &#96;tests/snapshots/&#96; directory\n\n   Provide complete YAML for each workflow file. Use GitHub Actions best practices: &#96;actions/checkout@v4&#96;, &#96;actions/setup-node@v4&#96;, &#96;actions/cache@v4&#96; for node_modules.\n\n3. **App Versioning Strategy**:\n   - Semver format: &#96;MAJOR.MINOR.PATCH&#96; (e.g., &#96;0.1.0&#96;, &#96;1.0.0&#96;)\n   - Version source: &#96;package.json&#96; &#96;\"version\"&#96; field\n   - Build-time injection: Vite &#96;define&#96; injects &#96;import.meta.env.VITE_APP_VERSION&#96; from &#96;package.json&#96;\n   - Deploy-time: CI stamps the git SHA + version into a &#96;version.json&#96; file at build root: &#96;{ \"version\": \"1.2.3\", \"buildSha\": \"abc1234\", \"buildDate\": \"2026-03-31\" }&#96;\n   - On app load: reads &#96;app_meta&#96; RxDB collection; if version differs from &#96;import.meta.env.VITE_APP_VERSION&#96;, triggers SW update check + RxDB migration check\n   - Version displayed in Parent Settings \u003e About\n\n   &#96;vite.config.ts&#96; snippet showing version injection:\n   &#96;&#96;&#96;typescript\n   import { version } from './package.json'\n   export default defineConfig({\n     define: {\n       'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),\n     },\n   })\n   &#96;&#96;&#96;\n\n4. **Service Worker Lifecycle on Deploy**:\n   - New deployment → new SW installed with new version hash\n   - SW &#96;install&#96; event: pre-cache new assets under version-prefixed cache name (e.g., &#96;baseskill-v1.2.3&#96;)\n   - SW &#96;activate&#96; event: delete all caches NOT matching current version prefix; call &#96;self.skipWaiting()&#96; + &#96;self.clients.claim()&#96;\n   - App detects SW update via &#96;navigator.serviceWorker.addEventListener('controllerchange')&#96;\n   - On controller change: compare new version in &#96;app_meta&#96;; if RxDB schema version changed, run migration before rendering\n   - User experience: transparent update; app silently updates on next navigation (no forced reload prompt)\n\n5. **GitHub Pages Deployment**:\n   - Repository: &#96;github.com/[owner]/base-skill&#96;\n   - Pages source: GitHub Actions (not branch)\n   - Base path: &#96;/base-skill/&#96; (unless custom domain configured)\n   - TanStack Router history mode: use &#96;createHashHistory()&#96; for GitHub Pages (no server-side routing needed; hash-based URLs work with static hosting)\n   - Alternative: configure 404.html redirect for clean URLs (document both options)\n   - Custom domain support: add &#96;CNAME&#96; file to &#96;public/&#96;; update base URL in &#96;app.config.ts&#96;\n\n6. **Build Output**:\n   - &#96;dist/&#96; directory structure:\n     &#96;&#96;&#96;\n     dist/\n       index.html\n       assets/           # Hashed JS/CSS bundles\n       games/            # Game asset chunks (lazy-loaded)\n       icons/            # PWA icons\n       manifest.json\n       sw.js             # Generated by vite-plugin-pwa\n       version.json      # Build metadata\n     &#96;&#96;&#96;\n   - All JS/CSS files are content-hashed (cache-busting)\n   - &#96;index.html&#96; contains &#96;\u003clink rel=\"manifest\"\u003e&#96; and SW registration\n\n7. **Portability — Deploying to Other Hosts**:\n   | Host | Steps |\n   |------|-------|\n   | **Netlify** | Drop &#96;dist/&#96; or connect GitHub repo; add &#96;_redirects&#96; file: &#96;/* /index.html 200&#96; |\n   | **Vercel** | &#96;vercel --prod&#96;; add &#96;vercel.json&#96;: &#96;{ \"rewrites\": [{\"source\": \"/(.*)\", \"destination\": \"/index.html\"}] }&#96; |\n   | **Cloudflare Pages** | Connect GitHub repo; build command &#96;npm run build&#96;; output directory &#96;dist&#96;; add &#96;_redirects&#96; |\n   | **Any static host** | Serve &#96;dist/&#96; with SPA fallback (redirect all 404s to &#96;index.html&#96;) |\n\n8. **Commit and Branch Strategy**:\n   - **Trunk-based development**: all work in short-lived feature branches; merge to &#96;main&#96; via PR\n   - **Commit convention**: Conventional Commits format: &#96;feat:&#96;, &#96;fix:&#96;, &#96;docs:&#96;, &#96;test:&#96;, &#96;chore:&#96;, &#96;refactor:&#96;\n   - **Each commit**: represents one logical increment with passing CI. No WIP commits to &#96;main&#96;.\n   - **Changelog**: auto-generated from Conventional Commits (e.g., &#96;conventional-changelog&#96;) on release\n   - **Versioning**: manually bump &#96;package.json&#96; version on release; tag &#96;v1.0.0&#96;, etc.\n\n9. **Branch Protection Rules** (recommended for &#96;main&#96;):\n   - Require pull request before merging\n   - Require status checks to pass: &#96;lint&#96;, &#96;typecheck&#96;, &#96;unit-test&#96;, &#96;build&#96;\n   - Require branches to be up to date before merging\n   - Dismiss stale reviews when new commits pushed\n   - Require at least 1 approval for community PRs\n   - Do not allow force pushes\n   - Do not allow deletions\n\n10. **Environment Variables**:\n    | Variable | Where set | Purpose |\n    |----------|-----------|---------|\n    | &#96;VITE_APP_VERSION&#96; | Injected by Vite from &#96;package.json&#96; | App version string |\n    | &#96;VITE_GOOGLE_CLIENT_ID&#96; | GitHub Actions secret | Google OAuth client ID (public, not secret) |\n    | &#96;VITE_ONEDRIVE_CLIENT_ID&#96; | GitHub Actions secret | OneDrive/MSAL.js client ID |\n    | &#96;VITE_CF_WORKER_URL&#96; | GitHub Actions secret | Cloudflare Worker OAuth proxy URL |\n    | &#96;VITE_ANALYTICS_PROVIDER&#96; | Optional, defaults to &#96;noop&#96; | Analytics provider selection |\n\n    Note: &#96;VITE_*&#96; variables are embedded in the client bundle at build time. Do NOT store secrets here. Only public IDs and URLs.\n\nAfter writing the file, return \"DONE: docs/ci-cd.md written successfully\".",
+  "subagentType": "unspecified"
+}
+```
+Additional data:
+
+```json
+{
+  "status": "success",
+  "subagentComposerId": "ce5c4f4d-4b36-4713-ba1c-0f29af5d9b8d",
+  "terminationReason": "completed"
+}
+```
+Result:
+
+```json
+{
+  "agentId": "ce5c4f4d-4b36-4713-ba1c-0f29af5d9b8d"
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2"><details>
+<summary>Tool use: **task_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+All 7 parallel docs are written. Let me verify all 9 files exist and check their sizes.
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: ls -la /Users/leocaseiro/Sites/base-skill/docs/ && echo "---" && wc -l /Users/leocaseiro/Sites/base-skill/docs/*.md</summary>
+
+```bash
+ls -la /Users/leocaseiro/Sites/base-skill/docs/ && echo "---" && wc -l /Users/leocaseiro/Sites/base-skill/docs/*.md
+```
+
+```
+total 704
+drwxr-xr-x@ 13 leocaseiro  staff    416 Mar 31 19:10 .
+drwxr-xr-x@  9 leocaseiro  staff    288 Mar 28 22:30 ..
+-rw-r--r--@  1 leocaseiro  staff  22739 Mar 31 19:04 accessibility.md
+-rw-r--r--@  1 leocaseiro  staff  22999 Mar 31 18:59 architecture.md
+-rw-r--r--@  1 leocaseiro  staff  15550 Mar 31 18:47 baseskill_milestone_breakdown_85146c93.plan.md
+-rw-r--r--@  1 leocaseiro  staff  26605 Mar 31 19:06 ci-cd.md
+-rw-r--r--@  1 leocaseiro  staff  44117 Mar 31 19:03 data-model.md
+-rw-r--r--@  1 leocaseiro  staff  46316 Mar 31 19:10 game-engine.md
+-rw-r--r--@  1 leocaseiro  staff  31693 Mar 31 19:07 i18n.md
+-rw-r--r--@  1 leocaseiro  staff  24149 Mar 28 03:51 prd-plan.md
+-rw-r--r--@  1 leocaseiro  staff  22297 Mar 31 18:57 prd.md
+-rw-r--r--@  1 leocaseiro  staff  28893 Mar 31 19:05 testing-strategy.md
+-rw-r--r--@  1 leocaseiro  staff  54319 Mar 31 19:06 ui-ux.md
+---
+     455 /Users/leocaseiro/Sites/base-skill/docs/accessibility.md
+     610 /Users/leocaseiro/Sites/base-skill/docs/architecture.md
+     271 /Users/leocaseiro/Sites/base-skill/docs/baseskill_milestone_breakdown_85146c93.plan.md
+     876 /Users/leocaseiro/Sites/base-skill/docs/ci-cd.md
+    1576 /Users/leocaseiro/Sites/base-skill/docs/data-model.md
+    1504 /Users/leocaseiro/Sites/base-skill/docs/game-engine.md
+    1143 /Users/leocaseiro/Sites/base-skill/docs/i18n.md
+     231 /Users/leocaseiro/Sites/base-skill/docs/prd-plan.md
+     409 /Users/leocaseiro/Sites/base-skill/docs/prd.md
+     912 /Users/leocaseiro/Sites/base-skill/docs/testing-strategy.md
+    1278 /Users/leocaseiro/Sites/base-skill/docs/ui-ux.md
+    9265 total
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+All 9 documents are written. Let me mark all todos as complete.
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Write docs/prd.md -- full PRD expanding prd-plan.md section 1 (personas, user stories, functional/non-functional requirements, constraints, analytics)",
+      "id": "prd",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/architecture.md -- system architecture expanding prd-plan.md section 2, updated for TanStack Start/Router (route tree, diagrams, OAuth, PWA, extension points)",
+      "id": "architecture",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/data-model.md -- RxDB schemas in JSON Schema format, relationships, sync strategy, chunking, cleanup, token storage (ASYNC)",
+      "id": "data-model",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/game-engine.md -- game lifecycle, session recorder, config schema, override merging, reusable components, 5 reference game specs (ASYNC)",
+      "id": "game-engine",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/ui-ux.md -- design system, themes, layouts, navigation, DnD helpers, encouragement, session viewer, responsive strategy (ASYNC)",
+      "id": "ui-ux",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/i18n.md -- i18n framework, translation structure, TTS voice selection, device-aware sync, locale formatting (ASYNC)",
+      "id": "i18n",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/accessibility.md -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech fallbacks (ASYNC)",
+      "id": "accessibility",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/testing-strategy.md -- Vitest/RTL/Playwright plan, coverage targets, visual regression, a11y tests, fixtures (ASYNC)",
+      "id": "testing",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/ci-cd.md -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection (ASYNC)",
+      "id": "cicd",
+      "status": "completed"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Write docs/prd.md -- full PRD expanding prd-plan.md section 1 (personas, user stories, functional/non-functional requirements, constraints, analytics)",
+      "id": "prd",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/architecture.md -- system architecture expanding prd-plan.md section 2, updated for TanStack Start/Router (route tree, diagrams, OAuth, PWA, extension points)",
+      "id": "architecture",
+      "status": "completed"
+    },
+    {
+      "content": "Write docs/data-model.md -- RxDB schemas in JSON Schema format, relationships, sync strategy, chunking, cleanup, token storage (ASYNC)",
+      "id": "data-model",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/game-engine.md -- game lifecycle, session recorder, config schema, override merging, reusable components, 5 reference game specs (ASYNC)",
+      "id": "game-engine",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/ui-ux.md -- design system, themes, layouts, navigation, DnD helpers, encouragement, session viewer, responsive strategy (ASYNC)",
+      "id": "ui-ux",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/i18n.md -- i18n framework, translation structure, TTS voice selection, device-aware sync, locale formatting (ASYNC)",
+      "id": "i18n",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/accessibility.md -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech fallbacks (ASYNC)",
+      "id": "accessibility",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/testing-strategy.md -- Vitest/RTL/Playwright plan, coverage targets, visual regression, a11y tests, fixtures (ASYNC)",
+      "id": "testing",
+      "status": "in_progress"
+    },
+    {
+      "content": "Write docs/ci-cd.md -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection (ASYNC)",
+      "id": "cicd",
+      "status": "in_progress"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-4.6-opus-high-thinking)**_
+
+Milestone 0 is complete. All 9 design documents have been authored in `docs/`:
+
+| File | Lines | Content |
+|------|-------|---------|
+| `docs/prd.md` | 409 | Product vision, 3 personas, user stories (C/P/F), 15 functional requirements, NFRs, constraints, competitors, glossary |
+| `docs/architecture.md` | 610 | TanStack Start config, route tree with guards, component hierarchy, state management, data flow diagram, OAuth (Google BFF + OneDrive MSAL), PWA/SW lifecycle, event bus + plugin API, directory structure |
+| `docs/data-model.md` | 1,576 | Full JSON Schema for all 10 RxDB collections, ER relationships diagram, chunking rules, sync strategy per collection, conflict resolution, token storage, migration framework |
+| `docs/game-engine.md` | 1,504 | Game lifecycle state machine, event bus integration, session recorder middleware, game config JSON schema, override merging algorithm, 8 reusable component specs, 5 reference game detailed specs |
+| `docs/ui-ux.md` | 1,278 | 6 theme color palettes, shadcn/ui extension strategy, all core layouts, grade-adaptive navigation, DnD UX helpers, encouragement system, session history viewer, data management screen, responsive strategy, animation guidelines |
+| `docs/i18n.md` | 1,143 | react-i18next setup, translation file structure with sample content (en + pt-BR), TTS voice selection, device-aware sync, STT language matching, locale-specific formatting, adding new language guide |
+| `docs/accessibility.md` | 455 | Full WCAG 2.1 AA checklist, screen reader ARIA patterns, colorblind guidelines, motor/keyboard accessibility per game component, cognitive accessibility, speech API fallbacks |
+| `docs/testing-strategy.md` | 912 | Vitest + RTL setup, TypeScript strictness enforcement, unit/component/E2E test plans, visual regression strategy, a11y testing, offline tests, i18n snapshot tests, session history tests, complete fixture specs |
+| `docs/ci-cd.md` | 876 | Complete GitHub Actions YAML for CI/E2E/deploy/visual-regression workflows, app versioning, SW lifecycle on deploy, GitHub Pages setup, portability guide, branch protection rules |
+
+**Total: 9,265 lines of design documentation.** The SYNC dependency was respected — `prd.md` and `architecture.md` were written first, then the 7 remaining docs were written in parallel. Milestone 1 (Project Scaffolding) can now begin.

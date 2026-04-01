@@ -1043,3 +1043,258 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/package.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{tsx,ts}",
+  "path": "/Users/leocaseiro/Sites/base-skill/src",
+  "pattern": "use[A-Z][a-zA-Z]*\\("
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/src",
+  "pattern": "use[A-Z][a-zA-Z]*\\(",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "src/routes/_app/game/$gameId.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "src/components/ui/sonner.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "src/components/ThemeToggle.tsx"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 4
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{tsx,ts}",
+  "path": "/Users/leocaseiro/Sites/base-skill/src",
+  "pattern": "\\buse[A-Za-z]+\\b"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/src",
+  "pattern": "\\buse[A-Za-z]+\\b",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "src/routes/_app/game/$gameId.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "src/components/ui/sonner.tsx"
+    },
+    {
+      "matchCount": 4,
+      "uri": "src/components/ThemeToggle.tsx"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 7
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/src/routes/_app.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+### 1) RxDB / database / local storage
+
+| Path | Summary |
+|------|---------|
+| `/Users/leocaseiro/Sites/base-skill/package.json` | No `rxdb` or DB dependency; planned stack only. |
+| `/Users/leocaseiro/Sites/base-skill/docs/data-model.md` | RxDB as local layer: schemas, IndexedDB, migrations (design). |
+| `/Users/leocaseiro/Sites/base-skill/docs/testing-strategy.md` | Planned real RxDB in tests, `fake-indexeddb`, example `speechSynthesis` mocks. |
+| `/Users/leocaseiro/Sites/base-skill/src/routes/__root.tsx` | Inline script reads/writes `localStorage` key `theme` + `prefers-color-scheme` before paint. |
+| `/Users/leocaseiro/Sites/base-skill/src/components/ThemeToggle.tsx` | Persists theme mode (`light` / `dark` / `auto`) in `localStorage`. |
+| `/Users/leocaseiro/Sites/base-skill/yarn.lock` | Transitive `idb` (not app-level IndexedDB usage). |
+
+### 2) React hooks patterns
+
+| Path | Summary |
+|------|---------|
+| `/Users/leocaseiro/Sites/base-skill/src/components/ThemeToggle.tsx` | `useState` + `useEffect` for theme mode and `matchMedia` listener. |
+| `/Users/leocaseiro/Sites/base-skill/src/components/ui/sonner.tsx` | `useTheme` from `next-themes`. |
+| `/Users/leocaseiro/Sites/base-skill/src/routes/_app/game/$gameId.tsx` | `Route.useParams()` (TanStack Router hook). |
+
+### 3) TanStack Query / Router
+
+| Path | Summary |
+|------|---------|
+| `/Users/leocaseiro/Sites/base-skill/package.json` | `@tanstack/react-router-ssr-query` present; **no** `@tanstack/react-query` listed. |
+| `/Users/leocaseiro/Sites/base-skill/src/router.tsx` | `createTanStackRouter` + route tree registration. |
+| `/Users/leocaseiro/Sites/base-skill/src/routes/**/*.tsx` | File routes via `createFileRoute` / `createRootRoute` / `Link` / `Outlet`. |
+| `/Users/leocaseiro/Sites/base-skill/docs/architecture.md` | Documents evaluating TanStack Query vs RxDB hooks (M2). |
+| `/Users/leocaseiro/Sites/base-skill/README.md` | Mentions loaders vs TanStack Query for data fetching. |
+
+### 4) i18n
+
+| Path | Summary |
+|------|---------|
+| `/Users/leocaseiro/Sites/base-skill/docs/i18n.md` | Full **react-i18next** design (no `src` implementation yet). |
+| `/Users/leocaseiro/Sites/base-skill/src/routes/_app.tsx` | Comment placeholder for i18n provider only. |
+| `/Users/leocaseiro/Sites/base-skill/docs/prd.md` | Points to `docs/i18n.md` for i18n framework. |
+
+### 5) Theme / CSS variables
+
+| Path | Summary |
+|------|---------|
+| `/Users/leocaseiro/Sites/base-skill/src/styles.css` | Ocean + shadcn tokens: `--sea-*`, `--bs-*`, `@media (prefers-color-scheme: dark)`, Tailwind `@theme`. |
+| `/Users/leocaseiro/Sites/base-skill/src/components/Header.tsx` | Layout uses `var(--line)`, `var(--header-bg)`, etc. |
+| `/Users/leocaseiro/Sites/base-skill/src/components/ui/button.tsx` / `sonner.tsx` | Components reference `var(--radius-*)`, popover/border CSS vars. |
+| `/Users/leocaseiro/Sites/base-skill/docs/ui-ux.md` | Product/theme spec including `--bs-*` usage (design). |
+
+### 6) Speech / TTS
+
+| Path | Summary |
+|------|---------|
+| `/Users/leocaseiro/Sites/base-skill/src/routes/_app/parent/voices.tsx` | Stub route title “TTS Voice Selector” only. |
+| `/Users/leocaseiro/Sites/base-skill/docs/game-engine.md`, `/Users/leocaseiro/Sites/base-skill/docs/i18n.md`, `/Users/leocaseiro/Sites/base-skill/docs/accessibility.md` | Web Speech API / `speechSynthesis` / STT design and examples (no runtime `speech.ts` in repo). |
+| `/Users/leocaseiro/Sites/base-skill/docs/testing-strategy.md` | Example mocks for `speechSynthesis` in tests. |
+
+### 7) Event bus / pub-sub
+
+| Path | Summary |
+|------|---------|
+| `/Users/leocaseiro/Sites/base-skill/docs/game-engine.md` | `GameEventBus` interface, `emit` / `subscribe` spec, session recorder wiring (design). |
+| `/Users/leocaseiro/Sites/base-skill/docs/architecture.md` | Event bus in architecture diagram and plugin constraints (design). |
+| `/Users/leocaseiro/Sites/base-skill/docs/testing-strategy.md` | Example tests using `eventBus.emit` (design). |
+| **App `src/`** | No `eventBus.ts` or equivalent implementation found. |
+
+### 8) CLAUDE.md, AGENTS.md, conventions
+
+| Path | Summary |
+|------|---------|
+| **CLAUDE.md / AGENTS.md** | **Not present** under `/Users/leocaseiro/Sites/base-skill`. |
+| `/Users/leocaseiro/Sites/base-skill/docs/baseskill_milestone_breakdown_85146c93.plan.md` | Milestone and workstream conventions. |
+| `/Users/leocaseiro/Sites/base-skill/docs/architecture.md` | Stack and folder layout target architecture. |
+| `/Users/leocaseiro/Sites/base-skill/scope.md` | High-level product/technical scope. |
+| `/Users/leocaseiro/Sites/base-skill/README.md` | TanStack Start / Router onboarding for this scaffold. |
+| **`.cursor/rules`** | **Not found** in workspace search. |

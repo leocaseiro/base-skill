@@ -7,7 +7,6 @@
 _**User**_
 
 Explore the codebase at /Users/leocaseiro/Sites/base-skill thoroughly. I need to understand:
-
 1. What files and directories exist at the root level
 2. What's in the docs/ directory
 3. Any existing design documents, specs, or architecture docs
@@ -21,7 +20,10 @@ Be very thorough - list all files found and provide summaries of key files.
 
 _**Agent (composer-2-fast)**_
 
+
 Exploring the codebase: listing the root, scanning `docs/`, and locating config and source files.
+
+
 
 _**Agent (composer-2-fast)**_
 
@@ -31,59 +33,58 @@ _**Agent (composer-2-fast)**_
 
 Directory: **/Users/leocaseiro/Sites/base-skill** (45 files)
 
-| File                                                                                      |
-| ----------------------------------------------------------------------------------------- |
-| `.git/logs/refs/heads/master`                                                             |
-| `.git/logs/HEAD`                                                                          |
-| `.git/refs/heads/master`                                                                  |
-| `.git/COMMIT_EDITMSG`                                                                     |
-| `.git/objects/a9/1465dbb2564b06d2f122d26cfbf516befc9edc`                                  |
-| `.git/objects/2b/1fb29c9ba9aa297c0c6b6431fe38728de8600e`                                  |
-| `.git/objects/cb/2057702bfe8aaf6020b32ac5fd56bd51e4adae`                                  |
-| `docs/baseskill_milestone_breakdown_85146c93.plan.md`                                     |
-| `.specstory/history/2026-03-27_17-17-43Z-project-breakdown-from-prd-to-completion.md`     |
-| `.specstory/statistics.json`                                                              |
-| `.git/gk/config`                                                                          |
-| `.specstory/.project.json`                                                                |
-| `.vscode/settings.json`                                                                   |
+| File |
+|------|
+| `.git/logs/refs/heads/master` |
+| `.git/logs/HEAD` |
+| `.git/refs/heads/master` |
+| `.git/COMMIT_EDITMSG` |
+| `.git/objects/a9/1465dbb2564b06d2f122d26cfbf516befc9edc` |
+| `.git/objects/2b/1fb29c9ba9aa297c0c6b6431fe38728de8600e` |
+| `.git/objects/cb/2057702bfe8aaf6020b32ac5fd56bd51e4adae` |
+| `docs/baseskill_milestone_breakdown_85146c93.plan.md` |
+| `.specstory/history/2026-03-27_17-17-43Z-project-breakdown-from-prd-to-completion.md` |
+| `.specstory/statistics.json` |
+| `.git/gk/config` |
+| `.specstory/.project.json` |
+| `.vscode/settings.json` |
 | `.specstory/history/2026-03-26_15-39-46Z-gameplay-session-history-and-data-management.md` |
-| `.specstory/history/2026-03-27_16-40-42Z-github-pages-and-oauth2-options.md`              |
-| `.git/logs/refs/remotes/origin/master`                                                    |
-| `.git/refs/remotes/origin/master`                                                         |
-| `.git/objects/93/e5883c05603398c06b04b47537642bf68e1ddd`                                  |
-| `scope.md`                                                                                |
-| `docs/prd-plan.md`                                                                        |
-| `.specstory/history/2026-03-27_16-41-18Z-repository-exploration-details.md`               |
-| `.git/config`                                                                             |
-| `.git/objects/24/9ad37354260ab1444b9201cf01857e69407753`                                  |
-| `.git/cursor/crepe/2be200fed365bc2ad21e7b7b47c8c932b3ad7f25/metadata.json`                |
-| `.git/objects/2b/e200fed365bc2ad21e7b7b47c8c932b3ad7f25`                                  |
-| `.specstory/history/2026-03-26_13-04-36Z-prd-for-ai-agents-and-licensing.md`              |
-| `.git/objects/24/ed95ea86199276ccc7d38904e137ce9f5b26e5`                                  |
-| `.git/HEAD`                                                                               |
-| `.git/hooks/push-to-checkout.sample`                                                      |
-| `.git/hooks/update.sample`                                                                |
-| `.git/hooks/pre-push.sample`                                                              |
-| `.git/hooks/pre-applypatch.sample`                                                        |
-| `.git/hooks/pre-merge-commit.sample`                                                      |
-| `.git/hooks/post-update.sample`                                                           |
-| `.git/hooks/prepare-commit-msg.sample`                                                    |
-| `.git/hooks/pre-receive.sample`                                                           |
-| `.git/hooks/fsmonitor-watchman.sample`                                                    |
-| `.git/hooks/applypatch-msg.sample`                                                        |
-| `.git/hooks/pre-commit.sample`                                                            |
-| `.git/hooks/sendemail-validate.sample`                                                    |
-| `.git/hooks/pre-rebase.sample`                                                            |
-| `.git/hooks/commit-msg.sample`                                                            |
-| `.git/description`                                                                        |
-| `.git/info/exclude`                                                                       |
-| `.specstory/cli/config.toml`                                                              |
+| `.specstory/history/2026-03-27_16-40-42Z-github-pages-and-oauth2-options.md` |
+| `.git/logs/refs/remotes/origin/master` |
+| `.git/refs/remotes/origin/master` |
+| `.git/objects/93/e5883c05603398c06b04b47537642bf68e1ddd` |
+| `scope.md` |
+| `docs/prd-plan.md` |
+| `.specstory/history/2026-03-27_16-41-18Z-repository-exploration-details.md` |
+| `.git/config` |
+| `.git/objects/24/9ad37354260ab1444b9201cf01857e69407753` |
+| `.git/cursor/crepe/2be200fed365bc2ad21e7b7b47c8c932b3ad7f25/metadata.json` |
+| `.git/objects/2b/e200fed365bc2ad21e7b7b47c8c932b3ad7f25` |
+| `.specstory/history/2026-03-26_13-04-36Z-prd-for-ai-agents-and-licensing.md` |
+| `.git/objects/24/ed95ea86199276ccc7d38904e137ce9f5b26e5` |
+| `.git/HEAD` |
+| `.git/hooks/push-to-checkout.sample` |
+| `.git/hooks/update.sample` |
+| `.git/hooks/pre-push.sample` |
+| `.git/hooks/pre-applypatch.sample` |
+| `.git/hooks/pre-merge-commit.sample` |
+| `.git/hooks/post-update.sample` |
+| `.git/hooks/prepare-commit-msg.sample` |
+| `.git/hooks/pre-receive.sample` |
+| `.git/hooks/fsmonitor-watchman.sample` |
+| `.git/hooks/applypatch-msg.sample` |
+| `.git/hooks/pre-commit.sample` |
+| `.git/hooks/sendemail-validate.sample` |
+| `.git/hooks/pre-rebase.sample` |
+| `.git/hooks/commit-msg.sample` |
+| `.git/description` |
+| `.git/info/exclude` |
+| `.specstory/cli/config.toml` |
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -100,7 +101,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -117,7 +117,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -134,7 +133,274 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+
+
+
+
+
+_**Agent (composer-2-fast)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: ls -la /Users/leocaseiro/Sites/base-skill 2>/dev/null; ls -la /Users/leocaseiro/Sites/base-skill/docs 2>/dev/null; find /Users/leocaseiro/Sites/base-skill -maxdepth 4 \( -name .git -o -path '*/.git/*' \) -prune -o -type f -print 2>/dev/null | head -80</summary>
+
+```bash
+ls -la /Users/leocaseiro/Sites/base-skill 2>/dev/null; ls -la /Users/leocaseiro/Sites/base-skill/docs 2>/dev/null; find /Users/leocaseiro/Sites/base-skill -maxdepth 4 \( -name .git -o -path '*/.git/*' \) -prune -o -type f -print 2>/dev/null | head -80
+```
+
+```
+total 24
+drwxr-xr-x@   9 leocaseiro  staff   288 Mar 28 22:30 .
+drwxr-xr-x+ 129 leocaseiro  staff  4128 Mar 31 17:57 ..
+-rw-r--r--@   1 leocaseiro  staff  6148 Mar 28 22:33 .DS_Store
+drwxr-xr-x   15 leocaseiro  staff   480 Mar 31 18:51 .git
+-rw-r--r--@   1 leocaseiro  staff     0 Mar 27 02:40 .gitignore
+drwxr-xr-x@   7 leocaseiro  staff   224 Mar 31 18:39 .specstory
+drwxr-xr-x@   3 leocaseiro  staff    96 Mar 27 02:39 .vscode
+drwxr-xr-x@   4 leocaseiro  staff   128 Mar 31 18:47 docs
+-rw-r--r--@   1 leocaseiro  staff  3981 Mar 28 03:51 scope.md
+total 80
+drwxr-xr-x@ 4 leocaseiro  staff    128 Mar 31 18:47 .
+drwxr-xr-x@ 9 leocaseiro  staff    288 Mar 28 22:30 ..
+-rw-r--r--@ 1 leocaseiro  staff  15550 Mar 31 18:47 baseskill_milestone_breakdown_85146c93.plan.md
+-rw-r--r--@ 1 leocaseiro  staff  24149 Mar 28 03:51 prd-plan.md
+/Users/leocaseiro/Sites/base-skill/.DS_Store
+/Users/leocaseiro/Sites/base-skill/scope.md
+/Users/leocaseiro/Sites/base-skill/.specstory/.DS_Store
+/Users/leocaseiro/Sites/base-skill/.specstory/cli/config.toml
+/Users/leocaseiro/Sites/base-skill/.specstory/statistics.json
+/Users/leocaseiro/Sites/base-skill/.specstory/history/2026-03-26_13-04-36Z-prd-for-ai-agents-and-licensing.md
+/Users/leocaseiro/Sites/base-skill/.specstory/history/2026-03-27_16-40-42Z-github-pages-and-oauth2-options.md
+/Users/leocaseiro/Sites/base-skill/.specstory/history/2026-03-27_16-41-18Z-repository-exploration-details.md
+/Users/leocaseiro/Sites/base-skill/.specstory/history/2026-03-27_17-17-43Z-project-breakdown-from-prd-to-completion.md
+/Users/leocaseiro/Sites/base-skill/.specstory/history/2026-03-26_15-39-46Z-gameplay-session-history-and-data-management.md
+/Users/leocaseiro/Sites/base-skill/.specstory/.project.json
+/Users/leocaseiro/Sites/base-skill/docs/prd-plan.md
+/Users/leocaseiro/Sites/base-skill/docs/baseskill_milestone_breakdown_85146c93.plan.md
+/Users/leocaseiro/Sites/base-skill/.gitignore
+/Users/leocaseiro/Sites/base-skill/.vscode/settings.json
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+
+Reading key files for summaries:
+
+
+
+_**Agent (composer-2-fast)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/scope.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/prd-plan.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/baseskill_milestone_breakdown_85146c93.plan.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/.gitignore</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/.vscode/settings.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/.specstory/.project.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+
+
+
+
+
+_**Agent (composer-2-fast)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/prd-plan.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/.specstory/cli/config.toml</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/.specstory/statistics.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2-fast)**_
+
+
+Here is a concise inventory of `/Users/leocaseiro/Sites/base-skill` based on filesystem listing and file reads.
+
+---
+
+## 1. Root-level files and directories
+
+| Path | Notes |
+|------|--------|
+| `.git/` | Git repository metadata |
+| `.gitignore` | Present but **empty** (0 bytes) |
+| `.DS_Store` | macOS folder metadata |
+| `.specstory/` | SpecStory CLI project data (see below) |
+| `.vscode/` | Editor settings |
+| `docs/` | Project documentation (2 markdown files) |
+| `scope.md` | High-level product vision and technical notes |
+
+There is **no** `package.json`, `src/`, `app/`, `LICENSE`, or typical app scaffold at the root. The repo is **documentation-first**; implementation is planned but not present.
+
+---
+
+## 2. `docs/` directory
+
+| File | Size (approx.) | Role |
+|------|----------------|------|
+| `docs/prd-plan.md` | ~24 KB | Master PRD/design outline: license (GPL v3), planned doc tree, sections 1–9 covering PRD, architecture, data model, game engine, UI/UX, i18n, accessibility, testing, CI/CD |
+| `docs/baseskill_milestone_breakdown_85146c93.plan.md` | ~15.5 KB | Milestone plan (M0–M8) with YAML front matter (todos, TanStack Start framing), async/sync work streams |
+
+---
+
+## 3. Design documents, specs, architecture
+
+**Committed as full narrative (not split into the planned filenames yet):**
+
+- **`docs/prd-plan.md`** — Central spec. It *describes* a future layout (`docs/prd.md`, `architecture.md`, `data-model.md`, etc.) but those individual files **do not exist** in the repo. Content includes: GPL v3 + premium-repo separation, personas, functional/non-functional requirements, React/TS/Vite/shadcn/RxDB/Workbox stack, OAuth (OneDrive PKCE; Google via Cloudflare Worker BFF), PWA/offline, RxDB collections and session-history chunking, game engine and five reference games, UI/themes, i18n, a11y, testing, CI/CD, and deferred items (Cursor rules, Mermaid, assets).
+- **`scope.md`** — Shorter vision: gamified educational PWA (JAMstack, GitHub Pages), kid-friendly, offline, TTS/STT, accessibility, competitors, RxDB + Drive/OneDrive sync, OAuth2 PKCE note pointing at `docs/prd-plan.md`, reusable components, session history and bounded chunks, CI on every step.
+- **`docs/baseskill_milestone_breakdown_85146c93.plan.md`** — Execution plan from “design docs first” through scaffolding, data layer, app shell, game engine, reference games, cloud sync, parent features, polish; references TanStack Start/Router, milestones, and parallelization.
+
+**`.specstory/history/`** — Session transcripts (not formal architecture docs):
+
+- `2026-03-26_13-04-36Z-prd-for-ai-agents-and-licensing.md`
+- `2026-03-26_15-39-46Z-gameplay-session-history-and-data-management.md`
+- `2026-03-27_16-40-42Z-github-pages-and-oauth2-options.md`
+- `2026-03-27_16-41-18Z-repository-exploration-details.md`
+- `2026-03-27_17-17-43Z-project-breakdown-from-prd-to-completion.md`
+
+---
+
+## 4. Dependencies and config files
+
+| File | Purpose |
+|------|---------|
+| **No `package.json`** | No Node/npm/pnpm project |
+| **No `requirements.txt`, `Cargo.toml`, etc.** | No other language package manifests found |
+| `.vscode/settings.json` | `specstory.cloudSync.enabled`: `"ask"` |
+| `.specstory/.project.json` | Workspace/git IDs, `project_name`: `"base-skill"` |
+| `.specstory/cli/config.toml` | SpecStory CLI defaults (mostly commented; local_sync, cloud_sync, logging, etc.) |
+| `.specstory/statistics.json` | Session statistics for SpecStory |
+
+---
+
+## 5. Source code structure
+
+**No application source tree.** No `src/`, `lib/`, `apps/`, `packages/`, or committed `.ts`/`.tsx`/`.js` application files in the tracked project layout. The milestone doc explicitly defers scaffolding to **Milestone 1** (TanStack Start, Vite, etc.).
+
+---
+
+## 6. README and AGENTS
+
+- **No `README.md`** (or `README`*) at repo root or under `docs/`.
+- **No `AGENTS.md`** (or `.cursor/rules` content called out in `prd-plan.md` as “not writing yet”).
+
+---
+
+## Summary
+
+`base-skill` is a **planning repository**: `scope.md` plus **`docs/prd-plan.md`** (full product/architecture/testing/CI outline) and **`docs/baseskill_milestone_breakdown_85146c93.plan.md`** (phased delivery). Tooling is limited to **VS Code** + **SpecStory** metadata; **no runtime code or `package.json` yet.** The PRD lists many `docs/*.md` files to be authored in Milestone 0; only the consolidated `prd-plan.md` and the milestone file exist under `docs/` today.

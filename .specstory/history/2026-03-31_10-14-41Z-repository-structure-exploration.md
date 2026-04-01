@@ -1588,4 +1588,25 @@ The milestone plan explicitly calls for adding **GPL v3** `LICENSE` in Milestone
 
 ---
 
-## Present vs mis
+## Present vs missing (summary)
+
+| Item | Status |
+|------|--------|
+| Design/spec Markdown under `docs/` | Present |
+| Root `scope.md` | Present |
+| `.vscode/settings.json` | Present |
+| `.specstory/` | Present |
+| Application source (`src`, components, etc.) | **Missing** |
+| `package.json`, Node toolchain | **Missing** |
+| `tsconfig.json` | **Missing** |
+| Vite / TanStack Start config files | **Missing** |
+| `README` | **Missing** |
+| `.gitignore` | **Not found** (no match for `.gitignore` in search) |
+| `.github/` / GitHub Actions | **Missing** |
+| `LICENSE` | **Missing** |
+| `manifest.json` / PWA assets | **Missing** |
+| `public/` | **Missing** |
+
+---
+
+**Note:** Tooling searches use the workspace indexer; if anything were gitignored and hidden from the index, it would not appear here. From indexed content, the picture above is complete: this repo is **spec + editor tooling (SpecStory, VS Code)** only, with **no app scaffold** and **no CI/license/PWA files** committed yet.

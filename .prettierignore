@@ -1,3 +1,6 @@
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
+
+# Cursor session exports — formatting churn should not block CI
+.specstory/
