@@ -1,4 +1,4 @@
-import type { RxJsonSchema } from 'rxdb'
+import type { RxJsonSchema } from 'rxdb';
 
 export type BookmarkDoc = {
   id: string
@@ -17,6 +17,6 @@ export const bookmarksSchema: RxJsonSchema<BookmarkDoc> = {
     gameId: { type: 'string', maxLength: 64 },
     createdAt: { type: 'string', format: 'date-time' },
   },
-  required: ['id', 'profileId', 'gameId', 'createdAt'],
+  required: [ 'id', 'profileId', 'gameId', 'createdAt' ],
   additionalProperties: false,
-}
+};

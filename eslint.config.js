@@ -47,6 +47,15 @@ export default [
         },
       ],
 
+      semi: ['error', 'always'],
+      quotes: ['error', 'single'],
+      'comma-dangle': ['error', 'always-multiline'],
+      'object-curly-spacing': ['error', 'always'],
+      'array-bracket-spacing': ['error', 'always'],
+      'arrow-parens': ['error', 'always'],
+      'arrow-spacing': ['error', { before: true, after: true }],
+      'arrow-body-style': ['error', 'as-needed'],
+
       'react/function-component-definition': [
         'error',
         {

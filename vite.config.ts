@@ -1,15 +1,15 @@
-import { defineConfig } from 'vite'
-import { devtools } from '@tanstack/devtools-vite'
-import tsconfigPaths from 'vite-tsconfig-paths'
+import tailwindcss from '@tailwindcss/vite';
+import { devtools } from '@tanstack/devtools-vite';
 
-import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 
-import viteReact from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import { VitePWA } from 'vite-plugin-pwa'
-import { version } from './package.json'
+import viteReact from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import { version } from './package.json';
 
-const base = process.env['APP_BASE_URL'] ?? '/base-skill/'
+const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
 
 const config = defineConfig({
   base,
@@ -18,7 +18,7 @@ const config = defineConfig({
   },
   plugins: [
     devtools(),
-    tsconfigPaths({ projects: ['./tsconfig.json'] }),
+    tsconfigPaths({ projects: [ './tsconfig.json' ] }),
     tailwindcss(),
     tanstackStart({
       spa: { enabled: true },
@@ -32,7 +32,7 @@ const config = defineConfig({
       strategies: 'generateSW',
       injectRegister: 'auto',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: [ '**/*.{js,css,html,ico,png,svg,woff2}' ],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -40,7 +40,7 @@ const config = defineConfig({
             options: {
               cacheName: 'google-fonts-cache',
               expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [ 0, 200 ] },
             },
           },
           {
@@ -49,7 +49,7 @@ const config = defineConfig({
             options: {
               cacheName: 'gstatic-fonts-cache',
               expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [ 0, 200 ] },
             },
           },
         ],
@@ -57,6 +57,6 @@ const config = defineConfig({
       manifest: false,
     }),
   ],
-})
+});
 
-export default config
+export default config;

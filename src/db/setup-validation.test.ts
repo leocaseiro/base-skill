@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest';
 
 describe('test environment', () => {
   it('indexedDB is available', () => {
-    expect(indexedDB).toBeDefined()
-  })
-})
+    expect(indexedDB).toBeDefined();
+  });
+});

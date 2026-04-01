@@ -1,4 +1,4 @@
-import type { RxJsonSchema } from 'rxdb'
+import type { RxJsonSchema } from 'rxdb';
 
 export type ProfileDoc = {
   id: string
@@ -23,7 +23,7 @@ export const profilesSchema: RxJsonSchema<ProfileDoc> = {
     avatar: { type: 'string' },
     gradeLevel: {
       type: 'string',
-      enum: ['pre-k', 'k', '1', '2', '3', '4', '5', '6'],
+      enum: [ 'pre-k', 'k', '1', '2', '3', '4', '5', '6' ],
     },
     language: { type: 'string' },
     themeId: { type: 'string' },
@@ -42,4 +42,4 @@ export const profilesSchema: RxJsonSchema<ProfileDoc> = {
     'updatedAt',
   ],
   additionalProperties: false,
-}
+};

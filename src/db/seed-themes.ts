@@ -1,10 +1,10 @@
-import type { BaseSkillDatabase } from './types'
-import type { ThemeDoc } from './schemas/themes'
+import type { ThemeDoc } from './schemas/themes';
+import type { BaseSkillDatabase } from './types';
 
-const OCEAN_ID = 'theme_ocean_preset'
-const FOREST_ID = 'theme_forest_preset'
+const OCEAN_ID = 'theme_ocean_preset';
+const FOREST_ID = 'theme_forest_preset';
 
-const now = '2024-01-01T00:00:00.000Z'
+const now = '2024-01-01T00:00:00.000Z';
 
 const oceanPreset: ThemeDoc = {
   id: OCEAN_ID,
@@ -24,7 +24,7 @@ const oceanPreset: ThemeDoc = {
   backgroundPattern: 'waves',
   createdAt: now,
   updatedAt: now,
-}
+};
 
 const forestPreset: ThemeDoc = {
   id: FOREST_ID,
@@ -44,14 +44,14 @@ const forestPreset: ThemeDoc = {
   backgroundPattern: 'dots',
   createdAt: now,
   updatedAt: now,
-}
+};
 
 /** Inserts the two M2 preset themes if missing (stable ids). */
 export async function seedThemesOnce(db: BaseSkillDatabase): Promise<void> {
-  for (const doc of [oceanPreset, forestPreset]) {
-    const existing = await db.themes.findOne(doc.id).exec()
+  for (const doc of [ oceanPreset, forestPreset ]) {
+    const existing = await db.themes.findOne(doc.id).exec();
     if (!existing) {
-      await db.themes.insert(doc)
+      await db.themes.insert(doc);
     }
   }
 }

@@ -1,4 +1,4 @@
-import type { RxJsonSchema } from 'rxdb'
+import type { RxJsonSchema } from 'rxdb';
 
 export type SettingsDoc = {
   id: string
@@ -31,6 +31,6 @@ export const settingsSchema: RxJsonSchema<SettingsDoc> = {
     preferredVoiceDeviceId: { type: 'string' },
     updatedAt: { type: 'string', format: 'date-time' },
   },
-  required: ['id', 'profileId', 'updatedAt'],
+  required: [ 'id', 'profileId', 'updatedAt' ],
   additionalProperties: false,
-}
+};

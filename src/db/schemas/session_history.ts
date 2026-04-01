@@ -1,4 +1,4 @@
-import type { RxJsonSchema } from 'rxdb'
+import type { RxJsonSchema } from 'rxdb';
 
 export type SessionHistoryEvent = {
   timestamp: string
@@ -39,13 +39,13 @@ export const sessionHistorySchema: RxJsonSchema<SessionHistoryDoc> = {
             oneOf: [
               {
                 type: 'string',
-                enum: ['correct', 'incorrect', 'skipped', 'timeout'],
+                enum: [ 'correct', 'incorrect', 'skipped', 'timeout' ],
               },
               { type: 'null' },
             ],
           },
         },
-        required: ['timestamp', 'action'],
+        required: [ 'timestamp', 'action' ],
         additionalProperties: false,
       },
       default: [],
@@ -62,4 +62,4 @@ export const sessionHistorySchema: RxJsonSchema<SessionHistoryDoc> = {
     'createdAt',
   ],
   additionalProperties: false,
-}
+};

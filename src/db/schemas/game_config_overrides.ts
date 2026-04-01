@@ -1,4 +1,4 @@
-import type { RxJsonSchema } from 'rxdb'
+import type { RxJsonSchema } from 'rxdb';
 
 export type GameConfigOverridesDoc = {
   id: string
@@ -19,9 +19,9 @@ export const gameConfigOverridesSchema: RxJsonSchema<GameConfigOverridesDoc> = {
   properties: {
     id: { type: 'string', maxLength: 36 },
     profileId: { type: 'string', maxLength: 36 },
-    scope: { type: 'string', enum: ['game', 'grade-band', 'global'] },
+    scope: { type: 'string', enum: [ 'game', 'grade-band', 'global' ] },
     scopeValue: {
-      oneOf: [{ type: 'string' }, { type: 'null' }],
+      oneOf: [ { type: 'string' }, { type: 'null' } ],
     },
     retries: {
       oneOf: [
@@ -30,19 +30,19 @@ export const gameConfigOverridesSchema: RxJsonSchema<GameConfigOverridesDoc> = {
       ],
     },
     timerDuration: {
-      oneOf: [{ type: 'integer', minimum: 0, multipleOf: 1 }, { type: 'null' }],
+      oneOf: [ { type: 'integer', minimum: 0, multipleOf: 1 }, { type: 'null' } ],
     },
     alwaysWin: {
-      oneOf: [{ type: 'boolean' }, { type: 'null' }],
+      oneOf: [ { type: 'boolean' }, { type: 'null' } ],
     },
     difficulty: {
       oneOf: [
-        { type: 'string', enum: ['easy', 'medium', 'hard'] },
+        { type: 'string', enum: [ 'easy', 'medium', 'hard' ] },
         { type: 'null' },
       ],
     },
     updatedAt: { type: 'string', format: 'date-time' },
   },
-  required: ['id', 'profileId', 'scope', 'scopeValue', 'updatedAt'],
+  required: [ 'id', 'profileId', 'scope', 'scopeValue', 'updatedAt' ],
   additionalProperties: false,
-}
+};
