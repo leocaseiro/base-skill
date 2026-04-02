@@ -1,6 +1,5 @@
 import rehypeFormat from 'rehype-format';
 import rehypeRaw from 'rehype-raw';
-import rehypeSanitize from 'rehype-sanitize';
 import remarkDirective from 'remark-directive';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkGfm from 'remark-gfm';
@@ -33,7 +32,12 @@ const config: StorybookConfig = {
             ],
             rehypePlugins: [
               [rehypeRaw, { passThrough: [...mdxRehypePassThrough] }],
-              rehypeSanitize,
+              // No `rehype-sanitize` here: `hast-util-sanitize` only handles HAST
+              // `element` nodes. MDX custom components are `mdxJsxFlowElement` etc.,
+              // which the sanitizer drops in its default branch—so interactive
+              // demos vanished from `storybook build` / GitHub Pages while dev
+              // could still look fine depending on cache. MDX under `src/` is
+              // trusted first-party content.
               rehypeFormat,
             ],
           },
