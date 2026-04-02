@@ -8,7 +8,7 @@ test.describe('@a11y accessibility', () => {
     await page.goto('/en/');
     await page.getByRole('main').waitFor({ state: 'visible' });
     await page
-      .getByRole('heading', { level: 1 })
+      .getByRole('group', { name: /filter by grade level/i })
       .waitFor({ state: 'visible' });
     const accessibilityScanResults = await new AxeBuilder({
       page,
