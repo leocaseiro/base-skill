@@ -25,13 +25,17 @@ export const UseRxQueryDemo = () => {
   };
 
   return (
-    <div className="flex flex-col items-start gap-4 p-4">
-      <CounterDemo source$={source$} />
-      <div className="flex gap-2">
-        <Button onClick={increment}>Increment</Button>
-        <Button variant="outline" onClick={reset}>
-          Reset
-        </Button>
+    <div className="flex flex-col gap-3 p-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <CounterDemo source$={source$} />
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" onClick={increment}>
+            Increment
+          </Button>
+          <Button type="button" variant="outline" onClick={reset}>
+            Reset
+          </Button>
+        </div>
       </div>
     </div>
   );
