@@ -69,29 +69,30 @@ Each slot receives drag context via `useDragDropContext()` — no prop drilling.
 ### File structure
 
 ```
-src/games/
-  drag-drop/                        ← shared primitive
-    DragDropGame.tsx                ← composition root + named slot props
-    DragDropGameProvider.tsx        ← context: drag state, evaluation, TTS
-    hooks/
+src/
+  components/
+    drag-drop-game/                 ← shared primitive (UI component + co-located hooks)
+      DragDropGame.tsx              ← composition root + named slot props
+      DragDropGameProvider.tsx      ← context: drag state, evaluation, TTS
       useDragDropContext.ts
       useTileEvaluation.ts          ← wrong-tile behavior, auto-eject timer
       useGameTTS.ts                 ← TTS triggers (tap, hint, round start)
       useAutoNextSlot.ts            ← auto-next-slot (B) interaction
       useFreeSwap.ts                ← free-swap (C) interaction
-    types.ts                        ← DragDropGameConfig base, TileItem, DropZone
-    DragDropGame.stories.tsx
+      types.ts                      ← DragDropGameConfig base, TileItem, DropZone
+      DragDropGame.stories.tsx
 
-  word-builder/                     ← Word Builder slot implementations
-    WordBuilder.tsx                 ← composes DragDropGame
-    WordPrompt.tsx                  ← picture / scramble / recall / sentence-gap
-    OrderedLetterSlots.tsx          ← sequential letter/syllable slots
-    LetterTileBank.tsx              ← letter / syllable / word tiles
-    types.ts                        ← WordBuilderConfig extends DragDropGameConfig
-    WordBuilder.stories.tsx
+  games/
+    word-builder/                   ← Word Builder slot implementations
+      WordBuilder.tsx               ← composes DragDropGame
+      WordPrompt.tsx                ← picture / scramble / recall / sentence-gap
+      OrderedLetterSlots.tsx        ← sequential letter/syllable slots
+      LetterTileBank.tsx            ← letter / syllable / word tiles
+      types.ts                      ← WordBuilderConfig extends DragDropGameConfig
+      WordBuilder.stories.tsx
 
-  number-match/                     ← future (own spec)
-  sort-numbers/                     ← future (own spec)
+    number-match/                   ← future (own spec)
+    sort-numbers/                   ← future (own spec)
 ```
 
 **Target audience:** K–Year 2 (ages 5–8)  
@@ -255,7 +256,7 @@ Full-screen celebration:
 `WordBuilderConfig` extends the shared `DragDropGameConfig` base type:
 
 ```ts
-// src/games/drag-drop/types.ts — shared base
+// src/components/drag-drop-game/types.ts — shared base
 interface DragDropGameConfig {
   gameId: string;
   inputMethod: 'drag' | 'type' | 'both'; // default: 'drag'
@@ -264,7 +265,7 @@ interface DragDropGameConfig {
   distractorCount?: number;
 }
 
-// src/games/word-builder/types.ts — Word Builder extension
+// src/games/word-builder/types.ts — extends shared base
 interface WordBuilderConfig extends DragDropGameConfig {
   component: 'WordBuilder';
 
