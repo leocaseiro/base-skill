@@ -8,6 +8,7 @@
     "prettier.config.js",
     "vite.config.js"
   ],
+  "exclude": ["worktrees"],
 
   "compilerOptions": {
     "target": "ES2022",
