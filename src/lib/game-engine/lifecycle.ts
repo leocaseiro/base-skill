@@ -16,7 +16,7 @@ type InternalMove =
     };
 
 function buildInitialState(
-  config: ResolvedGameConfig,
+  _config: ResolvedGameConfig,
   override?: GameEngineState,
 ): GameEngineState {
   if (override) return override;
@@ -31,7 +31,7 @@ function buildInitialState(
   };
 }
 
-function createReducer(
+export function createReducer(
   config: ResolvedGameConfig,
   gameMovers: Record<string, MoveHandler>,
 ) {

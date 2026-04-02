@@ -41,7 +41,7 @@ const submitHandler: MoveHandler = (state, args) => ({
   ...state,
   score:
     args['answer'] ===
-    state.content.rounds[state.roundIndex].correctAnswer
+    state.content.rounds[state.roundIndex]?.correctAnswer
       ? state.score + 1
       : state.score,
   currentRound: {

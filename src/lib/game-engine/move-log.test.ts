@@ -58,8 +58,8 @@ describe('useMoveLog', () => {
       result.current.appendMove(makeMove('REQUEST_HINT', {}));
     });
     expect(result.current.moves).toHaveLength(2);
-    expect(result.current.moves[0].type).toBe('SUBMIT_ANSWER');
-    expect(result.current.moves[1].type).toBe('REQUEST_HINT');
+    expect(result.current.moves[0]?.type).toBe('SUBMIT_ANSWER');
+    expect(result.current.moves[1]?.type).toBe('REQUEST_HINT');
   });
 
   it('accepts UNDO move within allowed depth', () => {
@@ -75,7 +75,7 @@ describe('useMoveLog', () => {
       result.current.appendMove(makeMove('UNDO', { targetStep: 0 }));
     });
     expect(result.current.moves).toHaveLength(3);
-    expect(result.current.moves[2].type).toBe('UNDO');
+    expect(result.current.moves[2]?.type).toBe('UNDO');
   });
 
   it('rejects UNDO move when maxUndoDepth is 0 (returns false)', () => {
