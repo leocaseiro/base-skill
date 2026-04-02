@@ -29,6 +29,16 @@ try {
   process.exit(1);
 }
 
+// ── Pre-build on host (vite build in the container can fail; dist is mounted in) ─
+const cwd = process.cwd();
+console.log(
+  '\u001B[36m\u25B6 Building app on host for Docker VR (APP_BASE_URL=/)\u001B[0m',
+);
+execSync(
+  'APP_BASE_URL=/ yarn build && cp dist/client/_shell.html dist/client/index.html',
+  { stdio: 'inherit', cwd },
+);
+
 // ── Build the playwright command ──────────────────────────────────────────────
 const playwrightArgs = [
   'npx',
@@ -49,7 +59,6 @@ const shellCommand = [
 ].join(' && ');
 
 // ── Run inside Docker ─────────────────────────────────────────────────────────
-const cwd = process.cwd();
 
 const dockerArgs = [
   'run',
@@ -61,6 +70,8 @@ const dockerArgs = [
   '/work',
   '-e',
   'APP_BASE_URL=/',
+  '-e',
+  'VR_DOCKER=1',
   DOCKER_IMAGE,
   'bash',
   '-c',

@@ -1,9 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const vrDocker = !!process.env['VR_DOCKER'];
+
 export default defineConfig({
   testDir: './e2e',
   snapshotPathTemplate:
-    '{testDir}/__snapshots__/{testFilePath}/{arg}{ext}',
+    '{testDir}/__snapshots__/{testFilePath}/{arg}-{projectName}{ext}',
   fullyParallel: true,
   forbidOnly: !!process.env['CI'],
   retries: process.env['CI'] ? 2 : 0,
@@ -19,8 +21,9 @@ export default defineConfig({
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
   webServer: {
-    command:
-      'APP_BASE_URL=/ yarn build && cp dist/client/_shell.html dist/client/index.html && npx serve dist/client -p 3000 -s',
+    command: vrDocker
+      ? 'npx serve dist/client -p 3000 -s'
+      : 'APP_BASE_URL=/ yarn build && cp dist/client/_shell.html dist/client/index.html && npx serve dist/client -p 3000 -s',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env['CI'],
     timeout: 120 * 1000,
