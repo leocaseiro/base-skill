@@ -25,6 +25,36 @@
 - **What's missing:** `e2e/__snapshots__/` directory — baselines have NOT been generated yet
 - **Note:** `feat/pre-push-hook` PR was already merged to master before this branch was cut, so no conflicts expected
 
+### Known bugs to fix before baselines can be generated
+
+**Bug 1 — Docker VR build fails (`ECONNREFUSED`)**
+The `playwright.config.ts` `webServer` command runs `yarn build` inside Docker, but the TanStack Start build tries to connect to a local port that isn't available in the container. The fix is to pre-build the app _before_ running Docker (outside the container) and configure the Docker run to serve the pre-built `dist/` instead of rebuilding. Update `scripts/vr-docker.mjs` to:
+
+1. Run `APP_BASE_URL=/ yarn build && cp dist/client/_shell.html dist/client/index.html` on the host first
+2. Then pass `-e SKIP_BUILD=1` (or similar) into Docker so the webServer can skip the build step
+
+Or simpler: set `webServer.reuseExistingServer: true` and start the server on the host before launching Docker, then use `--network=host` in the Docker run so the container can reach it.
+
+**Bug 2 — `snapshotPathTemplate` missing `{projectName}`**
+The current template `'{testDir}/__snapshots__/{testFilePath}/{arg}{ext}'` means all three browsers write to the same `home.png`. When `yarn test:e2e` runs (which includes visual tests across all browsers), chromium writes the file first, then firefox/webkit compare against it and get spurious diffs.
+
+Fix: add `{projectName}` to the template:
+
+```ts
+snapshotPathTemplate: '{testDir}/__snapshots__/{testFilePath}/{arg}-{projectName}{ext}',
+```
+
+This produces `home-chromium.png`, `home-firefox.png`, `home-webkit.png`. The VR workflow only cares about chromium (`--project=chromium`).
+
+**Bug 3 — Visual tests included in `yarn test:e2e`**
+`yarn test:e2e` runs all tests including `@visual`, but visual tests need baselines that only exist for chromium (Docker). The smoke/a11y tests should be the default E2E suite. Add `--ignore-snapshots` to `test:e2e` or exclude visual tests:
+
+```json
+"test:e2e": "playwright test --ignore-snapshots"
+```
+
+Or tag smoke/a11y differently and filter. The simplest fix: pass `--ignore-snapshots` so visual tests in E2E run don't fail when baselines are stale/missing.
+
 ---
 
 ## Files involved
