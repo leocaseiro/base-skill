@@ -41,44 +41,105 @@ everything else.
 
 ---
 
-## 3. Slot API
+## 3. Compound Component API
+
+`DragDropGame` uses the **compound component pattern** — sub-components are
+attached as static properties and act as layout-position wrappers. Slot
+implementations are **prop-free**: they read all config via
+`useDragDropContext()`.
 
 ```tsx
-<DragDropGame
-  config={config}
-  prompt={<WordPrompt />} // what the child is trying to do
-  dropZones={<OrderedLetterSlots />} // where tiles are placed
-  tileBank={<LetterTileBank />} // source tiles to drag/tap
-/>
+<DragDropGame config={config}>
+  <DragDropGame.Prompt />
+  <DragDropGame.DropZones />
+  <DragDropGame.TileBank />
+</DragDropGame>
 ```
 
-Each slot component accesses shared state via `useDragDropContext()` — no
-prop drilling. Slots can also call `useDragDropDispatch()` to fire
-evaluation actions.
+`DragDropGame.Prompt/DropZones/TileBank` render their `children` inside the
+correct layout zone. When used without children they render nothing (useful
+for games that omit a zone, e.g. no tile bank in type-only mode).
+
+### Compound parts (layout wrappers only)
+
+```tsx
+// DragDropGame.tsx
+DragDropGame.Prompt = ({ children }) => (
+  <div className="game-prompt-zone">{children}</div>
+);
+DragDropGame.DropZones = ({ children }) => (
+  <div className="game-drop-zones">{children}</div>
+);
+DragDropGame.TileBank = ({ children }) => (
+  <div className="game-tile-bank">{children}</div>
+);
+```
+
+### Slot implementations are prop-free (read from context)
+
+```tsx
+// WordSpellPrompt.tsx — no props, reads config from context
+function WordSpellPrompt() {
+  const { config } = useDragDropContext<WordSpellConfig>();
+  // renders based on config.mode, config.promptType
+}
+```
 
 ### How different games compose it
 
 ```tsx
 // WordSpell
-<DragDropGame config={config}
-  prompt={<WordSpellPrompt mode={config.mode} promptType={config.promptType} />}
-  dropZones={<OrderedLetterSlots tileUnit={config.tileUnit} />}
-  tileBank={<LetterTileBank tileUnit={config.tileUnit} tileBankMode={config.tileBankMode} />}
-/>
+function WordSpell({ config }: { config: WordSpellConfig }) {
+  return (
+    <DragDropGame config={config}>
+      <DragDropGame.Prompt>
+        <WordSpellPrompt /> {/* reads config.mode from context */}
+      </DragDropGame.Prompt>
+      <DragDropGame.DropZones>
+        <OrderedLetterSlots />{' '}
+        {/* reads config.tileUnit from context */}
+      </DragDropGame.DropZones>
+      <DragDropGame.TileBank>
+        <LetterTileBank />{' '}
+        {/* reads config.tileBankMode from context */}
+      </DragDropGame.TileBank>
+    </DragDropGame>
+  );
+}
 
 // NumberMatch
-<DragDropGame config={config}
-  prompt={<NumberGroupPrompt />}
-  dropZones={<MatchingPairZones />}
-  tileBank={<NumeralTileBank />}
-/>
+function NumberMatch({ config }: { config: NumberMatchConfig }) {
+  return (
+    <DragDropGame config={config}>
+      <DragDropGame.Prompt>
+        <NumberMatchPrompt />
+      </DragDropGame.Prompt>
+      <DragDropGame.DropZones>
+        <MatchingPairZones />
+      </DragDropGame.DropZones>
+      <DragDropGame.TileBank>
+        <NumeralTileBank />
+      </DragDropGame.TileBank>
+    </DragDropGame>
+  );
+}
 
 // SortNumbers (future)
-<DragDropGame config={config}
-  prompt={<SortInstruction direction={config.direction} />}
-  dropZones={<SortableSequence />}
-  tileBank={<NumberTileBank />}
-/>
+function SortNumbers({ config }: { config: SortNumbersConfig }) {
+  return (
+    <DragDropGame config={config}>
+      <DragDropGame.Prompt>
+        <SortInstruction />
+      </DragDropGame.Prompt>
+      <DragDropGame.DropZones>
+        <SortableSequence />
+      </DragDropGame.DropZones>
+      <DragDropGame.TileBank>
+        <NumberTileBank />
+      </DragDropGame.TileBank>
+    </DragDropGame>
+  );
+}
 ```
 
 ---
