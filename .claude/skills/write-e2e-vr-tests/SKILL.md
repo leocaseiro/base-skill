@@ -95,7 +95,7 @@ SKIP_VR=1 SKIP_E2E=1 git push
 | Mistake                               | Fix                                                             |
 | ------------------------------------- | --------------------------------------------------------------- |
 | No `waitFor` before screenshot        | Add `waitFor({ state: 'visible' })` on main content             |
-| VR test not tagged `@visual`          | Prepend `@visual ` to the test name                             |
+| VR test not tagged `@visual`          | Prepend `@visual` to the test name                             |
 | Running `yarn test:vr` without Docker | Start Docker desktop first                                      |
 | Committing without updating baselines | Run `yarn test:vr:update` after intentional UI changes          |
 | Hardcoding absolute URLs              | Use relative paths like `/en/`; Playwright handles the base URL |
