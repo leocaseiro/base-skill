@@ -7,7 +7,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 if (process.env.SKIP_NODE_VERSION_CHECK !== '1') {
-  const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const root = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '..',
+  );
   const raw = readFileSync(path.join(root, '.nvmrc'), 'utf8').trim();
   const major = Number(/^(\d+)/.exec(raw)?.[1]);
   if (!Number.isFinite(major)) {
