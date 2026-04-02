@@ -31,7 +31,6 @@ const config: StorybookConfig = {
               remarkDirective,
               remarkMath,
             ],
-            // Raw HTML is parsed then sanitized (XSS). Format runs last on the tree.
             rehypePlugins: [
               [rehypeRaw, { passThrough: [...mdxRehypePassThrough] }],
               rehypeSanitize,
