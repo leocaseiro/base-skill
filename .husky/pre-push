@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+# .husky/pre-push
+# Runs all quality checks before allowing a push.
+#
+# Skip individual checks with environment variables:
+#   SKIP_LINT=1       — skip eslint + knip
+#   SKIP_TYPECHECK=1  — skip TypeScript check
+#   SKIP_UNIT=1       — skip vitest unit tests
+#   SKIP_STORYBOOK=1  — skip storybook interaction tests
+#   SKIP_VR=1         — skip visual regression tests
+#   SKIP_E2E=1        — skip Playwright end-to-end tests
+#   SKIP_PREPUSH=1    — bypass all checks entirely
+#
+# Example: SKIP_E2E=1 SKIP_VR=1 git push
+#
+# Storybook tests require the dev server to be running on port 6006.
+# Either start it manually before pushing, or set START_STORYBOOK=1
+# to have this hook start and stop it automatically.
+
+set -euo pipefail
+
+# ── colour helpers ─────────────────────────────────────────────────────────────
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+pass()  { echo -e "${GREEN}  ✓ ${1}${RESET}"; }
+fail()  { echo -e "${RED}  ✗ ${1}${RESET}"; }
+skip()  { echo -e "${YELLOW}  ⚠ ${1} (skipped)${RESET}"; }
+info()  { echo -e "${CYAN}${BOLD}▶ ${1}${RESET}"; }
+divider(){ echo -e "${BOLD}──────────────────────────────────────────${RESET}"; }
+
+# ── global skip ────────────────────────────────────────────────────────────────
+if [[ "${SKIP_PREPUSH:-0}" == "1" ]]; then
+  skip "All pre-push checks (SKIP_PREPUSH=1)"
+  exit 0
+fi
+
+divider
+echo -e "${BOLD}  Pre-push checks${RESET}"
+divider
+
+FAILED=0
+
+run_check() {
+  local label="$1"
+  local skip_var="$2"
+  local cmd="$3"
+
+  if [[ "${!skip_var:-0}" == "1" ]]; then
+    skip "$label"
+    return
+  fi
+
+  info "Running: $label"
+  if eval "$cmd"; then
+    pass "$label"
+  else
+    fail "$label"
+    FAILED=1
+  fi
+}
+
+# ── 1. Lint ────────────────────────────────────────────────────────────────────
+run_check "Lint (eslint + knip)" "SKIP_LINT" "yarn lint"
+
+# ── 2. TypeScript ──────────────────────────────────────────────────────────────
+run_check "TypeScript typecheck" "SKIP_TYPECHECK" "yarn typecheck"
+
+# ── 3. Unit tests ─────────────────────────────────────────────────────────────
+run_check "Unit tests (vitest)" "SKIP_UNIT" "yarn test"
+
+# ── 4. Storybook tests ────────────────────────────────────────────────────────
+if [[ "${SKIP_STORYBOOK:-0}" == "1" ]]; then
+  skip "Storybook tests"
+else
+  STORYBOOK_PORT=6006
+  STORYBOOK_URL="http://localhost:${STORYBOOK_PORT}"
+  STORYBOOK_PID=""
+
+  # Check if storybook is already running
+  if curl -sf "${STORYBOOK_URL}" > /dev/null 2>&1; then
+    info "Running: Storybook tests (server already running)"
+    if yarn test:storybook; then
+      pass "Storybook tests"
+    else
+      fail "Storybook tests"
+      FAILED=1
+    fi
+  elif [[ "${START_STORYBOOK:-0}" == "1" ]]; then
+    info "Starting Storybook dev server..."
+    yarn storybook &
+    STORYBOOK_PID=$!
+    # Wait up to 60 s for storybook to become available
+    if yarn wait-on -t 60000 "${STORYBOOK_URL}" 2>/dev/null; then
+      info "Running: Storybook tests"
+      if yarn test:storybook; then
+        pass "Storybook tests"
+      else
+        fail "Storybook tests"
+        FAILED=1
+      fi
+    else
+      fail "Storybook server did not start in time"
+      FAILED=1
+    fi
+    # Clean up the server we started
+    if [[ -n "$STORYBOOK_PID" ]]; then
+      kill "$STORYBOOK_PID" 2>/dev/null || true
+    fi
+  else
+    skip "Storybook tests — server not running on port ${STORYBOOK_PORT}. Start it with 'yarn storybook' or set START_STORYBOOK=1"
+  fi
+fi
+
+# ── 5. Visual regression tests ────────────────────────────────────────────────
+run_check "Visual regression tests (playwright @visual)" "SKIP_VR" "yarn test:vr"
+
+# ── 6. End-to-end tests ───────────────────────────────────────────────────────
+run_check "End-to-end tests (playwright)" "SKIP_E2E" "yarn test:e2e"
+
+# ── Summary ───────────────────────────────────────────────────────────────────
+divider
+if [[ "$FAILED" -ne 0 ]]; then
+  echo -e "${RED}${BOLD}  Pre-push checks FAILED. Push aborted.${RESET}"
+  echo -e "${YELLOW}  Fix the issues above, or skip specific checks with SKIP_* env vars.${RESET}"
+  echo -e "${YELLOW}  Example: SKIP_E2E=1 SKIP_VR=1 git push${RESET}"
+  divider
+  exit 1
+else
+  echo -e "${GREEN}${BOLD}  All pre-push checks passed.${RESET}"
+  divider
+fi

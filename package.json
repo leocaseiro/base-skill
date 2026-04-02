@@ -15,6 +15,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:a11y": "playwright test --grep @a11y",
+    "test:vr": "playwright test --project=chromium --grep @visual",
     "storybook": "storybook dev --port 6006",
     "build-storybook": "storybook build",
     "test:storybook": "test-storybook",
