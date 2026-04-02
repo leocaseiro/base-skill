@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --ignore-snapshots",
     "test:e2e:a11y": "playwright test --grep @a11y",
     "test:vr": "node scripts/vr-docker.mjs test",
     "test:vr:update": "node scripts/vr-docker.mjs update",
