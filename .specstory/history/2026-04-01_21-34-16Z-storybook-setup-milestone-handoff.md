@@ -10494,3 +10494,20 @@ _**Agent (composer-2)**_
 **Clarifying PR checklist**
 
 I should clarify that some checklist items are better verified manually rather than automatically. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Yes. Putting that list in the PR description as **Markdown task list items** is normal and useful. Reviewers (and you) can tick boxes as things are verified.
+
+A few practical notes:
+
+1. **Manual vs automatic** — Items like “theme toolbar,” “Header/Footer,” and “MCP client can reach…” are **manual** checks unless you add automation later. CI will only cover what’s in the workflow (e.g. **`storybook-test`** after merge).
+
+2. **`yarn test:storybook`** — It doesn’t start Storybook by itself. Either run **`yarn storybook`** in another terminal and pass **`--url http://127.0.0.1:6006`**, or build + serve static output and use that URL (as in your handoff). Worth one line in the PR so reviewers don’t assume `yarn test:storybook` alone is enough.
+
+3. **“No a11y violations”** — Your last run **passed** while still **logging** some a11y findings (addon behavior with `test: 'todo'` / non-error mode). If CI matches that, the checkbox should say something like **“exits 0”** or **“no a11y failures”** rather than implying zero violations in the report, unless you’ve tightened addon config to `test: 'error'` everywhere.
+
+4. **“Ticket” in Jira** — You *can* mirror the same bullets as subtasks on an Epic, but for a single PR it’s usually enough to **one Epic + PR checklist** unless your team requires separate issues per verification step.
+
+So: **yes, use them as PR checkboxes**; adjust wording for how `test:storybook` is run and how strict a11y is, so the list matches what you actually require to merge.

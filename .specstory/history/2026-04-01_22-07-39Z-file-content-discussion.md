@@ -1917,7 +1917,7 @@ _**Agent (composer-2)**_
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
-<details><summary>Tool use: **read_file_v2** • Read file: </summary>
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/.markdownlintignore</summary>
 
 </details>
 </tool-use>
@@ -1926,3 +1926,114 @@ _**Agent (composer-2)**_
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Configuring linting rules**
+
+I'm adjusting markdownlint rules to disable MD037 specifically for MDX files while keeping it for .md files. I'm updating the markdownlint configuration to disable MD037 for MDX files using glob patterns. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.yaml",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup",
+  "pattern": "markdownlint-cli2"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup",
+  "pattern": "markdownlint-cli2",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Configuring markdownlint**
+
+I'm setting up .markdownlint-cli2.yaml to handle MDX-specific overrides. I'm switching to lint-staged for MDX files to run only Prettier, avoiding markdownlint conflicts. 
+
+**Adding markdownlint config**
+
+I'm adding `.markdownlint-cli2.yaml` to disable MD037 for MDX files only. I'm implementing `.markdownlint-cli2.yaml` to properly configure markdownlint for MDX files while preserving existing rules. I'm configuring `.markdownlint-cli2.yaml` with single config format and file pattern overrides. I'm switching to array format in `.markdownlint-cli2.jsonc` for glob-specific config overrides. 
+
+**Updating linting strategy**
+
+I'm simplifying the linting setup to run prettier on TS fences and markdownlint only on .md files. I'm adding MDX support to lint-staged to ensure prettier runs on staged MDX files. I'm adjusting the lint-staged configuration to run markdownlint and prettier on MDX files while preserving separate processing for .md files. I'm splitting the linting rules to run prettier only on MDX files for now, keeping markdownlint separate for .md files. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Storybook `.ts`/`.tsx` files (including `.storybook/` and `*.stories.tsx`) are already covered by `*.{ts,tsx}`. Only MDX was missing. Running `markdownlint-cli2` on our MDX files triggers MD037 false positives on `{/* eslint-disable */}`. Adding `*.mdx` to lint-staged with Prettier only — Prettier formats fenced `ts` blocks (including semicolons) without those false positives.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/.lintstagedrc.mjs</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+**Short answer**
+
+| What | Already on lint-staged? |
+|------|-------------------------|
+| `.storybook/main.ts`, `preview.tsx`, decorators, etc. | Yes — `*.{ts,tsx}` |
+| `*.stories.tsx`, demos, hooks | Yes — `*.{ts,tsx}` |
+| `*.mdx` (Storybook docs pages) | **Was no** — now yes |
+
+**Why not run markdownlint on MDX?**  
+On your MDX files, `markdownlint-cli2` reports **MD037** on the first line `{/* eslint-disable */}` (the `*` is read like emphasis). So for `*.mdx` we only run **Prettier**, which still fixes fenced ``` `ts` ``` blocks (including semicolons) without that problem.
+
+**Change made** in `.lintstagedrc.mjs`: added a `*.mdx` entry that runs `prettier --write` only, with a short comment explaining why markdownlint is skipped.
+
+CI `yarn format` (`prettier --check .`) already includes MDX; the gap was **staged** MDX not being formatted on commit. No extra Storybook-specific globs are required beyond this.

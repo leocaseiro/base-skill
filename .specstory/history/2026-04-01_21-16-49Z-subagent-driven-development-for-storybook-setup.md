@@ -7033,4 +7033,9 @@ _**Agent (composer-2)**_
 - Build warns **“unable to find package.json for radix-ui”** — harmless unless you want to chase it.
 - Confirm **`.mcp.json`** `storybook` entry matches your Cursor MCP schema (HTTP server URL is only valid while `yarn storybook` is running on 6006).
 
-### Pl
+### Plan deviations to remember
+- **Storybook 10:** `@storybook/addon-essentials` was replaced by **`@storybook/addon-docs`** + a11y/themes; **`@storybook/test-runner`** is **0.24.x**, not `^10.3.0`.
+- **MDX docs** were renamed from `*.stories.mdx` → **`*.mdx`** so Storybook 10’s indexer treats them as docs (not CSF).
+- **Knip:** `knip.json` from the plan was folded into **`knip.config.ts`** (entries + `ignoreDependencies`).
+
+Starting the next session in **`worktrees/milestone-storybook-setup`** keeps you aligned with `CLAUDE.md` / worktree rules.

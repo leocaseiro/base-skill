@@ -2708,6 +2708,12 @@ _**Agent (composer-2)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill && git branch --show-current && git status -sb
 ```
+
+```
+master
+## master
+
+```
 </details>
 </tool-use>
 
@@ -2715,3 +2721,222 @@ cd /Users/leocaseiro/Sites/base-skill && git branch --show-current && git status
 <summary>Tool use: **run_terminal_command_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Creating worktree**
+
+I'm creating a worktree for the storybook vite-tsconfig fix to avoid committing directly to master. I'll apply the StrReplace fix to the user's base-skill file and create a new branch fix/storybook-vite-tsconfig for the changes. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && git branch -a | rg storybook-vite || true</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && git branch -a | rg storybook-vite || true
+```
+
+```
++ fix/storybook-vite-tsconfig
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && git log fix/storybook-vite-tsconfig -1 --oneline 2>/dev/null || git -C worktrees/fix-storybook-vite-tsconfig log -1 --oneline 2>/dev/null</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && git log fix/storybook-vite-tsconfig -1 --oneline 2>/dev/null || git -C worktrees/fix-storybook-vite-tsconfig log -1 --oneline 2>/dev/null
+```
+
+```
+dfed8eb fix(storybook): resolve tsconfig paths from project root
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Cherry-picking commit**
+
+I'm using git checkout and cherry-pick to apply the commit to a new branch. 
+
+**Stripping patch**
+
+I'm replacing the tsconfig file directly instead of using cherry-pick. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/.storybook/vite.config.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && git checkout -b fix/storybook-tsconfig-path && git add .storybook/vite.config.ts && git commit -m "fix(storybook): resolve tsconfig paths from project root
+
+vite-tsconfig-paths resolves project paths relative to cwd. Running Storybook
+from a git worktree made ../tsconfig.json point at worktrees/tsconfig.json.
+Use path.resolve(workspaceRoot, tsconfig.json) instead." --trailer "Made-with: Cursor"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && git checkout -b fix/storybook-tsconfig-path && git add .storybook/vite.config.ts && git commit -m "fix(storybook): resolve tsconfig paths from project root
+
+vite-tsconfig-paths resolves project paths relative to cwd. Running Storybook
+from a git worktree made ../tsconfig.json point at worktrees/tsconfig.json.
+Use path.resolve(workspaceRoot, tsconfig.json) instead." --trailer "Made-with: Cursor"
+```
+
+```
+[fix/storybook-tsconfig-path d90dfe2] fix(storybook): resolve tsconfig paths from project root
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+Switched to a new branch 'fix/storybook-tsconfig-path'
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (2911a21)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/.storybook/vite.config.ts
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/.storybook/vite.config.ts
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/.storybook/vite.config.ts
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/.storybook/vite.config.ts
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill
+
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 11ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 19ms
+ ✓ src/games/registry.test.ts (3 tests) 19ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 7ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/routes/__root.test.tsx (1 test) 18ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 42ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 23ms
+ ✓ src/db/migrations.test.ts (1 test) 49ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 72ms
+ ✓ src/db/create-database.test.ts (3 tests) 105ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 289ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 337ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 369ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 276ms
+ ✓ src/db/hooks/useBookmarks.test.tsx (3 tests) 282ms
+
+ Test Files  19 passed (19)
+      Tests  53 passed (53)
+   Start at  10:40:04
+   Duration  2.37s (transform 665ms, setup 2.28s, collect 6.47s, tests 1.93s, environment 17.31s, prepare 1.88s)
+
+Done in 2.88s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+Here’s what changed.
+
+`vite-tsconfig-paths` was given `../tsconfig.json`, which is resolved from **`process.cwd()`**. From a worktree like `worktrees/milestone-4-game-engine` that becomes `worktrees/tsconfig.json` and breaks. It now uses the same project root as your aliases:
+
+```16:24:/Users/leocaseiro/Sites/base-skill/.storybook/vite.config.ts
+  plugins: [
+    // Resolve from this file’s project root — not `process.cwd()` — so `yarn storybook`
+    // works from git worktrees (otherwise `../tsconfig.json` becomes `worktrees/tsconfig.json`).
+    tsconfigPaths({
+      projects: [path.resolve(workspaceRoot, 'tsconfig.json')],
+    }),
+```
+
+This is committed on branch **`fix/storybook-tsconfig-path**` (commit `d90dfe2`), not on `master`, per your git rules. Open a PR into `master`, or run `git checkout master` when you want your main line back (the fix stays on that branch until you merge).
