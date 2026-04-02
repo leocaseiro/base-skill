@@ -5,6 +5,11 @@ on:
   pull_request:
     branches: [master]
   workflow_dispatch:
+    inputs:
+      update_snapshots:
+        description: 'Update baseline snapshots and commit them'
+        type: boolean
+        default: false
 
 concurrency:
   group: visual-${{ github.ref }}
@@ -39,13 +44,27 @@ jobs:
       - name: Copy shell to index.html
         run: cp dist/client/_shell.html dist/client/index.html
 
+      - name: Update baseline snapshots
+        if: inputs.update_snapshots == true
+        run: npx playwright test --project=${{ matrix.browser }} --grep @visual --update-snapshots
+
+      - name: Commit updated snapshots
+        if: inputs.update_snapshots == true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add e2e/
+          git diff --cached --quiet || git commit -m "chore(vr): update ${{ matrix.browser }} visual regression baselines [skip ci]"
+          git push
+
       - name: Run visual regression tests
+        if: inputs.update_snapshots != true
         run: npx playwright test --project=${{ matrix.browser }} --grep @visual
         continue-on-error: true
         id: visual
 
       - name: Upload diff images
-        if: steps.visual.outcome == 'failure'
+        if: inputs.update_snapshots != true && steps.visual.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
           name: visual-regression-diffs-${{ matrix.browser }}
@@ -53,5 +72,5 @@ jobs:
           retention-days: 14
 
       - name: Fail if visual regressions found
-        if: steps.visual.outcome == 'failure'
+        if: inputs.update_snapshots != true && steps.visual.outcome == 'failure'
         run: exit 1
