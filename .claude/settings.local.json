@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find /Users/leocaseiro/Sites/base-skill -maxdepth 2 -name app.config.*)"
+      "Bash(find /Users/leocaseiro/Sites/base-skill -maxdepth 2 -name app.config.*)",
+      "Bash(git add:*)",
+      "Bash(SKIP_PREPUSH=1 git commit -m \"docs\\(plan\\): add VR Docker baselines continuation plan\")",
+      "Bash(git push:*)",
+      "Bash(docker info:*)",
+      "Bash(yarn fix:*)"
     ]
   }
 }
