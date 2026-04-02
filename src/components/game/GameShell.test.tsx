@@ -25,8 +25,8 @@ import { DbProvider } from '@/providers/DbProvider';
 
 // Mock TanStack Router navigate
 vi.mock('@tanstack/react-router', async (importOriginal) => {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
   const actual =
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
     await importOriginal<typeof import('@tanstack/react-router')>();
   return {
     ...actual,
