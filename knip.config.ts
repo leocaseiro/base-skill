@@ -5,6 +5,7 @@ import type { KnipConfig } from 'knip';
  * (Unused files/exports are a separate cleanup; ESLint covers TS/JS style.)
  */
 const config: KnipConfig = {
+  ignoreWorkspaces: ['worktrees/**'],
   include: [
     'dependencies',
     'devDependencies',
@@ -30,7 +31,12 @@ const config: KnipConfig = {
     'eslint.config.js',
     'e2e/**/*.ts',
   ],
-  project: ['**/*.{js,mjs,cjs,ts,mts,cts,tsx}'],
+  project: [
+    'src/**/*.{js,mjs,cjs,ts,mts,cts,tsx}',
+    '.storybook/**/*.{ts,tsx}',
+    'e2e/**/*.ts',
+    '*.{js,mjs,cjs,ts,mts,cts}',
+  ],
   ignore: ['**/*.test.ts', '**/*.test.tsx', 'src/test-setup.ts'],
   ignoreDependencies: [
     // Only referenced from CSS `@import url('…')` / `@plugin` (Knip does not resolve these).

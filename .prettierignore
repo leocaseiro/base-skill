@@ -10,3 +10,6 @@ yarn.lock
 
 # Git worktrees — run `yarn fix` inside the worktree, not from root
 worktrees/
+
+# TanStack Router plugin output — formatting must match the generator, not Prettier
+src/routeTree.gen.ts
