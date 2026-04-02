@@ -76,10 +76,22 @@ SKIP_STORYBOOK=1 git push
 
 ### Visual Regression Tests
 
-VR tests (`yarn test:vr`) require baseline screenshots to exist. Generate them first:
+VR tests use Docker to ensure screenshots match CI exactly (Linux/Chromium).
 
-```bash
-yarn playwright test --project=chromium --grep @visual --update-snapshots
-```
+**Review workflow when UI changes:**
 
-If baselines do not exist yet, skip with `SKIP_VR=1` and document the reason.
+1. `yarn test:vr` — detects diffs, prints image paths on failure
+2. Review diff images (Claude can read PNGs with the Read tool)
+3. If change is intentional: `yarn test:vr:update` — updates baselines, then push
+4. If change is unintentional: fix the bug, then push
+
+**First-time setup:** baselines are auto-generated on first push if missing.
+
+**Requires Docker running.** If Docker is not available, the VR check is skipped with a warning.
+
+**Agent checklist when VR fails:**
+
+- Read the diff PNG paths printed by the hook
+- Compare with recent code changes — is this expected?
+- If yes: run `yarn test:vr:update`, commit updated baselines, then push
+- If no: investigate and fix before pushing

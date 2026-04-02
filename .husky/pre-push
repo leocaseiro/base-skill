@@ -117,7 +117,54 @@ else
 fi
 
 # ── 5. Visual regression tests ────────────────────────────────────────────────
-run_check "Visual regression tests (playwright @visual)" "SKIP_VR" "yarn test:vr"
+if [[ "${SKIP_VR:-0}" == "1" ]]; then
+  skip "Visual regression tests"
+else
+  # Check if Docker is running
+  if ! docker info > /dev/null 2>&1; then
+    echo -e "${YELLOW}  ⚠ Docker not running — skipping VR check${RESET}"
+  else
+    VR_SNAPSHOT_DIR="e2e/__snapshots__"
+    # Check if baselines exist (any PNG files under the snapshot dir)
+    BASELINE_COUNT=0
+    if [[ -d "$VR_SNAPSHOT_DIR" ]]; then
+      BASELINE_COUNT=$(find "$VR_SNAPSHOT_DIR" -name '*.png' | wc -l | tr -d ' ')
+    fi
+
+    if [[ "$BASELINE_COUNT" -eq 0 ]]; then
+      info "No VR baselines found — generating them now with yarn test:vr:update..."
+      if yarn test:vr:update; then
+        pass "Visual regression baselines generated"
+      else
+        fail "Visual regression baseline generation failed"
+        FAILED=1
+      fi
+    else
+      info "Running: Visual regression tests (Docker/Chromium)"
+      VR_EXIT=0
+      yarn test:vr || VR_EXIT=$?
+
+      if [[ "$VR_EXIT" -eq 0 ]]; then
+        pass "Visual regression tests"
+      else
+        fail "Visual regression tests"
+        # Print any diff images found
+        if [[ -d "test-results" ]]; then
+          DIFF_FILES=$(find test-results -name '*-diff.png' 2>/dev/null || true)
+          if [[ -n "$DIFF_FILES" ]]; then
+            echo -e "${RED}  Diff images:${RESET}"
+            while IFS= read -r diff_file; do
+              echo -e "${RED}    $diff_file${RESET}"
+            done <<< "$DIFF_FILES"
+          fi
+        fi
+        echo -e "${YELLOW}  Hint: yarn test:vr:report  — open the HTML report${RESET}"
+        echo -e "${RED}  UI changes detected. Review diffs, then run \`yarn test:vr:update\` if intentional, or fix the regression.${RESET}"
+        FAILED=1
+      fi
+    fi
+  fi
+fi
 
 # ── 6. End-to-end tests ───────────────────────────────────────────────────────
 run_check "End-to-end tests (playwright)" "SKIP_E2E" "yarn test:e2e"
