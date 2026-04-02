@@ -15,6 +15,7 @@ export function replayToStep(
 
   for (let i = 0; i <= stepIndex && i < log.moves.length; i++) {
     const move = log.moves[i];
+    if (!move) continue;
 
     if (move.type === 'UNDO') {
       const targetStep = move.args['targetStep'] as number;

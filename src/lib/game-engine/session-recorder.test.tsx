@@ -83,7 +83,7 @@ describe('useSessionRecorder', () => {
     const { rerender } = renderHook(
       ({ moves, phase }: { moves: Move[]; phase: string }) =>
         useSessionRecorder(moves, sessionId, meta, db, phase),
-      { initialProps: { moves: [], phase: 'playing' } },
+      { initialProps: { moves: [] as Move[], phase: 'playing' } },
     );
 
     act(() => {
@@ -95,7 +95,7 @@ describe('useSessionRecorder', () => {
       const chunk = await db.session_history.findOne(chunkId).exec();
       expect(chunk).not.toBeNull();
       expect(chunk?.events).toHaveLength(1);
-      expect(chunk?.events[0].action).toBe('SUBMIT_ANSWER');
+      expect(chunk?.events[0]?.action).toBe('SUBMIT_ANSWER');
     });
   });
 

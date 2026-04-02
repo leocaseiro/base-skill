@@ -37,11 +37,19 @@ export async function findInProgressSession(
 
   const allEvents = chunks
     .toSorted((a, b) => a.chunkIndex - b.chunkIndex)
-    .flatMap((c) => c.events);
+    .flatMap(
+      (c) =>
+        c.events as Array<{
+          timestamp: string;
+          action: string;
+          payload: Record<string, string | number | boolean> | null;
+          result: null;
+        }>,
+    );
 
   const moves: Move[] = allEvents.map((e) => ({
     type: e.action as MoveType,
-    args: (e.payload ?? {}) as Record<
+    args: (e.payload ?? {}) as unknown as Record<
       string,
       string | number | boolean
     >,
@@ -53,8 +61,8 @@ export async function findInProgressSession(
     sessionId: index.sessionId,
     profileId: index.profileId,
     seed: index.seed,
-    initialContent: index.initialContent as ResolvedContent,
-    initialState: index.initialState as GameEngineState,
+    initialContent: index.initialContent as unknown as ResolvedContent,
+    initialState: index.initialState as unknown as GameEngineState,
     moves,
   };
 }

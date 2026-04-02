@@ -41,8 +41,14 @@ export function useSessionRecorder(
       gradeBand: meta.gradeBand,
       status: 'in-progress',
       seed: meta.seed,
-      initialContent: meta.initialContent as Record<string, unknown>,
-      initialState: meta.initialState as Record<string, unknown>,
+      initialContent: meta.initialContent as unknown as Record<
+        string,
+        unknown
+      >,
+      initialState: meta.initialState as unknown as Record<
+        string,
+        unknown
+      >,
       totalChunks: 1,
       totalEvents: 0,
     });

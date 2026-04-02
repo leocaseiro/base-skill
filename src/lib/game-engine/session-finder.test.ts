@@ -93,8 +93,8 @@ describe('findInProgressSession', () => {
     expect(result?.sessionId).toBe('sess-finder-001');
     expect(result?.seed).toBe('seed-xyz');
     expect(result?.moves).toHaveLength(1);
-    expect(result?.moves[0].type).toBe('SUBMIT_ANSWER');
-    expect(result?.moves[0].args).toEqual({ answer: 'A' });
+    expect(result?.moves[0]?.type).toBe('SUBMIT_ANSWER');
+    expect(result?.moves[0]?.args).toEqual({ answer: 'A' });
   });
 
   it('returns null and marks session abandoned if startedAt is older than 24h', async () => {
@@ -183,7 +183,7 @@ describe('findInProgressSession', () => {
       'word-builder',
       db,
     );
-    expect(result?.moves[0].type).toBe('SUBMIT_ANSWER');
-    expect(result?.moves[1].type).toBe('NEXT_ROUND');
+    expect(result?.moves[0]?.type).toBe('SUBMIT_ANSWER');
+    expect(result?.moves[1]?.type).toBe('NEXT_ROUND');
   });
 });
