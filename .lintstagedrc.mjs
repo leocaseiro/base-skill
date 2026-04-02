@@ -1,5 +1,7 @@
 const skip = (files) =>
-  files.filter((f) => !f.includes('/.specstory/'));
+  files.filter(
+    (f) => !f.includes('/.specstory/') && !f.includes('/.claude/skills/'),
+  );
 
 const cmd = (command, files) => {
   const filtered = skip(files);
