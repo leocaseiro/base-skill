@@ -3,27 +3,26 @@
  * Override: SKIP_NODE_VERSION_CHECK=1
  */
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-if (process.env.SKIP_NODE_VERSION_CHECK === '1') {
-  process.exit(0);
-}
-
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const raw = readFileSync(join(root, '.nvmrc'), 'utf8').trim();
-const major = Number(/^(\d+)/.exec(raw)?.[1]);
-if (!Number.isFinite(major)) {
-  console.error(
-    'check-node-version: could not read a numeric Node major from .nvmrc',
+if (process.env.SKIP_NODE_VERSION_CHECK !== '1') {
+  const root = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '..',
   );
-  process.exit(1);
-}
+  const raw = readFileSync(path.join(root, '.nvmrc'), 'utf8').trim();
+  const major = Number(/^(\d+)/.exec(raw)?.[1]);
+  if (!Number.isFinite(major)) {
+    throw new TypeError(
+      'check-node-version: could not read a numeric Node major from .nvmrc',
+    );
+  }
 
-const currentMajor = Number(process.version.slice(1).split('.')[0]);
-if (currentMajor !== major) {
-  console.error(
-    `check-node-version: Node ${currentMajor}.x is active; .nvmrc requires ${major}.x (CI uses node-version-file: .nvmrc). Try: nvm use`,
-  );
-  process.exit(1);
+  const currentMajor = Number(process.version.slice(1).split('.')[0]);
+  if (currentMajor !== major) {
+    throw new Error(
+      `check-node-version: Node ${currentMajor}.x is active; .nvmrc requires ${major}.x (CI uses node-version-file: .nvmrc). Try: nvm use`,
+    );
+  }
 }
