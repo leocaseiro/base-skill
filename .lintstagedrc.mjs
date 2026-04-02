@@ -1,6 +1,9 @@
 const skip = (files) =>
   files.filter(
-    (f) => !f.includes('/.specstory/') && !f.includes('/.claude/skills/'),
+    (f) =>
+      !f.includes('/.specstory/') &&
+      !f.includes('/.claude/skills/') &&
+      !f.endsWith('/routeTree.gen.ts'),
   );
 
 const cmd = (command, files) => {
