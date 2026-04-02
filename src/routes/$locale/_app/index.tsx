@@ -4,6 +4,7 @@ import {
   useParams,
 } from '@tanstack/react-router';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { GameLevel, GameSubject } from '@/games/registry';
 import type { ValidatorAdapter } from '@tanstack/react-router';
 import { GameGrid } from '@/components/GameGrid';
@@ -52,6 +53,7 @@ const catalogSearchValidator: ValidatorAdapter<
 const PAGE_SIZE = 12;
 
 const HomeScreen = () => {
+  const { t } = useTranslation('common');
   const { level, subject, search, page } = Route.useSearch();
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate({ from: '/$locale/' });
@@ -98,6 +100,7 @@ const HomeScreen = () => {
 
   return (
     <div className="px-4 py-2">
+      <h1 className="sr-only">{t('home.title')}</h1>
       <LevelRow
         currentLevel={level as GameLevel | ''}
         onLevelChange={(l) => updateSearch({ level: l, page: 1 })}
