@@ -1,27 +1,31 @@
 # WordSpell + NumberMatch — Design Spec
 
 **Date:** 2026-04-03
-**Status:** Approved
+**Status:** In Review
 **Milestone:** 5 — Reference Games
-**Depends on:** M4 (GameEngineProvider), DragDropGame primitive (see [drag-drop-game-design.md](2026-04-03-drag-drop-game-design.md))
+**Depends on:** M4 (GameEngineProvider), AnswerGame primitive (see [drag-drop-game-design.md](2026-04-03-drag-drop-game-design.md))
 
 ---
 
 ## 1. Overview
 
 WordSpell and NumberMatch are two M5 reference games built on top of the
-shared `DragDropGame` primitive. They are specified together because their
-slot implementations are structurally similar — each has a prompt, an
-ordered or paired drop zone, and a tile bank.
+shared `AnswerGame` primitive. They are specified together because their
+slot implementations are structurally similar — each has a question, an
+ordered or paired answer zone, and a choices bank.
 
-|                 | WordSpell                                       | NumberMatch                   |
-| --------------- | ----------------------------------------------- | ----------------------------- |
-| **Grade**       | K–Year 2                                        | Pre-K / K                     |
-| **Subject**     | Reading / Spelling                              | Math                          |
-| **Tiles**       | Letters, syllables, words                       | Numerals, dot groups, objects |
-| **Drop zones**  | Ordered letter slots (sequential)               | Matching pair zones           |
-| **Interaction** | Auto-next-slot (B) + free-swap for scramble (C) | Tap-to-match or free-swap     |
-| **TTS on tile** | Speaks letter / syllable / word name            | Speaks number name            |
+Each game composes question primitives from `src/components/questions/`
+directly in its root component. There are no per-game prompt wrapper files
+(`WordSpellPrompt`, `NumberMatchPrompt`) — composition happens in JSX.
+
+|                 | WordSpell                               | NumberMatch                   |
+| --------------- | --------------------------------------- | ----------------------------- |
+| **Grade**       | K–Year 2                                | Pre-K / K                     |
+| **Subject**     | Reading / Spelling                      | Math                          |
+| **Tiles**       | Letters, syllables, words               | Numerals, dot groups, objects |
+| **Answer zone** | Ordered letter slots (sequential)       | Matching pair zones           |
+| **Interaction** | Auto-next-slot + free-swap for scramble | Tap-to-match or free-swap     |
+| **TTS on tile** | Speaks letter / syllable / word name    | Speaks number name            |
 
 ---
 
@@ -29,46 +33,49 @@ ordered or paired drop zone, and a tile bank.
 
 ### 2.1 Game Modes
 
-| Mode           | Prompt                                          | Interaction    | Best for |
+| Mode           | Question                                        | Interaction    | Best for |
 | -------------- | ----------------------------------------------- | -------------- | -------- |
-| `picture`      | Image of the word's referent + 🔊 button        | Auto-next-slot | K–Year 1 |
-| `scramble`     | Jumbled reference tiles above slots + "hear it" | Free-swap      | Year 1–2 |
-| `recall`       | TTS auto-plays; word-length underscores shown   | Auto-next-slot | Year 1–2 |
-| `sentence-gap` | Scene image + sentence with blank               | Auto-next-slot | Year 1–2 |
+| `picture`      | Image of the word's referent + AudioButton      | Auto-next-slot | K–Year 1 |
+| `scramble`     | Jumbled tiles above answer slots + AudioButton  | Free-swap      | Year 1–2 |
+| `recall`       | AudioButton only; TTS auto-plays on round start | Auto-next-slot | Year 1–2 |
+| `sentence-gap` | Scene image + sentence with blank + AudioButton | Auto-next-slot | Year 1–2 |
 
 ### 2.2 Slot Components
 
 ```
 src/games/word-spell/
-  WordSpell.tsx           ← composes DragDropGame
-  WordSpellPrompt.tsx     ← renders picture / scramble / recall / sentence-gap target zone
-  OrderedLetterSlots.tsx  ← sequential letter/syllable/word slots
+  WordSpell.tsx           ← composes AnswerGame + question primitives directly
+  OrderedLetterSlots.tsx  ← sequential letter/syllable/word answer zones
   LetterTileBank.tsx      ← letter / syllable / word tiles
-  types.ts                ← WordSpellConfig extends DragDropGameConfig
+  types.ts                ← WordSpellConfig extends AnswerGameConfig
   WordSpell.stories.tsx
 ```
 
 ### 2.3 Composition
 
-Slot implementations are prop-free — they read `config` via `useDragDropContext()`.
+Slot implementations are prop-free — they read `config` via
+`useAnswerGameContext()`. Question primitives are composed directly in the
+game root.
 
 ```tsx
 function WordSpell({ config }: { config: WordSpellConfig }) {
   return (
-    <DragDropGame config={config}>
-      <DragDropGame.Prompt>
-        <WordSpellPrompt />{' '}
-        {/* reads config.mode, config.promptType from context */}
-      </DragDropGame.Prompt>
-      <DragDropGame.DropZones>
+    <AnswerGame config={config}>
+      <AnswerGame.Question>
+        {/* picture and sentence-gap modes show the image */}
+        {config.mode !== 'recall' && <ImageQuestion />}
+        {/* all modes have an audio button */}
+        <AudioButton />
+      </AnswerGame.Question>
+      <AnswerGame.Answer>
         <OrderedLetterSlots />{' '}
         {/* reads config.tileUnit from context */}
-      </DragDropGame.DropZones>
-      <DragDropGame.TileBank>
+      </AnswerGame.Answer>
+      <AnswerGame.Choices>
         <LetterTileBank />{' '}
         {/* reads config.tileBankMode from context */}
-      </DragDropGame.TileBank>
-    </DragDropGame>
+      </AnswerGame.Choices>
+    </AnswerGame>
   );
 }
 ```
@@ -77,22 +84,24 @@ function WordSpell({ config }: { config: WordSpellConfig }) {
 
 ```ts
 // src/games/word-spell/types.ts
-interface WordSpellConfig extends DragDropGameConfig {
+interface WordSpellConfig extends AnswerGameConfig {
   component: 'WordSpell';
   mode: 'picture' | 'scramble' | 'recall' | 'sentence-gap';
-  promptType: 'image' | 'audio' | 'both'; // default: 'both'
   tileUnit: 'letter' | 'syllable' | 'word'; // default: 'letter'
   rounds: WordSpellRound[];
 }
 
 interface WordSpellRound {
   word: string;
-  image?: string; // Fluent Emoji SVG path or custom asset
+  image?: string; // Fluent Emoji SVG path or custom asset (picture/sentence-gap)
   sentence?: string; // sentence-gap mode: "The ___ sat on the mat."
   sceneImage?: string; // sentence-gap mode scene illustration
   audioOverride?: string; // optional custom audio instead of TTS
 }
 ```
+
+Note: `promptType` is removed. Which question primitives to render is
+determined by `config.mode` directly in the composition JSX above.
 
 ### 2.5 Example Configs
 
@@ -103,7 +112,6 @@ interface WordSpellRound {
   "inputMethod": "drag",
   "wrongTileBehavior": "lock-auto-eject",
   "mode": "picture",
-  "promptType": "both",
   "tileUnit": "letter",
   "tileBankMode": "exact",
   "rounds": [
@@ -122,8 +130,7 @@ interface WordSpellRound {
   "component": "WordSpell",
   "inputMethod": "drag",
   "wrongTileBehavior": "lock-auto-eject",
-  "mode": "picture",
-  "promptType": "audio",
+  "mode": "recall",
   "tileUnit": "letter",
   "tileBankMode": "distractors",
   "distractorCount": 4,
@@ -141,7 +148,7 @@ interface WordSpellRound {
 
 ### 3.1 Game Modes
 
-| Mode               | Prompt                        | Drop zones                 | Best for   |
+| Mode               | Question                      | Answer zones               | Best for   |
 | ------------------ | ----------------------------- | -------------------------- | ---------- |
 | `numeral-to-group` | Numeral shown (e.g. "3")      | Object/dot groups to match | Pre-K / K  |
 | `group-to-numeral` | Object group shown (e.g. ●●●) | Numeral tiles to match     | Pre-K / K  |
@@ -152,11 +159,10 @@ interface WordSpellRound {
 
 ```
 src/games/number-match/
-  NumberMatch.tsx           ← composes DragDropGame
-  NumberMatchPrompt.tsx     ← renders numeral / dot group / word prompt
+  NumberMatch.tsx           ← composes AnswerGame + question primitives directly
   MatchingPairZones.tsx     ← pair targets (not sequential — match any tile to zone)
   NumeralTileBank.tsx       ← numeral / dot group / object cluster tiles
-  types.ts                  ← NumberMatchConfig extends DragDropGameConfig
+  types.ts                  ← NumberMatchConfig extends AnswerGameConfig
   NumberMatch.stories.tsx
 ```
 
@@ -165,17 +171,24 @@ src/games/number-match/
 ```tsx
 function NumberMatch({ config }: { config: NumberMatchConfig }) {
   return (
-    <DragDropGame config={config}>
-      <DragDropGame.Prompt>
-        <NumberMatchPrompt /> {/* reads config.mode from context */}
-      </DragDropGame.Prompt>
-      <DragDropGame.DropZones>
+    <AnswerGame config={config}>
+      <AnswerGame.Question>
+        {/* numeral and word modes show text; group modes show dots/objects */}
+        {config.mode.startsWith('numeral') ||
+        config.mode === 'word-to-numeral' ? (
+          <TextQuestion />
+        ) : (
+          <DotGroupQuestion />
+        )}
+        <AudioButton />
+      </AnswerGame.Question>
+      <AnswerGame.Answer>
         <MatchingPairZones />
-      </DragDropGame.DropZones>
-      <DragDropGame.TileBank>
+      </AnswerGame.Answer>
+      <AnswerGame.Choices>
         <NumeralTileBank /> {/* reads config.tileStyle from context */}
-      </DragDropGame.TileBank>
-    </DragDropGame>
+      </AnswerGame.Choices>
+    </AnswerGame>
   );
 }
 ```
@@ -184,7 +197,7 @@ function NumberMatch({ config }: { config: NumberMatchConfig }) {
 
 ```ts
 // src/games/number-match/types.ts
-interface NumberMatchConfig extends DragDropGameConfig {
+interface NumberMatchConfig extends AnswerGameConfig {
   component: 'NumberMatch';
   mode:
     | 'numeral-to-group'
@@ -257,7 +270,7 @@ Both games support named presets (difficulty variants of the same `gameId`):
       "presetId": "easy",
       "label": "Easy",
       "tileBankMode": "exact",
-      "promptType": "both"
+      "mode": "picture"
     },
     {
       "presetId": "medium",
@@ -268,8 +281,8 @@ Both games support named presets (difficulty variants of the same `gameId`):
     {
       "presetId": "hard",
       "label": "Hard",
+      "mode": "recall",
       "tileBankMode": "distractors",
-      "promptType": "audio",
       "distractorCount": 5
     }
   ]
@@ -308,7 +321,7 @@ Both games support named presets (difficulty variants of the same `gameId`):
 | ------------------------- | ---------------------------------------------------------------------------------------- |
 | Unit — WordSpell          | Config validation, tile-bank generation (exact vs distractors), distractor deduplication |
 | Unit — WordSpell          | Evaluation: correct letter at position, auto-eject timer, word-complete detection        |
-| Unit — WordSpell          | TTS triggers: tile tap, image tap, hint button, recall auto-play                         |
+| Unit — WordSpell          | TTS triggers: tile tap, image tap, AudioButton tap, recall auto-play                     |
 | Unit — NumberMatch        | Config validation, range generation, pair zone matching                                  |
 | Unit — NumberMatch        | Evaluation: numeral ↔ group equivalence                                                  |
 | Integration — WordSpell   | Full round lifecycle: start → place tiles → complete word → next round → game-over       |
