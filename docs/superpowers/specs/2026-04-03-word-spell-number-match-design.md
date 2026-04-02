@@ -50,25 +50,25 @@ src/games/word-spell/
 
 ### 2.3 Composition
 
+Slot implementations are prop-free — they read `config` via `useDragDropContext()`.
+
 ```tsx
 function WordSpell({ config }: { config: WordSpellConfig }) {
   return (
-    <DragDropGame
-      config={config}
-      prompt={
-        <WordSpellPrompt
-          mode={config.mode}
-          promptType={config.promptType}
-        />
-      }
-      dropZones={<OrderedLetterSlots tileUnit={config.tileUnit} />}
-      tileBank={
-        <LetterTileBank
-          tileUnit={config.tileUnit}
-          tileBankMode={config.tileBankMode}
-        />
-      }
-    />
+    <DragDropGame config={config}>
+      <DragDropGame.Prompt>
+        <WordSpellPrompt />{' '}
+        {/* reads config.mode, config.promptType from context */}
+      </DragDropGame.Prompt>
+      <DragDropGame.DropZones>
+        <OrderedLetterSlots />{' '}
+        {/* reads config.tileUnit from context */}
+      </DragDropGame.DropZones>
+      <DragDropGame.TileBank>
+        <LetterTileBank />{' '}
+        {/* reads config.tileBankMode from context */}
+      </DragDropGame.TileBank>
+    </DragDropGame>
   );
 }
 ```
@@ -165,12 +165,17 @@ src/games/number-match/
 ```tsx
 function NumberMatch({ config }: { config: NumberMatchConfig }) {
   return (
-    <DragDropGame
-      config={config}
-      prompt={<NumberMatchPrompt mode={config.mode} />}
-      dropZones={<MatchingPairZones />}
-      tileBank={<NumeralTileBank tileStyle={config.tileStyle} />}
-    />
+    <DragDropGame config={config}>
+      <DragDropGame.Prompt>
+        <NumberMatchPrompt /> {/* reads config.mode from context */}
+      </DragDropGame.Prompt>
+      <DragDropGame.DropZones>
+        <MatchingPairZones />
+      </DragDropGame.DropZones>
+      <DragDropGame.TileBank>
+        <NumeralTileBank /> {/* reads config.tileStyle from context */}
+      </DragDropGame.TileBank>
+    </DragDropGame>
   );
 }
 ```
