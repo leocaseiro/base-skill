@@ -1,3 +1,5 @@
+import { createRequire } from 'node:module';
+
 import tailwindcss from '@tailwindcss/vite';
 import { devtools } from '@tanstack/devtools-vite';
 
@@ -11,8 +13,18 @@ import { version } from './package.json';
 
 const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
 
+const require = createRequire(import.meta.url);
+const pragmaticElementAdapter =
+  require.resolve('@atlaskit/pragmatic-drag-and-drop/dist/esm/entry-point/element/adapter.js');
+
 const config = defineConfig({
   base,
+  resolve: {
+    alias: {
+      '@atlaskit/pragmatic-drag-and-drop/element/adapter':
+        pragmaticElementAdapter,
+    },
+  },
   define: {
     'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
   },

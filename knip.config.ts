@@ -48,6 +48,8 @@ const config: KnipConfig = {
     // Optional direct pins for TanStack Start / router tooling (not always imported from app TS).
     '@tanstack/react-router-ssr-query',
     '@tanstack/router-plugin',
+    // Pragmatic DnD: consumed by game slot components (WordSpell / NumberMatch), not the primitive layer.
+    '@atlaskit/pragmatic-drag-and-drop',
     // Vitest coverage provider (CLI-only).
     '@vitest/coverage-v8',
     // Storybook / MDX (resolved via Storybook; not direct app imports).

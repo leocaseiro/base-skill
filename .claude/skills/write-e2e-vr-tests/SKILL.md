@@ -45,7 +45,7 @@ test('game catalog renders', async ({ page }) => {
 import { expect, test } from '@playwright/test';
 
 test('@visual game shell layout', async ({ page }) => {
-  await page.goto('/en/game/math-addition');
+  await page.goto('/en/game/word-spell');
   await page.getByRole('main').waitFor({ state: 'visible' });
   await expect(page).toHaveScreenshot('game-shell.png', {
     fullPage: true,

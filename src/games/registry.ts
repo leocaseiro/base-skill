@@ -10,21 +10,15 @@ export type GameCatalogEntry = {
 
 export const GAME_CATALOG: GameCatalogEntry[] = [
   {
-    id: 'math-addition',
-    titleKey: 'math-addition',
+    id: 'word-spell',
+    titleKey: 'word-spell',
+    levels: ['PK', 'K', '1'],
+    subject: 'reading',
+  },
+  {
+    id: 'number-match',
+    titleKey: 'number-match',
     levels: ['1', '2'],
     subject: 'math',
-  },
-  {
-    id: 'math-subtraction',
-    titleKey: 'math-subtraction',
-    levels: ['1', '2', '3'],
-    subject: 'math',
-  },
-  {
-    id: 'placeholder-game',
-    titleKey: 'placeholder-game',
-    levels: ['PK', 'K'],
-    subject: 'letters',
   },
 ];

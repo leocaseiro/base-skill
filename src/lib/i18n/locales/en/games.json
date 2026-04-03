@@ -1,5 +1,11 @@
 {
-  "math-addition": "Addition practice",
-  "math-subtraction": "Subtraction practice",
-  "placeholder-game": "Sample game"
+  "word-spell": "Word Spell",
+  "number-match": "Number Match",
+  "ui": {
+    "choose-a-letter": "Choose a letter",
+    "almost-try-again": "Almost! Try again.",
+    "great-job": "Great job!",
+    "hear-the-question": "Hear the question",
+    "tap-to-hear": "tap to hear"
+  }
 }

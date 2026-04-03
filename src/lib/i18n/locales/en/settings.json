@@ -2,5 +2,6 @@
   "title": "Settings",
   "volume": "Volume ({{percent}}%)",
   "speechRate": "Speech rate ({{rate}}×)",
-  "language": "Language"
+  "language": "Language",
+  "theme": "Theme"
 }
