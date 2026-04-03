@@ -4,16 +4,26 @@ import {
   SearchIcon,
   SlidersHorizontalIcon,
 } from 'lucide-react';
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EMPTY } from 'rxjs';
+import type { ThemeDoc } from '@/db/schemas/themes';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Sheet,
   SheetContent,
@@ -21,6 +31,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { Slider } from '@/components/ui/slider';
+import { useRxDB } from '@/db/hooks/useRxDB';
+import { useRxQuery } from '@/db/hooks/useRxQuery';
+import { useSettings } from '@/db/hooks/useSettings';
 
 const LOCALES = [
   { code: 'en', label: '🇬🇧 English' },
@@ -32,27 +46,110 @@ type HeaderLocale = (typeof LOCALES)[number]['code'];
 const HeaderMenuPanel = ({
   appName,
   locale,
-  settingsLabel,
+  onLocaleChange,
 }: {
   appName: string;
   locale: string;
-  settingsLabel: string;
-}) => (
-  <SheetContent side="right">
-    <SheetHeader>
-      <SheetTitle>{appName}</SheetTitle>
-    </SheetHeader>
-    <nav className="flex flex-col gap-1 p-4">
-      <Link
-        to="/$locale/settings"
-        params={{ locale }}
-        className="hover:bg-muted rounded-md px-3 py-2 text-sm font-medium"
-      >
-        {settingsLabel}
-      </Link>
-    </nav>
-  </SheetContent>
-);
+  onLocaleChange: (locale: HeaderLocale) => void;
+}) => {
+  const { t } = useTranslation('settings');
+  const { settings, update } = useSettings();
+  const { db } = useRxDB();
+  const volume = settings.volume ?? 0.8;
+  const speechRate = settings.speechRate ?? 1;
+  const activeThemeId = settings.themeId ?? 'theme_ocean_preset';
+
+  const themes$ = useMemo(
+    () => (db ? db.themes.find().$ : EMPTY),
+    [db],
+  );
+  const themeDocs = useRxQuery<{ toJSON: () => ThemeDoc }[]>(
+    themes$,
+    [],
+  );
+  const themes = themeDocs.map((d) => d.toJSON());
+
+  return (
+    <SheetContent side="right">
+      <SheetHeader>
+        <SheetTitle>{appName}</SheetTitle>
+      </SheetHeader>
+      <div className="flex flex-col gap-6 p-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="drawer-volume">
+            {t('volume', { percent: Math.round(volume * 100) })}
+          </Label>
+          <Slider
+            id="drawer-volume"
+            min={0}
+            max={1}
+            step={0.05}
+            value={[volume]}
+            onValueChange={([v]) => {
+              void update({ volume: v });
+            }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="drawer-speechRate">
+            {t('speechRate', { rate: speechRate })}
+          </Label>
+          <Slider
+            id="drawer-speechRate"
+            min={0.5}
+            max={2}
+            step={0.1}
+            value={[speechRate]}
+            onValueChange={([v]) => {
+              void update({ speechRate: v });
+            }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="drawer-language">{t('language')}</Label>
+          <Select
+            value={locale}
+            onValueChange={(v) => onLocaleChange(v as HeaderLocale)}
+          >
+            <SelectTrigger id="drawer-language">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LOCALES.map(({ code, label }) => (
+                <SelectItem key={code} value={code}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {themes.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="drawer-theme">{t('theme')}</Label>
+            <Select
+              value={activeThemeId}
+              onValueChange={(v) => void update({ themeId: v })}
+            >
+              <SelectTrigger id="drawer-theme">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {themes.map(({ id, name }) => (
+                  <SelectItem key={id} value={id}>
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+    </SheetContent>
+  );
+};
 
 const FiltersDropdown = ({
   filtersLabel,
@@ -152,34 +249,14 @@ export const Header = () => {
           />
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={t('nav.language')}
-            >
-              {locale === 'pt-BR' ? '🇧🇷' : '🇬🇧'}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {LOCALES.map(({ code, label }) => (
-              <DropdownMenuItem
-                key={code}
-                onClick={() => switchLocale(code)}
-              >
-                {label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ThemeToggle />
 
         <Sheet>
           <MenuSheetTrigger />
           <HeaderMenuPanel
             appName={t('appName')}
             locale={locale}
-            settingsLabel={t('nav.settings')}
+            onLocaleChange={switchLocale}
           />
         </Sheet>
       </div>

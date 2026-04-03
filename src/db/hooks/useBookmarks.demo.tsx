@@ -3,11 +3,7 @@ import { Button } from '#/components/ui/button';
 import { createStorybookDatabase } from '#/db';
 import { DbProvider } from '#/providers/DbProvider';
 
-const GAME_IDS = [
-  'math-addition',
-  'math-subtraction',
-  'placeholder-game',
-];
+const GAME_IDS = ['word-spell', 'number-match'];
 
 const openStorybookDatabase = () => createStorybookDatabase();
 

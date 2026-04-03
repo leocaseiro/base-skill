@@ -1,5 +1,9 @@
 # Claude Code Rules for BaseSkill
 
+## React Best Practices
+
+Analyse the [eslint.config.js](./eslint.config.js) to decide what approach to write the code. For example we don't use functions, but const(react/function-component-definition)
+
 ## Git Workflow
 
 **Never commit directly to `master`.** All changes must be made on a branch via a git worktree.
