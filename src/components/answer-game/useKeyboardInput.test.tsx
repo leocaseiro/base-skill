@@ -68,7 +68,7 @@ describe('useKeyboardInput', () => {
 
     act(() => {
       globalThis.dispatchEvent(
-        new KeyboardEvent('keypress', { key: 'c', bubbles: true }),
+        new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
       );
     });
 
@@ -88,7 +88,7 @@ describe('useKeyboardInput', () => {
 
     act(() => {
       globalThis.dispatchEvent(
-        new KeyboardEvent('keypress', { key: 'c', bubbles: true }),
+        new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
       );
     });
 
@@ -104,7 +104,7 @@ describe('useKeyboardInput', () => {
 
     act(() => {
       globalThis.dispatchEvent(
-        new KeyboardEvent('keypress', { key: 'x', bubbles: true }),
+        new KeyboardEvent('keydown', { key: 'x', bubbles: true }),
       );
     });
 
@@ -120,7 +120,7 @@ describe('useKeyboardInput', () => {
 
     act(() => {
       globalThis.dispatchEvent(
-        new KeyboardEvent('keypress', { key: 'C', bubbles: true }),
+        new KeyboardEvent('keydown', { key: 'C', bubbles: true }),
       );
     });
 

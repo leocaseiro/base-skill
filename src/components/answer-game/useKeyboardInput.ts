@@ -9,7 +9,7 @@ export const useKeyboardInput = (): void => {
   useEffect(() => {
     if (state.config.inputMethod !== 'type') return;
 
-    const handleKeyPress = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement) return;
       if (event.target instanceof HTMLTextAreaElement) return;
 
@@ -30,9 +30,9 @@ export const useKeyboardInput = (): void => {
       });
     };
 
-    globalThis.addEventListener('keypress', handleKeyPress);
+    globalThis.addEventListener('keydown', handleKeyDown);
     return () =>
-      globalThis.removeEventListener('keypress', handleKeyPress);
+      globalThis.removeEventListener('keydown', handleKeyDown);
   }, [
     state.config.inputMethod,
     state.allTiles,
