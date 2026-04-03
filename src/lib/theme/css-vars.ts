@@ -16,6 +16,15 @@ export function themeDocToCssVars(
     '--bs-success': defaultThemeCssVariables['--bs-success']!,
     '--bs-warning': defaultThemeCssVariables['--bs-warning']!,
     '--bs-error': defaultThemeCssVariables['--bs-error']!,
+    // Wire shadcn tokens so components like Button pick up theme colors.
+    '--primary': primary,
+    '--primary-foreground': surface,
+    '--secondary': secondary,
+    '--secondary-foreground': surface,
+    '--background': background,
+    // --card and --card-foreground are omitted — wired via CSS so dark mode can override them
+    '--border': accent,
+    '--ring': primary,
   };
 }
 

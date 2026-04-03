@@ -1,3 +1,4 @@
+import { MoonIcon, SunIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 type ThemeMode = 'light' | 'dark' | 'auto';
@@ -41,17 +42,18 @@ export const ThemeToggle = () => {
     };
   }, [mode]);
 
+  const isDark =
+    mode === 'dark' ||
+    (mode === 'auto' &&
+      globalThis.matchMedia('(prefers-color-scheme: dark)').matches);
+
   function toggleMode() {
-    const nextMode: ThemeMode =
-      mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light';
+    const nextMode: ThemeMode = isDark ? 'light' : 'dark';
     setMode(nextMode);
     applyThemeMode(nextMode);
   }
 
-  const label =
-    mode === 'auto'
-      ? 'Theme mode: auto (system). Click to switch to light mode.'
-      : `Theme mode: ${mode}. Click to switch mode.`;
+  const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
 
   return (
     <button
@@ -59,9 +61,9 @@ export const ThemeToggle = () => {
       onClick={toggleMode}
       aria-label={label}
       title={label}
-      className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5"
+      className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] p-2 text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5"
     >
-      {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light'}
+      {isDark ? <SunIcon size={16} /> : <MoonIcon size={16} />}
     </button>
   );
 };
