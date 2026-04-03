@@ -2157,6 +2157,7 @@ Expected: all pass. Skip with `SKIP_E2E=1` if game routes not yet wired and docu
 ## Task 11: NumeralTileBank — Domino dot layout
 
 **Design decision (approved 2026-04-03):** `tileStyle: 'dots'` renders pip patterns using dice/domino visuals:
+
 - **1–6** — single die face (classic dice pip positions on a 3×3 grid)
 - **7–12** — domino tile (two dice faces side by side, separated by a centre line, splits: 7=4+3, 8=4+4, 9=5+4, 10=6+4, 11=6+5, 12=6+6)
 - **13+** — large numeral (dots become uncountable; numeral is more appropriate for older learners)
@@ -2164,6 +2165,7 @@ Expected: all pass. Skip with `SKIP_E2E=1` if game routes not yet wired and docu
 Tile shape: single die = 80×80 square; domino = 128×72 rectangle.
 
 **Files:**
+
 - Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
 - Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx`
 
@@ -2207,7 +2209,9 @@ Tile shape: single die = 80×80 square; domino = 128×72 rectangle.
 
     it('has a visible centre divider', () => {
       const { container } = render(<DominoTile value={8} />);
-      expect(container.querySelector('[data-divider]')).toBeInTheDocument();
+      expect(
+        container.querySelector('[data-divider]'),
+      ).toBeInTheDocument();
     });
   });
   ```
@@ -2235,9 +2239,9 @@ Tile shape: single die = 80×80 square; domino = 128×72 rectangle.
 
   /** Which two die values add up to n for values 7–12. */
   const DOMINO_SPLIT: Record<number, [number, number]> = {
-    7:  [4, 3],
-    8:  [4, 4],
-    9:  [5, 4],
+    7: [4, 3],
+    8: [4, 4],
+    9: [5, 4],
     10: [6, 4],
     11: [6, 5],
     12: [6, 6],
@@ -2268,10 +2272,7 @@ Tile shape: single die = 80×80 square; domino = 128×72 rectangle.
   export const DominoTile = ({ value }: { value: number }) => {
     const [left, right] = DOMINO_SPLIT[value] ?? [6, value - 6];
     return (
-      <div
-        className="flex items-center gap-0"
-        aria-hidden="true"
-      >
+      <div className="flex items-center gap-0" aria-hidden="true">
         <DiceFace value={left} />
         <span
           data-divider=""
@@ -2288,21 +2289,23 @@ Tile shape: single die = 80×80 square; domino = 128×72 rectangle.
   Replace the `DotsTile` render inside `NumeralTile` with:
 
   ```tsx
-  {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
-    numericValue <= 6 ? (
-      <DiceFace value={numericValue} />
-    ) : numericValue <= 12 ? (
-      <DominoTile value={numericValue} />
+  {
+    tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
+      numericValue <= 6 ? (
+        <DiceFace value={numericValue} />
+      ) : numericValue <= 12 ? (
+        <DominoTile value={numericValue} />
+      ) : (
+        <span className="text-3xl font-bold tabular-nums leading-none">
+          {tile.label}
+        </span>
+      )
     ) : (
       <span className="text-3xl font-bold tabular-nums leading-none">
         {tile.label}
       </span>
-    )
-  ) : (
-    <span className="text-3xl font-bold tabular-nums leading-none">
-      {tile.label}
-    </span>
-  )}
+    );
+  }
   ```
 
 - [ ] **Step 4: Update tile size for domino tiles**
@@ -2365,6 +2368,7 @@ Tile shape: single die = 80×80 square; domino = 128×72 rectangle.
 Eliminates the duplicated drag + TTS + click wiring across `LetterTile`, `NumeralTile`, and `SortNumbersTileBank` (Group I). After this task, Group A+B Task 5 (drag-start TTS) only needs to be implemented once in the hook.
 
 **Files:**
+
 - Create: `src/components/answer-game/useDraggableTile.ts`
 - Create: `src/components/answer-game/useDraggableTile.test.tsx`
 - Modify: `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`

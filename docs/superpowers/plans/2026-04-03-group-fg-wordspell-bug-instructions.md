@@ -14,24 +14,25 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|---------------|
-| `src/components/answer-game/answer-game-reducer.ts` | Modify | Guard EJECT_TILE: only eject if zone.isWrong; fix PLACE_TILE wrong branch for lock-manual |
-| `src/components/answer-game/answer-game-reducer.test.ts` | Modify | Add tests for EJECT_TILE guard and lock-manual bank cleanup |
-| `src/components/answer-game/useAutoNextSlot.ts` | Modify | Skip locked zones when finding target slot |
-| `src/components/answer-game/useAutoNextSlot.test.tsx` | Modify | Add test for skipping locked zone |
-| `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` | Create | Full-screen overlay with instructions text + TTS + "Let's go!" button |
-| `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx` | Create | Renders text, calls speakPrompt on mount, dismisses on button click |
-| `src/games/word-spell/WordSpell/WordSpell.tsx` | Modify | Show InstructionsOverlay before first round |
-| `src/games/number-match/NumberMatch/NumberMatch.tsx` | Modify | Same |
-| `src/lib/i18n/locales/en/games.json` | Modify | Add instructions strings for word-spell and number-match |
-| `src/lib/i18n/locales/pt-BR/games.json` | Modify | Same in Portuguese |
+| File                                                                          | Action | Responsibility                                                                            |
+| ----------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------- |
+| `src/components/answer-game/answer-game-reducer.ts`                           | Modify | Guard EJECT_TILE: only eject if zone.isWrong; fix PLACE_TILE wrong branch for lock-manual |
+| `src/components/answer-game/answer-game-reducer.test.ts`                      | Modify | Add tests for EJECT_TILE guard and lock-manual bank cleanup                               |
+| `src/components/answer-game/useAutoNextSlot.ts`                               | Modify | Skip locked zones when finding target slot                                                |
+| `src/components/answer-game/useAutoNextSlot.test.tsx`                         | Modify | Add test for skipping locked zone                                                         |
+| `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`      | Create | Full-screen overlay with instructions text + TTS + "Let's go!" button                     |
+| `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx` | Create | Renders text, calls speakPrompt on mount, dismisses on button click                       |
+| `src/games/word-spell/WordSpell/WordSpell.tsx`                                | Modify | Show InstructionsOverlay before first round                                               |
+| `src/games/number-match/NumberMatch/NumberMatch.tsx`                          | Modify | Same                                                                                      |
+| `src/lib/i18n/locales/en/games.json`                                          | Modify | Add instructions strings for word-spell and number-match                                  |
+| `src/lib/i18n/locales/pt-BR/games.json`                                       | Modify | Same in Portuguese                                                                        |
 
 ---
 
 ## Task 1: Fix EJECT_TILE reducer guard
 
 **Files:**
+
 - Modify: `src/components/answer-game/answer-game-reducer.ts`
 - Modify: `src/components/answer-game/answer-game-reducer.test.ts`
 
@@ -181,6 +182,7 @@
 ## Task 2: Fix useAutoNextSlot to skip locked zones
 
 **Files:**
+
 - Modify: `src/components/answer-game/useAutoNextSlot.ts`
 - Modify: `src/components/answer-game/useAutoNextSlot.test.tsx`
 
@@ -260,6 +262,7 @@
 ## Task 3: Add instructions strings to i18n
 
 **Files:**
+
 - Modify: `src/lib/i18n/locales/en/games.json`
 - Modify: `src/lib/i18n/locales/pt-BR/games.json`
 
@@ -331,6 +334,7 @@
 ## Task 4: Create InstructionsOverlay component
 
 **Files:**
+
 - Create: `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`
 - Create: `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx`
 
@@ -367,7 +371,9 @@
           ttsEnabled={false}
         />,
       );
-      await userEvent.click(screen.getByRole('button', { name: /let's go/i }));
+      await userEvent.click(
+        screen.getByRole('button', { name: /let's go/i }),
+      );
       expect(onStart).toHaveBeenCalledOnce();
     });
 
@@ -379,7 +385,9 @@
           ttsEnabled={false}
         />,
       );
-      expect(screen.getByRole('button', { name: /let's go/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /let's go/i }),
+      ).toBeInTheDocument();
     });
   });
   ```
@@ -461,6 +469,7 @@
 ## Task 5: Add InstructionsOverlay to WordSpell + NumberMatch
 
 **Files:**
+
 - Modify: `src/games/word-spell/WordSpell/WordSpell.tsx`
 - Modify: `src/games/number-match/NumberMatch/NumberMatch.tsx`
 

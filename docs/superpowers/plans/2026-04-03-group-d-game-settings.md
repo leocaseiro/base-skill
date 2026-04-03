@@ -14,19 +14,20 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|---------------|
-| `src/components/answer-game/useKeyboardInput.ts` | Create | Listens to keypress; finds matching bank tile; dispatches PLACE_TILE |
-| `src/components/answer-game/useKeyboardInput.test.tsx` | Create | Fires on keypress with correct tile; no-op in drag mode; no-op when no match |
-| `src/components/answer-game/AnswerGameProvider.tsx` | Modify | Compose `useKeyboardInput` inside provider |
-| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` | Modify | Hide tiles when `inputMethod === 'type'`; show keyboard hint |
-| `src/routes/$locale/_app/game/$gameId.tsx` | Modify | Replace hardcoded configs with `useState`; add `GameConfigPanel` (dev only) |
+| File                                                     | Action | Responsibility                                                               |
+| -------------------------------------------------------- | ------ | ---------------------------------------------------------------------------- |
+| `src/components/answer-game/useKeyboardInput.ts`         | Create | Listens to keypress; finds matching bank tile; dispatches PLACE_TILE         |
+| `src/components/answer-game/useKeyboardInput.test.tsx`   | Create | Fires on keypress with correct tile; no-op in drag mode; no-op when no match |
+| `src/components/answer-game/AnswerGameProvider.tsx`      | Modify | Compose `useKeyboardInput` inside provider                                   |
+| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` | Modify | Hide tiles when `inputMethod === 'type'`; show keyboard hint                 |
+| `src/routes/$locale/_app/game/$gameId.tsx`               | Modify | Replace hardcoded configs with `useState`; add `GameConfigPanel` (dev only)  |
 
 ---
 
 ## Task 1: Create useKeyboardInput hook
 
 **Files:**
+
 - Create: `src/components/answer-game/useKeyboardInput.ts`
 - Create: `src/components/answer-game/useKeyboardInput.test.tsx`
 
@@ -111,7 +112,8 @@
       };
 
       window.addEventListener('keypress', handleKeyPress);
-      return () => window.removeEventListener('keypress', handleKeyPress);
+      return () =>
+        window.removeEventListener('keypress', handleKeyPress);
     }, [
       state.config.inputMethod,
       state.allTiles,
@@ -143,6 +145,7 @@
 ## Task 2: Compose useKeyboardInput in AnswerGameProvider
 
 **Files:**
+
 - Modify: `src/components/answer-game/AnswerGameProvider.tsx`
 
 - [ ] **Step 1: Add useKeyboardInput to provider**
@@ -192,6 +195,7 @@
 ## Task 3: Hide LetterTileBank in type mode + show hint
 
 **Files:**
+
 - Modify: `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
 
 - [ ] **Step 1: Update LetterTileBank to handle type mode**
@@ -210,7 +214,9 @@
       );
     }
 
-    const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
+    const bankTiles = allTiles.filter((t) =>
+      bankTileIds.includes(t.id),
+    );
 
     return (
       <div className="flex flex-wrap justify-center gap-3">
@@ -240,6 +246,7 @@
 ## Task 4: Add GameConfigPanel (dev-only) to game route
 
 **Files:**
+
 - Modify: `src/routes/$locale/_app/game/$gameId.tsx`
 
 - [ ] **Step 1: Replace hardcoded configs with useState**
@@ -281,7 +288,11 @@
   const generateRandomNumber = (min: number, max: number): number =>
     Math.floor(Math.random() * (max - min + 1)) + min;
 
-  const generateXRounds = (min: number, max: number, x: number): number[] =>
+  const generateXRounds = (
+    min: number,
+    max: number,
+    x: number,
+  ): number[] =>
     Array.from({ length: x }, () => generateRandomNumber(min, max));
 
   const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
@@ -297,9 +308,11 @@
     mode: 'numeral-to-group',
     tileStyle: 'dots',
     range: { min: NUMBER_MATCH_RANGE.min, max: NUMBER_MATCH_RANGE.max },
-    rounds: generateXRounds(NUMBER_MATCH_RANGE.min, NUMBER_MATCH_RANGE.max, 3).map(
-      (value) => ({ value }),
-    ),
+    rounds: generateXRounds(
+      NUMBER_MATCH_RANGE.min,
+      NUMBER_MATCH_RANGE.max,
+      3,
+    ).map((value) => ({ value })),
   });
   ```
 
@@ -307,9 +320,8 @@
 
   ```tsx
   const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
-    const [wordSpellConfig, setWordSpellConfig] = useState<WordSpellConfig>(
-      DEFAULT_WORD_SPELL_CONFIG,
-    );
+    const [wordSpellConfig, setWordSpellConfig] =
+      useState<WordSpellConfig>(DEFAULT_WORD_SPELL_CONFIG);
     const [numberMatchConfig, setNumberMatchConfig] =
       useState<NumberMatchConfig>(makeDefaultNumberMatchConfig);
 
@@ -364,18 +376,25 @@
     return (
       <details
         open={open}
-        onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}
+        onToggle={(e) =>
+          setOpen((e.currentTarget as HTMLDetailsElement).open)
+        }
         className="fixed right-4 top-20 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
       >
-        <summary className="cursor-pointer font-medium">⚙️ Game Config</summary>
+        <summary className="cursor-pointer font-medium">
+          ⚙️ Game Config
+        </summary>
         <div className="mt-3 flex flex-col gap-3">
-
           <label className="flex flex-col gap-1">
             Input method
             <select
               value={config.inputMethod}
               onChange={(e) =>
-                onChange({ ...config, inputMethod: e.target.value as WordSpellConfig['inputMethod'] })
+                onChange({
+                  ...config,
+                  inputMethod: e.target
+                    .value as WordSpellConfig['inputMethod'],
+                })
               }
               className="rounded border px-2 py-1"
             >
@@ -390,7 +409,10 @@
             <select
               value={config.mode}
               onChange={(e) =>
-                onChange({ ...config, mode: e.target.value as WordSpellConfig['mode'] })
+                onChange({
+                  ...config,
+                  mode: e.target.value as WordSpellConfig['mode'],
+                })
               }
               className="rounded border px-2 py-1"
             >
@@ -406,7 +428,11 @@
             <select
               value={config.tileBankMode}
               onChange={(e) =>
-                onChange({ ...config, tileBankMode: e.target.value as WordSpellConfig['tileBankMode'] })
+                onChange({
+                  ...config,
+                  tileBankMode: e.target
+                    .value as WordSpellConfig['tileBankMode'],
+                })
               }
               className="rounded border px-2 py-1"
             >
@@ -424,7 +450,10 @@
                 max={8}
                 value={config.distractorCount ?? 3}
                 onChange={(e) =>
-                  onChange({ ...config, distractorCount: Number(e.target.value) })
+                  onChange({
+                    ...config,
+                    distractorCount: Number(e.target.value),
+                  })
                 }
                 className="rounded border px-2 py-1"
               />
@@ -436,7 +465,11 @@
             <select
               value={config.wrongTileBehavior}
               onChange={(e) =>
-                onChange({ ...config, wrongTileBehavior: e.target.value as WordSpellConfig['wrongTileBehavior'] })
+                onChange({
+                  ...config,
+                  wrongTileBehavior: e.target
+                    .value as WordSpellConfig['wrongTileBehavior'],
+                })
               }
               className="rounded border px-2 py-1"
             >
@@ -450,7 +483,9 @@
             <input
               type="checkbox"
               checked={config.ttsEnabled}
-              onChange={(e) => onChange({ ...config, ttsEnabled: e.target.checked })}
+              onChange={(e) =>
+                onChange({ ...config, ttsEnabled: e.target.checked })
+              }
             />
             TTS enabled
           </label>
@@ -459,11 +494,12 @@
             <input
               type="checkbox"
               checked={config.roundsInOrder ?? false}
-              onChange={(e) => onChange({ ...config, roundsInOrder: e.target.checked })}
+              onChange={(e) =>
+                onChange({ ...config, roundsInOrder: e.target.checked })
+              }
             />
             Rounds in order
           </label>
-
         </div>
       </details>
     );
@@ -487,18 +523,24 @@
     return (
       <details
         open={open}
-        onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}
+        onToggle={(e) =>
+          setOpen((e.currentTarget as HTMLDetailsElement).open)
+        }
         className="fixed right-4 top-20 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
       >
-        <summary className="cursor-pointer font-medium">⚙️ Game Config</summary>
+        <summary className="cursor-pointer font-medium">
+          ⚙️ Game Config
+        </summary>
         <div className="mt-3 flex flex-col gap-3">
-
           <label className="flex flex-col gap-1">
             Mode
             <select
               value={config.mode}
               onChange={(e) =>
-                onChange({ ...config, mode: e.target.value as NumberMatchConfig['mode'] })
+                onChange({
+                  ...config,
+                  mode: e.target.value as NumberMatchConfig['mode'],
+                })
               }
               className="rounded border px-2 py-1"
             >
@@ -514,7 +556,11 @@
             <select
               value={config.tileStyle}
               onChange={(e) =>
-                onChange({ ...config, tileStyle: e.target.value as NumberMatchConfig['tileStyle'] })
+                onChange({
+                  ...config,
+                  tileStyle: e.target
+                    .value as NumberMatchConfig['tileStyle'],
+                })
               }
               className="rounded border px-2 py-1"
             >
@@ -532,7 +578,13 @@
               max={20}
               value={config.range.min}
               onChange={(e) =>
-                onChange({ ...config, range: { ...config.range, min: Number(e.target.value) } })
+                onChange({
+                  ...config,
+                  range: {
+                    ...config.range,
+                    min: Number(e.target.value),
+                  },
+                })
               }
               className="rounded border px-2 py-1"
             />
@@ -546,7 +598,13 @@
               max={20}
               value={config.range.max}
               onChange={(e) =>
-                onChange({ ...config, range: { ...config.range, max: Number(e.target.value) } })
+                onChange({
+                  ...config,
+                  range: {
+                    ...config.range,
+                    max: Number(e.target.value),
+                  },
+                })
               }
               className="rounded border px-2 py-1"
             />
@@ -557,7 +615,11 @@
             <select
               value={config.tileBankMode}
               onChange={(e) =>
-                onChange({ ...config, tileBankMode: e.target.value as NumberMatchConfig['tileBankMode'] })
+                onChange({
+                  ...config,
+                  tileBankMode: e.target
+                    .value as NumberMatchConfig['tileBankMode'],
+                })
               }
               className="rounded border px-2 py-1"
             >
@@ -575,7 +637,10 @@
                 max={8}
                 value={config.distractorCount ?? 3}
                 onChange={(e) =>
-                  onChange({ ...config, distractorCount: Number(e.target.value) })
+                  onChange({
+                    ...config,
+                    distractorCount: Number(e.target.value),
+                  })
                 }
                 className="rounded border px-2 py-1"
               />
@@ -587,7 +652,11 @@
             <select
               value={config.wrongTileBehavior}
               onChange={(e) =>
-                onChange({ ...config, wrongTileBehavior: e.target.value as NumberMatchConfig['wrongTileBehavior'] })
+                onChange({
+                  ...config,
+                  wrongTileBehavior: e.target
+                    .value as NumberMatchConfig['wrongTileBehavior'],
+                })
               }
               className="rounded border px-2 py-1"
             >
@@ -601,11 +670,12 @@
             <input
               type="checkbox"
               checked={config.ttsEnabled}
-              onChange={(e) => onChange({ ...config, ttsEnabled: e.target.checked })}
+              onChange={(e) =>
+                onChange({ ...config, ttsEnabled: e.target.checked })
+              }
             />
             TTS enabled
           </label>
-
         </div>
       </details>
     );

@@ -16,14 +16,14 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|---------------|
-| `src/lib/game-engine/GameRoundContext.tsx` | Create | Context + hook for round progress override |
-| `src/components/answer-game/AnswerGameProvider.tsx` | Modify | Populate `GameRoundContext` with current round/total |
-| `src/components/game/GameShell.tsx` | Modify | Read `GameRoundContext` with fallback to GameEngine state |
-| `src/components/answer-game/ScoreAnimation/ScoreAnimation.tsx` | Modify | Replace CSS dots with `canvas-confetti` short burst |
-| `src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx` | Create | Verify confetti fires when visible changes to true |
-| `src/components/answer-game/GameOverOverlay/GameOverOverlay.tsx` | Modify | Fire long confetti rain on mount |
+| File                                                                | Action | Responsibility                                            |
+| ------------------------------------------------------------------- | ------ | --------------------------------------------------------- |
+| `src/lib/game-engine/GameRoundContext.tsx`                          | Create | Context + hook for round progress override                |
+| `src/components/answer-game/AnswerGameProvider.tsx`                 | Modify | Populate `GameRoundContext` with current round/total      |
+| `src/components/game/GameShell.tsx`                                 | Modify | Read `GameRoundContext` with fallback to GameEngine state |
+| `src/components/answer-game/ScoreAnimation/ScoreAnimation.tsx`      | Modify | Replace CSS dots with `canvas-confetti` short burst       |
+| `src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx` | Create | Verify confetti fires when visible changes to true        |
+| `src/components/answer-game/GameOverOverlay/GameOverOverlay.tsx`    | Modify | Fire long confetti rain on mount                          |
 
 ---
 
@@ -49,6 +49,7 @@
 ## Task 2: Create GameRoundContext
 
 **Files:**
+
 - Create: `src/lib/game-engine/GameRoundContext.tsx`
 
 - [ ] **Step 1: Create the context file**
@@ -89,6 +90,7 @@
 ## Task 3: Populate GameRoundContext in AnswerGameProvider
 
 **Files:**
+
 - Modify: `src/components/answer-game/AnswerGameProvider.tsx`
 
 - [ ] **Step 1: Update AnswerGameProvider**
@@ -172,6 +174,7 @@
 ## Task 4: GameShell reads GameRoundContext
 
 **Files:**
+
 - Modify: `src/components/game/GameShell.tsx`
 
 - [ ] **Step 1: Update GameShellChrome to use GameRoundContext**
@@ -239,6 +242,7 @@
 ## Task 5: Replace ScoreAnimation with canvas-confetti burst
 
 **Files:**
+
 - Modify: `src/components/answer-game/ScoreAnimation/ScoreAnimation.tsx`
 - Create: `src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx`
 
@@ -266,7 +270,8 @@
     });
 
     it('does not fire confetti on re-render when already visible', async () => {
-      const confetti = (await import('canvas-confetti')).default as ReturnType<typeof vi.fn>;
+      const confetti = (await import('canvas-confetti'))
+        .default as ReturnType<typeof vi.fn>;
       confetti.mockClear();
       render(<ScoreAnimation visible={true} />);
       const callCount = confetti.mock.calls.length;
@@ -340,6 +345,7 @@
 ## Task 6: Long confetti rain in GameOverOverlay
 
 **Files:**
+
 - Modify: `src/components/answer-game/GameOverOverlay/GameOverOverlay.tsx`
 
 - [ ] **Step 1: Add confetti rain on mount**

@@ -14,23 +14,24 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|---------------|
-| `src/components/Footer.tsx` | Modify | Fix `switchLocale` to stay on current route |
-| `src/components/Header.tsx` | Modify | Fix `switchLocale` + add voice selector to drawer |
-| `src/routes/$locale/_app/settings.tsx` | Modify | Fix `handleLocaleChange` to stay on current route |
-| `src/components/game/GameShell.tsx` | Modify | Fix hardcoded `locale = 'en'`; translate Undo/Pause/Exit |
-| `src/components/game/GameShell.test.tsx` | Modify | Update test for translated button labels |
-| `src/lib/i18n/locales/en/games.json` | Modify | Add `shell.round`, `shell.undo`, `shell.pause`, `shell.exit` |
-| `src/lib/i18n/locales/pt-BR/games.json` | Modify | Same keys in Portuguese |
-| `src/lib/i18n/locales/en/settings.json` | Modify | Add `voice`, `themes.ocean`, `themes.forest` keys |
-| `src/lib/i18n/locales/pt-BR/settings.json` | Modify | Same keys in Portuguese |
+| File                                       | Action | Responsibility                                               |
+| ------------------------------------------ | ------ | ------------------------------------------------------------ |
+| `src/components/Footer.tsx`                | Modify | Fix `switchLocale` to stay on current route                  |
+| `src/components/Header.tsx`                | Modify | Fix `switchLocale` + add voice selector to drawer            |
+| `src/routes/$locale/_app/settings.tsx`     | Modify | Fix `handleLocaleChange` to stay on current route            |
+| `src/components/game/GameShell.tsx`        | Modify | Fix hardcoded `locale = 'en'`; translate Undo/Pause/Exit     |
+| `src/components/game/GameShell.test.tsx`   | Modify | Update test for translated button labels                     |
+| `src/lib/i18n/locales/en/games.json`       | Modify | Add `shell.round`, `shell.undo`, `shell.pause`, `shell.exit` |
+| `src/lib/i18n/locales/pt-BR/games.json`    | Modify | Same keys in Portuguese                                      |
+| `src/lib/i18n/locales/en/settings.json`    | Modify | Add `voice`, `themes.ocean`, `themes.forest` keys            |
+| `src/lib/i18n/locales/pt-BR/settings.json` | Modify | Same keys in Portuguese                                      |
 
 ---
 
 ## Task 1: Fix locale-switching in Footer
 
 **Files:**
+
 - Modify: `src/components/Footer.tsx`
 
 - [ ] **Step 1: Replace `switchLocale` navigation**
@@ -74,6 +75,7 @@
 ## Task 2: Fix locale-switching in Header
 
 **Files:**
+
 - Modify: `src/components/Header.tsx`
 
 - [ ] **Step 1: Replace `switchLocale` navigation**
@@ -117,6 +119,7 @@
 ## Task 3: Fix locale-switching in Settings route
 
 **Files:**
+
 - Modify: `src/routes/$locale/_app/settings.tsx`
 
 - [ ] **Step 1: Replace `handleLocaleChange` navigation**
@@ -135,7 +138,10 @@
   // AFTER
   const handleLocaleChange = (newLocale: string) => {
     void navigate({
-      params: (prev) => ({ ...prev, locale: newLocale as SettingsLocale }),
+      params: (prev) => ({
+        ...prev,
+        locale: newLocale as SettingsLocale,
+      }),
     });
   };
   ```
@@ -160,6 +166,7 @@
 ## Task 4: Fix GameShell hardcoded locale + translate shell buttons
 
 **Files:**
+
 - Modify: `src/components/game/GameShell.tsx`
 - Modify: `src/components/game/GameShell.test.tsx`
 - Modify: `src/lib/i18n/locales/en/games.json`
@@ -330,6 +337,7 @@
 ## Task 5: Add voice selector to Header drawer + translate voice/theme keys
 
 **Files:**
+
 - Modify: `src/components/Header.tsx`
 - Modify: `src/lib/i18n/locales/en/settings.json`
 - Modify: `src/lib/i18n/locales/pt-BR/settings.json`
@@ -397,26 +405,28 @@
   Then add the voice `<Select>` block to the `SheetContent` JSX, after the `speechRate` slider block and before the language block:
 
   ```tsx
-  {voices.length > 0 && (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor="drawer-voice">{t('voice')}</Label>
-      <Select
-        value={preferredVoice}
-        onValueChange={(v) => void update({ preferredVoiceURI: v })}
-      >
-        <SelectTrigger id="drawer-voice">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {voices.map((v) => (
-            <SelectItem key={v.name} value={v.name}>
-              {v.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  )}
+  {
+    voices.length > 0 && (
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="drawer-voice">{t('voice')}</Label>
+        <Select
+          value={preferredVoice}
+          onValueChange={(v) => void update({ preferredVoiceURI: v })}
+        >
+          <SelectTrigger id="drawer-voice">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {voices.map((v) => (
+              <SelectItem key={v.name} value={v.name}>
+                {v.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
   ```
 
 - [ ] **Step 4: Translate preset theme names in the drawer**
@@ -425,18 +435,22 @@
 
   ```tsx
   // BEFORE
-  {themes.map(({ id, name }) => (
-    <SelectItem key={id} value={id}>
-      {name}
-    </SelectItem>
-  ))}
+  {
+    themes.map(({ id, name }) => (
+      <SelectItem key={id} value={id}>
+        {name}
+      </SelectItem>
+    ));
+  }
 
   // AFTER
-  {themes.map(({ id, name, isPreset }) => (
-    <SelectItem key={id} value={id}>
-      {isPreset ? t(`themes.${id}`, { defaultValue: name }) : name}
-    </SelectItem>
-  ))}
+  {
+    themes.map(({ id, name, isPreset }) => (
+      <SelectItem key={id} value={id}>
+        {isPreset ? t(`themes.${id}`, { defaultValue: name }) : name}
+      </SelectItem>
+    ));
+  }
   ```
 
   Note: `ThemeDoc` includes `isPreset` — it's already in the type. The `toJSON()` call already returns the full doc shape. `t('themes.theme_ocean_preset', { defaultValue: name })` falls back to the raw `name` for any unknown preset IDs.
