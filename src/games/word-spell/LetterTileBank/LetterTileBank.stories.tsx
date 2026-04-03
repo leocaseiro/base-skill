@@ -19,9 +19,9 @@ const config: AnswerGameConfig = {
 };
 
 const tiles: TileItem[] = [
-  { id: 't1', label: 'C', value: 'C' },
-  { id: 't2', label: 'A', value: 'A' },
-  { id: 't3', label: 'T', value: 'T' },
+  { id: 't1', label: 'c', value: 'c' },
+  { id: 't2', label: 'a', value: 'a' },
+  { id: 't3', label: 'a', value: 't' },
 ];
 
 const zones: AnswerZone[] = [

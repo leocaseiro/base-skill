@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useAnswerGameContext } from './useAnswerGameContext';
 import type { AnswerGamePhase } from './types';
-import { playSound } from '@/lib/audio/AudioFeedback';
+import { queueSound } from '@/lib/audio/AudioFeedback';
 
 export const useGameSounds = (): void => {
   const { phase } = useAnswerGameContext();
@@ -14,9 +14,9 @@ export const useGameSounds = (): void => {
     if (phase === prev) return;
 
     if (phase === 'round-complete') {
-      playSound('round-complete');
+      queueSound('round-complete');
     } else if (phase === 'game-over') {
-      playSound('game-complete');
+      queueSound('game-complete');
     }
   }, [phase]);
 };

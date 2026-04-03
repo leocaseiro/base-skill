@@ -6,10 +6,12 @@ import { useGameSounds } from './useGameSounds';
 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
 import type { ReactNode } from 'react';
 
-import { playSound } from '@/lib/audio/AudioFeedback';
+import { queueSound } from '@/lib/audio/AudioFeedback';
 
 vi.mock('@/lib/audio/AudioFeedback', () => ({
   playSound: vi.fn(),
+  queueSound: vi.fn(),
+  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
 }));
 
 vi.mock('@/lib/game-event-bus', () => ({
@@ -52,10 +54,10 @@ describe('useGameSounds', () => {
     renderHook(() => useGameSounds(), {
       wrapper: createWrapper(baseConfig),
     });
-    expect(playSound).not.toHaveBeenCalled();
+    expect(queueSound).not.toHaveBeenCalled();
   });
 
-  it('plays "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
+  it('queues "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
     const { result } = renderHook(
       () => {
         const dispatch = useAnswerGameDispatch();
@@ -71,10 +73,10 @@ describe('useGameSounds', () => {
     act(() => {
       result.current({ type: 'COMPLETE_GAME' });
     });
-    expect(playSound).toHaveBeenCalledWith('game-complete');
+    expect(queueSound).toHaveBeenCalledWith('game-complete');
   });
 
-  it('plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
+  it('queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
     const { result } = renderHook(
       () => {
         const dispatch = useAnswerGameDispatch();
@@ -94,6 +96,6 @@ describe('useGameSounds', () => {
         zoneIndex: 0,
       });
     });
-    expect(playSound).toHaveBeenCalledWith('round-complete');
+    expect(queueSound).toHaveBeenCalledWith('round-complete');
   });
 });

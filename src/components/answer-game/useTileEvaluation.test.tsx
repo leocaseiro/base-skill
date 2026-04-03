@@ -14,6 +14,7 @@ import { useTileEvaluation } from './useTileEvaluation';
 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
 import type { ReactNode } from 'react';
 import { playSound } from '@/lib/audio/AudioFeedback';
+import { cancelSpeech } from '@/lib/speech/SpeechOutput';
 
 vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
@@ -21,6 +22,12 @@ vi.mock('@/lib/game-event-bus', () => ({
 
 vi.mock('@/lib/audio/AudioFeedback', () => ({
   playSound: vi.fn(),
+  queueSound: vi.fn(),
+  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+}));
+
+vi.mock('@/lib/speech/SpeechOutput', () => ({
+  cancelSpeech: vi.fn(),
 }));
 
 const baseConfig: AnswerGameConfig = {
@@ -89,6 +96,18 @@ describe('useTileEvaluation', () => {
     );
     act(() => result.current.placeTile('t1', 0));
     expect(playSound).toHaveBeenCalledWith('correct', 0.8);
+  });
+
+  it('cancels speech before playing sound on tile placement', () => {
+    const { result } = renderHook(
+      () => useInitialisedEvaluation(baseConfig),
+      { wrapper: createWrapper(baseConfig) },
+    );
+    act(() => result.current.placeTile('t1', 0));
+    const cancelOrder =
+      vi.mocked(cancelSpeech).mock.invocationCallOrder[0];
+    const playOrder = vi.mocked(playSound).mock.invocationCallOrder[0];
+    expect(cancelOrder).toBeLessThan(playOrder ?? Infinity);
   });
 
   it('plays "wrong" sound on incorrect tile placement', () => {

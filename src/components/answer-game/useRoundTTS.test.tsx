@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AnswerGameProvider } from './AnswerGameProvider';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
@@ -21,6 +21,8 @@ vi.mock('@/lib/game-event-bus', () => ({
 
 vi.mock('@/lib/audio/AudioFeedback', () => ({
   playSound: vi.fn(),
+  queueSound: vi.fn(),
+  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
 }));
 
 const ttsConfig: AnswerGameConfig = {
@@ -62,11 +64,13 @@ describe('useRoundTTS', () => {
     vi.clearAllMocks();
   });
 
-  it('calls speakPrompt on mount with the prompt', () => {
+  it('calls speakPrompt on mount with the prompt', async () => {
     renderHook(() => useRoundTTS('cat'), {
       wrapper: createWrapper(ttsConfig),
     });
-    expect(mockSpeakPrompt).toHaveBeenCalledWith('cat');
+    await waitFor(() => {
+      expect(mockSpeakPrompt).toHaveBeenCalledWith('cat');
+    });
   });
 
   it('does NOT call speakPrompt when ttsEnabled is false', () => {
@@ -76,7 +80,7 @@ describe('useRoundTTS', () => {
     expect(mockSpeakPrompt).not.toHaveBeenCalled();
   });
 
-  it('calls speakPrompt again when roundIndex changes (ADVANCE_ROUND)', () => {
+  it('calls speakPrompt again when roundIndex changes (ADVANCE_ROUND)', async () => {
     const { result } = renderHook(
       () => {
         const dispatch = useAnswerGameDispatch();
@@ -86,7 +90,9 @@ describe('useRoundTTS', () => {
       { wrapper: createWrapper(ttsConfig) },
     );
     // First call on mount
-    expect(mockSpeakPrompt).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockSpeakPrompt).toHaveBeenCalledTimes(1);
+    });
     vi.clearAllMocks();
 
     act(() => {
@@ -95,6 +101,8 @@ describe('useRoundTTS', () => {
     act(() => {
       result.current({ type: 'ADVANCE_ROUND', tiles, zones });
     });
-    expect(mockSpeakPrompt).toHaveBeenCalledWith('cat');
+    await waitFor(() => {
+      expect(mockSpeakPrompt).toHaveBeenCalledWith('cat');
+    });
   });
 });

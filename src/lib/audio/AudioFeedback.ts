@@ -14,17 +14,61 @@ const SOUND_PATHS: Record<SoundKey, string> = {
 };
 
 let currentAudio: HTMLAudioElement | null = null;
+let currentResolve: (() => void) | null = null;
+let queueTail: Promise<void> = Promise.resolve();
 
-export function playSound(key: SoundKey, volume = 0.8): void {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio = null;
-  }
+function playSoundInternal(
+  key: SoundKey,
+  volume: number,
+): Promise<void> {
+  currentAudio?.pause();
+  currentAudio = null;
+
   const audio = new Audio(SOUND_PATHS[key]);
   audio.volume = volume;
   currentAudio = audio;
-  void audio.play().catch(() => {
-    console.error(`Failed to play sound ${key}`);
-    // Ignore autoplay policy errors — sound is best-effort
+
+  return new Promise<void>((resolve) => {
+    currentResolve = resolve;
+
+    const cleanup = () => {
+      if (currentResolve === resolve) currentResolve = null;
+      if (currentAudio === audio) currentAudio = null;
+      resolve();
+    };
+
+    audio.addEventListener('ended', cleanup, { once: true });
+    audio.addEventListener('error', cleanup, { once: true });
+
+    void audio.play().catch(() => {
+      console.error(`Failed to play sound ${key}`);
+      cleanup();
+    });
   });
+}
+
+/**
+ * Plays immediately, cancelling any current audio and resetting the queue.
+ * Use for tile feedback (correct/wrong) where the latest sound always wins.
+ */
+export function playSound(key: SoundKey, volume = 0.8): void {
+  currentResolve?.();
+  currentResolve = null;
+  queueTail = playSoundInternal(key, volume);
+}
+
+/**
+ * Queues a sound to play after the current queue drains.
+ * Use for phase sounds (round-complete, game-complete) so they don't cut off tile feedback.
+ */
+export function queueSound(key: SoundKey, volume = 0.8): void {
+  queueTail = queueTail.then(() => playSoundInternal(key, volume));
+}
+
+/**
+ * Returns a promise that resolves when all pending audio (current + queued) finishes.
+ * Use to delay TTS until the audio queue is empty.
+ */
+export function whenSoundEnds(): Promise<void> {
+  return queueTail;
 }
