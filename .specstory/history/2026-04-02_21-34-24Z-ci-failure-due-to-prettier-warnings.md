@@ -2042,4 +2042,337 @@ I need to verify if the --grep-invert @visual change is actually present in the 
 
 The `@visual` string in bash scripts is likely safe as literal text, since `@` alone is not a special parameter in bash unless quoted or in specific contexts. The `@visual` pattern in Playwright's grep might need quoting as `'@visual'` to prevent GitHub Actions from eating the `@` character. 
 
-The `@visual` pattern in YAML doesn't need special escaping as it's a plain scalar, but I'll quote it in double quotes for consistency. I'll try quoting the grep-invert pattern with double quotes to avoid potential YAML parsing issues. </details></think>
+The `@visual` pattern in YAML doesn't need special escaping as it's a plain scalar, but I'll quote it in double quotes for consistency. I'll try quoting the grep-invert pattern with double quotes to avoid potential YAML parsing issues. I'll quote the `@visual` tag in the workflow to prevent YAML parsing issues. 
+
+**Refactoring test projects**
+
+I'm adding a chromium-e2e project to exclude visual tests and avoid grep issues in E2E CI. 
+
+**Configuring playwright projects**
+
+I'm setting up Playwright projects with grepInvert to exclude visual tests at the project level. I'm adjusting Playwright config to use `grep` and `grepInvert` strategically, ensuring CI and local runs behave correctly without affecting each other. 
+
+**Testing grep-invert**
+
+I discovered that `@visual` pattern might break silently in bash due to glob expansion, and I need to verify how Playwright handles missing values for `--grep-invert`. I'm adding `grepInvert: /@visual/` to all CI projects in playwright.config.ts to ensure consistent test filtering across chromium, firefox, and webkit. I'm clarifying how CLI `--grep` interacts with project-level `grepInvert` to ensure visual tests run correctly. The CLI --grep flag overrides project-level grepInvert, so --grep @visual will run @visual tests despite grepInvert: /@visual/. 
+
+**Updating playwright config**
+
+I'm adding `grepInvert: /@visual/` to each browser project in playwright.config.ts to ensure consistent invert behavior. I'm adjusting the VR docker command to use `--grep @visual` to override project config and ensure visual tests run correctly. 
+
+**Handling test filtering**
+
+The test filtering logic needs adjustment because project-level `grepInvert` can exclude @visual tests even when CLI overrides with `--grep @visual`. The project-level `grepInvert` and CLI `--grep` filters are ANDed, which breaks `yarn test:vr` when `grepInvert` excludes `@visual` tests. I'm implementing separate Chromium projects to isolate visual tests and avoid conflicts with grepInvert. 
+
+I'm using testMatch patterns to cleanly separate visual tests into dedicated Chromium project instead of relying on grepInvert. 
+
+**Updating project configuration**
+
+I'm adding a new `chromium-vr` project to replace the current `--project=chromium --grep @visual` setup. I'm updating the test configuration to use `chromium-vr` project instead of grep-based filtering. I'm adding testIgnore patterns to exclude visual.spec.ts from non-VR projects and creating a dedicated VR project for visual tests. I'm configuring Playwright projects to run visual tests only in chromium-vr and excluding visual.spec from default runs. I'm adjusting Playwright project configurations to run visual tests only on chromium-vr while excluding visual.spec from other projects. I'm adjusting Playwright project configurations to ensure visual tests run only on chromium-vr while excluding them from other projects. 
+
+I'm implementing Playwright config changes to isolate visual tests to chromium-vr project and exclude them from other projects. I'm simplifying the e2e test command to use explicit projects instead of grep-invert since visual tests are already excluded from main projects. I need to decide whether to exclude chromium-vr from default projects or use grep-invert in test:e2e to avoid running VR tests during regular e2e runs. I'll use grepInvert to exclude visual tests from regular e2e runs by modifying the chromium-vr project to ignore visual tests. I'm configuring playwright to exclude visual tests from default runs by modifying the chromium-vr project settings. 
+
+I'm implementing a workaround to exclude visual tests from default Playwright runs using conditional testIgnore in the config. I'm refactoring the Playwright config to use project dependencies instead of conditional logic for better maintainability. I'm updating the Playwright config to use project dependencies instead of conditional logic for better maintainability. 
+
+**Updating test configuration**
+
+I'm implementing a separate Playwright config for VR tests to avoid including visual.spec in the default e2e run. I'm quoting `@visual` in e2e.yml and package.json to prevent shell interpretation issues. I'm implementing playwright testIgnore for visual.spec.ts in main config instead of using explicit file paths. 
+
+I'm updating test configuration to ensure testIgnore doesn't interfere with explicit file path execution. I found that testIgnore excludes files even when explicitly passed to Playwright, so I need to adjust project configurations to avoid zero tests running. 
+
+I'm adding a separate `chromium-vr` project to avoid testIgnore conflicts and ensure proper test execution in Docker environments. I'm removing the `chromium-vr` project from CI since the Chromium project already handles testIgnore for visual.spec.ts, eliminating the need for a separate VR project. 
+
+I'm adjusting testIgnore to exclude visual.spec.ts for all projects, removing the need for chromium-vr project. I'm updating testIgnore to ensure explicit file paths like `e2e/visual.spec.ts` still run despite glob patterns, by checking Playwright's CLI override behavior. I'm removing testIgnore for VR runs by using an environment variable to conditionally apply the visual test exclusion. I'm adjusting the visual test inclusion logic to properly handle docker environments and project-specific execution. I'm adjusting test configuration to run visual tests only on chromium in VR docker environment. I'm ensuring visual tests run only in chromium within VR docker environment, while ignoring them locally without VR_DOCKER. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Investigating: `@visual` may be stripped or mis-parsed in the GitHub Actions `run` shell, so `--grep-invert` might not apply. Making VR exclusion structural in `playwright.config.ts` so the E2E job can't run `visual.spec.ts` regardless of CLI quoting.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/playwright.config.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/package.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/scripts/vr-docker.mjs</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Updating playwright config**
+
+I'm adding conditional testIgnore logic to playwright.config.ts to prevent visual.spec.ts from running in CI regardless of grep flags. I'm implementing PLAYWRIGHT_INCLUDE_VISUAL=1 flag to preserve visual snapshot updates in local non-docker environments. 
+
+I'm using env vars to conditionally include visual specs in local non-docker runs. I'm simplifying the test command to `playwright test` for default dev experience and removing the `test:e2e` script. 
+
+I'm removing the `testIgnore` option from project level configs since each project can define its own `testIgnore`. I'm replacing the `testIgnore` regex with the string glob pattern `'**/visual.spec.ts'` for cleaner configuration. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Excluding `visual.spec.ts` at the Playwright config level unless `VR_DOCKER=1` or `PLAYWRIGHT_INCLUDE_VISUAL=1`, so E2E CI can't run those tests even if `--grep-invert` is broken or missing in the workflow.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/playwright.config.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/package.json</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/.github/workflows/e2e.yml</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/playwright.config.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/playwright.config.ts"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/playwright.config.ts"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && npx playwright test --project=chromium --list 2>&1</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && npx playwright test --project=chromium --list 2>&1
+```
+
+```
+Listing tests:
+  [chromium] › a11y.spec.ts:5:3 › @a11y accessibility › home page has no detectable accessibility violations
+  [chromium] › smoke.spec.ts:8:1 › home page loads
+  [chromium] › smoke.spec.ts:14:1 › game catalog renders
+Total: 3 tests in 2 files
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && PLAYWRIGHT_INCLUDE_VISUAL=1 npx playwright test --project=chromium --list 2>&1</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && PLAYWRIGHT_INCLUDE_VISUAL=1 npx playwright test --project=chromium --list 2>&1
+```
+
+```
+Listing tests:
+  [chromium] › a11y.spec.ts:5:3 › @a11y accessibility › home page has no detectable accessibility violations
+  [chromium] › smoke.spec.ts:8:1 › home page loads
+  [chromium] › smoke.spec.ts:14:1 › game catalog renders
+  [chromium] › visual.spec.ts:3:1 › @visual home page
+  [chromium] › visual.spec.ts:12:1 › @visual game shell layout
+Total: 5 tests in 3 files
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && VR_DOCKER=1 npx playwright test --project=chromium --list 2>&1</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && VR_DOCKER=1 npx playwright test --project=chromium --list 2>&1
+```
+
+```
+Listing tests:
+  [chromium] › a11y.spec.ts:5:3 › @a11y accessibility › home page has no detectable accessibility violations
+  [chromium] › smoke.spec.ts:8:1 › home page loads
+  [chromium] › smoke.spec.ts:14:1 › game catalog renders
+  [chromium] › visual.spec.ts:3:1 › @visual home page
+  [chromium] › visual.spec.ts:12:1 › @visual game shell layout
+Total: 5 tests in 3 files
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+Here’s what was going wrong and what we changed.
+
+## Why E2E CI could still run VR
+
+The workflow was updated to use `--grep-invert @visual`, but that’s easy to break or miss (wrong branch, YAML/shell quirks with `@`, etc.). **Playwright was still allowed to load `e2e/visual.spec.ts`**, so any mistake meant you were back to **5 tests** and screenshot failures.
+
+## What we did instead (structural)
+
+In **`playwright.config.ts`**, `e2e/visual.spec.ts` is **ignored for every browser project** unless:
+
+- **`VR_DOCKER=1`** — set inside the Playwright Docker container by `scripts/vr-docker.mjs` (so `yarn test:vr` / `yarn test:vr:update` and the Visual Regression workflow keep working), or  
+- **`PLAYWRIGHT_INCLUDE_VISUAL=1`** — optional escape hatch for ad‑hoc host runs.
+
+So **E2E CI** (`CI=true`, no `VR_DOCKER`) only sees **3** Chromium tests — same as `playwright test --project=chromium --list` locally without those env vars.
+
+## Other edits
+
+- **`package.json`**: `test:e2e` is back to plain `playwright test` (the config handles VR exclusion).
+- **`.github/workflows/e2e.yml`**: dropped `--grep-invert @visual`; the step name no longer claims “no @visual” because the config owns that now.
+
+## If you still use raw Playwright for snapshots on the host
+
+Without Docker, run:
+
+`PLAYWRIGHT_INCLUDE_VISUAL=1 npx playwright test e2e/visual.spec.ts --project=chromium --update-snapshots`
+
+(or keep using **`yarn test:vr:update`** with Docker, which is what CI VR uses).

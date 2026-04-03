@@ -1,22 +1,27 @@
-/** Static UI tokens when RxDB has no active theme (anonymous / first paint). */
+/**
+ * Static UI tokens when RxDB has no active theme (anonymous / first paint).
+ * Matches `theme_ocean_preset` in seed-themes so hydration matches the default
+ * settings theme and primary/foreground pairs meet WCAG AA (avoids candy #FF6B6B
+ * + white failing axe in slower engines before DB is ready).
+ */
 export const defaultThemeCssVars: Record<string, string> = {
-  '--bs-primary': '#FF6B6B',
-  '--bs-secondary': '#FFD93D',
-  '--bs-background': '#FFF9EC',
+  '--bs-primary': '#0077B6',
+  '--bs-secondary': '#00B4D8',
+  '--bs-background': '#CAF0F8',
   '--bs-surface': '#FFFFFF',
-  '--bs-text': '#2D1B00',
-  '--bs-accent': '#6BCB77',
+  '--bs-text': '#03045E',
+  '--bs-accent': '#F77F00',
   '--bs-success': '#6BCB77',
   '--bs-warning': '#F4A261',
-  '--bs-error': '#FF6B6B',
+  '--bs-error': '#E63946',
   // Wire shadcn tokens so components like Button pick up theme colors.
   // Foreground/card-foreground are intentionally omitted — dark mode CSS handles those.
-  '--primary': '#FF6B6B',
+  '--primary': '#0077B6',
   '--primary-foreground': '#FFFFFF',
-  '--secondary': '#FFD93D',
+  '--secondary': '#00B4D8',
   '--secondary-foreground': '#FFFFFF',
-  '--background': '#FFF9EC',
+  '--background': '#CAF0F8',
   // --card and --card-foreground are omitted — wired via CSS so dark mode can override them
-  '--border': '#6BCB77',
-  '--ring': '#FF6B6B',
+  '--border': '#F77F00',
+  '--ring': '#0077B6',
 };
