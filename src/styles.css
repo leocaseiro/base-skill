@@ -67,16 +67,16 @@
   --sidebar-border: oklch(92.2% 0 0deg);
   --sidebar-ring: oklch(70.8% 0 0deg);
 
-  /* BaseSkill Design System — Candy (light) */
-  --bs-primary: #ff6b6b;
-  --bs-secondary: #ffd93d;
-  --bs-background: #fff9ec;
+  /* BaseSkill Design System — light defaults (aligned with Ocean preset / WCAG AA) */
+  --bs-primary: #0077b6;
+  --bs-secondary: #00b4d8;
+  --bs-background: #caf0f8;
   --bs-surface: #fff;
-  --bs-text: #2d1b00;
-  --bs-accent: #6bcb77;
+  --bs-text: #03045e;
+  --bs-accent: #f77f00;
   --bs-success: #6bcb77;
   --bs-warning: #f4a261;
-  --bs-error: #ff6b6b;
+  --bs-error: #e63946;
   --bs-font-weight-default: 600;
   --bs-radius-card: 1.5rem;
   --bs-radius-button: 1rem;
