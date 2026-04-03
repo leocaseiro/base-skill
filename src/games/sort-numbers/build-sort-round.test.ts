@@ -42,7 +42,7 @@ describe('generateSortRounds', () => {
       expect(round.sequence).toHaveLength(3);
       const diffs = round.sequence
         .slice(1)
-        .map((n, i) => n - round.sequence[i]);
+        .map((n, i) => n - (round.sequence[i] ?? 0));
       expect(diffs.every((d) => d === 1)).toBe(true);
     }
   });
@@ -71,7 +71,7 @@ describe('generateSortRounds', () => {
       allowSkips: false,
       totalRounds: 1,
     });
-    const seq = rounds[0].sequence;
+    const seq = rounds[0]?.sequence ?? [];
     expect(new Set(seq).size).toBe(seq.length);
   });
 });
