@@ -139,7 +139,7 @@ const SortNumbersConfigPanel = ({
       onToggle={(e) =>
         setOpen((e.currentTarget as HTMLDetailsElement).open)
       }
-      className="fixed right-4 top-20 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
+      className="fixed right-4 top-40 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
     >
       <summary className="cursor-pointer font-medium">
         ⚙️ Game Config
