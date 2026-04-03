@@ -20,6 +20,22 @@ vi.mock('@/lib/speech/SpeechOutput', () => ({
 vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
 }));
+vi.mock('@/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      speechRate: 1,
+      volume: 0.8,
+      preferredVoiceURI: undefined,
+    },
+    update: vi.fn(),
+  }),
+}));
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { language: 'en' },
+  }),
+}));
 
 const config: AnswerGameConfig = {
   gameId: 'test',
@@ -78,6 +94,9 @@ describe('NumeralTileBank', () => {
   it('calls speak() with the tile label on click when ttsEnabled', async () => {
     render(<NumeralTileBank tileStyle="dots" />, { wrapper });
     await userEvent.click(screen.getByRole('button', { name: /3/i }));
-    expect(speak).toHaveBeenCalledWith('3');
+    expect(speak).toHaveBeenCalledWith(
+      '3',
+      expect.objectContaining({ rate: 1 }),
+    );
   });
 });

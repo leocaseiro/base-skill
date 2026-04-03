@@ -16,6 +16,16 @@ vi.mock('@/lib/speech/SpeechOutput', () => ({
 vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
 }));
+vi.mock('@/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      speechRate: 1,
+      volume: 0.8,
+      preferredVoiceURI: undefined,
+    },
+    update: vi.fn(),
+  }),
+}));
 
 vi.mock(
   '@/components/answer-game/InstructionsOverlay/InstructionsOverlay',

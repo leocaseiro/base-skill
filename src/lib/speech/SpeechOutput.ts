@@ -1,33 +1,66 @@
-import { getVoiceByName } from './voices';
+export interface SpeakOptions {
+  rate?: number;
+  volume?: number;
+  voiceName?: string;
+  lang?: string;
+}
 
-export function speak(text: string, voiceName = 'Daniel'): void {
-  const synth = (
+function getSynth(): SpeechSynthesis | undefined {
+  return (
     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
   ).speechSynthesis;
-  if (!synth) {
+}
+
+function buildUtterance(
+  text: string,
+  options: SpeakOptions,
+  voices: SpeechSynthesisVoice[],
+): SpeechSynthesisUtterance {
+  const u = new SpeechSynthesisUtterance(text);
+  if (options.rate !== undefined) u.rate = options.rate;
+  if (options.volume !== undefined) u.volume = options.volume;
+  if (options.lang !== undefined) u.lang = options.lang;
+  const voiceName = options.voiceName ?? 'Daniel';
+  const voice = voices.find((v) => v.name === voiceName);
+  if (voice) u.voice = voice;
+  return u;
+}
+
+export function speak(
+  text: string,
+  options: SpeakOptions | string = {},
+): void {
+  const synth = getSynth();
+  if (!synth) return;
+
+  // Normalise: legacy callers may pass a voiceName string
+  const opts: SpeakOptions =
+    typeof options === 'string' ? { voiceName: options } : options;
+
+  synth.cancel();
+
+  const voices = synth.getVoices();
+
+  if (voices.length > 0) {
+    synth.speak(buildUtterance(text, opts, voices));
     return;
   }
-  synth.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  const voice = getVoiceByName(voiceName);
-  if (voice) {
-    u.voice = voice;
-  }
-  synth.speak(u);
+
+  // Voices not loaded yet — defer until voiceschanged fires
+  const handler = () => {
+    synth.removeEventListener('voiceschanged', handler);
+    const loadedVoices = synth.getVoices();
+    synth.speak(buildUtterance(text, opts, loadedVoices));
+  };
+  synth.addEventListener('voiceschanged', handler);
 }
 
 export function cancelSpeech(): void {
-  const synth = (
-    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-  ).speechSynthesis;
-  if (!synth) {
-    return;
-  }
+  const synth = getSynth();
+  if (!synth) return;
   synth.cancel();
 }
 
 export function isSpeechOutputAvailable(): boolean {
-  return !!(
-    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-  ).speechSynthesis;
+  return !!getSynth();
 }

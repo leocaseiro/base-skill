@@ -11,6 +11,24 @@ vi.mock('@/lib/speech/SpeechOutput', () => ({
   cancelSpeech: vi.fn(),
 }));
 
+vi.mock('@/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      speechRate: 1,
+      volume: 0.8,
+      preferredVoiceURI: undefined,
+    },
+    update: vi.fn(),
+  }),
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { language: 'en' },
+  }),
+}));
+
 const gameConfig: AnswerGameConfig = {
   gameId: 'test',
   inputMethod: 'drag',
@@ -55,6 +73,9 @@ describe('ImageQuestion', () => {
     await user.click(
       screen.getByRole('button', { name: 'cat — tap to hear' }),
     );
-    expect(speak).toHaveBeenCalledWith('cat');
+    expect(speak).toHaveBeenCalledWith(
+      'cat',
+      expect.objectContaining({ rate: 1 }),
+    );
   });
 });
