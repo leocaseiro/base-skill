@@ -160,11 +160,11 @@ Implement the 5 reference games. Each game is independent and can be built in pa
 
 **ASYNC (all 5 are independent):**
 
-- **Letter Tracing** (Pre-K/K, Letters) -- uses `LetterTracer`, TTS for letter names
-- **Number Match** (Pre-K/K, Math) -- uses `DragAndDrop` with snap, object-group visuals
 - **Word Builder** (K-Year 2, Reading) -- uses `DragAndDrop` + TTS hints, per-language word lists
-- **Read Aloud** (Year 1-3, Reading) -- uses `SpeechInput` (STT), sentence display, evaluation
+- **Number Match** (Pre-K/K, Math) -- uses `DragAndDrop` with snap, object-group visuals
 - **Math Facts** (Year 1-4, Math) -- uses `MultipleChoice` + `Timer`, visual number line
+- **Read Aloud** (Year 1-3, Reading) -- uses `SpeechInput` (STT), sentence display, evaluation
+- **Letter Tracing** (Pre-K/K, Letters) -- uses `LetterTracer`, TTS for letter names
 
 Each game should include: unit tests for game logic, integration test for full lifecycle, i18n content for `en` + `pt-BR`.
 

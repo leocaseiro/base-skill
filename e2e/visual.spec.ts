@@ -11,7 +11,7 @@ test('@visual home page', async ({ page }) => {
 
 test('@visual game shell layout', async ({ page }) => {
   await page.goto('/en/game/math-addition');
-  // Wait for the GameShell chrome to appear
+  // Wait for the exit button — signals the GameShell chrome is fully mounted
   await page
     .getByRole('button', { name: /exit/i })
     .waitFor({ state: 'visible' });
