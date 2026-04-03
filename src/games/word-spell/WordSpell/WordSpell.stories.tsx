@@ -1,3 +1,4 @@
+import { withRouter } from '../../../../.storybook/decorators/withRouter';
 import { WordSpell } from './WordSpell';
 import type { WordSpellConfig } from '../types';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -22,6 +23,7 @@ const baseConfig: WordSpellConfig = {
 const meta: Meta<typeof WordSpell> = {
   component: WordSpell,
   tags: ['autodocs'],
+  decorators: [withRouter],
   args: { config: baseConfig },
 };
 export default meta;
