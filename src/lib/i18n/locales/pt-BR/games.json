@@ -13,5 +13,10 @@
     "great-job": "Muito bem!",
     "hear-the-question": "Ouvir a pergunta",
     "tap-to-hear": "toque para ouvir"
+  },
+  "instructions": {
+    "word-spell": "Arraste as letras para as caixas e forme a palavra. Toque na imagem ou no alto-falante para ouvir a palavra.",
+    "number-match": "Arraste as peças para combinar cada número. Toque no número para ouvir.",
+    "lets-go": "Vamos lá!"
   }
 }

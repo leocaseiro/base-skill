@@ -13,5 +13,10 @@
     "great-job": "Great job!",
     "hear-the-question": "Hear the question",
     "tap-to-hear": "tap to hear"
+  },
+  "instructions": {
+    "word-spell": "Drag the letters into the boxes to spell the word. Tap the picture or the speaker to hear the word.",
+    "number-match": "Drag the tiles to match each number. Tap the number to hear it.",
+    "lets-go": "Let's go!"
   }
 }
