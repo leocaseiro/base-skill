@@ -23,8 +23,12 @@ if (mode !== 'test' && mode !== 'update') {
 try {
   execSync('docker info', { stdio: 'ignore' });
 } catch {
-  console.warn(
-    '\u001B[33m\u26A0 Docker not running \u2014 cannot execute VR tests.\u001B[0m',
+  console.error('\n\u001B[31mError: Docker is not available.\u001B[0m');
+  console.error(
+    'yarn test:vr and yarn test:vr:update require a running Docker daemon (e.g. Docker Desktop).',
+  );
+  console.error(
+    'Start Docker, confirm `docker info` works, then run this command again.\n',
   );
   process.exit(1);
 }
@@ -72,6 +76,7 @@ const dockerArgs = [
   'APP_BASE_URL=/',
   '-e',
   'VR_DOCKER=1',
+  ...(process.env['CI'] ? ['-e', 'CI=true'] : []),
   DOCKER_IMAGE,
   'bash',
   '-c',

@@ -12,6 +12,9 @@ test('@visual home page', async ({ page }) => {
 test('@visual game shell layout', async ({ page }) => {
   await page.goto('/en/game/math-addition');
   // Wait for the GameShell chrome to appear
+  await page.getByRole('main').waitFor({ state: 'visible' });
+
+  // Wait for the exit button to appear
   await page
     .getByRole('button', { name: /exit/i })
     .waitFor({ state: 'visible' });
