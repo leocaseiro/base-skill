@@ -1,4 +1,6 @@
-export function speak(text: string): void {
+import { getVoiceByName } from './voices';
+
+export function speak(text: string, voiceName = 'Daniel'): void {
   const synth = (
     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
   ).speechSynthesis;
@@ -7,6 +9,10 @@ export function speak(text: string): void {
   }
   synth.cancel();
   const u = new SpeechSynthesisUtterance(text);
+  const voice = getVoiceByName(voiceName);
+  if (voice) {
+    u.voice = voice;
+  }
   synth.speak(u);
 }
 
