@@ -1,3 +1,6 @@
+import confetti from 'canvas-confetti';
+import { useEffect } from 'react';
+
 interface GameOverOverlayProps {
   retryCount: number;
   onPlayAgain: () => void;
@@ -18,6 +21,31 @@ export const GameOverOverlay = ({
   onHome,
 }: GameOverOverlayProps) => {
   const stars = starsFromRetries(retryCount);
+
+  useEffect(() => {
+    const duration = 12_000;
+    const end = Date.now() + duration;
+
+    const frame = () => {
+      void confetti({
+        particleCount: 3,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+      });
+      void confetti({
+        particleCount: 3,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+      });
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    };
+
+    requestAnimationFrame(frame);
+  }, []);
 
   return (
     <div

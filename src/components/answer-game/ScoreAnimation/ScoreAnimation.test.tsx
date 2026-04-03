@@ -9,7 +9,9 @@ vi.mock('canvas-confetti', () => ({
 describe('ScoreAnimation', () => {
   it('fires confetti when visible becomes true', async () => {
     const canvasConfetti = await import('canvas-confetti');
-    const confetti = canvasConfetti.default as ReturnType<typeof vi.fn>;
+    const confetti = canvasConfetti.default as unknown as ReturnType<
+      typeof vi.fn
+    >;
     const { rerender } = render(<ScoreAnimation visible={false} />);
     expect(confetti).not.toHaveBeenCalled();
 
