@@ -11,11 +11,11 @@ E2E tests use Playwright and live in `e2e/`. VR (visual regression) tests are a 
 
 ## File Placement
 
-| Test type | File |
-|-----------|------|
-| Smoke / functional | `e2e/smoke.spec.ts` |
-| Accessibility | `e2e/a11y.spec.ts` |
-| Visual regression | `e2e/visual.spec.ts` |
+| Test type          | File                 |
+| ------------------ | -------------------- |
+| Smoke / functional | `e2e/smoke.spec.ts`  |
+| Accessibility      | `e2e/a11y.spec.ts`   |
+| Visual regression  | `e2e/visual.spec.ts` |
 
 Add new VR tests to `e2e/visual.spec.ts`. Add new functional E2E tests to `e2e/smoke.spec.ts` or a new file if the area warrants it.
 
@@ -34,6 +34,7 @@ test('game catalog renders', async ({ page }) => {
 ```
 
 **Rules:**
+
 - Always wait for a stable element (`waitFor({ state: 'visible' })`) before asserting
 - Use role-based selectors (`getByRole`, `getByLabel`) over CSS classes
 - Locale prefix is `/en/` in tests (Playwright `webServer` sets `APP_BASE_URL=/`)
@@ -46,11 +47,14 @@ import { expect, test } from '@playwright/test';
 test('@visual game shell layout', async ({ page }) => {
   await page.goto('/en/game/math-addition');
   await page.getByRole('main').waitFor({ state: 'visible' });
-  await expect(page).toHaveScreenshot('game-shell.png', { fullPage: true });
+  await expect(page).toHaveScreenshot('game-shell.png', {
+    fullPage: true,
+  });
 });
 ```
 
 **Rules:**
+
 - Tag with `@visual` at the start of the test name — the pre-push hook filters on this
 - Call `waitFor({ state: 'visible' })` on the main content before screenshotting
 - Use a descriptive, kebab-case filename for the `.png` baseline
@@ -88,10 +92,10 @@ SKIP_VR=1 SKIP_E2E=1 git push
 
 ## Common Mistakes
 
-| Mistake | Fix |
-|---------|-----|
-| No `waitFor` before screenshot | Add `waitFor({ state: 'visible' })` on main content |
-| VR test not tagged `@visual` | Prepend `@visual ` to the test name |
-| Running `yarn test:vr` without Docker | Start Docker desktop first |
-| Committing without updating baselines | Run `yarn test:vr:update` after intentional UI changes |
-| Hardcoding absolute URLs | Use relative paths like `/en/`; Playwright handles the base URL |
+| Mistake                               | Fix                                                             |
+| ------------------------------------- | --------------------------------------------------------------- |
+| No `waitFor` before screenshot        | Add `waitFor({ state: 'visible' })` on main content             |
+| VR test not tagged `@visual`          | Prepend `@visual` to the test name                              |
+| Running `yarn test:vr` without Docker | Start Docker desktop first                                      |
+| Committing without updating baselines | Run `yarn test:vr:update` after intentional UI changes          |
+| Hardcoding absolute URLs              | Use relative paths like `/en/`; Playwright handles the base URL |

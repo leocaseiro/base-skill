@@ -1,4 +1,5 @@
 # .github/workflows/visual-regression.yml
+# VR runs only via scripts/vr-docker.mjs (Playwright official image) — same path as yarn test:vr.
 name: Visual Regression
 
 on:
@@ -17,13 +18,8 @@ concurrency:
 
 jobs:
   visual-regression:
-    name: Visual Regression — ${{ matrix.browser }}
+    name: Visual Regression (Docker / Chromium)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium] # extend to firefox/webkit when baselines exist
-
     steps:
       - uses: actions/checkout@v6
 
@@ -35,42 +31,41 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps ${{ matrix.browser }}
-
-      - name: Build app
-        run: yarn build
-
-      - name: Copy shell to index.html
-        run: cp dist/client/_shell.html dist/client/index.html
-
       - name: Update baseline snapshots
-        if: inputs.update_snapshots == true
-        run: npx playwright test --project=${{ matrix.browser }} --grep @visual --update-snapshots
+        if: github.event_name == 'workflow_dispatch' && inputs.update_snapshots == true
+        run: node scripts/vr-docker.mjs update
 
       - name: Commit updated snapshots
-        if: inputs.update_snapshots == true
+        if: github.event_name == 'workflow_dispatch' && inputs.update_snapshots == true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add e2e/
-          git diff --cached --quiet || git commit -m "chore(vr): update ${{ matrix.browser }} visual regression baselines [skip ci]"
+          git diff --cached --quiet || git commit -m "chore(vr): update visual baselines (Docker/Chromium) [skip ci]"
           git push
 
       - name: Run visual regression tests
-        if: inputs.update_snapshots != true
-        run: npx playwright test --project=${{ matrix.browser }} --grep @visual
+        if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.update_snapshots != true)
+        run: node scripts/vr-docker.mjs test
         continue-on-error: true
         id: visual
 
       - name: Upload diff images
-        if: inputs.update_snapshots != true && steps.visual.outcome == 'failure'
+        if: (github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.update_snapshots != true)) && steps.visual.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
-          name: visual-regression-diffs-${{ matrix.browser }}
+          name: visual-regression-diffs-chromium
           path: test-results/
           retention-days: 14
 
-      - name: Fail if visual regressions found
+      - name: Upload Playwright HTML report
         if: inputs.update_snapshots != true && steps.visual.outcome == 'failure'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-vr-${{ matrix.browser }}
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Fail if visual regressions found
+        if: (github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.update_snapshots != true)) && steps.visual.outcome == 'failure'
         run: exit 1

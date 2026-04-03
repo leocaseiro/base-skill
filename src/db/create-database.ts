@@ -1,7 +1,9 @@
 import { nanoid } from 'nanoid';
-import { createRxDatabase } from 'rxdb';
+import { addRxPlugin, createRxDatabase } from 'rxdb';
+import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
 import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
+import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
 import { checkVersionAndMigrate } from './migrations';
 import {
   appMetaSchema,
@@ -18,6 +20,8 @@ import {
 import type { BaseSkillCollections, BaseSkillDatabase } from './types';
 import type { RxDatabase } from 'rxdb';
 
+addRxPlugin(RxDBMigrationSchemaPlugin);
+
 const DB_NAME = 'baseskill-data-test';
 const PRODUCTION_DB_NAME = 'baseskill-data';
 
@@ -30,7 +34,18 @@ const COLLECTIONS = {
   bookmarks: { schema: bookmarksSchema },
   themes: { schema: themesSchema },
   session_history: { schema: sessionHistorySchema },
-  session_history_index: { schema: sessionHistoryIndexSchema },
+  session_history_index: {
+    schema: sessionHistoryIndexSchema,
+    migrationStrategies: {
+      1: (oldDoc: Record<string, unknown>) => ({
+        ...oldDoc,
+        status: 'completed',
+        seed: '',
+        initialContent: { rounds: [] },
+        initialState: {},
+      }),
+    },
+  },
   sync_meta: { schema: syncMetaSchema },
 } as const;
 
@@ -45,7 +60,9 @@ async function addBaseSkillCollections(
 export async function createTestDatabase(): Promise<BaseSkillDatabase> {
   const db = await createRxDatabase<BaseSkillDatabase>({
     name: `${DB_NAME}-${nanoid()}`,
-    storage: getRxStorageMemory(),
+    storage: wrappedValidateAjvStorage({
+      storage: getRxStorageMemory(),
+    }),
     multiInstance: false,
   });
   return addBaseSkillCollections(db);
