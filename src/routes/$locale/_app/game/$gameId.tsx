@@ -449,7 +449,10 @@ const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
             onChange={setSortNumbersConfig}
           />
         )}
-        <SortNumbers config={sortNumbersConfig} />
+        <SortNumbers
+          key={sortNumbersConfig.inputMethod}
+          config={sortNumbersConfig}
+        />
       </>
     );
   }
@@ -463,7 +466,10 @@ const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
             onChange={setWordSpellConfig}
           />
         )}
-        <WordSpell config={wordSpellConfig} />
+        <WordSpell
+          key={wordSpellConfig.inputMethod}
+          config={wordSpellConfig}
+        />
       </>
     );
   }
@@ -476,7 +482,10 @@ const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
             onChange={setNumberMatchConfig}
           />
         )}
-        <NumberMatch config={numberMatchConfig} />
+        <NumberMatch
+          key={numberMatchConfig.inputMethod}
+          config={numberMatchConfig}
+        />
       </>
     );
   }
