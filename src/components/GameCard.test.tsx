@@ -18,7 +18,7 @@ const mockEntry = {
 } satisfies GameCatalogEntry;
 
 describe('GameCard', () => {
-  it('renders the game title key as text', () => {
+  it('renders the translated game title', () => {
     render(
       <GameCard
         entry={mockEntry}
@@ -28,7 +28,7 @@ describe('GameCard', () => {
       />,
       { wrapper },
     );
-    expect(screen.getByText('Word spell')).toBeInTheDocument();
+    expect(screen.getByText('Word Spell')).toBeInTheDocument();
   });
 
   it('renders level badges', () => {
