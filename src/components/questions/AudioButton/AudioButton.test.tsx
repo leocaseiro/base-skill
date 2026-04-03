@@ -44,6 +44,17 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
   </AnswerGameProvider>
 );
 
+const noTtsConfig: AnswerGameConfig = {
+  ...gameConfig,
+  ttsEnabled: false,
+};
+
+const NoTtsWrapper = ({ children }: { children: React.ReactNode }) => (
+  <AnswerGameProvider config={noTtsConfig}>
+    {children}
+  </AnswerGameProvider>
+);
+
 describe('AudioButton', () => {
   beforeEach(() => vi.clearAllMocks());
 
@@ -52,6 +63,13 @@ describe('AudioButton', () => {
     expect(
       screen.getByRole('button', { name: 'Hear the question' }),
     ).toBeInTheDocument();
+  });
+
+  it('returns null when ttsEnabled is false', () => {
+    render(<AudioButton prompt="cat" />, { wrapper: NoTtsWrapper });
+    expect(
+      screen.queryByRole('button', { name: 'Hear the question' }),
+    ).not.toBeInTheDocument();
   });
 
   it('calls speak() when clicked', async () => {
