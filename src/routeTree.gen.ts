@@ -15,7 +15,6 @@ import { Route as LocaleAppRouteImport } from './routes/$locale/_app'
 import { Route as LocaleAppIndexRouteImport } from './routes/$locale/_app/index'
 import { Route as LocaleAppSettingsRouteImport } from './routes/$locale/_app/settings'
 import { Route as LocaleAppParentRouteImport } from './routes/$locale/_app/parent'
-import { Route as LocaleAppDashboardRouteImport } from './routes/$locale/_app/dashboard'
 import { Route as LocaleAppParentIndexRouteImport } from './routes/$locale/_app/parent/index'
 import { Route as LocaleAppParentVoicesRouteImport } from './routes/$locale/_app/parent/voices'
 import { Route as LocaleAppParentSyncRouteImport } from './routes/$locale/_app/parent/sync'
@@ -51,11 +50,6 @@ const LocaleAppSettingsRoute = LocaleAppSettingsRouteImport.update({
 const LocaleAppParentRoute = LocaleAppParentRouteImport.update({
   id: '/parent',
   path: '/parent',
-  getParentRoute: () => LocaleAppRoute,
-} as any)
-const LocaleAppDashboardRoute = LocaleAppDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
   getParentRoute: () => LocaleAppRoute,
 } as any)
 const LocaleAppParentIndexRoute = LocaleAppParentIndexRouteImport.update({
@@ -98,7 +92,6 @@ const LocaleAppGameGameIdRoute = LocaleAppGameGameIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$locale': typeof LocaleAppRouteWithChildren
-  '/$locale/dashboard': typeof LocaleAppDashboardRoute
   '/$locale/parent': typeof LocaleAppParentRouteWithChildren
   '/$locale/settings': typeof LocaleAppSettingsRoute
   '/$locale/': typeof LocaleAppIndexRoute
@@ -113,7 +106,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$locale': typeof LocaleAppIndexRoute
-  '/$locale/dashboard': typeof LocaleAppDashboardRoute
   '/$locale/settings': typeof LocaleAppSettingsRoute
   '/$locale/game/$gameId': typeof LocaleAppGameGameIdRoute
   '/$locale/parent/data': typeof LocaleAppParentDataRoute
@@ -128,7 +120,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$locale': typeof LocaleRouteRouteWithChildren
   '/$locale/_app': typeof LocaleAppRouteWithChildren
-  '/$locale/_app/dashboard': typeof LocaleAppDashboardRoute
   '/$locale/_app/parent': typeof LocaleAppParentRouteWithChildren
   '/$locale/_app/settings': typeof LocaleAppSettingsRoute
   '/$locale/_app/': typeof LocaleAppIndexRoute
@@ -145,7 +136,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$locale'
-    | '/$locale/dashboard'
     | '/$locale/parent'
     | '/$locale/settings'
     | '/$locale/'
@@ -160,7 +150,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$locale'
-    | '/$locale/dashboard'
     | '/$locale/settings'
     | '/$locale/game/$gameId'
     | '/$locale/parent/data'
@@ -174,7 +163,6 @@ export interface FileRouteTypes {
     | '/'
     | '/$locale'
     | '/$locale/_app'
-    | '/$locale/_app/dashboard'
     | '/$locale/_app/parent'
     | '/$locale/_app/settings'
     | '/$locale/_app/'
@@ -234,13 +222,6 @@ declare module '@tanstack/react-router' {
       path: '/parent'
       fullPath: '/$locale/parent'
       preLoaderRoute: typeof LocaleAppParentRouteImport
-      parentRoute: typeof LocaleAppRoute
-    }
-    '/$locale/_app/dashboard': {
-      id: '/$locale/_app/dashboard'
-      path: '/dashboard'
-      fullPath: '/$locale/dashboard'
-      preLoaderRoute: typeof LocaleAppDashboardRouteImport
       parentRoute: typeof LocaleAppRoute
     }
     '/$locale/_app/parent/': {
@@ -318,7 +299,6 @@ const LocaleAppParentRouteWithChildren = LocaleAppParentRoute._addFileChildren(
 )
 
 interface LocaleAppRouteChildren {
-  LocaleAppDashboardRoute: typeof LocaleAppDashboardRoute
   LocaleAppParentRoute: typeof LocaleAppParentRouteWithChildren
   LocaleAppSettingsRoute: typeof LocaleAppSettingsRoute
   LocaleAppIndexRoute: typeof LocaleAppIndexRoute
@@ -326,7 +306,6 @@ interface LocaleAppRouteChildren {
 }
 
 const LocaleAppRouteChildren: LocaleAppRouteChildren = {
-  LocaleAppDashboardRoute: LocaleAppDashboardRoute,
   LocaleAppParentRoute: LocaleAppParentRouteWithChildren,
   LocaleAppSettingsRoute: LocaleAppSettingsRoute,
   LocaleAppIndexRoute: LocaleAppIndexRoute,
