@@ -9,6 +9,7 @@ import type {
   AnswerGameState,
 } from './types';
 import type { Dispatch, ReactNode } from 'react';
+import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
 
 export const AnswerGameStateContext =
   createContext<AnswerGameState | null>(null);
@@ -42,11 +43,18 @@ export const AnswerGameProvider = ({
     }
   }, [config.gameId, config.initialTiles, config.initialZones]);
 
+  const roundProgress = {
+    current: state.roundIndex + 1,
+    total: config.totalRounds,
+  };
+
   return (
-    <AnswerGameStateContext.Provider value={state}>
-      <AnswerGameDispatchContext.Provider value={dispatch}>
-        {children}
-      </AnswerGameDispatchContext.Provider>
-    </AnswerGameStateContext.Provider>
+    <GameRoundContext.Provider value={roundProgress}>
+      <AnswerGameStateContext.Provider value={state}>
+        <AnswerGameDispatchContext.Provider value={dispatch}>
+          {children}
+        </AnswerGameDispatchContext.Provider>
+      </AnswerGameStateContext.Provider>
+    </GameRoundContext.Provider>
   );
 };
