@@ -315,9 +315,14 @@ Game-specific configs extend this base. See the WordSpell + NumberMatch spec for
 
 ## 11. File Structure
 
+Each UI component lives in its own directory alongside its test and story files.
+Module-level files (hooks, provider, types) stay flat in the module directory.
+
 ```
 src/components/answer-game/
-  AnswerGame.tsx                ← composition root, named slot wrappers, layout
+  AnswerGame/
+    AnswerGame.tsx              ← composition root, named slot wrappers, layout
+    AnswerGame.stories.tsx
   AnswerGameProvider.tsx        ← context: drag state, evaluation, TTS
   useAnswerGameContext.ts        ← read shared game state
   useAnswerGameDispatch.ts       ← fire evaluation actions
@@ -326,15 +331,25 @@ src/components/answer-game/
   useAutoNextSlot.ts             ← auto-next-slot interaction
   useFreeSwap.ts                 ← free-swap interaction
   types.ts                       ← AnswerGameConfig, TileItem, AnswerZone
-  AnswerGame.stories.tsx
 
 src/components/questions/
-  ImageQuestion.tsx
-  AudioButton.tsx
-  TextQuestion.tsx
-  DotGroupQuestion.tsx
+  ImageQuestion/
+    ImageQuestion.tsx
+    ImageQuestion.test.tsx
+    ImageQuestion.stories.tsx
+  AudioButton/
+    AudioButton.tsx
+    AudioButton.test.tsx
+    AudioButton.stories.tsx
+  TextQuestion/
+    TextQuestion.tsx
+    TextQuestion.test.tsx
+    TextQuestion.stories.tsx
+  DotGroupQuestion/
+    DotGroupQuestion.tsx
+    DotGroupQuestion.test.tsx
+    DotGroupQuestion.stories.tsx
   index.ts
-  questions.stories.tsx
 ```
 
 ---
