@@ -152,6 +152,9 @@ export function answerGameReducer(
       const zone = state.zones[action.zoneIndex];
       if (!zone) return state;
 
+      // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
+      if (!zone.isWrong && !zone.isLocked) return state;
+
       if (zone.placedTileId) {
         return {
           ...state,
@@ -169,23 +172,19 @@ export function answerGameReducer(
         };
       }
 
-      if (zone.isWrong || zone.isLocked) {
-        return {
-          ...state,
-          zones: state.zones.map((z, i) =>
-            i === action.zoneIndex
-              ? {
-                  ...z,
-                  placedTileId: null,
-                  isWrong: false,
-                  isLocked: false,
-                }
-              : z,
-          ),
-        };
-      }
-
-      return state;
+      return {
+        ...state,
+        zones: state.zones.map((z, i) =>
+          i === action.zoneIndex
+            ? {
+                ...z,
+                placedTileId: null,
+                isWrong: false,
+                isLocked: false,
+              }
+            : z,
+        ),
+      };
     }
 
     case 'ADVANCE_ROUND': {

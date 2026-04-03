@@ -3,7 +3,12 @@ import {
   answerGameReducer,
   makeInitialState,
 } from './answer-game-reducer';
-import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
+import type {
+  AnswerGameConfig,
+  AnswerGameState,
+  AnswerZone,
+  TileItem,
+} from './types';
 
 const config: AnswerGameConfig = {
   gameId: 'test',
@@ -265,6 +270,76 @@ describe('answerGameReducer', () => {
     expect(state.bankTileIds).toEqual(['n1']);
     expect(state.retryCount).toBe(0);
     expect(state.phase).toBe('playing');
+  });
+
+  describe('EJECT_TILE', () => {
+    it('does NOT eject a zone that is not wrong (correct tile placed after stale timer)', () => {
+      const state = makeInitialState({
+        gameId: 'test',
+        inputMethod: 'drag',
+        wrongTileBehavior: 'lock-auto-eject',
+        tileBankMode: 'exact',
+        totalRounds: 1,
+        ttsEnabled: false,
+      });
+      const stateWithCorrectTile: AnswerGameState = {
+        ...state,
+        allTiles: [{ id: 't1', label: 'c', value: 'c' }],
+        bankTileIds: [],
+        zones: [
+          {
+            id: 'z0',
+            index: 0,
+            expectedValue: 'c',
+            placedTileId: 't1',
+            isWrong: false,
+            isLocked: false,
+          },
+        ],
+      };
+
+      const result = answerGameReducer(stateWithCorrectTile, {
+        type: 'EJECT_TILE',
+        zoneIndex: 0,
+      });
+
+      expect(result.zones[0].placedTileId).toBe('t1');
+      expect(result.bankTileIds).not.toContain('t1');
+    });
+
+    it('still ejects a zone that is wrong', () => {
+      const state = makeInitialState({
+        gameId: 'test',
+        inputMethod: 'drag',
+        wrongTileBehavior: 'lock-manual',
+        tileBankMode: 'exact',
+        totalRounds: 1,
+        ttsEnabled: false,
+      });
+      const stateWithWrongTile: AnswerGameState = {
+        ...state,
+        allTiles: [{ id: 't1', label: 'a', value: 'a' }],
+        bankTileIds: [],
+        zones: [
+          {
+            id: 'z0',
+            index: 0,
+            expectedValue: 'c',
+            placedTileId: 't1',
+            isWrong: true,
+            isLocked: true,
+          },
+        ],
+      };
+
+      const result = answerGameReducer(stateWithWrongTile, {
+        type: 'EJECT_TILE',
+        zoneIndex: 0,
+      });
+
+      expect(result.zones[0].placedTileId).toBeNull();
+      expect(result.bankTileIds).toContain('t1');
+    });
   });
 
   it('COMPLETE_GAME sets phase to game-over', () => {
