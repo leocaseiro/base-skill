@@ -9,6 +9,7 @@ import type {
   SessionMeta,
 } from '@/lib/game-engine/types';
 import type { JSX, ReactNode } from 'react';
+import { useGameRoundProgress } from '@/lib/game-engine/GameRoundContext';
 import {
   GameEngineProvider,
   useGameDispatch,
@@ -40,7 +41,9 @@ const GameShellChrome = ({
   const { t } = useTranslation('games');
   const { locale } = useParams({ from: '/$locale' });
 
-  const roundDisplay = state.roundIndex + 1;
+  const roundOverride = useGameRoundProgress();
+  const roundCurrent = roundOverride?.current ?? state.roundIndex + 1;
+  const roundTotal = roundOverride?.total ?? config.maxRounds;
   const title =
     config.title[locale] ?? config.title['en'] ?? config.gameId;
 
@@ -71,8 +74,8 @@ const GameShellChrome = ({
         </button>
         <span className="text-sm font-medium" data-testid="game-round">
           {t('shell.round', {
-            current: roundDisplay,
-            total: config.maxRounds,
+            current: roundCurrent,
+            total: roundTotal,
           })}
         </span>
       </header>
@@ -85,7 +88,7 @@ const GameShellChrome = ({
             <div
               className="h-full rounded-full bg-primary transition-all"
               style={{
-                width: `${Math.round((roundDisplay / config.maxRounds) * 100)}%`,
+                width: `${Math.round((roundCurrent / roundTotal) * 100)}%`,
               }}
             />
           </div>
