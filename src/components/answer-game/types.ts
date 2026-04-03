@@ -10,6 +10,9 @@ export interface AnswerGameConfig {
   totalRounds: number;
   /** Whether TTS is enabled for this profile */
   ttsEnabled: boolean;
+  /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
+  initialTiles?: TileItem[];
+  initialZones?: AnswerZone[];
 }
 
 export interface TileItem {

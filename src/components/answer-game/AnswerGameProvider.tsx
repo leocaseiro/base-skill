@@ -1,4 +1,4 @@
-import { createContext, useReducer } from 'react';
+import { createContext, useEffect, useReducer } from 'react';
 import {
   answerGameReducer,
   makeInitialState,
@@ -29,6 +29,18 @@ export const AnswerGameProvider = ({
     config,
     makeInitialState,
   );
+
+  useEffect(() => {
+    const tiles = config.initialTiles;
+    const zones = config.initialZones;
+    if (tiles?.length && zones?.length) {
+      dispatch({
+        type: 'INIT_ROUND',
+        tiles,
+        zones,
+      });
+    }
+  }, [config.gameId, config.initialTiles, config.initialZones]);
 
   return (
     <AnswerGameStateContext.Provider value={state}>
