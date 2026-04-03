@@ -1,6 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const vrDocker = !!process.env['VR_DOCKER'];
+/** Dedicated port so E2E never reuses `yarn dev` on :3000 (dev uses base `/base-skill/`; E2E serves `APP_BASE_URL=/` at root). */
+const e2ePort = process.env['PLAYWRIGHT_E2E_PORT'] ?? '4174';
+const e2eOrigin = `http://127.0.0.1:${e2ePort}`;
 // Keep screenshot tests out of normal E2E (including CI) unless explicitly running VR.
 // vr-docker.mjs sets VR_DOCKER=1; for host runs use PLAYWRIGHT_INCLUDE_VISUAL=1.
 const includeVisualSpecs =
@@ -20,7 +23,7 @@ export default defineConfig({
   workers: process.env['CI'] ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: e2eOrigin,
     trace: 'retain-on-failure',
   },
   projects: [
@@ -42,9 +45,9 @@ export default defineConfig({
   ],
   webServer: {
     command: vrDocker
-      ? 'npx serve dist/client -p 3000 -s'
-      : 'APP_BASE_URL=/ yarn build && cp dist/client/_shell.html dist/client/index.html && npx serve dist/client -p 3000 -s',
-    url: 'http://localhost:3000',
+      ? `npx serve dist/client -p ${e2ePort} -s`
+      : `APP_BASE_URL=/ yarn build && cp dist/client/_shell.html dist/client/index.html && npx serve dist/client -p ${e2ePort} -s`,
+    url: e2eOrigin,
     reuseExistingServer: !process.env['CI'],
     timeout: 120 * 1000,
   },
