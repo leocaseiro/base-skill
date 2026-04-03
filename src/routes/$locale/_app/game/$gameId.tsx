@@ -1,6 +1,8 @@
 // src/routes/$locale/_app/game/$gameId.tsx
 import { createFileRoute } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
+import type { NumberMatchConfig } from '@/games/number-match/types';
+import type { WordSpellConfig } from '@/games/word-spell/types';
 import type {
   GameEngineState,
   MoveLog,
@@ -11,6 +13,8 @@ import type {
 import type { JSX } from 'react';
 import { GameShell } from '@/components/game/GameShell';
 import { getOrCreateDatabase } from '@/db/create-database';
+import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
 import { loadGameConfig } from '@/lib/game-engine/config-loader';
 import { findInProgressSession } from '@/lib/game-engine/session-finder';
 
@@ -42,6 +46,47 @@ interface GameRouteLoaderData {
   meta: SessionMeta;
 }
 
+const WORD_SPELL_ROUTE_CONFIG: WordSpellConfig = {
+  gameId: 'word-spell',
+  component: 'WordSpell',
+  inputMethod: 'drag',
+  wrongTileBehavior: 'lock-auto-eject',
+  tileBankMode: 'exact',
+  totalRounds: 1,
+  ttsEnabled: true,
+  mode: 'picture',
+  tileUnit: 'letter',
+  rounds: [{ word: 'cat', image: 'https://placehold.co/200?text=cat' }],
+};
+
+const NUMBER_MATCH_ROUTE_CONFIG: NumberMatchConfig = {
+  gameId: 'number-match',
+  component: 'NumberMatch',
+  inputMethod: 'drag',
+  wrongTileBehavior: 'lock-auto-eject',
+  tileBankMode: 'exact',
+  totalRounds: 1,
+  ttsEnabled: true,
+  mode: 'numeral-to-group',
+  tileStyle: 'dots',
+  range: { min: 1, max: 9 },
+  rounds: [{ value: 3 }],
+};
+
+const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
+  if (gameId === 'word-spell') {
+    return <WordSpell config={WORD_SPELL_ROUTE_CONFIG} />;
+  }
+  if (gameId === 'number-match') {
+    return <NumberMatch config={NUMBER_MATCH_ROUTE_CONFIG} />;
+  }
+  return (
+    <div className="flex h-full items-center justify-center text-muted-foreground">
+      <p>Game component placeholder — real game in M5</p>
+    </div>
+  );
+};
+
 // Exported for direct testing — accepts loader data as props
 export const GameRoute = ({
   config,
@@ -57,9 +102,7 @@ export const GameRoute = ({
     meta={meta}
     initialLog={initialLog ?? undefined}
   >
-    <div className="flex h-full items-center justify-center text-muted-foreground">
-      <p>Game component placeholder — real game in M5</p>
-    </div>
+    <GameBody gameId={config.gameId} />
   </GameShell>
 );
 
