@@ -80,4 +80,57 @@ describe('useAutoNextSlot', () => {
     act(() => result.current.placeInNextSlot('t1'));
     expect(result.current.state.activeSlotIndex).toBe(1);
   });
+
+  it('skips locked zones when finding the next available slot', () => {
+    const lockedZoneConfig: AnswerGameConfig = {
+      ...gameConfig,
+    };
+    const lockedZones: AnswerZone[] = [
+      {
+        id: 'z0',
+        index: 0,
+        expectedValue: 'C',
+        placedTileId: null,
+        isWrong: false,
+        isLocked: true,
+      },
+      {
+        id: 'z1',
+        index: 1,
+        expectedValue: 'A',
+        placedTileId: null,
+        isWrong: false,
+        isLocked: false,
+      },
+    ];
+
+    function useHarnessWithLockedZone() {
+      const dispatch = useAnswerGameDispatch();
+      const state = useAnswerGameContext();
+      if (state.zones.length === 0)
+        dispatch({
+          type: 'INIT_ROUND',
+          tiles: tileItems,
+          zones: lockedZones,
+        });
+      const { placeInNextSlot } = useAutoNextSlot();
+      return { state, placeInNextSlot };
+    }
+
+    const LockedWrapper = ({ children }: { children: ReactNode }) => (
+      <AnswerGameProvider config={lockedZoneConfig}>
+        {children}
+      </AnswerGameProvider>
+    );
+
+    const { result } = renderHook(() => useHarnessWithLockedZone(), {
+      wrapper: LockedWrapper,
+    });
+
+    // Zone 0 is locked, so tile should go to zone 1
+    // t2 has value 'A' which matches zone 1's expectedValue 'A'
+    act(() => result.current.placeInNextSlot('t2'));
+    expect(result.current.state.zones[0]?.placedTileId).toBeNull();
+    expect(result.current.state.zones[1]?.placedTileId).toBe('t2');
+  });
 });
