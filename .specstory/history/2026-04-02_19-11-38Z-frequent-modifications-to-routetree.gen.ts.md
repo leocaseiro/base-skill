@@ -10,7 +10,7 @@ On every change we make, my git complains about:
  modified:   src/routeTree.gen.ts
 
 Why does it happening so frequently?
-Can we get rid of that? Like gitignore or something else? 
+Can we get rid of that? Like gitignore or something else?
 
 ---
 
@@ -525,11 +525,12 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating prettier config**
 
-I'm adding `src/routeTree.gen.ts` to `.prettierignore` to prevent Prettier from formatting the generated route tree file. 
+I'm adding `src/routeTree.gen.ts` to `.prettierignore` to prevent Prettier from formatting the generated route tree file.
 
 **Checking eslint ignores**
 
-I'm verifying how ESLint handles ignored files in flat config when running `eslint --fix file.ts`. The ESLint flat config uses an empty object with only ignores array, which may cause issues with targeted fixes. ESLint skips ignored files globally, but Prettier's .prettierignore handles formatting exclusions in CI and yarn fix. 
+I'm verifying how ESLint handles ignored files in flat config when running `eslint --fix file.ts`. The ESLint flat config uses an empty object with only ignores array, which may cause issues with targeted fixes. </details></think>
+I'm verifying how ESLint handles ignored files in flat config when running `eslint --fix file.ts`. The ESLint flat config uses an empty object with only ignores array, which may cause issues with targeted fixes. ESLint skips ignored files globally, but Prettier's .prettierignore handles formatting exclusions in CI and yarn fix.
 
 **Updating prettier ignore**
 

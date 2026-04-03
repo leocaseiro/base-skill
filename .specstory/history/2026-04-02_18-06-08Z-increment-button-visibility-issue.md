@@ -6,7 +6,7 @@
 
 _**User**_
 
-I used to have an increment button here, but I no longer can see it. @src/db/hooks/useRxQuery.demo.tsx 
+I used to have an increment button here, but I no longer can see it. @src/db/hooks/useRxQuery.demo.tsx
 make it for me
 
 
@@ -18,7 +18,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Reviewing demo file**
 
-I'm examining `useRxQuery.demo.tsx` to understand the current state and identify where the increment button should be restored or added. I'm reading `useRxQuery.demo.tsx` to implement the increment button restoration. 
+I'm examining `useRxQuery.demo.tsx` to understand the current state and identify where the increment button should be restored or added. I'm reading `useRxQuery.demo.tsx` to implement the increment button restoration.
 
 **Reading demo file**
 
@@ -157,7 +157,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Reading MDX file**
 
-I'm checking the useRxQuery.mdx file for potential CSS issues affecting button visibility. 
+I'm checking the useRxQuery.mdx file for potential CSS issues affecting button visibility.
 
 **Checking button visibility**
 
@@ -201,11 +201,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Improving UX visibility**
 
-I'm repositioning controls to be more visible and intuitive, placing them next to or below the counter. I'm adjusting button types to follow best practices and ensuring stable observable references in the demo component. 
+I'm repositioning controls to be more visible and intuitive, placing them next to or below the counter. I'm adjusting button types to follow best practices and ensuring stable observable references in the demo component.
 
 **Checking Storybook styles**
 
-I'm investigating why the primary button might be invisible in Storybook's docs theme due to color conflicts. I'm investigating a potential regression where the primary button became invisible in Storybook's docs theme due to color conflicts or layout issues. 
+I'm investigating why the primary button might be invisible in Storybook's docs theme due to color conflicts. I'm investigating a potential regression where the primary button became invisible in Storybook's docs theme due to color conflicts or layout issues.
 
 **Adjusting button layout**
 
@@ -600,10 +600,10 @@ _**Agent (composer-2)**_
 
 Here’s what was going on and what changed.
 
-**What the code already did**  
+**What the code already did**
 `UseRxQueryDemo` already rendered **Increment** and **Reset** under the count. If you only saw the big number in Storybook, the docs preview iframe is a common culprit: a fixed height can clip whatever sits **below** the first block, so the buttons never scroll into view.
 
-**What I changed**  
+**What I changed**
 The count and both controls are now on **one row** (`flex flex-wrap items-center gap-3`), so they tend to stay in the same visible band. I also set `type="button"` on the buttons.
 
 Committed on branch `fix/use-rx-query-demo-increment` in the worktree:
@@ -1110,10 +1110,10 @@ Done in 25.43s.
 -e [1m──────────────────────────────────────────[0m
 -e [0;32m[1m  All pre-push checks passed.[0m
 -e [1m──────────────────────────────────────────[0m
-remote: 
-remote: Create a pull request for 'fix/use-rx-query-demo-increment' on GitHub by visiting:        
-remote:      https://github.com/leocaseiro/base-skill/pull/new/fix/use-rx-query-demo-increment        
-remote: 
+remote:
+remote: Create a pull request for 'fix/use-rx-query-demo-increment' on GitHub by visiting:
+remote:      https://github.com/leocaseiro/base-skill/pull/new/fix/use-rx-query-demo-increment
+remote:
 To github.com:leocaseiro/base-skill.git
  * [new branch]      fix/use-rx-query-demo-increment -&gt; fix/use-rx-query-demo-increment
 branch 'fix/use-rx-query-demo-increment' set up to track 'origin/fix/use-rx-query-demo-increment'.
@@ -1213,7 +1213,7 @@ You can review and merge from that link.
 _**User**_
 
 I can't see the button still.
-I mean in the https://leocaseiro.github.io/base-skill/docs/?path=/docs/db-hooks-userxquery--docs 
+I mean in the https://leocaseiro.github.io/base-skill/docs/?path=/docs/db-hooks-userxquery--docs
 
 ---
 
@@ -1746,15 +1746,15 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing sanitize schema**
 
-I'm extending rehype-sanitize's schema to allow custom MDX component tags like `UseRxQueryDemo`. 
+I'm extending rehype-sanitize's schema to allow custom MDX component tags like `UseRxQueryDemo`.
 
 **Extending sanitize schema**
 
-I'm configuring rehype-sanitize's default schema to allow custom MDX component tags like `UseRxQueryDemo` by adding them to `tagNames`. 
+I'm configuring rehype-sanitize's default schema to allow custom MDX component tags like `UseRxQueryDemo` by adding them to `tagNames`.
 
 **Analyzing MDX compilation**
 
-I'm reviewing the MDX compilation process to understand how components like `UseRxQueryDemo` are transformed into JSX calls. The sanitization step in the MDX compilation pipeline appears to remove `mdxJsxFlowElement` nodes with tagName `UseRxQueryDemo`. 
+I'm reviewing the MDX compilation process to understand how components like `UseRxQueryDemo` are transformed into JSX calls. The sanitization step in the MDX compilation pipeline appears to remove `mdxJsxFlowElement` nodes with tagName `UseRxQueryDemo`.
 
 **Updating sanitization rules**
 
@@ -2045,11 +2045,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Adding dev dependency**
 
-I'm adding `hast-util-sanitize` as a devDependency to avoid Knip warnings. I'm adding `hast-util-sanitize` to devDependencies to satisfy Knip warnings. 
+I'm adding `hast-util-sanitize` as a devDependency to avoid Knip warnings. I'm adding `hast-util-sanitize` to devDependencies to satisfy Knip warnings.
 
 **Creating worktree**
 
-I'm creating a new worktree for the sanitize dependency fix: `git worktree add ./worktrees/fix-mdx-demo-sanitize -b fix/storybook-mdx-allow-demo-tags`. I'm creating a new worktree for the sanitize dependency fix: `git worktree add ./worktrees/fix-mdx-demo-components -b fix/storybook-mdx-sanitize-demo-tags`. 
+I'm creating a new worktree for the sanitize dependency fix: `git worktree add ./worktrees/fix-mdx-demo-sanitize -b fix/storybook-mdx-allow-demo-tags`. I'm creating a new worktree for the sanitize dependency fix: `git worktree add ./worktrees/fix-mdx-demo-components -b fix/storybook-mdx-sanitize-demo-tags`.
 
 I'm adding a worktree for the sanitize dependency fix and will include both the rehype sanitize schema and demo layout fixes. </details></think>
 
@@ -2801,7 +2801,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Handling MDX nodes**
 
-I need to add a custom rehype plugin before sanitization to handle MDX nodes properly. I'll remove rehypeSanitize for MDX-only paths since the MDX is codebase-owned and the security risk is equivalent to other repo code. I'm removing rehypeSanitize from MDX compile options in Storybook since MDX is a trusted source, and adding a comment to explain this decision. 
+I need to add a custom rehype plugin before sanitization to handle MDX nodes properly. I'll remove rehypeSanitize for MDX-only paths since the MDX is codebase-owned and the security risk is equivalent to other repo code. I'm removing rehypeSanitize from MDX compile options in Storybook since MDX is a trusted source, and adding a comment to explain this decision.
 
 **Removing sanitize**
 
@@ -3654,10 +3654,10 @@ npm notice
 (Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
 (node:43802) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
-remote: 
-remote: Create a pull request for 'fix/storybook-mdx-sanitize-allow-demos' on GitHub by visiting:        
-remote:      https://github.com/leocaseiro/base-skill/pull/new/fix/storybook-mdx-sanitize-allow-demos        
-remote: 
+remote:
+remote: Create a pull request for 'fix/storybook-mdx-sanitize-allow-demos' on GitHub by visiting:
+remote:      https://github.com/leocaseiro/base-skill/pull/new/fix/storybook-mdx-sanitize-allow-demos
+remote:
 To github.com:leocaseiro/base-skill.git
  * [new branch]      fix/storybook-mdx-sanitize-allow-demos -&gt; fix/storybook-mdx-sanitize-allow-demos
 
@@ -3771,7 +3771,7 @@ So on [your published docs](https://leocaseiro.github.io/base-skill/docs/?path=/
 
 Merge and deploy:
 
-- PR: **[https://github.com/leocaseiro/base-skill/pull/9](https://github.com/leocaseiro/base-skill/pull/9)**  
+- PR: **[https://github.com/leocaseiro/base-skill/pull/9](https://github.com/leocaseiro/base-skill/pull/9)**
 - After it’s on `master`, the [Deploy to GitHub Pages](https://github.com/leocaseiro/base-skill/blob/master/.github/workflows/deploy.yml) workflow will rebuild Storybook and update [https://leocaseiro.github.io/base-skill/docs/?path=/docs/db-hooks-userxquery--docs](https://leocaseiro.github.io/base-skill/docs/?path=/docs/db-hooks-userxquery--docs).
 
 **Trade-off:** raw HTML allowed through MDX is no longer run through that sanitizer. For repo-owned docs that’s usually acceptable; if you later need both safety and demos, you’d want a custom plugin that sanitizes only real HTML elements and leaves `mdxJsxFlowElement` alone.

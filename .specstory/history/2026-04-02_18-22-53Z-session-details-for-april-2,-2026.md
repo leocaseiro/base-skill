@@ -3730,6 +3730,11 @@ _**Agent (composer-2)**_
 
 <details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/.github/workflows/visual-regression.yml</summary>
 
+<<<<<<< HEAD
+Status: **loading**
+
+=======
+>>>>>>> d8ac485fea304defa16b2b0cf17fa27220e5a168
 </details>
 
 </tool-use>
@@ -3738,6 +3743,8 @@ _**Agent (composer-2)**_
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
+<<<<<<< HEAD
+=======
 
 _**Agent (composer-2)**_
 
@@ -5521,3 +5528,4 @@ Pre-push failed once because **Docker VR bind-mounts the repo and runs `yarn ins
 Please add a short note on the PR that **`SKIP_VR=1` on push** was to avoid Docker clobbering the host `node_modules` for this workflow-only change (per your repo’s skip-documentation rule). CI still runs the full Visual Regression workflow on GitHub.
 
 Optional follow-up: adjust `scripts/vr-docker.mjs` so install doesn’t write Linux `node_modules` onto the bind-mounted tree (e.g. anonymous volume for `/work/node_modules`), so local pre-push can keep VR enabled safely.
+>>>>>>> d8ac485fea304defa16b2b0cf17fa27220e5a168
