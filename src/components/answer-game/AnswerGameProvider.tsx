@@ -3,6 +3,7 @@ import {
   answerGameReducer,
   makeInitialState,
 } from './answer-game-reducer';
+import { useKeyboardInput } from './useKeyboardInput';
 import type {
   AnswerGameAction,
   AnswerGameConfig,
@@ -15,6 +16,11 @@ export const AnswerGameStateContext =
   createContext<AnswerGameState | null>(null);
 export const AnswerGameDispatchContext =
   createContext<Dispatch<AnswerGameAction> | null>(null);
+
+const KeyboardInputAdapter = () => {
+  useKeyboardInput();
+  return null;
+};
 
 interface AnswerGameProviderProps {
   config: AnswerGameConfig;
@@ -52,6 +58,7 @@ export const AnswerGameProvider = ({
     <GameRoundContext.Provider value={roundProgress}>
       <AnswerGameStateContext.Provider value={state}>
         <AnswerGameDispatchContext.Provider value={dispatch}>
+          <KeyboardInputAdapter />
           {children}
         </AnswerGameDispatchContext.Provider>
       </AnswerGameStateContext.Provider>

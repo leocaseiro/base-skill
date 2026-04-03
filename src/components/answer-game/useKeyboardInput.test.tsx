@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AnswerGameProvider } from './AnswerGameProvider';
 import { useKeyboardInput } from './useKeyboardInput';
 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
