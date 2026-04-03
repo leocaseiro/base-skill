@@ -11,6 +11,11 @@ import path from 'node:path';
 
 const PLAYWRIGHT_VERSION = '1.59.1';
 const DOCKER_IMAGE = `mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble`;
+// Named volume keeps Docker's node_modules (Linux binaries) separate from the
+// host's node_modules (macOS binaries). Without this, Docker's yarn install
+// overwrites @rollup/rollup-darwin-arm64 with Linux binaries, breaking the
+// host's vite build used by subsequent E2E tests.
+const VR_VOLUME_NAME = 'base-skill-vr-node-modules';
 
 const mode = process.argv[2];
 
@@ -70,6 +75,8 @@ const dockerArgs = [
   '--ipc=host',
   '-v',
   `${cwd}:/work`,
+  '-v',
+  `${VR_VOLUME_NAME}:/work/node_modules`,
   '-w',
   '/work',
   '-e',
