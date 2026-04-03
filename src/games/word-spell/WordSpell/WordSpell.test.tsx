@@ -3,6 +3,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { WordSpell } from './WordSpell';
 import type { WordSpellConfig } from '../types';
 
+const navigateStub = vi.hoisted(() => vi.fn());
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => navigateStub,
+}));
+
 vi.mock('@/lib/speech/SpeechOutput', () => ({
   speak: vi.fn(),
   cancelSpeech: vi.fn(),
@@ -18,6 +24,7 @@ const config: WordSpellConfig = {
   wrongTileBehavior: 'lock-auto-eject',
   tileBankMode: 'exact',
   totalRounds: 2,
+  roundsInOrder: true,
   ttsEnabled: true,
   mode: 'picture',
   tileUnit: 'letter',
@@ -31,13 +38,13 @@ describe('WordSpell', () => {
   it('renders the game with letter tiles for the first round word', () => {
     render(<WordSpell config={config} />);
     expect(
-      screen.getByRole('button', { name: 'Letter C' }),
+      screen.getByRole('button', { name: 'Letter c' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Letter A' }),
+      screen.getByRole('button', { name: 'Letter a' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Letter T' }),
+      screen.getByRole('button', { name: 'Letter t' }),
     ).toBeInTheDocument();
   });
 
@@ -54,5 +61,17 @@ describe('WordSpell', () => {
     };
     render(<WordSpell config={recallConfig} />);
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
+  it('renders native emoji when round.emoji is set (no img)', () => {
+    const emojiConfig: WordSpellConfig = {
+      ...config,
+      rounds: [{ word: 'cat', emoji: '🐱' }],
+    };
+    render(<WordSpell config={emojiConfig} />);
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /cat — tap to hear/i }),
+    ).toBeInTheDocument();
   });
 });

@@ -3,6 +3,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { NumberMatch } from './NumberMatch';
 import type { NumberMatchConfig } from '../types';
 
+const navigateStub = vi.hoisted(() => vi.fn());
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => navigateStub,
+}));
+
 vi.mock('@/lib/speech/SpeechOutput', () => ({
   speak: vi.fn(),
   cancelSpeech: vi.fn(),
@@ -18,6 +24,7 @@ const config: NumberMatchConfig = {
   wrongTileBehavior: 'lock-auto-eject',
   tileBankMode: 'exact',
   totalRounds: 3,
+  roundsInOrder: true,
   ttsEnabled: true,
   mode: 'numeral-to-group',
   tileStyle: 'dots',
@@ -47,5 +54,19 @@ describe('NumberMatch', () => {
   it('renders one pair zone per round value', () => {
     render(<NumberMatch config={config} />);
     expect(screen.getAllByRole('listitem')).toHaveLength(1);
+  });
+
+  it('shows correct tile plus distractors in the bank', () => {
+    const distractorConfig: NumberMatchConfig = {
+      ...config,
+      tileBankMode: 'distractors',
+      distractorCount: 3,
+      range: { min: 1, max: 9 },
+      rounds: [{ value: 5 }],
+    };
+    render(<NumberMatch config={distractorConfig} />);
+    expect(
+      screen.getAllByRole('button', { name: /^Number \d+$/ }),
+    ).toHaveLength(4);
   });
 });

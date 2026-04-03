@@ -35,6 +35,7 @@ export function answerGameReducer(
         zones: action.zones,
         activeSlotIndex: 0,
         phase: 'playing',
+        roundIndex: 0,
         retryCount: 0,
       };
     }

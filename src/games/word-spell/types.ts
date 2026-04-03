@@ -2,7 +2,11 @@ import type { AnswerGameConfig } from '@/components/answer-game/types';
 
 export interface WordSpellRound {
   word: string;
-  /** Fluent Emoji SVG path or custom asset path (picture/sentence-gap modes) */
+  /**
+   * Native emoji (or ZWJ sequence) for picture mode. When set, this is shown instead of `image` / `sceneImage`.
+   */
+  emoji?: string;
+  /** Fluent Emoji SVG path, URL, or `/public` asset path (picture/sentence-gap modes) */
   image?: string;
   /** Sentence with a blank for sentence-gap mode: "The ___ sat on the mat." */
   sentence?: string;

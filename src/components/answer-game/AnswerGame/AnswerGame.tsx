@@ -9,7 +9,7 @@ interface AnswerGameProps {
 
 const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
   <AnswerGameProvider config={config}>
-    <div className="flex min-h-dvh flex-col">{children}</div>
+    <div className="flex min-h-0 w-full flex-col">{children}</div>
   </AnswerGameProvider>
 );
 

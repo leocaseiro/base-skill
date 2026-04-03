@@ -7,13 +7,14 @@ import { useGameTTS } from '@/components/answer-game/useGameTTS';
 
 type TileStyle = 'dots' | 'objects' | 'fingers';
 
+/** Dot pattern fixed inside the square tile (3 columns, up to 9 dots). */
 const DotsTile = ({ count }: { count: number }) => (
   <div
-    className="flex flex-wrap justify-center gap-1"
+    className="grid w-full grid-cols-3 place-content-center place-items-center gap-x-2.5 gap-y-2 px-0.5"
     aria-hidden="true"
   >
     {Array.from({ length: count }, (_, i) => (
-      <span key={i} className="size-4 rounded-full bg-current" />
+      <span key={i} className="size-2.5 rounded-full bg-current" />
     ))}
   </div>
 );
@@ -49,16 +50,15 @@ const NumeralTile = ({
       ref={ref}
       type="button"
       aria-label={`Number ${tile.label}`}
-      className="flex min-h-14 min-w-14 cursor-grab flex-col items-center justify-center gap-1 rounded-2xl bg-card p-3 shadow-md transition-transform active:scale-95 active:cursor-grabbing"
+      className="flex size-20 shrink-0 cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl bg-card p-2 shadow-md transition-transform active:scale-95 active:cursor-grabbing"
       onClick={handleClick}
     >
       {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
-        <>
-          <DotsTile count={numericValue} />
-          <span className="text-sm font-bold">{tile.label}</span>
-        </>
+        <DotsTile count={numericValue} />
       ) : (
-        <span className="text-3xl font-bold">{tile.label}</span>
+        <span className="text-3xl font-bold tabular-nums leading-none">
+          {tile.label}
+        </span>
       )}
     </button>
   );

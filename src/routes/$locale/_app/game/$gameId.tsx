@@ -52,25 +52,52 @@ const WORD_SPELL_ROUTE_CONFIG: WordSpellConfig = {
   inputMethod: 'drag',
   wrongTileBehavior: 'lock-auto-eject',
   tileBankMode: 'exact',
-  totalRounds: 1,
+  totalRounds: 3,
+  roundsInOrder: false,
   ttsEnabled: true,
   mode: 'picture',
   tileUnit: 'letter',
-  rounds: [{ word: 'cat', image: 'https://placehold.co/200?text=cat' }],
+  rounds: [
+    { word: 'cat', emoji: '🐱' },
+    { word: 'dog', emoji: '🐶' },
+    { word: 'sun', emoji: '☀️' },
+    { word: 'pin', emoji: '📌' },
+    { word: 'sad', emoji: '☹️' },
+    { word: 'ant', emoji: '🐜' },
+    { word: 'can', emoji: '🥫' },
+  ],
 };
+
+const NUMBER_MATCH_RANGE = { min: 1, max: 12 } as const;
+
+const generateRandomNumber = (min: number, max: number): number =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
+
+const generateXRounds = (
+  min: number,
+  max: number,
+  x: number,
+): number[] =>
+  Array.from({ length: x }, () => generateRandomNumber(min, max));
 
 const NUMBER_MATCH_ROUTE_CONFIG: NumberMatchConfig = {
   gameId: 'number-match',
   component: 'NumberMatch',
   inputMethod: 'drag',
   wrongTileBehavior: 'lock-auto-eject',
-  tileBankMode: 'exact',
-  totalRounds: 1,
+  tileBankMode: 'distractors',
+  distractorCount: 3,
+  totalRounds: 3,
+  roundsInOrder: false,
   ttsEnabled: true,
   mode: 'numeral-to-group',
   tileStyle: 'dots',
-  range: { min: 1, max: 9 },
-  rounds: [{ value: 3 }],
+  range: { min: NUMBER_MATCH_RANGE.min, max: NUMBER_MATCH_RANGE.max },
+  rounds: generateXRounds(
+    NUMBER_MATCH_RANGE.min,
+    NUMBER_MATCH_RANGE.max,
+    3,
+  ).map((value) => ({ value })),
 };
 
 const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {

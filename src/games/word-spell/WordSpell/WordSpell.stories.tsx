@@ -9,6 +9,7 @@ const baseConfig: WordSpellConfig = {
   wrongTileBehavior: 'lock-auto-eject',
   tileBankMode: 'exact',
   totalRounds: 5,
+  roundsInOrder: true,
   ttsEnabled: true,
   mode: 'picture',
   tileUnit: 'letter',
