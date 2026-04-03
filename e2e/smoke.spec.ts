@@ -18,3 +18,22 @@ test('game catalog renders', async ({ page }) => {
     page.getByRole('group', { name: /filter by grade level/i }),
   ).toBeVisible();
 });
+
+test('WordSpell picture mode renders letter tiles', async ({
+  page,
+}) => {
+  await page.goto('/en/game/word-spell');
+  await page.getByRole('main').waitFor({ state: 'visible' });
+  const tiles = page.getByRole('button', { name: /^Letter /i });
+  await expect(tiles.first()).toBeVisible();
+});
+
+test('NumberMatch numeral-to-group renders numeral question', async ({
+  page,
+}) => {
+  await page.goto('/en/game/number-match');
+  await page.getByRole('main').waitFor({ state: 'visible' });
+  await expect(
+    page.getByRole('button', { name: 'Hear the question' }),
+  ).toBeVisible();
+});
