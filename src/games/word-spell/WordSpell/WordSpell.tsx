@@ -87,7 +87,7 @@ const WordSpellSession = ({
 
   const handleHome = () => {
     void navigate({
-      to: '/$locale/dashboard',
+      to: '/$locale',
       params: { locale: 'en' },
     });
   };
