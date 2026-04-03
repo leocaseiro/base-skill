@@ -1,4 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { seedMathRandom } from './seed-math-random';
+
+test.beforeEach(async ({ page }) => {
+  await seedMathRandom(page);
+});
 
 /** History router: home under default locale (Playwright webServer uses APP_BASE_URL=/). */
 function localeHomePath(locale: string): string {
