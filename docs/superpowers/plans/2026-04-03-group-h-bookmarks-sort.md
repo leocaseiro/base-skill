@@ -14,17 +14,18 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|---------------|
-| `src/games/catalog-utils.ts` | Modify | Add `sortByBookmarks(entries, bookmarkedIds)` |
-| `src/games/catalog-utils.test.ts` | Modify | Add tests for `sortByBookmarks` |
-| `src/routes/$locale/_app/index.tsx` | Modify | Call `sortByBookmarks` in `filtered` useMemo |
+| File                                | Action | Responsibility                                |
+| ----------------------------------- | ------ | --------------------------------------------- |
+| `src/games/catalog-utils.ts`        | Modify | Add `sortByBookmarks(entries, bookmarkedIds)` |
+| `src/games/catalog-utils.test.ts`   | Modify | Add tests for `sortByBookmarks`               |
+| `src/routes/$locale/_app/index.tsx` | Modify | Call `sortByBookmarks` in `filtered` useMemo  |
 
 ---
 
 ## Task 1: Add sortByBookmarks to catalog-utils
 
 **Files:**
+
 - Modify: `src/games/catalog-utils.ts`
 - Modify: `src/games/catalog-utils.test.ts`
 
@@ -37,9 +38,24 @@
 
   describe('sortByBookmarks', () => {
     const entries = [
-      { id: 'alpha', titleKey: 'alpha', levels: ['K' as const], subject: 'math' as const },
-      { id: 'beta',  titleKey: 'beta',  levels: ['K' as const], subject: 'math' as const },
-      { id: 'gamma', titleKey: 'gamma', levels: ['K' as const], subject: 'math' as const },
+      {
+        id: 'alpha',
+        titleKey: 'alpha',
+        levels: ['K' as const],
+        subject: 'math' as const,
+      },
+      {
+        id: 'beta',
+        titleKey: 'beta',
+        levels: ['K' as const],
+        subject: 'math' as const,
+      },
+      {
+        id: 'gamma',
+        titleKey: 'gamma',
+        levels: ['K' as const],
+        subject: 'math' as const,
+      },
     ];
 
     it('moves bookmarked entries to the front', () => {
@@ -57,7 +73,10 @@
     });
 
     it('preserves original order among multiple bookmarked entries', () => {
-      const result = sortByBookmarks(entries, new Set(['gamma', 'alpha']));
+      const result = sortByBookmarks(
+        entries,
+        new Set(['gamma', 'alpha']),
+      );
       expect(result[0].id).toBe('alpha');
       expect(result[1].id).toBe('gamma');
       expect(result[2].id).toBe('beta');
@@ -65,7 +84,11 @@
 
     it('returns original order when no bookmarks', () => {
       const result = sortByBookmarks(entries, new Set());
-      expect(result.map((e) => e.id)).toEqual(['alpha', 'beta', 'gamma']);
+      expect(result.map((e) => e.id)).toEqual([
+        'alpha',
+        'beta',
+        'gamma',
+      ]);
     });
 
     it('does not mutate the input array', () => {
@@ -122,6 +145,7 @@
 ## Task 2: Use sortByBookmarks in home route
 
 **Files:**
+
 - Modify: `src/routes/$locale/_app/index.tsx`
 
 - [ ] **Step 1: Import and call sortByBookmarks**
@@ -129,23 +153,24 @@
   In `src/routes/$locale/_app/index.tsx`, add `sortByBookmarks` to the import:
 
   ```ts
-  import { filterCatalog, paginateCatalog, sortByBookmarks } from '@/games/catalog-utils';
+  import {
+    filterCatalog,
+    paginateCatalog,
+    sortByBookmarks,
+  } from '@/games/catalog-utils';
   ```
 
   Then update the `filtered` useMemo to sort after filtering:
 
   ```ts
-  const filtered = useMemo(
-    () => {
-      const result = filterCatalog(GAME_CATALOG, {
-        search,
-        level: level as GameLevel | '',
-        subject: subject as GameSubject | '',
-      });
-      return sortByBookmarks(result, bookmarkedIds);
-    },
-    [search, level, subject, bookmarkedIds],
-  );
+  const filtered = useMemo(() => {
+    const result = filterCatalog(GAME_CATALOG, {
+      search,
+      level: level as GameLevel | '',
+      subject: subject as GameSubject | '',
+    });
+    return sortByBookmarks(result, bookmarkedIds);
+  }, [search, level, subject, bookmarkedIds]);
   ```
 
   Note: `bookmarkedIds` is a `Set<string>` already returned by `useBookmarks()` — just add it to the dependency array.

@@ -14,31 +14,32 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|---------------|
-| `src/db/schemas/saved_game_configs.ts` | Create | `SavedGameConfigDoc` type + RxDB schema |
-| `src/db/schemas/bookmarks.ts` | Delete | Replaced by saved_game_configs |
-| `src/db/schemas/index.ts` | Modify | Swap bookmark exports for saved_game_configs |
-| `src/db/types.ts` | Modify | Swap `bookmarks` collection for `saved_game_configs` |
-| `src/db/create-database.ts` | Modify | Register new collection, remove bookmarks |
-| `src/db/hooks/useSavedConfigs.ts` | Create | CRUD + name validation (replaces useBookmarks) |
-| `src/db/hooks/useSavedConfigs.test.ts` | Create | Unit tests for hook |
-| `src/db/hooks/useBookmarks.ts` | Delete | Replaced by useSavedConfigs |
-| `src/games/catalog-utils.ts` | Modify | Add `sortByHasSavedConfigs` (absorbs Group H) |
-| `src/games/catalog-utils.test.ts` | Modify | Tests for `sortByHasSavedConfigs` |
-| `src/components/SaveConfigDialog.tsx` | Create | Name input modal with duplicate validation |
-| `src/components/SaveConfigDialog.test.tsx` | Create | Tests for dialog |
-| `src/components/GameCard.tsx` | Modify | Config chips, bookmark → save-config behavior |
-| `src/components/GameCard.test.tsx` | Modify | Update tests for new props |
-| `src/components/GameGrid.tsx` | Modify | Pass savedConfigs + handlers |
-| `src/routes/$locale/_app/index.tsx` | Modify | Use `useSavedConfigs`, sort catalog |
-| `src/routes/$locale/_app/game/$gameId.tsx` | Modify | Accept `configId` search param, load saved config |
+| File                                       | Action | Responsibility                                       |
+| ------------------------------------------ | ------ | ---------------------------------------------------- |
+| `src/db/schemas/saved_game_configs.ts`     | Create | `SavedGameConfigDoc` type + RxDB schema              |
+| `src/db/schemas/bookmarks.ts`              | Delete | Replaced by saved_game_configs                       |
+| `src/db/schemas/index.ts`                  | Modify | Swap bookmark exports for saved_game_configs         |
+| `src/db/types.ts`                          | Modify | Swap `bookmarks` collection for `saved_game_configs` |
+| `src/db/create-database.ts`                | Modify | Register new collection, remove bookmarks            |
+| `src/db/hooks/useSavedConfigs.ts`          | Create | CRUD + name validation (replaces useBookmarks)       |
+| `src/db/hooks/useSavedConfigs.test.ts`     | Create | Unit tests for hook                                  |
+| `src/db/hooks/useBookmarks.ts`             | Delete | Replaced by useSavedConfigs                          |
+| `src/games/catalog-utils.ts`               | Modify | Add `sortByHasSavedConfigs` (absorbs Group H)        |
+| `src/games/catalog-utils.test.ts`          | Modify | Tests for `sortByHasSavedConfigs`                    |
+| `src/components/SaveConfigDialog.tsx`      | Create | Name input modal with duplicate validation           |
+| `src/components/SaveConfigDialog.test.tsx` | Create | Tests for dialog                                     |
+| `src/components/GameCard.tsx`              | Modify | Config chips, bookmark → save-config behavior        |
+| `src/components/GameCard.test.tsx`         | Modify | Update tests for new props                           |
+| `src/components/GameGrid.tsx`              | Modify | Pass savedConfigs + handlers                         |
+| `src/routes/$locale/_app/index.tsx`        | Modify | Use `useSavedConfigs`, sort catalog                  |
+| `src/routes/$locale/_app/game/$gameId.tsx` | Modify | Accept `configId` search param, load saved config    |
 
 ---
 
 ## Task 1: SavedGameConfigDoc schema + DB wiring
 
 **Files:**
+
 - Create: `src/db/schemas/saved_game_configs.ts`
 - Modify: `src/db/schemas/index.ts`
 - Modify: `src/db/types.ts`
@@ -62,21 +63,29 @@
     createdAt: string;
   };
 
-  export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> = {
-    version: 0,
-    primaryKey: 'id',
-    type: 'object',
-    properties: {
-      id: { type: 'string', maxLength: 36 },
-      profileId: { type: 'string', maxLength: 36 },
-      gameId: { type: 'string', maxLength: 64 },
-      name: { type: 'string', maxLength: 128 },
-      config: { type: 'object' },
-      createdAt: { type: 'string', format: 'date-time' },
-    },
-    required: ['id', 'profileId', 'gameId', 'name', 'config', 'createdAt'],
-    additionalProperties: false,
-  };
+  export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
+    {
+      version: 0,
+      primaryKey: 'id',
+      type: 'object',
+      properties: {
+        id: { type: 'string', maxLength: 36 },
+        profileId: { type: 'string', maxLength: 36 },
+        gameId: { type: 'string', maxLength: 64 },
+        name: { type: 'string', maxLength: 128 },
+        config: { type: 'object' },
+        createdAt: { type: 'string', format: 'date-time' },
+      },
+      required: [
+        'id',
+        'profileId',
+        'gameId',
+        'name',
+        'config',
+        'createdAt',
+      ],
+      additionalProperties: false,
+    };
   ```
 
 - [ ] **Step 2: Update `src/db/schemas/index.ts`**
@@ -189,7 +198,10 @@
     syncMetaSchema,
     themesSchema,
   } from './schemas';
-  import type { BaseSkillCollections, BaseSkillDatabase } from './types';
+  import type {
+    BaseSkillCollections,
+    BaseSkillDatabase,
+  } from './types';
   import type { RxDatabase } from 'rxdb';
 
   addRxPlugin(RxDBMigrationSchemaPlugin);
@@ -315,6 +327,7 @@
 ## Task 2: useSavedConfigs hook
 
 **Files:**
+
 - Create: `src/db/hooks/useSavedConfigs.ts`
 - Create: `src/db/hooks/useSavedConfigs.test.ts`
 
@@ -575,7 +588,11 @@
     const getByGameId = (gameId: string): SavedGameConfigDoc[] =>
       docs.filter((d) => d.gameId === gameId);
 
-    const save = async ({ gameId, name, config }: SaveInput): Promise<void> => {
+    const save = async ({
+      gameId,
+      name,
+      config,
+    }: SaveInput): Promise<void> => {
       if (!db) return;
       const trimmed = name.trim();
       const namesForGame = docs
@@ -603,7 +620,10 @@
       if (doc) await doc.remove();
     };
 
-    const rename = async (id: string, newName: string): Promise<void> => {
+    const rename = async (
+      id: string,
+      newName: string,
+    ): Promise<void> => {
       if (!db) return;
       const doc = await db.saved_game_configs.findOne(id).exec();
       if (!doc) return;
@@ -619,7 +639,14 @@
       await doc.incrementalPatch({ name: trimmed });
     };
 
-    return { savedConfigs: docs, gameIdsWithConfigs, getByGameId, save, remove, rename };
+    return {
+      savedConfigs: docs,
+      gameIdsWithConfigs,
+      getByGameId,
+      save,
+      remove,
+      rename,
+    };
   };
   ```
 
@@ -645,6 +672,7 @@
 ## Task 3: sortByHasSavedConfigs in catalog-utils
 
 **Files:**
+
 - Modify: `src/games/catalog-utils.ts`
 - Modify: `src/games/catalog-utils.test.ts`
 
@@ -657,9 +685,24 @@
 
   describe('sortByHasSavedConfigs', () => {
     const entries = [
-      { id: 'alpha', titleKey: 'alpha', levels: ['K' as const], subject: 'math' as const },
-      { id: 'beta',  titleKey: 'beta',  levels: ['K' as const], subject: 'math' as const },
-      { id: 'gamma', titleKey: 'gamma', levels: ['K' as const], subject: 'math' as const },
+      {
+        id: 'alpha',
+        titleKey: 'alpha',
+        levels: ['K' as const],
+        subject: 'math' as const,
+      },
+      {
+        id: 'beta',
+        titleKey: 'beta',
+        levels: ['K' as const],
+        subject: 'math' as const,
+      },
+      {
+        id: 'gamma',
+        titleKey: 'gamma',
+        levels: ['K' as const],
+        subject: 'math' as const,
+      },
     ];
 
     it('moves entries with saved configs to the front', () => {
@@ -677,7 +720,10 @@
     });
 
     it('preserves original order among multiple entries with configs', () => {
-      const result = sortByHasSavedConfigs(entries, new Set(['gamma', 'alpha']));
+      const result = sortByHasSavedConfigs(
+        entries,
+        new Set(['gamma', 'alpha']),
+      );
       expect(result[0].id).toBe('alpha');
       expect(result[1].id).toBe('gamma');
       expect(result[2].id).toBe('beta');
@@ -685,7 +731,11 @@
 
     it('returns original order when no gameIds have configs', () => {
       const result = sortByHasSavedConfigs(entries, new Set());
-      expect(result.map((e) => e.id)).toEqual(['alpha', 'beta', 'gamma']);
+      expect(result.map((e) => e.id)).toEqual([
+        'alpha',
+        'beta',
+        'gamma',
+      ]);
     });
 
     it('does not mutate the input array', () => {
@@ -745,6 +795,7 @@
 ## Task 4: SaveConfigDialog component
 
 **Files:**
+
 - Create: `src/components/SaveConfigDialog.tsx`
 - Create: `src/components/SaveConfigDialog.test.tsx`
 
@@ -792,7 +843,9 @@
         />,
         { wrapper },
       );
-      await userEvent.click(screen.getByRole('button', { name: /save/i }));
+      await userEvent.click(
+        screen.getByRole('button', { name: /save/i }),
+      );
       expect(onSave).toHaveBeenCalledWith('Word Spell');
     });
 
@@ -809,7 +862,9 @@
         { wrapper },
       );
       await userEvent.clear(screen.getByRole('textbox'));
-      await userEvent.click(screen.getByRole('button', { name: /save/i }));
+      await userEvent.click(
+        screen.getByRole('button', { name: /save/i }),
+      );
       expect(onSave).not.toHaveBeenCalled();
       expect(screen.getByRole('alert')).toBeInTheDocument();
     });
@@ -826,7 +881,9 @@
         />,
         { wrapper },
       );
-      await userEvent.click(screen.getByRole('button', { name: /save/i }));
+      await userEvent.click(
+        screen.getByRole('button', { name: /save/i }),
+      );
       expect(onSave).not.toHaveBeenCalled();
       expect(screen.getByRole('alert')).toBeInTheDocument();
     });
@@ -843,7 +900,9 @@
         />,
         { wrapper },
       );
-      await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+      await userEvent.click(
+        screen.getByRole('button', { name: /cancel/i }),
+      );
       expect(onCancel).toHaveBeenCalled();
     });
 
@@ -931,7 +990,10 @@
     if (!open) return null;
 
     return (
-      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
+      <Dialog
+        open={open}
+        onOpenChange={(isOpen) => !isOpen && onCancel()}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('saveConfig.title')}</DialogTitle>
@@ -1019,10 +1081,12 @@
 ## Task 5: Update GameCard — config chips + save behavior
 
 **Files:**
+
 - Modify: `src/components/GameCard.tsx`
 - Modify: `src/components/GameCard.test.tsx`
 
 The updated GameCard:
+
 - No longer receives `isBookmarked: boolean` or `onBookmarkToggle`
 - Receives `savedConfigs: SavedGameConfigDoc[]` (pre-filtered to this game's configs)
 - Bookmark icon: filled when `savedConfigs.length > 0`; clicking opens `SaveConfigDialog`
@@ -1107,7 +1171,9 @@ The updated GameCard:
         />,
         { wrapper },
       );
-      await userEvent.click(screen.getByRole('button', { name: /^play$/i }));
+      await userEvent.click(
+        screen.getByRole('button', { name: /^play$/i }),
+      );
       expect(onPlay).toHaveBeenCalledWith('word-spell');
     });
 
@@ -1123,7 +1189,9 @@ The updated GameCard:
         />,
         { wrapper },
       );
-      const icon = screen.getByRole('button', { name: /save configuration/i });
+      const icon = screen.getByRole('button', {
+        name: /save configuration/i,
+      });
       expect(icon.querySelector('svg')).not.toHaveClass('fill-current');
     });
 
@@ -1139,7 +1207,9 @@ The updated GameCard:
         />,
         { wrapper },
       );
-      const icon = screen.getByRole('button', { name: /save configuration/i });
+      const icon = screen.getByRole('button', {
+        name: /save configuration/i,
+      });
       expect(icon.querySelector('svg')).toHaveClass('fill-current');
     });
 
@@ -1171,8 +1241,13 @@ The updated GameCard:
         />,
         { wrapper },
       );
-      await userEvent.click(screen.getByRole('button', { name: /easy mode/i }));
-      expect(onPlayWithConfig).toHaveBeenCalledWith('word-spell', 'cfg-1');
+      await userEvent.click(
+        screen.getByRole('button', { name: /easy mode/i }),
+      );
+      expect(onPlayWithConfig).toHaveBeenCalledWith(
+        'word-spell',
+        'cfg-1',
+      );
     });
 
     it('calls onRemoveConfig when the × button on a chip is clicked', async () => {
@@ -1188,7 +1263,9 @@ The updated GameCard:
         />,
         { wrapper },
       );
-      await userEvent.click(screen.getByRole('button', { name: /remove easy mode/i }));
+      await userEvent.click(
+        screen.getByRole('button', { name: /remove easy mode/i }),
+      );
       expect(onRemoveConfig).toHaveBeenCalledWith('cfg-1');
     });
 
@@ -1330,7 +1407,9 @@ The updated GameCard:
                     <button
                       className="pr-1.5 py-0.5"
                       onClick={() => void onRemoveConfig(sc.id)}
-                      aria-label={tCommon('saveConfig.remove', { name: sc.name })}
+                      aria-label={tCommon('saveConfig.remove', {
+                        name: sc.name,
+                      })}
                     >
                       <XIcon size={10} />
                     </button>
@@ -1410,6 +1489,7 @@ The updated GameCard:
 ## Task 6: Wire GameGrid + HomeScreen
 
 **Files:**
+
 - Modify: `src/components/GameGrid.tsx`
 - Modify: `src/routes/$locale/_app/index.tsx`
 
@@ -1461,7 +1541,9 @@ The updated GameCard:
               <GameCard
                 key={entry.id}
                 entry={entry}
-                savedConfigs={savedConfigs.filter((c) => c.gameId === entry.id)}
+                savedConfigs={savedConfigs.filter(
+                  (c) => c.gameId === entry.id,
+                )}
                 onSaveConfig={onSaveConfig}
                 onRemoveConfig={onRemoveConfig}
                 onPlay={onPlay}
@@ -1533,7 +1615,11 @@ The updated GameCard:
   import { GameGrid } from '@/components/GameGrid';
   import { LevelRow } from '@/components/LevelRow';
   import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
-  import { filterCatalog, paginateCatalog, sortByHasSavedConfigs } from '@/games/catalog-utils';
+  import {
+    filterCatalog,
+    paginateCatalog,
+    sortByHasSavedConfigs,
+  } from '@/games/catalog-utils';
   import { GAME_CATALOG } from '@/games/registry';
 
   type CatalogSearchInput = {
@@ -1580,19 +1666,17 @@ The updated GameCard:
     const { level, subject, search, page } = Route.useSearch();
     const { locale } = useParams({ from: '/$locale' });
     const navigate = useNavigate({ from: '/$locale/' });
-    const { savedConfigs, gameIdsWithConfigs, save, remove } = useSavedConfigs();
+    const { savedConfigs, gameIdsWithConfigs, save, remove } =
+      useSavedConfigs();
 
-    const filtered = useMemo(
-      () => {
-        const result = filterCatalog(GAME_CATALOG, {
-          search,
-          level: level as GameLevel | '',
-          subject: subject as GameSubject | '',
-        });
-        return sortByHasSavedConfigs(result, gameIdsWithConfigs);
-      },
-      [search, level, subject, gameIdsWithConfigs],
-    );
+    const filtered = useMemo(() => {
+      const result = filterCatalog(GAME_CATALOG, {
+        search,
+        level: level as GameLevel | '',
+        subject: subject as GameSubject | '',
+      });
+      return sortByHasSavedConfigs(result, gameIdsWithConfigs);
+    }, [search, level, subject, gameIdsWithConfigs]);
 
     const {
       items,
@@ -1688,6 +1772,7 @@ The updated GameCard:
 ## Task 7: Game route — load saved config via configId search param
 
 **Files:**
+
 - Modify: `src/routes/$locale/_app/game/$gameId.tsx`
 
 When the user taps a config chip, the URL becomes `/$locale/game/word-spell?configId=abc`. The route loader reads this, fetches the saved config from RxDB, and passes it to `GameBody` as `gameSpecificConfig`.
@@ -1750,7 +1835,11 @@ When the user taps a config chip, the URL becomes `/$locale/game/word-spell?conf
   const generateRandomNumber = (min: number, max: number): number =>
     Math.floor(Math.random() * (max - min + 1)) + min;
 
-  const generateXRounds = (min: number, max: number, x: number): number[] =>
+  const generateXRounds = (
+    min: number,
+    max: number,
+    x: number,
+  ): number[] =>
     Array.from({ length: x }, () => generateRandomNumber(min, max));
 
   const WORD_SPELL_DEFAULT_CONFIG: WordSpellConfig = {
@@ -1789,9 +1878,11 @@ When the user taps a config chip, the URL becomes `/$locale/game/word-spell?conf
     mode: 'numeral-to-group',
     tileStyle: 'dots',
     range: { min: NUMBER_MATCH_RANGE.min, max: NUMBER_MATCH_RANGE.max },
-    rounds: generateXRounds(NUMBER_MATCH_RANGE.min, NUMBER_MATCH_RANGE.max, 3).map(
-      (value) => ({ value }),
-    ),
+    rounds: generateXRounds(
+      NUMBER_MATCH_RANGE.min,
+      NUMBER_MATCH_RANGE.max,
+      3,
+    ).map((value) => ({ value })),
   };
 
   const GameBody = ({
@@ -1803,12 +1894,14 @@ When the user taps a config chip, the URL becomes `/$locale/game/word-spell?conf
   }): JSX.Element => {
     if (gameId === 'word-spell') {
       const config =
-        (gameSpecificConfig as WordSpellConfig | null) ?? WORD_SPELL_DEFAULT_CONFIG;
+        (gameSpecificConfig as WordSpellConfig | null) ??
+        WORD_SPELL_DEFAULT_CONFIG;
       return <WordSpell config={config} />;
     }
     if (gameId === 'number-match') {
       const config =
-        (gameSpecificConfig as NumberMatchConfig | null) ?? NUMBER_MATCH_DEFAULT_CONFIG;
+        (gameSpecificConfig as NumberMatchConfig | null) ??
+        NUMBER_MATCH_DEFAULT_CONFIG;
       return <NumberMatch config={config} />;
     }
     return (
@@ -1833,7 +1926,10 @@ When the user taps a config chip, the URL becomes `/$locale/game/word-spell?conf
       meta={meta}
       initialLog={initialLog ?? undefined}
     >
-      <GameBody gameId={config.gameId} gameSpecificConfig={gameSpecificConfig} />
+      <GameBody
+        gameId={config.gameId}
+        gameSpecificConfig={gameSpecificConfig}
+      />
     </GameShell>
   );
 
@@ -1845,9 +1941,14 @@ When the user taps a config chip, the URL becomes `/$locale/game/word-spell?conf
   export const Route = createFileRoute('/$locale/_app/game/$gameId')({
     validateSearch: (search: Record<string, unknown>) => ({
       configId:
-        typeof search.configId === 'string' ? search.configId : undefined,
+        typeof search.configId === 'string'
+          ? search.configId
+          : undefined,
     }),
-    loader: async ({ params, search }): Promise<GameRouteLoaderData> => {
+    loader: async ({
+      params,
+      search,
+    }): Promise<GameRouteLoaderData> => {
       const { gameId } = params;
       const profileId = 'default';
 
@@ -1861,7 +1962,11 @@ When the user taps a config chip, the URL becomes `/$locale/game/word-spell?conf
         defaultConfig,
       );
 
-      const initialLog = await findInProgressSession(profileId, gameId, db);
+      const initialLog = await findInProgressSession(
+        profileId,
+        gameId,
+        db,
+      );
 
       let gameSpecificConfig: Record<string, unknown> | null = null;
       if (search.configId) {
@@ -1874,19 +1979,20 @@ When the user taps a config chip, the URL becomes `/$locale/game/word-spell?conf
       const sessionId = initialLog?.sessionId ?? nanoid();
       const seed = initialLog?.seed ?? nanoid();
       const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
-      const initialState: GameEngineState = initialLog?.initialState ?? {
-        phase: 'instructions',
-        roundIndex: 0,
-        score: 0,
-        streak: 0,
-        retryCount: 0,
-        content: initialContent,
-        currentRound: {
-          roundId: initialContent.rounds[0]?.id ?? '',
-          answer: null,
-          hintsUsed: 0,
-        },
-      };
+      const initialState: GameEngineState =
+        initialLog?.initialState ?? {
+          phase: 'instructions',
+          roundIndex: 0,
+          score: 0,
+          streak: 0,
+          retryCount: 0,
+          content: initialContent,
+          currentRound: {
+            roundId: initialContent.rounds[0]?.id ?? '',
+            answer: null,
+            hintsUsed: 0,
+          },
+        };
 
       const meta: SessionMeta = {
         profileId,
@@ -1897,7 +2003,13 @@ When the user taps a config chip, the URL becomes `/$locale/game/word-spell?conf
         initialState,
       };
 
-      return { config, initialLog, sessionId, meta, gameSpecificConfig };
+      return {
+        config,
+        initialLog,
+        sessionId,
+        meta,
+        gameSpecificConfig,
+      };
     },
     component: RouteComponent,
   });
@@ -1938,11 +2050,9 @@ When the user taps a config chip, the URL becomes `/$locale/game/word-spell?conf
 - [ ] **Step 2: Manual smoke check**
 
   Start `yarn dev`, navigate to `/en`:
-
   1. Game cards show empty bookmark icons — no configs yet
   2. Click the bookmark icon on "Word Spell" — `SaveConfigDialog` opens with suggested name "Word spell"
   3. Accept or rename, click Save — dialog closes, bookmark icon fills, a chip appears on the card
   4. Click the chip — navigates to `/en/game/word-spell?configId=<id>`, game loads
   5. Click the × on the chip — chip disappears, bookmark icon empties
   6. Save two configs on different games — both appear at the top of the catalog (sorted above unbookmarked games)
-

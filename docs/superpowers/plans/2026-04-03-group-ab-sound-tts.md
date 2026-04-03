@@ -11,6 +11,7 @@
 **Worktree:** `./worktrees/feat-word-spell-number-match`
 
 **Sound files to copy from Downloads:**
+
 - Wrong: `/Users/leocaseiro/Music/Downloads/wrong-button-sound-2_NWM.mp3` → `public/sounds/wrong.mp3`
 - Correct: `/Users/leocaseiro/Music/Downloads/audioblocks-positive-correct-answer_HYHfgGMU0wU_NWM.mp3` → `public/sounds/correct.mp3`
 - Round complete: `/Users/leocaseiro/Music/Downloads/Correct Answer #3 Sound Effect [0ZQ-Lk--ILE].mp3` → `public/sounds/round-complete.mp3`
@@ -20,35 +21,36 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|---------------|
-| `public/sounds/wrong.mp3` | Create (copy) | Wrong tile sound |
-| `public/sounds/correct.mp3` | Create (copy) | Correct tile sound |
-| `public/sounds/round-complete.mp3` | Create (copy) | Round applause |
-| `public/sounds/game-complete.mp3` | Create (copy) | Game end tune |
-| `src/lib/speech/SpeechOutput.ts` | Modify | Add `SpeakOptions`; fix voice loading race via voiceschanged; apply rate/volume/lang |
-| `src/lib/speech/SpeechOutput.test.ts` | Modify | Add tests for options and deferred voice loading |
-| `src/lib/audio/AudioFeedback.ts` | Create | `playSound(key, volume)` — HTMLAudio mp3 player |
-| `src/lib/audio/AudioFeedback.test.ts` | Create | Mock Audio constructor, verify correct file played |
-| `src/components/answer-game/useGameTTS.ts` | Modify | Read `useSettings()`, pass rate/volume/voice/lang to `speak()` |
-| `src/components/answer-game/useGameTTS.test.tsx` | Modify | Verify options forwarded; no-op when disabled |
-| `src/components/answer-game/useRoundTTS.ts` | Create | Auto-speaks prompt when `roundIndex` changes and `ttsEnabled` |
-| `src/components/answer-game/useRoundTTS.test.tsx` | Create | Fires speak on mount + roundIndex change; no-op when disabled |
-| `src/components/answer-game/useGameSounds.ts` | Create | Plays mp3 on `round-complete` / `game-over` phase transitions |
-| `src/components/answer-game/useGameSounds.test.tsx` | Create | Verifies correct sound per phase transition |
-| `src/components/answer-game/useTileEvaluation.ts` | Modify | Call `playSound('correct'/'wrong')` after dispatch |
-| `src/components/answer-game/useTileEvaluation.test.tsx` | Modify | Add assertions for playSound calls |
-| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` | Modify | Add `onDragStart: () => speakTileRef.current(label)` to draggable |
-| `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` | Modify | Same drag-start TTS |
-| `src/games/word-spell/WordSpell/WordSpell.tsx` | Modify | Add `useRoundTTS` + `useGameSounds` inside `WordSpellSession` |
-| `src/games/number-match/NumberMatch/NumberMatch.tsx` | Modify | Same hooks in `NumberMatchSession` |
-| `src/components/questions/AudioButton/AudioButton.tsx` | Modify | Return `null` when `!config.ttsEnabled` |
+| File                                                         | Action        | Responsibility                                                                       |
+| ------------------------------------------------------------ | ------------- | ------------------------------------------------------------------------------------ |
+| `public/sounds/wrong.mp3`                                    | Create (copy) | Wrong tile sound                                                                     |
+| `public/sounds/correct.mp3`                                  | Create (copy) | Correct tile sound                                                                   |
+| `public/sounds/round-complete.mp3`                           | Create (copy) | Round applause                                                                       |
+| `public/sounds/game-complete.mp3`                            | Create (copy) | Game end tune                                                                        |
+| `src/lib/speech/SpeechOutput.ts`                             | Modify        | Add `SpeakOptions`; fix voice loading race via voiceschanged; apply rate/volume/lang |
+| `src/lib/speech/SpeechOutput.test.ts`                        | Modify        | Add tests for options and deferred voice loading                                     |
+| `src/lib/audio/AudioFeedback.ts`                             | Create        | `playSound(key, volume)` — HTMLAudio mp3 player                                      |
+| `src/lib/audio/AudioFeedback.test.ts`                        | Create        | Mock Audio constructor, verify correct file played                                   |
+| `src/components/answer-game/useGameTTS.ts`                   | Modify        | Read `useSettings()`, pass rate/volume/voice/lang to `speak()`                       |
+| `src/components/answer-game/useGameTTS.test.tsx`             | Modify        | Verify options forwarded; no-op when disabled                                        |
+| `src/components/answer-game/useRoundTTS.ts`                  | Create        | Auto-speaks prompt when `roundIndex` changes and `ttsEnabled`                        |
+| `src/components/answer-game/useRoundTTS.test.tsx`            | Create        | Fires speak on mount + roundIndex change; no-op when disabled                        |
+| `src/components/answer-game/useGameSounds.ts`                | Create        | Plays mp3 on `round-complete` / `game-over` phase transitions                        |
+| `src/components/answer-game/useGameSounds.test.tsx`          | Create        | Verifies correct sound per phase transition                                          |
+| `src/components/answer-game/useTileEvaluation.ts`            | Modify        | Call `playSound('correct'/'wrong')` after dispatch                                   |
+| `src/components/answer-game/useTileEvaluation.test.tsx`      | Modify        | Add assertions for playSound calls                                                   |
+| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`     | Modify        | Add `onDragStart: () => speakTileRef.current(label)` to draggable                    |
+| `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` | Modify        | Same drag-start TTS                                                                  |
+| `src/games/word-spell/WordSpell/WordSpell.tsx`               | Modify        | Add `useRoundTTS` + `useGameSounds` inside `WordSpellSession`                        |
+| `src/games/number-match/NumberMatch/NumberMatch.tsx`         | Modify        | Same hooks in `NumberMatchSession`                                                   |
+| `src/components/questions/AudioButton/AudioButton.tsx`       | Modify        | Return `null` when `!config.ttsEnabled`                                              |
 
 ---
 
 ## Task 1: Copy sound files to public/sounds/
 
 **Files:**
+
 - Create: `public/sounds/wrong.mp3`
 - Create: `public/sounds/correct.mp3`
 - Create: `public/sounds/round-complete.mp3`
@@ -79,6 +81,7 @@
 ## Task 2: Create AudioFeedback service
 
 **Files:**
+
 - Create: `src/lib/audio/AudioFeedback.ts`
 - Create: `src/lib/audio/AudioFeedback.test.ts`
 
@@ -130,8 +133,12 @@
     it('sets volume on the audio element', async () => {
       let capturedVolume = 1;
       const AudioMock = vi.fn().mockImplementation(() => ({
-        set volume(v: number) { capturedVolume = v; },
-        get volume() { return capturedVolume; },
+        set volume(v: number) {
+          capturedVolume = v;
+        },
+        get volume() {
+          return capturedVolume;
+        },
         play: vi.fn().mockResolvedValue(undefined),
         pause: vi.fn(),
       }));
@@ -156,7 +163,11 @@
 - [ ] **Step 3: Create `src/lib/audio/AudioFeedback.ts`**
 
   ```ts
-  type SoundKey = 'correct' | 'wrong' | 'round-complete' | 'game-complete';
+  type SoundKey =
+    | 'correct'
+    | 'wrong'
+    | 'round-complete'
+    | 'game-complete';
 
   const SOUND_PATHS: Record<SoundKey, string> = {
     correct: '/sounds/correct.mp3',
@@ -201,6 +212,7 @@
 ## Task 3: Fix SpeechOutput voice loading race + add options
 
 **Files:**
+
 - Modify: `src/lib/speech/SpeechOutput.ts`
 - Modify: `src/lib/speech/SpeechOutput.test.ts`
 
@@ -211,7 +223,12 @@
   ```ts
   describe('speak with options', () => {
     it('applies rate and volume to utterance', () => {
-      const mockUtterance = { rate: 1, volume: 1, lang: '', voice: null };
+      const mockUtterance = {
+        rate: 1,
+        volume: 1,
+        lang: '',
+        voice: null,
+      };
       const UtteranceMock = vi.fn().mockReturnValue(mockUtterance);
       vi.stubGlobal('SpeechSynthesisUtterance', UtteranceMock);
 
@@ -232,7 +249,12 @@
     });
 
     it('defers speak via voiceschanged when voices not yet loaded', () => {
-      const mockUtterance = { rate: 1, volume: 1, lang: '', voice: null };
+      const mockUtterance = {
+        rate: 1,
+        volume: 1,
+        lang: '',
+        voice: null,
+      };
       const UtteranceMock = vi.fn().mockReturnValue(mockUtterance);
       vi.stubGlobal('SpeechSynthesisUtterance', UtteranceMock);
 
@@ -241,9 +263,12 @@
         cancel: vi.fn(),
         speak: vi.fn(),
         getVoices: vi.fn().mockReturnValue([]), // empty on first call
-        addEventListener: vi.fn().mockImplementation((event, handler) => {
-          if (event === 'voiceschanged') voicesChangedHandler = handler;
-        }),
+        addEventListener: vi
+          .fn()
+          .mockImplementation((event, handler) => {
+            if (event === 'voiceschanged')
+              voicesChangedHandler = handler;
+          }),
         removeEventListener: vi.fn(),
       };
       vi.stubGlobal('speechSynthesis', synthMock);
@@ -261,8 +286,16 @@
     });
 
     it('sets lang on utterance', () => {
-      const mockUtterance = { rate: 1, volume: 1, lang: '', voice: null };
-      vi.stubGlobal('SpeechSynthesisUtterance', vi.fn().mockReturnValue(mockUtterance));
+      const mockUtterance = {
+        rate: 1,
+        volume: 1,
+        lang: '',
+        voice: null,
+      };
+      vi.stubGlobal(
+        'SpeechSynthesisUtterance',
+        vi.fn().mockReturnValue(mockUtterance),
+      );
       vi.stubGlobal('speechSynthesis', {
         cancel: vi.fn(),
         speak: vi.fn(),
@@ -313,7 +346,10 @@
     synth.speak(u);
   }
 
-  export function speak(text: string, options: SpeakOptions = {}): void {
+  export function speak(
+    text: string,
+    options: SpeakOptions = {},
+  ): void {
     const synth = (
       globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
     ).speechSynthesis;
@@ -370,6 +406,7 @@
 ## Task 4: Wire settings into useGameTTS + language from i18n
 
 **Files:**
+
 - Modify: `src/components/answer-game/useGameTTS.ts`
 - Modify: `src/components/answer-game/useGameTTS.test.tsx`
 
@@ -384,7 +421,12 @@
     // Mock useSettings to return custom rate/volume
     vi.mock('@/db/hooks/useSettings', () => ({
       useSettings: () => ({
-        settings: { speechRate: 1.5, volume: 0.6, preferredVoiceURI: 'Samantha', ttsEnabled: true },
+        settings: {
+          speechRate: 1.5,
+          volume: 0.6,
+          preferredVoiceURI: 'Samantha',
+          ttsEnabled: true,
+        },
         update: vi.fn(),
       }),
     }));
@@ -429,7 +471,13 @@
           lang: i18n.language,
         });
       },
-      [config.ttsEnabled, settings.speechRate, settings.volume, settings.preferredVoiceURI, i18n.language],
+      [
+        config.ttsEnabled,
+        settings.speechRate,
+        settings.volume,
+        settings.preferredVoiceURI,
+        i18n.language,
+      ],
     );
 
     const speakPrompt = useCallback(
@@ -442,7 +490,13 @@
           lang: i18n.language,
         });
       },
-      [config.ttsEnabled, settings.speechRate, settings.volume, settings.preferredVoiceURI, i18n.language],
+      [
+        config.ttsEnabled,
+        settings.speechRate,
+        settings.volume,
+        settings.preferredVoiceURI,
+        i18n.language,
+      ],
     );
 
     return { speakTile, speakPrompt };
@@ -469,6 +523,7 @@
 ## Task 5: Add drag-start TTS to tile banks
 
 **Files:**
+
 - Modify: `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
 - Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
 
@@ -524,7 +579,9 @@
 
   export const LetterTileBank = () => {
     const { allTiles, bankTileIds } = useAnswerGameContext();
-    const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
+    const bankTiles = allTiles.filter((t) =>
+      bankTileIds.includes(t.id),
+    );
 
     return (
       <div className="flex flex-wrap justify-center gap-3">
@@ -542,7 +599,9 @@
 
   ```tsx
   const speakTileRef = useRef(speakTile);
-  useEffect(() => { speakTileRef.current = speakTile; }, [speakTile]);
+  useEffect(() => {
+    speakTileRef.current = speakTile;
+  }, [speakTile]);
 
   // In the draggable effect:
   return draggable({
@@ -573,6 +632,7 @@
 ## Task 6: Wire sound effects into useTileEvaluation
 
 **Files:**
+
 - Modify: `src/components/answer-game/useTileEvaluation.ts`
 - Modify: `src/components/answer-game/useTileEvaluation.test.tsx`
 
@@ -583,7 +643,9 @@
   ```tsx
   it('plays correct sound when tile is correct', async () => {
     const playSoundMock = vi.fn();
-    vi.mock('@/lib/audio/AudioFeedback', () => ({ playSound: playSoundMock }));
+    vi.mock('@/lib/audio/AudioFeedback', () => ({
+      playSound: playSoundMock,
+    }));
     // ... render with a correct tile placement
     // expect playSoundMock to have been called with 'correct'
   });
@@ -618,7 +680,10 @@
       const correct = tile.value === zone.expectedValue;
       dispatch({ type: 'PLACE_TILE', tileId, zoneIndex });
 
-      playSound(correct ? 'correct' : 'wrong', state.config.volume ?? 0.8);
+      playSound(
+        correct ? 'correct' : 'wrong',
+        state.config.volume ?? 0.8,
+      );
 
       getGameEventBus().emit({
         type: 'game:evaluate',
@@ -632,7 +697,10 @@
         nearMiss: false,
       });
 
-      if (!correct && state.config.wrongTileBehavior === 'lock-auto-eject') {
+      if (
+        !correct &&
+        state.config.wrongTileBehavior === 'lock-auto-eject'
+      ) {
         ejectionTimerRef.current = setTimeout(() => {
           dispatch({ type: 'EJECT_TILE', zoneIndex });
           ejectionTimerRef.current = null;
@@ -670,6 +738,7 @@
 ## Task 7: Create useGameSounds hook (round + game-complete mp3s)
 
 **Files:**
+
 - Create: `src/components/answer-game/useGameSounds.ts`
 - Create: `src/components/answer-game/useGameSounds.test.tsx`
 - Modify: `src/games/word-spell/WordSpell/WordSpell.tsx`
@@ -786,6 +855,7 @@
 ## Task 8: Create useRoundTTS hook (auto-speak prompt)
 
 **Files:**
+
 - Create: `src/components/answer-game/useRoundTTS.ts`
 - Create: `src/components/answer-game/useRoundTTS.test.tsx`
 - Modify: `src/games/word-spell/WordSpell/WordSpell.tsx`
@@ -802,7 +872,12 @@
   describe('useRoundTTS', () => {
     it('calls speakPrompt with the prompt on mount', () => {
       const speakPromptMock = vi.fn();
-      vi.mock('./useGameTTS', () => ({ useGameTTS: () => ({ speakPrompt: speakPromptMock, speakTile: vi.fn() }) }));
+      vi.mock('./useGameTTS', () => ({
+        useGameTTS: () => ({
+          speakPrompt: speakPromptMock,
+          speakTile: vi.fn(),
+        }),
+      }));
 
       // render useRoundTTS('cat') with a context where ttsEnabled = true, roundIndex = 0
       // expect speakPromptMock called with 'cat'
@@ -810,7 +885,12 @@
 
     it('calls speakPrompt again when roundIndex changes', () => {
       const speakPromptMock = vi.fn();
-      vi.mock('./useGameTTS', () => ({ useGameTTS: () => ({ speakPrompt: speakPromptMock, speakTile: vi.fn() }) }));
+      vi.mock('./useGameTTS', () => ({
+        useGameTTS: () => ({
+          speakPrompt: speakPromptMock,
+          speakTile: vi.fn(),
+        }),
+      }));
 
       // render, re-render with new roundIndex
       // expect speakPromptMock called twice
@@ -818,7 +898,12 @@
 
     it('does not call speakPrompt when ttsEnabled is false', () => {
       const speakPromptMock = vi.fn();
-      vi.mock('./useGameTTS', () => ({ useGameTTS: () => ({ speakPrompt: speakPromptMock, speakTile: vi.fn() }) }));
+      vi.mock('./useGameTTS', () => ({
+        useGameTTS: () => ({
+          speakPrompt: speakPromptMock,
+          speakTile: vi.fn(),
+        }),
+      }));
 
       // render with ttsEnabled = false
       // expect speakPromptMock NOT called
@@ -899,6 +984,7 @@
 ## Task 9: Hide AudioButton when TTS disabled
 
 **Files:**
+
 - Modify: `src/components/questions/AudioButton/AudioButton.tsx`
 
 - [ ] **Step 1: Update AudioButton to return null when TTS off**

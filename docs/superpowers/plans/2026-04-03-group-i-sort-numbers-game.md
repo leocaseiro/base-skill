@@ -14,27 +14,28 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|---------------|
-| `src/games/sort-numbers/types.ts` | Create | `SortNumbersConfig`, `SortNumbersRound` extending `AnswerGameConfig` |
-| `src/games/sort-numbers/build-sort-round.ts` | Create | Generates tiles + zones for a round from config |
-| `src/games/sort-numbers/build-sort-round.test.ts` | Create | Unit tests for ascending/descending/skip generation |
-| `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx` | Create | Sequential ordered drop zones reading from AnswerGameContext |
-| `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.test.tsx` | Create | Renders correct slot count, aria labels |
-| `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx` | Create | Draggable number tiles reading from AnswerGameContext |
-| `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx` | Create | Renders correct tiles, speaks on click |
-| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` | Create | Composition root |
-| `src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx` | Create | Ascending, descending, with-skips stories |
-| `src/games/registry.ts` | Modify | Add `sort-numbers` catalog entry |
-| `src/routes/$locale/_app/game/$gameId.tsx` | Modify | Handle `gameId === 'sort-numbers'` in `GameBody` |
-| `src/lib/i18n/locales/en/games.json` | Modify | Add `sort-numbers` title + instructions |
-| `src/lib/i18n/locales/pt-BR/games.json` | Modify | Same in Portuguese |
+| File                                                                      | Action | Responsibility                                                       |
+| ------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------- |
+| `src/games/sort-numbers/types.ts`                                         | Create | `SortNumbersConfig`, `SortNumbersRound` extending `AnswerGameConfig` |
+| `src/games/sort-numbers/build-sort-round.ts`                              | Create | Generates tiles + zones for a round from config                      |
+| `src/games/sort-numbers/build-sort-round.test.ts`                         | Create | Unit tests for ascending/descending/skip generation                  |
+| `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx`      | Create | Sequential ordered drop zones reading from AnswerGameContext         |
+| `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.test.tsx` | Create | Renders correct slot count, aria labels                              |
+| `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`      | Create | Draggable number tiles reading from AnswerGameContext                |
+| `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx` | Create | Renders correct tiles, speaks on click                               |
+| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                      | Create | Composition root                                                     |
+| `src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx`              | Create | Ascending, descending, with-skips stories                            |
+| `src/games/registry.ts`                                                   | Modify | Add `sort-numbers` catalog entry                                     |
+| `src/routes/$locale/_app/game/$gameId.tsx`                                | Modify | Handle `gameId === 'sort-numbers'` in `GameBody`                     |
+| `src/lib/i18n/locales/en/games.json`                                      | Modify | Add `sort-numbers` title + instructions                              |
+| `src/lib/i18n/locales/pt-BR/games.json`                                   | Modify | Same in Portuguese                                                   |
 
 ---
 
 ## Task 1: Define SortNumbers types
 
 **Files:**
+
 - Create: `src/games/sort-numbers/types.ts`
 
 - [ ] **Step 1: Create types file**
@@ -81,6 +82,7 @@
 ## Task 2: Build round generation logic
 
 **Files:**
+
 - Create: `src/games/sort-numbers/build-sort-round.ts`
 - Create: `src/games/sort-numbers/build-sort-round.test.ts`
 
@@ -90,17 +92,28 @@
 
   ```ts
   import { describe, expect, it } from 'vitest';
-  import { buildSortRound, generateSortRounds } from './build-sort-round';
+  import {
+    buildSortRound,
+    generateSortRounds,
+  } from './build-sort-round';
 
   describe('buildSortRound', () => {
     it('creates zones in ascending order for ascending direction', () => {
       const { zones } = buildSortRound([3, 1, 2], 'ascending');
-      expect(zones.map((z) => z.expectedValue)).toEqual(['1', '2', '3']);
+      expect(zones.map((z) => z.expectedValue)).toEqual([
+        '1',
+        '2',
+        '3',
+      ]);
     });
 
     it('creates zones in descending order for descending direction', () => {
       const { zones } = buildSortRound([3, 1, 2], 'descending');
-      expect(zones.map((z) => z.expectedValue)).toEqual(['3', '2', '1']);
+      expect(zones.map((z) => z.expectedValue)).toEqual([
+        '3',
+        '2',
+        '1',
+      ]);
     });
 
     it('creates tiles shuffled (not in sorted order)', () => {
@@ -178,7 +191,10 @@
   ```ts
   // src/games/sort-numbers/build-sort-round.ts
   import { nanoid } from 'nanoid';
-  import type { AnswerZone, TileItem } from '@/components/answer-game/types';
+  import type {
+    AnswerZone,
+    TileItem,
+  } from '@/components/answer-game/types';
   import type { SortNumbersRound } from './types';
 
   export function buildSortRound(
@@ -248,7 +264,10 @@
       const start =
         Math.floor(Math.random() * (maxStart - range.min + 1)) +
         range.min;
-      const sequence = Array.from({ length: quantity }, (_, i) => start + i);
+      const sequence = Array.from(
+        { length: quantity },
+        (_, i) => start + i,
+      );
       return { sequence };
     });
   }
@@ -275,6 +294,7 @@
 ## Task 3: Create NumberSequenceSlots
 
 **Files:**
+
 - Create: `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx`
 - Create: `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.test.tsx`
 
@@ -392,7 +412,9 @@
               key={zone.id}
               zoneIndex={i}
               label={placedTile?.label ?? null}
-              isActive={i === activeSlotIndex && zone.placedTileId === null}
+              isActive={
+                i === activeSlotIndex && zone.placedTileId === null
+              }
               isWrong={zone.isWrong}
             />
           );
@@ -420,6 +442,7 @@
 ## Task 4: Create SortNumbersTileBank
 
 **Files:**
+
 - Create: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
 - Create: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx`
 
@@ -497,7 +520,9 @@
 
   export const SortNumbersTileBank = () => {
     const { allTiles, bankTileIds } = useAnswerGameContext();
-    const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
+    const bankTiles = allTiles.filter((t) =>
+      bankTileIds.includes(t.id),
+    );
 
     return (
       <div className="flex flex-wrap justify-center gap-3">
@@ -527,6 +552,7 @@
 ## Task 5: Create SortNumbers composition root
 
 **Files:**
+
 - Create: `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
 - [ ] **Step 1: Create `SortNumbers.tsx`**
@@ -740,6 +766,7 @@
 ## Task 6: Add i18n strings for SortNumbers
 
 **Files:**
+
 - Modify: `src/lib/i18n/locales/en/games.json`
 - Modify: `src/lib/i18n/locales/pt-BR/games.json`
 
@@ -824,6 +851,7 @@
 ## Task 7: Register SortNumbers in catalog + game route
 
 **Files:**
+
 - Modify: `src/games/registry.ts`
 - Modify: `src/routes/$locale/_app/game/$gameId.tsx`
 
@@ -920,17 +948,25 @@
     return (
       <details
         open={open}
-        onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}
+        onToggle={(e) =>
+          setOpen((e.currentTarget as HTMLDetailsElement).open)
+        }
         className="fixed right-4 top-20 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
       >
-        <summary className="cursor-pointer font-medium">⚙️ SortNumbers Config</summary>
+        <summary className="cursor-pointer font-medium">
+          ⚙️ SortNumbers Config
+        </summary>
         <div className="mt-3 flex flex-col gap-3">
           <label className="flex flex-col gap-1">
             Direction
             <select
               value={config.direction}
               onChange={(e) =>
-                onChange({ ...config, direction: e.target.value as SortNumbersConfig['direction'] })
+                onChange({
+                  ...config,
+                  direction: e.target
+                    .value as SortNumbersConfig['direction'],
+                })
               }
               className="rounded border px-2 py-1"
             >
@@ -941,27 +977,54 @@
           <label className="flex flex-col gap-1">
             Quantity per round
             <input
-              type="number" min={2} max={10}
+              type="number"
+              min={2}
+              max={10}
               value={config.quantity}
-              onChange={(e) => onChange({ ...config, quantity: Number(e.target.value) })}
+              onChange={(e) =>
+                onChange({
+                  ...config,
+                  quantity: Number(e.target.value),
+                })
+              }
               className="rounded border px-2 py-1"
             />
           </label>
           <label className="flex flex-col gap-1">
             Range min
             <input
-              type="number" min={0} max={50}
+              type="number"
+              min={0}
+              max={50}
               value={config.range.min}
-              onChange={(e) => onChange({ ...config, range: { ...config.range, min: Number(e.target.value) } })}
+              onChange={(e) =>
+                onChange({
+                  ...config,
+                  range: {
+                    ...config.range,
+                    min: Number(e.target.value),
+                  },
+                })
+              }
               className="rounded border px-2 py-1"
             />
           </label>
           <label className="flex flex-col gap-1">
             Range max
             <input
-              type="number" min={1} max={100}
+              type="number"
+              min={1}
+              max={100}
               value={config.range.max}
-              onChange={(e) => onChange({ ...config, range: { ...config.range, max: Number(e.target.value) } })}
+              onChange={(e) =>
+                onChange({
+                  ...config,
+                  range: {
+                    ...config.range,
+                    max: Number(e.target.value),
+                  },
+                })
+              }
               className="rounded border px-2 py-1"
             />
           </label>
@@ -969,7 +1032,9 @@
             <input
               type="checkbox"
               checked={config.allowSkips}
-              onChange={(e) => onChange({ ...config, allowSkips: e.target.checked })}
+              onChange={(e) =>
+                onChange({ ...config, allowSkips: e.target.checked })
+              }
             />
             Allow gaps/skips
           </label>
@@ -977,7 +1042,9 @@
             <input
               type="checkbox"
               checked={config.ttsEnabled}
-              onChange={(e) => onChange({ ...config, ttsEnabled: e.target.checked })}
+              onChange={(e) =>
+                onChange({ ...config, ttsEnabled: e.target.checked })
+              }
             />
             TTS enabled
           </label>
