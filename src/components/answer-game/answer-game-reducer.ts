@@ -51,6 +51,14 @@ export function answerGameReducer(
       }
 
       if (correct) {
+        const previousId = zone.placedTileId;
+        let newBankTileIds = state.bankTileIds.filter(
+          (id) => id !== action.tileId,
+        );
+        if (previousId !== null && previousId !== action.tileId) {
+          // Bank tile dropped on an occupied slot: previous occupant returns to bank.
+          newBankTileIds = [...newBankTileIds, previousId];
+        }
         const newZone: AnswerZone = {
           ...zone,
           placedTileId: action.tileId,
@@ -59,9 +67,6 @@ export function answerGameReducer(
         };
         const newZones = state.zones.map((z, i) =>
           i === action.zoneIndex ? newZone : z,
-        );
-        const newBankTileIds = state.bankTileIds.filter(
-          (id) => id !== action.tileId,
         );
         const nextActiveSlot = newZones.findIndex(
           (z, i) => i > action.zoneIndex && z.placedTileId === null,
