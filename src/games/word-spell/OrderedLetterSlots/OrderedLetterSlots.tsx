@@ -1,5 +1,6 @@
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { useEffect, useRef } from 'react';
+import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
 
@@ -16,6 +17,7 @@ const LetterSlot = ({
 }) => {
   const ref = useRef<HTMLLIElement>(null);
   const { placeTile } = useTileEvaluation();
+  const dispatch = useAnswerGameDispatch();
 
   useEffect(() => {
     const element = ref.current;
@@ -34,12 +36,17 @@ const LetterSlot = ({
     ? `Slot ${zoneIndex + 1}, filled with ${label}`
     : `Slot ${zoneIndex + 1}, empty`;
 
+  const handleClick = () => {
+    if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
+  };
+
   return (
     <li
       ref={ref}
       aria-label={ariaLabel}
       data-active={isActive || undefined}
       data-wrong={isWrong || undefined}
+      onClick={isWrong ? handleClick : undefined}
       className={[
         'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
         'border-border',
@@ -47,7 +54,7 @@ const LetterSlot = ({
           ? 'ring-2 ring-primary ring-offset-2 animate-pulse'
           : '',
         isWrong
-          ? 'border-destructive bg-destructive/10 text-destructive'
+          ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
           : '',
         label && !isWrong
           ? 'border-primary bg-primary/10 text-primary'

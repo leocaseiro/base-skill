@@ -99,9 +99,12 @@ export function answerGameReducer(
       const newZones = state.zones.map((z, i) =>
         i === action.zoneIndex ? newZone : z,
       );
-      const newBankTileIds = lockManual
+      let newBankTileIds = lockManual
         ? state.bankTileIds.filter((id) => id !== action.tileId)
         : state.bankTileIds;
+      if (lockManual && zone.placedTileId && zone.placedTileId !== action.tileId) {
+        newBankTileIds = [...newBankTileIds, zone.placedTileId];
+      }
 
       return {
         ...state,
