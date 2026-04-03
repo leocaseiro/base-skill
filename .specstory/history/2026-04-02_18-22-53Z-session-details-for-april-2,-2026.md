@@ -3730,8 +3730,6 @@ _**Agent (composer-2)**_
 
 <details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/.github/workflows/visual-regression.yml</summary>
 
-Status: **loading**
-
 </details>
 
 </tool-use>
@@ -3740,3 +3738,1786 @@ Status: **loading**
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Verifying report generation**
+
+I'm confirming that Playwright with 'html' reporter always creates the report file even on test failures. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && git add .github/workflows/visual-regression.yml && git commit --trailer "Made-with: Cursor" -m "ci(vr): upload Playwright HTML report artifact on failure
+
+Enables local trace viewer via downloaded playwright-report (same flow as E2E)."</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && git add .github/workflows/visual-regression.yml && git commit --trailer "Made-with: Cursor" -m "ci(vr): upload Playwright HTML report artifact on failure
+
+Enables local trace viewer via downloaded playwright-report (same flow as E2E)."
+```
+
+```
+→ lint-staged could not find any staged files matching configured tasks.
+yarn run v1.22.22
+$ vitest run
+/Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js:115
+		throw new Error(
+		      ^
+
+Error: Cannot find module @rollup/rollup-darwin-arm64. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try &#96;npm i&#96; again after removing both package-lock.json and node_modules directory.
+    at requireWithFriendlyError (/Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js:115:9)
+    at Object.&lt;anonymous&gt; (/Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js:124:76)
+    at Module._compile (node:internal/modules/cjs/loader:1812:14)
+    at Object..js (node:internal/modules/cjs/loader:1943:10)
+    at Module.load (node:internal/modules/cjs/loader:1533:32)
+    at Module._load (node:internal/modules/cjs/loader:1335:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:328:3)
+    at ModuleWrap.&lt;anonymous&gt; (node:internal/modules/esm/translators:233:7)
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25) {
+  [cause]: Error: Cannot find module '@rollup/rollup-darwin-arm64'
+  Require stack:
+  - /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1456:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+      at Module._load (node:internal/modules/cjs/loader:1242:25)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+      at Module.require (node:internal/modules/cjs/loader:1556:12)
+      at require (node:internal/modules/helpers:152:16)
+      at requireWithFriendlyError (/Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js:97:10)
+      at Object.&lt;anonymous&gt; (/Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js:124:76)
+      at Module._compile (node:internal/modules/cjs/loader:1812:14) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [
+      '/Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js'
+    ]
+  }
+}
+
+Node.js v24.14.1
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+husky - pre-commit script failed (code 1)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && yarn install --frozen-lockfile</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && yarn install --frozen-lockfile
+```
+
+```
+yarn install v1.22.22
+$ node scripts/check-node-version.mjs
+[1/5] Validating package.json...
+[2/5] Resolving packages...
+[3/5] Fetching packages...
+[4/5] Linking dependencies...
+[5/5] Building fresh packages...
+$ husky
+Done in 10.82s.
+warning eciesjs@0.4.18: The engine "bun" appears to be invalid.
+warning eciesjs@0.4.18: The engine "deno" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "bun" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "deno" appears to be invalid.
+warning "@tanstack/react-devtools &gt; @tanstack/devtools@0.11.0" has unmet peer dependency "solid-js@&gt;=1.9.7".
+warning "@tanstack/react-devtools &gt; @tanstack/devtools &gt; goober@2.1.18" has unmet peer dependency "csstype@^3.0.10".
+warning "@tanstack/react-router-devtools &gt; @tanstack/router-devtools-core@1.167.1" has unmet peer dependency "@tanstack/router-core@^1.168.2".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/react-query@&gt;=5.90.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/router-core@&gt;=1.127.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @axe-core/playwright@4.11.1" has unmet peer dependency "playwright-core@&gt;= 1.0.0".
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && git add .github/workflows/visual-regression.yml && git commit --trailer "Made-with: Cursor" -m "ci(vr): upload Playwright HTML report artifact on failure
+
+Enables local trace viewer via downloaded playwright-report (same flow as E2E)."</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && git add .github/workflows/visual-regression.yml && git commit --trailer "Made-with: Cursor" -m "ci(vr): upload Playwright HTML report artifact on failure
+
+Enables local trace viewer via downloaded playwright-report (same flow as E2E)."
+```
+
+```
+[milestone-4-game-engine 03b1d29] ci(vr): upload Playwright HTML report artifact on failure
+ 1 file changed, 8 insertions(+)
+→ lint-staged could not find any staged files matching configured tasks.
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine
+
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 19ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 25ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/migrations.test.ts (1 test) 75ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 120ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/create-database.test.ts (3 tests) 144ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/GameCard.test.tsx (5 tests) 194ms
+ ✓ src/db/schemas/session_history_index.test.ts (3 tests) 158ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 249ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders round counter (1-indexed)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders round counter (1-indexed)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 137ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders score in sub-bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders score in sub-bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/GameGrid.test.tsx (5 tests) 269ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/session-finder.test.ts (6 tests) 275ms
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 253ms
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 308ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 323ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 327ms
+ ✓ src/db/hooks/useBookmarks.test.tsx (3 tests) 340ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 16ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/game/GameShell.test.tsx (9 tests) 582ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 20ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 3ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/routes/__root.test.tsx (1 test) 12ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/db/setup-validation.test.ts (1 test) 2ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+
+ Test Files  29 passed (29)
+      Tests  118 passed (118)
+   Start at  06:07:14
+   Duration  2.53s (transform 879ms, setup 3.42s, collect 9.10s, tests 3.87s, environment 16.49s, prepare 1.68s)
+
+Done in 3.28s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && git push origin milestone-4-game-engine</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && git push origin milestone-4-game-engine
+```
+
+```
+-e [1m──────────────────────────────────────────[0m
+-e [1m  Pre-push checks[0m
+-e [1m──────────────────────────────────────────[0m
+-e [0;36m[1m▶ Running: Lint (eslint + knip)[0m
+yarn run v1.22.22
+$ eslint . --max-warnings 0 &amp;&amp; knip --no-config-hints
+Done in 9.11s.
+-e [0;32m  ✓ Lint (eslint + knip)[0m
+-e [0;36m[1m▶ Running: TypeScript typecheck[0m
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 1.89s.
+-e [0;32m  ✓ TypeScript typecheck[0m
+-e [0;36m[1m▶ Running: Unit tests (vitest)[0m
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine
+
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 30ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 22ms
+ ✓ src/db/migrations.test.ts (1 test) 80ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 94ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 196ms
+ ✓ src/db/schemas/session_history_index.test.ts (3 tests) 132ms
+ ✓ src/db/create-database.test.ts (3 tests) 132ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 242ms
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 142ms
+ ✓ src/lib/game-engine/session-finder.test.ts (6 tests) 243ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 315ms
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 272ms
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 291ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 314ms
+ ✓ src/db/hooks/useBookmarks.test.tsx (3 tests) 331ms
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 388ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 28ms
+ ✓ src/components/game/GameShell.test.tsx (9 tests) 586ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 16ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 3ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/routes/__root.test.tsx (1 test) 15ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+
+ Test Files  29 passed (29)
+      Tests  118 passed (118)
+   Start at  06:07:36
+   Duration  2.10s (transform 649ms, setup 1.84s, collect 8.77s, tests 3.88s, environment 12.01s, prepare 1.48s)
+
+Done in 2.47s.
+-e [0;32m  ✓ Unit tests (vitest)[0m
+-e [1;33m  ⚠ Storybook tests — server not running on port 6006. Start it with 'yarn storybook' or set START_STORYBOOK=1 (skipped)[0m
+-e [0;36m[1m▶ Running: Visual regression tests (Docker/Chromium)[0m
+yarn run v1.22.22
+$ node scripts/vr-docker.mjs test
+[36m▶ Building app on host for Docker VR (APP_BASE_URL=/)[0m
+$ vite build
+vite v7.3.1 building client environment for production...
+transforming...
+
+[@tanstack/devtools-vite] Removed devtools code from: /src/routes/__root.tsx
+
+✓ 2774 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/client/registerSW.js                                        0.13 kB
+dist/client/assets/geist-cyrillic-wght-normal-CHSlOQsW.woff2    14.69 kB
+dist/client/assets/geist-latin-ext-wght-normal-DMtmJ5ZE.woff2   15.31 kB
+dist/client/assets/geist-latin-wght-normal-Dm3htQBi.woff2       28.40 kB
+dist/client/assets/styles-BcGnme4n.css                          69.79 kB │ gzip:  13.14 kB
+dist/client/assets/parent-aMhikjRE.js                            0.12 kB │ gzip:   0.13 kB
+dist/client/assets/_gameId-BfJ_Dias.js                           0.14 kB │ gzip:   0.14 kB
+dist/client/assets/useRxQuery-knqgfzqz.js                        0.19 kB │ gzip:   0.17 kB
+dist/client/assets/dashboard-bnOE-jPV.js                         0.27 kB │ gzip:   0.21 kB
+dist/client/assets/sync-DOvJNv28.js                              0.28 kB │ gzip:   0.22 kB
+dist/client/assets/history-BYzeLpMX.js                           0.28 kB │ gzip:   0.22 kB
+dist/client/assets/data-Bjv0iTcs.js                              0.29 kB │ gzip:   0.22 kB
+dist/client/assets/index-YYhiq7Bt.js                             0.30 kB │ gzip:   0.23 kB
+dist/client/assets/voices-Z12a--Fi.js                            0.30 kB │ gzip:   0.23 kB
+dist/client/assets/overrides-DTuv3mSn.js                         0.30 kB │ gzip:   0.23 kB
+dist/client/assets/route-UoFLkUdq.js                             0.32 kB │ gzip:   0.25 kB
+dist/client/assets/i18nInstance-B8K6-7Zg.js                      0.74 kB │ gzip:   0.47 kB
+dist/client/assets/button-vHVDX935.js                            3.36 kB │ gzip:   1.28 kB
+dist/client/assets/index-DsqQOLnF.js                             5.76 kB │ gzip:   2.19 kB
+dist/client/assets/settings-BSGace10.js                         33.23 kB │ gzip:  11.42 kB
+dist/client/assets/createLucideIcon-kEC-cSDg.js                 33.50 kB │ gzip:  11.42 kB
+dist/client/assets/_app-B54ICiWM.js                             39.01 kB │ gzip:  11.85 kB
+dist/client/assets/i18n-BsFajay9.js                             44.61 kB │ gzip:  14.56 kB
+dist/client/assets/index-CqiQqJPj.js                            51.36 kB │ gzip:  18.79 kB
+dist/client/assets/main-CyOXGnxa.js                            629.95 kB │ gzip: 201.29 kB
+✓ built in 1.86s
+vite v7.3.1 building ssr environment for production...
+transforming...
+
+[@tanstack/devtools-vite] Removed devtools code from: /src/routes/__root.tsx
+
+✓ 127 modules transformed.
+rendering chunks...
+dist/server/registerSW.js                                   0.13 kB
+dist/server/assets/start-HYkvq4Ni.js                        0.06 kB
+dist/server/assets/utils-H80jjgLf.js                        0.15 kB
+dist/server/assets/parent-Cjz5nUpj.js                       0.23 kB
+dist/server/assets/useRxQuery-JhsH-Ks4.js                   0.34 kB
+dist/server/assets/dashboard-BtritWqF.js                    0.38 kB
+dist/server/assets/sync-B9W9XhIX.js                         0.38 kB
+dist/server/assets/history-KP4A0aTR.js                      0.40 kB
+dist/server/assets/index-D3SUhtYy.js                        0.40 kB
+dist/server/assets/data-DM7cL2kh.js                         0.40 kB
+dist/server/assets/voices-DMFVOs54.js                       0.41 kB
+dist/server/assets/overrides-FnG4bxhN.js                    0.41 kB
+dist/server/assets/_gameId-E2DKZwas.js                      0.43 kB
+dist/server/assets/route-Bq0XoryG.js                        0.67 kB
+dist/server/assets/i18n-hS-ghRCf.js                         3.15 kB
+dist/server/assets/button-BSyCcLUx.js                       3.20 kB
+dist/server/assets/_tanstack-start-manifest_v-BYBZctnV.js   3.46 kB
+dist/server/assets/index-CmUxJg5e.js                       10.44 kB
+dist/server/assets/settings-D-9UV83a.js                    11.61 kB
+dist/server/assets/_app-ChihuYqo.js                        17.74 kB
+dist/server/server.js                                      37.23 kB
+dist/server/assets/router-Dj2dWpcz.js                      42.43 kB
+✓ built in 251ms
+[prerender] Prerendering pages...
+[prerender] Concurrency: 18
+[prerender] Crawling: /
+[prerender] Prerendered 1 pages:
+[prerender] - /
+[36m▶ Running VR tests in Docker (test mode)...[0m
+yarn install v1.22.22
+$ node scripts/check-node-version.mjs
+[1/5] Validating package.json...
+[2/5] Resolving packages...
+[3/5] Fetching packages...
+[4/5] Linking dependencies...
+[5/5] Building fresh packages...
+$ husky
+fatal: not a git repository: /Users/leocaseiro/Sites/base-skill/.git/worktrees/milestone-4-game-engine
+Done in 77.34s.
+
+
+Running 2 tests using 2 workers
+
+[1A[2K[1/2] [chromium] › e2e/visual.spec.ts:3:1 › @visual home page
+[1A[2K[2/2] [chromium] › e2e/visual.spec.ts:12:1 › @visual game shell layout
+[1A[2K  2 passed (7.1s)
+Done in 90.16s.
+-e [0;32m  ✓ Visual regression tests[0m
+-e [0;36m[1m▶ Running: End-to-end tests (playwright)[0m
+yarn run v1.22.22
+$ playwright test --ignore-snapshots
+
+Error: Process from config.webServer was not able to start. Exit code: 1
+
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+-e [0;31m  ✗ End-to-end tests (playwright)[0m
+-e [1m──────────────────────────────────────────[0m
+-e [0;31m[1m  Pre-push checks FAILED. Push aborted.[0m
+-e [1;33m  Fix the issues above, or skip specific checks with SKIP_* env vars.[0m
+-e [1;33m  Example: SKIP_E2E=1 SKIP_VR=1 git push[0m
+-e [1m──────────────────────────────────────────[0m
+husky - pre-push script failed (code 1)
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders round counter (1-indexed)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders round counter (1-indexed)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders score in sub-bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders score in sub-bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+"createRequestHandler", "defineHandlerCallback", "transformPipeableStreamWithRouter" and "transformReadableStreamWithRouter" are imported from external module "@tanstack/router-core/ssr/server" but never used in "node_modules/@tanstack/start-server-core/dist/esm/index.js".
+"RawStream" is imported from external module "@tanstack/router-core" but never used in "node_modules/@tanstack/start-client-core/dist/esm/index.js".
+"hydrate" and "json" are imported from external module "@tanstack/router-core/ssr/client" but never used in "node_modules/@tanstack/start-client-core/dist/esm/index.js".
+(node:7) [DEP0169] DeprecationWarning: &#96;url.parse()&#96; behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for &#96;url.parse()&#96; vulnerabilities.
+(Use &#96;node --trace-deprecation ...&#96; to show where the warning was created)
+warning eciesjs@0.4.18: The engine "bun" appears to be invalid.
+warning eciesjs@0.4.18: The engine "deno" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "bun" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "deno" appears to be invalid.
+warning "@tanstack/react-devtools &gt; @tanstack/devtools@0.11.0" has unmet peer dependency "solid-js@&gt;=1.9.7".
+warning "@tanstack/react-devtools &gt; @tanstack/devtools &gt; goober@2.1.18" has unmet peer dependency "csstype@^3.0.10".
+warning "@tanstack/react-router-devtools &gt; @tanstack/router-devtools-core@1.167.1" has unmet peer dependency "@tanstack/router-core@^1.168.2".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/react-query@&gt;=5.90.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/router-core@&gt;=1.127.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @axe-core/playwright@4.11.1" has unmet peer dependency "playwright-core@&gt;= 1.0.0".
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+[1A[2K[WebServer] npm warn exec The following package was not found and will be installed: serve@14.2.6
+npm notice
+npm notice New minor version of npm available! 11.11.0 -&gt; 11.12.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+npm notice To update run: npm install -g npm@11.12.1
+npm notice
+[WebServer] /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js:115
+[WebServer] 		throw new Error(
+[WebServer] 		      ^
+[WebServer] 
+[WebServer] Error: Cannot find module @rollup/rollup-darwin-arm64. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try &#96;npm i&#96; again after removing both package-lock.json and node_modules directory.
+[WebServer]     at requireWithFriendlyError (/Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js:115:9)
+[WebServer]     at Object.&lt;anonymous&gt; (/Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js:124:76)
+[WebServer]     at Module._compile (node:internal/modules/cjs/loader:1812:14)
+[WebServer]     at Object..js (node:internal/modules/cjs/loader:1943:10)
+[WebServer]     at Module.load (node:internal/modules/cjs/loader:1533:32)
+[WebServer]     at Module._load (node:internal/modules/cjs/loader:1335:12)
+[WebServer]     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+[WebServer]     at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:328:3)
+[WebServer]     at ModuleWrap.&lt;anonymous&gt; (node:internal/modules/esm/translators:233:7)
+[WebServer]     at ModuleJob.run (node:internal/modules/esm/module_job:430:25) {
+[WebServer]   [cause]: Error: Cannot find module '@rollup/rollup-darwin-arm64'
+[WebServer]   Require stack:
+[WebServer]   - /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js
+[WebServer]       at Module._resolveFilename (node:internal/modules/cjs/loader:1456:15)
+[WebServer]       at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+[WebServer]       at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+[WebServer]       at Module._load (node:internal/modules/cjs/loader:1242:25)
+[WebServer]       at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+[WebServer]       at Module.require (node:internal/modules/cjs/loader:1556:12)
+[WebServer]       at require (node:internal/modules/helpers:152:16)
+[WebServer]       at requireWithFriendlyError (/Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js:97:10)
+[WebServer]       at Object.&lt;anonymous&gt; (/Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js:124:76)
+[WebServer]       at Module._compile (node:internal/modules/cjs/loader:1812:14) {
+[WebServer]     code: 'MODULE_NOT_FOUND',
+[WebServer]     requireStack: [
+[WebServer]       '/Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/vite/node_modules/rollup/dist/native.js'
+[WebServer]     ]
+[WebServer]   }
+[WebServer] }
+[WebServer] 
+[WebServer] Node.js v24.14.1
+[WebServer] error Command failed with exit code 1.
+error Command failed with exit code 1.
+error: failed to push some refs to 'github.com:leocaseiro/base-skill.git'
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Fixing node_modules**
+
+I'm fixing the corrupted node_modules by removing it and reinstalling with yarn. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Reinstalling dependencies after Docker VR left `node_modules` in a broken state.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && rm -rf node_modules && yarn install --frozen-lockfile</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && rm -rf node_modules && yarn install --frozen-lockfile
+```
+
+```
+yarn install v1.22.22
+$ node scripts/check-node-version.mjs
+[1/5] Validating package.json...
+[2/5] Resolving packages...
+[3/5] Fetching packages...
+[4/5] Linking dependencies...
+[5/5] Building fresh packages...
+$ husky
+Done in 8.29s.
+warning eciesjs@0.4.18: The engine "bun" appears to be invalid.
+warning eciesjs@0.4.18: The engine "deno" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "bun" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "deno" appears to be invalid.
+warning "@tanstack/react-devtools &gt; @tanstack/devtools@0.11.0" has unmet peer dependency "solid-js@&gt;=1.9.7".
+warning "@tanstack/react-devtools &gt; @tanstack/devtools &gt; goober@2.1.18" has unmet peer dependency "csstype@^3.0.10".
+warning "@tanstack/react-router-devtools &gt; @tanstack/router-devtools-core@1.167.1" has unmet peer dependency "@tanstack/router-core@^1.168.2".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/react-query@&gt;=5.90.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/router-core@&gt;=1.127.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @axe-core/playwright@4.11.1" has unmet peer dependency "playwright-core@&gt;= 1.0.0".
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Checking rollup location**
+
+I'm verifying the rollup location with `ls node_modules/@rollup/rollup-darwin-arm64`. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: test -d /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/@rollup/rollup-darwin-arm64 && echo ok</summary>
+
+```bash
+test -d /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/@rollup/rollup-darwin-arm64 && echo ok
+```
+
+```
+ok
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/scripts/vr-docker.mjs</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Fixing Docker mount issue**
+
+I'm fixing the Docker mount to prevent overwriting host node_modules with Linux binaries. I'm implementing SKIP_VR=1 for this specific push to prevent node_modules corruption during pre-push. 
+
+**Adjusting push parameters**
+
+I'm amending the commit to add SKIP_VR=1 SKIP_E2E=1 to the commit message for the clean push. I'm pushing with SKIP_VR=1 SKIP_E2E=1 to avoid docker yarn install issues, documenting the root cause for the user. I'm skipping VR with `SKIP_VR=1` to avoid docker overwriting node_modules, allowing E2E tests to pass. 
+
+I'm using SKIP_VR=1 to prevent Docker from overwriting node_modules during pre-push, ensuring E2E tests validate the PR with stronger signal. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Docker VR mounts the repo and runs `yarn install` in Linux, overwriting the host's `node_modules` and removing `@rollup/rollup-darwin-arm64`. Pushing with `SKIP_VR=1` so pre-push doesn't corrupt `node_modules` and E2E can still run.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && SKIP_VR=1 git push origin milestone-4-game-engine</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine && SKIP_VR=1 git push origin milestone-4-game-engine
+```
+
+```
+-e [1m──────────────────────────────────────────[0m
+-e [1m  Pre-push checks[0m
+-e [1m──────────────────────────────────────────[0m
+-e [0;36m[1m▶ Running: Lint (eslint + knip)[0m
+yarn run v1.22.22
+$ eslint . --max-warnings 0 &amp;&amp; knip --no-config-hints
+Done in 7.03s.
+-e [0;32m  ✓ Lint (eslint + knip)[0m
+-e [0;36m[1m▶ Running: TypeScript typecheck[0m
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 1.72s.
+-e [0;32m  ✓ TypeScript typecheck[0m
+-e [0;36m[1m▶ Running: Unit tests (vitest)[0m
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine
+
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 4ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 3ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 20ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 19ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 21ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 176ms
+ ✓ src/db/schemas/session_history_index.test.ts (3 tests) 150ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 232ms
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 128ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 249ms
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 252ms
+ ✓ src/lib/game-engine/session-finder.test.ts (6 tests) 252ms
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 266ms
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 306ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 310ms
+ ✓ src/db/hooks/useBookmarks.test.tsx (3 tests) 313ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 4ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/components/game/GameShell.test.tsx (9 tests) 538ms
+ ✓ src/db/create-database.test.ts (3 tests) 130ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 93ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 23ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/routes/__root.test.tsx (1 test) 15ms
+ ✓ src/db/migrations.test.ts (1 test) 66ms
+
+ Test Files  29 passed (29)
+      Tests  118 passed (118)
+   Start at  06:10:06
+   Duration  2.44s (transform 860ms, setup 2.35s, collect 8.11s, tests 3.58s, environment 15.07s, prepare 1.53s)
+
+Done in 2.94s.
+-e [0;32m  ✓ Unit tests (vitest)[0m
+-e [1;33m  ⚠ Storybook tests — server not running on port 6006. Start it with 'yarn storybook' or set START_STORYBOOK=1 (skipped)[0m
+-e [1;33m  ⚠ Visual regression tests (skipped)[0m
+-e [0;36m[1m▶ Running: End-to-end tests (playwright)[0m
+yarn run v1.22.22
+$ playwright test --ignore-snapshots
+
+Running 15 tests using 1 worker
+···············
+  15 passed (28.0s)
+Done in 28.58s.
+-e [0;32m  ✓ End-to-end tests (playwright)[0m
+-e [1m──────────────────────────────────────────[0m
+-e [0;32m[1m  All pre-push checks passed.[0m
+-e [1m──────────────────────────────────────────[0m
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders round counter (1-indexed)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders round counter (1-indexed)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders score in sub-bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders score in sub-bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[WebServer] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] "createRequestHandler", "defineHandlerCallback", "transformPipeableStreamWithRouter" and "transformReadableStreamWithRouter" are imported from external module "@tanstack/router-core/ssr/server" but never used in "node_modules/@tanstack/start-server-core/dist/esm/index.js".
+[WebServer] "RawStream" is imported from external module "@tanstack/router-core" but never used in "node_modules/@tanstack/start-client-core/dist/esm/index.js".
+[WebServer] "hydrate" and "json" are imported from external module "@tanstack/router-core/ssr/client" but never used in "node_modules/@tanstack/start-client-core/dist/esm/index.js".
+[WebServer] npm warn Unknown env config "version-git-tag". This will stop working in the next major version of npm. See &#96;npm help npmrc&#96; for supported config options.
+[WebServer] npm warn Unknown env config "argv". This will stop working in the next major version of npm. See &#96;npm help npmrc&#96; for supported config options.
+[WebServer] npm warn Unknown env config "version-commit-hooks". This will stop working in the next major version of npm. See &#96;npm help npmrc&#96; for supported config options.
+[WebServer] npm warn Unknown env config "version-git-message". This will stop working in the next major version of npm. See &#96;npm help npmrc&#96; for supported config options.
+[WebServer] npm warn Unknown env config "version-tag-prefix". This will stop working in the next major version of npm. See &#96;npm help npmrc&#96; for supported config options.
+(node:40918) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+(node:40918) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+(node:41053) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+(node:41053) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+(node:41542) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+(node:41542) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+To github.com:leocaseiro/base-skill.git
+   4e81871..03b1d29  milestone-4-game-engine -&gt; milestone-4-game-engine
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+Here’s what changed and how it was pushed.
+
+### Change
+In `.github/workflows/visual-regression.yml`, when the `@visual` run fails (same condition as the diff upload), CI now also uploads the Playwright HTML report as artifact **`playwright-report-vr-chromium`** (`playwright-report/`, 14-day retention). You still get **`visual-regression-diffs-chromium`** (`test-results/`) for screenshots and related files.
+
+After a failed VR run: **Artifacts** on the workflow run → download **`playwright-report-vr-chromium`** → unzip → `npx playwright show-report <path>` to open traces like in the [trace viewer docs](https://playwright.dev/docs/trace-viewer-intro).
+
+### Branch / commit
+Pushed to **`milestone-4-game-engine`**: commit **`03b1d29`** (`ci(vr): upload Playwright HTML report artifact on failure`).
+
+### Pre-push note
+Pre-push failed once because **Docker VR bind-mounts the repo and runs `yarn install` in Linux**, which overwrites the Mac `node_modules` and drops `@rollup/rollup-darwin-arm64`, so the following **E2E** step can’t start Vite. I reinstalled deps and pushed with **`SKIP_VR=1`** so VR didn’t run again in that hook; **lint, typecheck, unit tests, and E2E still ran**.
+
+Please add a short note on the PR that **`SKIP_VR=1` on push** was to avoid Docker clobbering the host `node_modules` for this workflow-only change (per your repo’s skip-documentation rule). CI still runs the full Visual Regression workflow on GitHub.
+
+Optional follow-up: adjust `scripts/vr-docker.mjs` so install doesn’t write Linux `node_modules` onto the bind-mounted tree (e.g. anonymous volume for `/work/node_modules`), so local pre-push can keep VR enabled safely.

@@ -1440,3 +1440,2338 @@ _**Agent (composer-2)**_
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Investigating docs rendering**
+
+I'm checking how Storybook 7+ renders MDX blocks with custom components like `<UseRxQueryDemo />`. The demo crashes during SSR/hydration on static build, likely due to useRxDB errors on GitHub Pages causing partial content rendering. I'm searching for how MDX renders docs and looking for `Unstyled` or `DocsContainer` overrides. The issue might be with how MDX components render in Storybook 8, potentially bypassing the iframe context. The issue might stem from GitHub Pages base path causing asset loading problems that prevent React hydration. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && yarn build-storybook --output-dir /tmp/sb-out 2>&1 | tail -20</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && yarn build-storybook --output-dir /tmp/sb-out 2>&1 | tail -20
+```
+
+```
+│  581.79 kB │ gzip: 160.24 kB
+│  Vite ../../../../tmp/sb-out/assets/DocsRenderer-LL677BLK-BPjGwN60.js
+│  815.23 kB │ gzip: 260.90 kB
+│  Vite ../../../../tmp/sb-out/assets/iframe-CH5JMzCw.js
+│  1,150.16 kB │ gzip: 329.92 kB
+│
+▲  Vite
+│  (!) Some chunks are larger than 500 kB after minification. Consider:
+│  - Using dynamic import() to code-split the application
+│  - Use build.rollupOptions.output.manualChunks to improve chunking:
+│  ]8;;https://rollupjs.org/configuration-options/#output-manualchunkshttps://rollupjs.org/configuration-options/#output-manualchunks]8;;
+│  - Adjust chunk size limit for this warning via
+│  build.chunkSizeWarningLimit.
+│  Vite ✓ built in 3.81s
+│
+◇  Output directory: /tmp/sb-out
+│
+└  Storybook build completed successfully
+
+Done in 5.93s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/tmp/sb-out",
+  "pattern": "Increment|UseRxQueryDemo"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/tmp/sb-out",
+  "pattern": "Increment|UseRxQueryDemo",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "../../../../tmp/sb-out/assets/useRxQuery-DiGJRaIO.js"
+    },
+    {
+      "matchCount": 3,
+      "uri": "../../../../tmp/sb-out/manifests/components.html"
+    },
+    {
+      "matchCount": 1,
+      "uri": "../../../../tmp/sb-out/manifests/docs.json"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 5
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /tmp/sb-out/assets/useRxQuery-DiGJRaIO.js</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Analyzing MDX compilation**
+
+I found that the MDX compiler is stripping the interactive demo component `<UseRxQueryDemo />` from the rendered output. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **1** result in **1** directory</summary>
+
+Directory: **/tmp/sb-out/assets** (1 file)
+
+| File |
+|------|
+| `useBookmarks-C5HizoRD.js` |
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **1** result in **1** directory</summary>
+
+Directory: **/tmp/sb-out/assets** (1 file)
+
+| File |
+|------|
+| `useRxQuery-DiGJRaIO.js` |
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /tmp/sb-out/assets/useBookmarks-C5HizoRD.js</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /tmp/sb-out/assets/useBookmarks-C5HizoRD.js</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Fixing MDX compilation**
+
+I'm adding `UseBookmarksDemo` to the MDX provider components to prevent it from being stripped during compilation. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Identifying the issue: the compiled MDX bundle omits `<UseRxQueryDemo />` — only static markdown is emitted. Checking Storybook MDX configuration.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/.storybook/main.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/.storybook",
+  "pattern": "mdx|MDX"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/.storybook",
+  "pattern": "mdx|MDX",
+  "topFiles": [
+    {
+      "matchCount": 11,
+      "uri": ".storybook/main.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 11
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Fixing sanitize schema**
+
+I'm extending rehype-sanitize's schema to allow custom MDX component tags like `UseRxQueryDemo`. 
+
+**Extending sanitize schema**
+
+I'm configuring rehype-sanitize's default schema to allow custom MDX component tags like `UseRxQueryDemo` by adding them to `tagNames`. 
+
+**Analyzing MDX compilation**
+
+I'm reviewing the MDX compilation process to understand how components like `UseRxQueryDemo` are transformed into JSX calls. The sanitization step in the MDX compilation pipeline appears to remove `mdxJsxFlowElement` nodes with tagName `UseRxQueryDemo`. 
+
+**Updating sanitization rules**
+
+I'm extending the rehype-sanitize schema to permit demo component tags like `UseRxQueryDemo` and `UseBookmarksDemo`. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/node_modules/rehype-sanitize/lib/index.js</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.mdx",
+  "path": "/Users/leocaseiro/Sites/base-skill/src",
+  "pattern": "\\.demo"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/src",
+  "pattern": "\\.demo",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "src/db/hooks/useSettings.mdx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "src/db/hooks/useBookmarks.mdx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "src/lib/speech/SpeechOutput.mdx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "src/lib/speech/SpeechInput.mdx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "src/lib/game-event-bus.mdx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "src/db/hooks/useRxQuery.mdx"
+    }
+  ],
+  "totalFiles": 6,
+  "totalMatches": 6
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.js",
+  "path": "/Users/leocaseiro/Sites/base-skill/node_modules/hast-util-sanitize",
+  "pattern": "defaultSchema|tagNames"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/node_modules/hast-util-sanitize",
+  "pattern": "defaultSchema|tagNames",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "node_modules/hast-util-sanitize/lib/schema.js"
+    },
+    {
+      "matchCount": 1,
+      "uri": "node_modules/hast-util-sanitize/index.js"
+    },
+    {
+      "matchCount": 19,
+      "uri": "node_modules/hast-util-sanitize/lib/index.js"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 22
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Merging schema tags**
+
+I'm merging defaultSchema with additional tagNames for demo components and checking if standard React props are supported. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/node_modules/hast-util-sanitize/lib/schema.js</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Extending tag names**
+
+I'm adding demo component names to tagNames and checking sanitize behavior for custom tags under root. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/node_modules/rehype-sanitize/package.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/node_modules/hast-util-sanitize/package.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Updating sanitize schema**
+
+I'm updating the sanitize schema to allow custom MDX components. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/package.json",
+  "pattern": "hast-util-sanitize|rehype-sanitize"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/package.json",
+  "pattern": "hast-util-sanitize|rehype-sanitize",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "package.json"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Adding dev dependency**
+
+I'm adding `hast-util-sanitize` as a devDependency to avoid Knip warnings. I'm adding `hast-util-sanitize` to devDependencies to satisfy Knip warnings. 
+
+**Creating worktree**
+
+I'm creating a new worktree for the sanitize dependency fix: `git worktree add ./worktrees/fix-mdx-demo-sanitize -b fix/storybook-mdx-allow-demo-tags`. I'm creating a new worktree for the sanitize dependency fix: `git worktree add ./worktrees/fix-mdx-demo-components -b fix/storybook-mdx-sanitize-demo-tags`. 
+
+I'm adding a worktree for the sanitize dependency fix and will include both the rehype sanitize schema and demo layout fixes. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Identifying root cause: `rehype-sanitize` in `.storybook/main.ts` uses the default GitHub schema, which strips unknown tags — so MDX custom components like `<UseRxQueryDemo />` are removed before codegen. Verifying and fixing by extending the sanitize schema.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && git worktree add ./worktrees/fix-mdx-sanitize-demos -b fix/storybook-mdx-sanitize-allow-demos 2>/dev/null || (cd ./worktrees/fix-mdx-sanitize-demos && git checkout fix/storybook-mdx-sanitize-allow-demos 2>/dev/null; true)</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && git worktree add ./worktrees/fix-mdx-sanitize-demos -b fix/storybook-mdx-sanitize-allow-demos 2>/dev/null || (cd ./worktrees/fix-mdx-sanitize-demos && git checkout fix/storybook-mdx-sanitize-allow-demos 2>/dev/null; true)
+```
+
+```
+HEAD is now at e757d98 Merge branch 'master' of github.com:leocaseiro/base-skill
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/yarn.lock",
+  "pattern": "hast-util-sanitize@"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/yarn.lock",
+  "pattern": "hast-util-sanitize@",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "yarn.lock"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/knip.config.ts",
+  "pattern": "unlisted|ignore"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/knip.config.ts",
+  "pattern": "unlisted|ignore",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "knip.config.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Updating dependencies**
+
+I'm adding hast-util-sanitize as a dev dependency and updating the Storybook config to properly spread the tagNames from defaultSchema. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/package.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Updating dependencies**
+
+I'm adding hast-util-sanitize to devDependencies in the correct alphabetical position. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/node_modules/hast-util-sanitize/index.d.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+Implementing the fix: `rehype-sanitize` was stripping MDX custom components (not in GitHub's default tag list), so demos never reached the compiled bundle.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/package.json</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/.storybook/main.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/.storybook/main.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/.storybook/main.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/src/db/hooks/useRxQuery.demo.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn install && yarn typecheck && ./node_modules/.bin/eslint .storybook/main.ts --max-warnings 0 && yarn build-storybook --output-dir /tmp/sb-out2 2>&1 | tail -15</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn install && yarn typecheck && ./node_modules/.bin/eslint .storybook/main.ts --max-warnings 0 && yarn build-storybook --output-dir /tmp/sb-out2 2>&1 | tail -15
+```
+
+```
+yarn install v1.22.22
+$ node scripts/check-node-version.mjs
+[1/5] Validating package.json...
+[2/5] Resolving packages...
+[3/5] Fetching packages...
+[4/5] Linking dependencies...
+[5/5] Building fresh packages...
+$ husky
+Done in 9.71s.
+yarn run v1.22.22
+$ tsc --noEmit
+.storybook/main.ts(39,17): error TS2488: Type 'string[] | null | undefined' must have a '[Symbol.iterator]()' method that returns an iterator.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+warning eciesjs@0.4.18: The engine "bun" appears to be invalid.
+warning eciesjs@0.4.18: The engine "deno" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "bun" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "deno" appears to be invalid.
+warning "@tanstack/react-devtools &gt; @tanstack/devtools@0.11.0" has unmet peer dependency "solid-js@&gt;=1.9.7".
+warning "@tanstack/react-devtools &gt; @tanstack/devtools &gt; goober@2.1.18" has unmet peer dependency "csstype@^3.0.10".
+warning "@tanstack/react-router-devtools &gt; @tanstack/router-devtools-core@1.167.1" has unmet peer dependency "@tanstack/router-core@^1.168.2".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/react-query@&gt;=5.90.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/router-core@&gt;=1.127.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @axe-core/playwright@4.11.1" has unmet peer dependency "playwright-core@&gt;= 1.0.0".
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+error Command failed with exit code 2.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/.storybook/main.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn typecheck && ./node_modules/.bin/eslint .storybook/main.ts --max-warnings 0 && yarn build-storybook --output-dir /tmp/sb-out2 2>&1 | tail -8</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn typecheck && ./node_modules/.bin/eslint .storybook/main.ts --max-warnings 0 && yarn build-storybook --output-dir /tmp/sb-out2 2>&1 | tail -8
+```
+
+```
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 2.23s.
+
+/Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/.storybook/main.ts
+  2:1  error  &#96;hast-util-sanitize&#96; type import should occur after type import of &#96;@storybook/react-vite&#96;  import/order
+
+✖ 1 problem (1 error, 0 warnings)
+  1 error and 0 warnings potentially fixable with the &#96;--fix&#96; option.
+
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && ./node_modules/.bin/eslint .storybook/main.ts --fix --max-warnings 0 && yarn build-storybook --output-dir /tmp/sb-out2 2>&1 | tail -6</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && ./node_modules/.bin/eslint .storybook/main.ts --fix --max-warnings 0 && yarn build-storybook --output-dir /tmp/sb-out2 2>&1 | tail -6
+```
+
+```
+│
+◇  Output directory: /tmp/sb-out2
+│
+└  Storybook build completed successfully
+
+Done in 6.87s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*useRxQuery*",
+  "path": "/tmp/sb-out2/assets",
+  "pattern": "Increment|UseRxQueryDemo"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/tmp/sb-out2/assets",
+  "pattern": "Increment|UseRxQueryDemo",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "../../../../tmp/sb-out2/assets/useRxQuery-DACaRcd3.js"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /tmp/sb-out2/assets/useRxQuery-DACaRcd3.js</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/tmp/sb-out2",
+  "pattern": "UseRxQueryDemo|useRxQuery\\.demo"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/tmp/sb-out2",
+  "pattern": "UseRxQueryDemo|useRxQuery\\.demo",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "../../../../tmp/sb-out2/manifests/components.html"
+    },
+    {
+      "matchCount": 1,
+      "uri": "../../../../tmp/sb-out2/manifests/docs.json"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/tmp/sb-out2/assets",
+  "pattern": "Increment|UseRxQueryDemo|useRxQuery\\.demo"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/tmp/sb-out2/assets",
+  "pattern": "Increment|UseRxQueryDemo|useRxQuery\\.demo",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "../../../../tmp/sb-out2/assets/useRxQuery-DACaRcd3.js"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Analyzing MDX compilation**
+
+I'm investigating why `useRxQuery.demo` isn't appearing in assets during MDX compile, suspecting it may be represented as `mdxJsxFlowElement` with `name` property `UseRxQueryDemo` in the HAST tree. I'm checking how rehype-sanitize handles `mdxJsxFlowElement` nodes and whether it processes the element itself or its children. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/node_modules/hast-util-sanitize/lib/index.js</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Analyzing element types**
+
+I'm investigating why `UseRxQueryDemo` isn't being preserved despite being in `tagNames`, checking if it's a lowercase `userxquerydemo` or not an `element` type node. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/node_modules/hast-util-sanitize/lib/index.js</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/node_modules/hast-util-sanitize/lib/index.js</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/node_modules/hast-util-sanitize/lib/index.js",
+  "pattern": "function transform"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/node_modules/hast-util-sanitize/lib/index.js",
+  "pattern": "function transform",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "node_modules/hast-util-sanitize/lib/index.js"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/node_modules/hast-util-sanitize/lib/index.js</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Handling MDX nodes**
+
+I need to add a custom rehype plugin before sanitization to handle MDX nodes properly. I'll remove rehypeSanitize for MDX-only paths since the MDX is codebase-owned and the security risk is equivalent to other repo code. I'm removing rehypeSanitize from MDX compile options in Storybook since MDX is a trusted source, and adding a comment to explain this decision. 
+
+**Removing sanitize**
+
+I'm removing rehypeSanitize from the MDX pipeline since MDX authors are trusted, and deleting the associated import and dependency. I'm removing rehypeSanitize from the MDX pipeline but keeping rehypeFormat and rehypeRaw, and will add a comment explaining that MDX content in `src/` is trusted. </details></think>
+
+_**Agent (composer-2)**_
+
+
+Identifying the issue: `hast-util-sanitize` only handles `element` nodes. MDX custom components are `mdxJsxFlowElement` (and similar), which the sanitizer drops in the `default` branch—adding tag names doesn't help. Removing `rehype-sanitize` from the MDX pipeline for trusted first-party docs (or we'd need a plugin that preserves MDX node types). Checking whether we can keep sanitization for raw HTML only:
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/.storybook/main.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+Removing `rehype-sanitize` from the MDX pipeline. `hast-util-sanitize` ignores `mdxJsxFlowElement` nodes, so MDX demos are dropped entirely—not a tag-allowlist issue.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/.storybook/main.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/package.json</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx,js,mjs}",
+  "path": "/Users/leocaseiro/Sites/base-skill",
+  "pattern": "rehype-sanitize|rehypeSanitize"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill",
+  "pattern": "rehype-sanitize|rehypeSanitize",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "./.storybook/main.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos",
+  "pattern": "rehype-sanitize"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos",
+  "pattern": "rehype-sanitize",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "worktrees/fix-mdx-sanitize-demos/package.json"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/fix-mdx-sanitize-demos/.storybook/main.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/fix-mdx-sanitize-demos/yarn.lock"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/fix-mdx-sanitize-demos/.specstory/history/2026-04-02_00-17-06Z-i-want-to-fix.md"
+    },
+    {
+      "matchCount": 17,
+      "uri": "worktrees/fix-mdx-sanitize-demos/.specstory/history/2026-04-02_00-00-50Z-storybook-i18n-markdown-table-display.md"
+    }
+  ],
+  "totalFiles": 5,
+  "totalMatches": 25
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/package.json</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn install && yarn build-storybook --output-dir /tmp/sb-out3 2>&1 | tail -8</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn install && yarn build-storybook --output-dir /tmp/sb-out3 2>&1 | tail -8
+```
+
+```
+yarn install v1.22.22
+$ node scripts/check-node-version.mjs
+[1/5] Validating package.json...
+[2/5] Resolving packages...
+[3/5] Fetching packages...
+[4/5] Linking dependencies...
+[5/5] Building fresh packages...
+success Saved lockfile.
+$ husky
+Done in 2.35s.
+│  build.chunkSizeWarningLimit.
+│  Vite ✓ built in 4.04s
+│
+◇  Output directory: /tmp/sb-out3
+│
+└  Storybook build completed successfully
+
+Done in 6.00s.
+warning eciesjs@0.4.18: The engine "bun" appears to be invalid.
+warning eciesjs@0.4.18: The engine "deno" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "bun" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "deno" appears to be invalid.
+warning "@tanstack/react-devtools &gt; @tanstack/devtools@0.11.0" has unmet peer dependency "solid-js@&gt;=1.9.7".
+warning "@tanstack/react-devtools &gt; @tanstack/devtools &gt; goober@2.1.18" has unmet peer dependency "csstype@^3.0.10".
+warning "@tanstack/react-router-devtools &gt; @tanstack/router-devtools-core@1.167.1" has unmet peer dependency "@tanstack/router-core@^1.168.2".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/react-query@&gt;=5.90.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/router-core@&gt;=1.127.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @axe-core/playwright@4.11.1" has unmet peer dependency "playwright-core@&gt;= 1.0.0".
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **2** results in **1** directory</summary>
+
+Directory: **/tmp/sb-out3/assets** (2 files)
+
+| File |
+|------|
+| `useRxQuery-C3qjV2UJ.js` |
+| `useRxQuery-CyY6DA79.js` |
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/tmp/sb-out3/assets/useRxQuery-C3qjV2UJ.js",
+  "pattern": "UseRxQueryDemo|Increment|subject"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/tmp/sb-out3/assets/useRxQuery-C3qjV2UJ.js",
+  "pattern": "UseRxQueryDemo|Increment|subject",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/tmp/sb-out3/assets/useRxQuery-CyY6DA79.js",
+  "pattern": "UseRxQueryDemo|Increment|subject"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/tmp/sb-out3/assets/useRxQuery-CyY6DA79.js",
+  "pattern": "UseRxQueryDemo|Increment|subject",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "../../../../tmp/sb-out3/assets/useRxQuery-CyY6DA79.js"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn lint 2>&1 | tail -25</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn lint 2>&1 | tail -25
+```
+
+```
+yarn run v1.22.22
+$ eslint . --max-warnings 0 &amp;&amp; knip --no-config-hints
+Done in 7.51s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn test 2>&1 | tail -15</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn test 2>&1 | tail -15
+```
+
+```
+ ✓ src/db/create-database.test.ts (3 tests) 103ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 169ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 210ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 252ms
+ ✓ src/db/hooks/useBookmarks.test.tsx (3 tests) 271ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 287ms
+
+ Test Files  19 passed (19)
+      Tests  53 passed (53)
+   Start at  05:36:18
+   Duration  1.69s (transform 557ms, setup 1.98s, collect 4.39s, tests 1.49s, environment 11.57s, prepare 1.27s)
+
+Done in 2.20s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Committing fixes**
+
+I'm committing the Storybook fix to preserve MDX demo components by removing rehype-sanitize from the MDX processing chain. </details></think>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn typecheck && git status</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn typecheck && git status
+```
+
+```
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 1.96s.
+On branch fix/storybook-mdx-sanitize-allow-demos
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   .storybook/main.ts
+	modified:   package.json
+	modified:   src/db/hooks/useRxQuery.demo.tsx
+	modified:   yarn.lock
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && git add .storybook/main.ts package.json yarn.lock src/db/hooks/useRxQuery.demo.tsx && git commit --trailer "Made-with: Cursor" -m "fix(storybook): restore MDX interactive demos in static builds
+
+rehype-sanitize uses hast-util-sanitize, which only handles HAST element
+nodes. MDX embeds custom components as mdxJsxFlowElement (and related)
+nodes; those were dropped entirely, so storybook build and GitHub Pages
+showed docs prose without UseRxQueryDemo and other demos. MDX under src/
+is trusted; drop sanitize from the MDX rehype chain.
+
+Also lay out useRxQuery demo count and controls on one row for short docs
+previews.
+
+Remove unused rehype-sanitize devDependency."</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && git add .storybook/main.ts package.json yarn.lock src/db/hooks/useRxQuery.demo.tsx && git commit --trailer "Made-with: Cursor" -m "fix(storybook): restore MDX interactive demos in static builds
+
+rehype-sanitize uses hast-util-sanitize, which only handles HAST element
+nodes. MDX embeds custom components as mdxJsxFlowElement (and related)
+nodes; those were dropped entirely, so storybook build and GitHub Pages
+showed docs prose without UseRxQueryDemo and other demos. MDX under src/
+is trusted; drop sanitize from the MDX rehype chain.
+
+Also lay out useRxQuery demo count and controls on one row for short docs
+previews.
+
+Remove unused rehype-sanitize devDependency."
+```
+
+```
+[fix/storybook-mdx-sanitize-allow-demos dbd6414] fix(storybook): restore MDX interactive demos in static builds
+ 4 files changed, 17 insertions(+), 27 deletions(-)
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (e9a94c6)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 4 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 1 file
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/.storybook/main.ts /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/src/db/hooks/useRxQuery.demo.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/package.json
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/package.json
+[COMPLETED] *.json — 1 file
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/.storybook/main.ts /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/src/db/hooks/useRxQuery.demo.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/.storybook/main.ts /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/src/db/hooks/useRxQuery.demo.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/.storybook/main.ts /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos/src/db/hooks/useRxQuery.demo.tsx
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 4 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos
+
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 3ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/routes/__root.test.tsx (1 test) 13ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 26ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 18ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/migrations.test.ts (1 test) 36ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 59ms
+ ✓ src/db/create-database.test.ts (3 tests) 99ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 163ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 200ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 237ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 272ms
+ ✓ src/db/hooks/useBookmarks.test.tsx (3 tests) 276ms
+
+ Test Files  19 passed (19)
+      Tests  53 passed (53)
+   Start at  05:36:40
+   Duration  1.58s (transform 508ms, setup 2.00s, collect 4.40s, tests 1.41s, environment 10.08s, prepare 1.21s)
+
+Done in 1.96s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && git push -u origin fix/storybook-mdx-sanitize-allow-demos</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && git push -u origin fix/storybook-mdx-sanitize-allow-demos
+```
+
+```
+-e [1m──────────────────────────────────────────[0m
+-e [1m  Pre-push checks[0m
+-e [1m──────────────────────────────────────────[0m
+-e [0;36m[1m▶ Running: Lint (eslint + knip)[0m
+yarn run v1.22.22
+$ eslint . --max-warnings 0 &amp;&amp; knip --no-config-hints
+Done in 5.11s.
+-e [0;32m  ✓ Lint (eslint + knip)[0m
+-e [0;36m[1m▶ Running: TypeScript typecheck[0m
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 1.78s.
+-e [0;32m  ✓ TypeScript typecheck[0m
+-e [0;36m[1m▶ Running: Unit tests (vitest)[0m
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos
+
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (2 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/games/catalog-utils.test.ts (10 tests) 4ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/routes/__root.test.tsx (1 test) 13ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 35ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 17ms
+ ✓ src/db/migrations.test.ts (1 test) 41ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 68ms
+ ✓ src/db/create-database.test.ts (3 tests) 99ms
+ ✓ src/components/LevelRow.test.tsx (4 tests) 217ms
+ ✓ src/components/GameCard.test.tsx (5 tests) 195ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/components/GameGrid.test.tsx (5 tests) 242ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 272ms
+ ✓ src/db/hooks/useBookmarks.test.tsx (3 tests) 283ms
+
+ Test Files  19 passed (19)
+      Tests  53 passed (53)
+   Start at  05:36:59
+   Duration  1.76s (transform 495ms, setup 1.75s, collect 4.02s, tests 1.50s, environment 13.76s, prepare 1.06s)
+
+Done in 2.14s.
+-e [0;32m  ✓ Unit tests (vitest)[0m
+-e [1;33m  ⚠ Storybook tests — server not running on port 6006. Start it with 'yarn storybook' or set START_STORYBOOK=1 (skipped)[0m
+-e [0;36m[1m▶ Running: Visual regression tests (Docker/Chromium)[0m
+yarn run v1.22.22
+$ node scripts/vr-docker.mjs test
+[36m▶ Building app on host for Docker VR (APP_BASE_URL=/)[0m
+$ vite build
+vite v7.3.1 building client environment for production...
+transforming...
+
+[@tanstack/devtools-vite] Removed devtools code from: /src/routes/__root.tsx
+
+✓ 2616 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/client/registerSW.js                                        0.13 kB
+dist/client/assets/geist-cyrillic-wght-normal-CHSlOQsW.woff2    14.69 kB
+dist/client/assets/geist-latin-ext-wght-normal-DMtmJ5ZE.woff2   15.31 kB
+dist/client/assets/geist-latin-wght-normal-Dm3htQBi.woff2       28.40 kB
+dist/client/assets/styles-2uumuUbt.css                          69.77 kB │ gzip:  13.13 kB
+dist/client/assets/parent-COKdkicY.js                            0.12 kB │ gzip:   0.13 kB
+dist/client/assets/useRxQuery-DPOhe5i0.js                        0.19 kB │ gzip:   0.17 kB
+dist/client/assets/dashboard-Dpn-azkV.js                         0.27 kB │ gzip:   0.21 kB
+dist/client/assets/sync-BXA2kYyu.js                              0.28 kB │ gzip:   0.22 kB
+dist/client/assets/history-DWD3g_UL.js                           0.28 kB │ gzip:   0.22 kB
+dist/client/assets/data-EwOsPVax.js                              0.29 kB │ gzip:   0.22 kB
+dist/client/assets/index-DX5KS8OD.js                             0.30 kB │ gzip:   0.23 kB
+dist/client/assets/voices-DRl-Gi8z.js                            0.30 kB │ gzip:   0.23 kB
+dist/client/assets/overrides-Dw_olW5G.js                         0.30 kB │ gzip:   0.23 kB
+dist/client/assets/_gameId-CvOXxzwj.js                           0.31 kB │ gzip:   0.24 kB
+dist/client/assets/route-BbwTdB57.js                             0.32 kB │ gzip:   0.25 kB
+dist/client/assets/i18nInstance-B8K6-7Zg.js                      0.74 kB │ gzip:   0.47 kB
+dist/client/assets/button-CXG8nkFJ.js                            3.35 kB │ gzip:   1.27 kB
+dist/client/assets/index-OTFq9TZd.js                             5.76 kB │ gzip:   2.18 kB
+dist/client/assets/settings-DVPoB2Qj.js                         33.22 kB │ gzip:  11.41 kB
+dist/client/assets/_app--mnl7UKj.js                             39.00 kB │ gzip:  11.85 kB
+dist/client/assets/i18n-BsFajay9.js                             44.61 kB │ gzip:  14.56 kB
+dist/client/assets/index-Afd3FXr3.js                            51.35 kB │ gzip:  18.79 kB
+dist/client/assets/useRxDB-C8P9rBP4.js                         283.19 kB │ gzip:  92.68 kB
+dist/client/assets/main-CwqWvaXN.js                            327.95 kB │ gzip: 104.45 kB
+✓ built in 1.79s
+vite v7.3.1 building ssr environment for production...
+transforming...
+
+[@tanstack/devtools-vite] Removed devtools code from: /src/routes/__root.tsx
+
+✓ 119 modules transformed.
+rendering chunks...
+dist/server/registerSW.js                                   0.13 kB
+dist/server/assets/start-HYkvq4Ni.js                        0.06 kB
+dist/server/assets/parent-Cjz5nUpj.js                       0.23 kB
+dist/server/assets/useRxQuery-JhsH-Ks4.js                   0.34 kB
+dist/server/assets/dashboard-BtritWqF.js                    0.38 kB
+dist/server/assets/sync-B9W9XhIX.js                         0.38 kB
+dist/server/assets/history-KP4A0aTR.js                      0.40 kB
+dist/server/assets/index-D3SUhtYy.js                        0.40 kB
+dist/server/assets/data-DM7cL2kh.js                         0.40 kB
+dist/server/assets/voices-DMFVOs54.js                       0.41 kB
+dist/server/assets/overrides-FnG4bxhN.js                    0.41 kB
+dist/server/assets/_gameId-BxqwtmOn.js                      0.54 kB
+dist/server/assets/route-BAiaoOAW.js                        0.56 kB
+dist/server/assets/i18n-hS-ghRCf.js                         3.15 kB
+dist/server/assets/button-LguPQ8FM.js                       3.20 kB
+dist/server/assets/_tanstack-start-manifest_v-DDxui5EL.js   3.44 kB
+dist/server/assets/router-Du_zsWOP.js                       8.72 kB
+dist/server/assets/index-Ci1XDWrr.js                       10.41 kB
+dist/server/assets/settings-CCPupfG9.js                    11.53 kB
+dist/server/assets/useRxDB-DNBMjWds.js                     13.69 kB
+dist/server/assets/_app-v7wsU2Mb.js                        17.66 kB
+dist/server/server.js                                      37.23 kB
+✓ built in 256ms
+[prerender] Prerendering pages...
+[prerender] Concurrency: 18
+[prerender] Crawling: /
+[prerender] Prerendered 1 pages:
+[prerender] - /
+[36m▶ Running VR tests in Docker (test mode)...[0m
+yarn install v1.22.22
+$ node scripts/check-node-version.mjs
+[1/5] Validating package.json...
+[2/5] Resolving packages...
+[3/5] Fetching packages...
+[4/5] Linking dependencies...
+[5/5] Building fresh packages...
+$ husky
+fatal: not a git repository: /Users/leocaseiro/Sites/base-skill/.git/worktrees/fix-mdx-sanitize-demos
+Done in 84.27s.
+
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] › e2e/visual.spec.ts:3:1 › @visual home page
+[1A[2K  1 passed (6.9s)
+Done in 96.66s.
+-e [0;32m  ✓ Visual regression tests[0m
+-e [0;36m[1m▶ Running: End-to-end tests (playwright)[0m
+yarn run v1.22.22
+$ playwright test --ignore-snapshots
+
+Running 12 tests using 1 worker
+············
+  12 passed (25.8s)
+Done in 26.47s.
+-e [0;32m  ✓ End-to-end tests (playwright)[0m
+-e [1m──────────────────────────────────────────[0m
+-e [0;32m[1m  All pre-push checks passed.[0m
+-e [1m──────────────────────────────────────────[0m
+branch 'fix/storybook-mdx-sanitize-allow-demos' set up to track 'origin/fix/storybook-mdx-sanitize-allow-demos'.
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+"createRequestHandler", "defineHandlerCallback", "transformPipeableStreamWithRouter" and "transformReadableStreamWithRouter" are imported from external module "@tanstack/router-core/ssr/server" but never used in "node_modules/@tanstack/start-server-core/dist/esm/index.js".
+"RawStream" is imported from external module "@tanstack/router-core" but never used in "node_modules/@tanstack/start-client-core/dist/esm/index.js".
+"hydrate" and "json" are imported from external module "@tanstack/router-core/ssr/client" but never used in "node_modules/@tanstack/start-client-core/dist/esm/index.js".
+(node:7) [DEP0169] DeprecationWarning: &#96;url.parse()&#96; behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for &#96;url.parse()&#96; vulnerabilities.
+(Use &#96;node --trace-deprecation ...&#96; to show where the warning was created)
+warning eciesjs@0.4.18: The engine "bun" appears to be invalid.
+warning eciesjs@0.4.18: The engine "deno" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "bun" appears to be invalid.
+warning @ecies/ciphers@0.2.5: The engine "deno" appears to be invalid.
+warning "@tanstack/react-devtools &gt; @tanstack/devtools@0.11.0" has unmet peer dependency "solid-js@&gt;=1.9.7".
+warning "@tanstack/react-devtools &gt; @tanstack/devtools &gt; goober@2.1.18" has unmet peer dependency "csstype@^3.0.10".
+warning "@tanstack/react-router-devtools &gt; @tanstack/router-devtools-core@1.167.1" has unmet peer dependency "@tanstack/router-core@^1.168.2".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @tanstack/react-router-ssr-query@1.166.10" has unmet peer dependency "@tanstack/react-query@&gt;=5.90.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/router-core@&gt;=1.127.0".
+warning "@tanstack/react-router-ssr-query &gt; @tanstack/router-ssr-query-core@1.167.0" has unmet peer dependency "@tanstack/query-core@&gt;=5.90.0".
+warning " &gt; @axe-core/playwright@4.11.1" has unmet peer dependency "playwright-core@&gt;= 1.0.0".
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+[1A[2K[WebServer] npm warn exec The following package was not found and will be installed: serve@14.2.6
+npm notice
+npm notice New minor version of npm available! 11.11.0 -&gt; 11.12.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+npm notice To update run: npm install -g npm@11.12.1
+npm notice
+[WebServer] "createRequestHandler", "defineHandlerCallback", "transformPipeableStreamWithRouter" and "transformReadableStreamWithRouter" are imported from external module "@tanstack/router-core/ssr/server" but never used in "node_modules/@tanstack/start-server-core/dist/esm/index.js".
+[WebServer] "RawStream" is imported from external module "@tanstack/router-core" but never used in "node_modules/@tanstack/start-client-core/dist/esm/index.js".
+[WebServer] "hydrate" and "json" are imported from external module "@tanstack/router-core/ssr/client" but never used in "node_modules/@tanstack/start-client-core/dist/esm/index.js".
+[WebServer] npm warn Unknown env config "version-git-tag". This will stop working in the next major version of npm. See &#96;npm help npmrc&#96; for supported config options.
+[WebServer] npm warn Unknown env config "argv". This will stop working in the next major version of npm. See &#96;npm help npmrc&#96; for supported config options.
+[WebServer] npm warn Unknown env config "version-commit-hooks". This will stop working in the next major version of npm. See &#96;npm help npmrc&#96; for supported config options.
+[WebServer] npm warn Unknown env config "version-git-message". This will stop working in the next major version of npm. See &#96;npm help npmrc&#96; for supported config options.
+[WebServer] npm warn Unknown env config "version-tag-prefix". This will stop working in the next major version of npm. See &#96;npm help npmrc&#96; for supported config options.
+(node:43476) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+(node:43476) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+(node:43599) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+(node:43599) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+(node:43802) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+(node:43802) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use &#96;node --trace-warnings ...&#96; to show where the warning was created)
+remote: 
+remote: Create a pull request for 'fix/storybook-mdx-sanitize-allow-demos' on GitHub by visiting:        
+remote:      https://github.com/leocaseiro/base-skill/pull/new/fix/storybook-mdx-sanitize-allow-demos        
+remote: 
+To github.com:leocaseiro/base-skill.git
+ * [new branch]      fix/storybook-mdx-sanitize-allow-demos -&gt; fix/storybook-mdx-sanitize-allow-demos
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && gh pr create --base master --head fix/storybook-mdx-sanitize-allow-demos --title "fix(storybook): restore MDX demos on static build / GitHub Pages" --body "## Problem
+
+On [published Storybook](https://leocaseiro.github.io/base-skill/docs/?path=/docs/db-hooks-userxquery--docs), the \`useRxQuery\` (and other) MDX pages showed headings and prose but **no interactive demo** — no Increment button.
+
+## Root cause
+
+\`rehype-sanitize\` delegates to \`hast-util-sanitize\`, which only handles HAST nodes with \`type: \"element\"\`. MDX compiles \`<UseRxQueryDemo />\` to **\`mdxJsxFlowElement\`** (and related) nodes. Those hit the sanitizer’s \`default\` branch and are **dropped entirely** before MDX codegen, so \`yarn build-storybook\` emitted docs without the demo components. Dev mode could mask this with caching.
+
+Layout / iframe height was a red herring; the demo was not in the bundle at all.
+
+## Fix
+
+- Remove \`rehype-sanitize\` from the MDX \`rehypePlugins\` chain. MDX under \`src/\` is trusted first-party content.
+- Remove the unused \`rehype-sanitize\` devDependency.
+- Keep the \`useRxQuery\` demo layout tweak (count + controls on one row) for nicer docs previews.
+
+## After merge
+
+Merge to \`master\` so [\`deploy.yml\`](.github/workflows/deploy.yml) rebuilds Storybook for GitHub Pages.
+
+## Verification
+
+- \`yarn build-storybook\` output now includes \`UseRxQueryDemo\` / Increment in the compiled chunks.
+- Local pre-push: lint, typecheck, unit, VR, E2E (Storybook test-runner skipped — no server on 6006).
+
+Made with [Cursor](https://cursor.com)"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && gh pr create --base master --head fix/storybook-mdx-sanitize-allow-demos --title "fix(storybook): restore MDX demos on static build / GitHub Pages" --body "## Problem
+
+On [published Storybook](https://leocaseiro.github.io/base-skill/docs/?path=/docs/db-hooks-userxquery--docs), the \`useRxQuery\` (and other) MDX pages showed headings and prose but **no interactive demo** — no Increment button.
+
+## Root cause
+
+\`rehype-sanitize\` delegates to \`hast-util-sanitize\`, which only handles HAST nodes with \`type: \"element\"\`. MDX compiles \`<UseRxQueryDemo />\` to **\`mdxJsxFlowElement\`** (and related) nodes. Those hit the sanitizer’s \`default\` branch and are **dropped entirely** before MDX codegen, so \`yarn build-storybook\` emitted docs without the demo components. Dev mode could mask this with caching.
+
+Layout / iframe height was a red herring; the demo was not in the bundle at all.
+
+## Fix
+
+- Remove \`rehype-sanitize\` from the MDX \`rehypePlugins\` chain. MDX under \`src/\` is trusted first-party content.
+- Remove the unused \`rehype-sanitize\` devDependency.
+- Keep the \`useRxQuery\` demo layout tweak (count + controls on one row) for nicer docs previews.
+
+## After merge
+
+Merge to \`master\` so [\`deploy.yml\`](.github/workflows/deploy.yml) rebuilds Storybook for GitHub Pages.
+
+## Verification
+
+- \`yarn build-storybook\` output now includes \`UseRxQueryDemo\` / Increment in the compiled chunks.
+- Local pre-push: lint, typecheck, unit, VR, E2E (Storybook test-runner skipped — no server on 6006).
+
+Made with [Cursor](https://cursor.com)"
+```
+
+```
+https://github.com/leocaseiro/base-skill/pull/9
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+
+Here’s what was going wrong and what we did about it.
+
+## Cause (not layout)
+
+The problem wasn’t the iframe or button styling. **`rehype-sanitize` was removing your MDX demo components entirely** in production builds.
+
+`hast-util-sanitize` only understands normal HAST nodes with `type: "element"`. MDX compiles `<UseRxQueryDemo />` into nodes like **`mdxJsxFlowElement`**. Those don’t match any branch in the sanitizer, so they’re dropped and never make it into the generated MDX module. I confirmed this by comparing bundles: before the fix, the `useRxQuery` doc chunk had **no** demo import and **no** `e.jsx(…Demo…)`; after removing sanitize, it includes **Increment** and the demo component.
+
+So on [your published docs](https://leocaseiro.github.io/base-skill/docs/?path=/docs/db-hooks-userxquery--docs) you only saw the static text (“The counter below…”) because **the demo was never in the static Storybook output**, not because it was hidden below the fold.
+
+## Fix
+
+- **Removed `rehype-sanitize` from the MDX `rehypePlugins` chain** in `.storybook/main.ts`, with a short comment explaining why. MDX under `src/` is trusted source.
+- **Dropped the `rehype-sanitize` devDependency** (no longer used).
+- **Kept the `useRxQuery` demo layout** (count + Increment/Reset on one row).
+
+## What you need to do
+
+Merge and deploy:
+
+- PR: **[https://github.com/leocaseiro/base-skill/pull/9](https://github.com/leocaseiro/base-skill/pull/9)**  
+- After it’s on `master`, the [Deploy to GitHub Pages](https://github.com/leocaseiro/base-skill/blob/master/.github/workflows/deploy.yml) workflow will rebuild Storybook and update [https://leocaseiro.github.io/base-skill/docs/?path=/docs/db-hooks-userxquery--docs](https://leocaseiro.github.io/base-skill/docs/?path=/docs/db-hooks-userxquery--docs).
+
+**Trade-off:** raw HTML allowed through MDX is no longer run through that sanitizer. For repo-owned docs that’s usually acceptable; if you later need both safety and demos, you’d want a custom plugin that sanitizes only real HTML elements and leaves `mdxJsxFlowElement` alone.
