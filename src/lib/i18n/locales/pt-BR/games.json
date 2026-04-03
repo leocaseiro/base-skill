@@ -1,6 +1,12 @@
 {
   "word-spell": "Soletrar Palavras",
   "number-match": "Combinação de Números",
+  "shell": {
+    "round": "Rodada {{current}} / {{total}}",
+    "undo": "Desfazer",
+    "pause": "Pausar",
+    "exit": "Sair"
+  },
   "ui": {
     "choose-a-letter": "Escolha uma letra",
     "almost-try-again": "Quase! Tente de novo.",

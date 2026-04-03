@@ -1,6 +1,12 @@
 {
   "word-spell": "Word Spell",
   "number-match": "Number Match",
+  "shell": {
+    "round": "Round {{current}} / {{total}}",
+    "undo": "Undo",
+    "pause": "Pause",
+    "exit": "Exit"
+  },
   "ui": {
     "choose-a-letter": "Choose a letter",
     "almost-try-again": "Almost! Try again.",

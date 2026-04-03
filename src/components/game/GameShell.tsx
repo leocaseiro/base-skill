@@ -1,5 +1,6 @@
 // src/components/game/GameShell.tsx
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import type {
   GameEngineState,
   MoveHandler,
@@ -36,7 +37,8 @@ const GameShellChrome = ({
   const state = useGameState();
   const dispatch = useGameDispatch();
   const navigate = useNavigate();
-  const locale = 'en'; // TODO: use i18n locale in M5
+  const { t } = useTranslation('games');
+  const { locale } = useParams({ from: '/$locale' });
 
   const roundDisplay = state.roundIndex + 1;
   const title = config.title['en'] ?? config.gameId;
@@ -66,8 +68,11 @@ const GameShellChrome = ({
           <span aria-hidden="true">← </span>
           <span>{title}</span>
         </button>
-        <span className="text-sm font-medium">
-          Round {roundDisplay} / {config.maxRounds}
+        <span className="text-sm font-medium" data-testid="game-round">
+          {t('shell.round', {
+            current: roundDisplay,
+            total: config.maxRounds,
+          })}
         </span>
       </header>
 
@@ -108,7 +113,7 @@ const GameShellChrome = ({
             aria-label="Undo"
             type="button"
           >
-            ⟲ Undo
+            ⟲ {t('shell.undo')}
           </button>
         )}
         <button
@@ -116,7 +121,7 @@ const GameShellChrome = ({
           type="button"
           aria-label="Pause"
         >
-          II Pause
+          II {t('shell.pause')}
         </button>
         <button
           className="rounded px-3 py-1 text-sm hover:bg-muted"
@@ -124,7 +129,7 @@ const GameShellChrome = ({
           aria-label="Exit"
           type="button"
         >
-          ✕ Exit
+          ✕ {t('shell.exit')}
         </button>
       </footer>
     </div>
