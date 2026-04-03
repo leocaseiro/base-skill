@@ -151,6 +151,33 @@ describe('answerGameReducer', () => {
     expect(next).toBe(state);
   });
 
+  it('PLACE_TILE correct from bank replaces occupant and returns previous tile to bank', () => {
+    const lockManualConfig: AnswerGameConfig = {
+      ...config,
+      wrongTileBehavior: 'lock-manual',
+    };
+    let state = answerGameReducer(makeInitialState(lockManualConfig), {
+      type: 'INIT_ROUND',
+      tiles,
+      zones,
+    });
+    state = answerGameReducer(state, {
+      type: 'PLACE_TILE',
+      tileId: 't2',
+      zoneIndex: 0,
+    });
+    expect(state.zones[0]!.placedTileId).toBe('t2');
+    state = answerGameReducer(state, {
+      type: 'PLACE_TILE',
+      tileId: 't1',
+      zoneIndex: 0,
+    });
+    expect(state.zones[0]!.placedTileId).toBe('t1');
+    expect(state.zones[0]!.isWrong).toBe(false);
+    expect(state.bankTileIds).toContain('t2');
+    expect(state.bankTileIds).not.toContain('t1');
+  });
+
   it('SWAP_TILES exchanges placed tiles between two occupied zones', () => {
     let state = answerGameReducer(makeInitialState(config), {
       type: 'INIT_ROUND',
