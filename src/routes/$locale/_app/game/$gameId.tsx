@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
 import { useState } from 'react';
 import type { NumberMatchConfig } from '@/games/number-match/types';
+import type { SortNumbersConfig } from '@/games/sort-numbers/types';
 import type { WordSpellConfig } from '@/games/word-spell/types';
 import type {
   GameEngineState,
@@ -15,6 +16,8 @@ import type { JSX } from 'react';
 import { GameShell } from '@/components/game/GameShell';
 import { getOrCreateDatabase } from '@/db/create-database';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
+import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
 import { loadGameConfig } from '@/lib/game-engine/config-loader';
 import { findInProgressSession } from '@/lib/game-engine/session-finder';
@@ -87,6 +90,154 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
     value: Math.floor(Math.random() * 12) + 1,
   })),
 });
+
+const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
+  gameId: 'sort-numbers',
+  component: 'SortNumbers',
+  inputMethod: 'drag',
+  wrongTileBehavior: 'lock-auto-eject',
+  tileBankMode: 'exact',
+  totalRounds: 3,
+  roundsInOrder: false,
+  ttsEnabled: true,
+  direction: 'ascending',
+  range: { min: 1, max: 20 },
+  quantity: 4,
+  allowSkips: false,
+  rounds: generateSortRounds({
+    range: { min: 1, max: 20 },
+    quantity: 4,
+    allowSkips: false,
+    totalRounds: 3,
+  }),
+});
+
+const SortNumbersConfigPanel = ({
+  config,
+  onChange,
+}: {
+  config: SortNumbersConfig;
+  onChange: (c: SortNumbersConfig) => void;
+}) => {
+  const [open, setOpen] = useState(false);
+
+  const regenerate = () => {
+    onChange({
+      ...config,
+      rounds: generateSortRounds({
+        range: config.range,
+        quantity: config.quantity,
+        allowSkips: config.allowSkips,
+        totalRounds: config.totalRounds,
+      }),
+    });
+  };
+
+  return (
+    <details
+      open={open}
+      onToggle={(e) =>
+        setOpen((e.currentTarget as HTMLDetailsElement).open)
+      }
+      className="fixed right-4 top-20 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
+    >
+      <summary className="cursor-pointer font-medium">
+        ⚙️ Game Config
+      </summary>
+      <div className="mt-3 flex flex-col gap-3">
+        <label className="flex flex-col gap-1">
+          Direction
+          <select
+            value={config.direction}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                direction: e.target
+                  .value as SortNumbersConfig['direction'],
+              })
+            }
+            className="rounded border px-2 py-1"
+          >
+            <option value="ascending">ascending</option>
+            <option value="descending">descending</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          Quantity
+          <input
+            type="number"
+            value={config.quantity}
+            min={2}
+            max={8}
+            onChange={(e) =>
+              onChange({ ...config, quantity: Number(e.target.value) })
+            }
+            className="rounded border px-2 py-1"
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          Range min
+          <input
+            type="number"
+            value={config.range.min}
+            min={1}
+            max={config.range.max - 1}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                range: { ...config.range, min: Number(e.target.value) },
+              })
+            }
+            className="rounded border px-2 py-1"
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          Range max
+          <input
+            type="number"
+            value={config.range.max}
+            min={config.range.min + 1}
+            max={100}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                range: { ...config.range, max: Number(e.target.value) },
+              })
+            }
+            className="rounded border px-2 py-1"
+          />
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={config.allowSkips}
+            onChange={(e) =>
+              onChange({ ...config, allowSkips: e.target.checked })
+            }
+          />
+          Allow skips
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={config.ttsEnabled}
+            onChange={(e) =>
+              onChange({ ...config, ttsEnabled: e.target.checked })
+            }
+          />
+          TTS enabled
+        </label>
+        <button
+          type="button"
+          onClick={regenerate}
+          className="rounded border px-2 py-1 text-sm"
+        >
+          Regenerate rounds
+        </button>
+      </div>
+    </details>
+  );
+};
 
 const WordSpellConfigPanel = ({
   config,
@@ -286,6 +437,22 @@ const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
     useState<WordSpellConfig>(DEFAULT_WORD_SPELL_CONFIG);
   const [numberMatchConfig, setNumberMatchConfig] =
     useState<NumberMatchConfig>(makeDefaultNumberMatchConfig);
+  const [sortNumbersConfig, setSortNumbersConfig] =
+    useState<SortNumbersConfig>(makeDefaultSortNumbersConfig);
+
+  if (gameId === 'sort-numbers') {
+    return (
+      <>
+        {import.meta.env.DEV && (
+          <SortNumbersConfigPanel
+            config={sortNumbersConfig}
+            onChange={setSortNumbersConfig}
+          />
+        )}
+        <SortNumbers config={sortNumbersConfig} />
+      </>
+    );
+  }
 
   if (gameId === 'word-spell') {
     return (
