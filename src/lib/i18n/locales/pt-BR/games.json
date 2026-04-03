@@ -1,4 +1,11 @@
 {
-  "word-spell": "Soletrar palavras",
-  "number-match": "Combinar números"
+  "word-spell": "Soletrar Palavras",
+  "number-match": "Combinação de Números",
+  "ui": {
+    "choose-a-letter": "Escolha uma letra",
+    "almost-try-again": "Quase! Tente de novo.",
+    "great-job": "Muito bem!",
+    "hear-the-question": "Ouvir a pergunta",
+    "tap-to-hear": "toque para ouvir"
+  }
 }

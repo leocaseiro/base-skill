@@ -42,7 +42,7 @@ const GameShellChrome = ({
   const title = config.title['en'] ?? config.gameId;
 
   const handleExit = () => {
-    void navigate({ to: '/$locale/dashboard', params: { locale } });
+    void navigate({ to: '/$locale', params: { locale } });
   };
 
   const handleUndo = () => {
@@ -92,10 +92,12 @@ const GameShellChrome = ({
           )}
       </div>
 
-      {/* Game area */}
-      <main className="min-h-0 flex-1 overflow-auto p-4">
-        {children}
-      </main>
+      {/* Game area (div, not main — app layout already has a single page <main>) */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4">
+        <div className="flex w-full flex-1 flex-col items-center justify-center">
+          {children}
+        </div>
+      </div>
 
       {/* Footer */}
       <footer className="flex items-center justify-around border-t px-4 py-2">
