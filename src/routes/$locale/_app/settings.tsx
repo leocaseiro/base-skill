@@ -52,7 +52,7 @@ const SettingsScreen = () => {
 
   const volume = settings.volume ?? 0.8;
   const speechRate = settings.speechRate ?? 1;
-  const preferredVoice = settings.preferredVoiceURI ?? 'Daniel';
+  const preferredVoice = settings.preferredVoiceURI ?? '';
 
   return (
     <div className="mx-auto max-w-md px-4 py-8">

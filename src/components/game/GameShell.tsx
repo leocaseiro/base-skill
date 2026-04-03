@@ -41,7 +41,8 @@ const GameShellChrome = ({
   const { locale } = useParams({ from: '/$locale' });
 
   const roundDisplay = state.roundIndex + 1;
-  const title = config.title['en'] ?? config.gameId;
+  const title =
+    config.title[locale] ?? config.title['en'] ?? config.gameId;
 
   const handleExit = () => {
     void navigate({ to: '/$locale', params: { locale } });
