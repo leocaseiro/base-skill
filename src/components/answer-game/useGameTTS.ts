@@ -20,7 +20,7 @@ export const useGameTTS = (): GameTTS => {
       speak(label, {
         rate: settings.speechRate ?? 1,
         volume: settings.volume ?? 0.8,
-        voiceName: settings.preferredVoiceURI ?? undefined,
+        voiceName: settings.preferredVoiceURI,
         lang: i18n.language,
       });
     },
@@ -39,7 +39,7 @@ export const useGameTTS = (): GameTTS => {
       speak(text, {
         rate: settings.speechRate ?? 1,
         volume: settings.volume ?? 0.8,
-        voiceName: settings.preferredVoiceURI ?? undefined,
+        voiceName: settings.preferredVoiceURI,
         lang: i18n.language,
       });
     },

@@ -5,6 +5,8 @@ export interface SpeakOptions {
   lang?: string;
 }
 
+let pendingVoicesChangedHandler: (() => void) | null = null;
+
 function getSynth(): SpeechSynthesis | undefined {
   return (
     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
@@ -47,17 +49,32 @@ export function speak(
   }
 
   // Voices not loaded yet — defer until voiceschanged fires
+  if (pendingVoicesChangedHandler) {
+    synth.removeEventListener(
+      'voiceschanged',
+      pendingVoicesChangedHandler,
+    );
+  }
   const handler = () => {
+    pendingVoicesChangedHandler = null;
     synth.removeEventListener('voiceschanged', handler);
     const loadedVoices = synth.getVoices();
     synth.speak(buildUtterance(text, opts, loadedVoices));
   };
+  pendingVoicesChangedHandler = handler;
   synth.addEventListener('voiceschanged', handler);
 }
 
 export function cancelSpeech(): void {
   const synth = getSynth();
   if (!synth) return;
+  if (pendingVoicesChangedHandler) {
+    synth.removeEventListener(
+      'voiceschanged',
+      pendingVoicesChangedHandler,
+    );
+    pendingVoicesChangedHandler = null;
+  }
   synth.cancel();
 }
 
