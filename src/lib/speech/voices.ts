@@ -1,3 +1,15 @@
+export function getVoiceByName(
+  name: string,
+): SpeechSynthesisVoice | undefined {
+  const synth = (
+    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+  ).speechSynthesis;
+  if (!synth) {
+    return undefined;
+  }
+  return synth.getVoices().find((v) => v.name === name);
+}
+
 export function getVoicesForLanguage(
   lang: string,
 ): SpeechSynthesisVoice[] {
