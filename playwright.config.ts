@@ -1,6 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const vrDocker = !!process.env['VR_DOCKER'];
+// Keep screenshot tests out of normal E2E (including CI) unless explicitly running VR.
+// vr-docker.mjs sets VR_DOCKER=1; for host runs use PLAYWRIGHT_INCLUDE_VISUAL=1.
+const includeVisualSpecs =
+  process.env['VR_DOCKER'] === '1' ||
+  process.env['PLAYWRIGHT_INCLUDE_VISUAL'] === '1';
+const visualExclusion = includeVisualSpecs
+  ? {}
+  : { testIgnore: '**/visual.spec.ts' };
 
 export default defineConfig({
   testDir: './e2e',
@@ -16,9 +24,21 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      ...visualExclusion,
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+      ...visualExclusion,
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+      ...visualExclusion,
+    },
   ],
   webServer: {
     command: vrDocker

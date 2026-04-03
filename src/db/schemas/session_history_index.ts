@@ -11,11 +11,16 @@ export type SessionHistoryIndexDoc = {
   totalEvents?: number;
   totalChunks?: number;
   gradeBand: string;
+  // v1 additions
+  status: 'in-progress' | 'completed' | 'abandoned';
+  seed: string;
+  initialContent: Record<string, unknown>;
+  initialState: Record<string, unknown>;
 };
 
 export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> =
   {
-    version: 0,
+    version: 1,
     primaryKey: 'sessionId',
     type: 'object',
     properties: {
@@ -48,6 +53,13 @@ export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> =
         multipleOf: 1,
       },
       gradeBand: { type: 'string' },
+      status: {
+        type: 'string',
+        enum: ['in-progress', 'completed', 'abandoned'],
+      },
+      seed: { type: 'string' },
+      initialContent: { type: 'object', additionalProperties: true },
+      initialState: { type: 'object', additionalProperties: true },
     },
     required: [
       'sessionId',
@@ -55,6 +67,10 @@ export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> =
       'gameId',
       'startedAt',
       'gradeBand',
+      'status',
+      'seed',
+      'initialContent',
+      'initialState',
     ],
     additionalProperties: false,
   };

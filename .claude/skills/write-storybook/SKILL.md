@@ -54,11 +54,11 @@ export const SomeVariant: Story = {
 
 Use decorators when the component depends on context providers:
 
-| Needs | Decorator |
-|-------|-----------|
+| Needs                                           | Decorator                                                  |
+| ----------------------------------------------- | ---------------------------------------------------------- |
 | TanStack Router (`useNavigate`, `Link`, params) | `withRouter` from `../../.storybook/decorators/withRouter` |
-| Theme toggle | `withTheme` — already applied globally via `preview.tsx` |
-| ThemeProvider | Already applied globally — do NOT add again |
+| Theme toggle                                    | `withTheme` — already applied globally via `preview.tsx`   |
+| ThemeProvider                                   | Already applied globally — do NOT add again                |
 
 ```tsx
 import { withRouter } from '../../.storybook/decorators/withRouter';
@@ -93,11 +93,11 @@ argTypes: {
 
 ## Common Mistakes
 
-| Mistake | Fix |
-|---------|-----|
-| `import React from 'react'` at top | Remove — not needed |
-| Named export for meta (`export const meta`) | Use `export default meta` |
-| Default export for stories (`export default Default`) | Use `export const Default: Story = {}` |
-| Missing `Default` story | Always add one |
-| Forgetting `withRouter` for routing components | Check if component calls `useNavigate`, `Link`, or reads route params |
-| Adding `ThemeProvider` decorator | Already global — skip |
+| Mistake                                               | Fix                                                                   |
+| ----------------------------------------------------- | --------------------------------------------------------------------- |
+| `import React from 'react'` at top                    | Remove — not needed                                                   |
+| Named export for meta (`export const meta`)           | Use `export default meta`                                             |
+| Default export for stories (`export default Default`) | Use `export const Default: Story = {}`                                |
+| Missing `Default` story                               | Always add one                                                        |
+| Forgetting `withRouter` for routing components        | Check if component calls `useNavigate`, `Link`, or reads route params |
+| Adding `ThemeProvider` decorator                      | Already global — skip                                                 |
