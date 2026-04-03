@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
 import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
 import type { WordSpellConfig } from '../types';
@@ -11,6 +12,7 @@ import type {
 } from '@/components/answer-game/types';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
@@ -74,6 +76,8 @@ const WordSpellSession = ({
   roundOrder: readonly number[];
   onRestartSession: () => void;
 }) => {
+  const { t } = useTranslation('games');
+  const [showInstructions, setShowInstructions] = useState(true);
   const { phase, roundIndex, retryCount } = useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const navigate = useNavigate();
@@ -138,6 +142,16 @@ const WordSpellSession = ({
     wordSpellConfig.rounds,
     wordSpellConfig.tileUnit,
   ]);
+
+  if (showInstructions) {
+    return (
+      <InstructionsOverlay
+        text={t('instructions.word-spell')}
+        onStart={() => setShowInstructions(false)}
+        ttsEnabled={wordSpellConfig.ttsEnabled}
+      />
+    );
+  }
 
   if (!round) return null;
 

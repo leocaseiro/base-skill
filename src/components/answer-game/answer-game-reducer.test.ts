@@ -303,7 +303,7 @@ describe('answerGameReducer', () => {
         zoneIndex: 0,
       });
 
-      expect(result.zones[0].placedTileId).toBe('t1');
+      expect(result.zones[0]!.placedTileId).toBe('t1');
       expect(result.bankTileIds).not.toContain('t1');
     });
 
@@ -337,7 +337,7 @@ describe('answerGameReducer', () => {
         zoneIndex: 0,
       });
 
-      expect(result.zones[0].placedTileId).toBeNull();
+      expect(result.zones[0]!.placedTileId).toBeNull();
       expect(result.bankTileIds).toContain('t1');
     });
   });

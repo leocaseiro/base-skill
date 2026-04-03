@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { buildNumeralRound } from '../build-numeral-round';
 import { MatchingPairZones } from '../MatchingPairZones/MatchingPairZones';
 import { NumeralTileBank } from '../NumeralTileBank/NumeralTileBank';
@@ -11,6 +12,7 @@ import type {
 } from '@/components/answer-game/types';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
@@ -32,6 +34,8 @@ const NumberMatchSession = ({
   roundOrder: readonly number[];
   onRestartSession: () => void;
 }) => {
+  const { t } = useTranslation('games');
+  const [showInstructions, setShowInstructions] = useState(true);
   const { phase, roundIndex, retryCount } = useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const navigate = useNavigate();
@@ -97,6 +101,16 @@ const NumberMatchSession = ({
     numberMatchConfig.distractorCount,
     numberMatchConfig.range,
   ]);
+
+  if (showInstructions) {
+    return (
+      <InstructionsOverlay
+        text={t('instructions.number-match')}
+        onStart={() => setShowInstructions(false)}
+        ttsEnabled={numberMatchConfig.ttsEnabled}
+      />
+    );
+  }
 
   if (!round) return null;
 
