@@ -1,7 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { EMPTY } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import type { ThemeDoc } from '@/db/schemas/themes';
 import type { ReactNode } from 'react';
 import { useRxDB } from '@/db/hooks/useRxDB';
+import { useRxQuery } from '@/db/hooks/useRxQuery';
 import {
   applyThemeCssVars,
   themeDocToCssVars,
@@ -9,6 +12,7 @@ import {
 import { defaultThemeCssVars } from '@/lib/theme/default-tokens';
 
 const DEFAULT_THEME_ID = 'theme_ocean_preset';
+const ANONYMOUS_SETTINGS_ID = 'settings:anonymous';
 
 function applyDocOrDefault(doc: ThemeDoc | null | undefined): void {
   const root = document.documentElement;
@@ -26,17 +30,25 @@ export const ThemeRuntimeProvider = ({
 }) => {
   const { db, isReady } = useRxDB();
 
-  useEffect(() => {
-    if (!db || !isReady) {
-      return;
-    }
-    const sub = db.themes
-      .findOne(DEFAULT_THEME_ID)
-      .$.subscribe((doc) => {
-        applyDocOrDefault(doc ? (doc.toJSON() as ThemeDoc) : null);
-      });
-    return () => sub.unsubscribe();
+  const theme$ = useMemo(() => {
+    if (!db || !isReady) return EMPTY;
+    return db.settings.findOne(ANONYMOUS_SETTINGS_ID).$.pipe(
+      switchMap((settingsDoc) => {
+        const themeId =
+          settingsDoc?.toJSON().themeId ?? DEFAULT_THEME_ID;
+        return db.themes.findOne(themeId).$;
+      }),
+    );
   }, [db, isReady]);
+
+  const themeDoc = useRxQuery<{ toJSON: () => ThemeDoc } | null>(
+    theme$,
+    null,
+  );
+
+  useEffect(() => {
+    applyDocOrDefault(themeDoc ? themeDoc.toJSON() : null);
+  }, [themeDoc]);
 
   return <>{children}</>;
 };

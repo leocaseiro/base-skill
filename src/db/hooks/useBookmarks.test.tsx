@@ -56,13 +56,11 @@ describe('useBookmarks', () => {
     await waitFor(() => expect(result.current.isReady).toBe(true));
 
     await act(async () => {
-      await result.current.toggle('math-addition');
+      await result.current.toggle('word-spell');
     });
 
     await waitFor(() => {
-      expect(result.current.bookmarkedIds.has('math-addition')).toBe(
-        true,
-      );
+      expect(result.current.bookmarkedIds.has('word-spell')).toBe(true);
     });
   });
 
@@ -74,19 +72,17 @@ describe('useBookmarks', () => {
     await waitFor(() => expect(result.current.isReady).toBe(true));
 
     await act(async () => {
-      await result.current.toggle('math-addition');
+      await result.current.toggle('word-spell');
     });
     await waitFor(() => {
-      expect(result.current.bookmarkedIds.has('math-addition')).toBe(
-        true,
-      );
+      expect(result.current.bookmarkedIds.has('word-spell')).toBe(true);
     });
 
     await act(async () => {
-      await result.current.toggle('math-addition');
+      await result.current.toggle('word-spell');
     });
     await waitFor(() => {
-      expect(result.current.bookmarkedIds.has('math-addition')).toBe(
+      expect(result.current.bookmarkedIds.has('word-spell')).toBe(
         false,
       );
     });

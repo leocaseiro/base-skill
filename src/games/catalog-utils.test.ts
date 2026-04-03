@@ -38,12 +38,12 @@ describe('filterCatalog', () => {
 
   it('filters by search query (case-insensitive match on titleKey)', () => {
     const result = filterCatalog(GAME_CATALOG, {
-      search: 'ADDITION',
+      search: 'SPELL',
       level: '',
       subject: '',
     });
     expect(result).toHaveLength(1);
-    expect(result[0]?.id).toBe('math-addition');
+    expect(result[0]?.id).toBe('word-spell');
   });
 
   it('returns empty array when nothing matches', () => {
