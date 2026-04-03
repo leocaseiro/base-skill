@@ -1,7 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { NumeralTileBank } from './NumeralTileBank';
+import {
+  DiceFace,
+  DominoTile,
+  NumeralTileBank,
+} from './NumeralTileBank';
 import type {
   AnswerGameConfig,
   AnswerZone,
@@ -78,6 +82,42 @@ function wrapper({ children }: { children: ReactNode }) {
     </AnswerGameProvider>
   );
 }
+
+describe('DiceFace', () => {
+  it('renders 1 pip for value 1', () => {
+    const { container } = render(<DiceFace value={1} />);
+    expect(container.querySelectorAll('[data-pip]')).toHaveLength(1);
+  });
+
+  it('renders 6 pips for value 6', () => {
+    const { container } = render(<DiceFace value={6} />);
+    expect(container.querySelectorAll('[data-pip]')).toHaveLength(6);
+  });
+
+  it('renders 9 cells in the 3×3 grid', () => {
+    const { container } = render(<DiceFace value={1} />);
+    expect(container.querySelectorAll('[data-cell]')).toHaveLength(9);
+  });
+});
+
+describe('DominoTile', () => {
+  it('renders 7 pips for value 7 (4+3)', () => {
+    const { container } = render(<DominoTile value={7} />);
+    expect(container.querySelectorAll('[data-pip]')).toHaveLength(7);
+  });
+
+  it('renders 12 pips for value 12 (6+6)', () => {
+    const { container } = render(<DominoTile value={12} />);
+    expect(container.querySelectorAll('[data-pip]')).toHaveLength(12);
+  });
+
+  it('has a visible centre divider', () => {
+    const { container } = render(<DominoTile value={8} />);
+    expect(
+      container.querySelector('[data-divider]'),
+    ).toBeInTheDocument();
+  });
+});
 
 describe('NumeralTileBank', () => {
   beforeEach(() => {
