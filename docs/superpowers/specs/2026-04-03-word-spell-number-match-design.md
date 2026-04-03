@@ -44,11 +44,18 @@ directly in its root component. There are no per-game prompt wrapper files
 
 ```
 src/games/word-spell/
-  WordSpell.tsx           ← composes AnswerGame + question primitives directly
-  OrderedLetterSlots.tsx  ← sequential letter/syllable/word answer zones
-  LetterTileBank.tsx      ← letter / syllable / word tiles
-  types.ts                ← WordSpellConfig extends AnswerGameConfig
-  WordSpell.stories.tsx
+  WordSpell/
+    WordSpell.tsx           ← composes AnswerGame + question primitives directly
+    WordSpell.stories.tsx
+  OrderedLetterSlots/
+    OrderedLetterSlots.tsx  ← sequential letter/syllable/word answer zones
+    OrderedLetterSlots.test.tsx
+    OrderedLetterSlots.stories.tsx
+  LetterTileBank/
+    LetterTileBank.tsx      ← letter / syllable / word tiles
+    LetterTileBank.test.tsx
+    LetterTileBank.stories.tsx
+  types.ts                  ← WordSpellConfig extends AnswerGameConfig
 ```
 
 ### 2.3 Composition
@@ -159,11 +166,18 @@ determined by `config.mode` directly in the composition JSX above.
 
 ```
 src/games/number-match/
-  NumberMatch.tsx           ← composes AnswerGame + question primitives directly
-  MatchingPairZones.tsx     ← pair targets (not sequential — match any tile to zone)
-  NumeralTileBank.tsx       ← numeral / dot group / object cluster tiles
-  types.ts                  ← NumberMatchConfig extends AnswerGameConfig
-  NumberMatch.stories.tsx
+  NumberMatch/
+    NumberMatch.tsx           ← composes AnswerGame + question primitives directly
+    NumberMatch.stories.tsx
+  MatchingPairZones/
+    MatchingPairZones.tsx     ← pair targets (not sequential — match any tile to zone)
+    MatchingPairZones.test.tsx
+    MatchingPairZones.stories.tsx
+  NumeralTileBank/
+    NumeralTileBank.tsx       ← numeral / dot group / object cluster tiles
+    NumeralTileBank.test.tsx
+    NumeralTileBank.stories.tsx
+  types.ts                    ← NumberMatchConfig extends AnswerGameConfig
 ```
 
 ### 3.3 Composition
