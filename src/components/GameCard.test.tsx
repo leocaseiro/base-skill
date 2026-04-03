@@ -11,14 +11,14 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 const mockEntry = {
-  id: 'math-addition',
-  titleKey: 'math-addition',
+  id: 'word-spell',
+  titleKey: 'word-spell',
   levels: ['1', '2'],
-  subject: 'math',
+  subject: 'reading',
 } satisfies GameCatalogEntry;
 
 describe('GameCard', () => {
-  it('renders the game title key as text', () => {
+  it('renders the translated game title', () => {
     render(
       <GameCard
         entry={mockEntry}
@@ -28,7 +28,7 @@ describe('GameCard', () => {
       />,
       { wrapper },
     );
-    expect(screen.getByText('Addition practice')).toBeInTheDocument();
+    expect(screen.getByText('Word Spell')).toBeInTheDocument();
   });
 
   it('renders level badges', () => {
@@ -59,7 +59,7 @@ describe('GameCard', () => {
     await userEvent.click(
       screen.getByRole('button', { name: /play/i }),
     );
-    expect(onPlay).toHaveBeenCalledWith('math-addition');
+    expect(onPlay).toHaveBeenCalledWith('word-spell');
   });
 
   it('calls onBookmarkToggle with gameId when bookmark button is clicked', async () => {
@@ -76,7 +76,7 @@ describe('GameCard', () => {
     await userEvent.click(
       screen.getByRole('button', { name: /bookmark/i }),
     );
-    expect(onBookmarkToggle).toHaveBeenCalledWith('math-addition');
+    expect(onBookmarkToggle).toHaveBeenCalledWith('word-spell');
   });
 
   it('shows "remove bookmark" aria-label when isBookmarked is true', () => {

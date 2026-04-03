@@ -6,10 +6,10 @@ const meta: Meta<typeof GameCard> = {
   tags: ['autodocs'],
   args: {
     entry: {
-      id: 'math-addition',
-      titleKey: 'math-addition',
+      id: 'word-spell',
+      titleKey: 'word-spell',
       levels: ['1', '2'],
-      subject: 'math',
+      subject: 'reading',
     },
     isBookmarked: false,
   },
@@ -31,21 +31,21 @@ export const Bookmarked: Story = {
 export const MultiLevel: Story = {
   args: {
     entry: {
-      id: 'math-subtraction',
-      titleKey: 'math-subtraction',
+      id: 'number-match',
+      titleKey: 'number-match',
       levels: ['1', '2', '3'],
       subject: 'math',
     },
   },
 };
 
-export const LettersGame: Story = {
+export const EarlyYearsReading: Story = {
   args: {
     entry: {
-      id: 'placeholder-game',
-      titleKey: 'placeholder-game',
+      id: 'word-spell',
+      titleKey: 'word-spell',
       levels: ['PK', 'K'],
-      subject: 'letters',
+      subject: 'reading',
     },
   },
 };
