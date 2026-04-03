@@ -42,7 +42,7 @@ const GameShellChrome = ({
   const title = config.title['en'] ?? config.gameId;
 
   const handleExit = () => {
-    void navigate({ to: '/$locale/dashboard', params: { locale } });
+    void navigate({ to: '/$locale', params: { locale } });
   };
 
   const handleUndo = () => {
