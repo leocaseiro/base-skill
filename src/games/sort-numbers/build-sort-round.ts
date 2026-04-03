@@ -66,6 +66,16 @@ export function generateSortRounds(
       return { sequence: picked };
     }
 
+    // Consecutive: pick a random start such that start + quantity - 1 <= max
+    const rangeSize = range.max - range.min + 1;
+    if (quantity > rangeSize) {
+      // quantity exceeds range — fall back to the full range in order
+      const sequence = Array.from(
+        { length: rangeSize },
+        (_, i) => range.min + i,
+      );
+      return { sequence };
+    }
     const maxStart = range.max - quantity + 1;
     const start =
       Math.floor(Math.random() * (maxStart - range.min + 1)) +

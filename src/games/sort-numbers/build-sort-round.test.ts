@@ -64,6 +64,21 @@ describe('generateSortRounds', () => {
     }
   });
 
+  it('handles quantity larger than range size gracefully', () => {
+    const rounds = generateSortRounds({
+      range: { min: 1, max: 3 },
+      quantity: 5,
+      allowSkips: false,
+      totalRounds: 1,
+    });
+    const seq = rounds[0]?.sequence ?? [];
+    expect(seq).toHaveLength(3); // clamped to range size
+    for (const n of seq) {
+      expect(n).toBeGreaterThanOrEqual(1);
+      expect(n).toBeLessThanOrEqual(3);
+    }
+  });
+
   it('all numbers in a round are unique', () => {
     const rounds = generateSortRounds({
       range: { min: 1, max: 10 },
