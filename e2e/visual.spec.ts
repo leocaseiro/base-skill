@@ -1,4 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { seedMathRandom } from './seed-math-random';
+
+test.beforeEach(async ({ page }) => {
+  await seedMathRandom(page);
+});
 
 test('@visual home page', async ({ page }) => {
   await page.goto('/en/');
