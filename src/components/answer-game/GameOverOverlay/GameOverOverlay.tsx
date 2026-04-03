@@ -7,13 +7,13 @@ interface GameOverOverlayProps {
   onHome: () => void;
 }
 
-function starsFromRetries(retryCount: number): number {
+const starsFromRetries = (retryCount: number): number => {
   if (retryCount === 0) return 5;
   if (retryCount <= 2) return 4;
   if (retryCount <= 4) return 3;
   if (retryCount <= 6) return 2;
   return 1;
-}
+};
 
 export const GameOverOverlay = ({
   retryCount,
@@ -25,6 +25,7 @@ export const GameOverOverlay = ({
   useEffect(() => {
     const duration = 12_000;
     const end = Date.now() + duration;
+    let rafId: number;
 
     const frame = () => {
       void confetti({
@@ -40,11 +41,16 @@ export const GameOverOverlay = ({
         origin: { x: 1 },
       });
       if (Date.now() < end) {
-        requestAnimationFrame(frame);
+        rafId = requestAnimationFrame(frame);
       }
     };
 
-    requestAnimationFrame(frame);
+    rafId = requestAnimationFrame(frame);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      confetti.reset();
+    };
   }, []);
 
   return (
