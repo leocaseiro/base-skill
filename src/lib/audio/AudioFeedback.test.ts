@@ -7,6 +7,8 @@ import {
   vi,
 } from 'vitest';
 
+const mockPlay = () => Promise.resolve();
+
 describe('AudioFeedback', () => {
   beforeEach(() => {
     vi.resetModules();
@@ -17,7 +19,7 @@ describe('AudioFeedback', () => {
   });
 
   it('creates an Audio element with the correct src for "correct"', async () => {
-    const playSpy = vi.fn().mockResolvedValue();
+    const playSpy = vi.fn().mockImplementation(mockPlay);
     const AudioMock = vi.fn().mockImplementation((src: string) => ({
       src,
       volume: 1,
@@ -34,7 +36,7 @@ describe('AudioFeedback', () => {
   });
 
   it('creates an Audio element for "wrong"', async () => {
-    const playSpy = vi.fn().mockResolvedValue();
+    const playSpy = vi.fn().mockImplementation(mockPlay);
     const AudioMock = vi.fn().mockImplementation((src: string) => ({
       src,
       volume: 1,
@@ -58,7 +60,7 @@ describe('AudioFeedback', () => {
       get volume() {
         return capturedVolume;
       },
-      play: vi.fn().mockResolvedValue(),
+      play: vi.fn().mockImplementation(mockPlay),
       pause: vi.fn(),
     }));
     vi.stubGlobal('Audio', AudioMock);
