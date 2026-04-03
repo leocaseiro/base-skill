@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { speak } from '@/lib/speech/SpeechOutput';
+import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
 
 interface InstructionsOverlayProps {
   text: string;
@@ -17,6 +17,9 @@ export const InstructionsOverlay = ({
 
   useEffect(() => {
     if (ttsEnabled) speak(text);
+    return () => {
+      cancelSpeech();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount to speak instructions once
   }, []);
 
