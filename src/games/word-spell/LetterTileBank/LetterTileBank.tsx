@@ -9,6 +9,11 @@ const LetterTile = ({ tile }: { tile: TileItem }) => {
   const ref = useRef<HTMLButtonElement>(null);
   const { placeInNextSlot } = useAutoNextSlot();
   const { speakTile } = useGameTTS();
+  const speakTileRef = useRef(speakTile);
+
+  useEffect(() => {
+    speakTileRef.current = speakTile;
+  }, [speakTile]);
 
   useEffect(() => {
     const element = ref.current;
@@ -16,8 +21,9 @@ const LetterTile = ({ tile }: { tile: TileItem }) => {
     return draggable({
       element,
       getInitialData: () => ({ tileId: tile.id }),
+      onDragStart: () => speakTileRef.current(tile.label),
     });
-  }, [tile.id]);
+  }, [tile.id, tile.label]);
 
   const handleClick = () => {
     speakTile(tile.label);

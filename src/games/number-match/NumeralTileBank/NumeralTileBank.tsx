@@ -29,7 +29,12 @@ const NumeralTile = ({
   const ref = useRef<HTMLButtonElement>(null);
   const { placeInNextSlot } = useAutoNextSlot();
   const { speakTile } = useGameTTS();
+  const speakTileRef = useRef(speakTile);
   const numericValue = Number.parseInt(tile.value, 10);
+
+  useEffect(() => {
+    speakTileRef.current = speakTile;
+  }, [speakTile]);
 
   useEffect(() => {
     const element = ref.current;
@@ -37,8 +42,9 @@ const NumeralTile = ({
     return draggable({
       element,
       getInitialData: () => ({ tileId: tile.id }),
+      onDragStart: () => speakTileRef.current(tile.label),
     });
-  }, [tile.id]);
+  }, [tile.id, tile.label]);
 
   const handleClick = () => {
     speakTile(tile.label);
