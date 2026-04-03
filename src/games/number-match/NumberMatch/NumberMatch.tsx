@@ -1,4 +1,4 @@
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildNumeralRound } from '../build-numeral-round';
 import { MatchingPairZones } from '../MatchingPairZones/MatchingPairZones';
@@ -35,6 +35,7 @@ const NumberMatchSession = ({
   const { phase, roundIndex, retryCount } = useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const navigate = useNavigate();
+  const { locale } = useParams({ from: '/$locale' });
   const completionToken = useRef(0);
 
   const configRoundIndex = roundOrder[roundIndex];
@@ -44,10 +45,7 @@ const NumberMatchSession = ({
       : numberMatchConfig.rounds[configRoundIndex];
 
   const handleHome = () => {
-    void navigate({
-      to: '/$locale/dashboard',
-      params: { locale: 'en' },
-    });
+    void navigate({ to: '/$locale', params: { locale } });
   };
 
   const handlePlayAgain = () => {

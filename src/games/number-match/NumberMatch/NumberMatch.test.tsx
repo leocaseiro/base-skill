@@ -7,6 +7,7 @@ const navigateStub = vi.hoisted(() => vi.fn());
 
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => navigateStub,
+  useParams: () => ({ locale: 'en' }),
 }));
 
 vi.mock('@/lib/speech/SpeechOutput', () => ({
