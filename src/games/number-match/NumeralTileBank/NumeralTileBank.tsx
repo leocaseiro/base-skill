@@ -1,9 +1,6 @@
-import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { useEffect, useRef } from 'react';
 import type { TileItem } from '@/components/answer-game/types';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-import { useAutoNextSlot } from '@/components/answer-game/useAutoNextSlot';
-import { useGameTTS } from '@/components/answer-game/useGameTTS';
+import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
 
 type TileStyle = 'dots' | 'objects' | 'fingers';
 
@@ -70,30 +67,8 @@ const NumeralTile = ({
   tile: TileItem;
   tileStyle: TileStyle;
 }) => {
-  const ref = useRef<HTMLButtonElement>(null);
-  const { placeInNextSlot } = useAutoNextSlot();
-  const { speakTile } = useGameTTS();
-  const speakTileRef = useRef(speakTile);
+  const { ref, handleClick } = useDraggableTile(tile);
   const numericValue = Number.parseInt(tile.value, 10);
-
-  useEffect(() => {
-    speakTileRef.current = speakTile;
-  }, [speakTile]);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    return draggable({
-      element,
-      getInitialData: () => ({ tileId: tile.id }),
-      onDragStart: () => speakTileRef.current(tile.label),
-    });
-  }, [tile.id, tile.label]);
-
-  const handleClick = () => {
-    speakTile(tile.label);
-    placeInNextSlot(tile.id);
-  };
 
   const isDomino =
     tileStyle === 'dots' &&
