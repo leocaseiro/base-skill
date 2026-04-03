@@ -11,6 +11,11 @@ import path from 'node:path';
 
 const PLAYWRIGHT_VERSION = '1.59.1';
 const DOCKER_IMAGE = `mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble`;
+// Named volume keeps Docker's node_modules (Linux binaries) separate from the
+// host's node_modules (macOS binaries). Without this, Docker's yarn install
+// overwrites @rollup/rollup-darwin-arm64 with Linux binaries, breaking the
+// host's vite build used by subsequent E2E tests.
+const VR_VOLUME_NAME = 'base-skill-vr-node-modules';
 
 const mode = process.argv[2];
 
@@ -23,8 +28,12 @@ if (mode !== 'test' && mode !== 'update') {
 try {
   execSync('docker info', { stdio: 'ignore' });
 } catch {
-  console.warn(
-    '\u001B[33m\u26A0 Docker not running \u2014 cannot execute VR tests.\u001B[0m',
+  console.error('\n\u001B[31mError: Docker is not available.\u001B[0m');
+  console.error(
+    'yarn test:vr and yarn test:vr:update require a running Docker daemon (e.g. Docker Desktop).',
+  );
+  console.error(
+    'Start Docker, confirm `docker info` works, then run this command again.\n',
   );
   process.exit(1);
 }
@@ -66,12 +75,15 @@ const dockerArgs = [
   '--ipc=host',
   '-v',
   `${cwd}:/work`,
+  '-v',
+  `${VR_VOLUME_NAME}:/work/node_modules`,
   '-w',
   '/work',
   '-e',
   'APP_BASE_URL=/',
   '-e',
   'VR_DOCKER=1',
+  ...(process.env['CI'] ? ['-e', 'CI=true'] : []),
   DOCKER_IMAGE,
   'bash',
   '-c',
