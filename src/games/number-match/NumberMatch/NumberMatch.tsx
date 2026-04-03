@@ -17,6 +17,7 @@ import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAni
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
 import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
@@ -49,6 +50,8 @@ const NumberMatchSession = ({
     configRoundIndex === undefined
       ? undefined
       : numberMatchConfig.rounds[configRoundIndex];
+
+  useRoundTTS(String(round?.value ?? ''));
 
   const handleHome = () => {
     void navigate({ to: '/$locale', params: { locale } });

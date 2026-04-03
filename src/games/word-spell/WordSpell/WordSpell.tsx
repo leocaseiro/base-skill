@@ -17,6 +17,7 @@ import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAni
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
@@ -90,6 +91,8 @@ const WordSpellSession = ({
     configRoundIndex === undefined
       ? undefined
       : wordSpellConfig.rounds[configRoundIndex];
+
+  useRoundTTS(round?.word ?? '');
 
   const handleHome = () => {
     void navigate({
