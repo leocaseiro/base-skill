@@ -28,16 +28,16 @@ const config: AnswerGameConfig = {
 };
 
 const tiles: TileItem[] = [
-  { id: 't1', label: 'C', value: 'C' },
-  { id: 't2', label: 'A', value: 'A' },
-  { id: 't3', label: 'T', value: 'T' },
+  { id: 't1', label: 'c', value: 'c' },
+  { id: 't2', label: 'a', value: 'a' },
+  { id: 't3', label: 't', value: 't' },
 ];
 
 const zones: AnswerZone[] = [
   {
     id: 'z0',
     index: 0,
-    expectedValue: 'C',
+    expectedValue: 'c',
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -62,13 +62,13 @@ describe('LetterTileBank', () => {
   it('renders all bank tiles as buttons', () => {
     render(<LetterTileBank />, { wrapper });
     expect(
-      screen.getByRole('button', { name: 'Letter C' }),
+      screen.getByRole('button', { name: 'Letter c' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Letter A' }),
+      screen.getByRole('button', { name: 'Letter a' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Letter T' }),
+      screen.getByRole('button', { name: 'Letter t' }),
     ).toBeInTheDocument();
   });
 
@@ -85,10 +85,10 @@ describe('LetterTileBank', () => {
       </AnswerGameProvider>,
     );
     expect(
-      screen.queryByRole('button', { name: 'Letter C' }),
+      screen.queryByRole('button', { name: 'Letter c' }),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Letter A' }),
+      screen.getByRole('button', { name: 'Letter a' }),
     ).toBeInTheDocument();
   });
 });

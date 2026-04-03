@@ -9,6 +9,7 @@ const baseConfig: NumberMatchConfig = {
   wrongTileBehavior: 'lock-auto-eject',
   tileBankMode: 'exact',
   totalRounds: 5,
+  roundsInOrder: true,
   ttsEnabled: true,
   mode: 'numeral-to-group',
   tileStyle: 'dots',

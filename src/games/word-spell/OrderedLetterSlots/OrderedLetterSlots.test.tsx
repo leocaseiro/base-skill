@@ -20,16 +20,16 @@ const config: AnswerGameConfig = {
 };
 
 const tiles: TileItem[] = [
-  { id: 't1', label: 'C', value: 'C' },
-  { id: 't2', label: 'A', value: 'A' },
-  { id: 't3', label: 'T', value: 'T' },
+  { id: 't1', label: 'c', value: 'c' },
+  { id: 't2', label: 'a', value: 'a' },
+  { id: 't3', label: 't', value: 't' },
 ];
 
 const zones: AnswerZone[] = [
   {
     id: 'z0',
     index: 0,
-    expectedValue: 'C',
+    expectedValue: 'c',
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -37,7 +37,7 @@ const zones: AnswerZone[] = [
   {
     id: 'z1',
     index: 1,
-    expectedValue: 'A',
+    expectedValue: 'a',
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -45,7 +45,7 @@ const zones: AnswerZone[] = [
   {
     id: 'z2',
     index: 2,
-    expectedValue: 'T',
+    expectedValue: 't',
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -92,7 +92,7 @@ describe('OrderedLetterSlots', () => {
       </AnswerGameProvider>,
     );
     expect(
-      screen.getByRole('listitem', { name: 'Slot 1, filled with C' }),
+      screen.getByRole('listitem', { name: 'Slot 1, filled with c' }),
     ).toBeInTheDocument();
   });
 });

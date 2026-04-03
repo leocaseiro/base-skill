@@ -8,6 +8,11 @@ export interface AnswerGameConfig {
   distractorCount?: number;
   /** Total number of rounds in this session */
   totalRounds: number;
+  /**
+   * When `true`, rounds follow the order of `rounds` in config.
+   * When `false` or omitted, order is shuffled once per session (again after Play again).
+   */
+  roundsInOrder?: boolean;
   /** Whether TTS is enabled for this profile */
   ttsEnabled: boolean;
   /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
