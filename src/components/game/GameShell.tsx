@@ -92,12 +92,12 @@ const GameShellChrome = ({
           )}
       </div>
 
-      {/* Game area — flex so answer games can vertically center in the chrome */}
-      <main className="flex min-h-0 flex-1 flex-col overflow-auto p-4">
+      {/* Game area (div, not main — app layout already has a single page <main>) */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4">
         <div className="flex w-full flex-1 flex-col items-center justify-center">
           {children}
         </div>
-      </main>
+      </div>
 
       {/* Footer */}
       <footer className="flex items-center justify-around border-t px-4 py-2">
