@@ -13,9 +13,14 @@ import { useAnswerGameDispatch } from './useAnswerGameDispatch';
 import { useTileEvaluation } from './useTileEvaluation';
 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
 import type { ReactNode } from 'react';
+import { playSound } from '@/lib/audio/AudioFeedback';
 
 vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+}));
+
+vi.mock('@/lib/audio/AudioFeedback', () => ({
+  playSound: vi.fn(),
 }));
 
 const baseConfig: AnswerGameConfig = {
@@ -71,8 +76,28 @@ function useInitialisedEvaluation(_config: AnswerGameConfig) {
 }
 
 describe('useTileEvaluation', () => {
-  beforeEach(() => vi.useFakeTimers());
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.clearAllMocks();
+  });
   afterEach(() => vi.useRealTimers());
+
+  it('plays "correct" sound on correct tile placement', () => {
+    const { result } = renderHook(
+      () => useInitialisedEvaluation(baseConfig),
+      { wrapper: createWrapper(baseConfig) },
+    );
+    act(() => result.current.placeTile('t1', 0));
+    expect(playSound).toHaveBeenCalledWith('correct', 0.8);
+  });
+
+  it('plays "wrong" sound on incorrect tile placement', () => {
+    const { result } = renderHook(() => useTileEvaluationHarness(), {
+      wrapper: createWrapper(baseConfig),
+    });
+    act(() => result.current.placeTile('t2', 0));
+    expect(playSound).toHaveBeenCalledWith('wrong', 0.8);
+  });
 
   it('correct placement: zone not marked wrong', () => {
     const { result } = renderHook(

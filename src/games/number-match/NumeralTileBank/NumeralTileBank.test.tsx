@@ -20,6 +20,9 @@ vi.mock('@/lib/speech/SpeechOutput', () => ({
 vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
 }));
+vi.mock('@/lib/audio/AudioFeedback', () => ({
+  playSound: vi.fn(),
+}));
 vi.mock('@/db/hooks/useSettings', () => ({
   useSettings: () => ({
     settings: {

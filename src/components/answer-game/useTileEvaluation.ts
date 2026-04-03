@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAnswerGameContext } from './useAnswerGameContext';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+import { playSound } from '@/lib/audio/AudioFeedback';
 import { getGameEventBus } from '@/lib/game-event-bus';
 
 const AUTO_EJECT_DELAY_MS = 1000;
@@ -34,6 +35,7 @@ export function useTileEvaluation(): TileEvaluation {
       if (!tile || !zone) return;
 
       const correct = tile.value === zone.expectedValue;
+      playSound(correct ? 'correct' : 'wrong', 0.8);
       dispatch({ type: 'PLACE_TILE', tileId, zoneIndex });
 
       getGameEventBus().emit({
