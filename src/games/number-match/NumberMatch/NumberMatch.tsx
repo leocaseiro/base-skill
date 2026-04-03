@@ -16,6 +16,7 @@ import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverla
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+import { useGameSounds } from '@/components/answer-game/useGameSounds';
 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
 import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
@@ -38,6 +39,7 @@ const NumberMatchSession = ({
   const [showInstructions, setShowInstructions] = useState(true);
   const { phase, roundIndex, retryCount } = useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
+  useGameSounds();
   const navigate = useNavigate();
   const { locale } = useParams({ from: '/$locale' });
   const completionToken = useRef(0);
