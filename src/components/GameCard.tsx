@@ -52,7 +52,7 @@ export const GameCard = ({
           {entry.levels.map((level) => (
             <span
               key={level}
-              className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
+              className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground"
             >
               {tCommon(`levels.${level}`)}
             </span>
