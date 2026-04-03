@@ -44,7 +44,16 @@ const LetterTile = ({ tile }: { tile: TileItem }) => {
 };
 
 export const LetterTileBank = () => {
-  const { allTiles, bankTileIds } = useAnswerGameContext();
+  const { allTiles, bankTileIds, config } = useAnswerGameContext();
+
+  if (config.inputMethod === 'type') {
+    return (
+      <p className="text-sm text-muted-foreground" aria-live="polite">
+        ⌨️ Type the letters on your keyboard
+      </p>
+    );
+  }
+
   const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
 
   return (
