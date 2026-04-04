@@ -2151,3 +2151,485 @@ Expected: all pass. Skip with `SKIP_E2E=1` if game routes not yet wired and docu
 | VR screenshots both games                                  | Task 10                                                                                                          |
 | Preset / bookmark UX                                       | Out of scope for this plan — tracked separately in M5 presets spec                                               |
 | Image assets (Fluent Emoji)                                | Paths referenced in config; asset bundling is a build-time concern handled by Vite code-splitting, not this plan |
+
+---
+
+## Task 11: NumeralTileBank — Domino dot layout
+
+**Design decision (approved 2026-04-03):** `tileStyle: 'dots'` renders pip patterns using dice/domino visuals:
+
+- **1–6** — single die face (classic dice pip positions on a 3×3 grid)
+- **7–12** — domino tile (two dice faces side by side, separated by a centre line, splits: 7=4+3, 8=4+4, 9=5+4, 10=6+4, 11=6+5, 12=6+6)
+- **13+** — large numeral (dots become uncountable; numeral is more appropriate for older learners)
+
+Tile shape: single die = 80×80 square; domino = 128×72 rectangle.
+
+**Files:**
+
+- Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
+- Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx`
+
+- [ ] **Step 1: Write failing tests**
+
+  In `src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx`, add:
+
+  ```tsx
+  import { render } from '@testing-library/react';
+  import { describe, expect, it } from 'vitest';
+  import { DiceFace } from '../NumeralTileBank/NumeralTileBank';
+
+  describe('DiceFace', () => {
+    it('renders 1 pip for value 1', () => {
+      const { container } = render(<DiceFace value={1} />);
+      expect(container.querySelectorAll('[data-pip]')).toHaveLength(1);
+    });
+
+    it('renders 6 pips for value 6', () => {
+      const { container } = render(<DiceFace value={6} />);
+      expect(container.querySelectorAll('[data-pip]')).toHaveLength(6);
+    });
+
+    it('renders 9 empty cells + 1 pip for value 1 (3×3 grid)', () => {
+      const { container } = render(<DiceFace value={1} />);
+      expect(container.querySelectorAll('[data-cell]')).toHaveLength(9);
+    });
+  });
+
+  describe('DominoTile', () => {
+    it('renders two DiceFace halves for value 7 (4+3)', () => {
+      const { container } = render(<DominoTile value={7} />);
+      // 4 pips + 3 pips = 7 pips total
+      expect(container.querySelectorAll('[data-pip]')).toHaveLength(7);
+    });
+
+    it('renders 12 pips for value 12 (6+6)', () => {
+      const { container } = render(<DominoTile value={12} />);
+      expect(container.querySelectorAll('[data-pip]')).toHaveLength(12);
+    });
+
+    it('has a visible centre divider', () => {
+      const { container } = render(<DominoTile value={8} />);
+      expect(
+        container.querySelector('[data-divider]'),
+      ).toBeInTheDocument();
+    });
+  });
+  ```
+
+  Run to confirm FAIL:
+
+  ```bash
+  yarn test src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx 2>&1 | tail -10
+  ```
+
+- [ ] **Step 2: Add `DiceFace` and `DominoTile` sub-components**
+
+  Replace the `DotsTile` component in `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` with:
+
+  ```tsx
+  /** Pip positions (0–8) for each die value in a 3×3 grid. */
+  const DICE_PIPS: Record<number, number[]> = {
+    1: [4],
+    2: [2, 6],
+    3: [2, 4, 6],
+    4: [0, 2, 6, 8],
+    5: [0, 2, 4, 6, 8],
+    6: [0, 2, 3, 5, 6, 8],
+  };
+
+  /** Which two die values add up to n for values 7–12. */
+  const DOMINO_SPLIT: Record<number, [number, number]> = {
+    7: [4, 3],
+    8: [4, 4],
+    9: [5, 4],
+    10: [6, 4],
+    11: [6, 5],
+    12: [6, 6],
+  };
+
+  export const DiceFace = ({ value }: { value: number }) => {
+    const pips = DICE_PIPS[value] ?? [];
+    return (
+      <div
+        className="grid grid-cols-3 grid-rows-3 gap-1 p-1"
+        aria-hidden="true"
+      >
+        {Array.from({ length: 9 }, (_, i) => (
+          <span
+            key={i}
+            data-cell=""
+            data-pip={pips.includes(i) ? '' : undefined}
+            className={[
+              'size-2.5 rounded-full',
+              pips.includes(i) ? 'bg-current' : 'bg-transparent',
+            ].join(' ')}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  export const DominoTile = ({ value }: { value: number }) => {
+    const [left, right] = DOMINO_SPLIT[value] ?? [6, value - 6];
+    return (
+      <div className="flex items-center gap-0" aria-hidden="true">
+        <DiceFace value={left} />
+        <span
+          data-divider=""
+          className="h-10 w-px shrink-0 bg-current opacity-30"
+        />
+        <DiceFace value={right} />
+      </div>
+    );
+  };
+  ```
+
+- [ ] **Step 3: Update `DotsTile` usage in `NumeralTile`**
+
+  Replace the `DotsTile` render inside `NumeralTile` with:
+
+  ```tsx
+  {
+    tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
+      numericValue <= 6 ? (
+        <DiceFace value={numericValue} />
+      ) : numericValue <= 12 ? (
+        <DominoTile value={numericValue} />
+      ) : (
+        <span className="text-3xl font-bold tabular-nums leading-none">
+          {tile.label}
+        </span>
+      )
+    ) : (
+      <span className="text-3xl font-bold tabular-nums leading-none">
+        {tile.label}
+      </span>
+    );
+  }
+  ```
+
+- [ ] **Step 4: Update tile size for domino tiles**
+
+  The `NumeralTile` button needs a wider shape for domino tiles. Replace the fixed `size-20` class with a dynamic one:
+
+  ```tsx
+  const isDomino =
+    tileStyle === 'dots' &&
+    !Number.isNaN(numericValue) &&
+    numericValue > 6 &&
+    numericValue <= 12;
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      aria-label={`Number ${tile.label}`}
+      className={[
+        'shrink-0 cursor-grab rounded-2xl bg-card p-2 shadow-md transition-transform active:scale-95 active:cursor-grabbing',
+        'flex flex-col items-center justify-center gap-0.5',
+        isDomino ? 'h-18 w-32' : 'size-20',
+      ].join(' ')}
+      onClick={handleClick}
+    >
+  ```
+
+  Note: Tailwind v4 uses arbitrary values if `h-18` / `w-32` aren't in the default scale — use `h-[72px] w-32` to be safe:
+
+  ```tsx
+  isDomino ? 'h-[72px] w-32' : 'size-20',
+  ```
+
+- [ ] **Step 5: Run tests**
+
+  ```bash
+  yarn test src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx 2>&1 | tail -10
+  ```
+
+  Expected: all PASS.
+
+- [ ] **Step 6: Run typecheck**
+
+  ```bash
+  yarn typecheck 2>&1 | tail -5
+  ```
+
+- [ ] **Step 7: Commit**
+
+  ```bash
+  git add src/games/number-match/NumeralTileBank/NumeralTileBank.tsx \
+    src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
+  git commit -m "feat(number-match): domino dot layout for 1-6 (dice) and 7-12 (domino), numeral above 12"
+  ```
+
+---
+
+## Task 12: Extract useDraggableTile hook
+
+Eliminates the duplicated drag + TTS + click wiring across `LetterTile`, `NumeralTile`, and `SortNumbersTileBank` (Group I). After this task, Group A+B Task 5 (drag-start TTS) only needs to be implemented once in the hook.
+
+**Files:**
+
+- Create: `src/components/answer-game/useDraggableTile.ts`
+- Create: `src/components/answer-game/useDraggableTile.test.tsx`
+- Modify: `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
+- Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
+- Modify: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx` (if already created)
+
+- [ ] **Step 1: Write failing tests**
+
+  Create `src/components/answer-game/useDraggableTile.test.tsx`:
+
+  ```tsx
+  import { renderHook, act } from '@testing-library/react';
+  import { describe, expect, it, vi } from 'vitest';
+
+  vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
+    draggable: vi.fn().mockReturnValue(() => {}),
+  }));
+
+  vi.mock('./useAutoNextSlot', () => ({
+    useAutoNextSlot: () => ({ placeInNextSlot: vi.fn() }),
+  }));
+
+  vi.mock('./useGameTTS', () => ({
+    useGameTTS: () => ({ speakTile: vi.fn(), speakPrompt: vi.fn() }),
+  }));
+
+  describe('useDraggableTile', () => {
+    const tile = { id: 't1', label: 'C', value: 'c' };
+
+    it('returns a ref and handleClick', () => {
+      const { result } = renderHook(() =>
+        // wrap in AnswerGameContext mock via wrapper prop
+        useDraggableTile(tile),
+      );
+      expect(result.current.ref).toBeDefined();
+      expect(typeof result.current.handleClick).toBe('function');
+    });
+
+    it('handleClick calls speakTile with tile label', () => {
+      const speakTileMock = vi.fn();
+      vi.mocked(useGameTTS).mockReturnValue({
+        speakTile: speakTileMock,
+        speakPrompt: vi.fn(),
+      });
+
+      const { result } = renderHook(() => useDraggableTile(tile));
+      act(() => result.current.handleClick());
+
+      expect(speakTileMock).toHaveBeenCalledWith('C');
+    });
+
+    it('handleClick calls placeInNextSlot with tile id', () => {
+      const placeInNextSlotMock = vi.fn();
+      vi.mocked(useAutoNextSlot).mockReturnValue({
+        placeInNextSlot: placeInNextSlotMock,
+      });
+
+      const { result } = renderHook(() => useDraggableTile(tile));
+      act(() => result.current.handleClick());
+
+      expect(placeInNextSlotMock).toHaveBeenCalledWith('t1');
+    });
+  });
+  ```
+
+  Run to confirm FAIL:
+
+  ```bash
+  yarn test src/components/answer-game/useDraggableTile.test.tsx 2>&1 | tail -10
+  ```
+
+  Expected: FAIL — `Cannot find module './useDraggableTile'`
+
+- [ ] **Step 2: Create `useDraggableTile.ts`**
+
+  ```ts
+  import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+  import { useEffect, useRef } from 'react';
+  import type { RefObject } from 'react';
+  import { useAutoNextSlot } from './useAutoNextSlot';
+  import { useGameTTS } from './useGameTTS';
+  import type { TileItem } from './types';
+
+  export interface DraggableTile {
+    ref: RefObject<HTMLButtonElement | null>;
+    handleClick: () => void;
+  }
+
+  export function useDraggableTile(tile: TileItem): DraggableTile {
+    const ref = useRef<HTMLButtonElement>(null);
+    const { placeInNextSlot } = useAutoNextSlot();
+    const { speakTile } = useGameTTS();
+    const speakTileRef = useRef(speakTile);
+
+    useEffect(() => {
+      speakTileRef.current = speakTile;
+    }, [speakTile]);
+
+    useEffect(() => {
+      const element = ref.current;
+      if (!element) return;
+      return draggable({
+        element,
+        getInitialData: () => ({ tileId: tile.id }),
+        onDragStart: () => speakTileRef.current(tile.label),
+      });
+    }, [tile.id, tile.label]);
+
+    const handleClick = () => {
+      speakTile(tile.label);
+      placeInNextSlot(tile.id);
+    };
+
+    return { ref, handleClick };
+  }
+  ```
+
+- [ ] **Step 3: Run tests**
+
+  ```bash
+  yarn test src/components/answer-game/useDraggableTile.test.tsx 2>&1 | tail -10
+  ```
+
+  Expected: all PASS.
+
+- [ ] **Step 4: Refactor `LetterTile` to use `useDraggableTile`**
+
+  Replace the entire `LetterTile` component in `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`:
+
+  ```tsx
+  import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+
+  const LetterTile = ({ tile }: { tile: TileItem }) => {
+    const { ref, handleClick } = useDraggableTile(tile);
+
+    return (
+      <button
+        ref={ref}
+        type="button"
+        aria-label={`Letter ${tile.label}`}
+        className="flex size-14 cursor-grab items-center justify-center rounded-xl bg-card text-2xl font-bold shadow-md transition-transform active:scale-95 active:cursor-grabbing"
+        onClick={handleClick}
+      >
+        {tile.label}
+      </button>
+    );
+  };
+  ```
+
+  Remove the now-unused imports: `draggable`, `useAutoNextSlot`, `useGameTTS`, `useEffect`, `useRef`.
+
+- [ ] **Step 5: Run LetterTileBank tests**
+
+  ```bash
+  yarn test src/games/word-spell/LetterTileBank/ 2>&1 | tail -10
+  ```
+
+  Expected: PASS.
+
+- [ ] **Step 6: Refactor `NumeralTile` to use `useDraggableTile`**
+
+  Replace the boilerplate inside `NumeralTile` in `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`:
+
+  ```tsx
+  import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+
+  const NumeralTile = ({
+    tile,
+    tileStyle,
+  }: {
+    tile: TileItem;
+    tileStyle: TileStyle;
+  }) => {
+    const { ref, handleClick } = useDraggableTile(tile);
+    const numericValue = Number.parseInt(tile.value, 10);
+
+    const isDomino =
+      tileStyle === 'dots' &&
+      !Number.isNaN(numericValue) &&
+      numericValue > 6 &&
+      numericValue <= 12;
+
+    return (
+      <button
+        ref={ref}
+        type="button"
+        aria-label={`Number ${tile.label}`}
+        className={[
+          'flex shrink-0 cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl bg-card p-2 shadow-md transition-transform active:scale-95 active:cursor-grabbing',
+          isDomino ? 'h-[72px] w-32' : 'size-20',
+        ].join(' ')}
+        onClick={handleClick}
+      >
+        {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
+          numericValue <= 6 ? (
+            <DiceFace value={numericValue} />
+          ) : numericValue <= 12 ? (
+            <DominoTile value={numericValue} />
+          ) : (
+            <span className="text-3xl font-bold tabular-nums leading-none">
+              {tile.label}
+            </span>
+          )
+        ) : (
+          <span className="text-3xl font-bold tabular-nums leading-none">
+            {tile.label}
+          </span>
+        )}
+      </button>
+    );
+  };
+  ```
+
+  Remove now-unused imports: `draggable`, `useAutoNextSlot`, `useGameTTS`, `useEffect`, `useRef`.
+
+- [ ] **Step 7: Refactor `SortNumbersTileBank` (if already created)**
+
+  If `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx` already exists,
+  replace `NumberTile` the same way:
+
+  ```tsx
+  import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+
+  const NumberTile = ({ tile }: { tile: TileItem }) => {
+    const { ref, handleClick } = useDraggableTile(tile);
+
+    return (
+      <button
+        ref={ref}
+        type="button"
+        aria-label={`Number ${tile.label}`}
+        className="flex size-16 cursor-grab items-center justify-center rounded-xl bg-card text-2xl font-bold shadow-md transition-transform active:scale-95 active:cursor-grabbing"
+        onClick={handleClick}
+      >
+        {tile.label}
+      </button>
+    );
+  };
+  ```
+
+- [ ] **Step 8: Run all affected tests**
+
+  ```bash
+  yarn test src/games/ src/components/answer-game/useDraggableTile.test.tsx 2>&1 | tail -15
+  ```
+
+  Expected: all PASS.
+
+- [ ] **Step 9: Run typecheck**
+
+  ```bash
+  yarn typecheck 2>&1 | tail -5
+  ```
+
+- [ ] **Step 10: Commit**
+
+  ```bash
+  git add src/components/answer-game/useDraggableTile.ts \
+    src/components/answer-game/useDraggableTile.test.tsx \
+    src/games/word-spell/LetterTileBank/LetterTileBank.tsx \
+    src/games/number-match/NumeralTileBank/NumeralTileBank.tsx \
+    src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx
+  git commit -m "refactor(tiles): extract useDraggableTile hook — DRYs drag/TTS/click wiring across all tile banks"
+  ```

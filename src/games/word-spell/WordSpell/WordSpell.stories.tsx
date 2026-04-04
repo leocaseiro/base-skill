@@ -24,6 +24,7 @@ const baseConfig: WordSpellConfig = {
 const meta: Meta<typeof WordSpell> = {
   component: WordSpell,
   tags: ['autodocs'],
+  decorators: [withRouter],
   args: { config: baseConfig },
   decorators: [withDb, withRouter],
 };
