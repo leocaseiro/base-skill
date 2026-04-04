@@ -1,4 +1,5 @@
 import { Volume2 } from 'lucide-react';
+import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useGameTTS } from '@/components/answer-game/useGameTTS';
 
 interface AudioButtonProps {
@@ -6,7 +7,10 @@ interface AudioButtonProps {
 }
 
 export const AudioButton = ({ prompt }: AudioButtonProps) => {
+  const { config } = useAnswerGameContext();
   const { speakPrompt } = useGameTTS();
+
+  if (!config.ttsEnabled) return null;
 
   return (
     <button

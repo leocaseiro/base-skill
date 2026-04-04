@@ -6,16 +6,23 @@ export interface AutoNextSlot {
   placeInNextSlot: (tileId: string) => void;
 }
 
-export function useAutoNextSlot(): AutoNextSlot {
-  const { activeSlotIndex } = useAnswerGameContext();
+export const useAutoNextSlot = (): AutoNextSlot => {
+  const { activeSlotIndex, zones } = useAnswerGameContext();
   const { placeTile } = useTileEvaluation();
 
   const placeInNextSlot = useCallback(
     (tileId: string) => {
-      placeTile(tileId, activeSlotIndex);
+      const targetIndex = zones.findIndex(
+        (z, i) =>
+          i >= activeSlotIndex &&
+          z.placedTileId === null &&
+          !z.isLocked,
+      );
+      if (targetIndex === -1) return;
+      placeTile(tileId, targetIndex);
     },
-    [placeTile, activeSlotIndex],
+    [placeTile, activeSlotIndex, zones],
   );
 
   return { placeInNextSlot };
-}
+};

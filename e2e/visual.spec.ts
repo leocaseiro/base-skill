@@ -29,6 +29,7 @@ test('@visual WordSpell picture mode mid-game layout', async ({
   page,
 }) => {
   await page.goto('/en/game/word-spell');
+  await page.getByRole('button', { name: /let's go/i }).click();
   await page
     .getByRole('button', { name: /^Letter /i })
     .first()
@@ -42,6 +43,7 @@ test('@visual NumberMatch numeral-to-group layout', async ({
   page,
 }) => {
   await page.goto('/en/game/number-match');
+  await page.getByRole('button', { name: /let's go/i }).click();
   await page
     .getByRole('button', { name: 'Hear the question' })
     .waitFor({ state: 'visible' });

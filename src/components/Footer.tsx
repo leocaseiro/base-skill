@@ -1,4 +1,9 @@
-import { Link, useNavigate, useParams } from '@tanstack/react-router';
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+} from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,12 +24,14 @@ export const Footer = () => {
   const { t } = useTranslation('common');
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate();
+  const location = useLocation();
 
   const switchLocale = (newLocale: FooterLocale) => {
-    void navigate({
-      to: '/$locale',
-      params: { locale: newLocale },
-    });
+    const newPath = location.pathname.replace(
+      /^\/(en|pt-BR)/,
+      `/${newLocale}`,
+    );
+    void navigate({ to: newPath });
   };
 
   return (

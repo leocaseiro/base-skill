@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { buildNumeralRound } from '../build-numeral-round';
 import { MatchingPairZones } from '../MatchingPairZones/MatchingPairZones';
 import { NumeralTileBank } from '../NumeralTileBank/NumeralTileBank';
@@ -11,9 +12,12 @@ import type {
 } from '@/components/answer-game/types';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+import { useGameSounds } from '@/components/answer-game/useGameSounds';
+import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
 import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
@@ -32,8 +36,11 @@ const NumberMatchSession = ({
   roundOrder: readonly number[];
   onRestartSession: () => void;
 }) => {
+  const { t } = useTranslation('games');
+  const [showInstructions, setShowInstructions] = useState(true);
   const { phase, roundIndex, retryCount } = useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
+  const { confettiReady, gameOverReady } = useGameSounds();
   const navigate = useNavigate();
   const { locale } = useParams({ from: '/$locale' });
   const completionToken = useRef(0);
@@ -44,6 +51,8 @@ const NumberMatchSession = ({
       ? undefined
       : numberMatchConfig.rounds[configRoundIndex];
 
+  useRoundTTS(String(round?.value ?? ''));
+
   const handleHome = () => {
     void navigate({ to: '/$locale', params: { locale } });
   };
@@ -53,7 +62,7 @@ const NumberMatchSession = ({
   };
 
   useEffect(() => {
-    if (phase !== 'round-complete') return;
+    if (phase !== 'round-complete' || !confettiReady) return;
 
     const token = ++completionToken.current;
     const delayMs = 750;
@@ -89,6 +98,7 @@ const NumberMatchSession = ({
     };
   }, [
     phase,
+    confettiReady,
     roundIndex,
     dispatch,
     roundOrder,
@@ -97,6 +107,16 @@ const NumberMatchSession = ({
     numberMatchConfig.distractorCount,
     numberMatchConfig.range,
   ]);
+
+  if (showInstructions) {
+    return (
+      <InstructionsOverlay
+        text={t('instructions.number-match')}
+        onStart={() => setShowInstructions(false)}
+        ttsEnabled={numberMatchConfig.ttsEnabled}
+      />
+    );
+  }
 
   if (!round) return null;
 
@@ -126,8 +146,8 @@ const NumberMatchSession = ({
           <NumeralTileBank tileStyle={numberMatchConfig.tileStyle} />
         </AnswerGame.Choices>
       </div>
-      <ScoreAnimation visible={phase === 'round-complete'} />
-      {phase === 'game-over' ? (
+      <ScoreAnimation visible={confettiReady} />
+      {gameOverReady ? (
         <GameOverOverlay
           retryCount={retryCount}
           onPlayAgain={handlePlayAgain}
