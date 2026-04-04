@@ -10,7 +10,7 @@ import { queueSound } from '@/lib/audio/AudioFeedback';
 
 vi.mock('@/lib/audio/AudioFeedback', () => ({
   playSound: vi.fn(),
-  queueSound: vi.fn().mockResolvedValue(),
+  queueSound: vi.fn().mockImplementation(() => Promise.resolve()),
   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
 }));
 
@@ -142,7 +142,7 @@ describe('useGameSounds', () => {
   });
 
   it('confettiReady becomes true after the "starts" promise resolves', async () => {
-    vi.mocked(queueSound).mockResolvedValue();
+    vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
 
     const { result } = renderHook(
       () => {
@@ -167,7 +167,7 @@ describe('useGameSounds', () => {
   });
 
   it('confettiReady resets to false when phase leaves round-complete', async () => {
-    vi.mocked(queueSound).mockResolvedValue();
+    vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
 
     const multiRoundConfig: AnswerGameConfig = {
       ...baseConfig,
@@ -252,7 +252,7 @@ describe('useGameSounds', () => {
   });
 
   it('gameOverReady becomes true after the "starts" promise resolves', async () => {
-    vi.mocked(queueSound).mockResolvedValue();
+    vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
 
     const { result } = renderHook(
       () => {

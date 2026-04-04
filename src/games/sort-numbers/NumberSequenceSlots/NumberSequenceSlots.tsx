@@ -1,7 +1,7 @@
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { useEffect, useRef } from 'react';
-import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
 
 const NumberSlot = ({
@@ -40,13 +40,16 @@ const NumberSlot = ({
     if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
   };
 
+  const handleKeyDown = (e: { key: string }) => {
+    if (isWrong && (e.key === 'Enter' || e.key === ' ')) handleClick();
+  };
+
   return (
     <li
       ref={ref}
       aria-label={ariaLabel}
       data-active={isActive || undefined}
       data-wrong={isWrong || undefined}
-      onClick={isWrong ? handleClick : undefined}
       className={[
         'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
         'border-border',
@@ -63,7 +66,19 @@ const NumberSlot = ({
         .filter(Boolean)
         .join(' ')}
     >
-      {label ?? ''}
+      {isWrong ? (
+        <button
+          type="button"
+          aria-label={ariaLabel}
+          className="flex size-full items-center justify-center"
+          onClick={handleClick}
+          onKeyDown={handleKeyDown}
+        >
+          {label ?? ''}
+        </button>
+      ) : (
+        (label ?? '')
+      )}
     </li>
   );
 };
