@@ -64,7 +64,7 @@ const SortNumbersSession = ({
   };
 
   useEffect(() => {
-    if (phase !== 'round-complete') return;
+    if (phase !== 'round-complete' || !confettiReady) return;
 
     const token = ++completionToken.current;
     const delayMs = 750;
@@ -100,6 +100,7 @@ const SortNumbersSession = ({
     };
   }, [
     phase,
+    confettiReady,
     roundIndex,
     dispatch,
     roundOrder,
