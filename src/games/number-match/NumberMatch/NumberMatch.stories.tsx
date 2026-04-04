@@ -22,7 +22,6 @@ const baseConfig: NumberMatchConfig = {
 const meta: Meta<typeof NumberMatch> = {
   component: NumberMatch,
   tags: ['autodocs'],
-  decorators: [withRouter],
   args: { config: baseConfig },
   decorators: [withDb, withRouter],
 };
