@@ -14,7 +14,7 @@ export const ScoreAnimation = ({ visible }: ScoreAnimationProps) => {
         particleCount: 80,
         spread: 70,
         origin: { y: 0.5 },
-        ticks: 80,
+        ticks: 310,
       });
     }
     prevRef.current = visible;

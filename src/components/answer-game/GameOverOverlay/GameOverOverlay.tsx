@@ -23,7 +23,7 @@ export const GameOverOverlay = ({
   const stars = starsFromRetries(retryCount);
 
   useEffect(() => {
-    const duration = 12_000;
+    const duration = 2700;
     const end = Date.now() + duration;
     let rafId: number;
 
