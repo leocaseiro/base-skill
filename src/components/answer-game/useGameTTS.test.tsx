@@ -12,6 +12,24 @@ vi.mock('@/lib/speech/SpeechOutput', () => ({
   cancelSpeech: vi.fn(),
 }));
 
+vi.mock('@/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      speechRate: 1,
+      volume: 0.8,
+      preferredVoiceURI: undefined,
+    },
+    update: vi.fn(),
+  }),
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { language: 'en' },
+  }),
+}));
+
 const ttsConfig: AnswerGameConfig = {
   gameId: 'test',
   inputMethod: 'drag',
@@ -42,7 +60,10 @@ describe('useGameTTS', () => {
       wrapper: createWrapper(ttsConfig),
     });
     result.current.speakTile('A');
-    expect(speak).toHaveBeenCalledWith('A');
+    expect(speak).toHaveBeenCalledWith(
+      'A',
+      expect.objectContaining({ rate: 1, volume: 0.8 }),
+    );
   });
 
   it('speakPrompt calls speak() when ttsEnabled', () => {
@@ -50,7 +71,10 @@ describe('useGameTTS', () => {
       wrapper: createWrapper(ttsConfig),
     });
     result.current.speakPrompt('What is this animal?');
-    expect(speak).toHaveBeenCalledWith('What is this animal?');
+    expect(speak).toHaveBeenCalledWith(
+      'What is this animal?',
+      expect.objectContaining({ rate: 1, volume: 0.8 }),
+    );
   });
 
   it('speakTile is a no-op when ttsEnabled is false', () => {

@@ -1,11 +1,29 @@
 {
   "word-spell": "Soletrar Palavras",
   "number-match": "Combinação de Números",
+  "sort-numbers": "Ordenar Números",
+  "shell": {
+    "round": "Rodada {{current}} / {{total}}",
+    "undo": "Desfazer",
+    "pause": "Pausar",
+    "exit": "Sair"
+  },
   "ui": {
     "choose-a-letter": "Escolha uma letra",
     "almost-try-again": "Quase! Tente de novo.",
     "great-job": "Muito bem!",
     "hear-the-question": "Ouvir a pergunta",
     "tap-to-hear": "toque para ouvir"
+  },
+  "instructions": {
+    "word-spell": "Arraste as letras para as caixas e forme a palavra. Toque na imagem ou no alto-falante para ouvir a palavra.",
+    "number-match": "Arraste as peças para combinar cada número. Toque no número para ouvir.",
+    "sort-numbers": "Coloque os números em ordem! Arraste cada número para o lugar certo.",
+    "lets-go": "Vamos lá!"
+  },
+  "sort-numbers-ui": {
+    "ascending-label": "Menor → Maior",
+    "descending-label": "Maior → Menor",
+    "arrange": "Coloque {{count}} números em ordem {{direction}}"
   }
 }

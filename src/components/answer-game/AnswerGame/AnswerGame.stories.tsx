@@ -1,3 +1,4 @@
+import { withDb } from '../../../../.storybook/decorators/withDb';
 import { AnswerGame } from './AnswerGame';
 import type { AnswerGameConfig } from '../types';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -18,6 +19,7 @@ const meta: Meta<typeof AnswerGame> = {
   component: AnswerGame,
   tags: ['autodocs'],
   args: { config: baseConfig },
+  decorators: [withDb],
 };
 export default meta;
 

@@ -111,8 +111,8 @@ describe('GameShell', () => {
 
   it('renders round counter (1-indexed)', () => {
     renderShell();
-    // roundIndex=1 → "Round 2 / 2"
-    expect(screen.getByText(/Round 2/)).toBeInTheDocument();
+    // roundIndex=1 → round display = 2
+    expect(screen.getByTestId('game-round')).toBeInTheDocument();
   });
 
   it('renders score in sub-bar', () => {

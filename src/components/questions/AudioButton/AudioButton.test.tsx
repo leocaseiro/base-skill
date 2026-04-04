@@ -11,6 +11,24 @@ vi.mock('@/lib/speech/SpeechOutput', () => ({
   cancelSpeech: vi.fn(),
 }));
 
+vi.mock('@/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      speechRate: 1,
+      volume: 0.8,
+      preferredVoiceURI: undefined,
+    },
+    update: vi.fn(),
+  }),
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { language: 'en' },
+  }),
+}));
+
 const gameConfig: AnswerGameConfig = {
   gameId: 'test',
   inputMethod: 'drag',
@@ -26,6 +44,17 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
   </AnswerGameProvider>
 );
 
+const noTtsConfig: AnswerGameConfig = {
+  ...gameConfig,
+  ttsEnabled: false,
+};
+
+const NoTtsWrapper = ({ children }: { children: React.ReactNode }) => (
+  <AnswerGameProvider config={noTtsConfig}>
+    {children}
+  </AnswerGameProvider>
+);
+
 describe('AudioButton', () => {
   beforeEach(() => vi.clearAllMocks());
 
@@ -36,12 +65,22 @@ describe('AudioButton', () => {
     ).toBeInTheDocument();
   });
 
+  it('returns null when ttsEnabled is false', () => {
+    render(<AudioButton prompt="cat" />, { wrapper: NoTtsWrapper });
+    expect(
+      screen.queryByRole('button', { name: 'Hear the question' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('calls speak() when clicked', async () => {
     const user = userEvent.setup();
     render(<AudioButton prompt="cat" />, { wrapper: Wrapper });
     await user.click(
       screen.getByRole('button', { name: 'Hear the question' }),
     );
-    expect(speak).toHaveBeenCalledWith('cat');
+    expect(speak).toHaveBeenCalledWith(
+      'cat',
+      expect.objectContaining({ rate: 1 }),
+    );
   });
 });
