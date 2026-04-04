@@ -102,7 +102,11 @@ export function answerGameReducer(
       let newBankTileIds = lockManual
         ? state.bankTileIds.filter((id) => id !== action.tileId)
         : state.bankTileIds;
-      if (lockManual && zone.placedTileId && zone.placedTileId !== action.tileId) {
+      if (
+        lockManual &&
+        zone.placedTileId &&
+        zone.placedTileId !== action.tileId
+      ) {
         newBankTileIds = [...newBankTileIds, zone.placedTileId];
       }
 
