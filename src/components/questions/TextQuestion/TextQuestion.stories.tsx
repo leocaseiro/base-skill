@@ -1,3 +1,4 @@
+import { withDb } from '../../../../.storybook/decorators/withDb';
 import { TextQuestion } from './TextQuestion';
 import type { AnswerGameConfig } from '@/components/answer-game/types';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -16,6 +17,7 @@ const meta: Meta<typeof TextQuestion> = {
   component: TextQuestion,
   tags: ['autodocs'],
   decorators: [
+    withDb,
     (Story) => (
       <AnswerGameProvider config={storyConfig}>
         <Story />

@@ -21,4 +21,10 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
     levels: ['1', '2'],
     subject: 'math',
   },
+  {
+    id: 'sort-numbers',
+    titleKey: 'sort-numbers',
+    levels: ['K', '1', '2'],
+    subject: 'math',
+  },
 ];

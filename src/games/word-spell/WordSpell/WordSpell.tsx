@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
 import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
 import type { WordSpellConfig } from '../types';
@@ -11,9 +12,12 @@ import type {
 } from '@/components/answer-game/types';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+import { useGameSounds } from '@/components/answer-game/useGameSounds';
+import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
@@ -74,8 +78,11 @@ const WordSpellSession = ({
   roundOrder: readonly number[];
   onRestartSession: () => void;
 }) => {
+  const { t } = useTranslation('games');
+  const [showInstructions, setShowInstructions] = useState(true);
   const { phase, roundIndex, retryCount } = useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
+  const { confettiReady, gameOverReady } = useGameSounds();
   const navigate = useNavigate();
   const completionToken = useRef(0);
 
@@ -84,6 +91,8 @@ const WordSpellSession = ({
     configRoundIndex === undefined
       ? undefined
       : wordSpellConfig.rounds[configRoundIndex];
+
+  useRoundTTS(round?.word ?? '');
 
   const handleHome = () => {
     void navigate({
@@ -97,7 +106,7 @@ const WordSpellSession = ({
   };
 
   useEffect(() => {
-    if (phase !== 'round-complete') return;
+    if (phase !== 'round-complete' || !confettiReady) return;
 
     const token = ++completionToken.current;
     const delayMs = 750;
@@ -132,12 +141,23 @@ const WordSpellSession = ({
     };
   }, [
     phase,
+    confettiReady,
     roundIndex,
     dispatch,
     roundOrder,
     wordSpellConfig.rounds,
     wordSpellConfig.tileUnit,
   ]);
+
+  if (showInstructions) {
+    return (
+      <InstructionsOverlay
+        text={t('instructions.word-spell')}
+        onStart={() => setShowInstructions(false)}
+        ttsEnabled={wordSpellConfig.ttsEnabled}
+      />
+    );
+  }
 
   if (!round) return null;
 
@@ -173,8 +193,8 @@ const WordSpellSession = ({
           <LetterTileBank />
         </AnswerGame.Choices>
       </div>
-      <ScoreAnimation visible={phase === 'round-complete'} />
-      {phase === 'game-over' ? (
+      <ScoreAnimation visible={confettiReady} />
+      {gameOverReady ? (
         <GameOverOverlay
           retryCount={retryCount}
           onPlayAgain={handlePlayAgain}

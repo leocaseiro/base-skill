@@ -1,11 +1,29 @@
 {
   "word-spell": "Word Spell",
   "number-match": "Number Match",
+  "sort-numbers": "Sort Numbers",
+  "shell": {
+    "round": "Round {{current}} / {{total}}",
+    "undo": "Undo",
+    "pause": "Pause",
+    "exit": "Exit"
+  },
   "ui": {
     "choose-a-letter": "Choose a letter",
     "almost-try-again": "Almost! Try again.",
     "great-job": "Great job!",
     "hear-the-question": "Hear the question",
     "tap-to-hear": "tap to hear"
+  },
+  "instructions": {
+    "word-spell": "Drag the letters into the boxes to spell the word. Tap the picture or the speaker to hear the word.",
+    "number-match": "Drag the tiles to match each number. Tap the number to hear it.",
+    "sort-numbers": "Put the numbers in order! Drag each number to the right place.",
+    "lets-go": "Let's go!"
+  },
+  "sort-numbers-ui": {
+    "ascending-label": "Smallest → Biggest",
+    "descending-label": "Biggest → Smallest",
+    "arrange": "Put {{count}} numbers in {{direction}} order"
   }
 }

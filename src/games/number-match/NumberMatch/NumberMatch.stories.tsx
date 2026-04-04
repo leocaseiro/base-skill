@@ -1,3 +1,4 @@
+import { withDb } from '../../../../.storybook/decorators/withDb';
 import { withRouter } from '../../../../.storybook/decorators/withRouter';
 import { NumberMatch } from './NumberMatch';
 import type { NumberMatchConfig } from '../types';
@@ -21,8 +22,8 @@ const baseConfig: NumberMatchConfig = {
 const meta: Meta<typeof NumberMatch> = {
   component: NumberMatch,
   tags: ['autodocs'],
-  decorators: [withRouter],
   args: { config: baseConfig },
+  decorators: [withDb, withRouter],
 };
 export default meta;
 

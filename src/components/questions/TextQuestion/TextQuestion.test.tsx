@@ -11,6 +11,24 @@ vi.mock('@/lib/speech/SpeechOutput', () => ({
   cancelSpeech: vi.fn(),
 }));
 
+vi.mock('@/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      speechRate: 1,
+      volume: 0.8,
+      preferredVoiceURI: undefined,
+    },
+    update: vi.fn(),
+  }),
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { language: 'en' },
+  }),
+}));
+
 const gameConfig: AnswerGameConfig = {
   gameId: 'test',
   inputMethod: 'drag',
@@ -45,6 +63,9 @@ describe('TextQuestion', () => {
     const user = userEvent.setup();
     render(<TextQuestion text="three" />, { wrapper: Wrapper });
     await user.click(screen.getByRole('button'));
-    expect(speak).toHaveBeenCalledWith('three');
+    expect(speak).toHaveBeenCalledWith(
+      'three',
+      expect.objectContaining({ rate: 1 }),
+    );
   });
 });

@@ -114,7 +114,7 @@ describe('GameRoute', () => {
       { wrapper },
     );
     await waitFor(() => {
-      expect(screen.getByText(/Round 1/)).toBeInTheDocument();
+      expect(screen.getByTestId('game-round')).toBeInTheDocument();
     });
   });
 });

@@ -1,6 +1,7 @@
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { useEffect, useRef } from 'react';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
 
 const LetterSlot = ({
@@ -16,6 +17,7 @@ const LetterSlot = ({
 }) => {
   const ref = useRef<HTMLLIElement>(null);
   const { placeTile } = useTileEvaluation();
+  const dispatch = useAnswerGameDispatch();
 
   useEffect(() => {
     const element = ref.current;
@@ -34,6 +36,14 @@ const LetterSlot = ({
     ? `Slot ${zoneIndex + 1}, filled with ${label}`
     : `Slot ${zoneIndex + 1}, empty`;
 
+  const handleClick = () => {
+    if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
+  };
+
+  const handleKeyDown = (e: { key: string }) => {
+    if (isWrong && (e.key === 'Enter' || e.key === ' ')) handleClick();
+  };
+
   return (
     <li
       ref={ref}
@@ -47,7 +57,7 @@ const LetterSlot = ({
           ? 'ring-2 ring-primary ring-offset-2 animate-pulse'
           : '',
         isWrong
-          ? 'border-destructive bg-destructive/10 text-destructive'
+          ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
           : '',
         label && !isWrong
           ? 'border-primary bg-primary/10 text-primary'
@@ -56,7 +66,19 @@ const LetterSlot = ({
         .filter(Boolean)
         .join(' ')}
     >
-      {label ?? ''}
+      {isWrong ? (
+        <button
+          type="button"
+          aria-label={ariaLabel}
+          className="flex size-full items-center justify-center"
+          onClick={handleClick}
+          onKeyDown={handleKeyDown}
+        >
+          {label ?? ''}
+        </button>
+      ) : (
+        (label ?? '')
+      )}
     </li>
   );
 };

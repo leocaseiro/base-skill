@@ -29,6 +29,7 @@ test('WordSpell picture mode renders letter tiles', async ({
 }) => {
   await page.goto('/en/game/word-spell');
   await page.getByRole('main').waitFor({ state: 'visible' });
+  await page.getByRole('button', { name: /let's go/i }).click();
   const tiles = page.getByRole('button', { name: /^Letter /i });
   await expect(tiles.first()).toBeVisible();
 });
@@ -38,6 +39,7 @@ test('NumberMatch numeral-to-group renders numeral question', async ({
 }) => {
   await page.goto('/en/game/number-match');
   await page.getByRole('main').waitFor({ state: 'visible' });
+  await page.getByRole('button', { name: /let's go/i }).click();
   await expect(
     page.getByRole('button', { name: 'Hear the question' }),
   ).toBeVisible();
