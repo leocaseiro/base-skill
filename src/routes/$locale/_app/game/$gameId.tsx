@@ -79,7 +79,7 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
   inputMethod: 'drag',
   wrongTileBehavior: 'lock-auto-eject',
   tileBankMode: 'distractors',
-  distractorCount: 5,
+  distractorCount: 2,
   totalRounds: 3,
   roundsInOrder: false,
   ttsEnabled: true,
@@ -254,7 +254,7 @@ const WordSpellConfigPanel = ({
       onToggle={(e) =>
         setOpen((e.currentTarget as HTMLDetailsElement).open)
       }
-      className="fixed right-4 top-20 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
+      className="fixed right-4 top-40 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
     >
       <summary className="cursor-pointer font-medium">
         ⚙️ Game Config
@@ -326,7 +326,7 @@ const NumberMatchConfigPanel = ({
       onToggle={(e) =>
         setOpen((e.currentTarget as HTMLDetailsElement).open)
       }
-      className="fixed right-4 top-20 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
+      className="fixed right-4 top-40 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
     >
       <summary className="cursor-pointer font-medium">
         ⚙️ Game Config
@@ -384,6 +384,21 @@ const NumberMatchConfigPanel = ({
             <option value="exact">exact</option>
             <option value="distractors">distractors</option>
           </select>
+        </label>
+
+        <label className="flex flex-col gap-1">
+          Distractor count
+          <input
+            value={config.distractorCount}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                distractorCount: e.target
+                  .value as unknown as NumberMatchConfig['distractorCount'],
+              })
+            }
+            className="rounded border px-2 py-1"
+          />
         </label>
         <label className="flex flex-col gap-1">
           Range min
