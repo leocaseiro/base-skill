@@ -1,3 +1,4 @@
+import { withDb } from '../../../../.storybook/decorators/withDb';
 import { LetterTileBank } from './LetterTileBank';
 import type {
   AnswerGameConfig,
@@ -45,6 +46,7 @@ const meta: Meta<typeof LetterTileBank> = {
   component: LetterTileBank,
   tags: ['autodocs'],
   decorators: [
+    withDb,
     (Story) => (
       <AnswerGameProvider config={config}>
         <InitProvider>
@@ -83,6 +85,7 @@ const DistractorInitProvider = ({
 
 export const WithDistractors: Story = {
   decorators: [
+    withDb,
     (Story) => (
       <AnswerGameProvider config={distractorConfig}>
         <DistractorInitProvider>

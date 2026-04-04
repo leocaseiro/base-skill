@@ -75,6 +75,8 @@ export function answerGameReducer(
         const allFilledCorrectly = newZones.every(
           (z) => z.placedTileId !== null && !z.isWrong,
         );
+        const isLastRound =
+          state.roundIndex >= state.config.totalRounds - 1;
         return {
           ...state,
           zones: newZones,
@@ -84,7 +86,11 @@ export function answerGameReducer(
               ? state.activeSlotIndex
               : nextActiveSlot,
           retryCount: state.retryCount,
-          phase: allFilledCorrectly ? 'round-complete' : 'playing',
+          phase: allFilledCorrectly
+            ? isLastRound
+              ? 'game-over'
+              : 'round-complete'
+            : 'playing',
         };
       }
 

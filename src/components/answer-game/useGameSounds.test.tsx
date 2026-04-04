@@ -77,13 +77,17 @@ describe('useGameSounds', () => {
   });
 
   it('queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
+    const multiRoundConfig: AnswerGameConfig = {
+      ...baseConfig,
+      totalRounds: 2,
+    };
     const { result } = renderHook(
       () => {
         const dispatch = useAnswerGameDispatch();
         useGameSounds();
         return dispatch;
       },
-      { wrapper: createWrapper(baseConfig) },
+      { wrapper: createWrapper(multiRoundConfig) },
     );
     act(() => {
       result.current({ type: 'INIT_ROUND', tiles, zones });
@@ -106,7 +110,7 @@ describe('useGameSounds', () => {
     expect(result.current.confettiReady).toBe(false);
   });
 
-  it('confettiReady is false before the "starts" promise resolves', () => {
+  it('confettiReady is false before the round-complete sound starts', () => {
     let resolveStarts!: () => void;
     vi.mocked(queueSound).mockImplementationOnce(
       () =>
@@ -115,6 +119,65 @@ describe('useGameSounds', () => {
         }),
     );
 
+    const multiRoundConfig: AnswerGameConfig = {
+      ...baseConfig,
+      totalRounds: 2,
+    };
+    const { result } = renderHook(
+      () => {
+        const dispatch = useAnswerGameDispatch();
+        const sounds = useGameSounds();
+        return { dispatch, sounds };
+      },
+      { wrapper: createWrapper(multiRoundConfig) },
+    );
+    act(() => {
+      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+    });
+    act(() => {
+      result.current.dispatch({
+        type: 'PLACE_TILE',
+        tileId: 't1',
+        zoneIndex: 0,
+      });
+    });
+
+    expect(result.current.sounds.confettiReady).toBe(false);
+    act(() => {
+      resolveStarts();
+    });
+  });
+
+  it('confettiReady becomes true when the round-complete sound starts', async () => {
+    vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
+
+    const multiRoundConfig: AnswerGameConfig = {
+      ...baseConfig,
+      totalRounds: 2,
+    };
+    const { result } = renderHook(
+      () => {
+        const dispatch = useAnswerGameDispatch();
+        const sounds = useGameSounds();
+        return { dispatch, sounds };
+      },
+      { wrapper: createWrapper(multiRoundConfig) },
+    );
+    act(() => {
+      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+    });
+    await act(async () => {
+      result.current.dispatch({
+        type: 'PLACE_TILE',
+        tileId: 't1',
+        zoneIndex: 0,
+      });
+    });
+
+    expect(result.current.sounds.confettiReady).toBe(true);
+  });
+
+  it('confettiReady does not show when last round completes (goes straight to game-over)', () => {
     const { result } = renderHook(
       () => {
         const dispatch = useAnswerGameDispatch();
@@ -135,35 +198,7 @@ describe('useGameSounds', () => {
     });
 
     expect(result.current.sounds.confettiReady).toBe(false);
-    // resolve to avoid unhandled promise warnings
-    act(() => {
-      resolveStarts();
-    });
-  });
-
-  it('confettiReady becomes true after the "starts" promise resolves', async () => {
-    vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
-
-    const { result } = renderHook(
-      () => {
-        const dispatch = useAnswerGameDispatch();
-        const sounds = useGameSounds();
-        return { dispatch, sounds };
-      },
-      { wrapper: createWrapper(baseConfig) },
-    );
-    act(() => {
-      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
-    });
-    await act(async () => {
-      result.current.dispatch({
-        type: 'PLACE_TILE',
-        tileId: 't1',
-        zoneIndex: 0,
-      });
-    });
-
-    expect(result.current.sounds.confettiReady).toBe(true);
+    expect(queueSound).toHaveBeenCalledWith('game-complete');
   });
 
   it('confettiReady resets to false when phase leaves round-complete', async () => {
