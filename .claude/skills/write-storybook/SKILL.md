@@ -54,20 +54,37 @@ export const SomeVariant: Story = {
 
 Use decorators when the component depends on context providers:
 
-| Needs                                           | Decorator                                                  |
-| ----------------------------------------------- | ---------------------------------------------------------- |
-| TanStack Router (`useNavigate`, `Link`, params) | `withRouter` from `../../.storybook/decorators/withRouter` |
-| Theme toggle                                    | `withTheme` — already applied globally via `preview.tsx`   |
-| ThemeProvider                                   | Already applied globally — do NOT add again                |
+| Needs                                                          | Decorator                                                  |
+| -------------------------------------------------------------- | ---------------------------------------------------------- |
+| TanStack Router (`useNavigate`, `Link`, params)                | `withRouter` from `../../.storybook/decorators/withRouter` |
+| Database / RxDB (`useSettings`, `useRxDB`, any DB hook)        | `withDb` from `../../.storybook/decorators/withDb`         |
+| Theme toggle                                                   | `withTheme` — already applied globally via `preview.tsx`   |
+| ThemeProvider                                                  | Already applied globally — do NOT add again                |
+
+When both are needed, put `withDb` first (outermost), then `withRouter`:
 
 ```tsx
+import { withDb } from '../../.storybook/decorators/withDb';
 import { withRouter } from '../../.storybook/decorators/withRouter';
 
 const meta: Meta<typeof MyComponent> = {
   component: MyComponent,
   tags: ['autodocs'],
-  decorators: [withRouter],
+  decorators: [withDb, withRouter],
 };
+```
+
+When a story wraps in `AnswerGameProvider`, `withDb` must come **before** the provider wrapper:
+
+```tsx
+decorators: [
+  withDb,
+  (Story) => (
+    <AnswerGameProvider config={storyConfig}>
+      <Story />
+    </AnswerGameProvider>
+  ),
+],
 ```
 
 ## Required Story Variants
@@ -100,4 +117,5 @@ argTypes: {
 | Default export for stories (`export default Default`) | Use `export const Default: Story = {}`                                |
 | Missing `Default` story                               | Always add one                                                        |
 | Forgetting `withRouter` for routing components        | Check if component calls `useNavigate`, `Link`, or reads route params |
+| Forgetting `withDb` for DB/settings hooks             | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
 | Adding `ThemeProvider` decorator                      | Already global — skip                                                 |
