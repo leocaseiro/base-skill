@@ -60,9 +60,12 @@ export function playSound(key: SoundKey, volume = 0.8): void {
 /**
  * Queues a sound to play after the current queue drains.
  * Use for phase sounds (round-complete, game-complete) so they don't cut off tile feedback.
+ * Returns a promise that resolves when the queued sound **starts** (not ends).
  */
-export function queueSound(key: SoundKey, volume = 0.8): void {
-  queueTail = queueTail.then(() => playSoundInternal(key, volume));
+export function queueSound(key: SoundKey, volume = 0.8): Promise<void> {
+  const startsAt = queueTail;
+  queueTail = startsAt.then(() => playSoundInternal(key, volume));
+  return startsAt;
 }
 
 /**

@@ -10,7 +10,7 @@ import { queueSound } from '@/lib/audio/AudioFeedback';
 
 vi.mock('@/lib/audio/AudioFeedback', () => ({
   playSound: vi.fn(),
-  queueSound: vi.fn(),
+  queueSound: vi.fn().mockResolvedValue(),
   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
 }));
 
@@ -97,5 +97,178 @@ describe('useGameSounds', () => {
       });
     });
     expect(queueSound).toHaveBeenCalledWith('round-complete');
+  });
+
+  it('confettiReady is false initially', () => {
+    const { result } = renderHook(() => useGameSounds(), {
+      wrapper: createWrapper(baseConfig),
+    });
+    expect(result.current.confettiReady).toBe(false);
+  });
+
+  it('confettiReady is false before the "starts" promise resolves', () => {
+    let resolveStarts!: () => void;
+    vi.mocked(queueSound).mockImplementationOnce(
+      () =>
+        new Promise<void>((res) => {
+          resolveStarts = res;
+        }),
+    );
+
+    const { result } = renderHook(
+      () => {
+        const dispatch = useAnswerGameDispatch();
+        const sounds = useGameSounds();
+        return { dispatch, sounds };
+      },
+      { wrapper: createWrapper(baseConfig) },
+    );
+    act(() => {
+      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+    });
+    act(() => {
+      result.current.dispatch({
+        type: 'PLACE_TILE',
+        tileId: 't1',
+        zoneIndex: 0,
+      });
+    });
+
+    expect(result.current.sounds.confettiReady).toBe(false);
+    // resolve to avoid unhandled promise warnings
+    act(() => {
+      resolveStarts();
+    });
+  });
+
+  it('confettiReady becomes true after the "starts" promise resolves', async () => {
+    vi.mocked(queueSound).mockResolvedValue();
+
+    const { result } = renderHook(
+      () => {
+        const dispatch = useAnswerGameDispatch();
+        const sounds = useGameSounds();
+        return { dispatch, sounds };
+      },
+      { wrapper: createWrapper(baseConfig) },
+    );
+    act(() => {
+      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+    });
+    await act(async () => {
+      result.current.dispatch({
+        type: 'PLACE_TILE',
+        tileId: 't1',
+        zoneIndex: 0,
+      });
+    });
+
+    expect(result.current.sounds.confettiReady).toBe(true);
+  });
+
+  it('confettiReady resets to false when phase leaves round-complete', async () => {
+    vi.mocked(queueSound).mockResolvedValue();
+
+    const multiRoundConfig: AnswerGameConfig = {
+      ...baseConfig,
+      totalRounds: 2,
+    };
+    const extraTile: TileItem = { id: 't2', label: 'B', value: 'B' };
+    const extraZone: AnswerZone = {
+      id: 'z1',
+      index: 1,
+      expectedValue: 'B',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    };
+
+    const { result } = renderHook(
+      () => {
+        const dispatch = useAnswerGameDispatch();
+        const sounds = useGameSounds();
+        return { dispatch, sounds };
+      },
+      { wrapper: createWrapper(multiRoundConfig) },
+    );
+
+    act(() => {
+      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+    });
+    await act(async () => {
+      result.current.dispatch({
+        type: 'PLACE_TILE',
+        tileId: 't1',
+        zoneIndex: 0,
+      });
+    });
+    expect(result.current.sounds.confettiReady).toBe(true);
+
+    await act(async () => {
+      result.current.dispatch({
+        type: 'ADVANCE_ROUND',
+        tiles: [extraTile],
+        zones: [extraZone],
+      });
+    });
+    expect(result.current.sounds.confettiReady).toBe(false);
+  });
+
+  it('gameOverReady is false initially', () => {
+    const { result } = renderHook(() => useGameSounds(), {
+      wrapper: createWrapper(baseConfig),
+    });
+    expect(result.current.gameOverReady).toBe(false);
+  });
+
+  it('gameOverReady is false before the "starts" promise resolves', () => {
+    let resolveStarts!: () => void;
+    vi.mocked(queueSound).mockImplementationOnce(
+      () =>
+        new Promise<void>((res) => {
+          resolveStarts = res;
+        }),
+    );
+
+    const { result } = renderHook(
+      () => {
+        const dispatch = useAnswerGameDispatch();
+        const sounds = useGameSounds();
+        return { dispatch, sounds };
+      },
+      { wrapper: createWrapper(baseConfig) },
+    );
+    act(() => {
+      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+    });
+    act(() => {
+      result.current.dispatch({ type: 'COMPLETE_GAME' });
+    });
+
+    expect(result.current.sounds.gameOverReady).toBe(false);
+    act(() => {
+      resolveStarts();
+    });
+  });
+
+  it('gameOverReady becomes true after the "starts" promise resolves', async () => {
+    vi.mocked(queueSound).mockResolvedValue();
+
+    const { result } = renderHook(
+      () => {
+        const dispatch = useAnswerGameDispatch();
+        const sounds = useGameSounds();
+        return { dispatch, sounds };
+      },
+      { wrapper: createWrapper(baseConfig) },
+    );
+    act(() => {
+      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+    });
+    await act(async () => {
+      result.current.dispatch({ type: 'COMPLETE_GAME' });
+    });
+
+    expect(result.current.sounds.gameOverReady).toBe(true);
   });
 });

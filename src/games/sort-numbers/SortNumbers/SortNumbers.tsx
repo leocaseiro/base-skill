@@ -37,7 +37,7 @@ const SortNumbersSession = ({
   const [showInstructions, setShowInstructions] = useState(true);
   const { phase, roundIndex, retryCount } = useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
-  useGameSounds();
+  const { confettiReady, gameOverReady } = useGameSounds();
   const navigate = useNavigate();
   const { locale } = useParams({ from: '/$locale' });
   const completionToken = useRef(0);
@@ -134,8 +134,8 @@ const SortNumbersSession = ({
           <SortNumbersTileBank />
         </AnswerGame.Choices>
       </div>
-      <ScoreAnimation visible={phase === 'round-complete'} />
-      {phase === 'game-over' ? (
+      <ScoreAnimation visible={confettiReady} />
+      {gameOverReady ? (
         <GameOverOverlay
           retryCount={retryCount}
           onPlayAgain={handlePlayAgain}
