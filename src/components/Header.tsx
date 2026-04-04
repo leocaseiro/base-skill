@@ -1,10 +1,15 @@
-import { Link, useNavigate, useParams } from '@tanstack/react-router';
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+} from '@tanstack/react-router';
 import {
   MenuIcon,
   SearchIcon,
   SlidersHorizontalIcon,
 } from 'lucide-react';
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EMPTY } from 'rxjs';
 import type { ThemeDoc } from '@/db/schemas/themes';
@@ -58,6 +63,19 @@ const HeaderMenuPanel = ({
   const volume = settings.volume ?? 0.8;
   const speechRate = settings.speechRate ?? 1;
   const activeThemeId = settings.themeId ?? 'theme_ocean_preset';
+  const preferredVoice = settings.preferredVoiceURI ?? '';
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+  useEffect(() => {
+    const synth = (
+      globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+    ).speechSynthesis;
+    if (!synth) return;
+    const load = () => setVoices(synth.getVoices());
+    load();
+    synth.addEventListener('voiceschanged', load);
+    return () => synth.removeEventListener('voiceschanged', load);
+  }, []);
 
   const themes$ = useMemo(
     () => (db ? db.themes.find().$ : EMPTY),
@@ -107,6 +125,29 @@ const HeaderMenuPanel = ({
           />
         </div>
 
+        {voices.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="drawer-voice">{t('voice')}</Label>
+            <Select
+              value={preferredVoice}
+              onValueChange={(v) =>
+                void update({ preferredVoiceURI: v })
+              }
+            >
+              <SelectTrigger id="drawer-voice">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {voices.map((v) => (
+                  <SelectItem key={v.name} value={v.name}>
+                    {v.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <div className="flex flex-col gap-2">
           <Label htmlFor="drawer-language">{t('language')}</Label>
           <Select
@@ -137,9 +178,11 @@ const HeaderMenuPanel = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {themes.map(({ id, name }) => (
+                {themes.map(({ id, name, isPreset }) => (
                   <SelectItem key={id} value={id}>
-                    {name}
+                    {isPreset
+                      ? t(`themes.${id}`, { defaultValue: name })
+                      : name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -185,6 +228,7 @@ export const Header = () => {
   const { t } = useTranslation('common');
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate();
+  const location = useLocation();
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -203,10 +247,11 @@ export const Header = () => {
   };
 
   const switchLocale = (newLocale: HeaderLocale) => {
-    void navigate({
-      to: '/$locale',
-      params: { locale: newLocale },
-    });
+    const newPath = location.pathname.replace(
+      /^\/(en|pt-BR)/,
+      `/${newLocale}`,
+    );
+    void navigate({ to: newPath });
   };
 
   return (

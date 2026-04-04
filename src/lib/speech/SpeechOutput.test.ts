@@ -5,6 +5,8 @@ const makeSynth = (voices: Partial<SpeechSynthesisVoice>[] = []) => ({
   cancel: vi.fn(),
   speak: vi.fn(),
   getVoices: vi.fn().mockReturnValue(voices),
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
 });
 
 describe('SpeechOutput', () => {
@@ -24,7 +26,7 @@ describe('SpeechOutput', () => {
     expect(() => cancelSpeech()).not.toThrow();
   });
 
-  it('speak sets utterance.voice when the named voice is found', () => {
+  it('speak sets utterance.voice when the named voice is found via SpeakOptions', () => {
     const danielVoice = { name: 'Daniel' } as SpeechSynthesisVoice;
     const synth = makeSynth([danielVoice]);
     vi.stubGlobal('speechSynthesis', synth);
@@ -32,6 +34,30 @@ describe('SpeechOutput', () => {
       'SpeechSynthesisUtterance',
       class {
         voice: SpeechSynthesisVoice | null = null;
+        rate = 1;
+        volume = 1;
+        lang = '';
+        constructor(public text: string) {}
+      },
+    );
+    speak('hello', { voiceName: 'Daniel' });
+    const utterance = synth.speak.mock.calls[0]?.[0] as {
+      voice: SpeechSynthesisVoice | null;
+    };
+    expect(utterance.voice).toBe(danielVoice);
+  });
+
+  it('speak sets utterance.voice when a legacy voiceName string is passed', () => {
+    const danielVoice = { name: 'Daniel' } as SpeechSynthesisVoice;
+    const synth = makeSynth([danielVoice]);
+    vi.stubGlobal('speechSynthesis', synth);
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      class {
+        voice: SpeechSynthesisVoice | null = null;
+        rate = 1;
+        volume = 1;
+        lang = '';
         constructor(public text: string) {}
       },
     );
@@ -43,16 +69,20 @@ describe('SpeechOutput', () => {
   });
 
   it('speak leaves utterance.voice unset when the named voice is not found', () => {
-    const synth = makeSynth([]);
+    const knownVoice = { name: 'Samantha' } as SpeechSynthesisVoice;
+    const synth = makeSynth([knownVoice]);
     vi.stubGlobal('speechSynthesis', synth);
     vi.stubGlobal(
       'SpeechSynthesisUtterance',
       class {
         voice: SpeechSynthesisVoice | null = null;
+        rate = 1;
+        volume = 1;
+        lang = '';
         constructor(public text: string) {}
       },
     );
-    speak('hello', 'UnknownVoice');
+    speak('hello', { voiceName: 'UnknownVoice' });
     const utterance = synth.speak.mock.calls[0]?.[0] as {
       voice: SpeechSynthesisVoice | null;
     };
@@ -67,6 +97,9 @@ describe('SpeechOutput', () => {
       'SpeechSynthesisUtterance',
       class {
         voice: SpeechSynthesisVoice | null = null;
+        rate = 1;
+        volume = 1;
+        lang = '';
         constructor(public text: string) {}
       },
     );
@@ -75,5 +108,57 @@ describe('SpeechOutput', () => {
       voice: SpeechSynthesisVoice | null;
     };
     expect(utterance.voice).toBe(danielVoice);
+  });
+
+  it('speak applies rate and volume from SpeakOptions', () => {
+    const synth = makeSynth([
+      { name: 'Daniel' } as SpeechSynthesisVoice,
+    ]);
+    vi.stubGlobal('speechSynthesis', synth);
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      class {
+        voice: SpeechSynthesisVoice | null = null;
+        rate = 1;
+        volume = 1;
+        lang = '';
+        constructor(public text: string) {}
+      },
+    );
+    speak('hello', { rate: 1.5, volume: 0.5 });
+    const utterance = synth.speak.mock.calls[0]?.[0] as {
+      rate: number;
+      volume: number;
+    };
+    expect(utterance.rate).toBe(1.5);
+    expect(utterance.volume).toBe(0.5);
+  });
+
+  it('speak defers via voiceschanged when getVoices() returns empty', () => {
+    const addListenerSpy = vi.fn();
+    const synth = {
+      cancel: vi.fn(),
+      speak: vi.fn(),
+      getVoices: vi.fn().mockReturnValue([]),
+      addEventListener: addListenerSpy,
+      removeEventListener: vi.fn(),
+    };
+    vi.stubGlobal('speechSynthesis', synth);
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      class {
+        voice: SpeechSynthesisVoice | null = null;
+        rate = 1;
+        volume = 1;
+        lang = '';
+        constructor(public text: string) {}
+      },
+    );
+    speak('hello');
+    expect(synth.speak).not.toHaveBeenCalled();
+    expect(addListenerSpy).toHaveBeenCalledWith(
+      'voiceschanged',
+      expect.any(Function),
+    );
   });
 });

@@ -11,6 +11,10 @@ vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
 }));
 
+vi.mock('@/lib/audio/AudioFeedback', () => ({
+  playSound: vi.fn(),
+}));
+
 const gameConfig: AnswerGameConfig = {
   gameId: 'test',
   inputMethod: 'drag',

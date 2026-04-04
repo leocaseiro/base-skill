@@ -3,5 +3,10 @@
   "volume": "Volume ({{percent}}%)",
   "speechRate": "Speech rate ({{rate}}×)",
   "language": "Language",
-  "theme": "Theme"
+  "theme": "Theme",
+  "voice": "Voice",
+  "themes": {
+    "theme_ocean_preset": "Ocean",
+    "theme_forest_preset": "Forest"
+  }
 }

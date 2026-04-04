@@ -162,6 +162,7 @@ export default [
       // Git worktrees are separate checkouts; fix/lint from repo root targets main tree only.
       'worktrees/**',
       'storybook-static/**',
+      'playwright-report/**',
     ],
   },
 ];

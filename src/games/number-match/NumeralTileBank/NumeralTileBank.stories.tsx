@@ -1,3 +1,4 @@
+import { withDb } from '../../../../.storybook/decorators/withDb';
 import { NumeralTileBank } from './NumeralTileBank';
 import type {
   AnswerGameConfig,
@@ -48,6 +49,7 @@ const meta: Meta<typeof NumeralTileBank> = {
   tags: ['autodocs'],
   args: { tileStyle: 'dots' },
   decorators: [
+    withDb,
     (Story) => (
       <AnswerGameProvider config={config}>
         <InitProvider>

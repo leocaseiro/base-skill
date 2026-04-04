@@ -1,5 +1,6 @@
 import {
   createFileRoute,
+  useLocation,
   useNavigate,
   useParams,
 } from '@tanstack/react-router';
@@ -21,19 +22,19 @@ const LOCALES = [
   { code: 'pt-BR', label: '🇧🇷 Português' },
 ] as const;
 
-type SettingsLocale = (typeof LOCALES)[number]['code'];
-
 const SettingsScreen = () => {
   const { t } = useTranslation('settings');
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate();
+  const location = useLocation();
   const { settings, update } = useSettings();
 
   const handleLocaleChange = (newLocale: string) => {
-    void navigate({
-      to: '/$locale/settings',
-      params: { locale: newLocale as SettingsLocale },
-    });
+    const newPath = location.pathname.replace(
+      /^\/(en|pt-BR)/,
+      `/${newLocale}`,
+    );
+    void navigate({ to: newPath });
   };
 
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -51,7 +52,7 @@ const SettingsScreen = () => {
 
   const volume = settings.volume ?? 0.8;
   const speechRate = settings.speechRate ?? 1;
-  const preferredVoice = settings.preferredVoiceURI ?? 'Daniel';
+  const preferredVoice = settings.preferredVoiceURI ?? '';
 
   return (
     <div className="mx-auto max-w-md px-4 py-8">

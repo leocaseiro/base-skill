@@ -75,6 +75,8 @@ export function answerGameReducer(
         const allFilledCorrectly = newZones.every(
           (z) => z.placedTileId !== null && !z.isWrong,
         );
+        const isLastRound =
+          state.roundIndex >= state.config.totalRounds - 1;
         return {
           ...state,
           zones: newZones,
@@ -84,7 +86,11 @@ export function answerGameReducer(
               ? state.activeSlotIndex
               : nextActiveSlot,
           retryCount: state.retryCount,
-          phase: allFilledCorrectly ? 'round-complete' : 'playing',
+          phase: allFilledCorrectly
+            ? isLastRound
+              ? 'game-over'
+              : 'round-complete'
+            : 'playing',
         };
       }
 
@@ -99,9 +105,16 @@ export function answerGameReducer(
       const newZones = state.zones.map((z, i) =>
         i === action.zoneIndex ? newZone : z,
       );
-      const newBankTileIds = lockManual
+      let newBankTileIds = lockManual
         ? state.bankTileIds.filter((id) => id !== action.tileId)
         : state.bankTileIds;
+      if (
+        lockManual &&
+        zone.placedTileId &&
+        zone.placedTileId !== action.tileId
+      ) {
+        newBankTileIds = [...newBankTileIds, zone.placedTileId];
+      }
 
       return {
         ...state,
@@ -152,6 +165,9 @@ export function answerGameReducer(
       const zone = state.zones[action.zoneIndex];
       if (!zone) return state;
 
+      // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
+      if (!zone.isWrong && !zone.isLocked) return state;
+
       if (zone.placedTileId) {
         return {
           ...state,
@@ -169,23 +185,19 @@ export function answerGameReducer(
         };
       }
 
-      if (zone.isWrong || zone.isLocked) {
-        return {
-          ...state,
-          zones: state.zones.map((z, i) =>
-            i === action.zoneIndex
-              ? {
-                  ...z,
-                  placedTileId: null,
-                  isWrong: false,
-                  isLocked: false,
-                }
-              : z,
-          ),
-        };
-      }
-
-      return state;
+      return {
+        ...state,
+        zones: state.zones.map((z, i) =>
+          i === action.zoneIndex
+            ? {
+                ...z,
+                placedTileId: null,
+                isWrong: false,
+                isLocked: false,
+              }
+            : z,
+        ),
+      };
     }
 
     case 'ADVANCE_ROUND': {
