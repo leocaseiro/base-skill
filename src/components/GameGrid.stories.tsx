@@ -6,12 +6,14 @@ const SAMPLE_ENTRIES: GameCatalogEntry[] = [
   {
     id: 'word-spell',
     titleKey: 'word-spell',
+    descriptionKey: 'word-spell-description',
     levels: ['PK', 'K', '1'],
     subject: 'reading',
   },
   {
     id: 'number-match',
     titleKey: 'number-match',
+    descriptionKey: 'number-match-description',
     levels: ['1', '2'],
     subject: 'math',
   },
@@ -29,6 +31,7 @@ const meta: Meta<typeof GameGrid> = {
   argTypes: {
     onSaveConfig: { action: 'configSaved' },
     onRemoveConfig: { action: 'configRemoved' },
+    onUpdateConfig: { action: 'configUpdated' },
     onPlay: { action: 'played' },
     onPlayWithConfig: { action: 'playedWithConfig' },
     onPageChange: { action: 'pageChanged' },

@@ -43,6 +43,11 @@
     "cancel": "Cancel",
     "remove": "Remove {{name}}",
     "errorEmpty": "Please enter a name",
-    "errorDuplicate": "A configuration named \"{{name}}\" already exists"
+    "errorDuplicate": "A configuration named \"{{name}}\" already exists",
+    "colorLabel": "Colour",
+    "update": "Update \"{{name}}\"",
+    "saveAsNew": "Save as new bookmark…",
+    "saveBookmarkLabel": "Save as bookmark",
+    "saveBookmarkPlaceholder": "e.g. Easy Mode"
   }
 }

@@ -43,6 +43,11 @@
     "cancel": "Cancelar",
     "remove": "Remover {{name}}",
     "errorEmpty": "Por favor, insira um nome",
-    "errorDuplicate": "Já existe uma configuração chamada \"{{name}}\""
+    "errorDuplicate": "Já existe uma configuração chamada \"{{name}}\"",
+    "colorLabel": "Cor",
+    "update": "Actualizar \"{{name}}\"",
+    "saveAsNew": "Salvar como novo favorito…",
+    "saveBookmarkLabel": "Salvar como favorito",
+    "saveBookmarkPlaceholder": "ex: Modo Fácil"
   }
 }

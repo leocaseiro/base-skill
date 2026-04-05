@@ -14,6 +14,7 @@ const makeEntries = (count: number): GameCatalogEntry[] =>
   Array.from({ length: count }, (_, i) => ({
     id: `game-${i}`,
     titleKey: `game-${i}`,
+    descriptionKey: `game-${i}-description`,
     levels: ['1'] as const,
     subject: 'math' as const,
   }));
@@ -27,6 +28,7 @@ describe('GameGrid', () => {
         savedConfigs={[]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
         page={1}
@@ -47,6 +49,7 @@ describe('GameGrid', () => {
         savedConfigs={[]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
         page={2}
@@ -71,6 +74,7 @@ describe('GameGrid', () => {
         savedConfigs={[]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
         page={2}
@@ -92,6 +96,7 @@ describe('GameGrid', () => {
         savedConfigs={[]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
         page={1}
@@ -115,6 +120,7 @@ describe('GameGrid', () => {
         savedConfigs={[]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
         page={1}

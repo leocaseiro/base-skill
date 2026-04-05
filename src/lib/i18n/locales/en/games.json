@@ -1,7 +1,10 @@
 {
   "word-spell": "Word Spell",
+  "word-spell-description": "Drag letter tiles to spell the word shown in the picture.",
   "number-match": "Number Match",
+  "number-match-description": "Match numerals to groups by dragging tiles to the right place.",
   "sort-numbers": "Sort Numbers",
+  "sort-numbers-description": "Put the numbers in order from smallest to biggest — or biggest to smallest.",
   "shell": {
     "round": "Round {{current}} / {{total}}",
     "undo": "Undo",
