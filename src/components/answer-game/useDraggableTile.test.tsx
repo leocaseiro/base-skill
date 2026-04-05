@@ -45,13 +45,23 @@ vi.mock('./useAnswerGameDispatch', () => ({
   useAnswerGameDispatch: () => vi.fn(),
 }));
 
+const mockPlaceTile = vi.fn();
+
+vi.mock('./useTileEvaluation', () => ({
+  useTileEvaluation: () => ({ placeTile: mockPlaceTile }),
+}));
+
 describe('useDraggableTile', () => {
   const tile = { id: 't1', label: 'C', value: 'c' };
 
-  it('returns a ref and handleClick', () => {
+  it('returns a ref, handleClick, and touch handlers', () => {
     const { result } = renderHook(() => useDraggableTile(tile));
     expect(result.current.ref).toBeDefined();
     expect(typeof result.current.handleClick).toBe('function');
+    expect(typeof result.current.onPointerDown).toBe('function');
+    expect(typeof result.current.onPointerMove).toBe('function');
+    expect(typeof result.current.onPointerUp).toBe('function');
+    expect(typeof result.current.onPointerCancel).toBe('function');
   });
 
   it('handleClick does not throw', () => {

@@ -67,7 +67,14 @@ const NumeralTile = ({
   tile: TileItem;
   tileStyle: TileStyle;
 }) => {
-  const { ref, handleClick } = useDraggableTile(tile);
+  const {
+    ref,
+    handleClick,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerCancel,
+  } = useDraggableTile(tile);
   const numericValue = Number.parseInt(tile.value, 10);
 
   const isDomino =
@@ -82,10 +89,14 @@ const NumeralTile = ({
       type="button"
       aria-label={`Number ${tile.label}`}
       className={[
-        'flex shrink-0 cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl bg-card p-2 shadow-md transition-transform active:scale-95 active:cursor-grabbing',
+        'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl bg-card p-2 shadow-md transition-transform active:scale-95 active:cursor-grabbing',
         isDomino ? 'h-[72px] w-32' : 'size-20',
       ].join(' ')}
       onClick={handleClick}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
     >
       {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
         numericValue <= 6 ? (

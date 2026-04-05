@@ -12,6 +12,11 @@ export const useAutoNextSlot = (): AutoNextSlot => {
 
   const placeInNextSlot = useCallback(
     (tileId: string) => {
+      // Guard: if the active slot is in a wrong state (e.g. a wrong tile was
+      // just placed with lock-auto-eject), block further placements until it
+      // clears. This prevents double/triple taps from skipping past the slot.
+      if (zones[activeSlotIndex]?.isWrong) return;
+
       const targetIndex = zones.findIndex(
         (z, i) =>
           i >= activeSlotIndex &&
