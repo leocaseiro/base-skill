@@ -33,9 +33,12 @@ export const LetterTileBank = () => {
   const { allTiles, bankTileIds, config } = useAnswerGameContext();
 
   if (config.inputMethod === 'type') {
+    const isTouch = navigator.maxTouchPoints > 0;
     return (
       <p className="text-sm text-muted-foreground" aria-live="polite">
-        ⌨️ Type the letters on your keyboard
+        {isTouch
+          ? 'Tap a slot to type'
+          : '⌨️ Type the letters on your keyboard'}
       </p>
     );
   }
