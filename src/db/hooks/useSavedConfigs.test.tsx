@@ -376,7 +376,9 @@ describe('useSavedConfigs', () => {
     await waitFor(() =>
       expect(result.current.savedConfigs).toHaveLength(2),
     );
-    const idA = result.current.savedConfigs[0]!.id;
+    const idA = result.current.savedConfigs.find(
+      (d) => d.name === 'A',
+    )!.id;
     await expect(
       result.current.updateConfig(idA, {}, 'B'),
     ).rejects.toThrow('already exists');
