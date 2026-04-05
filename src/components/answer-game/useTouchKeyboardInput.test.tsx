@@ -87,7 +87,7 @@ describe('useTouchKeyboardInput', () => {
 
   it('clears the input value after each key', () => {
     render(<TestHarness />, { wrapper });
-    const input = screen.getByTestId('hidden');
+    const input = screen.getByTestId<HTMLInputElement>('hidden');
 
     fireEvent.input(input, {
       target: { value: 'c' },
