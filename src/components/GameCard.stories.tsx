@@ -35,6 +35,7 @@ export const WithSavedConfig: Story = {
         gameId: 'word-spell',
         name: 'Easy Mode',
         config: {},
+        color: 'indigo',
         createdAt: new Date().toISOString(),
       },
     ],

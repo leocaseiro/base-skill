@@ -14,7 +14,7 @@ type SaveInput = {
   gameId: string;
   name: string;
   config: Record<string, unknown>;
-  color?: string;
+  color: string;
 };
 
 type UseSavedConfigsResult = {
@@ -69,7 +69,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
     gameId,
     name,
     config,
-    color = 'indigo',
+    color,
   }: SaveInput): Promise<void> => {
     if (!db) return;
     const trimmed = name.trim();

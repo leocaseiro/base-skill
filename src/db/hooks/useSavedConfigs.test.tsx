@@ -57,6 +57,7 @@ describe('useSavedConfigs', () => {
         gameId: 'word-spell',
         name: 'Easy Mode',
         config: { totalRounds: 3 },
+        color: 'indigo',
       });
     });
     await waitFor(() =>
@@ -76,6 +77,7 @@ describe('useSavedConfigs', () => {
         gameId: 'word-spell',
         name: 'Easy Mode',
         config: {},
+        color: 'indigo',
       });
     });
     await waitFor(() =>
@@ -87,6 +89,7 @@ describe('useSavedConfigs', () => {
           gameId: 'word-spell',
           name: 'Easy Mode',
           config: {},
+          color: 'indigo',
         });
       }),
     ).rejects.toThrow('already exists');
@@ -102,6 +105,7 @@ describe('useSavedConfigs', () => {
         gameId: 'word-spell',
         name: 'Easy Mode',
         config: {},
+        color: 'indigo',
       });
     });
     await act(async () => {
@@ -109,6 +113,7 @@ describe('useSavedConfigs', () => {
         gameId: 'number-match',
         name: 'Easy Mode',
         config: {},
+        color: 'indigo',
       });
     });
     await waitFor(() =>
@@ -126,6 +131,7 @@ describe('useSavedConfigs', () => {
         gameId: 'word-spell',
         name: 'Easy Mode',
         config: {},
+        color: 'indigo',
       });
     });
     await waitFor(() =>
@@ -150,6 +156,7 @@ describe('useSavedConfigs', () => {
         gameId: 'word-spell',
         name: 'Easy Mode',
         config: {},
+        color: 'indigo',
       });
     });
     await waitFor(() =>
@@ -174,6 +181,7 @@ describe('useSavedConfigs', () => {
         gameId: 'word-spell',
         name: 'Easy Mode',
         config: {},
+        color: 'indigo',
       });
     });
     await waitFor(() =>
@@ -184,6 +192,7 @@ describe('useSavedConfigs', () => {
         gameId: 'word-spell',
         name: 'Hard Mode',
         config: {},
+        color: 'indigo',
       });
     });
     await waitFor(() =>
@@ -207,11 +216,13 @@ describe('useSavedConfigs', () => {
         gameId: 'word-spell',
         name: 'WS Config',
         config: {},
+        color: 'indigo',
       });
       await result.current.save({
         gameId: 'number-match',
         name: 'NM Config',
         config: {},
+        color: 'indigo',
       });
     });
     await waitFor(() =>
@@ -232,6 +243,7 @@ describe('useSavedConfigs', () => {
         gameId: 'word-spell',
         name: 'WS Config',
         config: {},
+        color: 'indigo',
       });
     });
     await waitFor(() =>

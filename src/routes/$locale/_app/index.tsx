@@ -115,7 +115,7 @@ const HomeScreen = () => {
     gameId: string,
     name: string,
   ): Promise<void> => {
-    await save({ gameId, name, config: {} });
+    await save({ gameId, name, config: {}, color: 'indigo' });
   };
 
   return (
