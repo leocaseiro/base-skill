@@ -99,13 +99,26 @@ if (
 
 This is a no-op on touch (the hook doesn't run), but protects desktop behaviour if someone ever tests with a touch device attached to a keyboard.
 
-### `OrderedLetterSlots` and `NumberSequenceSlots` changes
+### Slot Consolidation: `AnswerSlot` + `OrderedSlots`
 
-Both slot components (`src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx` and `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx`) have the same structure; changes apply identically to both.
+`OrderedLetterSlots` (`src/games/word-spell/`) and `NumberSequenceSlots` (`src/games/sort-numbers/`) are character-for-character identical. Since both need the same touch keyboard changes, this is the right time to consolidate them into shared components in `src/components/answer-game/`:
 
-Empty slots currently render a bare `<li>` with no click handler. For touch keyboard support, each empty slot's `<li>` gains an `onClick` that calls `focusKeyboard()` from `TouchKeyboardContext`. The call must happen in the synchronous click handler (not in a `useEffect`) so iOS allows the programmatic focus.
+- **`AnswerSlot`** — the shared `<li>` slot (replaces both `LetterSlot` and `NumberSlot`)
+- **`OrderedSlots`** — the shared `<ol>` list (replaces both `OrderedLetterSlots` and `NumberSequenceSlots`)
 
-Each slot also gains a `useEffect` that calls `ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })` when `isActive` becomes `true` and `window.visualViewport` is narrower than `window.innerHeight` by more than 150 px (a reliable proxy for the keyboard being open). This keeps the active slot visible without needing any external DOM ref in `useTouchKeyboardInput`.
+The game files (`OrderedLetterSlots.tsx`, `NumberSequenceSlots.tsx`) become thin re-exports:
+
+```tsx
+export { OrderedSlots as OrderedLetterSlots } from '@/components/answer-game/OrderedSlots/OrderedSlots';
+export { OrderedSlots as NumberSequenceSlots } from '@/components/answer-game/OrderedSlots/OrderedSlots';
+```
+
+This preserves the existing import paths used by `WordSpell` and `SortNumbers` with no further changes to those files.
+
+The touch keyboard behaviour is implemented once in `AnswerSlot`:
+
+- Empty slots render a `<li>` with an `onClick` that calls `focusKeyboard()` from `TouchKeyboardContext`. The call must happen in the synchronous click handler (not in a `useEffect`) so iOS allows the programmatic focus.
+- Each slot has a `useEffect` that calls `ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })` when `isActive` becomes `true` and `window.visualViewport` is narrower than `window.innerHeight` by more than 150 px (a reliable proxy for the keyboard being open).
 
 ### `LetterTileBank` changes
 
@@ -125,19 +138,20 @@ Each game passes `inputMode` to `AnswerGameConfig` (or it is derived from existi
 
 ## Files Changed
 
-| File                                                                 | Change                                                                           |
-| -------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `src/components/answer-game/useTouchKeyboardInput.ts`                | **New** - hook managing hidden input, input-event capture, PLACE_TILE dispatch   |
-| `src/components/answer-game/TouchKeyboardContext.ts`                 | **New** - context providing `focusKeyboard` function                             |
-| `src/components/answer-game/HiddenKeyboardInput.tsx`                 | **New** - the hidden `<input>` component                                         |
-| `src/components/answer-game/AnswerGameProvider.tsx`                  | Modified - render `HiddenKeyboardInput`, provide `TouchKeyboardContext`          |
-| `src/components/answer-game/useKeyboardInput.ts`                     | Modified - update `HTMLInputElement` guard to allow `data-touch-keyboard`        |
-| `src/components/answer-game/types.ts`                                | Modified - add optional `touchKeyboardInputMode` to `AnswerGameConfig`           |
-| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`             | Modified - update type-mode hint for touch                                       |
-| `src/games/word-spell/WordSpell/WordSpell.tsx`                       | Modified - pass `touchKeyboardInputMode: 'text'`                                 |
-| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                 | Modified - pass `touchKeyboardInputMode: 'numeric'`                              |
-| `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`     | Modified - empty slot tap calls `focusKeyboard()`; active slot scrolls into view |
-| `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx` | Modified - same as above                                                         |
+| File                                                                 | Change                                                                         |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `src/components/answer-game/useTouchKeyboardInput.ts`                | **New** - hook managing hidden input, input-event capture, PLACE_TILE dispatch |
+| `src/components/answer-game/TouchKeyboardContext.ts`                 | **New** - context providing `focusKeyboard` function                           |
+| `src/components/answer-game/HiddenKeyboardInput.tsx`                 | **New** - the hidden `<input>` component                                       |
+| `src/components/answer-game/AnswerGameProvider.tsx`                  | Modified - render `HiddenKeyboardInput`, provide `TouchKeyboardContext`        |
+| `src/components/answer-game/useKeyboardInput.ts`                     | Modified - update `HTMLInputElement` guard to allow `data-touch-keyboard`      |
+| `src/components/answer-game/types.ts`                                | Modified - add optional `touchKeyboardInputMode` to `AnswerGameConfig`         |
+| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`             | Modified - update type-mode hint for touch                                     |
+| `src/games/word-spell/WordSpell/WordSpell.tsx`                       | Modified - pass `touchKeyboardInputMode: 'text'`                               |
+| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                 | Modified - pass `touchKeyboardInputMode: 'numeric'`                            |
+| `src/components/answer-game/OrderedSlots/OrderedSlots.tsx`           | **New** - shared `AnswerSlot` + `OrderedSlots`                                 |
+| `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`     | Modified - thin re-export of `OrderedSlots`                                    |
+| `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx` | Modified - thin re-export of `OrderedSlots`                                    |
 
 ## Testing
 
