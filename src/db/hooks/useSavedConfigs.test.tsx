@@ -378,9 +378,7 @@ describe('useSavedConfigs', () => {
     );
     const idA = result.current.savedConfigs[0]!.id;
     await expect(
-      act(async () => {
-        await result.current.updateConfig(idA, {}, 'B');
-      }),
+      result.current.updateConfig(idA, {}, 'B'),
     ).rejects.toThrow('already exists');
   });
 });

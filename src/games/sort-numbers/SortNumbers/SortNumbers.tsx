@@ -12,7 +12,6 @@ import type {
 } from '@/components/answer-game/types';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
@@ -34,7 +33,6 @@ const SortNumbersSession = ({
   onRestartSession: () => void;
 }) => {
   const { t } = useTranslation('games');
-  const [showInstructions, setShowInstructions] = useState(true);
   const { phase, roundIndex, retryCount } = useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const { confettiReady, gameOverReady } = useGameSounds();
@@ -107,16 +105,6 @@ const SortNumbersSession = ({
     sortNumbersConfig.rounds,
     sortNumbersConfig.direction,
   ]);
-
-  if (showInstructions) {
-    return (
-      <InstructionsOverlay
-        text={t('instructions.sort-numbers')}
-        onStart={() => setShowInstructions(false)}
-        ttsEnabled={sortNumbersConfig.ttsEnabled}
-      />
-    );
-  }
 
   if (!round) return null;
 
