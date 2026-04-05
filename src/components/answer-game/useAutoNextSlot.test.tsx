@@ -137,4 +137,54 @@ describe('useAutoNextSlot', () => {
     expect(result.current.state.zones[0]?.placedTileId).toBeNull();
     expect(result.current.state.zones[1]?.placedTileId).toBe('t2');
   });
+
+  it('blocks placement when active slot is in wrong state (double-tap guard)', () => {
+    // Scenario: wrong tile was just placed in zone 0 (lock-auto-eject) —
+    // isWrong=true, placedTileId=null. A second tap should NOT advance to zone 1.
+    const wrongZones: AnswerZone[] = [
+      {
+        id: 'z0',
+        index: 0,
+        expectedValue: 'C',
+        placedTileId: null,
+        isWrong: true,
+        isLocked: true,
+      },
+      {
+        id: 'z1',
+        index: 1,
+        expectedValue: 'A',
+        placedTileId: null,
+        isWrong: false,
+        isLocked: false,
+      },
+    ];
+
+    function useHarnessWithWrongZone() {
+      const dispatch = useAnswerGameDispatch();
+      const state = useAnswerGameContext();
+      if (state.zones.length === 0)
+        dispatch({
+          type: 'INIT_ROUND',
+          tiles: tileItems,
+          zones: wrongZones,
+        });
+      const { placeInNextSlot } = useAutoNextSlot();
+      return { state, placeInNextSlot };
+    }
+
+    const WrongWrapper = ({ children }: { children: ReactNode }) => (
+      <AnswerGameProvider config={gameConfig}>
+        {children}
+      </AnswerGameProvider>
+    );
+
+    const { result } = renderHook(() => useHarnessWithWrongZone(), {
+      wrapper: WrongWrapper,
+    });
+
+    act(() => result.current.placeInNextSlot('t2'));
+    // Zone 1 must stay empty — the guard blocked the placement
+    expect(result.current.state.zones[1]?.placedTileId).toBeNull();
+  });
 });
