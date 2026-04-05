@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { filterCatalog, paginateCatalog } from './catalog-utils';
+import {
+  filterCatalog,
+  paginateCatalog,
+  sortByHasSavedConfigs,
+} from './catalog-utils';
 import { GAME_CATALOG } from './registry';
 
 describe('filterCatalog', () => {
@@ -94,5 +98,63 @@ describe('paginateCatalog', () => {
     expect(result.items).toHaveLength(0);
     expect(result.totalPages).toBe(1);
     expect(result.page).toBe(1);
+  });
+});
+
+describe('sortByHasSavedConfigs', () => {
+  const entries = [
+    {
+      id: 'alpha',
+      titleKey: 'alpha',
+      levels: ['K' as const],
+      subject: 'math' as const,
+    },
+    {
+      id: 'beta',
+      titleKey: 'beta',
+      levels: ['K' as const],
+      subject: 'math' as const,
+    },
+    {
+      id: 'gamma',
+      titleKey: 'gamma',
+      levels: ['K' as const],
+      subject: 'math' as const,
+    },
+  ];
+
+  it('moves entries with saved configs to the front', () => {
+    const result = sortByHasSavedConfigs(entries, new Set(['gamma']));
+    expect(result[0].id).toBe('gamma');
+    expect(result[1].id).toBe('alpha');
+    expect(result[2].id).toBe('beta');
+  });
+
+  it('preserves original order within each group', () => {
+    const result = sortByHasSavedConfigs(entries, new Set(['beta']));
+    expect(result[0].id).toBe('beta');
+    expect(result[1].id).toBe('alpha');
+    expect(result[2].id).toBe('gamma');
+  });
+
+  it('preserves original order among multiple entries with configs', () => {
+    const result = sortByHasSavedConfigs(
+      entries,
+      new Set(['gamma', 'alpha']),
+    );
+    expect(result[0].id).toBe('alpha');
+    expect(result[1].id).toBe('gamma');
+    expect(result[2].id).toBe('beta');
+  });
+
+  it('returns original order when no gameIds have configs', () => {
+    const result = sortByHasSavedConfigs(entries, new Set());
+    expect(result.map((e) => e.id)).toEqual(['alpha', 'beta', 'gamma']);
+  });
+
+  it('does not mutate the input array', () => {
+    const copy = [...entries];
+    sortByHasSavedConfigs(entries, new Set(['beta']));
+    expect(entries).toEqual(copy);
   });
 });

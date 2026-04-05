@@ -1,13 +1,16 @@
 import { useTranslation } from 'react-i18next';
+import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
 import type { GameCatalogEntry } from '@/games/registry';
 import { GameCard } from '@/components/GameCard';
 import { Button } from '@/components/ui/button';
 
 type GameGridProps = {
   entries: GameCatalogEntry[];
-  bookmarkedIds: Set<string>;
-  onBookmarkToggle: (gameId: string) => void;
+  savedConfigs: SavedGameConfigDoc[];
+  onSaveConfig: (gameId: string, name: string) => Promise<void>;
+  onRemoveConfig: (configId: string) => Promise<void>;
   onPlay: (gameId: string) => void;
+  onPlayWithConfig: (gameId: string, configId: string) => void;
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -15,9 +18,11 @@ type GameGridProps = {
 
 export const GameGrid = ({
   entries,
-  bookmarkedIds,
-  onBookmarkToggle,
+  savedConfigs,
+  onSaveConfig,
+  onRemoveConfig,
   onPlay,
+  onPlayWithConfig,
   page,
   totalPages,
   onPageChange,
@@ -36,9 +41,13 @@ export const GameGrid = ({
             <GameCard
               key={entry.id}
               entry={entry}
-              isBookmarked={bookmarkedIds.has(entry.id)}
-              onBookmarkToggle={onBookmarkToggle}
+              savedConfigs={savedConfigs.filter(
+                (c) => c.gameId === entry.id,
+              )}
+              onSaveConfig={onSaveConfig}
+              onRemoveConfig={onRemoveConfig}
               onPlay={onPlay}
+              onPlayWithConfig={onPlayWithConfig}
             />
           ))}
         </div>
