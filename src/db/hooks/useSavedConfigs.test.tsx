@@ -9,6 +9,7 @@ import {
   createTestDatabase,
   destroyTestDatabase,
 } from '@/db/create-database';
+import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
 import { DbProvider } from '@/providers/DbProvider';
 
 let db: BaseSkillDatabase;
@@ -239,6 +240,53 @@ describe('useSavedConfigs', () => {
       ),
     );
     expect(result.current.gameIdsWithConfigs.has('number-match')).toBe(
+      false,
+    );
+  });
+
+  it('persistLastSessionConfig upserts a hidden doc and omits it from savedConfigs', async () => {
+    const { result } = renderHook(() => useSavedConfigsReady(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    await act(async () => {
+      await result.current.persistLastSessionConfig('word-spell', {
+        component: 'WordSpell',
+        gameId: 'word-spell',
+        mode: 'picture',
+      });
+    });
+    expect(result.current.savedConfigs).toHaveLength(0);
+    const raw = await db.saved_game_configs
+      .findOne(lastSessionSavedConfigId('word-spell'))
+      .exec();
+    expect(raw?.config).toMatchObject({ mode: 'picture' });
+    await act(async () => {
+      await result.current.persistLastSessionConfig('word-spell', {
+        component: 'WordSpell',
+        gameId: 'word-spell',
+        mode: 'scramble',
+      });
+    });
+    const raw2 = await db.saved_game_configs
+      .findOne(lastSessionSavedConfigId('word-spell'))
+      .exec();
+    expect(raw2?.config).toMatchObject({ mode: 'scramble' });
+    expect(result.current.savedConfigs).toHaveLength(0);
+  });
+
+  it('gameIdsWithConfigs ignores last-session-only games', async () => {
+    const { result } = renderHook(() => useSavedConfigsReady(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    await act(async () => {
+      await result.current.persistLastSessionConfig('sort-numbers', {
+        component: 'SortNumbers',
+        gameId: 'sort-numbers',
+      });
+    });
+    expect(result.current.gameIdsWithConfigs.has('sort-numbers')).toBe(
       false,
     );
   });
