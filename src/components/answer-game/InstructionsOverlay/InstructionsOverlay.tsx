@@ -166,7 +166,7 @@ export const InstructionsOverlay = ({
                       onClick={() => {
                         const el = document.querySelector(
                           '#instructions-bookmark-name',
-                        );
+                        ) as HTMLInputElement | null;
                         void onUpdateBookmark(
                           el?.value ?? bookmarkName,
                           config,
