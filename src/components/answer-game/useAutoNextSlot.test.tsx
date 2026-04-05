@@ -187,4 +187,74 @@ describe('useAutoNextSlot', () => {
     // Zone 1 must stay empty — the guard blocked the placement
     expect(result.current.state.zones[1]?.placedTileId).toBeNull();
   });
+
+  it('wraps around to fill earlier empty slots after out-of-order drag placement', () => {
+    // Replicates "cat" scenario: user drags 'a' to slot 1, taps 't' into slot 2,
+    // then taps 'c' — activeSlotIndex is 2 (or beyond) but slot 0 is still empty.
+    // placeInNextSlot must wrap around and place 'c' in zone 0.
+    const threeZones: AnswerZone[] = [
+      {
+        id: 'z0',
+        index: 0,
+        expectedValue: 'C',
+        placedTileId: null, // still empty
+        isWrong: false,
+        isLocked: false,
+      },
+      {
+        id: 'z1',
+        index: 1,
+        expectedValue: 'A',
+        placedTileId: 't2', // already filled out-of-order
+        isWrong: false,
+        isLocked: false,
+      },
+      {
+        id: 'z2',
+        index: 2,
+        expectedValue: 'X',
+        placedTileId: null,
+        isWrong: false,
+        isLocked: false,
+      },
+    ];
+
+    const threeItems: TileItem[] = [
+      { id: 't1', label: 'C', value: 'C' },
+      { id: 't2', label: 'A', value: 'A' },
+      { id: 't3', label: 'X', value: 'X' },
+    ];
+
+    function useHarnessThreeZones() {
+      const dispatch = useAnswerGameDispatch();
+      const state = useAnswerGameContext();
+      if (state.zones.length === 0) {
+        dispatch({
+          type: 'INIT_ROUND',
+          tiles: threeItems,
+          zones: threeZones,
+        });
+        // Simulate activeSlotIndex already at 2 (as if zone 1 was filled via drag)
+        dispatch({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+      }
+      const { placeInNextSlot } = useAutoNextSlot();
+      return { state, placeInNextSlot };
+    }
+
+    const ThreeWrapper = ({ children }: { children: ReactNode }) => (
+      <AnswerGameProvider config={gameConfig}>
+        {children}
+      </AnswerGameProvider>
+    );
+
+    const { result } = renderHook(() => useHarnessThreeZones(), {
+      wrapper: ThreeWrapper,
+    });
+
+    // activeSlotIndex is 2; zones[2] is empty so first call fills zone 2
+    act(() => result.current.placeInNextSlot('t3'));
+    // Now zones[0] is still empty and activeSlotIndex should wrap around
+    act(() => result.current.placeInNextSlot('t1'));
+    expect(result.current.state.zones[0]?.placedTileId).toBe('t1');
+  });
 });
