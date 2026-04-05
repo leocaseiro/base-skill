@@ -22,13 +22,15 @@ const meta: Meta<typeof GameGrid> = {
   tags: ['autodocs'],
   args: {
     entries: SAMPLE_ENTRIES,
-    bookmarkedIds: new Set<string>(),
+    savedConfigs: [],
     page: 1,
     totalPages: 1,
   },
   argTypes: {
-    onBookmarkToggle: { action: 'bookmarkToggled' },
+    onSaveConfig: { action: 'configSaved' },
+    onRemoveConfig: { action: 'configRemoved' },
     onPlay: { action: 'played' },
+    onPlayWithConfig: { action: 'playedWithConfig' },
     onPageChange: { action: 'pageChanged' },
   },
 };
@@ -38,9 +40,18 @@ type Story = StoryObj<typeof GameGrid>;
 
 export const Default: Story = {};
 
-export const WithBookmarks: Story = {
+export const WithSavedConfig: Story = {
   args: {
-    bookmarkedIds: new Set(['word-spell']),
+    savedConfigs: [
+      {
+        id: 'cfg-1',
+        profileId: 'default',
+        gameId: 'word-spell',
+        name: 'Easy Mode',
+        config: {},
+        createdAt: new Date().toISOString(),
+      },
+    ],
   },
 };
 

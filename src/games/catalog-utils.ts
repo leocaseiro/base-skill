@@ -33,6 +33,18 @@ export type PaginateResult<T> = {
   totalPages: number;
 };
 
+export const sortByHasSavedConfigs = <T extends { id: string }>(
+  entries: T[],
+  gameIdsWithConfigs: Set<string>,
+): T[] => {
+  if (gameIdsWithConfigs.size === 0) return entries;
+  return [...entries].toSorted((a, b) => {
+    const aHas = gameIdsWithConfigs.has(a.id) ? 0 : 1;
+    const bHas = gameIdsWithConfigs.has(b.id) ? 0 : 1;
+    return aHas - bHas;
+  });
+};
+
 export function paginateCatalog<T>(
   items: T[],
   page: number,

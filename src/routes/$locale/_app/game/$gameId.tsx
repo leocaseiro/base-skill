@@ -1,10 +1,15 @@
-// src/routes/$locale/_app/game/$gameId.tsx
 import { createFileRoute } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
-import { useState } from 'react';
-import type { NumberMatchConfig } from '@/games/number-match/types';
+import { useEffect, useMemo, useState } from 'react';
+import type {
+  NumberMatchConfig,
+  NumberMatchRound,
+} from '@/games/number-match/types';
 import type { SortNumbersConfig } from '@/games/sort-numbers/types';
-import type { WordSpellConfig } from '@/games/word-spell/types';
+import type {
+  WordSpellConfig,
+  WordSpellRound,
+} from '@/games/word-spell/types';
 import type {
   GameEngineState,
   MoveLog,
@@ -15,6 +20,8 @@ import type {
 import type { JSX } from 'react';
 import { GameShell } from '@/components/game/GameShell';
 import { getOrCreateDatabase } from '@/db/create-database';
+import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
+import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
@@ -22,7 +29,6 @@ import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
 import { loadGameConfig } from '@/lib/game-engine/config-loader';
 import { findInProgressSession } from '@/lib/game-engine/session-finder';
 
-// Stub content used until M5 introduces game registrations
 const STUB_CONTENT: ResolvedContent = {
   rounds: [
     { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
@@ -48,7 +54,24 @@ interface GameRouteLoaderData {
   initialLog: MoveLog | null;
   sessionId: string;
   meta: SessionMeta;
+  gameSpecificConfig: Record<string, unknown> | null;
 }
+
+const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
+  { word: 'cat', emoji: '🐱' },
+  { word: 'dog', emoji: '🐶' },
+  { word: 'sun', emoji: '☀️' },
+  { word: 'pin', emoji: '📌' },
+  { word: 'sad', emoji: '☹️' },
+  { word: 'ant', emoji: '🐜' },
+  { word: 'can', emoji: '🥫' },
+  { word: 'mum', emoji: '🤱' },
+];
+
+const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
+  const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
+  return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
+};
 
 const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
   gameId: 'word-spell',
@@ -56,21 +79,12 @@ const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
   inputMethod: 'drag',
   wrongTileBehavior: 'lock-auto-eject',
   tileBankMode: 'exact',
-  totalRounds: 3,
+  totalRounds: 8,
   roundsInOrder: false,
   ttsEnabled: true,
   mode: 'picture',
   tileUnit: 'letter',
-  rounds: [
-    { word: 'cat', emoji: '🐱' },
-    { word: 'dog', emoji: '🐶' },
-    { word: 'sun', emoji: '☀️' },
-    { word: 'pin', emoji: '📌' },
-    { word: 'sad', emoji: '☹️' },
-    { word: 'ant', emoji: '🐜' },
-    { word: 'can', emoji: '🥫' },
-    { word: 'mum', emoji: '🤱' },
-  ],
+  rounds: sliceWordSpellRounds(8),
 };
 
 const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
@@ -91,13 +105,29 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
   })),
 });
 
+const resizeNumberMatchRounds = (
+  prev: NumberMatchRound[],
+  count: number,
+  range: { min: number; max: number },
+): NumberMatchRound[] => {
+  const n = Math.max(1, Math.min(count, 50));
+  const next = prev.slice(0, n).map((r) => ({ ...r }));
+  const span = Math.max(1, range.max - range.min + 1);
+  while (next.length < n) {
+    next.push({
+      value: range.min + Math.floor(Math.random() * span),
+    });
+  }
+  return next;
+};
+
 const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
   gameId: 'sort-numbers',
   component: 'SortNumbers',
   inputMethod: 'drag',
   wrongTileBehavior: 'lock-manual',
   tileBankMode: 'exact',
-  totalRounds: 4,
+  totalRounds: 8,
   roundsInOrder: false,
   ttsEnabled: true,
   direction: 'ascending',
@@ -112,6 +142,87 @@ const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
   }),
 });
 
+const resolveWordSpellConfig = (
+  saved: Record<string, unknown> | null,
+): WordSpellConfig => {
+  const base: WordSpellConfig = {
+    ...DEFAULT_WORD_SPELL_CONFIG,
+    rounds: DEFAULT_WORD_SPELL_CONFIG.rounds.map((r) => ({ ...r })),
+  };
+  if (!saved || saved.component !== 'WordSpell') return base;
+  const merged: WordSpellConfig = {
+    ...base,
+    ...(saved as Partial<WordSpellConfig>),
+    gameId: 'word-spell',
+    component: 'WordSpell',
+  };
+  const targetTotal = Math.max(
+    1,
+    Math.min(
+      merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
+      WORD_SPELL_ROUND_POOL.length,
+    ),
+  );
+  if (
+    !Array.isArray(merged.rounds) ||
+    merged.rounds.length === 0 ||
+    merged.rounds.length !== targetTotal
+  ) {
+    merged.rounds = sliceWordSpellRounds(targetTotal);
+  }
+  merged.totalRounds = merged.rounds.length;
+  return merged;
+};
+
+const resolveNumberMatchConfig = (
+  saved: Record<string, unknown> | null,
+): NumberMatchConfig => {
+  const base = makeDefaultNumberMatchConfig();
+  if (!saved || saved.component !== 'NumberMatch') return base;
+  const merged: NumberMatchConfig = {
+    ...base,
+    ...(saved as Partial<NumberMatchConfig>),
+    gameId: 'number-match',
+    component: 'NumberMatch',
+  };
+  const targetLen =
+    merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds;
+  merged.rounds = resizeNumberMatchRounds(
+    Array.isArray(merged.rounds) ? merged.rounds : [],
+    targetLen,
+    merged.range,
+  );
+  return merged;
+};
+
+const resolveSortNumbersConfig = (
+  saved: Record<string, unknown> | null,
+): SortNumbersConfig => {
+  const base = makeDefaultSortNumbersConfig();
+  if (!saved || saved.component !== 'SortNumbers') return base;
+  const merged: SortNumbersConfig = {
+    ...base,
+    ...(saved as Partial<SortNumbersConfig>),
+    gameId: 'sort-numbers',
+    component: 'SortNumbers',
+  };
+  const tr = Math.max(1, merged.totalRounds);
+  merged.totalRounds = tr;
+  if (
+    !Array.isArray(merged.rounds) ||
+    merged.rounds.length === 0 ||
+    merged.rounds.length !== tr
+  ) {
+    merged.rounds = generateSortRounds({
+      range: merged.range,
+      quantity: merged.quantity,
+      allowSkips: merged.allowSkips,
+      totalRounds: tr,
+    });
+  }
+  return merged;
+};
+
 const SortNumbersConfigPanel = ({
   config,
   onChange,
@@ -121,14 +232,14 @@ const SortNumbersConfigPanel = ({
 }) => {
   const [open, setOpen] = useState(false);
 
-  const regenerate = () => {
+  const regenerate = (next: SortNumbersConfig) => {
     onChange({
-      ...config,
+      ...next,
       rounds: generateSortRounds({
-        range: config.range,
-        quantity: config.quantity,
-        allowSkips: config.allowSkips,
-        totalRounds: config.totalRounds,
+        range: next.range,
+        quantity: next.quantity,
+        allowSkips: next.allowSkips,
+        totalRounds: next.totalRounds,
       }),
     });
   };
@@ -139,12 +250,89 @@ const SortNumbersConfigPanel = ({
       onToggle={(e) =>
         setOpen((e.currentTarget as HTMLDetailsElement).open)
       }
-      className="fixed right-4 top-40 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
+      className="fixed right-4 top-40 z-50 max-h-[min(70vh,calc(100vh-8rem))] w-72 overflow-y-auto rounded-lg border bg-background p-3 text-sm shadow-lg"
     >
       <summary className="cursor-pointer font-medium">
         ⚙️ Game Config
       </summary>
       <div className="mt-3 flex flex-col gap-3">
+        <label className="flex flex-col gap-1">
+          Input method
+          <select
+            value={config.inputMethod}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                inputMethod: e.target
+                  .value as SortNumbersConfig['inputMethod'],
+              })
+            }
+            className="rounded border px-2 py-1"
+          >
+            <option value="drag">drag</option>
+            <option value="type">type</option>
+            <option value="both">both</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          Wrong tile behaviour
+          <select
+            value={config.wrongTileBehavior}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                wrongTileBehavior: e.target
+                  .value as SortNumbersConfig['wrongTileBehavior'],
+              })
+            }
+            className="rounded border px-2 py-1"
+          >
+            <option value="reject">reject</option>
+            <option value="lock-manual">lock-manual</option>
+            <option value="lock-auto-eject">lock-auto-eject</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          Tile bank mode
+          <select
+            value={config.tileBankMode}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                tileBankMode: e.target
+                  .value as SortNumbersConfig['tileBankMode'],
+              })
+            }
+            className="rounded border px-2 py-1"
+          >
+            <option value="exact">exact</option>
+            <option value="distractors">distractors</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          Total rounds
+          <input
+            type="number"
+            value={config.totalRounds}
+            min={1}
+            max={30}
+            onChange={(e) => {
+              const totalRounds = Number(e.target.value);
+              regenerate({ ...config, totalRounds });
+            }}
+            className="rounded border px-2 py-1"
+          />
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={config.roundsInOrder === true}
+            onChange={(e) =>
+              onChange({ ...config, roundsInOrder: e.target.checked })
+            }
+          />
+          Rounds in order
+        </label>
         <label className="flex flex-col gap-1">
           Direction
           <select
@@ -170,7 +358,10 @@ const SortNumbersConfigPanel = ({
             min={2}
             max={8}
             onChange={(e) =>
-              onChange({ ...config, quantity: Number(e.target.value) })
+              regenerate({
+                ...config,
+                quantity: Number(e.target.value),
+              })
             }
             className="rounded border px-2 py-1"
           />
@@ -183,7 +374,7 @@ const SortNumbersConfigPanel = ({
             min={1}
             max={config.range.max - 1}
             onChange={(e) =>
-              onChange({
+              regenerate({
                 ...config,
                 range: { ...config.range, min: Number(e.target.value) },
               })
@@ -199,7 +390,7 @@ const SortNumbersConfigPanel = ({
             min={config.range.min + 1}
             max={100}
             onChange={(e) =>
-              onChange({
+              regenerate({
                 ...config,
                 range: { ...config.range, max: Number(e.target.value) },
               })
@@ -212,7 +403,7 @@ const SortNumbersConfigPanel = ({
             type="checkbox"
             checked={config.allowSkips}
             onChange={(e) =>
-              onChange({ ...config, allowSkips: e.target.checked })
+              regenerate({ ...config, allowSkips: e.target.checked })
             }
           />
           Allow skips
@@ -229,7 +420,7 @@ const SortNumbersConfigPanel = ({
         </label>
         <button
           type="button"
-          onClick={regenerate}
+          onClick={() => regenerate(config)}
           className="rounded border px-2 py-1 text-sm"
         >
           Regenerate rounds
@@ -254,7 +445,7 @@ const WordSpellConfigPanel = ({
       onToggle={(e) =>
         setOpen((e.currentTarget as HTMLDetailsElement).open)
       }
-      className="fixed right-4 top-40 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
+      className="fixed right-4 top-40 z-50 max-h-[min(70vh,calc(100vh-8rem))] w-72 overflow-y-auto rounded-lg border bg-background p-3 text-sm shadow-lg"
     >
       <summary className="cursor-pointer font-medium">
         ⚙️ Game Config
@@ -296,6 +487,104 @@ const WordSpellConfigPanel = ({
             <option value="lock-auto-eject">lock-auto-eject</option>
           </select>
         </label>
+        <label className="flex flex-col gap-1">
+          Tile bank mode
+          <select
+            value={config.tileBankMode}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                tileBankMode: e.target
+                  .value as WordSpellConfig['tileBankMode'],
+              })
+            }
+            className="rounded border px-2 py-1"
+          >
+            <option value="exact">exact</option>
+            <option value="distractors">distractors</option>
+          </select>
+        </label>
+        {config.tileBankMode === 'distractors' ? (
+          <label className="flex flex-col gap-1">
+            Distractor count
+            <input
+              type="number"
+              min={1}
+              max={12}
+              value={config.distractorCount ?? 2}
+              onChange={(e) =>
+                onChange({
+                  ...config,
+                  distractorCount: Number(e.target.value),
+                })
+              }
+              className="rounded border px-2 py-1"
+            />
+          </label>
+        ) : null}
+        <label className="flex flex-col gap-1">
+          Total rounds
+          <input
+            type="number"
+            value={config.totalRounds}
+            min={1}
+            max={WORD_SPELL_ROUND_POOL.length}
+            onChange={(e) => {
+              const totalRounds = Number(e.target.value);
+              onChange({
+                ...config,
+                totalRounds,
+                rounds: sliceWordSpellRounds(totalRounds),
+              });
+            }}
+            className="rounded border px-2 py-1"
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          Mode
+          <select
+            value={config.mode}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                mode: e.target.value as WordSpellConfig['mode'],
+              })
+            }
+            className="rounded border px-2 py-1"
+          >
+            <option value="picture">picture</option>
+            <option value="scramble">scramble</option>
+            <option value="recall">recall</option>
+            <option value="sentence-gap">sentence-gap</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          Tile unit
+          <select
+            value={config.tileUnit}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                tileUnit: e.target.value as WordSpellConfig['tileUnit'],
+              })
+            }
+            className="rounded border px-2 py-1"
+          >
+            <option value="letter">letter</option>
+            <option value="syllable">syllable</option>
+            <option value="word">word</option>
+          </select>
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={config.roundsInOrder === true}
+            onChange={(e) =>
+              onChange({ ...config, roundsInOrder: e.target.checked })
+            }
+          />
+          Rounds in order
+        </label>
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -326,12 +615,30 @@ const NumberMatchConfigPanel = ({
       onToggle={(e) =>
         setOpen((e.currentTarget as HTMLDetailsElement).open)
       }
-      className="fixed right-4 top-40 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
+      className="fixed right-4 top-40 z-50 max-h-[min(70vh,calc(100vh-8rem))] w-72 overflow-y-auto rounded-lg border bg-background p-3 text-sm shadow-lg"
     >
       <summary className="cursor-pointer font-medium">
         ⚙️ Game Config
       </summary>
       <div className="mt-3 flex flex-col gap-3">
+        <label className="flex flex-col gap-1">
+          Input method
+          <select
+            value={config.inputMethod}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                inputMethod: e.target
+                  .value as NumberMatchConfig['inputMethod'],
+              })
+            }
+            className="rounded border px-2 py-1"
+          >
+            <option value="drag">drag</option>
+            <option value="type">type</option>
+            <option value="both">both</option>
+          </select>
+        </label>
         <label className="flex flex-col gap-1">
           Mode
           <select
@@ -389,16 +696,50 @@ const NumberMatchConfigPanel = ({
         <label className="flex flex-col gap-1">
           Distractor count
           <input
-            value={config.distractorCount}
+            type="number"
+            min={0}
+            max={10}
+            value={config.distractorCount ?? 0}
             onChange={(e) =>
               onChange({
                 ...config,
-                distractorCount: e.target
-                  .value as unknown as NumberMatchConfig['distractorCount'],
+                distractorCount: Number(e.target.value),
               })
             }
             className="rounded border px-2 py-1"
           />
+        </label>
+        <label className="flex flex-col gap-1">
+          Total rounds
+          <input
+            type="number"
+            value={config.totalRounds}
+            min={1}
+            max={50}
+            onChange={(e) => {
+              const totalRounds = Number(e.target.value);
+              onChange({
+                ...config,
+                totalRounds,
+                rounds: resizeNumberMatchRounds(
+                  config.rounds,
+                  totalRounds,
+                  config.range,
+                ),
+              });
+            }}
+            className="rounded border px-2 py-1"
+          />
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={config.roundsInOrder === true}
+            onChange={(e) =>
+              onChange({ ...config, roundsInOrder: e.target.checked })
+            }
+          />
+          Rounds in order
         </label>
         <label className="flex flex-col gap-1">
           Range min
@@ -447,63 +788,121 @@ const NumberMatchConfigPanel = ({
   );
 };
 
-const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
-  const [wordSpellConfig, setWordSpellConfig] =
-    useState<WordSpellConfig>(DEFAULT_WORD_SPELL_CONFIG);
-  const [numberMatchConfig, setNumberMatchConfig] =
-    useState<NumberMatchConfig>(makeDefaultNumberMatchConfig);
-  const [sortNumbersConfig, setSortNumbersConfig] =
-    useState<SortNumbersConfig>(makeDefaultSortNumbersConfig);
+const WordSpellGameBody = ({
+  gameId,
+  gameSpecificConfig,
+}: {
+  gameId: string;
+  gameSpecificConfig: Record<string, unknown> | null;
+}): JSX.Element => {
+  const initial = useMemo(
+    () => resolveWordSpellConfig(gameSpecificConfig),
+    [gameSpecificConfig],
+  );
+  const [cfg, setCfg] = useState(initial);
+  useEffect(() => {
+    setCfg(initial);
+  }, [initial]);
+  usePersistLastGameConfig(
+    gameId,
+    cfg as unknown as Record<string, unknown>,
+  );
+  return (
+    <>
+      <WordSpellConfigPanel config={cfg} onChange={setCfg} />
+      <WordSpell key={cfg.inputMethod} config={cfg} />
+    </>
+  );
+};
 
+const NumberMatchGameBody = ({
+  gameId,
+  gameSpecificConfig,
+}: {
+  gameId: string;
+  gameSpecificConfig: Record<string, unknown> | null;
+}): JSX.Element => {
+  const initial = useMemo(
+    () => resolveNumberMatchConfig(gameSpecificConfig),
+    [gameSpecificConfig],
+  );
+  const [cfg, setCfg] = useState(initial);
+  useEffect(() => {
+    setCfg(initial);
+  }, [initial]);
+  usePersistLastGameConfig(
+    gameId,
+    cfg as unknown as Record<string, unknown>,
+  );
+  return (
+    <>
+      <NumberMatchConfigPanel config={cfg} onChange={setCfg} />
+      <NumberMatch key={cfg.inputMethod} config={cfg} />
+    </>
+  );
+};
+
+const SortNumbersGameBody = ({
+  gameId,
+  gameSpecificConfig,
+}: {
+  gameId: string;
+  gameSpecificConfig: Record<string, unknown> | null;
+}): JSX.Element => {
+  const initial = useMemo(
+    () => resolveSortNumbersConfig(gameSpecificConfig),
+    [gameSpecificConfig],
+  );
+  const [cfg, setCfg] = useState(initial);
+  useEffect(() => {
+    setCfg(initial);
+  }, [initial]);
+  usePersistLastGameConfig(
+    gameId,
+    cfg as unknown as Record<string, unknown>,
+  );
+  return (
+    <>
+      <SortNumbersConfigPanel config={cfg} onChange={setCfg} />
+      <SortNumbers key={cfg.inputMethod} config={cfg} />
+    </>
+  );
+};
+
+const GameBody = ({
+  gameId,
+  gameSpecificConfig,
+}: {
+  gameId: string;
+  gameSpecificConfig: Record<string, unknown> | null;
+}): JSX.Element => {
   if (gameId === 'sort-numbers') {
     return (
-      <>
-        {import.meta.env.DEV && (
-          <SortNumbersConfigPanel
-            config={sortNumbersConfig}
-            onChange={setSortNumbersConfig}
-          />
-        )}
-        <SortNumbers
-          key={sortNumbersConfig.inputMethod}
-          config={sortNumbersConfig}
-        />
-      </>
+      <SortNumbersGameBody
+        gameId={gameId}
+        gameSpecificConfig={gameSpecificConfig}
+      />
     );
   }
 
   if (gameId === 'word-spell') {
     return (
-      <>
-        {import.meta.env.DEV && (
-          <WordSpellConfigPanel
-            config={wordSpellConfig}
-            onChange={setWordSpellConfig}
-          />
-        )}
-        <WordSpell
-          key={wordSpellConfig.inputMethod}
-          config={wordSpellConfig}
-        />
-      </>
+      <WordSpellGameBody
+        gameId={gameId}
+        gameSpecificConfig={gameSpecificConfig}
+      />
     );
   }
+
   if (gameId === 'number-match') {
     return (
-      <>
-        {import.meta.env.DEV && (
-          <NumberMatchConfigPanel
-            config={numberMatchConfig}
-            onChange={setNumberMatchConfig}
-          />
-        )}
-        <NumberMatch
-          key={numberMatchConfig.inputMethod}
-          config={numberMatchConfig}
-        />
-      </>
+      <NumberMatchGameBody
+        gameId={gameId}
+        gameSpecificConfig={gameSpecificConfig}
+      />
     );
   }
+
   return (
     <div className="flex h-full items-center justify-center text-muted-foreground">
       <p>Game not found</p>
@@ -511,12 +910,12 @@ const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
   );
 };
 
-// Exported for direct testing — accepts loader data as props
 export const GameRoute = ({
   config,
   initialLog,
   sessionId,
   meta,
+  gameSpecificConfig,
 }: GameRouteLoaderData): JSX.Element => (
   <GameShell
     config={config}
@@ -526,20 +925,27 @@ export const GameRoute = ({
     meta={meta}
     initialLog={initialLog ?? undefined}
   >
-    <GameBody gameId={config.gameId} />
+    <GameBody
+      gameId={config.gameId}
+      gameSpecificConfig={gameSpecificConfig}
+    />
   </GameShell>
 );
 
-// Thin route component wrapper that reads from loader
 const RouteComponent = (): JSX.Element => {
   const data = Route.useLoaderData();
   return <GameRoute {...data} />;
 };
 
 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-  loader: async ({ params }): Promise<GameRouteLoaderData> => {
+  validateSearch: (search: Record<string, unknown>) => ({
+    configId:
+      typeof search.configId === 'string' ? search.configId : undefined,
+  }),
+  loaderDeps: ({ search }) => ({ configId: search.configId }),
+  loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
     const { gameId } = params;
-    const profileId = 'default'; // M5: pull from profile context
+    const profileId = 'default';
 
     const db = await getOrCreateDatabase();
     const defaultConfig = makeDefaultConfig(gameId);
@@ -556,6 +962,19 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
       gameId,
       db,
     );
+
+    let gameSpecificConfig: Record<string, unknown> | null = null;
+    if (deps.configId) {
+      const savedDoc = await db.saved_game_configs
+        .findOne(deps.configId)
+        .exec();
+      if (savedDoc) gameSpecificConfig = savedDoc.config;
+    } else {
+      const lastDoc = await db.saved_game_configs
+        .findOne(lastSessionSavedConfigId(gameId))
+        .exec();
+      if (lastDoc) gameSpecificConfig = lastDoc.config;
+    }
 
     const sessionId = initialLog?.sessionId ?? nanoid();
     const seed = initialLog?.seed ?? nanoid();
@@ -583,7 +1002,7 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
       initialState,
     };
 
-    return { config, initialLog, sessionId, meta };
+    return { config, initialLog, sessionId, meta, gameSpecificConfig };
   },
   component: RouteComponent,
 });

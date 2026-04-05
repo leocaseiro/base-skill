@@ -9,8 +9,12 @@ import type { GameLevel, GameSubject } from '@/games/registry';
 import type { ValidatorAdapter } from '@tanstack/react-router';
 import { GameGrid } from '@/components/GameGrid';
 import { LevelRow } from '@/components/LevelRow';
-import { useBookmarks } from '@/db/hooks/useBookmarks';
-import { filterCatalog, paginateCatalog } from '@/games/catalog-utils';
+import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
+import {
+  filterCatalog,
+  paginateCatalog,
+  sortByHasSavedConfigs,
+} from '@/games/catalog-utils';
 import { GAME_CATALOG } from '@/games/registry';
 
 type CatalogSearchInput = {
@@ -57,17 +61,17 @@ const HomeScreen = () => {
   const { level, subject, search, page } = Route.useSearch();
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate({ from: '/$locale/' });
-  const { bookmarkedIds, toggle } = useBookmarks();
+  const { savedConfigs, gameIdsWithConfigs, save, remove } =
+    useSavedConfigs();
 
-  const filtered = useMemo(
-    () =>
-      filterCatalog(GAME_CATALOG, {
-        search,
-        level: level as GameLevel | '',
-        subject: subject as GameSubject | '',
-      }),
-    [search, level, subject],
-  );
+  const filtered = useMemo(() => {
+    const result = filterCatalog(GAME_CATALOG, {
+      search,
+      level: level as GameLevel | '',
+      subject: subject as GameSubject | '',
+    });
+    return sortByHasSavedConfigs(result, gameIdsWithConfigs);
+  }, [search, level, subject, gameIdsWithConfigs]);
 
   const {
     items,
@@ -95,7 +99,23 @@ const HomeScreen = () => {
     void navigate({
       to: '/$locale/game/$gameId',
       params: { locale, gameId },
+      search: { configId: undefined },
     });
+  };
+
+  const handlePlayWithConfig = (gameId: string, configId: string) => {
+    void navigate({
+      to: '/$locale/game/$gameId',
+      params: { locale, gameId },
+      search: { configId },
+    });
+  };
+
+  const handleSaveConfig = async (
+    gameId: string,
+    name: string,
+  ): Promise<void> => {
+    await save({ gameId, name, config: {} });
   };
 
   return (
@@ -108,9 +128,11 @@ const HomeScreen = () => {
       <div className="mt-4">
         <GameGrid
           entries={items}
-          bookmarkedIds={bookmarkedIds}
-          onBookmarkToggle={toggle}
+          savedConfigs={savedConfigs}
+          onSaveConfig={handleSaveConfig}
+          onRemoveConfig={remove}
           onPlay={handlePlay}
+          onPlayWithConfig={handlePlayWithConfig}
           page={safePage}
           totalPages={totalPages}
           onPageChange={(p) => updateSearch({ page: p })}

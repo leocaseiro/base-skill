@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { filterCatalog, paginateCatalog } from './catalog-utils';
+import {
+  filterCatalog,
+  paginateCatalog,
+  sortByHasSavedConfigs,
+} from './catalog-utils';
 import { GAME_CATALOG } from './registry';
 
 describe('filterCatalog', () => {
@@ -94,5 +98,57 @@ describe('paginateCatalog', () => {
     expect(result.items).toHaveLength(0);
     expect(result.totalPages).toBe(1);
     expect(result.page).toBe(1);
+  });
+});
+
+describe('sortByHasSavedConfigs', () => {
+  const entries = [
+    {
+      id: 'alpha',
+      titleKey: 'alpha',
+      levels: ['K' as const],
+      subject: 'math' as const,
+    },
+    {
+      id: 'beta',
+      titleKey: 'beta',
+      levels: ['K' as const],
+      subject: 'math' as const,
+    },
+    {
+      id: 'gamma',
+      titleKey: 'gamma',
+      levels: ['K' as const],
+      subject: 'math' as const,
+    },
+  ];
+
+  it('moves entries with saved configs to the front', () => {
+    const result = sortByHasSavedConfigs(entries, new Set(['gamma']));
+    expect(result.map((e) => e.id)).toEqual(['gamma', 'alpha', 'beta']);
+  });
+
+  it('preserves original order within each group', () => {
+    const result = sortByHasSavedConfigs(entries, new Set(['beta']));
+    expect(result.map((e) => e.id)).toEqual(['beta', 'alpha', 'gamma']);
+  });
+
+  it('preserves original order among multiple entries with configs', () => {
+    const result = sortByHasSavedConfigs(
+      entries,
+      new Set(['gamma', 'alpha']),
+    );
+    expect(result.map((e) => e.id)).toEqual(['alpha', 'gamma', 'beta']);
+  });
+
+  it('returns original order when no gameIds have configs', () => {
+    const result = sortByHasSavedConfigs(entries, new Set());
+    expect(result.map((e) => e.id)).toEqual(['alpha', 'beta', 'gamma']);
+  });
+
+  it('does not mutate the input array', () => {
+    const copy = [...entries];
+    sortByHasSavedConfigs(entries, new Set(['beta']));
+    expect(entries).toEqual(copy);
   });
 });
