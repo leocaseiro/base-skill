@@ -33,6 +33,16 @@ export const numberMatchConfigFields: ConfigField[] = [
   },
   {
     type: 'select',
+    key: 'wrongTileBehavior',
+    label: 'Wrong tile behaviour',
+    options: [
+      { value: 'reject', label: 'reject' },
+      { value: 'lock-manual', label: 'lock-manual' },
+      { value: 'lock-auto-eject', label: 'lock-auto-eject' },
+    ],
+  },
+  {
+    type: 'select',
     key: 'mode',
     label: 'Mode',
     options: [
@@ -53,6 +63,22 @@ export const numberMatchConfigFields: ConfigField[] = [
     ],
   },
   {
+    type: 'select',
+    key: 'tileBankMode',
+    label: 'Tile bank mode',
+    options: [
+      { value: 'exact', label: 'exact' },
+      { value: 'distractors', label: 'distractors' },
+    ],
+  },
+  {
+    type: 'number',
+    key: 'distractorCount',
+    label: 'Distractor count',
+    min: 1,
+    max: 10,
+  },
+  {
     type: 'number',
     key: 'totalRounds',
     label: 'Total rounds',
@@ -60,5 +86,21 @@ export const numberMatchConfigFields: ConfigField[] = [
     max: 50,
   },
   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
+  {
+    type: 'nested-number',
+    key: 'range',
+    subKey: 'min',
+    label: 'Range min',
+    min: 1,
+    max: 100,
+  },
+  {
+    type: 'nested-number',
+    key: 'range',
+    subKey: 'max',
+    label: 'Range max',
+    min: 1,
+    max: 100,
+  },
   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
 ];

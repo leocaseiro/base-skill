@@ -40,6 +40,37 @@ export const ConfigFormFields = ({
         );
       }
 
+      if (field.type === 'nested-number') {
+        const nested = config[field.key] as
+          | Record<string, unknown>
+          | undefined;
+        return (
+          <label
+            key={`${field.key}.${field.subKey}`}
+            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+          >
+            {field.label}
+            <input
+              type="number"
+              aria-label={field.label}
+              value={Number(nested?.[field.subKey] ?? field.min)}
+              min={field.min}
+              max={field.max}
+              onChange={(e) =>
+                onChange({
+                  ...config,
+                  [field.key]: {
+                    ...nested,
+                    [field.subKey]: Number(e.target.value),
+                  },
+                })
+              }
+              className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+            />
+          </label>
+        );
+      }
+
       if (field.type === 'number') {
         return (
           <label

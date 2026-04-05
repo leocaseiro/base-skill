@@ -13,4 +13,13 @@ export type ConfigField =
       min: number;
       max: number;
     }
+  | {
+      /** A number field that reads/writes from a nested object: config[key][subKey] */
+      type: 'nested-number';
+      key: string;
+      subKey: string;
+      label: string;
+      min: number;
+      max: number;
+    }
   | { type: 'checkbox'; key: string; label: string };

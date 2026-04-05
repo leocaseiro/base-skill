@@ -38,6 +38,32 @@ export const wordSpellConfigFields: ConfigField[] = [
   },
   {
     type: 'select',
+    key: 'wrongTileBehavior',
+    label: 'Wrong tile behaviour',
+    options: [
+      { value: 'reject', label: 'reject' },
+      { value: 'lock-manual', label: 'lock-manual' },
+      { value: 'lock-auto-eject', label: 'lock-auto-eject' },
+    ],
+  },
+  {
+    type: 'select',
+    key: 'tileBankMode',
+    label: 'Tile bank mode',
+    options: [
+      { value: 'exact', label: 'exact' },
+      { value: 'distractors', label: 'distractors' },
+    ],
+  },
+  {
+    type: 'number',
+    key: 'totalRounds',
+    label: 'Total rounds',
+    min: 1,
+    max: 8,
+  },
+  {
+    type: 'select',
     key: 'mode',
     label: 'Mode',
     options: [
@@ -56,13 +82,6 @@ export const wordSpellConfigFields: ConfigField[] = [
       { value: 'syllable', label: 'syllable' },
       { value: 'word', label: 'word' },
     ],
-  },
-  {
-    type: 'number',
-    key: 'totalRounds',
-    label: 'Total rounds',
-    min: 1,
-    max: 8,
   },
   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
