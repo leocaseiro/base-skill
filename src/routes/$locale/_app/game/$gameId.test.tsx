@@ -95,6 +95,7 @@ describe('GameRoute', () => {
         initialLog={null}
         sessionId="sess-route-001"
         meta={testMeta}
+        gameSpecificConfig={null}
       />,
       { wrapper },
     );
@@ -110,6 +111,7 @@ describe('GameRoute', () => {
         initialLog={null}
         sessionId="sess-route-001"
         meta={testMeta}
+        gameSpecificConfig={null}
       />,
       { wrapper },
     );

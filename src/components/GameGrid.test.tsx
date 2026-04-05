@@ -24,9 +24,11 @@ describe('GameGrid', () => {
     render(
       <GameGrid
         entries={entries}
-        bookmarkedIds={new Set()}
-        onBookmarkToggle={vi.fn()}
+        savedConfigs={[]}
+        onSaveConfig={vi.fn()}
+        onRemoveConfig={vi.fn()}
         onPlay={vi.fn()}
+        onPlayWithConfig={vi.fn()}
         page={1}
         totalPages={1}
         onPageChange={vi.fn()}
@@ -34,7 +36,7 @@ describe('GameGrid', () => {
       { wrapper },
     );
     expect(
-      screen.getAllByRole('button', { name: /play/i }),
+      screen.getAllByRole('button', { name: /^play$/i }),
     ).toHaveLength(3);
   });
 
@@ -42,9 +44,11 @@ describe('GameGrid', () => {
     render(
       <GameGrid
         entries={makeEntries(1)}
-        bookmarkedIds={new Set()}
-        onBookmarkToggle={vi.fn()}
+        savedConfigs={[]}
+        onSaveConfig={vi.fn()}
+        onRemoveConfig={vi.fn()}
         onPlay={vi.fn()}
+        onPlayWithConfig={vi.fn()}
         page={2}
         totalPages={3}
         onPageChange={vi.fn()}
@@ -64,9 +68,11 @@ describe('GameGrid', () => {
     render(
       <GameGrid
         entries={makeEntries(1)}
-        bookmarkedIds={new Set()}
-        onBookmarkToggle={vi.fn()}
+        savedConfigs={[]}
+        onSaveConfig={vi.fn()}
+        onRemoveConfig={vi.fn()}
         onPlay={vi.fn()}
+        onPlayWithConfig={vi.fn()}
         page={2}
         totalPages={3}
         onPageChange={onPageChange}
@@ -83,9 +89,11 @@ describe('GameGrid', () => {
     render(
       <GameGrid
         entries={makeEntries(1)}
-        bookmarkedIds={new Set()}
-        onBookmarkToggle={vi.fn()}
+        savedConfigs={[]}
+        onSaveConfig={vi.fn()}
+        onRemoveConfig={vi.fn()}
         onPlay={vi.fn()}
+        onPlayWithConfig={vi.fn()}
         page={1}
         totalPages={1}
         onPageChange={vi.fn()}
@@ -104,9 +112,11 @@ describe('GameGrid', () => {
     render(
       <GameGrid
         entries={[]}
-        bookmarkedIds={new Set()}
-        onBookmarkToggle={vi.fn()}
+        savedConfigs={[]}
+        onSaveConfig={vi.fn()}
+        onRemoveConfig={vi.fn()}
         onPlay={vi.fn()}
+        onPlayWithConfig={vi.fn()}
         page={1}
         totalPages={1}
         onPageChange={vi.fn()}
