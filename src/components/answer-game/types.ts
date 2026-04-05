@@ -15,6 +15,11 @@ export interface AnswerGameConfig {
   roundsInOrder?: boolean;
   /** Whether TTS is enabled for this profile */
   ttsEnabled: boolean;
+  /**
+   * Controls the OS keyboard type shown on touch devices in type/both mode.
+   * @default 'text'
+   */
+  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
   /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
   initialTiles?: TileItem[];
   initialZones?: AnswerZone[];
