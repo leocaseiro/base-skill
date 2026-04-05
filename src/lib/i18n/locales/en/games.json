@@ -22,7 +22,8 @@
     "word-spell": "Drag the letters into the boxes to spell the word. Tap the picture or the speaker to hear the word.",
     "number-match": "Drag the tiles to match each number. Tap the number to hear it.",
     "sort-numbers": "Put the numbers in order! Drag each number to the right place.",
-    "lets-go": "Let's go!"
+    "lets-go": "Let's go!",
+    "settings": "⚙️ Settings"
   },
   "sort-numbers-ui": {
     "ascending-label": "Smallest → Biggest",
