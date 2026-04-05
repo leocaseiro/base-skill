@@ -25,7 +25,7 @@ describe('createTestDatabase', () => {
       'progress',
       'settings',
       'game_config_overrides',
-      'bookmarks',
+      'saved_game_configs',
       'themes',
       'session_history',
       'session_history_index',
