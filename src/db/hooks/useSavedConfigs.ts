@@ -1,11 +1,14 @@
 import { nanoid } from 'nanoid';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { EMPTY } from 'rxjs';
 import { useRxDB } from './useRxDB';
 import { useRxQuery } from './useRxQuery';
 import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
-
-const ANONYMOUS_PROFILE_ID = 'anonymous';
+import {
+  ANONYMOUS_PROFILE_ID,
+  isLastSessionSavedConfigId,
+  lastSessionSavedConfigId,
+} from '@/db/last-session-game-config';
 
 type SaveInput = {
   gameId: string;
@@ -20,6 +23,11 @@ type UseSavedConfigsResult = {
   save: (input: SaveInput) => Promise<void>;
   remove: (id: string) => Promise<void>;
   rename: (id: string, newName: string) => Promise<void>;
+  /** Upserts IndexedDB doc for “resume last settings” (not shown as a named chip) */
+  persistLastSessionConfig: (
+    gameId: string,
+    config: Record<string, unknown>,
+  ) => Promise<void>;
 };
 
 export const useSavedConfigs = (): UseSavedConfigsResult => {
@@ -38,13 +46,18 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
 
   const docs = useRxQuery<SavedGameConfigDoc[]>(query$, []);
 
-  const gameIdsWithConfigs = useMemo(
-    () => new Set(docs.map((d) => d.gameId)),
+  const savedConfigs = useMemo(
+    () => docs.filter((d) => !isLastSessionSavedConfigId(d.id)),
     [docs],
   );
 
+  const gameIdsWithConfigs = useMemo(
+    () => new Set(savedConfigs.map((d) => d.gameId)),
+    [savedConfigs],
+  );
+
   const getByGameId = (gameId: string): SavedGameConfigDoc[] =>
-    docs.filter((d) => d.gameId === gameId);
+    savedConfigs.filter((d) => d.gameId === gameId);
 
   const save = async ({
     gameId,
@@ -53,7 +66,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
   }: SaveInput): Promise<void> => {
     if (!db) return;
     const trimmed = name.trim();
-    const namesForGame = docs
+    const namesForGame = savedConfigs
       .filter((d) => d.gameId === gameId)
       .map((d) => d.name);
     if (namesForGame.includes(trimmed)) {
@@ -83,7 +96,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
     const doc = await db.saved_game_configs.findOne(id).exec();
     if (!doc) return;
     const trimmed = newName.trim();
-    const namesForGame = docs
+    const namesForGame = savedConfigs
       .filter((d) => d.gameId === doc.gameId && d.id !== id)
       .map((d) => d.name);
     if (namesForGame.includes(trimmed)) {
@@ -94,12 +107,33 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
     await doc.incrementalPatch({ name: trimmed });
   };
 
+  const persistLastSessionConfig = useCallback(
+    async (gameId: string, config: Record<string, unknown>) => {
+      if (!db) return;
+      const id = lastSessionSavedConfigId(gameId);
+      const now = new Date().toISOString();
+      const existing = await db.saved_game_configs.findOne(id).exec();
+      await (existing
+        ? existing.incrementalPatch({ config, createdAt: now })
+        : db.saved_game_configs.insert({
+            id,
+            profileId: ANONYMOUS_PROFILE_ID,
+            gameId,
+            name: '__last_session__',
+            config,
+            createdAt: now,
+          }));
+    },
+    [db],
+  );
+
   return {
-    savedConfigs: docs,
+    savedConfigs,
     gameIdsWithConfigs,
     getByGameId,
     save,
     remove,
     rename,
+    persistLastSessionConfig,
   };
 };

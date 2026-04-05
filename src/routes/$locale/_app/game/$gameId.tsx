@@ -20,6 +20,8 @@ import type {
 import type { JSX } from 'react';
 import { GameShell } from '@/components/game/GameShell';
 import { getOrCreateDatabase } from '@/db/create-database';
+import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
+import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
@@ -787,8 +789,10 @@ const NumberMatchConfigPanel = ({
 };
 
 const WordSpellGameBody = ({
+  gameId,
   gameSpecificConfig,
 }: {
+  gameId: string;
   gameSpecificConfig: Record<string, unknown> | null;
 }): JSX.Element => {
   const initial = useMemo(
@@ -799,6 +803,10 @@ const WordSpellGameBody = ({
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
+  usePersistLastGameConfig(
+    gameId,
+    cfg as unknown as Record<string, unknown>,
+  );
   return (
     <>
       <WordSpellConfigPanel config={cfg} onChange={setCfg} />
@@ -808,8 +816,10 @@ const WordSpellGameBody = ({
 };
 
 const NumberMatchGameBody = ({
+  gameId,
   gameSpecificConfig,
 }: {
+  gameId: string;
   gameSpecificConfig: Record<string, unknown> | null;
 }): JSX.Element => {
   const initial = useMemo(
@@ -820,6 +830,10 @@ const NumberMatchGameBody = ({
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
+  usePersistLastGameConfig(
+    gameId,
+    cfg as unknown as Record<string, unknown>,
+  );
   return (
     <>
       <NumberMatchConfigPanel config={cfg} onChange={setCfg} />
@@ -829,8 +843,10 @@ const NumberMatchGameBody = ({
 };
 
 const SortNumbersGameBody = ({
+  gameId,
   gameSpecificConfig,
 }: {
+  gameId: string;
   gameSpecificConfig: Record<string, unknown> | null;
 }): JSX.Element => {
   const initial = useMemo(
@@ -841,6 +857,10 @@ const SortNumbersGameBody = ({
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
+  usePersistLastGameConfig(
+    gameId,
+    cfg as unknown as Record<string, unknown>,
+  );
   return (
     <>
       <SortNumbersConfigPanel config={cfg} onChange={setCfg} />
@@ -858,19 +878,28 @@ const GameBody = ({
 }): JSX.Element => {
   if (gameId === 'sort-numbers') {
     return (
-      <SortNumbersGameBody gameSpecificConfig={gameSpecificConfig} />
+      <SortNumbersGameBody
+        gameId={gameId}
+        gameSpecificConfig={gameSpecificConfig}
+      />
     );
   }
 
   if (gameId === 'word-spell') {
     return (
-      <WordSpellGameBody gameSpecificConfig={gameSpecificConfig} />
+      <WordSpellGameBody
+        gameId={gameId}
+        gameSpecificConfig={gameSpecificConfig}
+      />
     );
   }
 
   if (gameId === 'number-match') {
     return (
-      <NumberMatchGameBody gameSpecificConfig={gameSpecificConfig} />
+      <NumberMatchGameBody
+        gameId={gameId}
+        gameSpecificConfig={gameSpecificConfig}
+      />
     );
   }
 
@@ -940,6 +969,11 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
         .findOne(deps.configId)
         .exec();
       if (savedDoc) gameSpecificConfig = savedDoc.config;
+    } else {
+      const lastDoc = await db.saved_game_configs
+        .findOne(lastSessionSavedConfigId(gameId))
+        .exec();
+      if (lastDoc) gameSpecificConfig = lastDoc.config;
     }
 
     const sessionId = initialLog?.sessionId ?? nanoid();
