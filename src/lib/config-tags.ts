@@ -11,8 +11,9 @@ const KEY_FORMATTERS: [string, Formatter][] = [
 ];
 
 export const configToTags = (
-  config: Record<string, unknown>,
+  config: Record<string, unknown> | undefined,
 ): string[] => {
+  if (!config) return [];
   const tags: string[] = [];
   for (const [key, format] of KEY_FORMATTERS) {
     if (key in config) {
