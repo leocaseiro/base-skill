@@ -223,6 +223,7 @@ export const WordSpell = ({ config }: WordSpellProps) => {
       totalRounds: config.rounds.length,
       roundsInOrder: config.roundsInOrder,
       ttsEnabled: config.ttsEnabled,
+      touchKeyboardInputMode: 'text',
       initialTiles: tiles,
       initialZones: zones,
     }),
