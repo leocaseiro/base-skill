@@ -1,5 +1,6 @@
 // src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 import type { ConfigField } from '@/lib/config-fields';
@@ -7,6 +8,7 @@ import { ConfigFormFields } from '@/components/ConfigFormFields';
 import { GameNameChip } from '@/components/GameNameChip';
 import {
   BOOKMARK_COLORS,
+  BOOKMARK_COLOR_KEYS,
   DEFAULT_BOOKMARK_COLOR,
 } from '@/lib/bookmark-colors';
 import { configToTags } from '@/lib/config-tags';
@@ -50,6 +52,8 @@ export const InstructionsOverlay = ({
   const { t } = useTranslation('games');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [newBookmarkName, setNewBookmarkName] = useState('');
+  const [newBookmarkColor, setNewBookmarkColor] =
+    useState<BookmarkColorKey>(DEFAULT_BOOKMARK_COLOR);
 
   useEffect(() => {
     if (ttsEnabled) speak(text);
@@ -62,7 +66,7 @@ export const InstructionsOverlay = ({
   const settingsColors = BOOKMARK_COLORS[bookmarkColor];
   const tags = configToTags(config);
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-label="Game instructions"
@@ -193,10 +197,44 @@ export const InstructionsOverlay = ({
                     </button>
                   </>
                 ) : (
-                  <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
-                    {t('common:saveConfig.saveBookmarkLabel', {
-                      defaultValue: 'Save as bookmark',
-                    })}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-semibold text-foreground">
+                      {t('common:saveConfig.saveBookmarkLabel', {
+                        defaultValue: 'Save as bookmark',
+                      })}
+                    </span>
+                    <div
+                      className="grid gap-1"
+                      style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
+                      role="group"
+                      aria-label="Bookmark color"
+                    >
+                      {BOOKMARK_COLOR_KEYS.map((key) => (
+                        <button
+                          key={key}
+                          type="button"
+                          aria-label={key}
+                          aria-pressed={newBookmarkColor === key}
+                          onClick={() => setNewBookmarkColor(key)}
+                          className="h-8 w-8 rounded-full border-2 transition-transform hover:scale-110"
+                          style={{
+                            background: BOOKMARK_COLORS[key].playBg,
+                            borderColor:
+                              newBookmarkColor === key
+                                ? BOOKMARK_COLORS[key].playBg
+                                : 'transparent',
+                            outline:
+                              newBookmarkColor === key
+                                ? '3px solid white'
+                                : undefined,
+                            outlineOffset:
+                              newBookmarkColor === key
+                                ? '-4px'
+                                : undefined,
+                          }}
+                        />
+                      ))}
+                    </div>
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -214,7 +252,7 @@ export const InstructionsOverlay = ({
                           if (newBookmarkName.trim()) {
                             void onSaveBookmark(
                               newBookmarkName.trim(),
-                              DEFAULT_BOOKMARK_COLOR,
+                              newBookmarkColor,
                             );
                             setNewBookmarkName('');
                           }
@@ -224,13 +262,14 @@ export const InstructionsOverlay = ({
                         🔖
                       </button>
                     </div>
-                  </label>
+                  </div>
                 )}
               </div>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
