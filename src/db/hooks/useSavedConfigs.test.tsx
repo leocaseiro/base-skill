@@ -290,4 +290,85 @@ describe('useSavedConfigs', () => {
       false,
     );
   });
+
+  it('save() stores the provided color on the doc', async () => {
+    const { result } = renderHook(() => useSavedConfigsReady(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    await act(async () => {
+      await result.current.save({
+        gameId: 'word-spell',
+        name: 'Teal Mode',
+        config: {},
+        color: 'teal',
+      });
+    });
+    await waitFor(() =>
+      expect(result.current.savedConfigs).toHaveLength(1),
+    );
+    expect(result.current.savedConfigs[0]!.color).toBe('teal');
+  });
+
+  it('updateConfig() patches config and optionally renames', async () => {
+    const { result } = renderHook(() => useSavedConfigsReady(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    await act(async () => {
+      await result.current.save({
+        gameId: 'word-spell',
+        name: 'Easy Mode',
+        config: { totalRounds: 5 },
+        color: 'indigo',
+      });
+    });
+    await waitFor(() =>
+      expect(result.current.savedConfigs).toHaveLength(1),
+    );
+    const id = result.current.savedConfigs[0]!.id;
+    await act(async () => {
+      await result.current.updateConfig(
+        id,
+        { totalRounds: 8 },
+        'Easy Mode v2',
+      );
+    });
+    await waitFor(() =>
+      expect(result.current.savedConfigs[0]?.name).toBe('Easy Mode v2'),
+    );
+    expect(result.current.savedConfigs[0]?.config).toEqual({
+      totalRounds: 8,
+    });
+  });
+
+  it('updateConfig() throws when new name already exists for same gameId', async () => {
+    const { result } = renderHook(() => useSavedConfigsReady(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    await act(async () => {
+      await result.current.save({
+        gameId: 'word-spell',
+        name: 'A',
+        config: {},
+        color: 'indigo',
+      });
+      await result.current.save({
+        gameId: 'word-spell',
+        name: 'B',
+        config: {},
+        color: 'teal',
+      });
+    });
+    await waitFor(() =>
+      expect(result.current.savedConfigs).toHaveLength(2),
+    );
+    const idA = result.current.savedConfigs[0]!.id;
+    await expect(
+      act(async () => {
+        await result.current.updateConfig(idA, {}, 'B');
+      }),
+    ).rejects.toThrow('already exists');
+  });
 });

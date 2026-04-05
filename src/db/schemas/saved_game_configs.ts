@@ -7,11 +7,12 @@ export type SavedGameConfigDoc = {
   name: string;
   config: Record<string, unknown>;
   createdAt: string;
+  color: string;
 };
 
 export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
   {
-    version: 0,
+    version: 1,
     primaryKey: 'id',
     type: 'object',
     properties: {
@@ -21,6 +22,7 @@ export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
       name: { type: 'string', maxLength: 128 },
       config: { type: 'object' },
       createdAt: { type: 'string', format: 'date-time' },
+      color: { type: 'string', maxLength: 32 },
     },
     required: [
       'id',
@@ -29,6 +31,7 @@ export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
       'name',
       'config',
       'createdAt',
+      'color',
     ],
     additionalProperties: false,
   };
