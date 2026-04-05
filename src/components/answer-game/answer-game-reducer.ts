@@ -94,22 +94,23 @@ export function answerGameReducer(
         };
       }
 
-      const lockManual =
-        state.config.wrongTileBehavior === 'lock-manual';
+      const shouldLock =
+        state.config.wrongTileBehavior === 'lock-manual' ||
+        state.config.wrongTileBehavior === 'lock-auto-eject';
       const newZone: AnswerZone = {
         ...zone,
-        placedTileId: lockManual ? action.tileId : zone.placedTileId,
+        placedTileId: shouldLock ? action.tileId : zone.placedTileId,
         isWrong: true,
         isLocked: true,
       };
       const newZones = state.zones.map((z, i) =>
         i === action.zoneIndex ? newZone : z,
       );
-      let newBankTileIds = lockManual
+      let newBankTileIds = shouldLock
         ? state.bankTileIds.filter((id) => id !== action.tileId)
         : state.bankTileIds;
       if (
-        lockManual &&
+        shouldLock &&
         zone.placedTileId &&
         zone.placedTileId !== action.tileId
       ) {

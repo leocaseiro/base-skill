@@ -83,7 +83,7 @@ describe('answerGameReducer', () => {
     expect(next.retryCount).toBe(0);
   });
 
-  it('PLACE_TILE wrong: tile stays in bank, zone marked wrong, retryCount incremented', () => {
+  it('PLACE_TILE wrong (lock-auto-eject): tile placed in slot, removed from bank, zone marked wrong', () => {
     const state = answerGameReducer(makeInitialState(config), {
       type: 'INIT_ROUND',
       tiles,
@@ -94,7 +94,8 @@ describe('answerGameReducer', () => {
       tileId: 't2',
       zoneIndex: 0,
     });
-    expect(next.bankTileIds).toContain('t2');
+    expect(next.zones[0]!.placedTileId).toBe('t2');
+    expect(next.bankTileIds).not.toContain('t2');
     expect(next.zones[0]!.isWrong).toBe(true);
     expect(next.zones[0]!.isLocked).toBe(true);
     expect(next.retryCount).toBe(1);
@@ -228,7 +229,10 @@ describe('answerGameReducer', () => {
       tileId: 't2',
       zoneIndex: 0,
     });
+    // tile is visible in the slot while wrong (content displayed in red)
+    expect(state.zones[0]!.placedTileId).toBe('t2');
     expect(state.zones[0]!.isWrong).toBe(true);
+    expect(state.bankTileIds).not.toContain('t2');
     state = answerGameReducer(state, {
       type: 'EJECT_TILE',
       zoneIndex: 0,
