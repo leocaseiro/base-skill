@@ -1,7 +1,10 @@
 {
   "word-spell": "Word Spell",
+  "word-spell-description": "Drag letter tiles to spell the word shown in the picture.",
   "number-match": "Number Match",
+  "number-match-description": "Match numerals to groups by dragging tiles to the right place.",
   "sort-numbers": "Sort Numbers",
+  "sort-numbers-description": "Put the numbers in order from smallest to biggest — or biggest to smallest.",
   "shell": {
     "round": "Round {{current}} / {{total}}",
     "undo": "Undo",
@@ -19,7 +22,8 @@
     "word-spell": "Drag the letters into the boxes to spell the word. Tap the picture or the speaker to hear the word.",
     "number-match": "Drag the tiles to match each number. Tap the number to hear it.",
     "sort-numbers": "Put the numbers in order! Drag each number to the right place.",
-    "lets-go": "Let's go!"
+    "lets-go": "Let's go!",
+    "settings": "⚙️ Settings"
   },
   "sort-numbers-ui": {
     "ascending-label": "Smallest → Biggest",

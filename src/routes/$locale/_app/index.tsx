@@ -6,10 +6,13 @@ import {
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { GameLevel, GameSubject } from '@/games/registry';
+import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 import type { ValidatorAdapter } from '@tanstack/react-router';
 import { GameGrid } from '@/components/GameGrid';
 import { LevelRow } from '@/components/LevelRow';
+import { getOrCreateDatabase } from '@/db/create-database';
 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
+import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
 import {
   filterCatalog,
   paginateCatalog,
@@ -61,8 +64,13 @@ const HomeScreen = () => {
   const { level, subject, search, page } = Route.useSearch();
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate({ from: '/$locale/' });
-  const { savedConfigs, gameIdsWithConfigs, save, remove } =
-    useSavedConfigs();
+  const {
+    savedConfigs,
+    gameIdsWithConfigs,
+    save,
+    remove,
+    updateConfig,
+  } = useSavedConfigs();
 
   const filtered = useMemo(() => {
     const result = filterCatalog(GAME_CATALOG, {
@@ -114,8 +122,27 @@ const HomeScreen = () => {
   const handleSaveConfig = async (
     gameId: string,
     name: string,
+    color: string,
   ): Promise<void> => {
-    await save({ gameId, name, config: {} });
+    const db = await getOrCreateDatabase();
+    const lastDoc = await db.saved_game_configs
+      .findOne(lastSessionSavedConfigId(gameId))
+      .exec();
+    const lastConfig = lastDoc?.config ?? {};
+    await save({
+      gameId,
+      name,
+      config: lastConfig,
+      color: color as BookmarkColorKey,
+    });
+  };
+
+  const handleUpdateConfig = async (
+    configId: string,
+    config: Record<string, unknown>,
+    name: string,
+  ): Promise<void> => {
+    await updateConfig(configId, config, name);
   };
 
   return (
@@ -131,6 +158,7 @@ const HomeScreen = () => {
           savedConfigs={savedConfigs}
           onSaveConfig={handleSaveConfig}
           onRemoveConfig={remove}
+          onUpdateConfig={handleUpdateConfig}
           onPlay={handlePlay}
           onPlayWithConfig={handlePlayWithConfig}
           page={safePage}

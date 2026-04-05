@@ -1,14 +1,24 @@
 import { useTranslation } from 'react-i18next';
 import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
 import type { GameCatalogEntry } from '@/games/registry';
+import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 import { GameCard } from '@/components/GameCard';
 import { Button } from '@/components/ui/button';
 
 type GameGridProps = {
   entries: GameCatalogEntry[];
   savedConfigs: SavedGameConfigDoc[];
-  onSaveConfig: (gameId: string, name: string) => Promise<void>;
+  onSaveConfig: (
+    gameId: string,
+    name: string,
+    color: BookmarkColorKey,
+  ) => Promise<void>;
   onRemoveConfig: (configId: string) => Promise<void>;
+  onUpdateConfig: (
+    configId: string,
+    config: Record<string, unknown>,
+    name: string,
+  ) => Promise<void>;
   onPlay: (gameId: string) => void;
   onPlayWithConfig: (gameId: string, configId: string) => void;
   page: number;
@@ -21,6 +31,7 @@ export const GameGrid = ({
   savedConfigs,
   onSaveConfig,
   onRemoveConfig,
+  onUpdateConfig,
   onPlay,
   onPlayWithConfig,
   page,
@@ -46,6 +57,7 @@ export const GameGrid = ({
               )}
               onSaveConfig={onSaveConfig}
               onRemoveConfig={onRemoveConfig}
+              onUpdateConfig={onUpdateConfig}
               onPlay={onPlay}
               onPlayWithConfig={onPlayWithConfig}
             />

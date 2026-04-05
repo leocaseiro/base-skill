@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type {
   NumberMatchConfig,
   NumberMatchRound,
@@ -10,6 +11,7 @@ import type {
   WordSpellConfig,
   WordSpellRound,
 } from '@/games/word-spell/types';
+import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 import type {
   GameEngineState,
   MoveLog,
@@ -18,13 +20,18 @@ import type {
   SessionMeta,
 } from '@/lib/game-engine/types';
 import type { JSX } from 'react';
+import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
 import { GameShell } from '@/components/game/GameShell';
 import { getOrCreateDatabase } from '@/db/create-database';
 import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
+import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
 import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+import { numberMatchConfigFields } from '@/games/number-match/types';
 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
+import { wordSpellConfigFields } from '@/games/word-spell/types';
 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
 import { loadGameConfig } from '@/lib/game-engine/config-loader';
 import { findInProgressSession } from '@/lib/game-engine/session-finder';
@@ -55,6 +62,9 @@ interface GameRouteLoaderData {
   sessionId: string;
   meta: SessionMeta;
   gameSpecificConfig: Record<string, unknown> | null;
+  bookmarkId: string | null;
+  bookmarkName: string | null;
+  bookmarkColor: string | null;
 }
 
 const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
@@ -223,583 +233,27 @@ const resolveSortNumbersConfig = (
   return merged;
 };
 
-const SortNumbersConfigPanel = ({
-  config,
-  onChange,
-}: {
-  config: SortNumbersConfig;
-  onChange: (c: SortNumbersConfig) => void;
-}) => {
-  const [open, setOpen] = useState(false);
-
-  const regenerate = (next: SortNumbersConfig) => {
-    onChange({
-      ...next,
-      rounds: generateSortRounds({
-        range: next.range,
-        quantity: next.quantity,
-        allowSkips: next.allowSkips,
-        totalRounds: next.totalRounds,
-      }),
-    });
-  };
-
-  return (
-    <details
-      open={open}
-      onToggle={(e) =>
-        setOpen((e.currentTarget as HTMLDetailsElement).open)
-      }
-      className="fixed right-4 top-40 z-50 max-h-[min(70vh,calc(100vh-8rem))] w-72 overflow-y-auto rounded-lg border bg-background p-3 text-sm shadow-lg"
-    >
-      <summary className="cursor-pointer font-medium">
-        ⚙️ Game Config
-      </summary>
-      <div className="mt-3 flex flex-col gap-3">
-        <label className="flex flex-col gap-1">
-          Input method
-          <select
-            value={config.inputMethod}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                inputMethod: e.target
-                  .value as SortNumbersConfig['inputMethod'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="drag">drag</option>
-            <option value="type">type</option>
-            <option value="both">both</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          Wrong tile behaviour
-          <select
-            value={config.wrongTileBehavior}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                wrongTileBehavior: e.target
-                  .value as SortNumbersConfig['wrongTileBehavior'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="reject">reject</option>
-            <option value="lock-manual">lock-manual</option>
-            <option value="lock-auto-eject">lock-auto-eject</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          Tile bank mode
-          <select
-            value={config.tileBankMode}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                tileBankMode: e.target
-                  .value as SortNumbersConfig['tileBankMode'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="exact">exact</option>
-            <option value="distractors">distractors</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          Total rounds
-          <input
-            type="number"
-            value={config.totalRounds}
-            min={1}
-            max={30}
-            onChange={(e) => {
-              const totalRounds = Number(e.target.value);
-              regenerate({ ...config, totalRounds });
-            }}
-            className="rounded border px-2 py-1"
-          />
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={config.roundsInOrder === true}
-            onChange={(e) =>
-              onChange({ ...config, roundsInOrder: e.target.checked })
-            }
-          />
-          Rounds in order
-        </label>
-        <label className="flex flex-col gap-1">
-          Direction
-          <select
-            value={config.direction}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                direction: e.target
-                  .value as SortNumbersConfig['direction'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="ascending">ascending</option>
-            <option value="descending">descending</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          Quantity
-          <input
-            type="number"
-            value={config.quantity}
-            min={2}
-            max={8}
-            onChange={(e) =>
-              regenerate({
-                ...config,
-                quantity: Number(e.target.value),
-              })
-            }
-            className="rounded border px-2 py-1"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          Range min
-          <input
-            type="number"
-            value={config.range.min}
-            min={1}
-            max={config.range.max - 1}
-            onChange={(e) =>
-              regenerate({
-                ...config,
-                range: { ...config.range, min: Number(e.target.value) },
-              })
-            }
-            className="rounded border px-2 py-1"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          Range max
-          <input
-            type="number"
-            value={config.range.max}
-            min={config.range.min + 1}
-            max={100}
-            onChange={(e) =>
-              regenerate({
-                ...config,
-                range: { ...config.range, max: Number(e.target.value) },
-              })
-            }
-            className="rounded border px-2 py-1"
-          />
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={config.allowSkips}
-            onChange={(e) =>
-              regenerate({ ...config, allowSkips: e.target.checked })
-            }
-          />
-          Allow skips
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={config.ttsEnabled}
-            onChange={(e) =>
-              onChange({ ...config, ttsEnabled: e.target.checked })
-            }
-          />
-          TTS enabled
-        </label>
-        <button
-          type="button"
-          onClick={() => regenerate(config)}
-          className="rounded border px-2 py-1 text-sm"
-        >
-          Regenerate rounds
-        </button>
-      </div>
-    </details>
-  );
-};
-
-const WordSpellConfigPanel = ({
-  config,
-  onChange,
-}: {
-  config: WordSpellConfig;
-  onChange: (c: WordSpellConfig) => void;
-}) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <details
-      open={open}
-      onToggle={(e) =>
-        setOpen((e.currentTarget as HTMLDetailsElement).open)
-      }
-      className="fixed right-4 top-40 z-50 max-h-[min(70vh,calc(100vh-8rem))] w-72 overflow-y-auto rounded-lg border bg-background p-3 text-sm shadow-lg"
-    >
-      <summary className="cursor-pointer font-medium">
-        ⚙️ Game Config
-      </summary>
-      <div className="mt-3 flex flex-col gap-3">
-        <label className="flex flex-col gap-1">
-          Input method
-          <select
-            value={config.inputMethod}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                inputMethod: e.target
-                  .value as WordSpellConfig['inputMethod'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="drag">drag</option>
-            <option value="type">type</option>
-            <option value="both">both</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          Wrong tile behaviour
-          <select
-            value={config.wrongTileBehavior}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                wrongTileBehavior: e.target
-                  .value as WordSpellConfig['wrongTileBehavior'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="reject">reject</option>
-            <option value="lock-manual">lock-manual</option>
-            <option value="lock-auto-eject">lock-auto-eject</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          Tile bank mode
-          <select
-            value={config.tileBankMode}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                tileBankMode: e.target
-                  .value as WordSpellConfig['tileBankMode'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="exact">exact</option>
-            <option value="distractors">distractors</option>
-          </select>
-        </label>
-        {config.tileBankMode === 'distractors' ? (
-          <label className="flex flex-col gap-1">
-            Distractor count
-            <input
-              type="number"
-              min={1}
-              max={12}
-              value={config.distractorCount ?? 2}
-              onChange={(e) =>
-                onChange({
-                  ...config,
-                  distractorCount: Number(e.target.value),
-                })
-              }
-              className="rounded border px-2 py-1"
-            />
-          </label>
-        ) : null}
-        <label className="flex flex-col gap-1">
-          Total rounds
-          <input
-            type="number"
-            value={config.totalRounds}
-            min={1}
-            max={WORD_SPELL_ROUND_POOL.length}
-            onChange={(e) => {
-              const totalRounds = Number(e.target.value);
-              onChange({
-                ...config,
-                totalRounds,
-                rounds: sliceWordSpellRounds(totalRounds),
-              });
-            }}
-            className="rounded border px-2 py-1"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          Mode
-          <select
-            value={config.mode}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                mode: e.target.value as WordSpellConfig['mode'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="picture">picture</option>
-            <option value="scramble">scramble</option>
-            <option value="recall">recall</option>
-            <option value="sentence-gap">sentence-gap</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          Tile unit
-          <select
-            value={config.tileUnit}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                tileUnit: e.target.value as WordSpellConfig['tileUnit'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="letter">letter</option>
-            <option value="syllable">syllable</option>
-            <option value="word">word</option>
-          </select>
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={config.roundsInOrder === true}
-            onChange={(e) =>
-              onChange({ ...config, roundsInOrder: e.target.checked })
-            }
-          />
-          Rounds in order
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={config.ttsEnabled}
-            onChange={(e) =>
-              onChange({ ...config, ttsEnabled: e.target.checked })
-            }
-          />
-          TTS enabled
-        </label>
-      </div>
-    </details>
-  );
-};
-
-const NumberMatchConfigPanel = ({
-  config,
-  onChange,
-}: {
-  config: NumberMatchConfig;
-  onChange: (c: NumberMatchConfig) => void;
-}) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <details
-      open={open}
-      onToggle={(e) =>
-        setOpen((e.currentTarget as HTMLDetailsElement).open)
-      }
-      className="fixed right-4 top-40 z-50 max-h-[min(70vh,calc(100vh-8rem))] w-72 overflow-y-auto rounded-lg border bg-background p-3 text-sm shadow-lg"
-    >
-      <summary className="cursor-pointer font-medium">
-        ⚙️ Game Config
-      </summary>
-      <div className="mt-3 flex flex-col gap-3">
-        <label className="flex flex-col gap-1">
-          Input method
-          <select
-            value={config.inputMethod}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                inputMethod: e.target
-                  .value as NumberMatchConfig['inputMethod'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="drag">drag</option>
-            <option value="type">type</option>
-            <option value="both">both</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          Mode
-          <select
-            value={config.mode}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                mode: e.target.value as NumberMatchConfig['mode'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="numeral-to-group">numeral-to-group</option>
-            <option value="group-to-numeral">group-to-numeral</option>
-            <option value="numeral-to-word">numeral-to-word</option>
-            <option value="word-to-numeral">word-to-numeral</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          Tile style
-          <select
-            value={config.tileStyle}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                tileStyle: e.target
-                  .value as NumberMatchConfig['tileStyle'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="dots">dots</option>
-            <option value="objects">objects</option>
-            <option value="fingers">fingers</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          Tile bank mode
-          <select
-            value={config.tileBankMode}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                tileBankMode: e.target
-                  .value as NumberMatchConfig['tileBankMode'],
-              })
-            }
-            className="rounded border px-2 py-1"
-          >
-            <option value="exact">exact</option>
-            <option value="distractors">distractors</option>
-          </select>
-        </label>
-
-        <label className="flex flex-col gap-1">
-          Distractor count
-          <input
-            type="number"
-            min={0}
-            max={10}
-            value={config.distractorCount ?? 0}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                distractorCount: Number(e.target.value),
-              })
-            }
-            className="rounded border px-2 py-1"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          Total rounds
-          <input
-            type="number"
-            value={config.totalRounds}
-            min={1}
-            max={50}
-            onChange={(e) => {
-              const totalRounds = Number(e.target.value);
-              onChange({
-                ...config,
-                totalRounds,
-                rounds: resizeNumberMatchRounds(
-                  config.rounds,
-                  totalRounds,
-                  config.range,
-                ),
-              });
-            }}
-            className="rounded border px-2 py-1"
-          />
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={config.roundsInOrder === true}
-            onChange={(e) =>
-              onChange({ ...config, roundsInOrder: e.target.checked })
-            }
-          />
-          Rounds in order
-        </label>
-        <label className="flex flex-col gap-1">
-          Range min
-          <input
-            type="number"
-            value={config.range.min}
-            min={1}
-            max={config.range.max - 1}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                range: { ...config.range, min: Number(e.target.value) },
-              })
-            }
-            className="rounded border px-2 py-1"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          Range max
-          <input
-            type="number"
-            value={config.range.max}
-            min={config.range.min + 1}
-            max={20}
-            onChange={(e) =>
-              onChange({
-                ...config,
-                range: { ...config.range, max: Number(e.target.value) },
-              })
-            }
-            className="rounded border px-2 py-1"
-          />
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={config.ttsEnabled}
-            onChange={(e) =>
-              onChange({ ...config, ttsEnabled: e.target.checked })
-            }
-          />
-          TTS enabled
-        </label>
-      </div>
-    </details>
-  );
-};
-
 const WordSpellGameBody = ({
   gameId,
   gameSpecificConfig,
+  bookmarkId,
+  bookmarkName,
+  bookmarkColor,
 }: {
   gameId: string;
   gameSpecificConfig: Record<string, unknown> | null;
+  bookmarkId: string | null;
+  bookmarkName: string | null;
+  bookmarkColor: string | null;
 }): JSX.Element => {
+  const { t } = useTranslation('games');
+  const { save, updateConfig } = useSavedConfigs();
   const initial = useMemo(
     () => resolveWordSpellConfig(gameSpecificConfig),
     [gameSpecificConfig],
   );
   const [cfg, setCfg] = useState(initial);
+  const [showInstructions, setShowInstructions] = useState(true);
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
@@ -807,26 +261,65 @@ const WordSpellGameBody = ({
     gameId,
     cfg as unknown as Record<string, unknown>,
   );
-  return (
-    <>
-      <WordSpellConfigPanel config={cfg} onChange={setCfg} />
-      <WordSpell key={cfg.inputMethod} config={cfg} />
-    </>
-  );
+
+  if (showInstructions) {
+    return (
+      <InstructionsOverlay
+        text={t('instructions.word-spell')}
+        onStart={() => setShowInstructions(false)}
+        ttsEnabled={cfg.ttsEnabled}
+        gameTitle={t('word-spell')}
+        bookmarkName={bookmarkName ?? undefined}
+        bookmarkColor={
+          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+        }
+        subject="reading"
+        config={cfg as unknown as Record<string, unknown>}
+        onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
+        onSaveBookmark={async (name, color) => {
+          await save({
+            gameId,
+            name,
+            color,
+            config: cfg as unknown as Record<string, unknown>,
+          });
+        }}
+        onUpdateBookmark={
+          bookmarkId
+            ? async (name, config) => {
+                await updateConfig(bookmarkId, config, name);
+              }
+            : undefined
+        }
+        configFields={wordSpellConfigFields}
+      />
+    );
+  }
+
+  return <WordSpell key={cfg.inputMethod} config={cfg} />;
 };
 
 const NumberMatchGameBody = ({
   gameId,
   gameSpecificConfig,
+  bookmarkId,
+  bookmarkName,
+  bookmarkColor,
 }: {
   gameId: string;
   gameSpecificConfig: Record<string, unknown> | null;
+  bookmarkId: string | null;
+  bookmarkName: string | null;
+  bookmarkColor: string | null;
 }): JSX.Element => {
+  const { t } = useTranslation('games');
+  const { save, updateConfig } = useSavedConfigs();
   const initial = useMemo(
     () => resolveNumberMatchConfig(gameSpecificConfig),
     [gameSpecificConfig],
   );
   const [cfg, setCfg] = useState(initial);
+  const [showInstructions, setShowInstructions] = useState(true);
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
@@ -834,26 +327,65 @@ const NumberMatchGameBody = ({
     gameId,
     cfg as unknown as Record<string, unknown>,
   );
-  return (
-    <>
-      <NumberMatchConfigPanel config={cfg} onChange={setCfg} />
-      <NumberMatch key={cfg.inputMethod} config={cfg} />
-    </>
-  );
+
+  if (showInstructions) {
+    return (
+      <InstructionsOverlay
+        text={t('instructions.number-match')}
+        onStart={() => setShowInstructions(false)}
+        ttsEnabled={cfg.ttsEnabled}
+        gameTitle={t('number-match')}
+        bookmarkName={bookmarkName ?? undefined}
+        bookmarkColor={
+          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+        }
+        subject="math"
+        config={cfg as unknown as Record<string, unknown>}
+        onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
+        onSaveBookmark={async (name, color) => {
+          await save({
+            gameId,
+            name,
+            color,
+            config: cfg as unknown as Record<string, unknown>,
+          });
+        }}
+        onUpdateBookmark={
+          bookmarkId
+            ? async (name, config) => {
+                await updateConfig(bookmarkId, config, name);
+              }
+            : undefined
+        }
+        configFields={numberMatchConfigFields}
+      />
+    );
+  }
+
+  return <NumberMatch key={cfg.inputMethod} config={cfg} />;
 };
 
 const SortNumbersGameBody = ({
   gameId,
   gameSpecificConfig,
+  bookmarkId,
+  bookmarkName,
+  bookmarkColor,
 }: {
   gameId: string;
   gameSpecificConfig: Record<string, unknown> | null;
+  bookmarkId: string | null;
+  bookmarkName: string | null;
+  bookmarkColor: string | null;
 }): JSX.Element => {
+  const { t } = useTranslation('games');
+  const { save, updateConfig } = useSavedConfigs();
   const initial = useMemo(
     () => resolveSortNumbersConfig(gameSpecificConfig),
     [gameSpecificConfig],
   );
   const [cfg, setCfg] = useState(initial);
+  const [showInstructions, setShowInstructions] = useState(true);
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
@@ -861,26 +393,65 @@ const SortNumbersGameBody = ({
     gameId,
     cfg as unknown as Record<string, unknown>,
   );
-  return (
-    <>
-      <SortNumbersConfigPanel config={cfg} onChange={setCfg} />
-      <SortNumbers key={cfg.inputMethod} config={cfg} />
-    </>
-  );
+
+  if (showInstructions) {
+    return (
+      <InstructionsOverlay
+        text={t('instructions.sort-numbers')}
+        onStart={() => setShowInstructions(false)}
+        ttsEnabled={cfg.ttsEnabled}
+        gameTitle={t('sort-numbers')}
+        bookmarkName={bookmarkName ?? undefined}
+        bookmarkColor={
+          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+        }
+        subject="math"
+        config={cfg as unknown as Record<string, unknown>}
+        onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
+        onSaveBookmark={async (name, color) => {
+          await save({
+            gameId,
+            name,
+            color,
+            config: cfg as unknown as Record<string, unknown>,
+          });
+        }}
+        onUpdateBookmark={
+          bookmarkId
+            ? async (name, config) => {
+                await updateConfig(bookmarkId, config, name);
+              }
+            : undefined
+        }
+        configFields={sortNumbersConfigFields}
+      />
+    );
+  }
+
+  return <SortNumbers key={cfg.inputMethod} config={cfg} />;
 };
 
 const GameBody = ({
   gameId,
   gameSpecificConfig,
+  bookmarkId,
+  bookmarkName,
+  bookmarkColor,
 }: {
   gameId: string;
   gameSpecificConfig: Record<string, unknown> | null;
+  bookmarkId: string | null;
+  bookmarkName: string | null;
+  bookmarkColor: string | null;
 }): JSX.Element => {
   if (gameId === 'sort-numbers') {
     return (
       <SortNumbersGameBody
         gameId={gameId}
         gameSpecificConfig={gameSpecificConfig}
+        bookmarkId={bookmarkId}
+        bookmarkName={bookmarkName}
+        bookmarkColor={bookmarkColor}
       />
     );
   }
@@ -890,6 +461,9 @@ const GameBody = ({
       <WordSpellGameBody
         gameId={gameId}
         gameSpecificConfig={gameSpecificConfig}
+        bookmarkId={bookmarkId}
+        bookmarkName={bookmarkName}
+        bookmarkColor={bookmarkColor}
       />
     );
   }
@@ -899,6 +473,9 @@ const GameBody = ({
       <NumberMatchGameBody
         gameId={gameId}
         gameSpecificConfig={gameSpecificConfig}
+        bookmarkId={bookmarkId}
+        bookmarkName={bookmarkName}
+        bookmarkColor={bookmarkColor}
       />
     );
   }
@@ -916,6 +493,9 @@ export const GameRoute = ({
   sessionId,
   meta,
   gameSpecificConfig,
+  bookmarkId,
+  bookmarkName,
+  bookmarkColor,
 }: GameRouteLoaderData): JSX.Element => (
   <GameShell
     config={config}
@@ -928,6 +508,9 @@ export const GameRoute = ({
     <GameBody
       gameId={config.gameId}
       gameSpecificConfig={gameSpecificConfig}
+      bookmarkId={bookmarkId}
+      bookmarkName={bookmarkName}
+      bookmarkColor={bookmarkColor}
     />
   </GameShell>
 );
@@ -964,11 +547,20 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
     );
 
     let gameSpecificConfig: Record<string, unknown> | null = null;
+    let bookmarkId: string | null = null;
+    let bookmarkName: string | null = null;
+    let bookmarkColor: string | null = null;
+
     if (deps.configId) {
       const savedDoc = await db.saved_game_configs
         .findOne(deps.configId)
         .exec();
-      if (savedDoc) gameSpecificConfig = savedDoc.config;
+      if (savedDoc) {
+        gameSpecificConfig = savedDoc.config;
+        bookmarkId = savedDoc.id;
+        bookmarkName = savedDoc.name;
+        bookmarkColor = savedDoc.color;
+      }
     } else {
       const lastDoc = await db.saved_game_configs
         .findOne(lastSessionSavedConfigId(gameId))
@@ -1002,7 +594,16 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
       initialState,
     };
 
-    return { config, initialLog, sessionId, meta, gameSpecificConfig };
+    return {
+      config,
+      initialLog,
+      sessionId,
+      meta,
+      gameSpecificConfig,
+      bookmarkId,
+      bookmarkName,
+      bookmarkColor,
+    };
   },
   component: RouteComponent,
 });

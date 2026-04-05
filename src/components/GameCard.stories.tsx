@@ -8,6 +8,7 @@ const meta: Meta<typeof GameCard> = {
     entry: {
       id: 'word-spell',
       titleKey: 'word-spell',
+      descriptionKey: 'word-spell-description',
       levels: ['1', '2'],
       subject: 'reading',
     },
@@ -16,6 +17,7 @@ const meta: Meta<typeof GameCard> = {
   argTypes: {
     onSaveConfig: { action: 'configSaved' },
     onRemoveConfig: { action: 'configRemoved' },
+    onUpdateConfig: { action: 'configUpdated' },
     onPlay: { action: 'played' },
     onPlayWithConfig: { action: 'playedWithConfig' },
   },
@@ -35,6 +37,7 @@ export const WithSavedConfig: Story = {
         gameId: 'word-spell',
         name: 'Easy Mode',
         config: {},
+        color: 'indigo',
         createdAt: new Date().toISOString(),
       },
     ],
@@ -46,6 +49,7 @@ export const MultiLevel: Story = {
     entry: {
       id: 'number-match',
       titleKey: 'number-match',
+      descriptionKey: 'number-match-description',
       levels: ['1', '2', '3'],
       subject: 'math',
     },
@@ -57,6 +61,7 @@ export const EarlyYearsReading: Story = {
     entry: {
       id: 'word-spell',
       titleKey: 'word-spell',
+      descriptionKey: 'word-spell-description',
       levels: ['PK', 'K'],
       subject: 'reading',
     },

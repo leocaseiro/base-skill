@@ -40,7 +40,10 @@ describe('SaveConfigDialog', () => {
     await userEvent.click(
       screen.getByRole('button', { name: /save/i }),
     );
-    expect(onSave).toHaveBeenCalledWith('Word Spell');
+    expect(onSave).toHaveBeenCalledWith(
+      'Word Spell',
+      expect.any(String),
+    );
   });
 
   it('shows error and does not call onSave when name is empty', async () => {
