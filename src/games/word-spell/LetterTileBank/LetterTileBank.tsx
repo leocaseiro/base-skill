@@ -3,15 +3,26 @@ import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameCont
 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
 
 const LetterTile = ({ tile }: { tile: TileItem }) => {
-  const { ref, handleClick } = useDraggableTile(tile);
+  const {
+    ref,
+    handleClick,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerCancel,
+  } = useDraggableTile(tile);
 
   return (
     <button
       ref={ref}
       type="button"
       aria-label={`Letter ${tile.label}`}
-      className="flex size-14 cursor-grab items-center justify-center rounded-xl bg-card text-2xl font-bold shadow-md transition-transform active:scale-95 active:cursor-grabbing"
+      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl bg-card text-2xl font-bold shadow-md transition-transform active:scale-95 active:cursor-grabbing"
       onClick={handleClick}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
     >
       {tile.label}
     </button>
