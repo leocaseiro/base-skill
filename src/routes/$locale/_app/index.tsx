@@ -99,6 +99,7 @@ const HomeScreen = () => {
     void navigate({
       to: '/$locale/game/$gameId',
       params: { locale, gameId },
+      search: { configId: undefined },
     });
   };
 

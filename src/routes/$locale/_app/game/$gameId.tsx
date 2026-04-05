@@ -177,7 +177,8 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
     configId:
       typeof search.configId === 'string' ? search.configId : undefined,
   }),
-  loader: async ({ params, search }): Promise<GameRouteLoaderData> => {
+  loaderDeps: ({ search }) => ({ configId: search.configId }),
+  loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
     const { gameId } = params;
     const profileId = 'default';
 
@@ -198,9 +199,9 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
     );
 
     let gameSpecificConfig: Record<string, unknown> | null = null;
-    if (search.configId) {
+    if (deps.configId) {
       const savedDoc = await db.saved_game_configs
-        .findOne(search.configId)
+        .findOne(deps.configId)
         .exec();
       if (savedDoc) gameSpecificConfig = savedDoc.config;
     }

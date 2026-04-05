@@ -11,11 +11,13 @@ const meta: Meta<typeof GameCard> = {
       levels: ['1', '2'],
       subject: 'reading',
     },
-    isBookmarked: false,
+    savedConfigs: [],
   },
   argTypes: {
-    onBookmarkToggle: { action: 'bookmarkToggled' },
+    onSaveConfig: { action: 'configSaved' },
+    onRemoveConfig: { action: 'configRemoved' },
     onPlay: { action: 'played' },
+    onPlayWithConfig: { action: 'playedWithConfig' },
   },
 };
 export default meta;
@@ -24,8 +26,19 @@ type Story = StoryObj<typeof GameCard>;
 
 export const Default: Story = {};
 
-export const Bookmarked: Story = {
-  args: { isBookmarked: true },
+export const WithSavedConfig: Story = {
+  args: {
+    savedConfigs: [
+      {
+        id: 'cfg-1',
+        profileId: 'default',
+        gameId: 'word-spell',
+        name: 'Easy Mode',
+        config: {},
+        createdAt: new Date().toISOString(),
+      },
+    ],
+  },
 };
 
 export const MultiLevel: Story = {

@@ -61,8 +61,8 @@ describe('useSavedConfigs', () => {
     await waitFor(() =>
       expect(result.current.savedConfigs).toHaveLength(1),
     );
-    expect(result.current.savedConfigs[0].name).toBe('Easy Mode');
-    expect(result.current.savedConfigs[0].gameId).toBe('word-spell');
+    expect(result.current.savedConfigs[0]!.name).toBe('Easy Mode');
+    expect(result.current.savedConfigs[0]!.gameId).toBe('word-spell');
   });
 
   it('save() throws when name already exists for same gameId', async () => {
@@ -130,7 +130,7 @@ describe('useSavedConfigs', () => {
     await waitFor(() =>
       expect(result.current.savedConfigs).toHaveLength(1),
     );
-    const id = result.current.savedConfigs[0].id;
+    const id = result.current.savedConfigs[0]!.id;
     await act(async () => {
       await result.current.remove(id);
     });
@@ -154,12 +154,12 @@ describe('useSavedConfigs', () => {
     await waitFor(() =>
       expect(result.current.savedConfigs).toHaveLength(1),
     );
-    const id = result.current.savedConfigs[0].id;
+    const id = result.current.savedConfigs[0]!.id;
     await act(async () => {
       await result.current.rename(id, 'Hard Mode');
     });
     await waitFor(() =>
-      expect(result.current.savedConfigs[0].name).toBe('Hard Mode'),
+      expect(result.current.savedConfigs[0]?.name).toBe('Hard Mode'),
     );
   });
 
@@ -188,7 +188,7 @@ describe('useSavedConfigs', () => {
     await waitFor(() =>
       expect(result.current.savedConfigs).toHaveLength(2),
     );
-    const id = result.current.savedConfigs[0].id;
+    const id = result.current.savedConfigs[0]!.id;
     await expect(
       act(async () => {
         await result.current.rename(id, 'Hard Mode');
@@ -218,7 +218,7 @@ describe('useSavedConfigs', () => {
     );
     const wsConfigs = result.current.getByGameId('word-spell');
     expect(wsConfigs).toHaveLength(1);
-    expect(wsConfigs[0].gameId).toBe('word-spell');
+    expect(wsConfigs[0]?.gameId).toBe('word-spell');
   });
 
   it('gameIdsWithConfigs is a Set of gameIds that have at least one config', async () => {

@@ -125,16 +125,12 @@ describe('sortByHasSavedConfigs', () => {
 
   it('moves entries with saved configs to the front', () => {
     const result = sortByHasSavedConfigs(entries, new Set(['gamma']));
-    expect(result[0].id).toBe('gamma');
-    expect(result[1].id).toBe('alpha');
-    expect(result[2].id).toBe('beta');
+    expect(result.map((e) => e.id)).toEqual(['gamma', 'alpha', 'beta']);
   });
 
   it('preserves original order within each group', () => {
     const result = sortByHasSavedConfigs(entries, new Set(['beta']));
-    expect(result[0].id).toBe('beta');
-    expect(result[1].id).toBe('alpha');
-    expect(result[2].id).toBe('gamma');
+    expect(result.map((e) => e.id)).toEqual(['beta', 'alpha', 'gamma']);
   });
 
   it('preserves original order among multiple entries with configs', () => {
@@ -142,9 +138,7 @@ describe('sortByHasSavedConfigs', () => {
       entries,
       new Set(['gamma', 'alpha']),
     );
-    expect(result[0].id).toBe('alpha');
-    expect(result[1].id).toBe('gamma');
-    expect(result[2].id).toBe('beta');
+    expect(result.map((e) => e.id)).toEqual(['alpha', 'gamma', 'beta']);
   });
 
   it('returns original order when no gameIds have configs', () => {
