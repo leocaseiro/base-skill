@@ -28,22 +28,6 @@ vi.mock('@/db/hooks/useSettings', () => ({
   }),
 }));
 
-vi.mock(
-  '@/components/answer-game/InstructionsOverlay/InstructionsOverlay',
-  () => ({
-    InstructionsOverlay: ({
-      onStart,
-    }: {
-      onStart: () => void;
-      text: string;
-      ttsEnabled: boolean;
-    }) => {
-      onStart();
-      return null;
-    },
-  }),
-);
-
 const config: NumberMatchConfig = {
   gameId: 'number-match-test',
   component: 'NumberMatch',

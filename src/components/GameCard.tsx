@@ -1,9 +1,12 @@
-import { BookmarkIcon, XIcon } from 'lucide-react';
+// src/components/GameCard.tsx
+import { BookmarkIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
 import type { GameCatalogEntry } from '@/games/registry';
+import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 import { SaveConfigDialog } from '@/components/SaveConfigDialog';
+import { SavedConfigChip } from '@/components/SavedConfigChip';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -11,12 +14,22 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { getConfigFields } from '@/games/config-fields-registry';
 
 type GameCardProps = {
   entry: GameCatalogEntry;
   savedConfigs: SavedGameConfigDoc[];
-  onSaveConfig: (gameId: string, name: string) => Promise<void>;
+  onSaveConfig: (
+    gameId: string,
+    name: string,
+    color: BookmarkColorKey,
+  ) => Promise<void>;
   onRemoveConfig: (configId: string) => Promise<void>;
+  onUpdateConfig: (
+    configId: string,
+    config: Record<string, unknown>,
+    name: string,
+  ) => Promise<void>;
   onPlay: (gameId: string) => void;
   onPlayWithConfig: (gameId: string, configId: string) => void;
 };
@@ -36,6 +49,7 @@ export const GameCard = ({
   savedConfigs,
   onSaveConfig,
   onRemoveConfig,
+  onUpdateConfig,
   onPlay,
   onPlayWithConfig,
 }: GameCardProps) => {
@@ -44,12 +58,14 @@ export const GameCard = ({
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const gameTitle = t(entry.titleKey);
+  const description = t(entry.descriptionKey);
   const existingNames = savedConfigs.map((c) => c.name);
   const suggestedName = suggestConfigName(gameTitle, existingNames);
   const hasConfigs = savedConfigs.length > 0;
+  const configFields = getConfigFields(entry.id);
 
-  const handleSave = async (name: string) => {
-    await onSaveConfig(entry.id, name);
+  const handleSave = async (name: string, color: BookmarkColorKey) => {
+    await onSaveConfig(entry.id, name, color);
     setDialogOpen(false);
   };
 
@@ -74,6 +90,10 @@ export const GameCard = ({
             </Button>
           </div>
 
+          <p className="text-xs text-muted-foreground leading-snug">
+            {description}
+          </p>
+
           <div className="flex flex-wrap gap-1 pt-1">
             {entry.levels.map((level) => (
               <span
@@ -86,29 +106,16 @@ export const GameCard = ({
           </div>
 
           {hasConfigs && (
-            <div className="flex flex-wrap gap-1 pt-2">
+            <div className="flex flex-col gap-2 pt-2">
               {savedConfigs.map((sc) => (
-                <div
+                <SavedConfigChip
                   key={sc.id}
-                  className="flex items-center gap-0.5 rounded-full bg-primary/10 text-xs font-medium text-primary"
-                >
-                  <button
-                    className="py-0.5 pl-2 pr-1"
-                    onClick={() => onPlayWithConfig(entry.id, sc.id)}
-                    aria-label={sc.name}
-                  >
-                    {sc.name}
-                  </button>
-                  <button
-                    className="py-0.5 pr-1.5"
-                    onClick={() => void onRemoveConfig(sc.id)}
-                    aria-label={tCommon('saveConfig.remove', {
-                      name: sc.name,
-                    })}
-                  >
-                    <XIcon size={10} />
-                  </button>
-                </div>
+                  doc={sc}
+                  configFields={configFields}
+                  onPlay={(id) => onPlayWithConfig(entry.id, id)}
+                  onDelete={(id) => void onRemoveConfig(id)}
+                  onSave={onUpdateConfig}
+                />
               ))}
             </div>
           )}
@@ -125,7 +132,7 @@ export const GameCard = ({
         open={dialogOpen}
         suggestedName={suggestedName}
         existingNames={existingNames}
-        onSave={(name) => void handleSave(name)}
+        onSave={(name, color) => void handleSave(name, color)}
         onCancel={() => setDialogOpen(false)}
       />
     </>

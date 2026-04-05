@@ -27,22 +27,6 @@ vi.mock('@/db/hooks/useSettings', () => ({
   }),
 }));
 
-vi.mock(
-  '@/components/answer-game/InstructionsOverlay/InstructionsOverlay',
-  () => ({
-    InstructionsOverlay: ({
-      onStart,
-    }: {
-      onStart: () => void;
-      text: string;
-      ttsEnabled: boolean;
-    }) => {
-      onStart();
-      return null;
-    },
-  }),
-);
-
 const config: WordSpellConfig = {
   gameId: 'word-spell-test',
   component: 'WordSpell',

@@ -31,7 +31,15 @@ const COLLECTIONS = {
   progress: { schema: progressSchema },
   settings: { schema: settingsSchema },
   game_config_overrides: { schema: gameConfigOverridesSchema },
-  saved_game_configs: { schema: savedGameConfigsSchema },
+  saved_game_configs: {
+    schema: savedGameConfigsSchema,
+    migrationStrategies: {
+      1: (oldDoc: Record<string, unknown>) => ({
+        ...oldDoc,
+        color: 'indigo',
+      }),
+    },
+  },
   themes: { schema: themesSchema },
   session_history: { schema: sessionHistorySchema },
   session_history_index: {

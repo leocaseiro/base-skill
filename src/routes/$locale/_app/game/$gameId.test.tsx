@@ -96,6 +96,9 @@ describe('GameRoute', () => {
         sessionId="sess-route-001"
         meta={testMeta}
         gameSpecificConfig={null}
+        bookmarkId={null}
+        bookmarkName={null}
+        bookmarkColor={null}
       />,
       { wrapper },
     );
@@ -112,6 +115,9 @@ describe('GameRoute', () => {
         sessionId="sess-route-001"
         meta={testMeta}
         gameSpecificConfig={null}
+        bookmarkId={null}
+        bookmarkName={null}
+        bookmarkColor={null}
       />,
       { wrapper },
     );
