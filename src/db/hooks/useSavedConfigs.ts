@@ -14,6 +14,7 @@ type SaveInput = {
   gameId: string;
   name: string;
   config: Record<string, unknown>;
+  color?: string;
 };
 
 type UseSavedConfigsResult = {
@@ -23,7 +24,12 @@ type UseSavedConfigsResult = {
   save: (input: SaveInput) => Promise<void>;
   remove: (id: string) => Promise<void>;
   rename: (id: string, newName: string) => Promise<void>;
-  /** Upserts IndexedDB doc for “resume last settings” (not shown as a named chip) */
+  updateConfig: (
+    id: string,
+    config: Record<string, unknown>,
+    name?: string,
+  ) => Promise<void>;
+  /** Upserts IndexedDB doc for "resume last settings" (not shown as a named chip) */
   persistLastSessionConfig: (
     gameId: string,
     config: Record<string, unknown>,
@@ -63,6 +69,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
     gameId,
     name,
     config,
+    color = 'indigo',
   }: SaveInput): Promise<void> => {
     if (!db) return;
     const trimmed = name.trim();
@@ -80,6 +87,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
       gameId,
       name: trimmed,
       config,
+      color,
       createdAt: new Date().toISOString(),
     };
     await db.saved_game_configs.insert(doc);
@@ -107,6 +115,33 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
     await doc.incrementalPatch({ name: trimmed });
   };
 
+  const updateConfig = useCallback(
+    async (
+      id: string,
+      config: Record<string, unknown>,
+      name?: string,
+    ): Promise<void> => {
+      if (!db) return;
+      const doc = await db.saved_game_configs.findOne(id).exec();
+      if (!doc) return;
+      const patch: Partial<SavedGameConfigDoc> = { config };
+      if (name !== undefined) {
+        const trimmed = name.trim();
+        const namesForGame = savedConfigs
+          .filter((d) => d.gameId === doc.gameId && d.id !== id)
+          .map((d) => d.name);
+        if (namesForGame.includes(trimmed)) {
+          throw new Error(
+            `A saved config named "${trimmed}" already exists for this game`,
+          );
+        }
+        patch.name = trimmed;
+      }
+      await doc.incrementalPatch(patch);
+    },
+    [db, savedConfigs],
+  );
+
   const persistLastSessionConfig = useCallback(
     async (gameId: string, config: Record<string, unknown>) => {
       if (!db) return;
@@ -121,6 +156,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
             gameId,
             name: '__last_session__',
             config,
+            color: 'indigo',
             createdAt: now,
           }));
     },
@@ -134,6 +170,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
     save,
     remove,
     rename,
+    updateConfig,
     persistLastSessionConfig,
   };
 };
