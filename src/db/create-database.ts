@@ -7,10 +7,10 @@ import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
 import { checkVersionAndMigrate } from './migrations';
 import {
   appMetaSchema,
-  bookmarksSchema,
   gameConfigOverridesSchema,
   profilesSchema,
   progressSchema,
+  savedGameConfigsSchema,
   sessionHistoryIndexSchema,
   sessionHistorySchema,
   settingsSchema,
@@ -31,7 +31,7 @@ const COLLECTIONS = {
   progress: { schema: progressSchema },
   settings: { schema: settingsSchema },
   game_config_overrides: { schema: gameConfigOverridesSchema },
-  bookmarks: { schema: bookmarksSchema },
+  saved_game_configs: { schema: savedGameConfigsSchema },
   themes: { schema: themesSchema },
   session_history: { schema: sessionHistorySchema },
   session_history_index: {

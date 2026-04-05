@@ -1,8 +1,8 @@
 import type { AppMetaDoc } from './schemas/app-meta';
-import type { BookmarkDoc } from './schemas/bookmarks';
 import type { GameConfigOverridesDoc } from './schemas/game_config_overrides';
 import type { ProfileDoc } from './schemas/profiles';
 import type { ProgressDoc } from './schemas/progress';
+import type { SavedGameConfigDoc } from './schemas/saved_game_configs';
 import type { SessionHistoryDoc } from './schemas/session_history';
 import type { SessionHistoryIndexDoc } from './schemas/session_history_index';
 import type { SettingsDoc } from './schemas/settings';
@@ -16,7 +16,7 @@ export type BaseSkillCollections = {
   progress: RxCollection<ProgressDoc>;
   settings: RxCollection<SettingsDoc>;
   game_config_overrides: RxCollection<GameConfigOverridesDoc>;
-  bookmarks: RxCollection<BookmarkDoc>;
+  saved_game_configs: RxCollection<SavedGameConfigDoc>;
   themes: RxCollection<ThemeDoc>;
   session_history: RxCollection<SessionHistoryDoc>;
   session_history_index: RxCollection<SessionHistoryIndexDoc>;
