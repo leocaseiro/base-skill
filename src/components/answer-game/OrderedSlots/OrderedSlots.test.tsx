@@ -68,13 +68,11 @@ const Initialiser = ({ children }: { children: ReactNode }) => {
   return <>{children}</>;
 };
 
-function wrapper({ children }: { children: ReactNode }) {
-  return (
-    <AnswerGameProvider config={config}>
-      <Initialiser>{children}</Initialiser>
-    </AnswerGameProvider>
-  );
-}
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <AnswerGameProvider config={config}>
+    <Initialiser>{children}</Initialiser>
+  </AnswerGameProvider>
+);
 
 describe('OrderedSlots', () => {
   it('renders one slot per zone', () => {
