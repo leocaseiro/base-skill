@@ -174,6 +174,11 @@ describe('useSavedConfigs', () => {
         name: 'Easy Mode',
         config: {},
       });
+    });
+    await waitFor(() =>
+      expect(result.current.savedConfigs).toHaveLength(1),
+    );
+    await act(async () => {
       await result.current.save({
         gameId: 'word-spell',
         name: 'Hard Mode',

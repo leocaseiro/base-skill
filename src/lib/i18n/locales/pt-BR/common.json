@@ -34,8 +34,15 @@
     "next": "Próximo",
     "pageOf": "Página {{page}} de {{total}}"
   },
-  "bookmark": {
-    "add": "Favoritar",
-    "remove": "Remover favorito"
+  "play": "Jogar",
+  "saveConfig": {
+    "title": "Salvar configuração",
+    "nameLabel": "Nome da configuração",
+    "placeholder": "ex: Fácil",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "remove": "Remover {{name}}",
+    "errorEmpty": "Por favor, insira um nome",
+    "errorDuplicate": "Já existe uma configuração chamada \"{{name}}\""
   }
 }

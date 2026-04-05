@@ -34,8 +34,15 @@
     "next": "Next",
     "pageOf": "Page {{page}} of {{total}}"
   },
-  "bookmark": {
-    "add": "Bookmark",
-    "remove": "Remove bookmark"
+  "play": "Play",
+  "saveConfig": {
+    "title": "Save configuration",
+    "nameLabel": "Configuration name",
+    "placeholder": "e.g. Easy Mode",
+    "save": "Save",
+    "cancel": "Cancel",
+    "remove": "Remove {{name}}",
+    "errorEmpty": "Please enter a name",
+    "errorDuplicate": "A configuration named \"{{name}}\" already exists"
   }
 }
