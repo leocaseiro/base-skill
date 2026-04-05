@@ -132,4 +132,30 @@ describe('useKeyboardInput', () => {
 
     unmount();
   });
+
+  it('fires when target is the data-touch-keyboard input', () => {
+    const { unmount } = renderHook(() => useKeyboardInput(), {
+      wrapper: makeWrapper('type'),
+    });
+
+    const fakeInput = document.createElement('input');
+    fakeInput.dataset['touchKeyboard'] = 'true';
+
+    act(() => {
+      const event = new KeyboardEvent('keydown', {
+        key: 'c',
+        bubbles: true,
+      });
+      Object.defineProperty(event, 'target', { value: fakeInput });
+      globalThis.dispatchEvent(event);
+    });
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'PLACE_TILE',
+      tileId: 't1',
+      zoneIndex: 0,
+    });
+
+    unmount();
+  });
 });
