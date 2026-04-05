@@ -61,8 +61,13 @@ const HomeScreen = () => {
   const { level, subject, search, page } = Route.useSearch();
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate({ from: '/$locale/' });
-  const { savedConfigs, gameIdsWithConfigs, save, remove } =
-    useSavedConfigs();
+  const {
+    savedConfigs,
+    gameIdsWithConfigs,
+    save,
+    remove,
+    updateConfig,
+  } = useSavedConfigs();
 
   const filtered = useMemo(() => {
     const result = filterCatalog(GAME_CATALOG, {
@@ -114,8 +119,17 @@ const HomeScreen = () => {
   const handleSaveConfig = async (
     gameId: string,
     name: string,
+    color: string,
   ): Promise<void> => {
-    await save({ gameId, name, config: {}, color: 'indigo' });
+    await save({ gameId, name, config: {}, color });
+  };
+
+  const handleUpdateConfig = async (
+    configId: string,
+    config: Record<string, unknown>,
+    name: string,
+  ): Promise<void> => {
+    await updateConfig(configId, config, name);
   };
 
   return (
@@ -131,6 +145,7 @@ const HomeScreen = () => {
           savedConfigs={savedConfigs}
           onSaveConfig={handleSaveConfig}
           onRemoveConfig={remove}
+          onUpdateConfig={handleUpdateConfig}
           onPlay={handlePlay}
           onPlayWithConfig={handlePlayWithConfig}
           page={safePage}

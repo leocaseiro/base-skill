@@ -14,6 +14,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 const mockEntry: GameCatalogEntry = {
   id: 'word-spell',
   titleKey: 'word-spell',
+  descriptionKey: 'word-spell-description',
   levels: ['1', '2'],
   subject: 'reading',
 };
@@ -36,6 +37,7 @@ describe('GameCard', () => {
         savedConfigs={[]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
       />,
@@ -51,6 +53,7 @@ describe('GameCard', () => {
         savedConfigs={[]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
       />,
@@ -68,6 +71,7 @@ describe('GameCard', () => {
         savedConfigs={[]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={onPlay}
         onPlayWithConfig={vi.fn()}
       />,
@@ -86,6 +90,7 @@ describe('GameCard', () => {
         savedConfigs={[]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
       />,
@@ -104,6 +109,7 @@ describe('GameCard', () => {
         savedConfigs={[mockConfig]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
       />,
@@ -122,6 +128,7 @@ describe('GameCard', () => {
         savedConfigs={[mockConfig]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
       />,
@@ -130,7 +137,7 @@ describe('GameCard', () => {
     expect(screen.getByText('Easy Mode')).toBeInTheDocument();
   });
 
-  it('calls onPlayWithConfig when a config chip is clicked', async () => {
+  it('calls onPlayWithConfig when the play button on a config chip is clicked', async () => {
     const onPlayWithConfig = vi.fn();
     render(
       <GameCard
@@ -138,13 +145,14 @@ describe('GameCard', () => {
         savedConfigs={[mockConfig]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={onPlayWithConfig}
       />,
       { wrapper },
     );
     await userEvent.click(
-      screen.getByRole('button', { name: /^easy mode$/i }),
+      screen.getByRole('button', { name: /play easy mode/i }),
     );
     expect(onPlayWithConfig).toHaveBeenCalledWith(
       'word-spell',
@@ -160,13 +168,14 @@ describe('GameCard', () => {
         savedConfigs={[mockConfig]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={onRemoveConfig}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
       />,
       { wrapper },
     );
     await userEvent.click(
-      screen.getByRole('button', { name: /remove easy mode/i }),
+      screen.getByRole('button', { name: /delete easy mode/i }),
     );
     expect(onRemoveConfig).toHaveBeenCalledWith('cfg-1');
   });
@@ -178,6 +187,7 @@ describe('GameCard', () => {
         savedConfigs={[]}
         onSaveConfig={vi.fn()}
         onRemoveConfig={vi.fn()}
+        onUpdateConfig={vi.fn()}
         onPlay={vi.fn()}
         onPlayWithConfig={vi.fn()}
       />,
