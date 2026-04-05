@@ -127,9 +127,15 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
       const patch: Partial<SavedGameConfigDoc> = { config };
       if (name !== undefined) {
         const trimmed = name.trim();
-        const namesForGame = savedConfigs
-          .filter((d) => d.gameId === doc.gameId && d.id !== id)
-          .map((d) => d.name);
+        const siblings = await db.saved_game_configs
+          .find({
+            selector: {
+              gameId: doc.gameId,
+              id: { $ne: id },
+            },
+          })
+          .exec();
+        const namesForGame = siblings.map((d) => d.name);
         if (namesForGame.includes(trimmed)) {
           throw new Error(
             `A saved config named "${trimmed}" already exists for this game`,
@@ -139,7 +145,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
       }
       await doc.incrementalPatch(patch);
     },
-    [db, savedConfigs],
+    [db],
   );
 
   const persistLastSessionConfig = useCallback(
