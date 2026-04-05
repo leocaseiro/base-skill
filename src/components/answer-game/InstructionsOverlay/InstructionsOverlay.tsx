@@ -164,9 +164,10 @@ export const InstructionsOverlay = ({
                       type="button"
                       aria-label={`Update ${bookmarkName}`}
                       onClick={() => {
-                        const el = document.querySelector(
-                          '#instructions-bookmark-name',
-                        ) as HTMLInputElement | null;
+                        const el =
+                          document.querySelector<HTMLInputElement>(
+                            '#instructions-bookmark-name',
+                          );
                         void onUpdateBookmark(
                           el?.value ?? bookmarkName,
                           config,
