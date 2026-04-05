@@ -70,7 +70,7 @@ export const InstructionsOverlay = ({
     <div
       role="dialog"
       aria-label="Game instructions"
-      className="fixed inset-0 z-40 flex flex-col items-center justify-start overflow-y-auto bg-background/95 px-5 py-8"
+      className="fixed inset-0 z-40 flex flex-col items-center justify-start overflow-y-auto bg-background/95 px-5 pb-8 pt-20"
     >
       <div className="flex w-full max-w-sm flex-col items-center gap-5">
         {/* 1. Game name chip */}
