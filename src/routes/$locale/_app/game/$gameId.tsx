@@ -221,18 +221,20 @@ const resolveSortNumbersConfig = (
   };
   const tr = Math.max(1, merged.totalRounds);
   merged.totalRounds = tr;
-  const roundsOutOfRange =
+  const roundsStale =
     Array.isArray(merged.rounds) &&
-    merged.rounds.some((r) =>
-      r.sequence.some(
-        (v) => v < merged.range.min || v > merged.range.max,
-      ),
+    merged.rounds.some(
+      (r) =>
+        r.sequence.length !== merged.quantity ||
+        r.sequence.some(
+          (v) => v < merged.range.min || v > merged.range.max,
+        ),
     );
   if (
     !Array.isArray(merged.rounds) ||
     merged.rounds.length === 0 ||
     merged.rounds.length !== tr ||
-    roundsOutOfRange
+    roundsStale
   ) {
     merged.rounds = generateSortRounds({
       range: merged.range,
