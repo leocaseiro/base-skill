@@ -12,51 +12,52 @@
 
 ## File Map
 
-| Action | Path |
-| --- | --- |
-| Create | `src/lib/config-fields.ts` |
-| Create | `src/lib/bookmark-colors.ts` |
-| Create | `src/lib/config-tags.ts` |
-| Create | `src/lib/config-tags.test.ts` |
-| Create | `src/games/config-fields-registry.ts` |
-| Create | `src/components/ConfigFormFields.tsx` |
-| Create | `src/components/ConfigFormFields.test.tsx` |
-| Create | `src/components/GameNameChip.tsx` |
-| Create | `src/components/GameNameChip.test.tsx` |
-| Create | `src/components/SavedConfigChip.tsx` |
-| Create | `src/components/SavedConfigChip.test.tsx` |
-| Modify | `src/db/schemas/saved_game_configs.ts` |
-| Modify | `src/db/create-database.ts` |
-| Modify | `src/db/hooks/useSavedConfigs.ts` |
-| Modify | `src/db/hooks/useSavedConfigs.test.tsx` |
-| Modify | `src/games/word-spell/types.ts` |
-| Modify | `src/games/number-match/types.ts` |
-| Modify | `src/games/sort-numbers/types.ts` |
-| Modify | `src/games/registry.ts` |
-| Modify | `src/lib/i18n/locales/en/games.json` |
-| Modify | `src/lib/i18n/locales/pt-BR/games.json` |
-| Modify | `src/lib/i18n/locales/en/common.json` |
-| Modify | `src/lib/i18n/locales/pt-BR/common.json` |
-| Modify | `src/components/GameCard.tsx` |
-| Modify | `src/components/GameCard.test.tsx` |
-| Modify | `src/components/SaveConfigDialog.tsx` |
-| Modify | `src/components/GameGrid.tsx` |
-| Modify | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` |
+| Action | Path                                                                          |
+| ------ | ----------------------------------------------------------------------------- |
+| Create | `src/lib/config-fields.ts`                                                    |
+| Create | `src/lib/bookmark-colors.ts`                                                  |
+| Create | `src/lib/config-tags.ts`                                                      |
+| Create | `src/lib/config-tags.test.ts`                                                 |
+| Create | `src/games/config-fields-registry.ts`                                         |
+| Create | `src/components/ConfigFormFields.tsx`                                         |
+| Create | `src/components/ConfigFormFields.test.tsx`                                    |
+| Create | `src/components/GameNameChip.tsx`                                             |
+| Create | `src/components/GameNameChip.test.tsx`                                        |
+| Create | `src/components/SavedConfigChip.tsx`                                          |
+| Create | `src/components/SavedConfigChip.test.tsx`                                     |
+| Modify | `src/db/schemas/saved_game_configs.ts`                                        |
+| Modify | `src/db/create-database.ts`                                                   |
+| Modify | `src/db/hooks/useSavedConfigs.ts`                                             |
+| Modify | `src/db/hooks/useSavedConfigs.test.tsx`                                       |
+| Modify | `src/games/word-spell/types.ts`                                               |
+| Modify | `src/games/number-match/types.ts`                                             |
+| Modify | `src/games/sort-numbers/types.ts`                                             |
+| Modify | `src/games/registry.ts`                                                       |
+| Modify | `src/lib/i18n/locales/en/games.json`                                          |
+| Modify | `src/lib/i18n/locales/pt-BR/games.json`                                       |
+| Modify | `src/lib/i18n/locales/en/common.json`                                         |
+| Modify | `src/lib/i18n/locales/pt-BR/common.json`                                      |
+| Modify | `src/components/GameCard.tsx`                                                 |
+| Modify | `src/components/GameCard.test.tsx`                                            |
+| Modify | `src/components/SaveConfigDialog.tsx`                                         |
+| Modify | `src/components/GameGrid.tsx`                                                 |
+| Modify | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`      |
 | Modify | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx` |
-| Modify | `src/games/word-spell/WordSpell/WordSpell.tsx` |
-| Modify | `src/games/word-spell/WordSpell/WordSpell.test.tsx` |
-| Modify | `src/games/number-match/NumberMatch/NumberMatch.tsx` |
-| Modify | `src/games/number-match/NumberMatch/NumberMatch.test.tsx` |
-| Modify | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` |
-| Modify | `src/games/sort-numbers/SortNumbers/SortNumbers.test.tsx` |
-| Modify | `src/routes/$locale/_app/game/$gameId.tsx` |
-| Modify | `src/routes/$locale/_app/index.tsx` |
+| Modify | `src/games/word-spell/WordSpell/WordSpell.tsx`                                |
+| Modify | `src/games/word-spell/WordSpell/WordSpell.test.tsx`                           |
+| Modify | `src/games/number-match/NumberMatch/NumberMatch.tsx`                          |
+| Modify | `src/games/number-match/NumberMatch/NumberMatch.test.tsx`                     |
+| Modify | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                          |
+| Modify | `src/games/sort-numbers/SortNumbers/SortNumbers.test.tsx`                     |
+| Modify | `src/routes/$locale/_app/game/$gameId.tsx`                                    |
+| Modify | `src/routes/$locale/_app/index.tsx`                                           |
 
 ---
 
 ## Task 1: Foundation — `ConfigField`, `BookmarkColor`, `configToTags`
 
 **Files:**
+
 - Create: `src/lib/config-fields.ts`
 - Create: `src/lib/bookmark-colors.ts`
 - Create: `src/lib/config-tags.ts`
@@ -73,7 +74,13 @@ export type ConfigField =
       label: string;
       options: { value: string; label: string }[];
     }
-  | { type: 'number'; key: string; label: string; min: number; max: number }
+  | {
+      type: 'number';
+      key: string;
+      label: string;
+      min: number;
+      max: number;
+    }
   | { type: 'checkbox'; key: string; label: string };
 ```
 
@@ -82,8 +89,18 @@ export type ConfigField =
 ```ts
 // src/lib/bookmark-colors.ts
 export const BOOKMARK_COLOR_KEYS = [
-  'indigo', 'teal', 'rose', 'amber', 'sky', 'lime',
-  'purple', 'orange', 'pink', 'emerald', 'slate', 'cyan',
+  'indigo',
+  'teal',
+  'rose',
+  'amber',
+  'sky',
+  'lime',
+  'purple',
+  'orange',
+  'pink',
+  'emerald',
+  'slate',
+  'cyan',
 ] as const;
 
 export type BookmarkColorKey = (typeof BOOKMARK_COLOR_KEYS)[number];
@@ -98,18 +115,102 @@ export type ColorTokens = {
 };
 
 export const BOOKMARK_COLORS: Record<BookmarkColorKey, ColorTokens> = {
-  indigo:  { bg: '#eef2ff', border: '#c7d2fe', tagBg: '#e0e7ff', tagText: '#3730a3', playBg: '#6366f1', headerText: '#3730a3' },
-  teal:    { bg: '#f0fdfa', border: '#99f6e4', tagBg: '#ccfbf1', tagText: '#0f766e', playBg: '#14b8a6', headerText: '#0f766e' },
-  rose:    { bg: '#fff1f2', border: '#fecdd3', tagBg: '#ffe4e6', tagText: '#9f1239', playBg: '#f43f5e', headerText: '#9f1239' },
-  amber:   { bg: '#fffbeb', border: '#fde68a', tagBg: '#fef9c3', tagText: '#92400e', playBg: '#f59e0b', headerText: '#92400e' },
-  sky:     { bg: '#f0f9ff', border: '#bae6fd', tagBg: '#e0f2fe', tagText: '#0c4a6e', playBg: '#0ea5e9', headerText: '#0c4a6e' },
-  lime:    { bg: '#f7fee7', border: '#d9f99d', tagBg: '#ecfccb', tagText: '#3a5c00', playBg: '#84cc16', headerText: '#3a5c00' },
-  purple:  { bg: '#faf5ff', border: '#e9d5ff', tagBg: '#f3e8ff', tagText: '#5b21b6', playBg: '#a855f7', headerText: '#5b21b6' },
-  orange:  { bg: '#fff7ed', border: '#fed7aa', tagBg: '#ffedd5', tagText: '#7c2d12', playBg: '#f97316', headerText: '#7c2d12' },
-  pink:    { bg: '#fdf2f8', border: '#fbcfe8', tagBg: '#fce7f3', tagText: '#831843', playBg: '#ec4899', headerText: '#831843' },
-  emerald: { bg: '#ecfdf5', border: '#a7f3d0', tagBg: '#d1fae5', tagText: '#065f46', playBg: '#10b981', headerText: '#065f46' },
-  slate:   { bg: '#f8fafc', border: '#cbd5e1', tagBg: '#f1f5f9', tagText: '#1e293b', playBg: '#64748b', headerText: '#1e293b' },
-  cyan:    { bg: '#ecfeff', border: '#a5f3fc', tagBg: '#cffafe', tagText: '#164e63', playBg: '#06b6d4', headerText: '#164e63' },
+  indigo: {
+    bg: '#eef2ff',
+    border: '#c7d2fe',
+    tagBg: '#e0e7ff',
+    tagText: '#3730a3',
+    playBg: '#6366f1',
+    headerText: '#3730a3',
+  },
+  teal: {
+    bg: '#f0fdfa',
+    border: '#99f6e4',
+    tagBg: '#ccfbf1',
+    tagText: '#0f766e',
+    playBg: '#14b8a6',
+    headerText: '#0f766e',
+  },
+  rose: {
+    bg: '#fff1f2',
+    border: '#fecdd3',
+    tagBg: '#ffe4e6',
+    tagText: '#9f1239',
+    playBg: '#f43f5e',
+    headerText: '#9f1239',
+  },
+  amber: {
+    bg: '#fffbeb',
+    border: '#fde68a',
+    tagBg: '#fef9c3',
+    tagText: '#92400e',
+    playBg: '#f59e0b',
+    headerText: '#92400e',
+  },
+  sky: {
+    bg: '#f0f9ff',
+    border: '#bae6fd',
+    tagBg: '#e0f2fe',
+    tagText: '#0c4a6e',
+    playBg: '#0ea5e9',
+    headerText: '#0c4a6e',
+  },
+  lime: {
+    bg: '#f7fee7',
+    border: '#d9f99d',
+    tagBg: '#ecfccb',
+    tagText: '#3a5c00',
+    playBg: '#84cc16',
+    headerText: '#3a5c00',
+  },
+  purple: {
+    bg: '#faf5ff',
+    border: '#e9d5ff',
+    tagBg: '#f3e8ff',
+    tagText: '#5b21b6',
+    playBg: '#a855f7',
+    headerText: '#5b21b6',
+  },
+  orange: {
+    bg: '#fff7ed',
+    border: '#fed7aa',
+    tagBg: '#ffedd5',
+    tagText: '#7c2d12',
+    playBg: '#f97316',
+    headerText: '#7c2d12',
+  },
+  pink: {
+    bg: '#fdf2f8',
+    border: '#fbcfe8',
+    tagBg: '#fce7f3',
+    tagText: '#831843',
+    playBg: '#ec4899',
+    headerText: '#831843',
+  },
+  emerald: {
+    bg: '#ecfdf5',
+    border: '#a7f3d0',
+    tagBg: '#d1fae5',
+    tagText: '#065f46',
+    playBg: '#10b981',
+    headerText: '#065f46',
+  },
+  slate: {
+    bg: '#f8fafc',
+    border: '#cbd5e1',
+    tagBg: '#f1f5f9',
+    tagText: '#1e293b',
+    playBg: '#64748b',
+    headerText: '#1e293b',
+  },
+  cyan: {
+    bg: '#ecfeff',
+    border: '#a5f3fc',
+    tagBg: '#cffafe',
+    tagText: '#164e63',
+    playBg: '#06b6d4',
+    headerText: '#164e63',
+  },
 };
 
 export const DEFAULT_BOOKMARK_COLOR: BookmarkColorKey = 'indigo';
@@ -171,15 +272,17 @@ Expected: FAIL with "Cannot find module './config-tags'"
 type Formatter = (v: unknown) => string | null;
 
 const KEY_FORMATTERS: [string, Formatter][] = [
-  ['inputMethod',  (v) => String(v)],
-  ['mode',         (v) => String(v)],
-  ['tileUnit',     (v) => String(v)],
-  ['direction',    (v) => String(v)],
-  ['totalRounds',  (v) => `${String(v)} rounds`],
-  ['ttsEnabled',   (v) => v === true ? 'TTS on' : null],
+  ['inputMethod', (v) => String(v)],
+  ['mode', (v) => String(v)],
+  ['tileUnit', (v) => String(v)],
+  ['direction', (v) => String(v)],
+  ['totalRounds', (v) => `${String(v)} rounds`],
+  ['ttsEnabled', (v) => (v === true ? 'TTS on' : null)],
 ];
 
-export const configToTags = (config: Record<string, unknown>): string[] => {
+export const configToTags = (
+  config: Record<string, unknown>,
+): string[] => {
   const tags: string[] = [];
   for (const [key, format] of KEY_FORMATTERS) {
     if (key in config) {
@@ -212,6 +315,7 @@ git commit -m "feat: add ConfigField type, bookmark color palette, and configToT
 ## Task 2: DB Schema — add `color` to `SavedGameConfigDoc` + `updateConfig` hook method
 
 **Files:**
+
 - Modify: `src/db/schemas/saved_game_configs.ts`
 - Modify: `src/db/create-database.ts`
 - Modify: `src/db/hooks/useSavedConfigs.ts`
@@ -259,12 +363,18 @@ it('updateConfig() patches config and optionally renames', async () => {
   );
   const id = result.current.savedConfigs[0]!.id;
   await act(async () => {
-    await result.current.updateConfig(id, { totalRounds: 8 }, 'Easy Mode v2');
+    await result.current.updateConfig(
+      id,
+      { totalRounds: 8 },
+      'Easy Mode v2',
+    );
   });
   await waitFor(() =>
     expect(result.current.savedConfigs[0]?.name).toBe('Easy Mode v2'),
   );
-  expect(result.current.savedConfigs[0]?.config).toEqual({ totalRounds: 8 });
+  expect(result.current.savedConfigs[0]?.config).toEqual({
+    totalRounds: 8,
+  });
 });
 
 it('updateConfig() throws when new name already exists for same gameId', async () => {
@@ -273,8 +383,18 @@ it('updateConfig() throws when new name already exists for same gameId', async (
   });
   await waitFor(() => expect(result.current.isReady).toBe(true));
   await act(async () => {
-    await result.current.save({ gameId: 'word-spell', name: 'A', config: {}, color: 'indigo' });
-    await result.current.save({ gameId: 'word-spell', name: 'B', config: {}, color: 'teal' });
+    await result.current.save({
+      gameId: 'word-spell',
+      name: 'A',
+      config: {},
+      color: 'indigo',
+    });
+    await result.current.save({
+      gameId: 'word-spell',
+      name: 'B',
+      config: {},
+      color: 'teal',
+    });
   });
   await waitFor(() =>
     expect(result.current.savedConfigs).toHaveLength(2),
@@ -311,22 +431,31 @@ export type SavedGameConfigDoc = {
   color: string;
 };
 
-export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> = {
-  version: 1,
-  primaryKey: 'id',
-  type: 'object',
-  properties: {
-    id: { type: 'string', maxLength: 36 },
-    profileId: { type: 'string', maxLength: 36 },
-    gameId: { type: 'string', maxLength: 64 },
-    name: { type: 'string', maxLength: 128 },
-    config: { type: 'object' },
-    createdAt: { type: 'string', format: 'date-time' },
-    color: { type: 'string', maxLength: 32 },
-  },
-  required: ['id', 'profileId', 'gameId', 'name', 'config', 'createdAt', 'color'],
-  additionalProperties: false,
-};
+export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
+  {
+    version: 1,
+    primaryKey: 'id',
+    type: 'object',
+    properties: {
+      id: { type: 'string', maxLength: 36 },
+      profileId: { type: 'string', maxLength: 36 },
+      gameId: { type: 'string', maxLength: 64 },
+      name: { type: 'string', maxLength: 128 },
+      config: { type: 'object' },
+      createdAt: { type: 'string', format: 'date-time' },
+      color: { type: 'string', maxLength: 32 },
+    },
+    required: [
+      'id',
+      'profileId',
+      'gameId',
+      'name',
+      'config',
+      'createdAt',
+      'color',
+    ],
+    additionalProperties: false,
+  };
 ```
 
 - [ ] **Step 2.4: Add migration strategy in `src/db/create-database.ts`**
@@ -445,6 +574,7 @@ git commit -m "feat(db): add color field to saved_game_configs, add updateConfig
 ## Task 3: Game `configFields` exports + registry lookup
 
 **Files:**
+
 - Modify: `src/games/word-spell/types.ts`
 - Modify: `src/games/number-match/types.ts`
 - Modify: `src/games/sort-numbers/types.ts`
@@ -489,7 +619,13 @@ export const wordSpellConfigFields: ConfigField[] = [
       { value: 'word', label: 'word' },
     ],
   },
-  { type: 'number', key: 'totalRounds', label: 'Total rounds', min: 1, max: 8 },
+  {
+    type: 'number',
+    key: 'totalRounds',
+    label: 'Total rounds',
+    min: 1,
+    max: 8,
+  },
   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
 ];
@@ -534,7 +670,13 @@ export const numberMatchConfigFields: ConfigField[] = [
       { value: 'fingers', label: 'fingers' },
     ],
   },
-  { type: 'number', key: 'totalRounds', label: 'Total rounds', min: 1, max: 50 },
+  {
+    type: 'number',
+    key: 'totalRounds',
+    label: 'Total rounds',
+    min: 1,
+    max: 50,
+  },
   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
 ];
@@ -567,8 +709,20 @@ export const sortNumbersConfigFields: ConfigField[] = [
       { value: 'descending', label: 'descending' },
     ],
   },
-  { type: 'number', key: 'quantity', label: 'Quantity', min: 2, max: 8 },
-  { type: 'number', key: 'totalRounds', label: 'Total rounds', min: 1, max: 30 },
+  {
+    type: 'number',
+    key: 'quantity',
+    label: 'Quantity',
+    min: 2,
+    max: 8,
+  },
+  {
+    type: 'number',
+    key: 'totalRounds',
+    label: 'Total rounds',
+    min: 1,
+    max: 30,
+  },
   { type: 'checkbox', key: 'allowSkips', label: 'Allow skips' },
   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
@@ -586,10 +740,14 @@ import { wordSpellConfigFields } from './word-spell/types';
 
 export const getConfigFields = (gameId: string): ConfigField[] => {
   switch (gameId) {
-    case 'word-spell':    return wordSpellConfigFields;
-    case 'number-match':  return numberMatchConfigFields;
-    case 'sort-numbers':  return sortNumbersConfigFields;
-    default:              return [];
+    case 'word-spell':
+      return wordSpellConfigFields;
+    case 'number-match':
+      return numberMatchConfigFields;
+    case 'sort-numbers':
+      return sortNumbersConfigFields;
+    default:
+      return [];
   }
 };
 ```
@@ -614,6 +772,7 @@ git commit -m "feat: export configFields from each game, add getConfigFields reg
 ## Task 4: `ConfigFormFields` — shared form renderer
 
 **Files:**
+
 - Create: `src/components/ConfigFormFields.tsx`
 - Create: `src/components/ConfigFormFields.test.tsx`
 
@@ -637,7 +796,13 @@ const fields: ConfigField[] = [
       { value: 'type', label: 'type' },
     ],
   },
-  { type: 'number', key: 'totalRounds', label: 'Total rounds', min: 1, max: 10 },
+  {
+    type: 'number',
+    key: 'totalRounds',
+    label: 'Total rounds',
+    min: 1,
+    max: 10,
+  },
   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
 ];
 
@@ -650,45 +815,77 @@ const config: Record<string, unknown> = {
 describe('ConfigFormFields', () => {
   it('renders a label and select for select fields', () => {
     render(
-      <ConfigFormFields fields={fields} config={config} onChange={vi.fn()} />,
+      <ConfigFormFields
+        fields={fields}
+        config={config}
+        onChange={vi.fn()}
+      />,
     );
     expect(screen.getByLabelText('Input method')).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Input method' })).toHaveValue('drag');
+    expect(
+      screen.getByRole('combobox', { name: 'Input method' }),
+    ).toHaveValue('drag');
   });
 
   it('renders a label and number input for number fields', () => {
     render(
-      <ConfigFormFields fields={fields} config={config} onChange={vi.fn()} />,
+      <ConfigFormFields
+        fields={fields}
+        config={config}
+        onChange={vi.fn()}
+      />,
     );
     expect(screen.getByLabelText('Total rounds')).toHaveValue(5);
   });
 
   it('renders a checkbox for checkbox fields', () => {
     render(
-      <ConfigFormFields fields={fields} config={config} onChange={vi.fn()} />,
+      <ConfigFormFields
+        fields={fields}
+        config={config}
+        onChange={vi.fn()}
+      />,
     );
-    expect(screen.getByRole('checkbox', { name: 'TTS enabled' })).toBeChecked();
+    expect(
+      screen.getByRole('checkbox', { name: 'TTS enabled' }),
+    ).toBeChecked();
   });
 
   it('calls onChange with updated config when select changes', async () => {
     const onChange = vi.fn();
     render(
-      <ConfigFormFields fields={fields} config={config} onChange={onChange} />,
+      <ConfigFormFields
+        fields={fields}
+        config={config}
+        onChange={onChange}
+      />,
     );
     await userEvent.selectOptions(
       screen.getByRole('combobox', { name: 'Input method' }),
       'type',
     );
-    expect(onChange).toHaveBeenCalledWith({ ...config, inputMethod: 'type' });
+    expect(onChange).toHaveBeenCalledWith({
+      ...config,
+      inputMethod: 'type',
+    });
   });
 
   it('calls onChange with updated config when checkbox toggles', async () => {
     const onChange = vi.fn();
     render(
-      <ConfigFormFields fields={fields} config={config} onChange={onChange} />,
+      <ConfigFormFields
+        fields={fields}
+        config={config}
+        onChange={onChange}
+      />,
     );
-    await userEvent.click(screen.getByRole('checkbox', { name: 'TTS enabled' }));
-    expect(onChange).toHaveBeenCalledWith({ ...config, ttsEnabled: false });
+    await userEvent.click(
+      screen.getByRole('checkbox', { name: 'TTS enabled' }),
+    );
+    expect(onChange).toHaveBeenCalledWith({
+      ...config,
+      ttsEnabled: false,
+    });
   });
 });
 ```
@@ -760,7 +957,10 @@ export const ConfigFormFields = ({
               min={field.min}
               max={field.max}
               onChange={(e) =>
-                onChange({ ...config, [field.key]: Number(e.target.value) })
+                onChange({
+                  ...config,
+                  [field.key]: Number(e.target.value),
+                })
               }
               className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
             />
@@ -811,6 +1011,7 @@ git commit -m "feat: add ConfigFormFields shared form renderer"
 ## Task 5: `GameNameChip` — display-only identity chip
 
 **Files:**
+
 - Create: `src/components/GameNameChip.tsx`
 - Create: `src/components/GameNameChip.test.tsx`
 
@@ -907,7 +1108,11 @@ export const GameNameChip = ({
         {bookmarkName && (
           <span
             className="rounded px-2 py-0.5 text-xs font-semibold"
-            style={{ background: colors.tagBg, color: colors.headerText, border: `1px solid ${colors.border}` }}
+            style={{
+              background: colors.tagBg,
+              color: colors.headerText,
+              border: `1px solid ${colors.border}`,
+            }}
           >
             {bookmarkName}
           </span>
@@ -946,6 +1151,7 @@ git commit -m "feat: add GameNameChip display-only identity chip"
 ## Task 6: `SavedConfigChip` — expandable bookmark chip with inline form
 
 **Files:**
+
 - Create: `src/components/SavedConfigChip.tsx`
 - Create: `src/components/SavedConfigChip.test.tsx`
 
@@ -1020,7 +1226,9 @@ describe('SavedConfigChip', () => {
         onSave={vi.fn()}
       />,
     );
-    await userEvent.click(screen.getByRole('button', { name: /play easy mode/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /play easy mode/i }),
+    );
     expect(onPlay).toHaveBeenCalledWith('cfg-1');
   });
 
@@ -1035,7 +1243,9 @@ describe('SavedConfigChip', () => {
         onSave={vi.fn()}
       />,
     );
-    await userEvent.click(screen.getByRole('button', { name: /delete easy mode/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /delete easy mode/i }),
+    );
     expect(onDelete).toHaveBeenCalledWith('cfg-1');
   });
 
@@ -1049,7 +1259,9 @@ describe('SavedConfigChip', () => {
         onSave={vi.fn()}
       />,
     );
-    await userEvent.click(screen.getByRole('button', { name: /expand easy mode/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /expand easy mode/i }),
+    );
     expect(screen.getByLabelText('Input method')).toBeInTheDocument();
   });
 
@@ -1064,8 +1276,12 @@ describe('SavedConfigChip', () => {
         onSave={onSave}
       />,
     );
-    await userEvent.click(screen.getByRole('button', { name: /expand easy mode/i }));
-    await userEvent.click(screen.getByRole('button', { name: /^save$/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /expand easy mode/i }),
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /^save$/i }),
+    );
     expect(onSave).toHaveBeenCalledWith(
       'cfg-1',
       expect.objectContaining({ inputMethod: 'drag' }),
@@ -1084,10 +1300,16 @@ describe('SavedConfigChip', () => {
         onSave={onSave}
       />,
     );
-    await userEvent.click(screen.getByRole('button', { name: /expand easy mode/i }));
-    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /expand easy mode/i }),
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /cancel/i }),
+    );
     expect(onSave).not.toHaveBeenCalled();
-    expect(screen.queryByLabelText('Input method')).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText('Input method'),
+    ).not.toBeInTheDocument();
   });
 });
 ```
@@ -1139,7 +1361,8 @@ export const SavedConfigChip = ({
   const [editConfig, setEditConfig] = useState(doc.config);
   const [editName, setEditName] = useState(doc.name);
 
-  const colorKey = (doc.color as BookmarkColorKey) ?? DEFAULT_BOOKMARK_COLOR;
+  const colorKey =
+    (doc.color as BookmarkColorKey) ?? DEFAULT_BOOKMARK_COLOR;
   const colors = BOOKMARK_COLORS[colorKey];
   const tags = configToTags(doc.config);
 
@@ -1181,7 +1404,11 @@ export const SavedConfigChip = ({
           </span>
           <span
             className="ml-auto text-xs"
-            style={{ color: expanded ? 'rgba(255,255,255,0.7)' : colors.tagText }}
+            style={{
+              color: expanded
+                ? 'rgba(255,255,255,0.7)'
+                : colors.tagText,
+            }}
           >
             {expanded ? '▲' : '▼'}
           </span>
@@ -1216,7 +1443,10 @@ export const SavedConfigChip = ({
             <span
               key={tag}
               className="rounded px-2 py-0.5 text-xs font-medium"
-              style={{ background: colors.tagBg, color: colors.tagText }}
+              style={{
+                background: colors.tagBg,
+                color: colors.tagText,
+              }}
             >
               {tag}
             </span>
@@ -1226,7 +1456,10 @@ export const SavedConfigChip = ({
 
       {/* Expanded: inline form */}
       {expanded && (
-        <div className="flex flex-col gap-3 p-3" style={{ background: colors.bg }}>
+        <div
+          className="flex flex-col gap-3 p-3"
+          style={{ background: colors.bg }}
+        >
           <ConfigFormFields
             fields={configFields}
             config={editConfig}
@@ -1286,6 +1519,7 @@ git commit -m "feat: add SavedConfigChip expandable bookmark chip with inline fo
 ## Task 7: `GameCard` + i18n + `SaveConfigDialog` updates
 
 **Files:**
+
 - Modify: `src/games/registry.ts`
 - Modify: `src/lib/i18n/locales/en/games.json`
 - Modify: `src/lib/i18n/locales/pt-BR/games.json`
@@ -1415,7 +1649,9 @@ export const SaveConfigDialog = ({
 }: SaveConfigDialogProps) => {
   const { t } = useTranslation('common');
   const [name, setName] = useState(suggestedName);
-  const [color, setColor] = useState<BookmarkColorKey>(DEFAULT_BOOKMARK_COLOR);
+  const [color, setColor] = useState<BookmarkColorKey>(
+    DEFAULT_BOOKMARK_COLOR,
+  );
   const [error, setError] = useState('');
 
   const handleSave = () => {
@@ -1436,7 +1672,10 @@ export const SaveConfigDialog = ({
   const previewColors = BOOKMARK_COLORS[color];
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => !isOpen && onCancel()}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t('saveConfig.title')}</DialogTitle>
@@ -1480,11 +1719,11 @@ export const SaveConfigDialog = ({
                   style={{
                     background: BOOKMARK_COLORS[key].playBg,
                     borderColor:
-                      color === key ? BOOKMARK_COLORS[key].playBg : 'transparent',
-                    outline:
                       color === key
-                        ? `3px solid white`
-                        : undefined,
+                        ? BOOKMARK_COLORS[key].playBg
+                        : 'transparent',
+                    outline:
+                      color === key ? `3px solid white` : undefined,
                     outlineOffset: color === key ? '-5px' : undefined,
                   }}
                 />
@@ -1557,7 +1796,11 @@ import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 type GameCardProps = {
   entry: GameCatalogEntry;
   savedConfigs: SavedGameConfigDoc[];
-  onSaveConfig: (gameId: string, name: string, color: BookmarkColorKey) => Promise<void>;
+  onSaveConfig: (
+    gameId: string,
+    name: string,
+    color: BookmarkColorKey,
+  ) => Promise<void>;
   onRemoveConfig: (configId: string) => Promise<void>;
   onUpdateConfig: (
     configId: string,
@@ -1682,7 +1925,11 @@ Add `onUpdateConfig` to `GameGridProps` and pass it down to `GameCard`:
 type GameGridProps = {
   entries: GameCatalogEntry[];
   savedConfigs: SavedGameConfigDoc[];
-  onSaveConfig: (gameId: string, name: string, color: BookmarkColorKey) => Promise<void>;
+  onSaveConfig: (
+    gameId: string,
+    name: string,
+    color: BookmarkColorKey,
+  ) => Promise<void>;
   onRemoveConfig: (configId: string) => Promise<void>;
   onUpdateConfig: (
     configId: string,
@@ -1771,6 +2018,7 @@ git commit -m "feat: add game descriptions, color picker to save dialog, SavedCo
 ## Task 8: `InstructionsOverlay` redesign
 
 **Files:**
+
 - Modify: `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`
 - Modify: `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx`
 
@@ -1853,18 +2101,24 @@ describe('InstructionsOverlay', () => {
   it('calls onStart when "Let\'s go!" is clicked', async () => {
     const onStart = vi.fn();
     render(<InstructionsOverlay {...baseProps} onStart={onStart} />);
-    await userEvent.click(screen.getByRole('button', { name: /let's go/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /let's go/i }),
+    );
     expect(onStart).toHaveBeenCalledOnce();
   });
 
   it('renders settings chip collapsed by default', () => {
     render(<InstructionsOverlay {...baseProps} />);
-    expect(screen.queryByLabelText('Input method')).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText('Input method'),
+    ).not.toBeInTheDocument();
   });
 
   it('expands settings chip when tapped', async () => {
     render(<InstructionsOverlay {...baseProps} />);
-    await userEvent.click(screen.getByRole('button', { name: /settings/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /settings/i }),
+    );
     expect(screen.getByLabelText('Input method')).toBeInTheDocument();
   });
 
@@ -1881,7 +2135,9 @@ describe('InstructionsOverlay', () => {
 
   it('shows "Save as bookmark" input when no bookmarkName', async () => {
     render(<InstructionsOverlay {...baseProps} />);
-    await userEvent.click(screen.getByRole('button', { name: /settings/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /settings/i }),
+    );
     expect(
       screen.getByPlaceholderText(/e\.g\. easy mode/i),
     ).toBeInTheDocument();
@@ -1897,7 +2153,9 @@ describe('InstructionsOverlay', () => {
         onUpdateBookmark={onUpdateBookmark}
       />,
     );
-    await userEvent.click(screen.getByRole('button', { name: /settings/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /settings/i }),
+    );
     expect(
       screen.getByRole('button', { name: /update/i }),
     ).toBeInTheDocument();
@@ -1943,7 +2201,10 @@ interface InstructionsOverlayProps {
   subject?: string;
   config: Record<string, unknown>;
   onConfigChange: (config: Record<string, unknown>) => void;
-  onSaveBookmark: (name: string, color: BookmarkColorKey) => Promise<void>;
+  onSaveBookmark: (
+    name: string,
+    color: BookmarkColorKey,
+  ) => Promise<void>;
   onUpdateBookmark?: (
     name: string,
     config: Record<string, unknown>,
@@ -1971,11 +2232,14 @@ export const InstructionsOverlay = ({
 
   useEffect(() => {
     if (ttsEnabled) speak(text);
-    return () => { cancelSpeech(); };
+    return () => {
+      cancelSpeech();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const settingsColors = BOOKMARK_COLORS[bookmarkColor ?? DEFAULT_BOOKMARK_COLOR];
+  const settingsColors =
+    BOOKMARK_COLORS[bookmarkColor ?? DEFAULT_BOOKMARK_COLOR];
   const tags = configToTags(config);
 
   return (
@@ -1985,7 +2249,6 @@ export const InstructionsOverlay = ({
       className="fixed inset-0 z-40 flex flex-col items-center justify-start overflow-y-auto bg-background/95 px-5 py-8"
     >
       <div className="flex w-full max-w-sm flex-col items-center gap-5">
-
         {/* 1. Game name chip */}
         <div className="w-full">
           <GameNameChip
@@ -2032,7 +2295,11 @@ export const InstructionsOverlay = ({
             </span>
             <span
               className="text-xs"
-              style={{ color: settingsOpen ? 'rgba(255,255,255,0.7)' : undefined }}
+              style={{
+                color: settingsOpen
+                  ? 'rgba(255,255,255,0.7)'
+                  : undefined,
+              }}
             >
               {settingsOpen ? '▲' : '▼'}
             </span>
@@ -2113,7 +2380,9 @@ export const InstructionsOverlay = ({
                       <input
                         type="text"
                         value={newBookmarkName}
-                        onChange={(e) => setNewBookmarkName(e.target.value)}
+                        onChange={(e) =>
+                          setNewBookmarkName(e.target.value)
+                        }
                         placeholder="e.g. Easy Mode"
                         className="h-12 flex-1 rounded-lg border border-input bg-background px-3 text-sm"
                       />
@@ -2180,6 +2449,7 @@ git commit -m "feat: redesign InstructionsOverlay with game chip, settings, book
 ## Task 9: Lift instructions + remove config panels from game components and `$gameId.tsx`
 
 **Files:**
+
 - Modify: `src/games/word-spell/WordSpell/WordSpell.tsx`
 - Modify: `src/games/word-spell/WordSpell/WordSpell.test.tsx`
 - Modify: `src/games/number-match/NumberMatch/NumberMatch.tsx`
@@ -2209,6 +2479,7 @@ In `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`, apply the same three re
 - [ ] **Step 9.4: Update game component tests to remove instructions-screen assertions**
 
 In each of the three `*.test.tsx` files (`WordSpell.test.tsx`, `NumberMatch.test.tsx`, `SortNumbers.test.tsx`):
+
 - Remove any test that clicks "Let's go!" or checks for "instructions" overlay rendering.
 - These tests will be covered by `InstructionsOverlay.test.tsx` already.
 
@@ -2227,6 +2498,7 @@ Expected: all remaining tests PASS
 Replace the relevant sections of `src/routes/$locale/_app/game/$gameId.tsx`.
 
 **Add to imports:**
+
 ```ts
 import { useTranslation } from 'react-i18next';
 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
@@ -2238,6 +2510,7 @@ import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 ```
 
 **Update `GameRouteLoaderData`:**
+
 ```ts
 interface GameRouteLoaderData {
   config: ResolvedGameConfig;
@@ -2252,6 +2525,7 @@ interface GameRouteLoaderData {
 ```
 
 **Update the loader** to also fetch and return bookmark metadata:
+
 ```ts
 let bookmarkId: string | null = null;
 let bookmarkName: string | null = null;
@@ -2274,7 +2548,16 @@ if (deps.configId) {
   if (lastDoc) gameSpecificConfig = lastDoc.config;
 }
 
-return { config, initialLog, sessionId, meta, gameSpecificConfig, bookmarkId, bookmarkName, bookmarkColor };
+return {
+  config,
+  initialLog,
+  sessionId,
+  meta,
+  gameSpecificConfig,
+  bookmarkId,
+  bookmarkName,
+  bookmarkColor,
+};
 ```
 
 **Delete** the three `*ConfigPanel` components (`SortNumbersConfigPanel`, `WordSpellConfigPanel`, `NumberMatchConfigPanel`) entirely.
@@ -2303,8 +2586,13 @@ const WordSpellGameBody = ({
   );
   const [cfg, setCfg] = useState(initial);
   const [showInstructions, setShowInstructions] = useState(true);
-  useEffect(() => { setCfg(initial); }, [initial]);
-  usePersistLastGameConfig(gameId, cfg as unknown as Record<string, unknown>);
+  useEffect(() => {
+    setCfg(initial);
+  }, [initial]);
+  usePersistLastGameConfig(
+    gameId,
+    cfg as unknown as Record<string, unknown>,
+  );
 
   if (showInstructions) {
     return (
@@ -2366,8 +2654,13 @@ const NumberMatchGameBody = ({
   );
   const [cfg, setCfg] = useState(initial);
   const [showInstructions, setShowInstructions] = useState(true);
-  useEffect(() => { setCfg(initial); }, [initial]);
-  usePersistLastGameConfig(gameId, cfg as unknown as Record<string, unknown>);
+  useEffect(() => {
+    setCfg(initial);
+  }, [initial]);
+  usePersistLastGameConfig(
+    gameId,
+    cfg as unknown as Record<string, unknown>,
+  );
 
   if (showInstructions) {
     return (
@@ -2429,8 +2722,13 @@ const SortNumbersGameBody = ({
   );
   const [cfg, setCfg] = useState(initial);
   const [showInstructions, setShowInstructions] = useState(true);
-  useEffect(() => { setCfg(initial); }, [initial]);
-  usePersistLastGameConfig(gameId, cfg as unknown as Record<string, unknown>);
+  useEffect(() => {
+    setCfg(initial);
+  }, [initial]);
+  usePersistLastGameConfig(
+    gameId,
+    cfg as unknown as Record<string, unknown>,
+  );
 
   if (showInstructions) {
     return (
@@ -2585,6 +2883,7 @@ git commit -m "feat: lift instructions to game bodies, remove config panels from
 ## Task 10: `index.tsx` — snapshot last-played config on bookmark save
 
 **Files:**
+
 - Modify: `src/routes/$locale/_app/index.tsx`
 
 - [ ] **Step 10.1: Update `handleSaveConfig` in `src/routes/$locale/_app/index.tsx`**
@@ -2609,7 +2908,12 @@ const handleSaveConfig = async (
     .findOne(lastSessionSavedConfigId(gameId))
     .exec();
   const lastConfig = lastDoc?.config ?? {};
-  await save({ gameId, name, config: lastConfig, color: color as BookmarkColorKey });
+  await save({
+    gameId,
+    name,
+    config: lastConfig,
+    color: color as BookmarkColorKey,
+  });
 };
 ```
 
@@ -2664,24 +2968,24 @@ git commit -m "feat: snapshot last-played config when saving a bookmark from hom
 
 After writing the plan, checking spec coverage:
 
-| Spec requirement | Covered by task |
-| --- | --- |
-| Hide config panel during gameplay | Task 9 (remove `*ConfigPanel`) |
-| GameCard: game description | Task 7 (descriptionKey + rendering) |
-| GameCard: expandable bookmark chips with config tags | Task 6 + 7 |
-| GameCard: inline edit form | Task 4 + 6 |
-| Bookmark color (chosen at save time) | Task 1 + 2 + 7 |
-| Save config snapshots last-played config | Task 10 |
-| `configToTags` auto-generates summary | Task 1 |
-| `ConfigField` / `configFields` per game | Task 3 |
-| `config-fields-registry` lookup | Task 3 |
-| `GameNameChip` display-only | Task 5 |
-| `SavedConfigChip` component | Task 6 |
-| `useSavedConfigs.updateConfig` | Task 2 |
-| `SavedGameConfigDoc.color` + migration | Task 2 |
-| `InstructionsOverlay` redesign | Task 8 |
-| Instructions: GameNameChip → text → Let's go! → ⚙️ Settings | Task 8 |
-| Settings: collapsed with tags, expandable with form | Task 8 |
-| Settings: Update bookmark / Save as new / Save bookmark | Task 8 |
-| Lift instructions out of game components | Task 9 |
-| Bookmark metadata (id, name, color) in loader | Task 9 |
+| Spec requirement                                            | Covered by task                     |
+| ----------------------------------------------------------- | ----------------------------------- |
+| Hide config panel during gameplay                           | Task 9 (remove `*ConfigPanel`)      |
+| GameCard: game description                                  | Task 7 (descriptionKey + rendering) |
+| GameCard: expandable bookmark chips with config tags        | Task 6 + 7                          |
+| GameCard: inline edit form                                  | Task 4 + 6                          |
+| Bookmark color (chosen at save time)                        | Task 1 + 2 + 7                      |
+| Save config snapshots last-played config                    | Task 10                             |
+| `configToTags` auto-generates summary                       | Task 1                              |
+| `ConfigField` / `configFields` per game                     | Task 3                              |
+| `config-fields-registry` lookup                             | Task 3                              |
+| `GameNameChip` display-only                                 | Task 5                              |
+| `SavedConfigChip` component                                 | Task 6                              |
+| `useSavedConfigs.updateConfig`                              | Task 2                              |
+| `SavedGameConfigDoc.color` + migration                      | Task 2                              |
+| `InstructionsOverlay` redesign                              | Task 8                              |
+| Instructions: GameNameChip → text → Let's go! → ⚙️ Settings | Task 8                              |
+| Settings: collapsed with tags, expandable with form         | Task 8                              |
+| Settings: Update bookmark / Save as new / Save bookmark     | Task 8                              |
+| Lift instructions out of game components                    | Task 9                              |
+| Bookmark metadata (id, name, color) in loader               | Task 9                              |
