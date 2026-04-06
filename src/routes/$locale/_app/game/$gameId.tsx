@@ -121,8 +121,11 @@ const resizeNumberMatchRounds = (
   range: { min: number; max: number },
 ): NumberMatchRound[] => {
   const n = Math.max(1, Math.min(count, 50));
-  const next = prev.slice(0, n).map((r) => ({ ...r }));
   const span = Math.max(1, range.max - range.min + 1);
+  const next = prev.slice(0, n).map((r) => {
+    if (r.value >= range.min && r.value <= range.max) return { ...r };
+    return { value: range.min + Math.floor(Math.random() * span) };
+  });
   while (next.length < n) {
     next.push({
       value: range.min + Math.floor(Math.random() * span),
@@ -218,10 +221,18 @@ const resolveSortNumbersConfig = (
   };
   const tr = Math.max(1, merged.totalRounds);
   merged.totalRounds = tr;
+  const roundsOutOfRange =
+    Array.isArray(merged.rounds) &&
+    merged.rounds.some((r) =>
+      r.sequence.some(
+        (v) => v < merged.range.min || v > merged.range.max,
+      ),
+    );
   if (
     !Array.isArray(merged.rounds) ||
     merged.rounds.length === 0 ||
-    merged.rounds.length !== tr
+    merged.rounds.length !== tr ||
+    roundsOutOfRange
   ) {
     merged.rounds = generateSortRounds({
       range: merged.range,
