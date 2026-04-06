@@ -103,11 +103,9 @@ const AnswerSlot = ({
       onClick={handleSlotClick}
       onKeyDown={handleSlotKeyDown}
       className={[
-        'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
+        'relative flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
         'border-border',
-        isActive && !label
-          ? 'animate-pulse ring-2 ring-primary ring-offset-2'
-          : '',
+        isActive && !label ? 'ring-2 ring-primary ring-offset-2' : '',
         isWrong
           ? 'border-destructive bg-destructive/10 text-destructive'
           : '',
@@ -118,6 +116,12 @@ const AnswerSlot = ({
         .filter(Boolean)
         .join(' ')}
     >
+      {isActive && !label && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+        />
+      )}
       {label ? (
         <button
           ref={dragRef}
