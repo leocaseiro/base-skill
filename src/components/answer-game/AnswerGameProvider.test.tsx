@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { AnswerGameProvider } from './AnswerGameProvider';
+import { useTouchKeyboard } from './TouchKeyboardContext';
 import { useAnswerGameContext } from './useAnswerGameContext';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
 import type { AnswerGameConfig } from './types';
@@ -70,5 +71,26 @@ describe('AnswerGameProvider', () => {
       'useAnswerGameDispatch must be used inside AnswerGameProvider',
     );
     console.error = consoleError;
+  });
+
+  it('provides null TouchKeyboardContext on non-touch devices', () => {
+    const FocusReader = () => {
+      const focusKeyboard = useTouchKeyboard();
+      return (
+        <div data-testid="has-focus">
+          {focusKeyboard === null ? 'null' : 'fn'}
+        </div>
+      );
+    };
+
+    render(
+      <AnswerGameProvider
+        config={{ ...gameConfig, inputMethod: 'type' }}
+      >
+        <FocusReader />
+      </AnswerGameProvider>,
+    );
+
+    expect(screen.getByTestId('has-focus')).toHaveTextContent('null');
   });
 });

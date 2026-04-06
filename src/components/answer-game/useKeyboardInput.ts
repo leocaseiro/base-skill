@@ -10,7 +10,11 @@ export const useKeyboardInput = (): void => {
     if (state.config.inputMethod !== 'type') return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLInputElement) return;
+      if (
+        event.target instanceof HTMLInputElement &&
+        !event.target.dataset['touchKeyboard']
+      )
+        return;
       if (event.target instanceof HTMLTextAreaElement) return;
 
       const char = event.key.toLowerCase();

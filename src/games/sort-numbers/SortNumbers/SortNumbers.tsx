@@ -166,6 +166,7 @@ export const SortNumbers = ({ config }: SortNumbersProps) => {
       totalRounds: config.rounds.length,
       roundsInOrder: config.roundsInOrder,
       ttsEnabled: config.ttsEnabled,
+      touchKeyboardInputMode: 'numeric',
       initialTiles: tiles,
       initialZones: zones,
     }),
