@@ -13,6 +13,7 @@ vi.mock('@tanstack/react-router', () => ({
 vi.mock('@/lib/speech/SpeechOutput', () => ({
   speak: vi.fn(),
   cancelSpeech: vi.fn(),
+  isSpeechActive: vi.fn().mockReturnValue(false),
 }));
 vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),

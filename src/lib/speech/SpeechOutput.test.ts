@@ -1,9 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cancelSpeech, speak } from './SpeechOutput';
 
-const makeSynth = (voices: Partial<SpeechSynthesisVoice>[] = []) => ({
+const makeSynth = (
+  voices: Partial<SpeechSynthesisVoice>[] = [],
+  { speaking = false, pending = false } = {},
+) => ({
   cancel: vi.fn(),
   speak: vi.fn(),
+  speaking,
+  pending,
   getVoices: vi.fn().mockReturnValue(voices),
   addEventListener: vi.fn(),
   removeEventListener: vi.fn(),
@@ -132,6 +137,46 @@ describe('SpeechOutput', () => {
     };
     expect(utterance.rate).toBe(1.5);
     expect(utterance.volume).toBe(0.5);
+  });
+
+  it('speak does not call synth.cancel()', () => {
+    const synth = makeSynth([
+      { name: 'Daniel' } as SpeechSynthesisVoice,
+    ]);
+    vi.stubGlobal('speechSynthesis', synth);
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      class {
+        voice: SpeechSynthesisVoice | null = null;
+        rate = 1;
+        volume = 1;
+        lang = '';
+        constructor(public text: string) {}
+      },
+    );
+    speak('hello');
+    expect(synth.cancel).not.toHaveBeenCalled();
+  });
+
+  it('cancelSpeech calls synth.cancel() when synth.speaking is true', () => {
+    const synth = makeSynth([], { speaking: true });
+    vi.stubGlobal('speechSynthesis', synth);
+    cancelSpeech();
+    expect(synth.cancel).toHaveBeenCalledOnce();
+  });
+
+  it('cancelSpeech calls synth.cancel() when synth.pending is true', () => {
+    const synth = makeSynth([], { pending: true });
+    vi.stubGlobal('speechSynthesis', synth);
+    cancelSpeech();
+    expect(synth.cancel).toHaveBeenCalledOnce();
+  });
+
+  it('cancelSpeech does not call synth.cancel() when nothing is speaking or pending', () => {
+    const synth = makeSynth([], { speaking: false, pending: false });
+    vi.stubGlobal('speechSynthesis', synth);
+    cancelSpeech();
+    expect(synth.cancel).not.toHaveBeenCalled();
   });
 
   it('speak defers via voiceschanged when getVoices() returns empty', () => {

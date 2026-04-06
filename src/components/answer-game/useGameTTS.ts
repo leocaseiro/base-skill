@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAnswerGameContext } from './useAnswerGameContext';
 import { useSettings } from '@/db/hooks/useSettings';
-import { speak } from '@/lib/speech/SpeechOutput';
+import { isSpeechActive, speak } from '@/lib/speech/SpeechOutput';
 
 export interface GameTTS {
   speakTile: (label: string) => void;
@@ -17,6 +17,10 @@ export const useGameTTS = (): GameTTS => {
   const speakTile = useCallback(
     (label: string) => {
       if (!config.ttsEnabled) return;
+      if (isSpeechActive()) {
+        console.debug(`[TTS] speakTile("${label}") — busy, skipped`);
+        return;
+      }
       speak(label, {
         rate: settings.speechRate ?? 1,
         volume: settings.volume ?? 0.8,

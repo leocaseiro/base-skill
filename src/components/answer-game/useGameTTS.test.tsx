@@ -5,11 +5,11 @@ import { useGameTTS } from './useGameTTS';
 import type { AnswerGameConfig } from './types';
 import type { ReactNode } from 'react';
 
-import { speak } from '@/lib/speech/SpeechOutput';
+import { isSpeechActive, speak } from '@/lib/speech/SpeechOutput';
 
 vi.mock('@/lib/speech/SpeechOutput', () => ({
   speak: vi.fn(),
-  cancelSpeech: vi.fn(),
+  isSpeechActive: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock('@/db/hooks/useSettings', () => ({
@@ -75,6 +75,15 @@ describe('useGameTTS', () => {
       'What is this animal?',
       expect.objectContaining({ rate: 1, volume: 0.8 }),
     );
+  });
+
+  it('speakTile is a no-op when speech is already active', () => {
+    vi.mocked(isSpeechActive).mockReturnValue(true);
+    const { result } = renderHook(() => useGameTTS(), {
+      wrapper: createWrapper(ttsConfig),
+    });
+    result.current.speakTile('A');
+    expect(speak).not.toHaveBeenCalled();
   });
 
   it('speakTile is a no-op when ttsEnabled is false', () => {
