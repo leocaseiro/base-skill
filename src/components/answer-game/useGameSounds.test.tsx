@@ -6,7 +6,7 @@ import { useGameSounds } from './useGameSounds';
 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
 import type { ReactNode } from 'react';
 
-import { queueSound } from '@/lib/audio/AudioFeedback';
+import { playSound } from '@/lib/audio/AudioFeedback';
 
 vi.mock('@/lib/audio/AudioFeedback', () => ({
   playSound: vi.fn(),
@@ -54,10 +54,10 @@ describe('useGameSounds', () => {
     renderHook(() => useGameSounds(), {
       wrapper: createWrapper(baseConfig),
     });
-    expect(queueSound).not.toHaveBeenCalled();
+    expect(playSound).not.toHaveBeenCalled();
   });
 
-  it('queues "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
+  it('plays "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
     const { result } = renderHook(
       () => {
         const dispatch = useAnswerGameDispatch();
@@ -73,10 +73,10 @@ describe('useGameSounds', () => {
     act(() => {
       result.current({ type: 'COMPLETE_GAME' });
     });
-    expect(queueSound).toHaveBeenCalledWith('game-complete');
+    expect(playSound).toHaveBeenCalledWith('game-complete');
   });
 
-  it('queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
+  it('plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
     const multiRoundConfig: AnswerGameConfig = {
       ...baseConfig,
       totalRounds: 2,
@@ -100,7 +100,7 @@ describe('useGameSounds', () => {
         zoneIndex: 0,
       });
     });
-    expect(queueSound).toHaveBeenCalledWith('round-complete');
+    expect(playSound).toHaveBeenCalledWith('round-complete');
   });
 
   it('confettiReady is false initially', () => {
@@ -110,47 +110,7 @@ describe('useGameSounds', () => {
     expect(result.current.confettiReady).toBe(false);
   });
 
-  it('confettiReady is false before the round-complete sound starts', () => {
-    let resolveStarts!: () => void;
-    vi.mocked(queueSound).mockImplementationOnce(
-      () =>
-        new Promise<void>((res) => {
-          resolveStarts = res;
-        }),
-    );
-
-    const multiRoundConfig: AnswerGameConfig = {
-      ...baseConfig,
-      totalRounds: 2,
-    };
-    const { result } = renderHook(
-      () => {
-        const dispatch = useAnswerGameDispatch();
-        const sounds = useGameSounds();
-        return { dispatch, sounds };
-      },
-      { wrapper: createWrapper(multiRoundConfig) },
-    );
-    act(() => {
-      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
-    });
-    act(() => {
-      result.current.dispatch({
-        type: 'PLACE_TILE',
-        tileId: 't1',
-        zoneIndex: 0,
-      });
-    });
-
-    expect(result.current.sounds.confettiReady).toBe(false);
-    act(() => {
-      resolveStarts();
-    });
-  });
-
-  it('confettiReady becomes true when the round-complete sound starts', async () => {
-    vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
-
+  it('confettiReady becomes true on next microtask when phase is round-complete', async () => {
     const multiRoundConfig: AnswerGameConfig = {
       ...baseConfig,
       totalRounds: 2,
@@ -198,12 +158,10 @@ describe('useGameSounds', () => {
     });
 
     expect(result.current.sounds.confettiReady).toBe(false);
-    expect(queueSound).toHaveBeenCalledWith('game-complete');
+    expect(playSound).toHaveBeenCalledWith('game-complete');
   });
 
   it('confettiReady resets to false when phase leaves round-complete', async () => {
-    vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
-
     const multiRoundConfig: AnswerGameConfig = {
       ...baseConfig,
       totalRounds: 2,
@@ -256,39 +214,7 @@ describe('useGameSounds', () => {
     expect(result.current.gameOverReady).toBe(false);
   });
 
-  it('gameOverReady is false before the "starts" promise resolves', () => {
-    let resolveStarts!: () => void;
-    vi.mocked(queueSound).mockImplementationOnce(
-      () =>
-        new Promise<void>((res) => {
-          resolveStarts = res;
-        }),
-    );
-
-    const { result } = renderHook(
-      () => {
-        const dispatch = useAnswerGameDispatch();
-        const sounds = useGameSounds();
-        return { dispatch, sounds };
-      },
-      { wrapper: createWrapper(baseConfig) },
-    );
-    act(() => {
-      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
-    });
-    act(() => {
-      result.current.dispatch({ type: 'COMPLETE_GAME' });
-    });
-
-    expect(result.current.sounds.gameOverReady).toBe(false);
-    act(() => {
-      resolveStarts();
-    });
-  });
-
-  it('gameOverReady becomes true after the "starts" promise resolves', async () => {
-    vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
-
+  it('gameOverReady becomes true on next microtask when phase is game-over', async () => {
     const { result } = renderHook(
       () => {
         const dispatch = useAnswerGameDispatch();

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAnswerGameContext } from './useAnswerGameContext';
 import type { AnswerGamePhase } from './types';
-import { queueSound } from '@/lib/audio/AudioFeedback';
+import { playSound } from '@/lib/audio/AudioFeedback';
 
 export const useGameSounds = (): {
   confettiReady: boolean;
@@ -18,16 +18,16 @@ export const useGameSounds = (): {
 
     if (phase === prev) return;
 
-    // cancelled is set by the effect cleanup when phase changes, preventing
-    // stale promise callbacks from updating state after the phase has moved on.
     let cancelled = false;
 
     if (phase === 'round-complete') {
-      void queueSound('round-complete').then(() => {
+      playSound('round-complete');
+      void Promise.resolve().then(() => {
         if (!cancelled) setConfettiReady(true);
       });
     } else if (phase === 'game-over') {
-      void queueSound('game-complete').then(() => {
+      playSound('game-complete');
+      void Promise.resolve().then(() => {
         if (!cancelled) setGameOverReady(true);
       });
     } else {
