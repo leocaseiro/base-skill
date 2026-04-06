@@ -12,12 +12,14 @@ const AnswerSlot = ({
   label,
   isActive,
   isWrong,
+  showCursor,
 }: {
   zoneIndex: number;
   tileId: string | null;
   label: string | null;
   isActive: boolean;
   isWrong: boolean;
+  showCursor: boolean;
 }) => {
   const ref = useRef<HTMLLIElement>(null);
   const { placeTile } = useTileEvaluation();
@@ -116,7 +118,7 @@ const AnswerSlot = ({
         .filter(Boolean)
         .join(' ')}
     >
-      {isActive && !label && (
+      {isActive && !label && showCursor && (
         <span
           aria-hidden="true"
           className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
@@ -142,7 +144,9 @@ const AnswerSlot = ({
 };
 
 export const OrderedSlots = () => {
-  const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
+  const { zones, activeSlotIndex, allTiles, config } =
+    useAnswerGameContext();
+  const showCursor = config.inputMethod !== 'drag';
 
   return (
     <ol
@@ -163,6 +167,7 @@ export const OrderedSlots = () => {
               i === activeSlotIndex && zone.placedTileId === null
             }
             isWrong={zone.isWrong}
+            showCursor={showCursor}
           />
         );
       })}
