@@ -1,4 +1,6 @@
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
+import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
 import { useCallback, useEffect, useRef } from 'react';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
 import { useTouchDrag } from './useTouchDrag';
@@ -16,10 +18,16 @@ interface UseSlotTileDragOptions {
   zoneIndex: number;
   /**
    * Called when the dragged tile is dropped on a target zone.
-   * REMOVE_TILE is dispatched before this callback, so the tile is back
-   * in the bank and can be placed normally.
+   * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
+   * REMOVE_TILE or SWAP_TILES as appropriate.
    */
   onDrop: (tileId: string, targetZoneIndex: number) => void;
+  /**
+   * Called immediately before REMOVE_TILE is dispatched when the tile
+   * is returning to the bank (no valid drop target). Use this to trigger
+   * the eject-return animation while the slot button is still in the DOM.
+   */
+  onBankReturn?: () => void;
 }
 
 /**
@@ -27,25 +35,34 @@ interface UseSlotTileDragOptions {
  * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
  *
  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
- * visible in the slot during the drag. On a confirmed drop, REMOVE_TILE is
- * dispatched first (returning the tile to the bank) then onDrop is called so
- * the drop target can place it normally. On cancel or missed drop, the tile
- * snaps back via SET_DRAG_ACTIVE with tileId: null.
+ * visible in the slot during the drag.
+ *
+ * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
+ * called so the caller can dispatch SWAP_TILES or REMOVE_TILE+PLACE_TILE.
+ *
+ * On cancel or no valid drop target: onBankReturn is called (for animation),
+ * then REMOVE_TILE + SET_DRAG_ACTIVE are dispatched to return the tile to bank.
  */
 export const useSlotTileDrag = ({
   tileId,
   label,
   zoneIndex,
   onDrop,
+  onBankReturn,
 }: UseSlotTileDragOptions): SlotTileDrag => {
   const dispatch = useAnswerGameDispatch();
   const dragRef = useRef<HTMLButtonElement>(null);
 
-  // Keep a stable ref to onDrop so the HTML5 adapter closure stays current.
+  // Keep stable refs so the HTML5 adapter closure stays current.
   const onDropRef = useRef(onDrop);
   useEffect(() => {
     onDropRef.current = onDrop;
   }, [onDrop]);
+
+  const onBankReturnRef = useRef(onBankReturn);
+  useEffect(() => {
+    onBankReturnRef.current = onBankReturn;
+  }, [onBankReturn]);
 
   // HTML5 DnD — desktop
   useEffect(() => {
@@ -54,49 +71,74 @@ export const useSlotTileDrag = ({
     if (!element) return;
     const currentTileId = tileId;
     const currentZoneIndex = zoneIndex;
+    const currentLabel = label ?? '';
     return draggable({
       element,
-      // Include sourceZoneIndex so the drop target can identify slot-tile drags
-      // and defer placement to this hook's onDrop handler.
       getInitialData: () => ({
         tileId: currentTileId,
         sourceZoneIndex: currentZoneIndex,
       }),
+      onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
+        setCustomNativeDragPreview({
+          nativeSetDragImage,
+          getOffset: preserveOffsetOnSource({
+            element,
+            input: location.current.input,
+          }),
+          render({ container }) {
+            const rect = element.getBoundingClientRect();
+            const ghost = document.createElement('div');
+            ghost.textContent = currentLabel;
+            Object.assign(ghost.style, {
+              width: `${rect.width}px`,
+              height: `${rect.height}px`,
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'var(--card, #fff)',
+              color: 'var(--card-foreground, #000)',
+              fontSize: getComputedStyle(element).fontSize,
+              fontWeight: 'bold',
+              boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+              transform: 'scale(1.08)',
+            });
+            container.append(ghost);
+            return () => ghost.remove();
+          },
+        });
+      },
       onDragStart: () =>
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
       onDrop: ({ location }) => {
         const targets = location.current.dropTargets;
-        if (targets.length > 0) {
-          // Confirmed drop on a zone: remove tile from source slot first,
-          // then place via the onDrop callback.
-          const targetZoneIndex = targets[0]?.data['zoneIndex'];
-          if (typeof targetZoneIndex === 'number') {
-            dispatch({
-              type: 'REMOVE_TILE',
-              zoneIndex: currentZoneIndex,
-            });
-            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-            onDropRef.current(currentTileId, targetZoneIndex);
-          } else {
-            // Drop target exists but has no zoneIndex — treat as cancel.
-            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-          }
+        const targetZoneIndex = targets[0]?.data['zoneIndex'];
+
+        // Always clear drag state first.
+        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+
+        if (targets.length > 0 && typeof targetZoneIndex === 'number') {
+          // Confirmed drop on a valid slot — caller handles REMOVE_TILE / SWAP_TILES.
+          onDropRef.current(currentTileId, targetZoneIndex);
         } else {
-          // No drop target — cancel, tile snaps back.
-          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+          // No valid slot target (dropped on bank or outside) — return to bank.
+          onBankReturnRef.current?.();
+          dispatch({
+            type: 'REMOVE_TILE',
+            zoneIndex: currentZoneIndex,
+          });
         }
       },
     });
-  }, [tileId, zoneIndex, dispatch]);
+  }, [tileId, zoneIndex, label, dispatch]);
 
-  // Wrap onDrop for the touch path: dispatch REMOVE_TILE before calling onDrop.
+  // Wrap onDrop for the touch path: caller handles REMOVE_TILE / SWAP_TILES.
   const handleTouchDrop = useCallback(
     (droppedTileId: string, targetZoneIndex: number) => {
-      dispatch({ type: 'REMOVE_TILE', zoneIndex });
       dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
       onDrop(droppedTileId, targetZoneIndex);
     },
-    [dispatch, zoneIndex, onDrop],
+    [dispatch, onDrop],
   );
 
   // Pointer-events drag — touch / mobile
@@ -108,7 +150,11 @@ export const useSlotTileDrag = ({
         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
         : undefined,
       onDragCancel: tileId
-        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null })
+        ? () => {
+            onBankReturnRef.current?.();
+            dispatch({ type: 'REMOVE_TILE', zoneIndex });
+            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+          }
         : undefined,
       onDrop: handleTouchDrop,
     });

@@ -128,7 +128,7 @@ export const triggerEjectReturn = (
   // Phase 1: fly to the hole (no opacity change during flight).
   ghost.style.transition = 'transform 300ms ease-in';
   void ghost.offsetWidth;
-  ghost.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.8)`;
+  ghost.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
 
   ghost.addEventListener(
     'transitionend',

@@ -2,7 +2,6 @@ import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element
 import { useCallback, useEffect, useRef } from 'react';
 import { useAnswerGameContext } from '../useAnswerGameContext';
 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
-import { useFreeSwap } from '../useFreeSwap';
 import { useSlotTileDrag } from '../useSlotTileDrag';
 import { useTileEvaluation } from '../useTileEvaluation';
 import {
@@ -11,6 +10,7 @@ import {
   triggerShake,
 } from './slot-animations';
 import type { RefObject } from 'react';
+import { playSound } from '@/lib/audio/AudioFeedback';
 
 export interface SlotRenderProps {
   label: string | null;
@@ -43,7 +43,6 @@ export const useSlotBehavior = (
     useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const { placeTile } = useTileEvaluation();
-  const { swapOrPlace } = useFreeSwap();
 
   const zone = zones[index];
   const tileId = zone?.placedTileId ?? null;
@@ -76,11 +75,27 @@ export const useSlotBehavior = (
     (droppedTileId: string, targetZoneIndex: number) => {
       if (isOrdered) {
         placeTile(droppedTileId, targetZoneIndex);
-      } else {
-        swapOrPlace(droppedTileId, targetZoneIndex);
+        return;
       }
+      // free-swap: swap if target is occupied by a slot tile, otherwise place
+      const targetZone = zones[targetZoneIndex];
+      if (!targetZone) return;
+      if (targetZone.placedTileId !== null) {
+        const sourceZoneIndex = zones.findIndex(
+          (z) => z.placedTileId === droppedTileId,
+        );
+        if (sourceZoneIndex !== -1) {
+          dispatch({
+            type: 'SWAP_TILES',
+            fromZoneIndex: sourceZoneIndex,
+            toZoneIndex: targetZoneIndex,
+          });
+          return;
+        }
+      }
+      placeTile(droppedTileId, targetZoneIndex);
     },
-    [isOrdered, placeTile, swapOrPlace],
+    [isOrdered, placeTile, zones, dispatch],
   );
 
   // Register as drop target
@@ -137,13 +152,24 @@ export const useSlotBehavior = (
     prevTileIdRef.current = tileId;
     const freshlyPlaced = tileId !== null && prevTileId === null;
 
-    if (isWrong && !wasWrong) {
+    if (
+      tileId !== null &&
+      prevTileId !== null &&
+      tileId !== prevTileId
+    ) {
+      // Tile swapped between slots — animate and sound based on new correctness.
+      if (isWrong) {
+        triggerShake(el);
+        playSound('wrong');
+      } else {
+        triggerPop(el);
+        playSound('correct');
+      }
+    } else if (isWrong && !wasWrong) {
+      // Newly wrong via PLACE_TILE (sound already played by useTileEvaluation).
       triggerShake(el);
 
       if (config.wrongTileBehavior === 'lock-auto-eject') {
-        // After the shake settles, start the fly animation. The ghost parks at
-        // the hole and waits; startFadeRef.current() is called below when
-        // EJECT_TILE fires and the tile is visible in the bank.
         const timerId = setTimeout(() => {
           const tileEl = dragRef.current;
           if (!tileEl) return;
@@ -156,12 +182,14 @@ export const useSlotBehavior = (
         }, 350);
         return () => clearTimeout(timerId);
       }
-    } else if (!isWrong && wasWrong && tileId === null) {
-      // EJECT_TILE fired: tile is now back in the bank — fade the ghost out.
+    } else if (freshlyPlaced && !isWrong) {
+      // Correctly placed from bank (sound already played by useTileEvaluation).
+      triggerPop(el);
+    } else if (tileId === null && prevTileId !== null) {
+      // Tile returned to bank (click, drag, or eject).
+      playSound('tile-place');
       startFadeRef.current?.();
       startFadeRef.current = null;
-    } else if (freshlyPlaced && !isWrong) {
-      triggerPop(el);
     }
   }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
 
