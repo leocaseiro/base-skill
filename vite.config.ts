@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module';
+import path from 'node:path';
 
 import tailwindcss from '@tailwindcss/vite';
 import { devtools } from '@tanstack/devtools-vite';
@@ -7,9 +8,9 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 
 import viteReact from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import { VitePWA } from 'vite-plugin-pwa';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { version } from './package.json';
+import type { Plugin } from 'vite';
 
 const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
 
@@ -17,38 +18,29 @@ const require = createRequire(import.meta.url);
 const pragmaticElementAdapter =
   require.resolve('@atlaskit/pragmatic-drag-and-drop/dist/esm/entry-point/element/adapter.js');
 
-const config = defineConfig({
-  base,
-  resolve: {
-    alias: {
-      '@atlaskit/pragmatic-drag-and-drop/element/adapter':
-        pragmaticElementAdapter,
-    },
-  },
-  define: {
-    'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
-  },
-  plugins: [
-    devtools(),
-    tsconfigPaths({ projects: ['./tsconfig.json'] }),
-    tailwindcss(),
-    tanstackStart({
-      spa: { enabled: true },
-      router: {
-        // eslint-disable-next-line unicorn/prefer-string-raw -- vite config file
-        routeFileIgnorePattern: '(test|spec)\\.(ts|tsx)$',
-      },
-    }),
-    viteReact(),
-    VitePWA({
-      registerType: 'prompt',
-      strategies: 'generateSW',
-      injectRegister: null,
-      workbox: {
+/**
+ * Custom workbox plugin that generates the service worker after the client
+ * build completes. Replaces vite-plugin-pwa which does not work correctly
+ * in Vite 7 builder mode (sharedPlugins=true overwrites configResolved so
+ * the ssr=true flag prevents SW generation).
+ */
+const workboxPlugin = (): Plugin => ({
+  name: 'workbox-sw-generator',
+  buildApp: {
+    order: 'post',
+    async handler(builder) {
+      const clientEnv = builder.environments['client'];
+      if (!clientEnv?.isBuilt) return;
+      const outDir = clientEnv.config.build.outDir;
+      const { generateSW } = await import('workbox-build');
+      const result = await generateSW({
+        swDest: path.join(outDir, 'sw.js'),
+        globDirectory: outDir,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: `${base}index.html`,
         navigateFallbackDenylist: [/\/api\//],
         cleanupOutdatedCaches: true,
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        mode: 'production',
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -75,9 +67,42 @@ const config = defineConfig({
             },
           },
         ],
+      });
+      console.log(
+        `[workbox] Generated sw.js — ${result.count} files, ${Math.round(result.size / 1024)} kB`,
+      );
+    },
+  },
+});
+
+const config = defineConfig({
+  base,
+  resolve: {
+    alias: {
+      '@atlaskit/pragmatic-drag-and-drop/element/adapter':
+        pragmaticElementAdapter,
+    },
+  },
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
+  },
+  ssr: {
+    // workbox-window ships only CJS; bundle it so the SSR server can import it
+    noExternal: ['workbox-window'],
+  },
+  plugins: [
+    devtools(),
+    tsconfigPaths({ projects: ['./tsconfig.json'] }),
+    tailwindcss(),
+    tanstackStart({
+      spa: { enabled: true },
+      router: {
+        // eslint-disable-next-line unicorn/prefer-string-raw -- vite config file
+        routeFileIgnorePattern: '(test|spec)\\.(ts|tsx)$',
       },
-      manifest: false,
     }),
+    viteReact(),
+    workboxPlugin(),
   ],
 });
 
