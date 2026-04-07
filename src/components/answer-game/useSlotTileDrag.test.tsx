@@ -96,7 +96,7 @@ describe('useSlotTileDrag', () => {
   });
 
   describe('HTML5 onDrop — no drop targets', () => {
-    it('dispatches REMOVE_TILE for the correct zoneIndex and does not call onDrop', () => {
+    it('clears drag state and does NOT dispatch REMOVE_TILE (tile stays in slot)', () => {
       capturedDraggableOptions = null;
       mockDispatch.mockClear();
       const mockOnDrop = vi.fn();
@@ -118,19 +118,18 @@ describe('useSlotTileDrag', () => {
       });
 
       expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'REMOVE_TILE',
-        zoneIndex: 0,
-      });
-      expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SET_DRAG_ACTIVE',
         tileId: null,
       });
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'REMOVE_TILE' }),
+      );
       expect(mockOnDrop).not.toHaveBeenCalled();
     });
   });
 
-  describe('HTML5 onDrop — drop target with no zoneIndex', () => {
-    it('dispatches REMOVE_TILE but does not call onDrop when target lacks zoneIndex', () => {
+  describe('HTML5 onDrop — dropped on bank target', () => {
+    it('clears drag state and does NOT dispatch REMOVE_TILE (tile stays in slot)', () => {
       capturedDraggableOptions = null;
       mockDispatch.mockClear();
       const mockOnDrop = vi.fn();
@@ -150,25 +149,24 @@ describe('useSlotTileDrag', () => {
       ).onDrop?.({
         location: {
           current: {
-            dropTargets: [{ data: { someOtherKey: 'value' } }],
+            dropTargets: [{ data: { isBankTarget: true } }],
           },
         },
       });
 
       expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'REMOVE_TILE',
-        zoneIndex: 0,
-      });
-      expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SET_DRAG_ACTIVE',
         tileId: null,
       });
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'REMOVE_TILE' }),
+      );
       expect(mockOnDrop).not.toHaveBeenCalled();
     });
   });
 
   describe('HTML5 onDrop — confirmed drop on valid target', () => {
-    it('dispatches SET_DRAG_ACTIVE and calls onDrop — caller owns REMOVE_TILE/SWAP_TILES', () => {
+    it('dispatches SET_DRAG_ACTIVE and calls onDrop — caller owns SWAP_TILES', () => {
       capturedDraggableOptions = null;
       mockDispatch.mockClear();
       const mockOnDrop = vi.fn();
