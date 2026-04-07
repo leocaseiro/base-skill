@@ -104,22 +104,26 @@ describe('triggerEjectReturn', () => {
     const onComplete = vi.fn();
     triggerEjectReturn(el, 'nonexistent-tile', onComplete);
 
-    const ghost = document.body.querySelector(
+    const ghost = document.body.querySelector<HTMLElement>(
       'div[style*="position: fixed"]',
     );
     expect(ghost).not.toBeNull();
     expect(ghost?.style.transition).toContain('opacity 300ms ease-in');
   });
 
-  it('animates ghost to target hole, calls onComplete and removes ghost after two-phase transition', () => {
+  it('ghost parks at hole after phase 1 and only fades when startFade is called', () => {
     const hole = document.createElement('div');
     hole.dataset.tileBankHole = 'tile-abc';
     document.body.append(hole);
 
     const onComplete = vi.fn();
-    triggerEjectReturn(el, 'tile-abc', onComplete);
+    const { startFade } = triggerEjectReturn(
+      el,
+      'tile-abc',
+      onComplete,
+    );
 
-    const ghost = document.body.querySelector(
+    const ghost = document.body.querySelector<HTMLElement>(
       'div[style*="position: fixed"]',
     );
     expect(ghost).not.toBeNull();
@@ -129,16 +133,45 @@ describe('triggerEjectReturn', () => {
     );
     expect(ghost?.style.transition).not.toContain('opacity');
 
-    // End of phase 1: arrive at hole
+    // Phase 1 completes — ghost parked at hole, fade NOT yet started
     ghost?.dispatchEvent(new TransitionEvent('transitionend'));
     expect(onComplete).not.toHaveBeenCalled();
+    expect(ghost?.style.opacity).not.toBe('0');
 
-    // Phase 2: fade out at the hole
+    // Caller triggers fade (e.g. after EJECT_TILE fires)
+    startFade();
     expect(ghost?.style.transition).toContain('opacity 200ms ease-out');
 
-    // End of phase 2: ghost removed, onComplete called
+    // Phase 2 completes — ghost removed, onComplete called
     ghost?.dispatchEvent(new TransitionEvent('transitionend'));
     expect(onComplete).toHaveBeenCalledOnce();
     expect(document.body.contains(ghost)).toBe(false);
+  });
+
+  it('startFade called before phase 1 completes triggers fade immediately after arrival', () => {
+    const hole = document.createElement('div');
+    hole.dataset.tileBankHole = 'tile-xyz';
+    document.body.append(hole);
+
+    const onComplete = vi.fn();
+    const { startFade } = triggerEjectReturn(
+      el,
+      'tile-xyz',
+      onComplete,
+    );
+
+    const ghost = document.body.querySelector<HTMLElement>(
+      'div[style*="position: fixed"]',
+    );
+
+    // Call startFade before phase 1 fires
+    startFade();
+
+    // Phase 1 fires — fade should start immediately
+    ghost?.dispatchEvent(new TransitionEvent('transitionend'));
+    expect(ghost?.style.transition).toContain('opacity 200ms ease-out');
+
+    ghost?.dispatchEvent(new TransitionEvent('transitionend'));
+    expect(onComplete).toHaveBeenCalledOnce();
   });
 });
