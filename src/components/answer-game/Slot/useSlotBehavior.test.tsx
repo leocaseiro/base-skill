@@ -1,4 +1,5 @@
 import { renderHook } from '@testing-library/react';
+import { useEffect } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { AnswerGameProvider } from '../AnswerGameProvider';
 import { useAnswerGameContext } from '../useAnswerGameContext';
@@ -66,9 +67,11 @@ function createWrapper(config: AnswerGameConfig) {
 function useHarness(index: number, zones: AnswerZone[] = emptyZones) {
   const dispatch = useAnswerGameDispatch();
   const state = useAnswerGameContext();
-  if (state.zones.length === 0) {
-    dispatch({ type: 'INIT_ROUND', tiles, zones });
-  }
+  useEffect(() => {
+    if (state.zones.length === 0) {
+      dispatch({ type: 'INIT_ROUND', tiles, zones });
+    }
+  }, []); // empty deps is fine here as tiles/zones are stable test fixtures
   const result = useSlotBehavior(index);
   return { state, result };
 }
