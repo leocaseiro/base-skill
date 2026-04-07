@@ -183,3 +183,80 @@ test('@visual InstructionsOverlay before start dark', async ({
     fullPage: true,
   });
 });
+
+// ── Slot drag preview ────────────────────────────────────────────────────────
+
+test('@visual Slot drag preview target (empty slot hover)', async ({
+  page,
+}) => {
+  await page.goto('/en/game/word-spell');
+  await page.getByRole('button', { name: /let's go/i }).click();
+  const tileButton = page
+    .getByRole('button', { name: /^Letter /i })
+    .first();
+  await tileButton.waitFor({ state: 'visible' });
+
+  const tileBBox = await tileButton.boundingBox();
+  if (!tileBBox) throw new Error('Tile bounding box not found');
+
+  // Pick up the tile via pointer events
+  const tileX = tileBBox.x + tileBBox.width / 2;
+  const tileY = tileBBox.y + tileBBox.height / 2;
+  await page.mouse.move(tileX, tileY);
+  await page.mouse.down();
+
+  // Move to the first empty slot
+  const emptySlot = page.getByRole('listitem', {
+    name: /^Slot 1, empty/i,
+  });
+  const slotBBox = await emptySlot.boundingBox();
+  if (!slotBBox) throw new Error('Slot bounding box not found');
+
+  const slotX = slotBBox.x + slotBBox.width / 2;
+  const slotY = slotBBox.y + slotBBox.height / 2;
+  await page.mouse.move(slotX, slotY, { steps: 5 });
+
+  // Screenshot while dragging over the empty slot
+  await expect(page).toHaveScreenshot('slot-drag-preview-target.png', {
+    fullPage: true,
+  });
+
+  await page.mouse.up();
+});
+
+test('@visual Slot drag preview target dark (empty slot hover)', async ({
+  page,
+}) => {
+  await page.goto('/en/game/word-spell');
+  await page.getByRole('button', { name: /let's go/i }).click();
+  const tileButton = page
+    .getByRole('button', { name: /^Letter /i })
+    .first();
+  await tileButton.waitFor({ state: 'visible' });
+
+  const tileBBox = await tileButton.boundingBox();
+  if (!tileBBox) throw new Error('Tile bounding box not found');
+
+  const tileX = tileBBox.x + tileBBox.width / 2;
+  const tileY = tileBBox.y + tileBBox.height / 2;
+  await page.mouse.move(tileX, tileY);
+  await page.mouse.down();
+
+  const emptySlot = page.getByRole('listitem', {
+    name: /^Slot 1, empty/i,
+  });
+  const slotBBox = await emptySlot.boundingBox();
+  if (!slotBBox) throw new Error('Slot bounding box not found');
+
+  const slotX = slotBBox.x + slotBBox.width / 2;
+  const slotY = slotBBox.y + slotBBox.height / 2;
+  await page.mouse.move(slotX, slotY, { steps: 5 });
+
+  await setDarkMode(page);
+  await expect(page).toHaveScreenshot(
+    'slot-drag-preview-target-dark.png',
+    { fullPage: true },
+  );
+
+  await page.mouse.up();
+});
