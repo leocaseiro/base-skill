@@ -241,7 +241,7 @@ export const InlineSentenceGap: Story = {
       }}
     >
       <div className="p-4">
-        <SentenceWithGaps sentence="The ___ sat on the mat." />
+        <SentenceWithGaps sentence="The {0} sat on the mat." />
       </div>
     </AnswerGameProvider>
   ),
