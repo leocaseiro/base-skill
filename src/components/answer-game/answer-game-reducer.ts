@@ -169,15 +169,20 @@ export function answerGameReducer(
       if (!fromZone || !toZone) return state;
 
       // After the swap: fromZone gets toZone's tile, toZone gets fromZone's tile.
-      const tileNowInFrom = state.allTiles.find(
-        (t) => t.id === toZone.placedTileId,
-      );
-      const tileNowInTo = state.allTiles.find(
-        (t) => t.id === fromZone.placedTileId,
-      );
-      const fromCorrect =
-        tileNowInFrom?.value === fromZone.expectedValue;
-      const toCorrect = tileNowInTo?.value === toZone.expectedValue;
+      // Either zone may become empty (null) when moving a tile to an empty slot.
+      const tileNowInFrom = toZone.placedTileId
+        ? state.allTiles.find((t) => t.id === toZone.placedTileId)
+        : null;
+      const tileNowInTo = fromZone.placedTileId
+        ? state.allTiles.find((t) => t.id === fromZone.placedTileId)
+        : null;
+      // An empty zone is never wrong.
+      const fromCorrect = tileNowInFrom
+        ? tileNowInFrom.value === fromZone.expectedValue
+        : true;
+      const toCorrect = tileNowInTo
+        ? tileNowInTo.value === toZone.expectedValue
+        : true;
       const shouldLock =
         state.config.wrongTileBehavior === 'lock-manual' ||
         state.config.wrongTileBehavior === 'lock-auto-eject';
@@ -187,15 +192,21 @@ export function answerGameReducer(
           return {
             ...z,
             placedTileId: toZone.placedTileId,
-            isWrong: !fromCorrect,
-            isLocked: !fromCorrect && shouldLock,
+            isWrong: toZone.placedTileId !== null && !fromCorrect,
+            isLocked:
+              toZone.placedTileId !== null &&
+              !fromCorrect &&
+              shouldLock,
           };
         if (i === action.toZoneIndex)
           return {
             ...z,
             placedTileId: fromZone.placedTileId,
-            isWrong: !toCorrect,
-            isLocked: !toCorrect && shouldLock,
+            isWrong: fromZone.placedTileId !== null && !toCorrect,
+            isLocked:
+              fromZone.placedTileId !== null &&
+              !toCorrect &&
+              shouldLock,
           };
         return z;
       });

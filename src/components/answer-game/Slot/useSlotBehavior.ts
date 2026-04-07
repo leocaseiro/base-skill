@@ -77,21 +77,20 @@ export const useSlotBehavior = (
         placeTile(droppedTileId, targetZoneIndex);
         return;
       }
-      // free-swap: swap if target is occupied by a slot tile, otherwise place
+      // free-swap: if tile comes from a slot, always SWAP_TILES (even to empty target = move).
+      // Only fall back to placeTile for bank tiles.
       const targetZone = zones[targetZoneIndex];
       if (!targetZone) return;
-      if (targetZone.placedTileId !== null) {
-        const sourceZoneIndex = zones.findIndex(
-          (z) => z.placedTileId === droppedTileId,
-        );
-        if (sourceZoneIndex !== -1) {
-          dispatch({
-            type: 'SWAP_TILES',
-            fromZoneIndex: sourceZoneIndex,
-            toZoneIndex: targetZoneIndex,
-          });
-          return;
-        }
+      const sourceZoneIndex = zones.findIndex(
+        (z) => z.placedTileId === droppedTileId,
+      );
+      if (sourceZoneIndex !== -1) {
+        dispatch({
+          type: 'SWAP_TILES',
+          fromZoneIndex: sourceZoneIndex,
+          toZoneIndex: targetZoneIndex,
+        });
+        return;
       }
       placeTile(droppedTileId, targetZoneIndex);
     },
