@@ -2,7 +2,6 @@ import { useNavigate } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
-import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
 import type { WordSpellConfig } from '../types';
 import type {
   AnswerGameConfig,
@@ -12,6 +11,8 @@ import type {
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+import { Slot } from '@/components/answer-game/Slot/Slot';
+import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useGameSounds } from '@/components/answer-game/useGameSounds';
@@ -76,7 +77,8 @@ const WordSpellSession = ({
   roundOrder: readonly number[];
   onRestartSession: () => void;
 }) => {
-  const { phase, roundIndex, retryCount } = useAnswerGameContext();
+  const { phase, roundIndex, retryCount, zones } =
+    useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const { confettiReady, gameOverReady } = useGameSounds();
   const navigate = useNavigate();
@@ -173,7 +175,19 @@ const WordSpellSession = ({
           <AudioButton prompt={round.word} />
         </AnswerGame.Question>
         <AnswerGame.Answer>
-          <OrderedLetterSlots />
+          <SlotRow className="gap-2">
+            {zones.map((zone, i) => (
+              <Slot
+                key={zone.id}
+                index={i}
+                className="size-14 rounded-lg"
+              >
+                {({ label }) => (
+                  <span className="text-2xl font-bold">{label}</span>
+                )}
+              </Slot>
+            ))}
+          </SlotRow>
         </AnswerGame.Answer>
         <AnswerGame.Choices>
           <LetterTileBank />
@@ -226,6 +240,8 @@ export const WordSpell = ({ config }: WordSpellProps) => {
       touchKeyboardInputMode: 'text',
       initialTiles: tiles,
       initialZones: zones,
+      slotInteraction:
+        config.mode === 'scramble' ? 'free-swap' : 'ordered',
     }),
     [
       config.gameId,
@@ -236,6 +252,7 @@ export const WordSpell = ({ config }: WordSpellProps) => {
       config.rounds.length,
       config.roundsInOrder,
       config.ttsEnabled,
+      config.mode,
       tiles,
       zones,
     ],
