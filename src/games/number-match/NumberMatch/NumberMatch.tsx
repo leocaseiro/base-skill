@@ -1,8 +1,11 @@
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildNumeralRound } from '../build-numeral-round';
-import { MatchingPairZones } from '../MatchingPairZones/MatchingPairZones';
-import { NumeralTileBank } from '../NumeralTileBank/NumeralTileBank';
+import {
+  DiceFace,
+  DominoTile,
+  NumeralTileBank,
+} from '../NumeralTileBank/NumeralTileBank';
 import type { NumberMatchConfig } from '../types';
 import type {
   AnswerGameConfig,
@@ -12,6 +15,8 @@ import type {
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+import { Slot } from '@/components/answer-game/Slot/Slot';
+import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useGameSounds } from '@/components/answer-game/useGameSounds';
@@ -34,7 +39,8 @@ const NumberMatchSession = ({
   roundOrder: readonly number[];
   onRestartSession: () => void;
 }) => {
-  const { phase, roundIndex, retryCount } = useAnswerGameContext();
+  const { phase, roundIndex, retryCount, zones, allTiles } =
+    useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const { confettiReady, gameOverReady } = useGameSounds();
   const navigate = useNavigate();
@@ -106,6 +112,14 @@ const NumberMatchSession = ({
 
   if (!round) return null;
 
+  const allDice = allTiles.every((t) => {
+    const n = Number.parseInt(t.value, 10);
+    return !Number.isNaN(n) && n <= 6;
+  });
+  const slotClass = allDice
+    ? 'size-20 rounded-2xl'
+    : 'h-[72px] w-32 rounded-2xl';
+
   const showTextQuestion =
     numberMatchConfig.mode === 'numeral-to-group' ||
     numberMatchConfig.mode === 'numeral-to-word' ||
@@ -126,7 +140,31 @@ const NumberMatchSession = ({
           <AudioButton prompt={String(round.value)} />
         </AnswerGame.Question>
         <AnswerGame.Answer>
-          <MatchingPairZones />
+          <SlotRow className="gap-4">
+            {zones.map((zone, i) => (
+              <Slot key={zone.id} index={i} className={slotClass}>
+                {({ label }) => {
+                  if (!label) return null;
+                  const n = Number.parseInt(label, 10);
+                  if (
+                    numberMatchConfig.tileStyle === 'dots' &&
+                    !Number.isNaN(n)
+                  ) {
+                    return n <= 6 ? (
+                      <DiceFace value={n} />
+                    ) : (
+                      <DominoTile value={n} />
+                    );
+                  }
+                  return (
+                    <span className="text-3xl font-bold tabular-nums">
+                      {label}
+                    </span>
+                  );
+                }}
+              </Slot>
+            ))}
+          </SlotRow>
         </AnswerGame.Answer>
         <AnswerGame.Choices>
           <NumeralTileBank tileStyle={numberMatchConfig.tileStyle} />
@@ -188,6 +226,7 @@ export const NumberMatch = ({ config }: NumberMatchProps) => {
       ttsEnabled: config.ttsEnabled,
       initialTiles: tiles,
       initialZones: zones,
+      slotInteraction: 'free-swap' as const,
     }),
     [
       config.gameId,
