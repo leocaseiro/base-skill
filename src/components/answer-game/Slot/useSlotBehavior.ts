@@ -5,7 +5,11 @@ import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
 import { useFreeSwap } from '../useFreeSwap';
 import { useSlotTileDrag } from '../useSlotTileDrag';
 import { useTileEvaluation } from '../useTileEvaluation';
-import { triggerPop, triggerShake } from './slot-animations';
+import {
+  triggerEjectReturn,
+  triggerPop,
+  triggerShake,
+} from './slot-animations';
 import type { RefObject } from 'react';
 
 export interface SlotRenderProps {
@@ -23,6 +27,7 @@ export interface UseSlotBehaviorReturn {
   slotRef: RefObject<HTMLElement | null>;
   dragRef: RefObject<HTMLButtonElement | null>;
   handleClick: () => void;
+  isBeingDragged: boolean;
   pointerHandlers: {
     onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
     onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
@@ -34,7 +39,7 @@ export interface UseSlotBehaviorReturn {
 export const useSlotBehavior = (
   index: number,
 ): UseSlotBehaviorReturn => {
-  const { zones, allTiles, activeSlotIndex, config } =
+  const { zones, allTiles, activeSlotIndex, config, dragActiveTileId } =
     useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const { placeTile } = useTileEvaluation();
@@ -57,6 +62,7 @@ export const useSlotBehavior = (
   const isActive = isOrdered && activeSlotIndex === index;
   const showCursor =
     isActive && isEmpty && config.inputMethod !== 'drag';
+  const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
 
   const slotRef = useRef<HTMLElement | null>(null);
   const prevIsWrongRef = useRef(isWrong);
@@ -83,15 +89,18 @@ export const useSlotBehavior = (
       getData: () => ({ zoneIndex: index }),
       onDrop: ({ source }) => {
         // Slot-tile drags (sourceZoneIndex present) handle their own
-        // REMOVE_TILE + placeTile sequence via useSlotTileDrag's onDrop.
+        // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
         if (typeof source.data['sourceZoneIndex'] === 'number') return;
         const sourceTileId = source.data['tileId'];
         if (typeof sourceTileId === 'string') {
           handleDrop(sourceTileId, index);
+          // Clear drag active state here — the draggable component (bank tile)
+          // unmounts when PLACE_TILE fires, so its own onDrop may never run.
+          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
         }
       },
     });
-  }, [index, handleDrop]);
+  }, [index, handleDrop, dispatch]);
 
   // Drag source for filled slots
   const {
@@ -127,10 +136,26 @@ export const useSlotBehavior = (
 
     if (isWrong && !wasWrong) {
       triggerShake(el);
+
+      if (config.wrongTileBehavior === 'lock-auto-eject') {
+        // After the shake settles, animate the tile flying back toward the bank.
+        // EJECT_TILE fires at 1000ms; this animation runs from ~350ms to ~650ms.
+        const timerId = setTimeout(() => {
+          const tileEl = dragRef.current;
+          if (!tileEl) return;
+          const bankEl =
+            document.querySelector<HTMLElement>('[data-tile-bank]');
+          triggerEjectReturn(tileEl, bankEl, () => {
+            // Keep the tile invisible in its slot until EJECT_TILE clears it.
+            tileEl.style.opacity = '0';
+          });
+        }, 350);
+        return () => clearTimeout(timerId);
+      }
     } else if (freshlyPlaced && !isWrong) {
       triggerPop(el);
     }
-  }, [isWrong, tileId]);
+  }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
 
   return {
     renderProps: {
@@ -145,6 +170,7 @@ export const useSlotBehavior = (
     slotRef,
     dragRef,
     handleClick,
+    isBeingDragged,
     pointerHandlers: {
       onPointerDown,
       onPointerMove,

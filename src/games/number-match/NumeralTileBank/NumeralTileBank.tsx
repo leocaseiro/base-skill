@@ -129,7 +129,10 @@ export const NumeralTileBank = ({
   const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
 
   return (
-    <div className="flex flex-wrap justify-center gap-3">
+    <div
+      data-tile-bank=""
+      className="flex flex-wrap justify-center gap-3"
+    >
       {bankTiles.map((tile) => {
         if (tile.id === dragActiveTileId) {
           const numericValue = Number.parseInt(tile.value, 10);
