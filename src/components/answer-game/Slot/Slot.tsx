@@ -93,8 +93,10 @@ export const Slot = ({
           <button
             ref={dragRef}
             type="button"
-            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
-            aria-hidden={isBeingDragged ? 'true' : undefined}
+            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
+            aria-hidden={
+              isBeingDragged && !isPreview ? 'true' : undefined
+            }
             style={skeuoStyle}
             onClick={handleClick}
             onPointerDown={pointerHandlers.onPointerDown}
