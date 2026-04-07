@@ -83,6 +83,13 @@
   --bs-font-weight-default: 600;
   --bs-radius-card: 1.5rem;
   --bs-radius-button: 1rem;
+
+  /* Skeuomorphic tile tokens */
+  --skeuo-highlight: rgb(255 255 255 / 100%);
+  --skeuo-ring: rgb(0 0 0 / 8%);
+  --skeuo-inset-bottom: rgb(0 0 0 / 8%);
+  --skeuo-inset-top: rgb(255 255 255 / 50%);
+  --skeuo-text-shadow: rgb(0 0 0 / 12%);
 }
 
 :root[data-theme='dark'] {
@@ -412,8 +419,58 @@ a:hover {
   }
 }
 
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-4px);
+  }
+
+  40% {
+    transform: translateX(4px);
+  }
+
+  60% {
+    transform: translateX(-3px);
+  }
+
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(var(--primary) / 40%);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgb(var(--primary) / 0%);
+  }
+}
+
 @theme inline {
   --animate-blink: blink 1s step-end infinite;
+  --animate-shake: shake 300ms ease-in-out;
+  --animate-pop: pop 250ms ease-out;
   --font-heading: var(--font-sans);
   --font-sans:
     'Andika', 'Edu NSW ACT Foundation', 'Nunito', 'Manrope', system-ui,
@@ -459,6 +516,13 @@ a:hover {
 }
 
 .dark {
+  /*
+   * Hardcoded values — NOT var(--bs-*) references.
+   * --bs-* vars are set as inline styles on <html> by ThemeRuntimeProvider,
+   * so inline specificity beats .dark class rules. Shadcn vars here must use
+   * concrete values to override the :root derivations.
+   * Galaxy dark palette: surface=#16213e, background=#1a1a2e, text=#e8f4fd
+   */
   --background: oklch(14.5% 0 0deg);
   --foreground: oklch(98.5% 0 0deg);
   --card: oklch(20.5% 0 0deg);
@@ -490,6 +554,13 @@ a:hover {
   --sidebar-accent-foreground: oklch(98.5% 0 0deg);
   --sidebar-border: oklch(100% 0 0deg / 10%);
   --sidebar-ring: oklch(55.6% 0 0deg);
+
+  /* Skeuomorphic tile tokens — dark */
+  --skeuo-highlight: rgb(255 255 255 / 6%);
+  --skeuo-ring: rgb(255 255 255 / 10%);
+  --skeuo-inset-bottom: rgb(255 255 255 / 4%);
+  --skeuo-inset-top: rgb(255 255 255 / 8%);
+  --skeuo-text-shadow: rgb(0 0 0 / 40%);
 }
 
 /* Bookmark colour utilities — derived from --bookmark-play set per-component */

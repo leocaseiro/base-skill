@@ -23,6 +23,8 @@ export interface AnswerGameConfig {
   /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
   initialTiles?: TileItem[];
   initialZones?: AnswerZone[];
+  /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
+  slotInteraction?: 'ordered' | 'free-swap';
 }
 
 export interface TileItem {
@@ -58,6 +60,9 @@ export interface AnswerGameState {
   /** Index of next slot to fill in auto-next-slot mode */
   activeSlotIndex: number;
   dragActiveTileId: string | null;
+  dragHoverZoneIndex: number | null;
+  /** ID of the bank tile hole currently hovered by a dragged slot tile. */
+  dragHoverBankTileId: string | null;
   phase: AnswerGamePhase;
   roundIndex: number;
   retryCount: number;
@@ -71,7 +76,10 @@ export type AnswerGameAction =
   | { type: 'EJECT_TILE'; zoneIndex: number }
   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
   | { type: 'COMPLETE_GAME' }
-  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
+  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
+  | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
+  | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
+  | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string };
 
 /**
  * Snapshot of AnswerGameState persisted to session_history_index.draftState.

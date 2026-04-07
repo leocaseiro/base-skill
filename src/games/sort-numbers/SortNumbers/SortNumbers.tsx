@@ -2,7 +2,6 @@ import { useNavigate, useParams } from '@tanstack/react-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { buildSortRound } from '../build-sort-round';
-import { NumberSequenceSlots } from '../NumberSequenceSlots/NumberSequenceSlots';
 import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
 import type { SortNumbersConfig } from '../types';
 import type {
@@ -14,6 +13,8 @@ import type {
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+import { Slot } from '@/components/answer-game/Slot/Slot';
+import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useGameSounds } from '@/components/answer-game/useGameSounds';
@@ -37,7 +38,8 @@ const SortNumbersSession = ({
   onRestartSession: () => void;
 }) => {
   const { t } = useTranslation('games');
-  const { phase, roundIndex, retryCount } = useAnswerGameContext();
+  const { phase, roundIndex, retryCount, zones } =
+    useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const { confettiReady, gameOverReady } = useGameSounds();
   const navigate = useNavigate();
@@ -90,11 +92,15 @@ const SortNumbersSession = ({
         return;
       }
 
-      const { tiles, zones } = buildSortRound(
+      const { tiles: nextTiles, zones: nextZones } = buildSortRound(
         nextRound.sequence,
         sortNumbersConfig.direction,
       );
-      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+      dispatch({
+        type: 'ADVANCE_ROUND',
+        tiles: nextTiles,
+        zones: nextZones,
+      });
     }, delayMs);
 
     return () => {
@@ -121,7 +127,19 @@ const SortNumbersSession = ({
           </p>
         </AnswerGame.Question>
         <AnswerGame.Answer>
-          <NumberSequenceSlots />
+          <SlotRow className="gap-2">
+            {zones.map((zone, i) => (
+              <Slot
+                key={zone.id}
+                index={i}
+                className="size-14 rounded-lg"
+              >
+                {({ label }) => (
+                  <span className="text-2xl font-bold">{label}</span>
+                )}
+              </Slot>
+            ))}
+          </SlotRow>
         </AnswerGame.Answer>
         <AnswerGame.Choices>
           <SortNumbersTileBank />
@@ -178,6 +196,7 @@ export const SortNumbers = ({
       touchKeyboardInputMode: 'numeric',
       initialTiles: tiles,
       initialZones: zones,
+      slotInteraction: 'free-swap' as const,
     }),
     [
       config.gameId,

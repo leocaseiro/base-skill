@@ -89,7 +89,7 @@ describe('SortNumbersTileBank', () => {
     ).toBeInTheDocument();
   });
 
-  it('does not render placed tiles', () => {
+  it('placed tile renders as hole', () => {
     const TestWithPlace = () => {
       const dispatch = useAnswerGameDispatch();
       dispatch({ type: 'INIT_ROUND', tiles, zones });
@@ -97,7 +97,7 @@ describe('SortNumbersTileBank', () => {
       dispatch({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 0 });
       return <SortNumbersTileBank />;
     };
-    render(
+    const { container } = render(
       <AnswerGameProvider config={config}>
         <TestWithPlace />
       </AnswerGameProvider>,
@@ -108,5 +108,8 @@ describe('SortNumbersTileBank', () => {
     expect(
       screen.getByRole('button', { name: 'Number 3' }),
     ).toBeInTheDocument();
+    expect(
+      container.querySelectorAll('[aria-hidden="true"]').length,
+    ).toBeGreaterThan(0);
   });
 });
