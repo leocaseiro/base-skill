@@ -21,6 +21,7 @@ export const Slot = ({
     dragRef,
     handleClick,
     pointerHandlers,
+    isBeingDragged,
   } = useSlotBehavior(index);
 
   const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
@@ -30,7 +31,7 @@ export const Slot = ({
     : `Slot ${index + 1}, filled with ${label}`;
 
   const stateClasses = [
-    'relative flex items-center justify-center border-2 transition-all',
+    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
     isEmpty && !isActive
       ? 'border-border'
       : isEmpty && isActive
@@ -61,11 +62,16 @@ export const Slot = ({
             />
           ) : null}
         </>
+      ) : isBeingDragged ? (
+        <div
+          className="size-full bg-muted/30 shadow-inner"
+          aria-hidden="true"
+        />
       ) : (
         <button
           ref={dragRef}
           type="button"
-          className="flex size-full touch-none select-none cursor-grab items-center justify-center"
+          className="flex size-full touch-none select-none cursor-grab items-center justify-center bg-card shadow-md"
           onClick={handleClick}
           onPointerDown={pointerHandlers.onPointerDown}
           onPointerMove={pointerHandlers.onPointerMove}
