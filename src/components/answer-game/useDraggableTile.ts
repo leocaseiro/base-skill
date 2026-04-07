@@ -26,16 +26,23 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
     speakTileRef.current = speakTile;
   }, [speakTile]);
 
-  // HTML5 DnD — desktop (no SET_DRAG_ACTIVE to avoid browser snap-back fadeout)
+  // HTML5 DnD — desktop
+  // SET_DRAG_ACTIVE on start so slots can show a preview while the bank tile
+  // is being dragged. Cleared on drop (slot handler also clears it on success,
+  // so the double-clear here is idempotent).
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
     return draggable({
       element,
       getInitialData: () => ({ tileId: tile.id }),
-      onDragStart: () => speakTileRef.current(tile.label),
+      onDragStart: () => {
+        speakTileRef.current(tile.label);
+        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+      },
+      onDrop: () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
     });
-  }, [tile.id, tile.label]);
+  }, [tile.id, tile.label, dispatch]);
 
   // Pointer-events drag — touch / mobile
   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
