@@ -75,6 +75,7 @@ export const useSlotTileDrag = ({
               type: 'REMOVE_TILE',
               zoneIndex: currentZoneIndex,
             });
+            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
             onDropRef.current(currentTileId, targetZoneIndex);
           } else {
             // Drop target exists but has no zoneIndex — treat as cancel.
@@ -92,6 +93,7 @@ export const useSlotTileDrag = ({
   const handleTouchDrop = useCallback(
     (droppedTileId: string, targetZoneIndex: number) => {
       dispatch({ type: 'REMOVE_TILE', zoneIndex });
+      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
       onDrop(droppedTileId, targetZoneIndex);
     },
     [dispatch, zoneIndex, onDrop],
