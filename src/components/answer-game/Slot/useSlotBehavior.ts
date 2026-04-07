@@ -152,7 +152,10 @@ export const useSlotBehavior = (
     [placeTile, zones, dispatch, allTiles],
   );
 
-  // Register as drop target
+  // Register slotRef as drop target so all drag events (including bank tiles
+  // that never dispatch SET_DRAG_ACTIVE) reach the handler. The dropRef expanded
+  // hit zone catches drag events in the ~12 px border zone and they bubble up
+  // to slotRef here naturally.
   useEffect(() => {
     const el = slotRef.current;
     if (!el) return;
