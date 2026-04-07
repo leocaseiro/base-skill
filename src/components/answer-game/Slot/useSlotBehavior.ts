@@ -20,6 +20,8 @@ export interface SlotRenderProps {
   isLocked: boolean;
   isEmpty: boolean;
   showCursor: boolean;
+  isPreview: boolean;
+  previewLabel: string | null;
 }
 
 export interface UseSlotBehaviorReturn {
@@ -39,8 +41,14 @@ export interface UseSlotBehaviorReturn {
 export const useSlotBehavior = (
   index: number,
 ): UseSlotBehaviorReturn => {
-  const { zones, allTiles, activeSlotIndex, config, dragActiveTileId } =
-    useAnswerGameContext();
+  const {
+    zones,
+    allTiles,
+    activeSlotIndex,
+    config,
+    dragActiveTileId,
+    dragHoverZoneIndex,
+  } = useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const { placeTile } = useTileEvaluation();
 
@@ -62,6 +70,31 @@ export const useSlotBehavior = (
   const showCursor =
     isActive && isEmpty && config.inputMethod !== 'drag';
   const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
+
+  // Preview derivation
+  const isPreviewTarget =
+    dragHoverZoneIndex === index && dragActiveTileId !== null;
+
+  const draggedTile = dragActiveTileId
+    ? allTiles.find((t) => t.id === dragActiveTileId)
+    : null;
+
+  let isPreview = false;
+  let previewLabel: string | null = null;
+
+  if (isPreviewTarget) {
+    isPreview = true;
+    previewLabel = draggedTile?.label ?? null;
+  } else if (isBeingDragged && dragHoverZoneIndex !== null) {
+    // This slot is the source of the active drag AND the drag is hovering over some target.
+    isPreview = true;
+    // Source slot shows what it will receive: the target's current tile label.
+    const targetZone = zones[dragHoverZoneIndex];
+    const targetTile = targetZone?.placedTileId
+      ? allTiles.find((t) => t.id === targetZone.placedTileId)
+      : null;
+    previewLabel = targetTile?.label ?? null; // null means source will become empty
+  }
 
   const slotRef = useRef<HTMLElement | null>(null);
   const prevIsWrongRef = useRef(isWrong);
@@ -242,6 +275,8 @@ export const useSlotBehavior = (
       isLocked,
       isEmpty,
       showCursor,
+      isPreview,
+      previewLabel,
     },
     slotRef,
     dragRef,
