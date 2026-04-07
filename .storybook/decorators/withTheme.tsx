@@ -53,7 +53,7 @@ const THEME_VARS: Record<string, Record<string, string>> = {
   },
 };
 
-const DARK_THEMES = new Set(['dark', 'forest-dark']);
+const DARK_THEMES = new Set(['dark', 'forest-dark', 'high-contrast']);
 
 const WithThemeInner = ({
   Story,

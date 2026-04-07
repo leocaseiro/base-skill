@@ -120,7 +120,7 @@ const ShowcaseBody = () => (
 
 // ── Meta ──────────────────────────────────────────────────────────────────
 
-const meta: Meta<typeof GameShell> = {
+const meta = {
   component: GameShell,
   title: 'Pages/ThemeShowcase',
   tags: ['autodocs'],
@@ -136,7 +136,7 @@ const meta: Meta<typeof GameShell> = {
     meta: sessionMeta,
     children: <ShowcaseBody />,
   },
-};
+} satisfies Meta<typeof GameShell>;
 export default meta;
 
 type Story = StoryObj<typeof GameShell>;
