@@ -477,6 +477,27 @@ a:hover {
   --sidebar-ring: oklch(55.6% 0 0deg);
 }
 
+/* Bookmark colour utilities — derived from --bookmark-play set per-component */
+.bookmark-bg {
+  background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
+}
+
+.dark .bookmark-bg {
+  background: color-mix(in srgb, var(--bookmark-play) 20%, transparent);
+}
+
+.bookmark-tag-bg {
+  background: color-mix(in srgb, var(--bookmark-play) 18%, transparent);
+}
+
+.dark .bookmark-tag-bg {
+  background: color-mix(in srgb, var(--bookmark-play) 25%, transparent);
+}
+
+.bookmark-text {
+  color: var(--bookmark-play);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
