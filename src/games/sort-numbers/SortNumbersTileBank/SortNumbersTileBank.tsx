@@ -36,7 +36,10 @@ export const SortNumbersTileBank = () => {
   const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
 
   return (
-    <div className="flex flex-wrap justify-center gap-3">
+    <div
+      data-tile-bank=""
+      className="flex flex-wrap justify-center gap-3"
+    >
       {bankTiles.map((tile) =>
         tile.id === dragActiveTileId ? (
           <div

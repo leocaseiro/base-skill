@@ -84,7 +84,14 @@ export const useTouchDrag = ({
     typeof globalThis.setTimeout
   > | null>(null);
 
+  // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
+  // → cleanupGhost re-entry.
+  const cleanupInProgressRef = useRef(false);
+
   const cleanupGhost = useCallback(() => {
+    if (cleanupInProgressRef.current) return;
+    cleanupInProgressRef.current = true;
+
     if (safetyTimerRef.current !== null) {
       globalThis.clearTimeout(safetyTimerRef.current);
       safetyTimerRef.current = null;
@@ -93,23 +100,24 @@ export const useTouchDrag = ({
     ghostRef.current?.el.remove();
     ghostRef.current = null;
 
-    if (
-      capturedElRef.current !== null &&
-      capturedPointerIdRef.current !== null
-    ) {
+    // Clear refs BEFORE releasePointerCapture so that any synchronous
+    // lostpointercapture event triggered by it sees null refs and bails out.
+    const el = capturedElRef.current;
+    const pointerId = capturedPointerIdRef.current;
+    capturedElRef.current = null;
+    capturedPointerIdRef.current = null;
+
+    if (el !== null && pointerId !== null) {
       try {
-        capturedElRef.current.releasePointerCapture(
-          capturedPointerIdRef.current,
-        );
+        el.releasePointerCapture(pointerId);
       } catch {
         // Element may no longer be in the DOM — ignore.
       }
-      capturedElRef.current = null;
-      capturedPointerIdRef.current = null;
     }
 
     isDragging.current = false;
     startPos.current = null;
+    cleanupInProgressRef.current = false;
   }, []);
 
   const cleanup = useCallback(() => {
@@ -124,8 +132,23 @@ export const useTouchDrag = ({
       capturedPointerIdRef.current = e.pointerId;
       startPos.current = { x: e.clientX, y: e.clientY };
       isDragging.current = false;
+
+      // When the captured element is removed from the DOM (e.g. a slot tile
+      // gets auto-ejected while the user is dragging it), the browser fires
+      // lostpointercapture and onPointerUp never fires.  Clean up here so the
+      // ghost doesn't float for 5 seconds.
+      e.currentTarget.addEventListener(
+        'lostpointercapture',
+        () => {
+          if (!cleanupInProgressRef.current && isDragging.current) {
+            cleanupGhost();
+            onDragCancelRef.current?.();
+          }
+        },
+        { once: true },
+      );
     },
-    [tileId],
+    [tileId, cleanupGhost],
   );
 
   const onPointerMove = useCallback(

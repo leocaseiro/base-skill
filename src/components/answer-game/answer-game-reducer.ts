@@ -47,8 +47,18 @@ export function answerGameReducer(
 
       const correct = tile.value === zone.expectedValue;
 
+      // A tile placement always ends any active drag for that tile.
+      const dragActiveTileId =
+        state.dragActiveTileId === action.tileId
+          ? null
+          : state.dragActiveTileId;
+
       if (!correct && state.config.wrongTileBehavior === 'reject') {
-        return { ...state, retryCount: state.retryCount + 1 };
+        return {
+          ...state,
+          dragActiveTileId,
+          retryCount: state.retryCount + 1,
+        };
       }
 
       if (correct) {
@@ -79,6 +89,7 @@ export function answerGameReducer(
           state.roundIndex >= state.config.totalRounds - 1;
         return {
           ...state,
+          dragActiveTileId,
           zones: newZones,
           bankTileIds: newBankTileIds,
           activeSlotIndex:
@@ -119,6 +130,7 @@ export function answerGameReducer(
 
       return {
         ...state,
+        dragActiveTileId,
         zones: newZones,
         bankTileIds: newBankTileIds,
         activeSlotIndex: state.activeSlotIndex,
@@ -170,8 +182,15 @@ export function answerGameReducer(
       if (!zone.isWrong && !zone.isLocked) return state;
 
       if (zone.placedTileId) {
+        const ejectedTileId = zone.placedTileId;
         return {
           ...state,
+          // If the ejected tile was mid-drag, clear drag state so the bank
+          // hole disappears immediately rather than waiting for the drag to end.
+          dragActiveTileId:
+            state.dragActiveTileId === ejectedTileId
+              ? null
+              : state.dragActiveTileId,
           zones: state.zones.map((z, i) =>
             i === action.zoneIndex
               ? {
@@ -182,7 +201,7 @@ export function answerGameReducer(
                 }
               : z,
           ),
-          bankTileIds: [...state.bankTileIds, zone.placedTileId],
+          bankTileIds: [...state.bankTileIds, ejectedTileId],
         };
       }
 
