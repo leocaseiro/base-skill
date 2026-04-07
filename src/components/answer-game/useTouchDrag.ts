@@ -61,6 +61,8 @@ interface UseTouchDragOptions {
   /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
   onDragCancel?: () => void;
   onDrop: (tileId: string, zoneIndex: number) => void;
+  /** Called when the tile is dropped on the bank container. */
+  onDropOnBank?: () => void;
 }
 
 export const useTouchDrag = ({
@@ -69,6 +71,7 @@ export const useTouchDrag = ({
   onDragStart,
   onDragCancel,
   onDrop,
+  onDropOnBank,
 }: UseTouchDragOptions): TouchDragHandlers => {
   const onDragCancelRef = useRef(onDragCancel);
   useEffect(() => {
@@ -223,6 +226,15 @@ export const useTouchDrag = ({
               break;
             }
           }
+          // Dropped on the tile bank container — return tile to bank.
+          if (
+            el instanceof HTMLElement &&
+            el.dataset['tileBank'] !== undefined
+          ) {
+            onDropOnBank?.();
+            dropped = true;
+            break;
+          }
         }
         if (!dropped) {
           onDragCancelRef.current?.();
@@ -231,7 +243,7 @@ export const useTouchDrag = ({
 
       cleanup();
     },
-    [tileId, onDrop, cleanup],
+    [tileId, onDrop, onDropOnBank, cleanup],
   );
 
   const onPointerCancel = useCallback(

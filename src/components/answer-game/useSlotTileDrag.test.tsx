@@ -129,7 +129,7 @@ describe('useSlotTileDrag', () => {
   });
 
   describe('HTML5 onDrop — dropped on bank target', () => {
-    it('clears drag state and does NOT dispatch REMOVE_TILE (tile stays in slot)', () => {
+    it('clears drag state and dispatches REMOVE_TILE to return tile to bank', () => {
       capturedDraggableOptions = null;
       mockDispatch.mockClear();
       const mockOnDrop = vi.fn();
@@ -158,9 +158,10 @@ describe('useSlotTileDrag', () => {
         type: 'SET_DRAG_ACTIVE',
         tileId: null,
       });
-      expect(mockDispatch).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'REMOVE_TILE' }),
-      );
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'REMOVE_TILE',
+        zoneIndex: 0,
+      });
       expect(mockOnDrop).not.toHaveBeenCalled();
     });
   });

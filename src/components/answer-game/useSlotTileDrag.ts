@@ -28,7 +28,7 @@ interface UseSlotTileDragOptions {
  * Enables an occupied slot tile to be dragged to another slot.
  * Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
  *
- * Tiles never return to the bank via drag — only the eject effect can do that.
+ * Tiles can return to the bank by dropping on the bank container (REMOVE_TILE).
  *
  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
  * visible in the slot during the drag.
@@ -102,6 +102,7 @@ export const useSlotTileDrag = ({
       onDrop: ({ location }) => {
         const targets = location.current.dropTargets;
         const targetZoneIndex = targets[0]?.data['zoneIndex'];
+        const isBankTarget = targets[0]?.data['isBankTarget'];
 
         // Always clear drag state first.
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
@@ -109,6 +110,9 @@ export const useSlotTileDrag = ({
         if (targets.length > 0 && typeof targetZoneIndex === 'number') {
           // Confirmed drop on a valid slot — caller handles SWAP_TILES.
           onDropRef.current(currentTileId, targetZoneIndex);
+        } else if (isBankTarget === true) {
+          // Dropped on the tile bank — return tile to bank.
+          dispatch({ type: 'REMOVE_TILE', zoneIndex });
         }
         // else: dropped outside a slot — tile stays put (no-op)
       },
@@ -123,6 +127,12 @@ export const useSlotTileDrag = ({
     },
     [dispatch, onDrop],
   );
+
+  // Touch: dropped on the tile bank — return tile to bank.
+  const handleTouchDropOnBank = useCallback(() => {
+    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+    dispatch({ type: 'REMOVE_TILE', zoneIndex });
+  }, [dispatch, zoneIndex]);
 
   // Pointer-events drag — touch / mobile
   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
@@ -139,6 +149,7 @@ export const useSlotTileDrag = ({
           }
         : undefined,
       onDrop: handleTouchDrop,
+      onDropOnBank: handleTouchDropOnBank,
     });
 
   return {
