@@ -44,22 +44,21 @@ export const LetterTileBank = () => {
     );
   }
 
-  const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
-
   return (
     <div
       data-tile-bank=""
       className="flex flex-wrap justify-center gap-3"
     >
-      {bankTiles.map((tile) =>
-        tile.id === dragActiveTileId ? (
+      {allTiles.map((tile) =>
+        bankTileIds.includes(tile.id) &&
+        tile.id !== dragActiveTileId ? (
+          <LetterTile key={tile.id} tile={tile} />
+        ) : (
           <div
             key={tile.id}
             className="size-14 rounded-xl bg-muted/30 shadow-inner"
             aria-hidden="true"
           />
-        ) : (
-          <LetterTile key={tile.id} tile={tile} />
         ),
       )}
     </div>
