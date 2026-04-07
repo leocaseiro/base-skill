@@ -202,30 +202,36 @@ export const useTouchDrag = ({
         el.style.left = `${e.clientX - halfW}px`;
         el.style.top = `${e.clientY - halfH}px`;
 
-        // Detect zone under pointer for hover preview.
-        // Temporarily hide the ghost so it doesn't intercept elementsFromPoint.
+        // Sample 5 points (pointer center + 4 ghost corners) so the drop zone
+        // activates as soon as the ghost tile visually overlaps a slot.
+        // Hide the ghost once before sampling so it doesn't block elementsFromPoint.
         el.style.visibility = 'hidden';
-        const elements = document.elementsFromPoint(
-          e.clientX,
-          e.clientY,
-        );
-        el.style.visibility = 'visible';
+        const samplePoints: [number, number][] = [
+          [e.clientX, e.clientY],
+          [e.clientX - halfW, e.clientY - halfH],
+          [e.clientX + halfW, e.clientY - halfH],
+          [e.clientX - halfW, e.clientY + halfH],
+          [e.clientX + halfW, e.clientY + halfH],
+        ];
         let detectedZone: number | null = null;
-        for (const elem of elements) {
-          if (
-            elem instanceof HTMLElement &&
-            elem.dataset['zoneIndex'] !== undefined
-          ) {
-            const parsed = Number.parseInt(
-              elem.dataset['zoneIndex'],
-              10,
-            );
-            if (!Number.isNaN(parsed)) {
-              detectedZone = parsed;
-              break;
+        outer: for (const [px, py] of samplePoints) {
+          for (const elem of document.elementsFromPoint(px, py)) {
+            if (
+              elem instanceof HTMLElement &&
+              elem.dataset['zoneIndex'] !== undefined
+            ) {
+              const parsed = Number.parseInt(
+                elem.dataset['zoneIndex'],
+                10,
+              );
+              if (!Number.isNaN(parsed)) {
+                detectedZone = parsed;
+                break outer;
+              }
             }
           }
         }
+        el.style.visibility = 'visible';
         if (detectedZone !== lastHoverZoneRef.current) {
           lastHoverZoneRef.current = detectedZone;
           onHoverZoneRef.current?.(detectedZone);
@@ -240,42 +246,91 @@ export const useTouchDrag = ({
       if (e.pointerType === 'mouse' || !startPos.current) return;
 
       if (isDragging.current) {
+        // Capture ghost dimensions before removing.
+        const ghostHalfW = ghostRef.current?.halfW ?? 0;
+        const ghostHalfH = ghostRef.current?.halfH ?? 0;
+
         // Remove ghost before elementsFromPoint so it doesn't interfere.
         ghostRef.current?.el.remove();
         ghostRef.current = null;
 
-        const elements = document.elementsFromPoint(
-          e.clientX,
-          e.clientY,
-        );
-        let dropped = false;
-        for (const el of elements) {
-          if (
-            el instanceof HTMLElement &&
-            el.dataset['zoneIndex'] !== undefined
-          ) {
-            const zoneIndex = Number.parseInt(
-              el.dataset['zoneIndex'],
-              10,
-            );
-            if (!Number.isNaN(zoneIndex)) {
-              onDrop(tileId, zoneIndex);
-              dropped = true;
-              break;
+        // Priority order (honours explicit pointer intent before ghost expansion):
+        //   1. Center → zone   (precise slot aim)
+        //   2. Center → bank   (explicit bank aim beats corner zone hits)
+        //   3. Corners → zone  (expanded zone — ghost visually overlaps slot)
+        //   4. Corners → bank  (expanded bank)
+        //   5. Cancel
+        const centerX = e.clientX;
+        const centerY = e.clientY;
+        const cornerPoints: [number, number][] = [
+          [centerX - ghostHalfW, centerY - ghostHalfH],
+          [centerX + ghostHalfW, centerY - ghostHalfH],
+          [centerX - ghostHalfW, centerY + ghostHalfH],
+          [centerX + ghostHalfW, centerY + ghostHalfH],
+        ];
+
+        const findZoneAt = (px: number, py: number): number | null => {
+          for (const el of document.elementsFromPoint(px, py)) {
+            if (
+              el instanceof HTMLElement &&
+              el.dataset['zoneIndex'] !== undefined
+            ) {
+              const parsed = Number.parseInt(
+                el.dataset['zoneIndex'],
+                10,
+              );
+              if (!Number.isNaN(parsed)) return parsed;
             }
           }
-          // Dropped on the tile bank container — return tile to bank.
-          if (
-            el instanceof HTMLElement &&
-            el.dataset['tileBank'] !== undefined
-          ) {
-            onDropOnBank?.();
-            dropped = true;
+          return null;
+        };
+        const isBankAt = (px: number, py: number): boolean =>
+          document
+            .elementsFromPoint(px, py)
+            .some(
+              (el) =>
+                el instanceof HTMLElement &&
+                el.dataset['tileBank'] !== undefined,
+            );
+
+        // 1. Center → zone
+        const centerZone = findZoneAt(centerX, centerY);
+        if (centerZone !== null) {
+          onDrop(tileId, centerZone);
+          cleanup();
+          return;
+        }
+        // 2. Center → bank
+        if (isBankAt(centerX, centerY)) {
+          onDropOnBank?.();
+          cleanup();
+          return;
+        }
+        // 3. Corners → zone
+        let droppedZoneIndex: number | null = null;
+        for (const [px, py] of cornerPoints) {
+          const z = findZoneAt(px, py);
+          if (z !== null) {
+            droppedZoneIndex = z;
             break;
           }
         }
-        if (!dropped) {
-          onDragCancelRef.current?.();
+        if (droppedZoneIndex === null) {
+          // 4. Corners → bank
+          let hitBank = false;
+          for (const [px, py] of cornerPoints) {
+            if (isBankAt(px, py)) {
+              hitBank = true;
+              break;
+            }
+          }
+          if (hitBank) {
+            onDropOnBank?.();
+          } else {
+            onDragCancelRef.current?.();
+          }
+        } else {
+          onDrop(tileId, droppedZoneIndex);
         }
       }
 
