@@ -18,6 +18,7 @@
   --sea-ink: #173a40;
   --sea-ink-soft: #416166;
   --lagoon: #4fb8b2;
+  --lagoon-light: #7ed3bf;
   --lagoon-deep: #328f97;
   --palm: #2f6a4a;
   --sand: #e7f0e8;
@@ -349,7 +350,11 @@ a:hover {
   height: 2px;
   transform: scaleX(0);
   transform-origin: left;
-  background: linear-gradient(90deg, var(--lagoon), #7ed3bf);
+  background: linear-gradient(
+    90deg,
+    var(--lagoon),
+    var(--lagoon-light)
+  );
   transition: transform 170ms ease;
 }
 
