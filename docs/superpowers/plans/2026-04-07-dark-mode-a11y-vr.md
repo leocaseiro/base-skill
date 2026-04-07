@@ -12,35 +12,36 @@
 
 ## File Map
 
-| Action | Path |
-|--------|------|
-| Modify | `src/styles.css` |
-| Modify | `src/lib/theme/css-vars.ts` |
-| Modify | `src/lib/theme/default-tokens.ts` |
-| Modify | `src/lib/bookmark-colors.ts` |
-| Modify | `src/components/GameNameChip.tsx` |
-| Modify | `src/components/SavedConfigChip.tsx` |
-| Modify | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` |
-| Modify | `src/components/SaveConfigDialog.tsx` |
-| Modify | `.stylelintrc.yaml` |
-| Modify | `eslint.config.js` |
-| Modify | `e2e/visual.spec.ts` |
-| Create | `.storybook/decorators.tsx` |
+| Action | Path                                                                             |
+| ------ | -------------------------------------------------------------------------------- |
+| Modify | `src/styles.css`                                                                 |
+| Modify | `src/lib/theme/css-vars.ts`                                                      |
+| Modify | `src/lib/theme/default-tokens.ts`                                                |
+| Modify | `src/lib/bookmark-colors.ts`                                                     |
+| Modify | `src/components/GameNameChip.tsx`                                                |
+| Modify | `src/components/SavedConfigChip.tsx`                                             |
+| Modify | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`         |
+| Modify | `src/components/SaveConfigDialog.tsx`                                            |
+| Modify | `.stylelintrc.yaml`                                                              |
+| Modify | `eslint.config.js`                                                               |
+| Modify | `e2e/visual.spec.ts`                                                             |
+| Create | `.storybook/decorators.tsx`                                                      |
 | Create | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx` |
-| Create | `src/components/ConfigFormFields.stories.tsx` |
-| Create | `src/components/GameNameChip.stories.tsx` |
-| Create | `src/components/SavedConfigChip.stories.tsx` |
-| Create | `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx` |
-| Create | `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx` |
-| Modify | `.storybook/decorators/withTheme.tsx` |
-| Modify | `.storybook/preview.tsx` |
-| Create | `src/stories/ThemeShowcase.stories.tsx` |
+| Create | `src/components/ConfigFormFields.stories.tsx`                                    |
+| Create | `src/components/GameNameChip.stories.tsx`                                        |
+| Create | `src/components/SavedConfigChip.stories.tsx`                                     |
+| Create | `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx`     |
+| Create | `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx`     |
+| Modify | `.storybook/decorators/withTheme.tsx`                                            |
+| Modify | `.storybook/preview.tsx`                                                         |
+| Create | `src/stories/ThemeShowcase.stories.tsx`                                          |
 
 ---
 
 ## Task 1: Worktree Setup
 
 **Files:**
+
 - None (git plumbing only)
 
 - [ ] **Step 1: Create worktree from project root**
@@ -61,6 +62,7 @@ Expected: `Preparing worktree (new branch 'feat/dark-mode-a11y-vr')` — no erro
 The root cause of dark mode not working: `ThemeRuntimeProvider` sets shadcn CSS vars (`--background`, `--primary`, etc.) as inline styles on `<html>`, which have higher specificity than the `.dark` class in `styles.css`. Fix: only set `--bs-*` vars inline; derive shadcn vars from `--bs-*` in the `:root` block so the cascade works correctly.
 
 **Files:**
+
 - Modify: `src/styles.css`
 - Modify: `src/lib/theme/css-vars.ts`
 - Modify: `src/lib/theme/default-tokens.ts`
@@ -78,15 +80,15 @@ Expected: 0 errors.
 Find the `:root` block (ends around line 83 with `--bs-font-weight-default`). Add inside that block, before the closing `}`:
 
 ```css
-  /* Wire shadcn vars from --bs-* tokens; inline style only sets --bs-*, so .dark class wins */
-  --foreground: var(--bs-text);
-  --background: var(--bs-background);
-  --primary: var(--bs-primary);
-  --primary-foreground: var(--bs-surface);
-  --secondary: var(--bs-secondary);
-  --secondary-foreground: var(--bs-surface);
-  --border: var(--bs-accent);
-  --ring: var(--bs-primary);
+/* Wire shadcn vars from --bs-* tokens; inline style only sets --bs-*, so .dark class wins */
+--foreground: var(--bs-text);
+--background: var(--bs-background);
+--primary: var(--bs-primary);
+--primary-foreground: var(--bs-surface);
+--secondary: var(--bs-secondary);
+--secondary-foreground: var(--bs-surface);
+--border: var(--bs-accent);
+--ring: var(--bs-primary);
 ```
 
 - [ ] **Step 3: Remove shadcn vars from `src/lib/theme/css-vars.ts`**
@@ -179,6 +181,7 @@ git commit -m "fix(theme): wire shadcn vars from --bs-* in CSS so .dark class wi
 Replace the 6-token `ColorTokens` type with 2 tokens (`border`, `playBg`). All light/dark tints now come from CSS utility classes using `color-mix`.
 
 **Files:**
+
 - Modify: `src/styles.css`
 - Modify: `src/lib/bookmark-colors.ts`
 
@@ -236,18 +239,18 @@ export type ColorTokens = {
 };
 
 export const BOOKMARK_COLORS: Record<BookmarkColorKey, ColorTokens> = {
-  indigo:  { border: '#c7d2fe', playBg: '#6366f1' },
-  teal:    { border: '#99f6e4', playBg: '#14b8a6' },
-  rose:    { border: '#fecdd3', playBg: '#f43f5e' },
-  amber:   { border: '#fde68a', playBg: '#f59e0b' },
-  sky:     { border: '#bae6fd', playBg: '#0ea5e9' },
-  lime:    { border: '#d9f99d', playBg: '#84cc16' },
-  purple:  { border: '#e9d5ff', playBg: '#a855f7' },
-  orange:  { border: '#fed7aa', playBg: '#f97316' },
-  pink:    { border: '#fbcfe8', playBg: '#ec4899' },
+  indigo: { border: '#c7d2fe', playBg: '#6366f1' },
+  teal: { border: '#99f6e4', playBg: '#14b8a6' },
+  rose: { border: '#fecdd3', playBg: '#f43f5e' },
+  amber: { border: '#fde68a', playBg: '#f59e0b' },
+  sky: { border: '#bae6fd', playBg: '#0ea5e9' },
+  lime: { border: '#d9f99d', playBg: '#84cc16' },
+  purple: { border: '#e9d5ff', playBg: '#a855f7' },
+  orange: { border: '#fed7aa', playBg: '#f97316' },
+  pink: { border: '#fbcfe8', playBg: '#ec4899' },
   emerald: { border: '#a7f3d0', playBg: '#10b981' },
-  slate:   { border: '#cbd5e1', playBg: '#64748b' },
-  cyan:    { border: '#a5f3fc', playBg: '#06b6d4' },
+  slate: { border: '#cbd5e1', playBg: '#64748b' },
+  cyan: { border: '#a5f3fc', playBg: '#06b6d4' },
 };
 
 export const DEFAULT_BOOKMARK_COLOR: BookmarkColorKey = 'indigo';
@@ -268,6 +271,7 @@ Expected: TypeScript errors in `GameNameChip.tsx`, `SavedConfigChip.tsx`, `Instr
 Fix TypeScript failures from Task 3 by updating all 4 components to use `--bookmark-play` CSS var + utility classes. Also fixes the two hardcoded colours (Section 3 of spec).
 
 **Files:**
+
 - Modify: `src/components/GameNameChip.tsx`
 - Modify: `src/components/SavedConfigChip.tsx`
 - Modify: `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`
@@ -305,10 +309,12 @@ export const GameNameChip = ({
   return (
     <div
       className="overflow-hidden rounded-xl border"
-      style={{
-        borderColor: colors.border,
-        '--bookmark-play': colors.playBg,
-      } as React.CSSProperties}
+      style={
+        {
+          borderColor: colors.border,
+          '--bookmark-play': colors.playBg,
+        } as React.CSSProperties
+      }
     >
       <div className="bookmark-bg flex min-h-12 items-center gap-2 px-3">
         <span className="bookmark-text text-sm font-bold">{title}</span>
@@ -387,18 +393,22 @@ export const SavedConfigChip = ({
   return (
     <div
       className="overflow-hidden rounded-xl border-2"
-      style={{
-        '--bookmark-play': colors.playBg,
-        borderColor: expanded ? colors.playBg : colors.border,
-        boxShadow: expanded
-          ? `0 0 0 3px color-mix(in srgb, var(--bookmark-play) 12%, transparent)`
-          : undefined,
-      } as React.CSSProperties}
+      style={
+        {
+          '--bookmark-play': colors.playBg,
+          borderColor: expanded ? colors.playBg : colors.border,
+          boxShadow: expanded
+            ? `0 0 0 3px color-mix(in srgb, var(--bookmark-play) 12%, transparent)`
+            : undefined,
+        } as React.CSSProperties
+      }
     >
       {/* Header row */}
       <div
         className={`flex min-h-12 items-stretch ${!expanded ? 'bookmark-tag-bg' : ''}`}
-        style={expanded ? { background: 'var(--bookmark-play)' } : undefined}
+        style={
+          expanded ? { background: 'var(--bookmark-play)' } : undefined
+        }
       >
         <button
           type="button"
@@ -499,6 +509,7 @@ export const SavedConfigChip = ({
 - [ ] **Step 3: Update `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`**
 
 Key changes:
+
 - Add `'--bookmark-play': settingsColors.playBg` to settings section div
 - Replace `style={{ background: settingsColors.playBg }}` with `style={{ background: 'var(--bookmark-play)' }}`
 - Replace `color: settingsOpen ? 'rgba(255,255,255,0.7)' : undefined` with `className` conditional
@@ -609,9 +620,11 @@ export const InstructionsOverlay = ({
         {/* 4. Settings chip (collapsed by default) */}
         <div
           className="w-full overflow-hidden rounded-xl border border-border"
-          style={{
-            '--bookmark-play': settingsColors.playBg,
-          } as React.CSSProperties}
+          style={
+            {
+              '--bookmark-play': settingsColors.playBg,
+            } as React.CSSProperties
+          }
         >
           {/* Settings header */}
           <button
@@ -790,29 +803,33 @@ The preview section uses `previewColors.tagBg` and `previewColors.headerText` �
 Replace the preview `<div className="flex flex-col gap-1">` block (lines ~120–144) with:
 
 ```tsx
-          {/* Preview */}
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              Preview
-            </span>
-            <div
-              className="inline-flex overflow-hidden rounded-lg border"
-              style={{
-                borderColor: previewColors.border,
-                '--bookmark-play': previewColors.playBg,
-              } as React.CSSProperties}
-            >
-              <div className="bookmark-tag-bg bookmark-text px-3 py-2 text-sm font-semibold">
-                {name || t('saveConfig.placeholder')}
-              </div>
-              <div
-                className="flex w-10 items-center justify-center text-sm text-white"
-                style={{ background: 'var(--bookmark-play)' }}
-              >
-                ▶
-              </div>
-            </div>
-          </div>
+{
+  /* Preview */
+}
+<div className="flex flex-col gap-1">
+  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+    Preview
+  </span>
+  <div
+    className="inline-flex overflow-hidden rounded-lg border"
+    style={
+      {
+        borderColor: previewColors.border,
+        '--bookmark-play': previewColors.playBg,
+      } as React.CSSProperties
+    }
+  >
+    <div className="bookmark-tag-bg bookmark-text px-3 py-2 text-sm font-semibold">
+      {name || t('saveConfig.placeholder')}
+    </div>
+    <div
+      className="flex w-10 items-center justify-center text-sm text-white"
+      style={{ background: 'var(--bookmark-play)' }}
+    >
+      ▶
+    </div>
+  </div>
+</div>;
 ```
 
 Also remove the `previewColors` variable (since we no longer access `previewColors.tagBg` / `previewColors.headerText`). Keep `previewColors.border` and `previewColors.playBg`.
@@ -852,6 +869,7 @@ git commit -m "feat(bookmark): replace hardcoded colour tokens with CSS utility 
 Prevent future hardcoded colours via Stylelint (CSS files) and ESLint `no-restricted-syntax` (JSX inline styles).
 
 **Files:**
+
 - Modify: `.stylelintrc.yaml`
 - Modify: `eslint.config.js`
 
@@ -939,6 +957,7 @@ git commit -m "feat(lint): enforce no hardcoded colours in CSS or JSX inline sty
 Expand from 4 light-mode screenshots to 12: add dark variants for all existing screens, plus SortNumbers (light + dark) and InstructionsOverlay (light + dark).
 
 **Files:**
+
 - Modify: `e2e/visual.spec.ts`
 
 - [ ] **Step 1: Replace `e2e/visual.spec.ts` with expanded test matrix**
@@ -977,7 +996,9 @@ test('@visual home page dark', async ({ page }) => {
     .getByRole('group', { name: /filter by grade level/i })
     .waitFor({ state: 'visible' });
   await setDarkMode(page);
-  await expect(page).toHaveScreenshot('home-dark.png', { fullPage: true });
+  await expect(page).toHaveScreenshot('home-dark.png', {
+    fullPage: true,
+  });
 });
 
 // ── Game shell ───────────────────────────────────────────────────────────────
@@ -987,7 +1008,9 @@ test('@visual game shell layout', async ({ page }) => {
   await page
     .getByRole('button', { name: /exit/i })
     .waitFor({ state: 'visible' });
-  await expect(page).toHaveScreenshot('game-shell.png', { fullPage: true });
+  await expect(page).toHaveScreenshot('game-shell.png', {
+    fullPage: true,
+  });
 });
 
 test('@visual game shell layout dark', async ({ page }) => {
@@ -1003,7 +1026,9 @@ test('@visual game shell layout dark', async ({ page }) => {
 
 // ── WordSpell ────────────────────────────────────────────────────────────────
 
-test('@visual WordSpell picture mode mid-game layout', async ({ page }) => {
+test('@visual WordSpell picture mode mid-game layout', async ({
+  page,
+}) => {
   await page.goto('/en/game/word-spell');
   await page.getByRole('button', { name: /let's go/i }).click();
   await page
@@ -1025,14 +1050,19 @@ test('@visual WordSpell picture mode mid-game layout dark', async ({
     .first()
     .waitFor({ state: 'visible' });
   await setDarkMode(page);
-  await expect(page).toHaveScreenshot('word-spell-picture-mode-dark.png', {
-    fullPage: true,
-  });
+  await expect(page).toHaveScreenshot(
+    'word-spell-picture-mode-dark.png',
+    {
+      fullPage: true,
+    },
+  );
 });
 
 // ── NumberMatch ──────────────────────────────────────────────────────────────
 
-test('@visual NumberMatch numeral-to-group layout', async ({ page }) => {
+test('@visual NumberMatch numeral-to-group layout', async ({
+  page,
+}) => {
   await page.goto('/en/game/number-match');
   await page.getByRole('button', { name: /let's go/i }).click();
   await page
@@ -1044,7 +1074,9 @@ test('@visual NumberMatch numeral-to-group layout', async ({ page }) => {
   );
 });
 
-test('@visual NumberMatch numeral-to-group layout dark', async ({ page }) => {
+test('@visual NumberMatch numeral-to-group layout dark', async ({
+  page,
+}) => {
   await page.goto('/en/game/number-match');
   await page.getByRole('button', { name: /let's go/i }).click();
   await page
@@ -1066,7 +1098,9 @@ test('@visual SortNumbers mid-game layout', async ({ page }) => {
     .getByRole('button', { name: /^Number /i })
     .first()
     .waitFor({ state: 'visible' });
-  await expect(page).toHaveScreenshot('sort-numbers.png', { fullPage: true });
+  await expect(page).toHaveScreenshot('sort-numbers.png', {
+    fullPage: true,
+  });
 });
 
 test('@visual SortNumbers mid-game layout dark', async ({ page }) => {
@@ -1094,7 +1128,9 @@ test('@visual InstructionsOverlay before start', async ({ page }) => {
   });
 });
 
-test('@visual InstructionsOverlay before start dark', async ({ page }) => {
+test('@visual InstructionsOverlay before start dark', async ({
+  page,
+}) => {
   await page.goto('/en/game/sort-numbers');
   await page
     .getByRole('button', { name: /let's go/i })
@@ -1147,6 +1183,7 @@ git commit -m "test(vr): update baselines for dark mode and new screens"
 Create a component-level dark mode decorator that wraps a story in a `.dark` div, so individual story variants can show the dark appearance without switching the global Storybook theme.
 
 **Files:**
+
 - Create: `.storybook/decorators.tsx`
 
 - [ ] **Step 1: Create `.storybook/decorators.tsx`**
@@ -1194,6 +1231,7 @@ git commit -m "feat(storybook): add withDarkMode component-level decorator"
 Create/update 6 story files with dark variants. All use named exports (no `export default` → `export default meta` is the CSF convention, exempted by eslint.config.js).
 
 **Files:**
+
 - Create: `src/components/GameNameChip.stories.tsx`
 - Create: `src/components/SavedConfigChip.stories.tsx`
 - Create: `src/components/ConfigFormFields.stories.tsx`
@@ -1252,16 +1290,29 @@ export const WithSubjectDark: Story = {
 export const AllColors: Story = {
   render: () => (
     <div className="flex flex-col gap-2">
-      {(['indigo', 'teal', 'rose', 'amber', 'sky', 'lime', 'purple', 'orange', 'pink', 'emerald', 'slate', 'cyan'] as const).map(
-        (color) => (
-          <GameNameChip
-            key={color}
-            title="Word Spell"
-            bookmarkName={color}
-            bookmarkColor={color}
-          />
-        ),
-      )}
+      {(
+        [
+          'indigo',
+          'teal',
+          'rose',
+          'amber',
+          'sky',
+          'lime',
+          'purple',
+          'orange',
+          'pink',
+          'emerald',
+          'slate',
+          'cyan',
+        ] as const
+      ).map((color) => (
+        <GameNameChip
+          key={color}
+          title="Word Spell"
+          bookmarkName={color}
+          bookmarkColor={color}
+        />
+      ))}
     </div>
   ),
 };
@@ -1411,7 +1462,7 @@ import { InstructionsOverlay } from './InstructionsOverlay';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const baseArgs = {
-  text: "Listen to each number and drag it into the correct slot to sort from smallest to biggest.",
+  text: 'Listen to each number and drag it into the correct slot to sort from smallest to biggest.',
   onStart: () => {},
   ttsEnabled: false,
   gameTitle: 'Sort Numbers',
@@ -1496,10 +1547,38 @@ const config: AnswerGameConfig = {
     { id: 't4', label: '5', value: '5' },
   ],
   initialZones: [
-    { id: 'z1', index: 0, expectedValue: '1', placedTileId: null, isWrong: false, isLocked: false },
-    { id: 'z2', index: 1, expectedValue: '3', placedTileId: null, isWrong: false, isLocked: false },
-    { id: 'z3', index: 2, expectedValue: '5', placedTileId: null, isWrong: false, isLocked: false },
-    { id: 'z4', index: 3, expectedValue: '7', placedTileId: null, isWrong: false, isLocked: false },
+    {
+      id: 'z1',
+      index: 0,
+      expectedValue: '1',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+    {
+      id: 'z2',
+      index: 1,
+      expectedValue: '3',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+    {
+      id: 'z3',
+      index: 2,
+      expectedValue: '5',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+    {
+      id: 'z4',
+      index: 3,
+      expectedValue: '7',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
   ],
 };
 
@@ -1549,9 +1628,30 @@ const config: AnswerGameConfig = {
     { id: 't3', label: '5', value: '5' },
   ],
   initialZones: [
-    { id: 'z1', index: 0, expectedValue: '1', placedTileId: null, isWrong: false, isLocked: false },
-    { id: 'z2', index: 1, expectedValue: '3', placedTileId: null, isWrong: false, isLocked: false },
-    { id: 'z3', index: 2, expectedValue: '5', placedTileId: null, isWrong: false, isLocked: false },
+    {
+      id: 'z1',
+      index: 0,
+      expectedValue: '1',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+    {
+      id: 'z2',
+      index: 1,
+      expectedValue: '3',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+    {
+      id: 'z3',
+      index: 2,
+      expectedValue: '5',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
   ],
 };
 
@@ -1648,6 +1748,7 @@ A full-page Storybook story that stacks the app shell chrome with the key bookma
 **Why `parameters.globals` instead of a custom decorator:** The `withTheme` decorator already reads `context.globals.theme` and applies CSS vars + dark class globally. Locking `globals` per story is the standard Storybook pattern for this — no new decorator machinery needed.
 
 **Files:**
+
 - Modify: `.storybook/decorators/withTheme.tsx`
 - Modify: `.storybook/preview.tsx`
 - Create: `src/stories/ThemeShowcase.stories.tsx`
@@ -1749,10 +1850,13 @@ export const withTheme: Decorator = (Story, context) => (
 - [ ] **Step 2: Add forest themes to toolbar in `.storybook/preview.tsx`**
 
 Replace the `theme` globalType toolbar items array from:
+
 ```ts
 items: ['light', 'dark', 'high-contrast'],
 ```
+
 to:
+
 ```ts
 items: [
   { value: 'light',          title: 'Ocean Light' },
@@ -1798,7 +1902,11 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 const content: ResolvedContent = {
   rounds: [
-    { id: 'r1', prompt: { en: 'Sort the numbers' }, correctAnswer: '1' },
+    {
+      id: 'r1',
+      prompt: { en: 'Sort the numbers' },
+      correctAnswer: '1',
+    },
   ],
 };
 
@@ -1951,6 +2059,7 @@ yarn storybook
 ```
 
 Navigate to **Pages → ThemeShowcase** and cycle through OceanLight, OceanDark, ForestLight, ForestDark. Verify:
+
 - App shell chrome (header, score bar, timer) picks up each palette
 - `GameNameChip` bookmark tint is visible
 - `SavedConfigChip` border/play button uses the teal bookmark colour
@@ -1973,6 +2082,7 @@ git commit -m "feat(storybook): add forest theme variants and 4-theme showcase V
 **Section 2 — BOOKMARK_COLORS Dark Mode:** ✅ Covered in Tasks 3–4 (slim `ColorTokens`, bookmark utility classes, all 4 components updated).
 
 **Section 3 — Hardcoded Colour Cleanup:**
+
 - `InstructionsOverlay.tsx` line 124 `rgba(255,255,255,0.7)` → `text-white/70` ✅ (Task 4 Step 3)
 - `SavedConfigChip.tsx` line 99 `rgb(254 226 226)` → CSS variable approach ✅ (Task 4 Step 2)
 
