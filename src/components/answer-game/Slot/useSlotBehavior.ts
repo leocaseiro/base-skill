@@ -24,10 +24,10 @@ export interface UseSlotBehaviorReturn {
   dragRef: RefObject<HTMLButtonElement | null>;
   handleClick: () => void;
   pointerHandlers: {
-    onPointerDown: (e: React.PointerEvent) => void;
-    onPointerMove: (e: React.PointerEvent) => void;
-    onPointerUp: (e: React.PointerEvent) => void;
-    onPointerCancel: (e: React.PointerEvent) => void;
+    onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
+    onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
+    onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
+    onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
   };
 }
 
