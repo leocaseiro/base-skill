@@ -58,7 +58,7 @@ export const LetterTileBank = () => {
         const inBank = bankTileIds.includes(tile.id);
         const isDragging = tile.id === dragActiveTileId;
 
-        if (inBank && isDragging) {
+        if (inBank) {
           return (
             <div key={tile.id} className="relative size-14">
               <div
@@ -67,17 +67,13 @@ export const LetterTileBank = () => {
                 aria-hidden="true"
               />
               <div
-                className="absolute inset-0 invisible"
-                aria-hidden="true"
+                className={`absolute inset-0${isDragging ? ' invisible' : ''}`}
+                aria-hidden={isDragging || undefined}
               >
                 <LetterTile tile={tile} />
               </div>
             </div>
           );
-        }
-
-        if (inBank) {
-          return <LetterTile key={tile.id} tile={tile} />;
         }
 
         return (

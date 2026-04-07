@@ -145,7 +145,7 @@ export const NumeralTileBank = ({
         const isDomino = getIsDomino(tileStyle, numericValue);
         const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
 
-        if (inBank && isDragging) {
+        if (inBank) {
           return (
             <div
               key={tile.id}
@@ -160,22 +160,12 @@ export const NumeralTileBank = ({
                 aria-hidden="true"
               />
               <div
-                className="absolute inset-0 invisible"
-                aria-hidden="true"
+                className={`absolute inset-0${isDragging ? ' invisible' : ''}`}
+                aria-hidden={isDragging || undefined}
               >
                 <NumeralTile tile={tile} tileStyle={tileStyle} />
               </div>
             </div>
-          );
-        }
-
-        if (inBank) {
-          return (
-            <NumeralTile
-              key={tile.id}
-              tile={tile}
-              tileStyle={tileStyle}
-            />
           );
         }
 
