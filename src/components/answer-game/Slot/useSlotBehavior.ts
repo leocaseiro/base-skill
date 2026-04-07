@@ -26,6 +26,9 @@ export interface SlotRenderProps {
 
 export interface UseSlotBehaviorReturn {
   renderProps: SlotRenderProps;
+  /** Outer wrapper — registered as drop target, carries data-zone-index. */
+  outerRef: RefObject<HTMLElement | null>;
+  /** Inner visual div — used for animations (shake, pop, eject). */
   slotRef: RefObject<HTMLElement | null>;
   dragRef: RefObject<HTMLButtonElement | null>;
   handleClick: () => void;
@@ -96,6 +99,7 @@ export const useSlotBehavior = (
     previewLabel = targetTile?.label ?? null; // null means source will become empty
   }
 
+  const outerRef = useRef<HTMLElement | null>(null);
   const slotRef = useRef<HTMLElement | null>(null);
   const prevIsWrongRef = useRef(isWrong);
   const prevTileIdRef = useRef(tileId);
@@ -152,15 +156,16 @@ export const useSlotBehavior = (
     [placeTile, zones, dispatch, allTiles],
   );
 
-  // Register slotRef as drop target so all drag events (including bank tiles
-  // that never dispatch SET_DRAG_ACTIVE) reach the handler. The dropRef expanded
-  // hit zone catches drag events in the ~12 px border zone and they bubble up
-  // to slotRef here naturally.
+  // Register outerRef (the wrapper element, p-1.5 larger than the visual slot)
+  // as the drop target so the hit area extends ~6 px beyond the visual slot on
+  // all sides. getIsSticky keeps the target active once the pointer enters it,
+  // matching the pragmatic-board card pattern.
   useEffect(() => {
-    const el = slotRef.current;
+    const el = outerRef.current;
     if (!el) return;
     return dropTargetForElements({
       element: el,
+      getIsSticky: () => true,
       getData: () => ({ zoneIndex: index }),
       onDragEnter: () => {
         dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: index });
@@ -302,6 +307,7 @@ export const useSlotBehavior = (
       isPreview,
       previewLabel,
     },
+    outerRef,
     slotRef,
     dragRef,
     handleClick,
