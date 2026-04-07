@@ -168,7 +168,7 @@ describe('useSlotTileDrag', () => {
   });
 
   describe('HTML5 onDrop — confirmed drop on valid target', () => {
-    it('dispatches REMOVE_TILE and SET_DRAG_ACTIVE, then calls onDrop with correct args', () => {
+    it('dispatches SET_DRAG_ACTIVE and calls onDrop — caller owns REMOVE_TILE/SWAP_TILES', () => {
       capturedDraggableOptions = null;
       mockDispatch.mockClear();
       const mockOnDrop = vi.fn();
@@ -194,13 +194,12 @@ describe('useSlotTileDrag', () => {
       });
 
       expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'REMOVE_TILE',
-        zoneIndex: 0,
-      });
-      expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SET_DRAG_ACTIVE',
         tileId: null,
       });
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'REMOVE_TILE' }),
+      );
       expect(mockOnDrop).toHaveBeenCalledOnce();
       expect(mockOnDrop).toHaveBeenCalledWith('tile-1', 2);
     });

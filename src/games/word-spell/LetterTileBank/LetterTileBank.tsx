@@ -1,6 +1,7 @@
 import type { TileItem } from '@/components/answer-game/types';
 import { skeuoStyle } from '@/components/answer-game/styles';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
 
 const LetterTile = ({ tile }: { tile: TileItem }) => {
@@ -34,6 +35,7 @@ const LetterTile = ({ tile }: { tile: TileItem }) => {
 export const LetterTileBank = () => {
   const { allTiles, bankTileIds, config, dragActiveTileId } =
     useAnswerGameContext();
+  const { bankRef } = useBankDropTarget();
 
   if (config.inputMethod === 'type') {
     const isTouch = navigator.maxTouchPoints > 0;
@@ -48,6 +50,7 @@ export const LetterTileBank = () => {
 
   return (
     <div
+      ref={bankRef}
       data-tile-bank=""
       className="flex flex-wrap justify-center gap-3"
     >
