@@ -99,6 +99,16 @@ export default [
       // enforcing no-spread would require per-file disables or unnatural APIs.
       'react/jsx-props-no-spreading': 'off',
       'react/no-unknown-property': 'error',
+
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            'JSXAttribute[name.name="style"] > JSXExpressionContainer > ObjectExpression > Property[key.name=/^(color|background|backgroundColor|borderColor|outlineColor|fill|stroke)$/i] > Literal[value=/^(#|rgb|rgba|hsl|oklch)/i]',
+          message:
+            'Use a CSS variable (var(--...)) instead of a hardcoded colour in inline styles.',
+        },
+      ],
     },
   },
   // TypeScript-specific rules scoped to TS/TSX files — these require the TypeScript

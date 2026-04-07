@@ -49,15 +49,22 @@ export const SavedConfigChip = ({
   return (
     <div
       className="overflow-hidden rounded-xl border-2"
-      style={{
-        borderColor: expanded ? colors.playBg : colors.border,
-        boxShadow: expanded ? `0 0 0 3px ${colors.bg}` : undefined,
-      }}
+      style={
+        {
+          '--bookmark-play': colors.playBg,
+          borderColor: expanded ? colors.playBg : colors.border,
+          boxShadow: expanded
+            ? `0 0 0 3px color-mix(in srgb, var(--bookmark-play) 12%, transparent)`
+            : undefined,
+        } as React.CSSProperties
+      }
     >
       {/* Header row */}
       <div
-        className="flex min-h-12 items-stretch"
-        style={{ background: expanded ? colors.playBg : colors.tagBg }}
+        className={`flex min-h-12 items-stretch ${expanded ? '' : 'bookmark-tag-bg'}`}
+        style={
+          expanded ? { background: 'var(--bookmark-play)' } : undefined
+        }
       >
         <button
           type="button"
@@ -66,18 +73,12 @@ export const SavedConfigChip = ({
           className="flex min-h-12 flex-1 items-center gap-2 px-3 text-left"
         >
           <span
-            className="text-sm font-semibold"
-            style={{ color: expanded ? 'white' : colors.headerText }}
+            className={`text-sm font-semibold ${expanded ? 'text-white' : 'bookmark-text'}`}
           >
             {doc.name}
           </span>
           <span
-            className="ml-auto text-xs"
-            style={{
-              color: expanded
-                ? 'rgba(255,255,255,0.7)'
-                : colors.tagText,
-            }}
+            className={`ml-auto text-xs ${expanded ? 'text-white/70' : 'bookmark-text'}`}
           >
             {expanded ? '▲' : '▼'}
           </span>
@@ -87,7 +88,7 @@ export const SavedConfigChip = ({
           aria-label={`Play ${doc.name}`}
           onClick={() => onPlay(doc.id)}
           className="flex min-h-12 w-12 items-center justify-center text-sm text-white"
-          style={{ background: colors.playBg }}
+          style={{ background: 'var(--bookmark-play)' }}
         >
           ▶
         </button>
@@ -96,7 +97,10 @@ export const SavedConfigChip = ({
           aria-label={`Delete ${doc.name}`}
           onClick={() => onDelete(doc.id)}
           className="flex min-h-12 w-12 items-center justify-center border-l border-destructive/20 text-sm text-destructive"
-          style={{ background: 'rgb(254 226 226)' }}
+          style={{
+            background:
+              'color-mix(in srgb, var(--bs-error) 15%, transparent)',
+          }}
         >
           ✕
         </button>
@@ -104,18 +108,11 @@ export const SavedConfigChip = ({
 
       {/* Collapsed: config summary tags */}
       {!expanded && (
-        <div
-          className="flex flex-wrap gap-1 px-3 pb-2 pt-1"
-          style={{ background: colors.bg }}
-        >
+        <div className="bookmark-bg flex flex-wrap gap-1 px-3 pb-2 pt-1">
           {tags.map((tag) => (
             <span
               key={tag}
-              className="rounded px-2 py-0.5 text-xs font-medium"
-              style={{
-                background: colors.tagBg,
-                color: colors.tagText,
-              }}
+              className="bookmark-tag-bg bookmark-text rounded px-2 py-0.5 text-xs font-medium"
             >
               {tag}
             </span>
@@ -125,10 +122,7 @@ export const SavedConfigChip = ({
 
       {/* Expanded: inline form */}
       {expanded && (
-        <div
-          className="flex flex-col gap-3 p-3"
-          style={{ background: colors.bg }}
-        >
+        <div className="bookmark-bg flex flex-col gap-3 p-3">
           <ConfigFormFields
             fields={configFields}
             config={editConfig}

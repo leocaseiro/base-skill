@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 import type { ConfigField } from '@/lib/config-fields';
+import type { JSX } from 'react';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
 import { GameNameChip } from '@/components/GameNameChip';
 import {
@@ -14,7 +15,7 @@ import {
 import { configToTags } from '@/lib/config-tags';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
 
-interface InstructionsOverlayProps {
+type InstructionsOverlayProps = {
   text: string;
   onStart: () => void;
   ttsEnabled: boolean;
@@ -33,7 +34,7 @@ interface InstructionsOverlayProps {
     config: Record<string, unknown>,
   ) => Promise<void>;
   configFields: ConfigField[];
-}
+};
 
 export const InstructionsOverlay = ({
   text,
@@ -48,7 +49,7 @@ export const InstructionsOverlay = ({
   onSaveBookmark,
   onUpdateBookmark,
   configFields,
-}: InstructionsOverlayProps) => {
+}: InstructionsOverlayProps): JSX.Element => {
   const { t } = useTranslation('games');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [newBookmarkName, setNewBookmarkName] = useState('');
@@ -98,7 +99,14 @@ export const InstructionsOverlay = ({
         </button>
 
         {/* 4. Settings chip (collapsed by default) */}
-        <div className="w-full overflow-hidden rounded-xl border border-border">
+        <div
+          className="w-full overflow-hidden rounded-xl border border-border"
+          style={
+            {
+              '--bookmark-play': settingsColors.playBg,
+            } as React.CSSProperties
+          }
+        >
           {/* Settings header */}
           <button
             type="button"
@@ -107,23 +115,17 @@ export const InstructionsOverlay = ({
             className="flex min-h-12 w-full items-center gap-2 bg-muted px-3 text-left"
             style={
               settingsOpen
-                ? { background: settingsColors.playBg }
+                ? { background: 'var(--bookmark-play)' }
                 : undefined
             }
           >
             <span
-              className="flex-1 text-sm font-semibold"
-              style={{ color: settingsOpen ? 'white' : undefined }}
+              className={`flex-1 text-sm font-semibold ${settingsOpen ? 'text-white' : ''}`}
             >
               {t('instructions.settings')}
             </span>
             <span
-              className="text-xs"
-              style={{
-                color: settingsOpen
-                  ? 'rgba(255,255,255,0.7)'
-                  : undefined,
-              }}
+              className={`text-xs ${settingsOpen ? 'text-white/70' : ''}`}
             >
               {settingsOpen ? '▲' : '▼'}
             </span>
@@ -178,7 +180,7 @@ export const InstructionsOverlay = ({
                         );
                       }}
                       className="h-12 w-full rounded-xl font-bold text-white text-sm"
-                      style={{ background: settingsColors.playBg }}
+                      style={{ background: 'var(--bookmark-play)' }}
                     >
                       {t('instructions.updateBookmark', {
                         name: bookmarkName,

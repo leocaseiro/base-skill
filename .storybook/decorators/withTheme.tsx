@@ -18,6 +18,28 @@ const THEME_VARS: Record<string, Record<string, string>> = {
     '--bs-warning': '#F4A261',
     '--bs-error': '#E63946',
   },
+  'forest-light': {
+    '--bs-primary': '#2D6A4F',
+    '--bs-secondary': '#52B788',
+    '--bs-background': '#F0F7F0',
+    '--bs-surface': '#FFFFFF',
+    '--bs-text': '#1A3A2A',
+    '--bs-accent': '#D4A017',
+    '--bs-success': '#6BCB77',
+    '--bs-warning': '#F4A261',
+    '--bs-error': '#E63946',
+  },
+  'forest-dark': {
+    '--bs-primary': '#52B788',
+    '--bs-secondary': '#95D5B2',
+    '--bs-background': '#1A2E1F',
+    '--bs-surface': '#243B2A',
+    '--bs-text': '#D8F3DC',
+    '--bs-accent': '#F4C842',
+    '--bs-success': '#2DC653',
+    '--bs-warning': '#F4A261',
+    '--bs-error': '#E63946',
+  },
   'high-contrast': {
     '--bs-primary': '#FFFF00',
     '--bs-secondary': '#00FFFF',
@@ -30,6 +52,8 @@ const THEME_VARS: Record<string, Record<string, string>> = {
     '--bs-error': '#FF0000',
   },
 };
+
+const DARK_THEMES = new Set(['dark', 'forest-dark', 'high-contrast']);
 
 const WithThemeInner = ({
   Story,
@@ -46,7 +70,7 @@ const WithThemeInner = ({
 
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(
-      theme === 'dark' ? 'dark' : 'light',
+      DARK_THEMES.has(theme) ? 'dark' : 'light',
     );
   }, [theme]);
 

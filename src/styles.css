@@ -18,6 +18,7 @@
   --sea-ink: #173a40;
   --sea-ink-soft: #416166;
   --lagoon: #4fb8b2;
+  --lagoon-light: #7ed3bf;
   --lagoon-deep: #328f97;
   --palm: #2f6a4a;
   --sand: #e7f0e8;
@@ -34,24 +35,26 @@
   --link-bg-hover: rgb(255 255 255 / 90%);
   --hero-a: rgb(79 184 178 / 36%);
   --hero-b: rgb(47 106 74 / 20%);
-  --background: oklch(100% 0 0deg);
-  --foreground: oklch(14.5% 0 0deg);
-  --card: var(--bs-surface, oklch(100% 0 0deg));
-  --card-foreground: var(--bs-text, oklch(14.5% 0 0deg));
+
+  /* Wire shadcn vars from --bs-* tokens; inline style only sets --bs-*, so .dark class wins */
+  --foreground: var(--bs-text);
+  --background: var(--bs-background);
   --popover: oklch(100% 0 0deg);
   --popover-foreground: oklch(14.5% 0 0deg);
-  --primary: oklch(20.5% 0 0deg);
-  --primary-foreground: oklch(98.5% 0 0deg);
-  --secondary: oklch(97% 0 0deg);
-  --secondary-foreground: oklch(20.5% 0 0deg);
+  --primary: var(--bs-primary);
+  --primary-foreground: var(--bs-surface);
+  --secondary: var(--bs-secondary);
+  --secondary-foreground: var(--bs-surface);
+  --card: var(--bs-surface);
+  --card-foreground: var(--bs-text);
   --muted: oklch(97% 0 0deg);
   --muted-foreground: oklch(55.6% 0 0deg);
   --accent: oklch(97% 0 0deg);
   --accent-foreground: oklch(20.5% 0 0deg);
   --destructive: oklch(57.7% 0.245 27.325deg);
-  --border: oklch(92.2% 0 0deg);
+  --border: var(--bs-accent);
   --input: oklch(92.2% 0 0deg);
-  --ring: oklch(70.8% 0 0deg);
+  --ring: var(--bs-primary);
   --chart-1: oklch(87% 0 0deg);
   --chart-2: oklch(55.6% 0 0deg);
   --chart-3: oklch(43.9% 0 0deg);
@@ -182,7 +185,7 @@ body {
     ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, var(--sand) 68%, white) 0%,
+      color-mix(in oklab, var(--sand) 68%, oklch(100% 0 0deg)) 0%,
       var(--foam) 44%,
       var(--bg-base) 100%
     );
@@ -229,7 +232,7 @@ body::after {
   background-size: 28px 28px;
   mask-image: radial-gradient(
     circle at 50% 30%,
-    black,
+    oklch(0% 0 0deg),
     transparent 78%
   );
 }
@@ -244,7 +247,11 @@ a {
 code {
   font-size: 0.9em;
   border: 1px solid var(--line);
-  background: color-mix(in oklab, var(--surface-strong) 82%, white 18%);
+  background: color-mix(
+    in oklab,
+    var(--surface-strong) 82%,
+    oklch(100% 0 0deg) 18%
+  );
   border-radius: 7px;
   padding: 2px 7px;
 }
@@ -284,7 +291,11 @@ pre code {
 .feature-card {
   background: linear-gradient(
     165deg,
-    color-mix(in oklab, var(--surface-strong) 93%, white 7%),
+    color-mix(
+      in oklab,
+      var(--surface-strong) 93%,
+      oklch(100% 0 0deg) 7%
+    ),
     var(--surface)
   );
   box-shadow:
@@ -313,7 +324,7 @@ a {
 }
 
 a:hover {
-  color: #246f76;
+  color: var(--lagoon-deep);
 }
 
 .island-kicker {
@@ -341,7 +352,11 @@ a:hover {
   height: 2px;
   transform: scaleX(0);
   transform-origin: left;
-  background: linear-gradient(90deg, var(--lagoon), #7ed3bf);
+  background: linear-gradient(
+    90deg,
+    var(--lagoon),
+    var(--lagoon-light)
+  );
   transition: transform 170ms ease;
 }
 
@@ -475,6 +490,27 @@ a:hover {
   --sidebar-accent-foreground: oklch(98.5% 0 0deg);
   --sidebar-border: oklch(100% 0 0deg / 10%);
   --sidebar-ring: oklch(55.6% 0 0deg);
+}
+
+/* Bookmark colour utilities — derived from --bookmark-play set per-component */
+.bookmark-bg {
+  background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
+}
+
+.dark .bookmark-bg {
+  background: color-mix(in srgb, var(--bookmark-play) 20%, transparent);
+}
+
+.bookmark-tag-bg {
+  background: color-mix(in srgb, var(--bookmark-play) 18%, transparent);
+}
+
+.dark .bookmark-tag-bg {
+  background: color-mix(in srgb, var(--bookmark-play) 25%, transparent);
+}
+
+.bookmark-text {
+  color: var(--bookmark-play);
 }
 
 @layer base {
