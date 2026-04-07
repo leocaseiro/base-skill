@@ -58,6 +58,8 @@ interface UseTouchDragOptions {
   tileId: string;
   label: string;
   onDragStart?: () => void;
+  /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
+  onDragCancel?: () => void;
   onDrop: (tileId: string, zoneIndex: number) => void;
 }
 
@@ -65,6 +67,7 @@ export const useTouchDrag = ({
   tileId,
   label,
   onDragStart,
+  onDragCancel,
   onDrop,
 }: UseTouchDragOptions): TouchDragHandlers => {
   const ghostRef = useRef<GhostInfo | null>(null);
@@ -142,6 +145,7 @@ export const useTouchDrag = ({
 
           safetyTimerRef.current = globalThis.setTimeout(() => {
             cleanupGhost();
+            onDragCancel?.();
           }, 5000);
 
           document.addEventListener('contextmenu', cleanupGhost, {
@@ -159,7 +163,7 @@ export const useTouchDrag = ({
         el.style.top = `${e.clientY - halfH}px`;
       }
     },
-    [label, onDragStart, cleanupGhost],
+    [label, onDragStart, onDragCancel, cleanupGhost],
   );
 
   const onPointerUp = useCallback(
@@ -175,6 +179,7 @@ export const useTouchDrag = ({
           e.clientX,
           e.clientY,
         );
+        let dropped = false;
         for (const el of elements) {
           if (
             el instanceof HTMLElement &&
@@ -186,23 +191,30 @@ export const useTouchDrag = ({
             );
             if (!Number.isNaN(zoneIndex)) {
               onDrop(tileId, zoneIndex);
+              dropped = true;
               break;
             }
           }
+        }
+        if (!dropped) {
+          onDragCancel?.();
         }
       }
 
       cleanup();
     },
-    [tileId, onDrop, cleanup],
+    [tileId, onDrop, onDragCancel, cleanup],
   );
 
   const onPointerCancel = useCallback(
     (e: PointerEvent<HTMLElement>) => {
       if (e.pointerType === 'mouse') return;
+      if (isDragging.current) {
+        onDragCancel?.();
+      }
       cleanupGhost();
     },
-    [cleanupGhost],
+    [onDragCancel, cleanupGhost],
   );
 
   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
