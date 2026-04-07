@@ -1,6 +1,13 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useEffect } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { AnswerGameProvider } from '../AnswerGameProvider';
 import { useAnswerGameContext } from '../useAnswerGameContext';
 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
@@ -75,6 +82,19 @@ function useHarness(index: number, zones: AnswerZone[] = emptyZones) {
   }, []);
   const result = useSlotBehavior(index);
   return { state, result };
+}
+
+function useEjectHarness() {
+  const dispatch = useAnswerGameDispatch();
+  const state = useAnswerGameContext();
+  useEffect(() => {
+    if (state.zones.length === 0) {
+      dispatch({ type: 'INIT_ROUND', tiles, zones: emptyZones });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable test fixtures
+  }, []);
+  const slotResult = useSlotBehavior(0);
+  return { state, dispatch, slotResult };
 }
 
 describe('useSlotBehavior', () => {
@@ -224,5 +244,34 @@ describe('useSlotBehavior', () => {
 
     expect(result.current.result.renderProps.isWrong).toBe(true);
     expect(result.current.result.renderProps.isLocked).toBe(true);
+  });
+
+  describe('lock-auto-eject EJECT_TILE dispatch', () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    it('dispatches EJECT_TILE after 1000ms when a wrong tile is placed', () => {
+      const { result } = renderHook(() => useEjectHarness(), {
+        wrapper: createWrapper(baseConfig),
+      });
+
+      // Place wrong tile: tile-2 has value 'B', zone 0 expects 'A'
+      act(() => {
+        result.current.dispatch({
+          type: 'PLACE_TILE',
+          tileId: 'tile-2',
+          zoneIndex: 0,
+        });
+      });
+      expect(result.current.state.zones[0]?.isWrong).toBe(true);
+      expect(result.current.state.zones[0]?.placedTileId).toBe(
+        'tile-2',
+      );
+
+      act(() => vi.advanceTimersByTime(1000));
+      expect(result.current.state.zones[0]?.placedTileId).toBeNull();
+      expect(result.current.state.zones[0]?.isWrong).toBe(false);
+      expect(result.current.state.bankTileIds).toContain('tile-2');
+    });
   });
 });

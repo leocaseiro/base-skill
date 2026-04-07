@@ -183,7 +183,8 @@ export const useSlotBehavior = (
       triggerShake(el);
 
       if (config.wrongTileBehavior === 'lock-auto-eject') {
-        const timerId = setTimeout(() => {
+        // Start the eject animation after the shake settles.
+        const animationTimerId = setTimeout(() => {
           const tileEl = dragRef.current;
           if (!tileEl) return;
           const { startFade } = triggerEjectReturn(
@@ -193,7 +194,7 @@ export const useSlotBehavior = (
           );
           startFadeRef.current = startFade;
         }, 350);
-        return () => clearTimeout(timerId);
+        return () => clearTimeout(animationTimerId);
       }
     } else if (freshlyPlaced && !isWrong) {
       // Correctly placed from bank (sound already played by useTileEvaluation).
@@ -205,6 +206,18 @@ export const useSlotBehavior = (
       startFadeRef.current = null;
     }
   }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
+
+  // EJECT_TILE dispatch lives in its own effect (no DOM ref needed) so the
+  // timer survives when the bank tile unmounts after PLACE_TILE. The animation
+  // effect above also uses isWrong/tileId so both fire on the same transition.
+  useEffect(() => {
+    if (!isWrong || config.wrongTileBehavior !== 'lock-auto-eject')
+      return;
+    const timerId = setTimeout(() => {
+      dispatch({ type: 'EJECT_TILE', zoneIndex: index });
+    }, 1000);
+    return () => clearTimeout(timerId);
+  }, [isWrong, config.wrongTileBehavior, dispatch, index]);
 
   return {
     renderProps: {
