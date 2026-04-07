@@ -117,7 +117,6 @@ export const useSlotBehavior = (
         (z) => z.placedTileId === droppedTileId,
       );
       if (sourceZoneIndex !== -1) {
-        // Evaluate both outcomes before dispatching to play exactly one sound.
         const droppedTile = allTiles.find(
           (t) => t.id === droppedTileId,
         );
@@ -127,12 +126,19 @@ export const useSlotBehavior = (
         const sourceZone = zones[sourceZoneIndex];
         const droppedCorrect =
           droppedTile?.value === targetZone.expectedValue;
-        const displacedCorrect = displacedTile
-          ? displacedTile.value === sourceZone?.expectedValue
-          : true;
-        playSound(
-          droppedCorrect || displacedCorrect ? 'correct' : 'wrong',
-        );
+
+        if (displacedTile) {
+          // True swap: correct if either tile lands correctly
+          const displacedCorrect =
+            displacedTile.value === sourceZone?.expectedValue;
+          playSound(
+            droppedCorrect || displacedCorrect ? 'correct' : 'wrong',
+          );
+        } else {
+          // Move to empty slot: evaluate only the moved tile
+          playSound(droppedCorrect ? 'correct' : 'wrong');
+        }
+
         dispatch({
           type: 'SWAP_TILES',
           fromZoneIndex: sourceZoneIndex,
