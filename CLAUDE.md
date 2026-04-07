@@ -33,6 +33,48 @@ Name branches after the milestone or feature, e.g. `milestone-3-app-shell`, `fea
 
 > **Why this matters for docs/specs/plans:** Planning files committed directly to master bypass the PR review process. Even non-code changes belong on a branch so they can be reviewed, revised, and merged cleanly.
 
+## Markdown Authoring
+
+Any `.md` file written or edited by an agent (plans, specs, docs, READMEs) **must pass
+both markdownlint and Prettier** before committing. The project enforces this in CI via
+`npx prettier --check .` and `yarn lint:md`.
+
+### Fix command
+
+After writing or editing a markdown file, run:
+
+```bash
+yarn fix:md
+```
+
+This runs `markdownlint-cli2 --fix` followed by `prettier --write` and corrects the
+most common issues automatically.
+
+### Rules in effect
+
+Config lives in `.markdownlint.yaml`. Most default rules are active; key disabled ones:
+
+- `MD013` (line length) — disabled, Prettier handles wrapping
+- `MD033` (inline HTML) — disabled
+- `MD041` (first line heading) — disabled
+
+### Common issues to avoid
+
+- Blank line required before and after fenced code blocks
+- Blank line required before and after lists
+- Blank line required before and after headings
+- No trailing spaces
+- No multiple consecutive blank lines
+
+### Workflow
+
+1. Write the markdown file
+2. Run `yarn fix:md` — auto-fixes most issues
+3. If any violations remain, fix them manually
+4. Commit
+
+**Never commit a markdown file that fails `yarn lint:md` or `npx prettier --check`.**
+
 ## Pre-push Quality Gate
 
 A `.husky/pre-push` hook runs automatically on every `git push`. It enforces the
