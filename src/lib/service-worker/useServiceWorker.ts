@@ -1,5 +1,5 @@
 // src/lib/service-worker/useServiceWorker.ts
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Workbox } from 'workbox-window';
 import type { ServiceWorkerContextValue } from './ServiceWorkerContext';
 
@@ -21,17 +21,16 @@ export const useServiceWorker = (): ServiceWorkerContextValue => {
       setUpdateAvailable(true);
     });
 
-    void wb.register();
-  }, []);
-
-  const applyUpdate = () => {
-    const wb = wbRef.current;
-    if (!wb) return;
     wb.addEventListener('controlling', () => {
       globalThis.location.reload();
     });
-    void wb.messageSkipWaiting();
-  };
+
+    void wb.register();
+  }, []);
+
+  const applyUpdate = useCallback(() => {
+    wbRef.current?.messageSkipWaiting();
+  }, []);
 
   return { updateAvailable, applyUpdate };
 };
