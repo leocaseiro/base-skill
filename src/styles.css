@@ -412,8 +412,47 @@ a:hover {
   }
 }
 
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-4px);
+  }
+
+  40% {
+    transform: translateX(4px);
+  }
+
+  60% {
+    transform: translateX(-3px);
+  }
+
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
 @theme inline {
   --animate-blink: blink 1s step-end infinite;
+  --animate-shake: shake 300ms ease-in-out;
+  --animate-pop: pop 250ms ease-out;
   --font-heading: var(--font-sans);
   --font-sans:
     'Andika', 'Edu NSW ACT Foundation', 'Nunito', 'Manrope', system-ui,
