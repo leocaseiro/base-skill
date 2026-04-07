@@ -70,3 +70,47 @@ describe('session_history_index schema v1', () => {
     expect(found?.sessionId).toBe('sess-003');
   });
 });
+
+describe('schema v2', () => {
+  const baseDoc = {
+    profileId: 'prof-1',
+    gameId: 'word-spell',
+    gradeBand: 'year1-2',
+    status: 'in-progress' as const,
+    seed: 'seed-abc',
+    initialContent: { rounds: [] },
+    initialState: {},
+    startedAt: new Date().toISOString(),
+  };
+
+  it('inserts a document with draftState: null', async () => {
+    const doc = await db.session_history_index.insert({
+      ...baseDoc,
+      sessionId: 'test-v2-null',
+      draftState: null,
+    });
+
+    expect(doc.sessionId).toBe('test-v2-null');
+    expect(doc.draftState).toBeNull();
+  });
+
+  it('inserts a document with draftState set to an object', async () => {
+    const doc = await db.session_history_index.insert({
+      ...baseDoc,
+      sessionId: 'test-v2-obj',
+      draftState: { phase: 'playing', roundIndex: 0 },
+    });
+
+    expect(doc.sessionId).toBe('test-v2-obj');
+    expect(doc.draftState).toEqual({ phase: 'playing', roundIndex: 0 });
+  });
+
+  it('inserts a document without draftState field (optional)', async () => {
+    const doc = await db.session_history_index.insert({
+      ...baseDoc,
+      sessionId: 'test-v2-omit',
+    });
+
+    expect(doc.sessionId).toBe('test-v2-omit');
+  });
+});
