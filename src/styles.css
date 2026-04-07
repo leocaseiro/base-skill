@@ -45,6 +45,8 @@
   --primary-foreground: var(--bs-surface);
   --secondary: var(--bs-secondary);
   --secondary-foreground: var(--bs-surface);
+  --card: var(--bs-surface);
+  --card-foreground: var(--bs-text);
   --muted: oklch(97% 0 0deg);
   --muted-foreground: oklch(55.6% 0 0deg);
   --accent: oklch(97% 0 0deg);
