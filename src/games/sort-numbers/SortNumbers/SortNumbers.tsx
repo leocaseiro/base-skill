@@ -7,6 +7,7 @@ import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank'
 import type { SortNumbersConfig } from '../types';
 import type {
   AnswerGameConfig,
+  AnswerGameDraftState,
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
@@ -21,6 +22,8 @@ import { buildRoundOrder } from '@/games/build-round-order';
 
 interface SortNumbersProps {
   config: SortNumbersConfig;
+  initialState?: AnswerGameDraftState;
+  sessionId?: string;
 }
 
 const SortNumbersSession = ({
@@ -135,7 +138,11 @@ const SortNumbersSession = ({
   );
 };
 
-export const SortNumbers = ({ config }: SortNumbersProps) => {
+export const SortNumbers = ({
+  config,
+  initialState,
+  sessionId,
+}: SortNumbersProps) => {
   const roundsInOrder = config.roundsInOrder === true;
   const [sessionEpoch, setSessionEpoch] = useState(0);
 
@@ -186,7 +193,11 @@ export const SortNumbers = ({ config }: SortNumbersProps) => {
   if (!round0) return null;
 
   return (
-    <AnswerGame config={answerGameConfig}>
+    <AnswerGame
+      config={answerGameConfig}
+      initialState={initialState}
+      sessionId={sessionId}
+    >
       <SortNumbersSession
         sortNumbersConfig={config}
         roundOrder={roundOrder}
