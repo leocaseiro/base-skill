@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 import type { ConfigField } from '@/lib/config-fields';
+import type { JSX } from 'react';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
 import { GameNameChip } from '@/components/GameNameChip';
 import {
@@ -14,7 +15,7 @@ import {
 import { configToTags } from '@/lib/config-tags';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
 
-interface InstructionsOverlayProps {
+type InstructionsOverlayProps = {
   text: string;
   onStart: () => void;
   ttsEnabled: boolean;
@@ -33,7 +34,7 @@ interface InstructionsOverlayProps {
     config: Record<string, unknown>,
   ) => Promise<void>;
   configFields: ConfigField[];
-}
+};
 
 export const InstructionsOverlay = ({
   text,
@@ -48,7 +49,7 @@ export const InstructionsOverlay = ({
   onSaveBookmark,
   onUpdateBookmark,
   configFields,
-}: InstructionsOverlayProps) => {
+}: InstructionsOverlayProps): JSX.Element => {
   const { t } = useTranslation('games');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [newBookmarkName, setNewBookmarkName] = useState('');
