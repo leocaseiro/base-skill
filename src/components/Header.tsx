@@ -40,6 +40,7 @@ import { Slider } from '@/components/ui/slider';
 import { useRxDB } from '@/db/hooks/useRxDB';
 import { useRxQuery } from '@/db/hooks/useRxQuery';
 import { useSettings } from '@/db/hooks/useSettings';
+import { APP_VERSION, IS_BETA } from '@/lib/version';
 
 const LOCALES = [
   { code: 'en', label: '🇬🇧 English' },
@@ -264,6 +265,14 @@ export const Header = () => {
         >
           {t('appName')}
         </Link>
+        {IS_BETA && (
+          <span className="flex-shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+            Beta
+          </span>
+        )}
+        <span className="flex-shrink-0 text-xs text-muted-foreground">
+          v{APP_VERSION}
+        </span>
 
         <a
           href="/base-skill/docs/"
