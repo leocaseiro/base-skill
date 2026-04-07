@@ -14,8 +14,17 @@ import { version } from './package.json';
 const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
 
 const require = createRequire(import.meta.url);
-const pragmaticElementAdapter =
-  require.resolve('@atlaskit/pragmatic-drag-and-drop/dist/esm/entry-point/element/adapter.js');
+const pragmaticBase =
+  '@atlaskit/pragmatic-drag-and-drop/dist/esm/entry-point/element';
+const pragmaticElementAdapter = require.resolve(
+  `${pragmaticBase}/adapter.js`,
+);
+const pragmaticPreserveOffset = require.resolve(
+  `${pragmaticBase}/preserve-offset-on-source.js`,
+);
+const pragmaticSetCustomPreview = require.resolve(
+  `${pragmaticBase}/set-custom-native-drag-preview.js`,
+);
 
 const config = defineConfig({
   base,
@@ -23,6 +32,10 @@ const config = defineConfig({
     alias: {
       '@atlaskit/pragmatic-drag-and-drop/element/adapter':
         pragmaticElementAdapter,
+      '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source':
+        pragmaticPreserveOffset,
+      '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview':
+        pragmaticSetCustomPreview,
     },
   },
   define: {
