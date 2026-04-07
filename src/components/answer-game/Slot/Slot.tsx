@@ -1,3 +1,4 @@
+import { skeuoStyle } from '../styles';
 import { useSlotBehavior } from './useSlotBehavior';
 import type { SlotRenderProps } from './useSlotBehavior';
 import type { ReactNode, Ref } from 'react';
@@ -62,24 +63,27 @@ export const Slot = ({
             />
           ) : null}
         </>
-      ) : isBeingDragged ? (
-        <div
-          className="size-full bg-muted/30 shadow-inner"
-          aria-hidden="true"
-        />
       ) : (
-        <button
-          ref={dragRef}
-          type="button"
-          className="flex size-full touch-none select-none cursor-grab items-center justify-center bg-card shadow-md"
-          onClick={handleClick}
-          onPointerDown={pointerHandlers.onPointerDown}
-          onPointerMove={pointerHandlers.onPointerMove}
-          onPointerUp={pointerHandlers.onPointerUp}
-          onPointerCancel={pointerHandlers.onPointerCancel}
-        >
-          {children(renderProps)}
-        </button>
+        <>
+          <div
+            className="absolute inset-0 bg-muted/60 shadow-inner"
+            aria-hidden="true"
+          />
+          <button
+            ref={dragRef}
+            type="button"
+            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}`}
+            aria-hidden={isBeingDragged ? 'true' : undefined}
+            style={skeuoStyle}
+            onClick={handleClick}
+            onPointerDown={pointerHandlers.onPointerDown}
+            onPointerMove={pointerHandlers.onPointerMove}
+            onPointerUp={pointerHandlers.onPointerUp}
+            onPointerCancel={pointerHandlers.onPointerCancel}
+          >
+            {children(renderProps)}
+          </button>
+        </>
       )}
     </Tag>
   );
