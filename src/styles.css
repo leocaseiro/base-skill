@@ -456,6 +456,17 @@ a:hover {
   }
 }
 
+@keyframes pulse-ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(var(--primary) / 40%);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgb(var(--primary) / 0%);
+  }
+}
+
 @theme inline {
   --animate-blink: blink 1s step-end infinite;
   --animate-shake: shake 300ms ease-in-out;

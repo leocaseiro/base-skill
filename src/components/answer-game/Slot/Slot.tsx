@@ -25,7 +25,15 @@ export const Slot = ({
     isBeingDragged,
   } = useSlotBehavior(index);
 
-  const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
+  const {
+    label,
+    isEmpty,
+    isWrong,
+    isActive,
+    showCursor,
+    isPreview,
+    previewLabel,
+  } = renderProps;
 
   const ariaLabel = isEmpty
     ? `Slot ${index + 1}, empty`
@@ -33,13 +41,15 @@ export const Slot = ({
 
   const stateClasses = [
     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-    isEmpty && !isActive
-      ? 'border-border'
-      : isEmpty && isActive
-        ? 'border-primary ring-2 ring-primary ring-offset-2'
-        : isWrong
-          ? 'border-destructive bg-destructive/10 text-destructive'
-          : 'border-primary bg-primary/10 text-primary',
+    isPreview
+      ? 'border-dashed border-primary'
+      : isEmpty && !isActive
+        ? 'border-border'
+        : isEmpty && isActive
+          ? 'border-primary ring-2 ring-primary ring-offset-2'
+          : isWrong
+            ? 'border-destructive bg-destructive/10 text-destructive'
+            : 'border-primary bg-primary/10 text-primary',
   ]
     .filter(Boolean)
     .join(' ');
@@ -52,10 +62,21 @@ export const Slot = ({
       aria-label={ariaLabel}
       data-zone-index={index}
       className={[stateClasses, className].filter(Boolean).join(' ')}
+      style={
+        isPreview
+          ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
+          : undefined
+      }
     >
       {isEmpty ? (
         <>
-          {children(renderProps)}
+          {isPreview && previewLabel !== null ? (
+            <span className="text-xl font-bold opacity-50">
+              {previewLabel}
+            </span>
+          ) : (
+            children(renderProps)
+          )}
           {showCursor ? (
             <span
               aria-hidden="true"
@@ -72,7 +93,7 @@ export const Slot = ({
           <button
             ref={dragRef}
             type="button"
-            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}`}
+            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
             aria-hidden={isBeingDragged ? 'true' : undefined}
             style={skeuoStyle}
             onClick={handleClick}
@@ -81,7 +102,11 @@ export const Slot = ({
             onPointerUp={pointerHandlers.onPointerUp}
             onPointerCancel={pointerHandlers.onPointerCancel}
           >
-            {children(renderProps)}
+            {isPreview && previewLabel !== null ? (
+              <span className="text-xl font-bold">{previewLabel}</span>
+            ) : (
+              children(renderProps)
+            )}
           </button>
         </>
       )}
