@@ -23,6 +23,8 @@ export interface AnswerGameConfig {
   /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
   initialTiles?: TileItem[];
   initialZones?: AnswerZone[];
+  /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
+  slotInteraction?: 'ordered' | 'free-swap';
 }
 
 export interface TileItem {
