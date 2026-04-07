@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Fix dark mode CSS variable specificity, replace hardcoded bookmark colours with CSS utility classes, add Stylelint/ESLint colour enforcement, and expand VR test coverage to include dark mode and SortNumbers screens.
+**Goal:** Fix dark mode CSS variable specificity, replace hardcoded bookmark colours with CSS utility classes, add Stylelint/ESLint colour enforcement, expand VR test coverage to include dark mode and SortNumbers screens, and add a Storybook theme showcase page with 4 locked-theme VR snapshots (Ocean/Forest × light/dark).
 
 **Architecture:** CSS-first fix — inline styles only set `--bs-*` vars; shadcn vars derive from `--bs-*` in `:root` so the `.dark` class cascade wins. Bookmark colours collapse to two tokens (`border`, `playBg`); CSS utility classes using `color-mix` handle all other tints. Components set `--bookmark-play` as a CSS custom property and use utility classes.
 
@@ -32,6 +32,9 @@
 | Create | `src/components/SavedConfigChip.stories.tsx` |
 | Create | `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx` |
 | Create | `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx` |
+| Modify | `.storybook/decorators/withTheme.tsx` |
+| Modify | `.storybook/preview.tsx` |
+| Create | `src/stories/ThemeShowcase.stories.tsx` |
 
 ---
 
@@ -1638,6 +1641,331 @@ SKIP_E2E=1 git push
 
 ---
 
+## Task 10: Theme Showcase Page + 4 VR Stories
+
+A full-page Storybook story that stacks the app shell chrome with the key bookmark components below it. Four story exports — one per theme × mode combination — each locking its theme via `parameters.globals` so the VR test runner always captures the correct palette regardless of the toolbar selection.
+
+**Why `parameters.globals` instead of a custom decorator:** The `withTheme` decorator already reads `context.globals.theme` and applies CSS vars + dark class globally. Locking `globals` per story is the standard Storybook pattern for this — no new decorator machinery needed.
+
+**Files:**
+- Modify: `.storybook/decorators/withTheme.tsx`
+- Modify: `.storybook/preview.tsx`
+- Create: `src/stories/ThemeShowcase.stories.tsx`
+
+- [ ] **Step 1: Add forest theme vars to `.storybook/decorators/withTheme.tsx`**
+
+Forest colours come from `src/db/seed-themes.ts` `forestPreset`.
+
+Replace the entire file:
+
+```tsx
+import { useEffect } from 'react';
+import { applyThemeCssVars } from '../../src/lib/theme/css-vars';
+import { defaultThemeCssVars } from '../../src/lib/theme/default-tokens';
+import type { Decorator } from '@storybook/react';
+
+type DecoratorStory = Parameters<Decorator>[0];
+
+const THEME_VARS: Record<string, Record<string, string>> = {
+  light: defaultThemeCssVars,
+  dark: {
+    '--bs-primary': '#48CAE4',
+    '--bs-secondary': '#90E0EF',
+    '--bs-background': '#03045E',
+    '--bs-surface': '#0077B6',
+    '--bs-text': '#CAF0F8',
+    '--bs-accent': '#FFB703',
+    '--bs-success': '#2DC653',
+    '--bs-warning': '#F4A261',
+    '--bs-error': '#E63946',
+  },
+  'forest-light': {
+    '--bs-primary': '#2D6A4F',
+    '--bs-secondary': '#52B788',
+    '--bs-background': '#F0F7F0',
+    '--bs-surface': '#FFFFFF',
+    '--bs-text': '#1A3A2A',
+    '--bs-accent': '#D4A017',
+    '--bs-success': '#6BCB77',
+    '--bs-warning': '#F4A261',
+    '--bs-error': '#E63946',
+  },
+  'forest-dark': {
+    '--bs-primary': '#52B788',
+    '--bs-secondary': '#95D5B2',
+    '--bs-background': '#1A2E1F',
+    '--bs-surface': '#243B2A',
+    '--bs-text': '#D8F3DC',
+    '--bs-accent': '#F4C842',
+    '--bs-success': '#2DC653',
+    '--bs-warning': '#F4A261',
+    '--bs-error': '#E63946',
+  },
+  'high-contrast': {
+    '--bs-primary': '#FFFF00',
+    '--bs-secondary': '#00FFFF',
+    '--bs-background': '#000000',
+    '--bs-surface': '#111111',
+    '--bs-text': '#FFFFFF',
+    '--bs-accent': '#FF8C00',
+    '--bs-success': '#00FF00',
+    '--bs-warning': '#FF8C00',
+    '--bs-error': '#FF0000',
+  },
+};
+
+const DARK_THEMES = new Set(['dark', 'forest-dark']);
+
+const WithThemeInner = ({
+  Story,
+  themeKey,
+}: {
+  Story: DecoratorStory;
+  themeKey: string | undefined;
+}) => {
+  const theme = themeKey ?? 'light';
+
+  useEffect(() => {
+    const vars = THEME_VARS[theme] ?? defaultThemeCssVars;
+    applyThemeCssVars(document.documentElement, vars);
+
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(
+      DARK_THEMES.has(theme) ? 'dark' : 'light',
+    );
+  }, [theme]);
+
+  return Story();
+};
+
+export const withTheme: Decorator = (Story, context) => (
+  <WithThemeInner
+    Story={Story}
+    themeKey={context.globals['theme'] as string | undefined}
+  />
+);
+```
+
+- [ ] **Step 2: Add forest themes to toolbar in `.storybook/preview.tsx`**
+
+Replace the `theme` globalType toolbar items array from:
+```ts
+items: ['light', 'dark', 'high-contrast'],
+```
+to:
+```ts
+items: [
+  { value: 'light',          title: 'Ocean Light' },
+  { value: 'dark',           title: 'Ocean Dark' },
+  { value: 'forest-light',   title: 'Forest Light' },
+  { value: 'forest-dark',    title: 'Forest Dark' },
+  { value: 'high-contrast',  title: 'High Contrast' },
+],
+```
+
+- [ ] **Step 3: Run TypeScript check**
+
+```bash
+yarn typecheck
+```
+
+Expected: 0 errors.
+
+- [ ] **Step 4: Create `src/stories/ThemeShowcase.stories.tsx`**
+
+The page stacks the GameShell chrome (for app shell context) with a scrollable body of the key bookmark components. `GameShell` needs `withDb` + `withRouter` decorators. The bookmark section below uses `GameNameChip`, `SavedConfigChip`, and `ConfigFormFields` so both the shell theme and the component colours are visible in one frame.
+
+Each of the 4 exports locks its theme via `parameters.globals` — the `withTheme` decorator reads this and applies the correct CSS vars.
+
+```tsx
+import { withDb } from '../../.storybook/decorators/withDb';
+import { withRouter } from '../../.storybook/decorators/withRouter';
+import { ConfigFormFields } from '@/components/ConfigFormFields';
+import { GameNameChip } from '@/components/GameNameChip';
+import { SavedConfigChip } from '@/components/SavedConfigChip';
+import { GameShell } from '@/components/game/GameShell';
+import type {
+  GameEngineState,
+  ResolvedContent,
+  ResolvedGameConfig,
+  SessionMeta,
+} from '@/lib/game-engine/types';
+import type { ConfigField } from '@/lib/config-fields';
+import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
+import type { Meta, StoryObj } from '@storybook/react';
+
+// ── GameShell fixture data ────────────────────────────────────────────────
+
+const content: ResolvedContent = {
+  rounds: [
+    { id: 'r1', prompt: { en: 'Sort the numbers' }, correctAnswer: '1' },
+  ],
+};
+
+const shellConfig: ResolvedGameConfig = {
+  gameId: 'theme-showcase',
+  title: { en: 'Theme Showcase' },
+  gradeBand: 'year1-2',
+  maxRounds: 3,
+  maxRetries: 1,
+  maxUndoDepth: 3,
+  timerVisible: true,
+  timerDurationSeconds: 60,
+  difficulty: 'medium',
+};
+
+const initialState: GameEngineState = {
+  phase: 'playing',
+  roundIndex: 0,
+  score: 0,
+  streak: 0,
+  retryCount: 0,
+  content,
+  currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
+};
+
+const sessionMeta: SessionMeta = {
+  profileId: 'storybook-user',
+  gameId: 'theme-showcase',
+  gradeBand: 'year1-2',
+  seed: 'storybook-seed',
+  initialContent: content,
+  initialState,
+};
+
+// ── Bookmark component fixture data ──────────────────────────────────────
+
+const savedDoc: SavedGameConfigDoc = {
+  id: 'cfg-showcase',
+  profileId: 'anonymous',
+  gameId: 'sort-numbers',
+  name: 'Easy Numbers',
+  config: { totalRounds: 8, inputMethod: 'drag' },
+  createdAt: new Date().toISOString(),
+  color: 'teal',
+};
+
+const configFields: ConfigField[] = [
+  {
+    type: 'select',
+    key: 'inputMethod',
+    label: 'Input method',
+    options: [
+      { value: 'drag', label: 'Drag' },
+      { value: 'type', label: 'Type' },
+    ],
+  },
+  {
+    type: 'number',
+    key: 'totalRounds',
+    label: 'Total rounds',
+    min: 1,
+    max: 20,
+  },
+  {
+    type: 'checkbox',
+    key: 'ttsEnabled',
+    label: 'Text-to-speech',
+  },
+];
+
+// ── Story body ────────────────────────────────────────────────────────────
+
+const ShowcaseBody = () => (
+  <div className="flex flex-col gap-4 p-4">
+    <GameNameChip
+      title="Sort Numbers"
+      bookmarkName="Easy Numbers"
+      bookmarkColor="teal"
+    />
+    <GameNameChip title="Word Spell" subject="reading" />
+    <SavedConfigChip
+      doc={savedDoc}
+      configFields={configFields}
+      onPlay={() => {}}
+      onDelete={() => {}}
+      onSave={async () => {}}
+    />
+    <ConfigFormFields
+      fields={configFields}
+      config={{ inputMethod: 'drag', totalRounds: 8, ttsEnabled: true }}
+      onChange={() => {}}
+    />
+  </div>
+);
+
+// ── Meta ──────────────────────────────────────────────────────────────────
+
+const meta: Meta<typeof GameShell> = {
+  component: GameShell,
+  title: 'Pages/ThemeShowcase',
+  tags: ['autodocs'],
+  decorators: [withDb, withRouter],
+  parameters: {
+    layout: 'fullscreen',
+  },
+  args: {
+    config: shellConfig,
+    moves: {},
+    initialState,
+    sessionId: 'showcase-session',
+    meta: sessionMeta,
+    children: <ShowcaseBody />,
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof GameShell>;
+
+// ── 4 locked-theme VR stories ─────────────────────────────────────────────
+
+export const OceanLight: Story = {
+  parameters: { globals: { theme: 'light' } },
+};
+
+export const OceanDark: Story = {
+  parameters: { globals: { theme: 'dark' } },
+};
+
+export const ForestLight: Story = {
+  parameters: { globals: { theme: 'forest-light' } },
+};
+
+export const ForestDark: Story = {
+  parameters: { globals: { theme: 'forest-dark' } },
+};
+```
+
+- [ ] **Step 5: Run TypeScript check**
+
+```bash
+yarn typecheck
+```
+
+Expected: 0 errors. If `GameShell` props differ from what's shown, check `src/components/game/GameShell.tsx` for the current prop shape and adjust the fixture args to match.
+
+- [ ] **Step 6: Smoke-test in Storybook browser**
+
+```bash
+yarn storybook
+```
+
+Navigate to **Pages → ThemeShowcase** and cycle through OceanLight, OceanDark, ForestLight, ForestDark. Verify:
+- App shell chrome (header, score bar, timer) picks up each palette
+- `GameNameChip` bookmark tint is visible
+- `SavedConfigChip` border/play button uses the teal bookmark colour
+- `ConfigFormFields` inputs use `bg-background` (dark in dark mode)
+- Dark stories show dark backgrounds throughout
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add .storybook/decorators/withTheme.tsx .storybook/preview.tsx src/stories/ThemeShowcase.stories.tsx
+git commit -m "feat(storybook): add forest theme variants and 4-theme showcase VR page"
+```
+
+---
+
 ## Self-Review Against Spec
 
 **Section 1 — CSS Variable Architecture Fix:** ✅ Covered in Task 2 (`css-vars.ts`, `default-tokens.ts`, `styles.css :root` additions).
@@ -1653,3 +1981,5 @@ SKIP_E2E=1 git push
 **Section 5 — VR Tests:** ✅ Covered in Task 6 (12 screenshots: 6 light + 6 dark).
 
 **Section 5 — Storybook VR:** ✅ Covered in Tasks 7–8 (`withDarkMode` decorator + 6 story files with dark variants).
+
+**Theme Showcase (addition):** ✅ Covered in Task 10 — `withTheme.tsx` extended with `forest-light`/`forest-dark` entries, toolbar updated in `preview.tsx`, `ThemeShowcase.stories.tsx` provides 4 locked-theme VR snapshots (OceanLight, OceanDark, ForestLight, ForestDark).
