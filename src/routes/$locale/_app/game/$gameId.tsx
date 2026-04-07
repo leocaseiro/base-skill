@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { AnswerGameDraftState } from '@/components/answer-game/types';
 import type {
   NumberMatchConfig,
   NumberMatchRound,
@@ -12,6 +13,7 @@ import type {
   WordSpellRound,
 } from '@/games/word-spell/types';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { InProgressSession } from '@/lib/game-engine/session-finder';
 import type {
   GameEngineState,
   MoveLog,
@@ -59,7 +61,9 @@ const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
 interface GameRouteLoaderData {
   config: ResolvedGameConfig;
   initialLog: MoveLog | null;
+  draftState: AnswerGameDraftState | null;
   sessionId: string;
+  seed: string;
   meta: SessionMeta;
   gameSpecificConfig: Record<string, unknown> | null;
   bookmarkId: string | null;
@@ -248,12 +252,18 @@ const resolveSortNumbersConfig = (
 
 const WordSpellGameBody = ({
   gameId,
+  sessionId,
+  seed,
+  draftState,
   gameSpecificConfig,
   bookmarkId,
   bookmarkName,
   bookmarkColor,
 }: {
   gameId: string;
+  sessionId: string;
+  seed: string;
+  draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
   bookmarkId: string | null;
   bookmarkName: string | null;
@@ -266,7 +276,9 @@ const WordSpellGameBody = ({
     [gameSpecificConfig],
   );
   const [cfg, setCfg] = useState(initial);
-  const [showInstructions, setShowInstructions] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(
+    draftState === null,
+  );
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
@@ -309,17 +321,31 @@ const WordSpellGameBody = ({
     );
   }
 
-  return <WordSpell key={cfg.inputMethod} config={cfg} />;
+  return (
+    <WordSpell
+      key={cfg.inputMethod}
+      config={cfg}
+      initialState={draftState ?? undefined}
+      sessionId={sessionId}
+      seed={seed}
+    />
+  );
 };
 
 const NumberMatchGameBody = ({
   gameId,
+  sessionId,
+  seed,
+  draftState,
   gameSpecificConfig,
   bookmarkId,
   bookmarkName,
   bookmarkColor,
 }: {
   gameId: string;
+  sessionId: string;
+  seed: string;
+  draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
   bookmarkId: string | null;
   bookmarkName: string | null;
@@ -332,7 +358,9 @@ const NumberMatchGameBody = ({
     [gameSpecificConfig],
   );
   const [cfg, setCfg] = useState(initial);
-  const [showInstructions, setShowInstructions] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(
+    draftState === null,
+  );
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
@@ -375,17 +403,31 @@ const NumberMatchGameBody = ({
     );
   }
 
-  return <NumberMatch key={cfg.inputMethod} config={cfg} />;
+  return (
+    <NumberMatch
+      key={cfg.inputMethod}
+      config={cfg}
+      initialState={draftState ?? undefined}
+      sessionId={sessionId}
+      seed={seed}
+    />
+  );
 };
 
 const SortNumbersGameBody = ({
   gameId,
+  sessionId,
+  seed,
+  draftState,
   gameSpecificConfig,
   bookmarkId,
   bookmarkName,
   bookmarkColor,
 }: {
   gameId: string;
+  sessionId: string;
+  seed: string;
+  draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
   bookmarkId: string | null;
   bookmarkName: string | null;
@@ -398,7 +440,9 @@ const SortNumbersGameBody = ({
     [gameSpecificConfig],
   );
   const [cfg, setCfg] = useState(initial);
-  const [showInstructions, setShowInstructions] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(
+    draftState === null,
+  );
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
@@ -441,17 +485,31 @@ const SortNumbersGameBody = ({
     );
   }
 
-  return <SortNumbers key={cfg.inputMethod} config={cfg} />;
+  return (
+    <SortNumbers
+      key={cfg.inputMethod}
+      config={cfg}
+      initialState={draftState ?? undefined}
+      sessionId={sessionId}
+      seed={seed}
+    />
+  );
 };
 
 const GameBody = ({
   gameId,
+  sessionId,
+  seed,
+  draftState,
   gameSpecificConfig,
   bookmarkId,
   bookmarkName,
   bookmarkColor,
 }: {
   gameId: string;
+  sessionId: string;
+  seed: string;
+  draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
   bookmarkId: string | null;
   bookmarkName: string | null;
@@ -461,6 +519,9 @@ const GameBody = ({
     return (
       <SortNumbersGameBody
         gameId={gameId}
+        sessionId={sessionId}
+        seed={seed}
+        draftState={draftState}
         gameSpecificConfig={gameSpecificConfig}
         bookmarkId={bookmarkId}
         bookmarkName={bookmarkName}
@@ -473,6 +534,9 @@ const GameBody = ({
     return (
       <WordSpellGameBody
         gameId={gameId}
+        sessionId={sessionId}
+        seed={seed}
+        draftState={draftState}
         gameSpecificConfig={gameSpecificConfig}
         bookmarkId={bookmarkId}
         bookmarkName={bookmarkName}
@@ -485,6 +549,9 @@ const GameBody = ({
     return (
       <NumberMatchGameBody
         gameId={gameId}
+        sessionId={sessionId}
+        seed={seed}
+        draftState={draftState}
         gameSpecificConfig={gameSpecificConfig}
         bookmarkId={bookmarkId}
         bookmarkName={bookmarkName}
@@ -503,7 +570,9 @@ const GameBody = ({
 export const GameRoute = ({
   config,
   initialLog,
+  draftState,
   sessionId,
+  seed,
   meta,
   gameSpecificConfig,
   bookmarkId,
@@ -520,6 +589,9 @@ export const GameRoute = ({
   >
     <GameBody
       gameId={config.gameId}
+      sessionId={sessionId}
+      seed={seed}
+      draftState={draftState}
       gameSpecificConfig={gameSpecificConfig}
       bookmarkId={bookmarkId}
       bookmarkName={bookmarkName}
@@ -542,9 +614,48 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
   loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
     const { gameId } = params;
     const profileId = 'default';
+    const defaultConfig = makeDefaultConfig(gameId);
+
+    // Route loaders run server-side (SSR) where IndexedDB is unavailable.
+    // Return minimal defaults so the client hydrates and re-runs on the client.
+    if (typeof indexedDB === 'undefined') {
+      const sessionId = nanoid();
+      const seed = nanoid();
+      const initialState: GameEngineState = {
+        phase: 'instructions',
+        roundIndex: 0,
+        score: 0,
+        streak: 0,
+        retryCount: 0,
+        content: STUB_CONTENT,
+        currentRound: {
+          roundId: STUB_CONTENT.rounds[0]?.id ?? '',
+          answer: null,
+          hintsUsed: 0,
+        },
+      };
+      return {
+        config: defaultConfig,
+        initialLog: null,
+        draftState: null,
+        sessionId,
+        seed,
+        meta: {
+          profileId,
+          gameId,
+          gradeBand: defaultConfig.gradeBand,
+          seed,
+          initialContent: STUB_CONTENT,
+          initialState,
+        },
+        gameSpecificConfig: null,
+        bookmarkId: null,
+        bookmarkName: null,
+        bookmarkColor: null,
+      };
+    }
 
     const db = await getOrCreateDatabase();
-    const defaultConfig = makeDefaultConfig(gameId);
     const config = await loadGameConfig(
       gameId,
       profileId,
@@ -553,11 +664,10 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
       defaultConfig,
     );
 
-    const initialLog = await findInProgressSession(
-      profileId,
-      gameId,
-      db,
-    );
+    const inProgressSession: InProgressSession | null =
+      await findInProgressSession(profileId, gameId, db);
+    const initialLog = inProgressSession?.log ?? null;
+    const draftState = inProgressSession?.draftState ?? null;
 
     let gameSpecificConfig: Record<string, unknown> | null = null;
     let bookmarkId: string | null = null;
@@ -610,7 +720,9 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
     return {
       config,
       initialLog,
+      draftState,
       sessionId,
+      seed,
       meta,
       gameSpecificConfig,
       bookmarkId,

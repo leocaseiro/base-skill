@@ -6,6 +6,7 @@ import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
 import type { WordSpellConfig } from '../types';
 import type {
   AnswerGameConfig,
+  AnswerGameDraftState,
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
@@ -64,6 +65,9 @@ function buildTilesAndZones(
 
 interface WordSpellProps {
   config: WordSpellConfig;
+  initialState?: AnswerGameDraftState;
+  sessionId?: string;
+  seed?: string;
 }
 
 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
@@ -191,14 +195,19 @@ const WordSpellSession = ({
   );
 };
 
-export const WordSpell = ({ config }: WordSpellProps) => {
+export const WordSpell = ({
+  config,
+  initialState,
+  sessionId,
+  seed,
+}: WordSpellProps) => {
   const roundsInOrder = config.roundsInOrder === true;
   const [sessionEpoch, setSessionEpoch] = useState(0);
 
   const roundOrder = useMemo(() => {
     void sessionEpoch;
-    return buildRoundOrder(config.rounds.length, roundsInOrder);
-  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
 
   const firstConfigIndex = roundOrder[0];
   const round0 =
@@ -244,7 +253,11 @@ export const WordSpell = ({ config }: WordSpellProps) => {
   if (!round0) return null;
 
   return (
-    <AnswerGame config={answerGameConfig}>
+    <AnswerGame
+      config={answerGameConfig}
+      initialState={initialState}
+      sessionId={sessionId}
+    >
       <WordSpellSession
         wordSpellConfig={config}
         roundOrder={roundOrder}

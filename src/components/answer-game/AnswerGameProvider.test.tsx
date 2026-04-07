@@ -5,7 +5,7 @@ import { AnswerGameProvider } from './AnswerGameProvider';
 import { useTouchKeyboard } from './TouchKeyboardContext';
 import { useAnswerGameContext } from './useAnswerGameContext';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-import type { AnswerGameConfig } from './types';
+import type { AnswerGameConfig, AnswerGameDraftState } from './types';
 
 const gameConfig: AnswerGameConfig = {
   gameId: 'test',
@@ -92,5 +92,95 @@ describe('AnswerGameProvider', () => {
     );
 
     expect(screen.getByTestId('has-focus')).toHaveTextContent('null');
+  });
+
+  it('initialises from initialState when provided', () => {
+    const draft: AnswerGameDraftState = {
+      allTiles: [
+        { id: 't-c', label: 'c', value: 'c' },
+        { id: 't-a', label: 'a', value: 'a' },
+        { id: 't-t', label: 't', value: 't' },
+      ],
+      bankTileIds: ['t-t'],
+      zones: [
+        {
+          id: 'z1',
+          index: 0,
+          expectedValue: 'c',
+          placedTileId: 't-c',
+          isWrong: false,
+          isLocked: false,
+        },
+        {
+          id: 'z2',
+          index: 1,
+          expectedValue: 'a',
+          placedTileId: 't-a',
+          isWrong: false,
+          isLocked: false,
+        },
+        {
+          id: 'z3',
+          index: 2,
+          expectedValue: 't',
+          placedTileId: null,
+          isWrong: false,
+          isLocked: false,
+        },
+      ],
+      activeSlotIndex: 2,
+      phase: 'playing',
+      roundIndex: 0,
+      retryCount: 0,
+    };
+
+    const BankReader = () => {
+      const state = useAnswerGameContext();
+      return (
+        <div data-testid="bank">{state.bankTileIds.join(',')}</div>
+      );
+    };
+
+    render(
+      <AnswerGameProvider config={gameConfig} initialState={draft}>
+        <BankReader />
+      </AnswerGameProvider>,
+    );
+
+    expect(screen.getByTestId('bank')).toHaveTextContent('t-t');
+  });
+
+  it('skips INIT_ROUND effect when initialState is provided', async () => {
+    const draft: AnswerGameDraftState = {
+      allTiles: [{ id: 'x', label: 'x', value: 'x' }],
+      bankTileIds: ['x'],
+      zones: [],
+      activeSlotIndex: 0,
+      phase: 'playing',
+      roundIndex: 0,
+      retryCount: 0,
+    };
+
+    const cfgWithTiles: AnswerGameConfig = {
+      ...gameConfig,
+      initialTiles: [{ id: 'y', label: 'y', value: 'y' }],
+      initialZones: [],
+    };
+
+    const BankReader = () => {
+      const state = useAnswerGameContext();
+      return (
+        <div data-testid="bank">{state.bankTileIds.join(',')}</div>
+      );
+    };
+
+    render(
+      <AnswerGameProvider config={cfgWithTiles} initialState={draft}>
+        <BankReader />
+      </AnswerGameProvider>,
+    );
+
+    // Should still show draft bankTileIds ('x'), not the config tiles ('y')
+    expect(screen.getByTestId('bank')).toHaveTextContent('x');
   });
 });

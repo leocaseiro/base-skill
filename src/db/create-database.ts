@@ -52,6 +52,10 @@ const COLLECTIONS = {
         initialContent: { rounds: [] },
         initialState: {},
       }),
+      2: (oldDoc: Record<string, unknown>) => ({
+        ...oldDoc,
+        draftState: null,
+      }),
     },
   },
   sync_meta: { schema: syncMetaSchema },
