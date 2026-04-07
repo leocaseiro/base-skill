@@ -25,35 +25,25 @@ export const GameNameChip = ({
   return (
     <div
       className="overflow-hidden rounded-xl border"
-      style={{ borderColor: colors.border }}
+      style={
+        {
+          borderColor: colors.border,
+          '--bookmark-play': colors.playBg,
+        } as React.CSSProperties
+      }
     >
-      <div
-        className="flex min-h-12 items-center gap-2 px-3"
-        style={{ background: colors.tagBg }}
-      >
-        <span
-          className="text-sm font-bold"
-          style={{ color: colors.headerText }}
-        >
-          {title}
-        </span>
+      <div className="bookmark-bg flex min-h-12 items-center gap-2 px-3">
+        <span className="bookmark-text text-sm font-bold">{title}</span>
         {bookmarkName && (
           <span
-            className="rounded px-2 py-0.5 text-xs font-semibold"
-            style={{
-              background: colors.tagBg,
-              color: colors.headerText,
-              border: `1px solid ${colors.border}`,
-            }}
+            className="bookmark-bg bookmark-text rounded border px-2 py-0.5 text-xs font-semibold"
+            style={{ borderColor: colors.border }}
           >
             {bookmarkName}
           </span>
         )}
         {!bookmarkName && subject && (
-          <span
-            className="rounded px-2 py-0.5 text-xs font-medium text-muted-foreground"
-            style={{ background: colors.bg }}
-          >
+          <span className="bookmark-bg rounded px-2 py-0.5 text-xs font-medium text-muted-foreground">
             {subject}
           </span>
         )}

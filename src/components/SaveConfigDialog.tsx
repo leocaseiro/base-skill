@@ -123,20 +123,19 @@ export const SaveConfigDialog = ({
             </span>
             <div
               className="inline-flex overflow-hidden rounded-lg border"
-              style={{ borderColor: previewColors.border }}
+              style={
+                {
+                  borderColor: previewColors.border,
+                  '--bookmark-play': previewColors.playBg,
+                } as React.CSSProperties
+              }
             >
-              <div
-                className="px-3 py-2 text-sm font-semibold"
-                style={{
-                  background: previewColors.tagBg,
-                  color: previewColors.headerText,
-                }}
-              >
+              <div className="bookmark-tag-bg bookmark-text px-3 py-2 text-sm font-semibold">
                 {name || t('saveConfig.placeholder')}
               </div>
               <div
                 className="flex w-10 items-center justify-center text-sm text-white"
-                style={{ background: previewColors.playBg }}
+                style={{ background: 'var(--bookmark-play)' }}
               >
                 ▶
               </div>
