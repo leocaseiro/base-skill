@@ -71,7 +71,8 @@ function useHarness(index: number, zones: AnswerZone[] = emptyZones) {
     if (state.zones.length === 0) {
       dispatch({ type: 'INIT_ROUND', tiles, zones });
     }
-  }, []); // empty deps is fine here as tiles/zones are stable test fixtures
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tiles/zones are stable test fixtures; empty deps intentional
+  }, []);
   const result = useSlotBehavior(index);
   return { state, result };
 }
