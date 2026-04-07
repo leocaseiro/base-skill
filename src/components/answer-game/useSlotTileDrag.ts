@@ -71,7 +71,6 @@ export const useSlotTileDrag = ({
     if (!element) return;
     const currentTileId = tileId;
     const currentZoneIndex = zoneIndex;
-    const currentLabel = label ?? '';
     return draggable({
       element,
       getInitialData: () => ({
@@ -88,7 +87,10 @@ export const useSlotTileDrag = ({
           render({ container }) {
             const rect = element.getBoundingClientRect();
             const ghost = document.createElement('div');
-            ghost.textContent = currentLabel;
+            // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
+            // inner elements are preserved — avoids the shrunken-font issue
+            // that occurs when reading fontSize from the button itself.
+            ghost.innerHTML = element.innerHTML;
             Object.assign(ghost.style, {
               width: `${rect.width}px`,
               height: `${rect.height}px`,
@@ -98,8 +100,6 @@ export const useSlotTileDrag = ({
               justifyContent: 'center',
               background: 'var(--card, #fff)',
               color: 'var(--card-foreground, #000)',
-              fontSize: getComputedStyle(element).fontSize,
-              fontWeight: 'bold',
               boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
               transform: 'scale(1.08)',
             });
@@ -130,7 +130,7 @@ export const useSlotTileDrag = ({
         }
       },
     });
-  }, [tileId, zoneIndex, label, dispatch]);
+  }, [tileId, zoneIndex, dispatch]);
 
   // Wrap onDrop for the touch path: caller handles REMOVE_TILE / SWAP_TILES.
   const handleTouchDrop = useCallback(
