@@ -2,7 +2,8 @@ type SoundKey =
   | 'correct'
   | 'wrong'
   | 'round-complete'
-  | 'game-complete';
+  | 'game-complete'
+  | 'tile-place';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -11,6 +12,7 @@ const SOUND_PATHS: Record<SoundKey, string> = {
   wrong: `${base}/sounds/wrong.mp3`,
   'round-complete': `${base}/sounds/round-complete.mp3`,
   'game-complete': `${base}/sounds/game-complete.mp3`,
+  'tile-place': `${base}/sounds/tile-place.mp3`,
 };
 
 let currentAudio: HTMLAudioElement | null = null;

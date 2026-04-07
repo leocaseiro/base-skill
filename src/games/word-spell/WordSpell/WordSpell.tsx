@@ -1,8 +1,8 @@
 import { useNavigate } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { buildSentenceGapRound } from '../build-sentence-gap-round';
 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
-import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
 import type { WordSpellConfig } from '../types';
 import type {
   AnswerGameConfig,
@@ -13,6 +13,9 @@ import type {
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+import { SentenceWithGaps } from '@/components/answer-game/Slot/SentenceWithGaps';
+import { Slot } from '@/components/answer-game/Slot/Slot';
+import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useGameSounds } from '@/components/answer-game/useGameSounds';
@@ -80,7 +83,8 @@ const WordSpellSession = ({
   roundOrder: readonly number[];
   onRestartSession: () => void;
 }) => {
-  const { phase, roundIndex, retryCount } = useAnswerGameContext();
+  const { phase, roundIndex, retryCount, zones } =
+    useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const { confettiReady, gameOverReady } = useGameSounds();
   const navigate = useNavigate();
@@ -129,11 +133,23 @@ const WordSpellSession = ({
         dispatch({ type: 'COMPLETE_GAME' });
         return;
       }
-      const { tiles, zones } = buildTilesAndZones(
-        word,
-        wordSpellConfig.tileUnit,
-      );
-      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+      if (nextRound?.gaps && nextRound.gaps.length > 0) {
+        const { tiles: nextTiles, zones: nextZones } =
+          buildSentenceGapRound(nextRound.gaps);
+        dispatch({
+          type: 'ADVANCE_ROUND',
+          tiles: nextTiles,
+          zones: nextZones,
+        });
+      } else {
+        const { tiles: nextTiles, zones: nextZones } =
+          buildTilesAndZones(word, wordSpellConfig.tileUnit);
+        dispatch({
+          type: 'ADVANCE_ROUND',
+          tiles: nextTiles,
+          zones: nextZones,
+        });
+      }
     }, delayMs);
 
     return () => {
@@ -162,9 +178,16 @@ const WordSpellSession = ({
       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
         <AnswerGame.Question>
           {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
-            <p className="max-w-md text-center text-lg text-foreground">
-              {round.sentence}
-            </p>
+            round.gaps && round.gaps.length > 0 ? (
+              <SentenceWithGaps
+                sentence={round.sentence}
+                className="max-w-md text-center text-foreground"
+              />
+            ) : (
+              <p className="max-w-md text-center text-lg text-foreground">
+                {round.sentence}
+              </p>
+            )
           ) : null}
           {hasEmoji ? (
             <EmojiQuestion
@@ -177,7 +200,21 @@ const WordSpellSession = ({
           <AudioButton prompt={round.word} />
         </AnswerGame.Question>
         <AnswerGame.Answer>
-          <OrderedLetterSlots />
+          {round.gaps && round.gaps.length > 0 ? null : (
+            <SlotRow className="gap-2">
+              {zones.map((zone, i) => (
+                <Slot
+                  key={zone.id}
+                  index={i}
+                  className="size-14 rounded-lg"
+                >
+                  {({ label }) => (
+                    <span className="text-2xl font-bold">{label}</span>
+                  )}
+                </Slot>
+              ))}
+            </SlotRow>
+          )}
         </AnswerGame.Answer>
         <AnswerGame.Choices>
           <LetterTileBank />
@@ -219,8 +256,15 @@ export const WordSpell = ({
   const { tiles, zones } = useMemo(() => {
     if (!roundWord)
       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+
+    // Sentence-gap with gaps array
+    if (round0?.gaps && round0.gaps.length > 0) {
+      return buildSentenceGapRound(round0.gaps);
+    }
+
+    // Default: letter/syllable/word spelling
     return buildTilesAndZones(roundWord, config.tileUnit);
-  }, [roundWord, config.tileUnit]);
+  }, [roundWord, config.tileUnit, round0]);
 
   const answerGameConfig = useMemo(
     (): AnswerGameConfig => ({
@@ -235,6 +279,10 @@ export const WordSpell = ({
       touchKeyboardInputMode: 'text',
       initialTiles: tiles,
       initialZones: zones,
+      slotInteraction:
+        config.mode === 'scramble' || config.mode === 'sentence-gap'
+          ? 'free-swap'
+          : 'ordered',
     }),
     [
       config.gameId,
@@ -245,6 +293,7 @@ export const WordSpell = ({
       config.rounds.length,
       config.roundsInOrder,
       config.ttsEnabled,
+      config.mode,
       tiles,
       zones,
     ],

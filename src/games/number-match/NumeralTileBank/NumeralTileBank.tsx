@@ -1,8 +1,16 @@
 import type { TileItem } from '@/components/answer-game/types';
+import { skeuoStyle } from '@/components/answer-game/styles';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
 
 type TileStyle = 'dots' | 'objects' | 'fingers';
+
+const getIsDomino = (tileStyle: TileStyle, numericValue: number) =>
+  tileStyle === 'dots' &&
+  !Number.isNaN(numericValue) &&
+  numericValue > 6 &&
+  numericValue <= 12;
 
 /** Pip positions (0–8) for each die value in a 3×3 grid. */
 const DICE_PIPS: Record<number, number[]> = {
@@ -77,11 +85,7 @@ const NumeralTile = ({
   } = useDraggableTile(tile);
   const numericValue = Number.parseInt(tile.value, 10);
 
-  const isDomino =
-    tileStyle === 'dots' &&
-    !Number.isNaN(numericValue) &&
-    numericValue > 6 &&
-    numericValue <= 12;
+  const isDomino = getIsDomino(tileStyle, numericValue);
 
   return (
     <button
@@ -89,9 +93,10 @@ const NumeralTile = ({
       type="button"
       aria-label={`Number ${tile.label}`}
       className={[
-        'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl bg-card p-2 shadow-md transition-transform active:scale-95 active:cursor-grabbing',
+        'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl p-2 transition-transform active:scale-95 active:cursor-grabbing',
         isDomino ? 'h-[72px] w-32' : 'size-20',
       ].join(' ')}
+      style={skeuoStyle}
       onClick={handleClick}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -124,14 +129,80 @@ export interface NumeralTileBankProps {
 export const NumeralTileBank = ({
   tileStyle,
 }: NumeralTileBankProps) => {
-  const { allTiles, bankTileIds } = useAnswerGameContext();
-  const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
-
+  const {
+    allTiles,
+    bankTileIds,
+    dragActiveTileId,
+    dragHoverBankTileId,
+  } = useAnswerGameContext();
+  const { bankRef } = useBankDropTarget();
   return (
-    <div className="flex flex-wrap justify-center gap-3">
-      {bankTiles.map((tile) => (
-        <NumeralTile key={tile.id} tile={tile} tileStyle={tileStyle} />
-      ))}
+    <div
+      ref={bankRef}
+      data-tile-bank=""
+      className="flex flex-wrap justify-center gap-3"
+    >
+      {allTiles.map((tile) => {
+        const inBank = bankTileIds.includes(tile.id);
+        const isDragging = tile.id === dragActiveTileId;
+        const isHoverTarget = tile.id === dragHoverBankTileId;
+        const numericValue = Number.parseInt(tile.value, 10);
+        const isDomino = getIsDomino(tileStyle, numericValue);
+        const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
+        const hoverClass = isHoverTarget
+          ? ' border-2 border-dashed border-primary'
+          : '';
+
+        if (inBank) {
+          return (
+            <div
+              key={tile.id}
+              className={[
+                'relative transition-all',
+                holeSizeClass,
+                isHoverTarget
+                  ? 'rounded-2xl ring-2 ring-primary ring-offset-2'
+                  : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              <div
+                data-tile-bank-hole={tile.id}
+                className={[
+                  'rounded-2xl bg-muted/60 shadow-inner',
+                  holeSizeClass,
+                  hoverClass,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                aria-hidden="true"
+              />
+              <div
+                className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
+                aria-hidden={isDragging || undefined}
+              >
+                <NumeralTile tile={tile} tileStyle={tileStyle} />
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div
+            key={tile.id}
+            data-tile-bank-hole={tile.id}
+            className={[
+              'rounded-2xl bg-muted/60 shadow-inner transition-all',
+              holeSizeClass,
+              hoverClass,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            aria-hidden="true"
+          />
+        );
+      })}
     </div>
   );
 };

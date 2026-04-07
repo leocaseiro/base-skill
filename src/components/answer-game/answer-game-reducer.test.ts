@@ -365,4 +365,39 @@ describe('answerGameReducer', () => {
     });
     expect(cleared.dragActiveTileId).toBeNull();
   });
+
+  it('SET_DRAG_HOVER sets dragHoverZoneIndex', () => {
+    const state = makeInitialState(config);
+    const next = answerGameReducer(state, {
+      type: 'SET_DRAG_HOVER',
+      zoneIndex: 2,
+    });
+    expect(next.dragHoverZoneIndex).toBe(2);
+  });
+
+  it('SET_DRAG_HOVER with null clears dragHoverZoneIndex', () => {
+    let state = makeInitialState(config);
+    state = answerGameReducer(state, {
+      type: 'SET_DRAG_HOVER',
+      zoneIndex: 1,
+    });
+    const next = answerGameReducer(state, {
+      type: 'SET_DRAG_HOVER',
+      zoneIndex: null,
+    });
+    expect(next.dragHoverZoneIndex).toBeNull();
+  });
+
+  it('SET_DRAG_ACTIVE clearing to null also clears dragHoverZoneIndex', () => {
+    let state = makeInitialState(config);
+    state = answerGameReducer(state, {
+      type: 'SET_DRAG_HOVER',
+      zoneIndex: 1,
+    });
+    state = answerGameReducer(state, {
+      type: 'SET_DRAG_ACTIVE',
+      tileId: null,
+    });
+    expect(state.dragHoverZoneIndex).toBeNull();
+  });
 });
