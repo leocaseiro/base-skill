@@ -124,14 +124,39 @@ export interface NumeralTileBankProps {
 export const NumeralTileBank = ({
   tileStyle,
 }: NumeralTileBankProps) => {
-  const { allTiles, bankTileIds } = useAnswerGameContext();
+  const { allTiles, bankTileIds, dragActiveTileId } =
+    useAnswerGameContext();
   const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
 
   return (
     <div className="flex flex-wrap justify-center gap-3">
-      {bankTiles.map((tile) => (
-        <NumeralTile key={tile.id} tile={tile} tileStyle={tileStyle} />
-      ))}
+      {bankTiles.map((tile) => {
+        if (tile.id === dragActiveTileId) {
+          const numericValue = Number.parseInt(tile.value, 10);
+          const isDomino =
+            tileStyle === 'dots' &&
+            !Number.isNaN(numericValue) &&
+            numericValue > 6 &&
+            numericValue <= 12;
+          return (
+            <div
+              key={tile.id}
+              className={[
+                'rounded-2xl bg-muted/30 shadow-inner',
+                isDomino ? 'h-[72px] w-32' : 'size-20',
+              ].join(' ')}
+              aria-hidden="true"
+            />
+          );
+        }
+        return (
+          <NumeralTile
+            key={tile.id}
+            tile={tile}
+            tileStyle={tileStyle}
+          />
+        );
+      })}
     </div>
   );
 };
