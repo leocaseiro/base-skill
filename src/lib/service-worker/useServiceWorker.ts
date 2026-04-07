@@ -14,7 +14,7 @@ export const useServiceWorker = (): ServiceWorkerContextValue => {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
-    const wb = new Workbox('/base-skill/sw.js');
+    const wb = new Workbox(`${import.meta.env.BASE_URL}sw.js`);
     wbRef.current = wb;
 
     wb.addEventListener('waiting', () => {
