@@ -34,6 +34,9 @@ const AnswerSlot = ({
       element,
       getData: () => ({ zoneIndex }),
       onDrop: ({ source }) => {
+        // Slot-tile drags (sourceZoneIndex present) handle their own
+        // REMOVE_TILE + placeTile sequence via useSlotTileDrag's onDrop.
+        if (typeof source.data['sourceZoneIndex'] === 'number') return;
         const sourceTileId = source.data['tileId'];
         if (typeof sourceTileId === 'string')
           placeTile(sourceTileId, zoneIndex);
