@@ -99,6 +99,7 @@ export const useSlotBehavior = (
   const slotRef = useRef<HTMLElement | null>(null);
   const prevIsWrongRef = useRef(isWrong);
   const prevTileIdRef = useRef(tileId);
+  const prevDragActiveTileIdRef = useRef(dragActiveTileId);
   // Holds the startFade handle returned by triggerEjectReturn so we can call
   // it when EJECT_TILE fires and the tile is back in the bank.
   const startFadeRef = useRef<(() => void) | null>(null);
@@ -213,6 +214,9 @@ export const useSlotBehavior = (
     const el = slotRef.current;
     if (!el) return;
 
+    const prevDragActiveTileId = prevDragActiveTileIdRef.current;
+    prevDragActiveTileIdRef.current = dragActiveTileId;
+
     const wasWrong = prevIsWrongRef.current;
     prevIsWrongRef.current = isWrong;
 
@@ -253,12 +257,23 @@ export const useSlotBehavior = (
       // Correctly placed from bank (sound already played by useTileEvaluation).
       triggerPop(el);
     } else if (tileId === null && prevTileId !== null) {
-      // Tile returned to bank (click, drag, or eject).
-      playSound('tile-place');
+      // Tile left this slot.
+      // If the tile that left matches the previously-active drag tile, this is
+      // a swap/move — the sound was already played in handleDrop.
+      const wasSwapOrMove = prevTileId === prevDragActiveTileId;
+      if (!wasSwapOrMove) {
+        playSound('tile-place');
+      }
       startFadeRef.current?.();
       startFadeRef.current = null;
     }
-  }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
+  }, [
+    isWrong,
+    tileId,
+    config.wrongTileBehavior,
+    dragRef,
+    dragActiveTileId,
+  ]);
 
   // EJECT_TILE dispatch lives in its own effect (no DOM ref needed) so the
   // timer survives when the bank tile unmounts after PLACE_TILE. The animation
