@@ -45,7 +45,7 @@ const config = defineConfig({
       strategies: 'generateSW',
       injectRegister: null,
       workbox: {
-        navigateFallback: 'index.html',
+        navigateFallback: `${base}index.html`,
         navigateFallbackDenylist: [/\/api\//],
         cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
