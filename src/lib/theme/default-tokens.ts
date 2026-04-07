@@ -14,14 +14,4 @@ export const defaultThemeCssVars: Record<string, string> = {
   '--bs-success': '#6BCB77',
   '--bs-warning': '#F4A261',
   '--bs-error': '#E63946',
-  // Wire shadcn tokens so components like Button pick up theme colors.
-  // Foreground/card-foreground are intentionally omitted — dark mode CSS handles those.
-  '--primary': '#0077B6',
-  '--primary-foreground': '#FFFFFF',
-  '--secondary': '#00B4D8',
-  '--secondary-foreground': '#FFFFFF',
-  '--background': '#CAF0F8',
-  // --card and --card-foreground are omitted — wired via CSS so dark mode can override them
-  '--border': '#F77F00',
-  '--ring': '#0077B6',
 };
