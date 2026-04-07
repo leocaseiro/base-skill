@@ -16,11 +16,13 @@ export type SessionHistoryIndexDoc = {
   seed: string;
   initialContent: Record<string, unknown>;
   initialState: Record<string, unknown>;
+  // v2 additions
+  draftState?: Record<string, unknown> | null;
 };
 
 export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> =
   {
-    version: 1,
+    version: 2,
     primaryKey: 'sessionId',
     type: 'object',
     properties: {
@@ -60,6 +62,12 @@ export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> =
       seed: { type: 'string' },
       initialContent: { type: 'object', additionalProperties: true },
       initialState: { type: 'object', additionalProperties: true },
+      draftState: {
+        oneOf: [
+          { type: 'object', additionalProperties: true },
+          { type: 'null' },
+        ],
+      },
     },
     required: [
       'sessionId',
