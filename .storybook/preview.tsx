@@ -20,7 +20,13 @@ const preview: Preview = {
       name: 'Theme',
       toolbar: {
         icon: 'paintbrush',
-        items: ['light', 'dark', 'high-contrast'],
+        items: [
+          { value: 'light', title: 'Ocean Light' },
+          { value: 'dark', title: 'Ocean Dark' },
+          { value: 'forest-light', title: 'Forest Light' },
+          { value: 'forest-dark', title: 'Forest Dark' },
+          { value: 'high-contrast', title: 'High Contrast' },
+        ],
         dynamicTitle: true,
       },
     },
