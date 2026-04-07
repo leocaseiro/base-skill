@@ -70,18 +70,50 @@ export const useTouchDrag = ({
   const ghostRef = useRef<GhostInfo | null>(null);
   const isDragging = useRef(false);
   const startPos = useRef<{ x: number; y: number } | null>(null);
+  const capturedElRef = useRef<HTMLElement | null>(null);
+  const capturedPointerIdRef = useRef<number | null>(null);
+  const safetyTimerRef = useRef<ReturnType<
+    typeof globalThis.setTimeout
+  > | null>(null);
 
-  const cleanup = useCallback(() => {
+  const cleanupGhost = useCallback(() => {
+    if (safetyTimerRef.current !== null) {
+      globalThis.clearTimeout(safetyTimerRef.current);
+      safetyTimerRef.current = null;
+    }
+
     ghostRef.current?.el.remove();
     ghostRef.current = null;
+
+    if (
+      capturedElRef.current !== null &&
+      capturedPointerIdRef.current !== null
+    ) {
+      try {
+        capturedElRef.current.releasePointerCapture(
+          capturedPointerIdRef.current,
+        );
+      } catch {
+        // Element may no longer be in the DOM — ignore.
+      }
+      capturedElRef.current = null;
+      capturedPointerIdRef.current = null;
+    }
+
     isDragging.current = false;
     startPos.current = null;
   }, []);
+
+  const cleanup = useCallback(() => {
+    cleanupGhost();
+  }, [cleanupGhost]);
 
   const onPointerDown = useCallback(
     (e: PointerEvent<HTMLElement>) => {
       if (e.pointerType === 'mouse' || !tileId) return;
       e.currentTarget.setPointerCapture(e.pointerId);
+      capturedElRef.current = e.currentTarget;
+      capturedPointerIdRef.current = e.pointerId;
       startPos.current = { x: e.clientX, y: e.clientY };
       isDragging.current = false;
     },
@@ -107,6 +139,17 @@ export const useTouchDrag = ({
             e.clientY,
           );
           onDragStart?.();
+
+          safetyTimerRef.current = globalThis.setTimeout(() => {
+            cleanupGhost();
+          }, 5000);
+
+          document.addEventListener('contextmenu', cleanupGhost, {
+            once: true,
+          });
+          document.addEventListener('visibilitychange', cleanupGhost, {
+            once: true,
+          });
         }
       }
 
@@ -116,7 +159,7 @@ export const useTouchDrag = ({
         el.style.top = `${e.clientY - halfH}px`;
       }
     },
-    [label, onDragStart],
+    [label, onDragStart, cleanupGhost],
   );
 
   const onPointerUp = useCallback(
@@ -157,9 +200,9 @@ export const useTouchDrag = ({
   const onPointerCancel = useCallback(
     (e: PointerEvent<HTMLElement>) => {
       if (e.pointerType === 'mouse') return;
-      cleanup();
+      cleanupGhost();
     },
-    [cleanup],
+    [cleanupGhost],
   );
 
   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
