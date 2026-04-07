@@ -26,7 +26,7 @@
     "lint:css": "stylelint 'src/**/*.css'",
     "lint:md": "markdownlint-cli2 '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees'",
     "format": "prettier --check .",
-    "fix": "prettier --write . && eslint --fix .",
+    "fix": "prettier --write . && eslint --fix . && yarn fix:css && yarn fix:md",
     "fix:css": "stylelint --fix 'src/**/*.css' && prettier --write 'src/**/*.css'",
     "fix:md": "markdownlint-cli2 --fix '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees' && prettier --write '**/*.md'",
     "preinstall": "node scripts/check-node-version.mjs",
