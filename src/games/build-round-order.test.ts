@@ -24,4 +24,20 @@ describe('buildRoundOrder', () => {
       0, 1, 2, 3, 4, 5,
     ]);
   });
+
+  it('produces the same order for the same seed', () => {
+    const a = buildRoundOrder(6, false, 'seed-xyz');
+    const b = buildRoundOrder(6, false, 'seed-xyz');
+    expect(a).toEqual(b);
+  });
+
+  it('produces different orders for different seeds', () => {
+    const a = buildRoundOrder(6, false, 'seed-abc');
+    const b = buildRoundOrder(6, false, 'seed-def');
+    expect(a).not.toEqual(b);
+  });
+
+  it('ignores seed when roundsInOrder is true', () => {
+    expect(buildRoundOrder(4, true, 'any-seed')).toEqual([0, 1, 2, 3]);
+  });
 });

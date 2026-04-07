@@ -26,6 +26,7 @@ interface NumberMatchProps {
   config: NumberMatchConfig;
   initialState?: AnswerGameDraftState;
   sessionId?: string;
+  seed?: string;
 }
 
 const NumberMatchSession = ({
@@ -151,14 +152,15 @@ export const NumberMatch = ({
   config,
   initialState,
   sessionId,
+  seed,
 }: NumberMatchProps) => {
   const roundsInOrder = config.roundsInOrder === true;
   const [sessionEpoch, setSessionEpoch] = useState(0);
 
   const roundOrder = useMemo(() => {
     void sessionEpoch;
-    return buildRoundOrder(config.rounds.length, roundsInOrder);
-  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
 
   const firstConfigIndex = roundOrder[0];
   const round0 =

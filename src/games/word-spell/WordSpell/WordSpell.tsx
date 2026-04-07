@@ -67,6 +67,7 @@ interface WordSpellProps {
   config: WordSpellConfig;
   initialState?: AnswerGameDraftState;
   sessionId?: string;
+  seed?: string;
 }
 
 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
@@ -198,14 +199,15 @@ export const WordSpell = ({
   config,
   initialState,
   sessionId,
+  seed,
 }: WordSpellProps) => {
   const roundsInOrder = config.roundsInOrder === true;
   const [sessionEpoch, setSessionEpoch] = useState(0);
 
   const roundOrder = useMemo(() => {
     void sessionEpoch;
-    return buildRoundOrder(config.rounds.length, roundsInOrder);
-  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
 
   const firstConfigIndex = roundOrder[0];
   const round0 =

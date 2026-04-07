@@ -63,6 +63,7 @@ interface GameRouteLoaderData {
   initialLog: MoveLog | null;
   draftState: AnswerGameDraftState | null;
   sessionId: string;
+  seed: string;
   meta: SessionMeta;
   gameSpecificConfig: Record<string, unknown> | null;
   bookmarkId: string | null;
@@ -252,6 +253,7 @@ const resolveSortNumbersConfig = (
 const WordSpellGameBody = ({
   gameId,
   sessionId,
+  seed,
   draftState,
   gameSpecificConfig,
   bookmarkId,
@@ -260,6 +262,7 @@ const WordSpellGameBody = ({
 }: {
   gameId: string;
   sessionId: string;
+  seed: string;
   draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
   bookmarkId: string | null;
@@ -324,6 +327,7 @@ const WordSpellGameBody = ({
       config={cfg}
       initialState={draftState ?? undefined}
       sessionId={sessionId}
+      seed={seed}
     />
   );
 };
@@ -331,6 +335,7 @@ const WordSpellGameBody = ({
 const NumberMatchGameBody = ({
   gameId,
   sessionId,
+  seed,
   draftState,
   gameSpecificConfig,
   bookmarkId,
@@ -339,6 +344,7 @@ const NumberMatchGameBody = ({
 }: {
   gameId: string;
   sessionId: string;
+  seed: string;
   draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
   bookmarkId: string | null;
@@ -403,6 +409,7 @@ const NumberMatchGameBody = ({
       config={cfg}
       initialState={draftState ?? undefined}
       sessionId={sessionId}
+      seed={seed}
     />
   );
 };
@@ -410,6 +417,7 @@ const NumberMatchGameBody = ({
 const SortNumbersGameBody = ({
   gameId,
   sessionId,
+  seed,
   draftState,
   gameSpecificConfig,
   bookmarkId,
@@ -418,6 +426,7 @@ const SortNumbersGameBody = ({
 }: {
   gameId: string;
   sessionId: string;
+  seed: string;
   draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
   bookmarkId: string | null;
@@ -482,6 +491,7 @@ const SortNumbersGameBody = ({
       config={cfg}
       initialState={draftState ?? undefined}
       sessionId={sessionId}
+      seed={seed}
     />
   );
 };
@@ -489,6 +499,7 @@ const SortNumbersGameBody = ({
 const GameBody = ({
   gameId,
   sessionId,
+  seed,
   draftState,
   gameSpecificConfig,
   bookmarkId,
@@ -497,6 +508,7 @@ const GameBody = ({
 }: {
   gameId: string;
   sessionId: string;
+  seed: string;
   draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
   bookmarkId: string | null;
@@ -508,6 +520,7 @@ const GameBody = ({
       <SortNumbersGameBody
         gameId={gameId}
         sessionId={sessionId}
+        seed={seed}
         draftState={draftState}
         gameSpecificConfig={gameSpecificConfig}
         bookmarkId={bookmarkId}
@@ -522,6 +535,7 @@ const GameBody = ({
       <WordSpellGameBody
         gameId={gameId}
         sessionId={sessionId}
+        seed={seed}
         draftState={draftState}
         gameSpecificConfig={gameSpecificConfig}
         bookmarkId={bookmarkId}
@@ -536,6 +550,7 @@ const GameBody = ({
       <NumberMatchGameBody
         gameId={gameId}
         sessionId={sessionId}
+        seed={seed}
         draftState={draftState}
         gameSpecificConfig={gameSpecificConfig}
         bookmarkId={bookmarkId}
@@ -557,6 +572,7 @@ export const GameRoute = ({
   initialLog,
   draftState,
   sessionId,
+  seed,
   meta,
   gameSpecificConfig,
   bookmarkId,
@@ -574,6 +590,7 @@ export const GameRoute = ({
     <GameBody
       gameId={config.gameId}
       sessionId={sessionId}
+      seed={seed}
       draftState={draftState}
       gameSpecificConfig={gameSpecificConfig}
       bookmarkId={bookmarkId}
@@ -666,6 +683,7 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
       initialLog,
       draftState,
       sessionId,
+      seed,
       meta,
       gameSpecificConfig,
       bookmarkId,
