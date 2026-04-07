@@ -34,24 +34,26 @@
   --link-bg-hover: rgb(255 255 255 / 90%);
   --hero-a: rgb(79 184 178 / 36%);
   --hero-b: rgb(47 106 74 / 20%);
-  --background: oklch(100% 0 0deg);
-  --foreground: oklch(14.5% 0 0deg);
+
+  /* Wire shadcn vars from --bs-* tokens; inline style only sets --bs-*, so .dark class wins */
+  --foreground: var(--bs-text);
+  --background: var(--bs-background);
   --card: var(--bs-surface, oklch(100% 0 0deg));
   --card-foreground: var(--bs-text, oklch(14.5% 0 0deg));
   --popover: oklch(100% 0 0deg);
   --popover-foreground: oklch(14.5% 0 0deg);
-  --primary: oklch(20.5% 0 0deg);
-  --primary-foreground: oklch(98.5% 0 0deg);
-  --secondary: oklch(97% 0 0deg);
-  --secondary-foreground: oklch(20.5% 0 0deg);
+  --primary: var(--bs-primary);
+  --primary-foreground: var(--bs-surface);
+  --secondary: var(--bs-secondary);
+  --secondary-foreground: var(--bs-surface);
   --muted: oklch(97% 0 0deg);
   --muted-foreground: oklch(55.6% 0 0deg);
   --accent: oklch(97% 0 0deg);
   --accent-foreground: oklch(20.5% 0 0deg);
   --destructive: oklch(57.7% 0.245 27.325deg);
-  --border: oklch(92.2% 0 0deg);
+  --border: var(--bs-accent);
   --input: oklch(92.2% 0 0deg);
-  --ring: oklch(70.8% 0 0deg);
+  --ring: var(--bs-primary);
   --chart-1: oklch(87% 0 0deg);
   --chart-2: oklch(55.6% 0 0deg);
   --chart-3: oklch(43.9% 0 0deg);
