@@ -61,6 +61,8 @@ export interface AnswerGameState {
   activeSlotIndex: number;
   dragActiveTileId: string | null;
   dragHoverZoneIndex: number | null;
+  /** ID of the bank tile hole currently hovered by a dragged slot tile. */
+  dragHoverBankTileId: string | null;
   phase: AnswerGamePhase;
   roundIndex: number;
   retryCount: number;
@@ -75,8 +77,9 @@ export type AnswerGameAction =
   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
   | { type: 'COMPLETE_GAME' }
   | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
-  | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null };
-  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
+  | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
+  | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
+  | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string };
 
 /**
  * Snapshot of AnswerGameState persisted to session_history_index.draftState.

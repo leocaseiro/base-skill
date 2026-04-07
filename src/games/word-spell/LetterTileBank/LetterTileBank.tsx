@@ -33,8 +33,13 @@ const LetterTile = ({ tile }: { tile: TileItem }) => {
 };
 
 export const LetterTileBank = () => {
-  const { allTiles, bankTileIds, config, dragActiveTileId } =
-    useAnswerGameContext();
+  const {
+    allTiles,
+    bankTileIds,
+    config,
+    dragActiveTileId,
+    dragHoverBankTileId,
+  } = useAnswerGameContext();
   const { bankRef } = useBankDropTarget();
 
   if (config.inputMethod === 'type') {
@@ -57,13 +62,17 @@ export const LetterTileBank = () => {
       {allTiles.map((tile) => {
         const inBank = bankTileIds.includes(tile.id);
         const isDragging = tile.id === dragActiveTileId;
+        const isHoverTarget = tile.id === dragHoverBankTileId;
 
         if (inBank) {
           return (
-            <div key={tile.id} className="relative size-14">
+            <div
+              key={tile.id}
+              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' ring-2 ring-primary ring-offset-2' : ''}`}
+            >
               <div
                 data-tile-bank-hole={tile.id}
-                className="size-14 rounded-xl bg-muted/60 shadow-inner"
+                className={`size-14 rounded-xl bg-muted/60 shadow-inner${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
                 aria-hidden="true"
               />
               <div
@@ -80,7 +89,7 @@ export const LetterTileBank = () => {
           <div
             key={tile.id}
             data-tile-bank-hole={tile.id}
-            className="size-14 rounded-xl bg-muted/60 shadow-inner"
+            className={`size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
             aria-hidden="true"
           />
         );

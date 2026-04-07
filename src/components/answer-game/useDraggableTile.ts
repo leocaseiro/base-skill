@@ -1,4 +1,7 @@
-import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import {
+  draggable,
+  dropTargetForElements,
+} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { useEffect, useRef } from 'react';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
 import { useAutoNextSlot } from './useAutoNextSlot';
@@ -30,10 +33,13 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
   // SET_DRAG_ACTIVE on start so slots can show a preview while the bank tile
   // is being dragged. Cleared on drop (slot handler also clears it on success,
   // so the double-clear here is idempotent).
+  // Also registered as a drop target so slot tiles can be dropped onto this
+  // bank tile to trigger SWAP_SLOT_BANK. onDragEnter sets the hover preview;
+  // hover is cleared by SET_DRAG_ACTIVE(null) when the drag ends.
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
-    return draggable({
+    const cleanupDraggable = draggable({
       element,
       getInitialData: () => ({ tileId: tile.id }),
       onDragStart: () => {
@@ -42,6 +48,16 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
       },
       onDrop: () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
     });
+    const cleanupDropTarget = dropTargetForElements({
+      element,
+      getData: () => ({ bankTileId: tile.id, isBankTarget: true }),
+      onDragEnter: () =>
+        dispatch({ type: 'SET_DRAG_HOVER_BANK', tileId: tile.id }),
+    });
+    return () => {
+      cleanupDraggable();
+      cleanupDropTarget();
+    };
   }, [tile.id, tile.label, dispatch]);
 
   // Pointer-events drag — touch / mobile

@@ -129,8 +129,12 @@ export interface NumeralTileBankProps {
 export const NumeralTileBank = ({
   tileStyle,
 }: NumeralTileBankProps) => {
-  const { allTiles, bankTileIds, dragActiveTileId } =
-    useAnswerGameContext();
+  const {
+    allTiles,
+    bankTileIds,
+    dragActiveTileId,
+    dragHoverBankTileId,
+  } = useAnswerGameContext();
   const { bankRef } = useBankDropTarget();
   return (
     <div
@@ -141,22 +145,37 @@ export const NumeralTileBank = ({
       {allTiles.map((tile) => {
         const inBank = bankTileIds.includes(tile.id);
         const isDragging = tile.id === dragActiveTileId;
+        const isHoverTarget = tile.id === dragHoverBankTileId;
         const numericValue = Number.parseInt(tile.value, 10);
         const isDomino = getIsDomino(tileStyle, numericValue);
         const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
+        const hoverClass = isHoverTarget
+          ? ' border-2 border-dashed border-primary'
+          : '';
 
         if (inBank) {
           return (
             <div
               key={tile.id}
-              className={['relative', holeSizeClass].join(' ')}
+              className={[
+                'relative transition-all',
+                holeSizeClass,
+                isHoverTarget
+                  ? 'rounded-2xl ring-2 ring-primary ring-offset-2'
+                  : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
             >
               <div
                 data-tile-bank-hole={tile.id}
                 className={[
                   'rounded-2xl bg-muted/60 shadow-inner',
                   holeSizeClass,
-                ].join(' ')}
+                  hoverClass,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
                 aria-hidden="true"
               />
               <div
@@ -174,9 +193,12 @@ export const NumeralTileBank = ({
             key={tile.id}
             data-tile-bank-hole={tile.id}
             className={[
-              'rounded-2xl bg-muted/60 shadow-inner',
+              'rounded-2xl bg-muted/60 shadow-inner transition-all',
               holeSizeClass,
-            ].join(' ')}
+              hoverClass,
+            ]
+              .filter(Boolean)
+              .join(' ')}
             aria-hidden="true"
           />
         );

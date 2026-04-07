@@ -61,9 +61,13 @@ interface UseTouchDragOptions {
   /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
   onDragCancel?: () => void;
   onDrop: (tileId: string, zoneIndex: number) => void;
-  /** Called when the tile is dropped on the bank container. */
+  /** Called when the tile is dropped on the bank container (empty hole). */
   onDropOnBank?: () => void;
+  /** Called when the tile is dropped on a specific bank tile hole. */
+  onDropOnBankTile?: (bankTileId: string) => void;
   onHoverZone?: (zoneIndex: number | null) => void;
+  /** Called when the ghost enters or leaves a bank tile hole during drag. */
+  onHoverBankTile?: (bankTileId: string | null) => void;
 }
 
 export const useTouchDrag = ({
@@ -73,7 +77,9 @@ export const useTouchDrag = ({
   onDragCancel,
   onDrop,
   onDropOnBank,
+  onDropOnBankTile,
   onHoverZone,
+  onHoverBankTile,
 }: UseTouchDragOptions): TouchDragHandlers => {
   const onDragCancelRef = useRef(onDragCancel);
   useEffect(() => {
@@ -84,6 +90,11 @@ export const useTouchDrag = ({
   useEffect(() => {
     onHoverZoneRef.current = onHoverZone;
   }, [onHoverZone]);
+
+  const onHoverBankTileRef = useRef(onHoverBankTile);
+  useEffect(() => {
+    onHoverBankTileRef.current = onHoverBankTile;
+  }, [onHoverBankTile]);
 
   const ghostRef = useRef<GhostInfo | null>(null);
   const isDragging = useRef(false);
@@ -98,6 +109,7 @@ export const useTouchDrag = ({
   // → cleanupGhost re-entry.
   const cleanupInProgressRef = useRef(false);
   const lastHoverZoneRef = useRef<number | null>(null);
+  const lastHoverBankTileRef = useRef<string | null>(null);
 
   const cleanupGhost = useCallback(() => {
     if (cleanupInProgressRef.current) return;
@@ -128,6 +140,7 @@ export const useTouchDrag = ({
 
     isDragging.current = false;
     lastHoverZoneRef.current = null;
+    lastHoverBankTileRef.current = null;
     startPos.current = null;
     cleanupInProgressRef.current = false;
   }, []);
@@ -236,6 +249,30 @@ export const useTouchDrag = ({
           lastHoverZoneRef.current = detectedZone;
           onHoverZoneRef.current?.(detectedZone);
         }
+
+        // Bank tile hover: detect which bank hole the ghost is over.
+        if (onHoverBankTileRef.current) {
+          let detectedBankTileId: string | null = null;
+          if (detectedZone === null) {
+            for (const [px, py] of samplePoints) {
+              for (const elem of document.elementsFromPoint(px, py)) {
+                if (
+                  elem instanceof HTMLElement &&
+                  elem.dataset['tileBankHole'] !== undefined
+                ) {
+                  detectedBankTileId =
+                    elem.dataset['tileBankHole'] ?? null;
+                  break;
+                }
+              }
+              if (detectedBankTileId !== null) break;
+            }
+          }
+          if (detectedBankTileId !== lastHoverBankTileRef.current) {
+            lastHoverBankTileRef.current = detectedBankTileId;
+            onHoverBankTileRef.current(detectedBankTileId);
+          }
+        }
       }
     },
     [label, onDragStart, cleanupGhost],
@@ -284,6 +321,20 @@ export const useTouchDrag = ({
           }
           return null;
         };
+        const findBankTileAt = (
+          px: number,
+          py: number,
+        ): string | null => {
+          for (const el of document.elementsFromPoint(px, py)) {
+            if (
+              el instanceof HTMLElement &&
+              el.dataset['tileBankHole'] !== undefined
+            ) {
+              return el.dataset['tileBankHole'] ?? null;
+            }
+          }
+          return null;
+        };
         const isBankAt = (px: number, py: number): boolean =>
           document
             .elementsFromPoint(px, py)
@@ -293,6 +344,15 @@ export const useTouchDrag = ({
                 el.dataset['tileBank'] !== undefined,
             );
 
+        // Priority order:
+        //   1. Center → zone   (precise slot aim)
+        //   2. Center → bank tile (specific hole — swap or return)
+        //   3. Center → bank   (empty bank area — return to bank)
+        //   4. Corners → zone  (expanded zone)
+        //   5. Corners → bank tile
+        //   6. Corners → bank
+        //   7. Cancel
+
         // 1. Center → zone
         const centerZone = findZoneAt(centerX, centerY);
         if (centerZone !== null) {
@@ -300,13 +360,22 @@ export const useTouchDrag = ({
           cleanup();
           return;
         }
-        // 2. Center → bank
+        // 2. Center → bank tile
+        if (onDropOnBankTile) {
+          const centerBankTile = findBankTileAt(centerX, centerY);
+          if (centerBankTile !== null) {
+            onDropOnBankTile(centerBankTile);
+            cleanup();
+            return;
+          }
+        }
+        // 3. Center → bank
         if (isBankAt(centerX, centerY)) {
           onDropOnBank?.();
           cleanup();
           return;
         }
-        // 3. Corners → zone
+        // 4. Corners → zone
         let droppedZoneIndex: number | null = null;
         for (const [px, py] of cornerPoints) {
           const z = findZoneAt(px, py);
@@ -316,18 +385,34 @@ export const useTouchDrag = ({
           }
         }
         if (droppedZoneIndex === null) {
-          // 4. Corners → bank
-          let hitBank = false;
-          for (const [px, py] of cornerPoints) {
-            if (isBankAt(px, py)) {
-              hitBank = true;
-              break;
+          // 5. Corners → bank tile
+          let cornerBankTile: string | null = null;
+          if (onDropOnBankTile) {
+            for (const [px, py] of cornerPoints) {
+              const bt = findBankTileAt(px, py);
+              if (bt !== null) {
+                cornerBankTile = bt;
+                break;
+              }
             }
           }
-          if (hitBank) {
-            onDropOnBank?.();
+          if (cornerBankTile !== null && onDropOnBankTile) {
+            onDropOnBankTile(cornerBankTile);
           } else {
-            onDragCancelRef.current?.();
+            // 6. Corners → bank
+            let hitBank = false;
+            for (const [px, py] of cornerPoints) {
+              if (isBankAt(px, py)) {
+                hitBank = true;
+                break;
+              }
+            }
+            if (hitBank) {
+              onDropOnBank?.();
+            } else {
+              // 7. Cancel
+              onDragCancelRef.current?.();
+            }
           }
         } else {
           onDrop(tileId, droppedZoneIndex);
@@ -336,7 +421,7 @@ export const useTouchDrag = ({
 
       cleanup();
     },
-    [tileId, onDrop, onDropOnBank, cleanup],
+    [tileId, onDrop, onDropOnBank, onDropOnBankTile, cleanup],
   );
 
   const onPointerCancel = useCallback(

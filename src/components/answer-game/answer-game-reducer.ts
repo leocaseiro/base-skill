@@ -17,6 +17,7 @@ export function makeInitialState(
     activeSlotIndex: 0,
     dragActiveTileId: null,
     dragHoverZoneIndex: null,
+    dragHoverBankTileId: null,
     phase: 'playing',
     roundIndex: 0,
     retryCount: 0,
@@ -305,11 +306,46 @@ export function answerGameReducer(
         dragActiveTileId: action.tileId,
         dragHoverZoneIndex:
           action.tileId === null ? null : state.dragHoverZoneIndex,
+        dragHoverBankTileId:
+          action.tileId === null ? null : state.dragHoverBankTileId,
       };
     }
 
     case 'SET_DRAG_HOVER': {
       return { ...state, dragHoverZoneIndex: action.zoneIndex };
+    }
+
+    case 'SET_DRAG_HOVER_BANK': {
+      return { ...state, dragHoverBankTileId: action.tileId };
+    }
+
+    case 'SWAP_SLOT_BANK': {
+      const zone = state.zones[action.zoneIndex];
+      if (!zone?.placedTileId) return state;
+      if (!state.bankTileIds.includes(action.bankTileId)) return state;
+
+      const slotTileId = zone.placedTileId;
+      const newBankTileIds = [
+        ...state.bankTileIds.filter((id) => id !== action.bankTileId),
+        slotTileId,
+      ];
+      const newZones = state.zones.map((z, i) =>
+        i === action.zoneIndex
+          ? {
+              ...z,
+              placedTileId: action.bankTileId,
+              isWrong: false,
+              isLocked: false,
+            }
+          : z,
+      );
+      return {
+        ...state,
+        bankTileIds: newBankTileIds,
+        zones: newZones,
+        dragActiveTileId: null,
+        dragHoverBankTileId: null,
+      };
     }
 
     default: {
