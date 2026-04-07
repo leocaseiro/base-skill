@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { PointerEvent } from 'react';
 
 const DRAG_THRESHOLD_PX = 8;
@@ -70,6 +70,11 @@ export const useTouchDrag = ({
   onDragCancel,
   onDrop,
 }: UseTouchDragOptions): TouchDragHandlers => {
+  const onDragCancelRef = useRef(onDragCancel);
+  useEffect(() => {
+    onDragCancelRef.current = onDragCancel;
+  }, [onDragCancel]);
+
   const ghostRef = useRef<GhostInfo | null>(null);
   const isDragging = useRef(false);
   const startPos = useRef<{ x: number; y: number } | null>(null);
@@ -145,7 +150,7 @@ export const useTouchDrag = ({
 
           safetyTimerRef.current = globalThis.setTimeout(() => {
             cleanupGhost();
-            onDragCancel?.();
+            onDragCancelRef.current?.();
           }, 5000);
 
           document.addEventListener('contextmenu', cleanupGhost, {
@@ -163,7 +168,7 @@ export const useTouchDrag = ({
         el.style.top = `${e.clientY - halfH}px`;
       }
     },
-    [label, onDragStart, onDragCancel, cleanupGhost],
+    [label, onDragStart, cleanupGhost],
   );
 
   const onPointerUp = useCallback(
@@ -197,24 +202,24 @@ export const useTouchDrag = ({
           }
         }
         if (!dropped) {
-          onDragCancel?.();
+          onDragCancelRef.current?.();
         }
       }
 
       cleanup();
     },
-    [tileId, onDrop, onDragCancel, cleanup],
+    [tileId, onDrop, cleanup],
   );
 
   const onPointerCancel = useCallback(
     (e: PointerEvent<HTMLElement>) => {
       if (e.pointerType === 'mouse') return;
       if (isDragging.current) {
-        onDragCancel?.();
+        onDragCancelRef.current?.();
       }
       cleanupGhost();
     },
-    [onDragCancel, cleanupGhost],
+    [cleanupGhost],
   );
 
   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
