@@ -22,6 +22,7 @@ interface UseSlotTileDragOptions {
    * SWAP_TILES as appropriate.
    */
   onDrop: (tileId: string, targetZoneIndex: number) => void;
+  onHoverZone?: (zoneIndex: number | null) => void;
 }
 
 /**
@@ -44,6 +45,7 @@ export const useSlotTileDrag = ({
   label,
   zoneIndex,
   onDrop,
+  onHoverZone,
 }: UseSlotTileDragOptions): SlotTileDrag => {
   const dispatch = useAnswerGameDispatch();
   const dragRef = useRef<HTMLButtonElement>(null);
@@ -150,6 +152,7 @@ export const useSlotTileDrag = ({
         : undefined,
       onDrop: handleTouchDrop,
       onDropOnBank: handleTouchDropOnBank,
+      onHoverZone,
     });
 
   return {
