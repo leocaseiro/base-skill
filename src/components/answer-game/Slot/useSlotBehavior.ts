@@ -119,7 +119,14 @@ export const useSlotBehavior = (
     return dropTargetForElements({
       element: el,
       getData: () => ({ zoneIndex: index }),
+      onDragEnter: () => {
+        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: index });
+      },
+      onDragLeave: () => {
+        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+      },
       onDrop: ({ source }) => {
+        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
         // Slot-tile drags (sourceZoneIndex present) handle their own
         // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
         if (typeof source.data['sourceZoneIndex'] === 'number') return;
