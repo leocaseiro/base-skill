@@ -7,13 +7,13 @@ import {
   it,
   vi,
 } from 'vitest';
+import { useAnswerGameDraftSync } from './useAnswerGameDraftSync';
+import type { AnswerGameState } from '@/components/answer-game/types';
+import type { BaseSkillDatabase } from '@/db/types';
 import {
   createTestDatabase,
   destroyTestDatabase,
 } from '@/db/create-database';
-import type { BaseSkillDatabase } from '@/db/types';
-import type { AnswerGameState } from '@/components/answer-game/types';
-import { useAnswerGameDraftSync } from './useAnswerGameDraftSync';
 
 const baseIndex = {
   sessionId: 'draft-sess-001',
@@ -93,9 +93,9 @@ describe('useAnswerGameDraftSync', () => {
       .exec();
     expect(doc?.draftState).not.toBeNull();
     const draft = doc?.draftState as Record<string, unknown>;
-    expect(draft?.phase).toBe('playing');
-    expect(draft?.roundIndex).toBe(0);
-    expect(draft?.bankTileIds).toEqual(['a']);
+    expect(draft.phase).toBe('playing');
+    expect(draft.roundIndex).toBe(0);
+    expect(draft.bankTileIds).toEqual(['a']);
   });
 
   it('does not fire before 500ms', async () => {
@@ -160,6 +160,52 @@ describe('useAnswerGameDraftSync', () => {
     expect(doc?.draftState).toBeUndefined();
   });
 
+  it('resets the debounce when state changes', async () => {
+    const { rerender } = renderHook(
+      ({ state }: { state: AnswerGameState }) =>
+        useAnswerGameDraftSync(state, 'draft-sess-001', db),
+      { initialProps: { state: makeState() } },
+    );
+
+    // Advance 300ms — debounce still pending
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    // Change state — resets the debounce
+    rerender({ state: makeState({ roundIndex: 1 }) });
+
+    // Advance another 300ms (total 600ms from start, but only 300ms from reset)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    // Should still NOT have written (debounce reset, need 500ms from second render)
+    const docBefore = await db.session_history_index
+      .findOne('draft-sess-001')
+      .exec();
+    expect(docBefore?.draftState).toBeUndefined();
+
+    // Advance remaining 200ms
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    // Allow the async setTimeout callback (findOne + incrementalPatch) to settle
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    // Now it should have written with the new state
+    const docAfter = await db.session_history_index
+      .findOne('draft-sess-001')
+      .exec();
+    const draft = docAfter?.draftState as Record<string, unknown>;
+    expect(draft.roundIndex).toBe(1);
+  });
+
   it('flushes immediately on visibilitychange hidden', async () => {
     const state = makeState();
     renderHook(() =>
@@ -182,10 +228,19 @@ describe('useAnswerGameDraftSync', () => {
       await Promise.resolve();
     });
 
+    // Allow all pending promises (RxDB findOne + incrementalPatch) to settle
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
     const doc = await db.session_history_index
       .findOne('draft-sess-001')
       .exec();
-    expect(doc?.draftState).not.toBeUndefined();
+    expect(doc?.draftState).not.toBeNull();
+    const draft = doc?.draftState as Record<string, unknown>;
+    expect(draft.phase).toBe('playing');
 
     // Restore
     Object.defineProperty(document, 'visibilityState', {
