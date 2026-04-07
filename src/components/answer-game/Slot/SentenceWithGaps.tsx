@@ -20,6 +20,7 @@ export const SentenceWithGaps = ({
     >
       {segments.map((seg, i) =>
         seg.type === 'text' ? (
+          // eslint-disable-next-line react/no-array-index-key -- segments are positional and never reordered; index is the stable key
           <span key={i}>{seg.value}</span>
         ) : (
           <Slot
