@@ -1,4 +1,5 @@
 import { withDarkMode } from '../../../../.storybook/decorators';
+import { withDb } from '../../../../.storybook/decorators/withDb';
 import { SortNumbersTileBank } from './SortNumbersTileBank';
 import type { AnswerGameConfig } from '@/components/answer-game/types';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -62,7 +63,7 @@ const withProvider = (Story: React.ComponentType) => (
 const meta: Meta<typeof SortNumbersTileBank> = {
   component: SortNumbersTileBank,
   tags: ['autodocs'],
-  decorators: [withProvider],
+  decorators: [withDb, withProvider],
 };
 export default meta;
 

@@ -1,4 +1,5 @@
 import { withDarkMode } from '../../../../.storybook/decorators';
+import { withDb } from '../../../../.storybook/decorators/withDb';
 import { NumberSequenceSlots } from './NumberSequenceSlots';
 import type { AnswerGameConfig } from '@/components/answer-game/types';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -53,7 +54,7 @@ const withProvider = (Story: React.ComponentType) => (
 const meta: Meta<typeof NumberSequenceSlots> = {
   component: NumberSequenceSlots,
   tags: ['autodocs'],
-  decorators: [withProvider],
+  decorators: [withDb, withProvider],
 };
 export default meta;
 
