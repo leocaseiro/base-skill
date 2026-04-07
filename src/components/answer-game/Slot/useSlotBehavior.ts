@@ -73,14 +73,13 @@ export const useSlotBehavior = (
   // Drop target handler — choose evaluation or swap based on interaction mode
   const handleDrop = useCallback(
     (droppedTileId: string, targetZoneIndex: number) => {
-      if (isOrdered) {
-        placeTile(droppedTileId, targetZoneIndex);
-        return;
-      }
-      // free-swap: if tile comes from a slot, always SWAP_TILES (even to empty target = move).
-      // Only fall back to placeTile for bank tiles.
       const targetZone = zones[targetZoneIndex];
       if (!targetZone) return;
+
+      // Always check for slot-to-slot drag first (regardless of interaction
+      // mode) so that SWAP_TILES clears the source slot. Falling through to
+      // placeTile for slot-to-slot would leave the source unchanged and
+      // duplicate the tile.
       const sourceZoneIndex = zones.findIndex(
         (z) => z.placedTileId === droppedTileId,
       );
@@ -110,7 +109,7 @@ export const useSlotBehavior = (
       }
       placeTile(droppedTileId, targetZoneIndex);
     },
-    [isOrdered, placeTile, zones, dispatch, allTiles],
+    [placeTile, zones, dispatch, allTiles],
   );
 
   // Register as drop target
