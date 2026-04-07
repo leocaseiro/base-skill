@@ -30,15 +30,24 @@ const NumberTile = ({ tile }: { tile: TileItem }) => {
 };
 
 export const SortNumbersTileBank = () => {
-  const { allTiles, bankTileIds } = useAnswerGameContext();
+  const { allTiles, bankTileIds, dragActiveTileId } =
+    useAnswerGameContext();
 
   const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
 
   return (
     <div className="flex flex-wrap justify-center gap-3">
-      {bankTiles.map((tile) => (
-        <NumberTile key={tile.id} tile={tile} />
-      ))}
+      {bankTiles.map((tile) =>
+        tile.id === dragActiveTileId ? (
+          <div
+            key={tile.id}
+            className="size-14 rounded-xl bg-muted/30 shadow-inner"
+            aria-hidden="true"
+          />
+        ) : (
+          <NumberTile key={tile.id} tile={tile} />
+        ),
+      )}
     </div>
   );
 };
