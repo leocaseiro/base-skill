@@ -19,36 +19,31 @@ interface UseSlotTileDragOptions {
   /**
    * Called when the dragged tile is dropped on a target zone.
    * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
-   * REMOVE_TILE or SWAP_TILES as appropriate.
+   * SWAP_TILES as appropriate.
    */
   onDrop: (tileId: string, targetZoneIndex: number) => void;
-  /**
-   * Called immediately before REMOVE_TILE is dispatched when the tile
-   * is returning to the bank (no valid drop target). Use this to trigger
-   * the eject-return animation while the slot button is still in the DOM.
-   */
-  onBankReturn?: () => void;
 }
 
 /**
- * Enables an occupied slot tile to be dragged back to the bank or to another
- * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
+ * Enables an occupied slot tile to be dragged to another slot.
+ * Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
+ *
+ * Tiles never return to the bank via drag — only the eject effect can do that.
  *
  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
  * visible in the slot during the drag.
  *
  * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
- * called so the caller can dispatch SWAP_TILES or REMOVE_TILE+PLACE_TILE.
+ * called so the caller can dispatch SWAP_TILES.
  *
- * On cancel or no valid drop target: onBankReturn is called (for animation),
- * then REMOVE_TILE + SET_DRAG_ACTIVE are dispatched to return the tile to bank.
+ * On cancel or no valid drop target: SET_DRAG_ACTIVE is cleared and the tile
+ * stays in its current slot (no-op).
  */
 export const useSlotTileDrag = ({
   tileId,
   label,
   zoneIndex,
   onDrop,
-  onBankReturn,
 }: UseSlotTileDragOptions): SlotTileDrag => {
   const dispatch = useAnswerGameDispatch();
   const dragRef = useRef<HTMLButtonElement>(null);
@@ -59,23 +54,17 @@ export const useSlotTileDrag = ({
     onDropRef.current = onDrop;
   }, [onDrop]);
 
-  const onBankReturnRef = useRef(onBankReturn);
-  useEffect(() => {
-    onBankReturnRef.current = onBankReturn;
-  }, [onBankReturn]);
-
   // HTML5 DnD — desktop
   useEffect(() => {
     if (!tileId) return;
     const element = dragRef.current;
     if (!element) return;
     const currentTileId = tileId;
-    const currentZoneIndex = zoneIndex;
     return draggable({
       element,
       getInitialData: () => ({
         tileId: currentTileId,
-        sourceZoneIndex: currentZoneIndex,
+        sourceZoneIndex: zoneIndex,
       }),
       onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
         setCustomNativeDragPreview({
@@ -118,21 +107,15 @@ export const useSlotTileDrag = ({
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
 
         if (targets.length > 0 && typeof targetZoneIndex === 'number') {
-          // Confirmed drop on a valid slot — caller handles REMOVE_TILE / SWAP_TILES.
+          // Confirmed drop on a valid slot — caller handles SWAP_TILES.
           onDropRef.current(currentTileId, targetZoneIndex);
-        } else {
-          // No valid slot target (dropped on bank or outside) — return to bank.
-          onBankReturnRef.current?.();
-          dispatch({
-            type: 'REMOVE_TILE',
-            zoneIndex: currentZoneIndex,
-          });
         }
+        // else: dropped outside a slot — tile stays put (no-op)
       },
     });
   }, [tileId, zoneIndex, dispatch]);
 
-  // Wrap onDrop for the touch path: caller handles REMOVE_TILE / SWAP_TILES.
+  // Wrap onDrop for the touch path: caller handles SWAP_TILES.
   const handleTouchDrop = useCallback(
     (droppedTileId: string, targetZoneIndex: number) => {
       dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
@@ -151,8 +134,7 @@ export const useSlotTileDrag = ({
         : undefined,
       onDragCancel: tileId
         ? () => {
-            onBankReturnRef.current?.();
-            dispatch({ type: 'REMOVE_TILE', zoneIndex });
+            // Dropped outside all targets — tile stays in slot (no-op).
             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
           }
         : undefined,

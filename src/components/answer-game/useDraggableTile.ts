@@ -26,22 +26,16 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
     speakTileRef.current = speakTile;
   }, [speakTile]);
 
-  // HTML5 DnD — desktop
+  // HTML5 DnD — desktop (no SET_DRAG_ACTIVE to avoid browser snap-back fadeout)
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
     return draggable({
       element,
       getInitialData: () => ({ tileId: tile.id }),
-      onDragStart: () => {
-        speakTileRef.current(tile.label);
-        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-      },
-      onDrop: () => {
-        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-      },
+      onDragStart: () => speakTileRef.current(tile.label),
     });
-  }, [tile.id, tile.label, dispatch]);
+  }, [tile.id, tile.label]);
 
   // Pointer-events drag — touch / mobile
   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =

@@ -56,7 +56,7 @@ export const SortNumbersTileBank = () => {
                 aria-hidden="true"
               />
               <div
-                className={`absolute inset-0${isDragging ? ' invisible' : ''}`}
+                className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
                 aria-hidden={isDragging || undefined}
               >
                 <NumberTile tile={tile} />
