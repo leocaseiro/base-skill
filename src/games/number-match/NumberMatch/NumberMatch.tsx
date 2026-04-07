@@ -87,12 +87,19 @@ const NumberMatchSession = ({
         dispatch({ type: 'COMPLETE_GAME' });
         return;
       }
-      const { tiles, zones } = buildNumeralRound(value, {
-        tileBankMode: numberMatchConfig.tileBankMode,
-        distractorCount: numberMatchConfig.distractorCount,
-        range: numberMatchConfig.range,
+      const { tiles: nextTiles, zones: nextZones } = buildNumeralRound(
+        value,
+        {
+          tileBankMode: numberMatchConfig.tileBankMode,
+          distractorCount: numberMatchConfig.distractorCount,
+          range: numberMatchConfig.range,
+        },
+      );
+      dispatch({
+        type: 'ADVANCE_ROUND',
+        tiles: nextTiles,
+        zones: nextZones,
       });
-      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
     }, delayMs);
 
     return () => {

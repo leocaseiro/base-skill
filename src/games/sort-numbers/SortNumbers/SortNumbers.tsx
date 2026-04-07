@@ -88,11 +88,15 @@ const SortNumbersSession = ({
         return;
       }
 
-      const { tiles, zones } = buildSortRound(
+      const { tiles: nextTiles, zones: nextZones } = buildSortRound(
         nextRound.sequence,
         sortNumbersConfig.direction,
       );
-      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+      dispatch({
+        type: 'ADVANCE_ROUND',
+        tiles: nextTiles,
+        zones: nextZones,
+      });
     }, delayMs);
 
     return () => {
