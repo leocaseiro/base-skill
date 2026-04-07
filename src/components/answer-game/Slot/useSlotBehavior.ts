@@ -85,6 +85,22 @@ export const useSlotBehavior = (
         (z) => z.placedTileId === droppedTileId,
       );
       if (sourceZoneIndex !== -1) {
+        // Evaluate both outcomes before dispatching to play exactly one sound.
+        const droppedTile = allTiles.find(
+          (t) => t.id === droppedTileId,
+        );
+        const displacedTile = targetZone.placedTileId
+          ? allTiles.find((t) => t.id === targetZone.placedTileId)
+          : null;
+        const sourceZone = zones[sourceZoneIndex];
+        const droppedCorrect =
+          droppedTile?.value === targetZone.expectedValue;
+        const displacedCorrect = displacedTile
+          ? displacedTile.value === sourceZone?.expectedValue
+          : true;
+        playSound(
+          droppedCorrect || displacedCorrect ? 'correct' : 'wrong',
+        );
         dispatch({
           type: 'SWAP_TILES',
           fromZoneIndex: sourceZoneIndex,
@@ -94,7 +110,7 @@ export const useSlotBehavior = (
       }
       placeTile(droppedTileId, targetZoneIndex);
     },
-    [isOrdered, placeTile, zones, dispatch],
+    [isOrdered, placeTile, zones, dispatch, allTiles],
   );
 
   // Register as drop target
@@ -156,13 +172,11 @@ export const useSlotBehavior = (
       prevTileId !== null &&
       tileId !== prevTileId
     ) {
-      // Tile swapped between slots — animate and sound based on new correctness.
+      // Tile swapped between slots — animate per zone; sound played once in handleDrop.
       if (isWrong) {
         triggerShake(el);
-        playSound('wrong');
       } else {
         triggerPop(el);
-        playSound('correct');
       }
     } else if (isWrong && !wasWrong) {
       // Newly wrong via PLACE_TILE (sound already played by useTileEvaluation).
