@@ -126,37 +126,38 @@ export const NumeralTileBank = ({
 }: NumeralTileBankProps) => {
   const { allTiles, bankTileIds, dragActiveTileId } =
     useAnswerGameContext();
-  const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
-
   return (
     <div
       data-tile-bank=""
       className="flex flex-wrap justify-center gap-3"
     >
-      {bankTiles.map((tile) => {
-        if (tile.id === dragActiveTileId) {
-          const numericValue = Number.parseInt(tile.value, 10);
-          const isDomino =
-            tileStyle === 'dots' &&
-            !Number.isNaN(numericValue) &&
-            numericValue > 6 &&
-            numericValue <= 12;
+      {allTiles.map((tile) => {
+        if (
+          bankTileIds.includes(tile.id) &&
+          tile.id !== dragActiveTileId
+        ) {
           return (
-            <div
+            <NumeralTile
               key={tile.id}
-              className={[
-                'rounded-2xl bg-muted/30 shadow-inner',
-                isDomino ? 'h-[72px] w-32' : 'size-20',
-              ].join(' ')}
-              aria-hidden="true"
+              tile={tile}
+              tileStyle={tileStyle}
             />
           );
         }
+        const numericValue = Number.parseInt(tile.value, 10);
+        const isDomino =
+          tileStyle === 'dots' &&
+          !Number.isNaN(numericValue) &&
+          numericValue > 6 &&
+          numericValue <= 12;
         return (
-          <NumeralTile
+          <div
             key={tile.id}
-            tile={tile}
-            tileStyle={tileStyle}
+            className={[
+              'rounded-2xl bg-muted/30 shadow-inner',
+              isDomino ? 'h-[72px] w-32' : 'size-20',
+            ].join(' ')}
+            aria-hidden="true"
           />
         );
       })}
