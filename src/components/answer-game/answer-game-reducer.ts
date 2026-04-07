@@ -16,6 +16,7 @@ export function makeInitialState(
     zones: [],
     activeSlotIndex: 0,
     dragActiveTileId: null,
+    dragHoverZoneIndex: null,
     phase: 'playing',
     roundIndex: 0,
     retryCount: 0,
@@ -299,7 +300,16 @@ export function answerGameReducer(
     }
 
     case 'SET_DRAG_ACTIVE': {
-      return { ...state, dragActiveTileId: action.tileId };
+      return {
+        ...state,
+        dragActiveTileId: action.tileId,
+        dragHoverZoneIndex:
+          action.tileId === null ? null : state.dragHoverZoneIndex,
+      };
+    }
+
+    case 'SET_DRAG_HOVER': {
+      return { ...state, dragHoverZoneIndex: action.zoneIndex };
     }
 
     default: {
