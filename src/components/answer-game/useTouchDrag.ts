@@ -63,6 +63,7 @@ interface UseTouchDragOptions {
   onDrop: (tileId: string, zoneIndex: number) => void;
   /** Called when the tile is dropped on the bank container. */
   onDropOnBank?: () => void;
+  onHoverZone?: (zoneIndex: number | null) => void;
 }
 
 export const useTouchDrag = ({
@@ -72,11 +73,17 @@ export const useTouchDrag = ({
   onDragCancel,
   onDrop,
   onDropOnBank,
+  onHoverZone,
 }: UseTouchDragOptions): TouchDragHandlers => {
   const onDragCancelRef = useRef(onDragCancel);
   useEffect(() => {
     onDragCancelRef.current = onDragCancel;
   }, [onDragCancel]);
+
+  const onHoverZoneRef = useRef(onHoverZone);
+  useEffect(() => {
+    onHoverZoneRef.current = onHoverZone;
+  }, [onHoverZone]);
 
   const ghostRef = useRef<GhostInfo | null>(null);
   const isDragging = useRef(false);
@@ -90,6 +97,7 @@ export const useTouchDrag = ({
   // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
   // → cleanupGhost re-entry.
   const cleanupInProgressRef = useRef(false);
+  const lastHoverZoneRef = useRef<number | null>(null);
 
   const cleanupGhost = useCallback(() => {
     if (cleanupInProgressRef.current) return;
@@ -119,6 +127,7 @@ export const useTouchDrag = ({
     }
 
     isDragging.current = false;
+    lastHoverZoneRef.current = null;
     startPos.current = null;
     cleanupInProgressRef.current = false;
   }, []);
@@ -192,6 +201,35 @@ export const useTouchDrag = ({
         const { el, halfW, halfH } = ghostRef.current;
         el.style.left = `${e.clientX - halfW}px`;
         el.style.top = `${e.clientY - halfH}px`;
+
+        // Detect zone under pointer for hover preview.
+        // Temporarily hide the ghost so it doesn't intercept elementsFromPoint.
+        el.style.visibility = 'hidden';
+        const elements = document.elementsFromPoint(
+          e.clientX,
+          e.clientY,
+        );
+        el.style.visibility = 'visible';
+        let detectedZone: number | null = null;
+        for (const elem of elements) {
+          if (
+            elem instanceof HTMLElement &&
+            elem.dataset['zoneIndex'] !== undefined
+          ) {
+            const parsed = Number.parseInt(
+              elem.dataset['zoneIndex'],
+              10,
+            );
+            if (!Number.isNaN(parsed)) {
+              detectedZone = parsed;
+              break;
+            }
+          }
+        }
+        if (detectedZone !== lastHoverZoneRef.current) {
+          lastHoverZoneRef.current = detectedZone;
+          onHoverZoneRef.current?.(detectedZone);
+        }
       }
     },
     [label, onDragStart, cleanupGhost],

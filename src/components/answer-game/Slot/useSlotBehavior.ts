@@ -141,6 +141,13 @@ export const useSlotBehavior = (
     });
   }, [index, handleDrop, dispatch]);
 
+  const handleHoverZone = useCallback(
+    (zoneIndex: number | null) => {
+      dispatch({ type: 'SET_DRAG_HOVER', zoneIndex });
+    },
+    [dispatch],
+  );
+
   // Drag source for filled slots
   const {
     dragRef,
@@ -153,6 +160,7 @@ export const useSlotBehavior = (
     label,
     zoneIndex: index,
     onDrop: handleDrop,
+    onHoverZone: handleHoverZone,
   });
 
   // Click handler: remove tile from slot (returns to bank)
