@@ -6,6 +6,7 @@ import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
 import type { WordSpellConfig } from '../types';
 import type {
   AnswerGameConfig,
+  AnswerGameDraftState,
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
@@ -64,6 +65,8 @@ function buildTilesAndZones(
 
 interface WordSpellProps {
   config: WordSpellConfig;
+  initialState?: AnswerGameDraftState;
+  sessionId?: string;
 }
 
 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
@@ -191,7 +194,11 @@ const WordSpellSession = ({
   );
 };
 
-export const WordSpell = ({ config }: WordSpellProps) => {
+export const WordSpell = ({
+  config,
+  initialState,
+  sessionId,
+}: WordSpellProps) => {
   const roundsInOrder = config.roundsInOrder === true;
   const [sessionEpoch, setSessionEpoch] = useState(0);
 
@@ -244,7 +251,11 @@ export const WordSpell = ({ config }: WordSpellProps) => {
   if (!round0) return null;
 
   return (
-    <AnswerGame config={answerGameConfig}>
+    <AnswerGame
+      config={answerGameConfig}
+      initialState={initialState}
+      sessionId={sessionId}
+    >
       <WordSpellSession
         wordSpellConfig={config}
         roundOrder={roundOrder}

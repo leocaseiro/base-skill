@@ -6,6 +6,7 @@ import { NumeralTileBank } from '../NumeralTileBank/NumeralTileBank';
 import type { NumberMatchConfig } from '../types';
 import type {
   AnswerGameConfig,
+  AnswerGameDraftState,
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
@@ -23,6 +24,8 @@ import { buildRoundOrder } from '@/games/build-round-order';
 
 interface NumberMatchProps {
   config: NumberMatchConfig;
+  initialState?: AnswerGameDraftState;
+  sessionId?: string;
 }
 
 const NumberMatchSession = ({
@@ -144,7 +147,11 @@ const NumberMatchSession = ({
   );
 };
 
-export const NumberMatch = ({ config }: NumberMatchProps) => {
+export const NumberMatch = ({
+  config,
+  initialState,
+  sessionId,
+}: NumberMatchProps) => {
   const roundsInOrder = config.roundsInOrder === true;
   const [sessionEpoch, setSessionEpoch] = useState(0);
 
@@ -206,7 +213,11 @@ export const NumberMatch = ({ config }: NumberMatchProps) => {
   if (!round0) return null;
 
   return (
-    <AnswerGame config={answerGameConfig}>
+    <AnswerGame
+      config={answerGameConfig}
+      initialState={initialState}
+      sessionId={sessionId}
+    >
       <NumberMatchSession
         numberMatchConfig={config}
         roundOrder={roundOrder}
