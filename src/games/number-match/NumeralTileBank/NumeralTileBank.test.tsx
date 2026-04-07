@@ -143,4 +143,27 @@ describe('NumeralTileBank', () => {
       expect.objectContaining({ rate: 1 }),
     );
   });
+
+  it('placed tile renders as a hole, not a button', () => {
+    const TestWithPlace = () => {
+      const dispatch = useAnswerGameDispatch();
+      dispatch({ type: 'INIT_ROUND', tiles, zones });
+      dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+      return <NumeralTileBank tileStyle="dots" />;
+    };
+    const { container } = render(
+      <AnswerGameProvider config={config}>
+        <TestWithPlace />
+      </AnswerGameProvider>,
+    );
+    expect(
+      screen.queryByRole('button', { name: /3/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /5/i }),
+    ).toBeInTheDocument();
+    expect(
+      container.querySelectorAll('[aria-hidden="true"]').length,
+    ).toBeGreaterThan(0);
+  });
 });
