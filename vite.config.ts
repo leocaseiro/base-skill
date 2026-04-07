@@ -41,10 +41,13 @@ const config = defineConfig({
     }),
     viteReact(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       strategies: 'generateSW',
-      injectRegister: 'auto',
+      injectRegister: null,
       workbox: {
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/\/api\//],
+        cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
