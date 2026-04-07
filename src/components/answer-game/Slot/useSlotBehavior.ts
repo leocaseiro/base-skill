@@ -67,6 +67,9 @@ export const useSlotBehavior = (
   const slotRef = useRef<HTMLElement | null>(null);
   const prevIsWrongRef = useRef(isWrong);
   const prevTileIdRef = useRef(tileId);
+  // Holds the startFade handle returned by triggerEjectReturn so we can call
+  // it when EJECT_TILE fires and the tile is back in the bank.
+  const startFadeRef = useRef<(() => void) | null>(null);
 
   // Drop target handler — choose evaluation or swap based on interaction mode
   const handleDrop = useCallback(
@@ -138,20 +141,25 @@ export const useSlotBehavior = (
       triggerShake(el);
 
       if (config.wrongTileBehavior === 'lock-auto-eject') {
-        // After the shake settles, animate the tile flying back toward the bank.
-        // EJECT_TILE fires at 1000ms; this animation runs from ~350ms to ~650ms.
+        // After the shake settles, start the fly animation. The ghost parks at
+        // the hole and waits; startFadeRef.current() is called below when
+        // EJECT_TILE fires and the tile is visible in the bank.
         const timerId = setTimeout(() => {
           const tileEl = dragRef.current;
           if (!tileEl) return;
-          const bankEl =
-            document.querySelector<HTMLElement>('[data-tile-bank]');
-          triggerEjectReturn(tileEl, bankEl, () => {
-            // Keep the tile invisible in its slot until EJECT_TILE clears it.
-            tileEl.style.opacity = '0';
-          });
+          const { startFade } = triggerEjectReturn(
+            tileEl,
+            tileId,
+            () => {},
+          );
+          startFadeRef.current = startFade;
         }, 350);
         return () => clearTimeout(timerId);
       }
+    } else if (!isWrong && wasWrong && tileId === null) {
+      // EJECT_TILE fired: tile is now back in the bank — fade the ghost out.
+      startFadeRef.current?.();
+      startFadeRef.current = null;
     } else if (freshlyPlaced && !isWrong) {
       triggerPop(el);
     }

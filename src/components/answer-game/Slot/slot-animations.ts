@@ -24,8 +24,17 @@ export const triggerPop = (el: HTMLElement): void => {
 };
 
 /**
- * Animates a tile flying from its slot toward the tile bank,
- * then calls onComplete.
+ * Animates a tile flying from its slot toward the tile bank.
+ *
+ * Phase 1: ghost flies to the hole (transform only, no opacity change).
+ * Phase 2: ghost fades out — but only when the caller invokes `startFade()`.
+ *          This lets the caller wait until the real tile has appeared in the
+ *          bank (i.e. after EJECT_TILE fires) before fading the ghost out,
+ *          preventing a visible gap between ghost disappearing and tile appearing.
+ *
+ * Returns { startFade } — call it when the bank tile is ready to be shown.
+ * If startFade is called before phase 1 completes, the fade starts immediately
+ * after the ghost arrives. Calling it multiple times is a no-op.
  *
  * el is the button inside the slot. We use its parent (the slot li) for
  * accurate pixel dimensions and border-radius, then build a fresh fixed-
@@ -36,7 +45,7 @@ export const triggerEjectReturn = (
   el: HTMLElement,
   tileId: string | null,
   onComplete: () => void,
-): void => {
+): { startFade: () => void } => {
   // Slot element gives us correct size + border-radius (button has size-full %).
   const sourceEl = el.parentElement ?? el;
   const sourceRect = sourceEl.getBoundingClientRect();
@@ -79,12 +88,31 @@ export const triggerEjectReturn = (
       )
     : document.querySelector<HTMLElement>('[data-tile-bank]');
 
+  // startFade state machine: phase-1 may complete before or after the caller
+  // triggers the fade, so we track both independently.
+  let fadeRequested = false;
+  let phaseOneDone = false;
+
+  const doFade = () => {
+    ghost.style.transition = 'opacity 200ms ease-out';
+    void ghost.offsetWidth;
+    ghost.style.opacity = '0';
+    ghost.addEventListener('transitionend', cleanup, { once: true });
+  };
+
+  const startFade = () => {
+    if (fadeRequested) return; // idempotent
+    fadeRequested = true;
+    if (phaseOneDone) doFade();
+  };
+
   if (!targetEl) {
+    // No target — fade in place immediately (no hole to fly to).
     ghost.style.transition = 'opacity 300ms ease-in';
     void ghost.offsetWidth;
     ghost.style.opacity = '0';
     ghost.addEventListener('transitionend', cleanup, { once: true });
-    return;
+    return { startFade };
   }
 
   const bankRect = targetEl.getBoundingClientRect();
@@ -105,12 +133,12 @@ export const triggerEjectReturn = (
   ghost.addEventListener(
     'transitionend',
     () => {
-      // Phase 2: fade out once arrived at the hole.
-      ghost.style.transition = 'opacity 200ms ease-out';
-      void ghost.offsetWidth;
-      ghost.style.opacity = '0';
-      ghost.addEventListener('transitionend', cleanup, { once: true });
+      phaseOneDone = true;
+      if (fadeRequested) doFade();
+      // Otherwise ghost waits at hole until startFade() is called.
     },
     { once: true },
   );
+
+  return { startFade };
 };
