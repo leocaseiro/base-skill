@@ -15,50 +15,9 @@ import type { Plugin } from 'vite';
 const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
 
 const require = createRequire(import.meta.url);
-const pragmaticBase =
-  '@atlaskit/pragmatic-drag-and-drop/dist/esm/entry-point/element';
-const pragmaticElementAdapter = require.resolve(
-  `${pragmaticBase}/adapter.js`,
-);
-const pragmaticPreserveOffset = require.resolve(
-  `${pragmaticBase}/preserve-offset-on-source.js`,
-);
-const pragmaticSetCustomPreview = require.resolve(
-  `${pragmaticBase}/set-custom-native-drag-preview.js`,
-);
+const pragmaticElementAdapter =
+  require.resolve('@atlaskit/pragmatic-drag-and-drop/dist/esm/entry-point/element/adapter.js');
 
-const config = defineConfig({
-  base,
-  resolve: {
-    alias: {
-      '@atlaskit/pragmatic-drag-and-drop/element/adapter':
-        pragmaticElementAdapter,
-      '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source':
-        pragmaticPreserveOffset,
-      '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview':
-        pragmaticSetCustomPreview,
-    },
-  },
-  define: {
-    'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
-  },
-  plugins: [
-    devtools(),
-    tsconfigPaths({ projects: ['./tsconfig.json'] }),
-    tailwindcss(),
-    tanstackStart({
-      spa: { enabled: true },
-      router: {
-        // eslint-disable-next-line unicorn/prefer-string-raw -- vite config file
-        routeFileIgnorePattern: '(test|spec)\\.(ts|tsx)$',
-      },
-    }),
-    viteReact(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      strategies: 'generateSW',
-      injectRegister: 'auto',
-      workbox: {
 /**
  * Custom workbox plugin that generates the service worker after the client
  * build completes. Replaces vite-plugin-pwa which does not work correctly
