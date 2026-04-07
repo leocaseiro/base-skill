@@ -51,10 +51,7 @@ export const useAnswerGameDraftSync = (
 
       const draft = buildDraft(s);
       await doc.incrementalPatch({
-        draftState: draft as unknown as Record<
-          string,
-          unknown
-        > | null,
+        draftState: draft as unknown as Record<string, unknown> | null,
       });
     }, 500);
 
@@ -73,10 +70,7 @@ export const useAnswerGameDraftSync = (
 
       const draft = buildDraft(s);
       await doc.incrementalPatch({
-        draftState: draft as unknown as Record<
-          string,
-          unknown
-        > | null,
+        draftState: draft as unknown as Record<string, unknown> | null,
       });
     };
 
