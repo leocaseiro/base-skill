@@ -18,14 +18,14 @@ This spec delivers three tightly related capabilities as a single offline-first 
 
 **Design decisions:**
 
-| Decision | Choice |
-|---|---|
-| Resume UX | Silent instant resume — no prompt, skip instructions overlay |
-| SW update mid-game | Defer banner until natural exit (back/game-over) |
-| SW update elsewhere | Non-intrusive banner: "New version available — tap to update" |
-| Version display | Header (all users) + Parent Settings > About |
-| Game state storage | Snapshot on `session_history_index.draftState` (no new collection) |
-| Replay history | Existing `MoveLog` event sourcing (unchanged) |
+| Decision            | Choice                                                             |
+| ------------------- | ------------------------------------------------------------------ |
+| Resume UX           | Silent instant resume — no prompt, skip instructions overlay       |
+| SW update mid-game  | Defer banner until natural exit (back/game-over)                   |
+| SW update elsewhere | Non-intrusive banner: "New version available — tap to update"      |
+| Version display     | Header (all users) + Parent Settings > About                       |
+| Game state storage  | Snapshot on `session_history_index.draftState` (no new collection) |
+| Replay history      | Existing `MoveLog` event sourcing (unchanged)                      |
 
 ---
 
@@ -89,12 +89,14 @@ Migration: existing documents get `draftState: null` (no data loss, optional fie
 New hook mounted inside `AnswerGameProvider`. Writes the current `AnswerGameState` snapshot to `session_history_index.draftState` after significant state changes.
 
 **Write triggers:**
+
 - Debounced 500ms after every `AnswerGameState` change
 - Flush immediately on `visibilitychange → hidden` (browser may close)
 - Write `null` when `phase === 'game-over'` (clear draft on completion)
 - Write `null` when `status === 'abandoned'` (player exits via back button)
 
 **What it writes:**
+
 ```ts
 {
   allTiles: state.allTiles,
@@ -123,7 +125,7 @@ export async function findInProgressSession(
   profileId: string,
   gameId: string,
   db: BaseSkillDatabase,
-): Promise<InProgressSession | null>
+): Promise<InProgressSession | null>;
 ```
 
 Returns both `log` (existing) and `draftState` (new). Callers already destructure the result.
@@ -141,12 +143,17 @@ interface AnswerGameProviderProps {
 ```
 
 When `initialState` is provided:
+
 - `useReducer` initialises from `initialState` directly (not `makeInitialState(config)`)
 - The `INIT_ROUND` `useEffect` is guarded — only fires if `initialState` is absent
 
 ```ts
 // Before
-const [state, dispatch] = useReducer(answerGameReducer, config, makeInitialState);
+const [state, dispatch] = useReducer(
+  answerGameReducer,
+  config,
+  makeInitialState,
+);
 
 // After
 const [state, dispatch] = useReducer(
@@ -162,6 +169,7 @@ const [state, dispatch] = useReducer(
 The route loader already calls `findInProgressSession()`. The result now includes `draftState`.
 
 `GameRouteLoaderData` gains:
+
 ```ts
 interface GameRouteLoaderData {
   // existing fields...
@@ -201,20 +209,20 @@ Existing 24-hour staleness check in `findInProgressSession` applies to both `log
 
 ### 3.1 Current gaps
 
-| Gap | Impact |
-|---|---|
-| No `navigateFallback` | SPA routes show browser offline error on refresh |
-| No `cleanupOutdatedCaches` | Old SW caches accumulate |
-| `injectRegister: 'auto'` | No hook for SW update events |
-| No update notification UI | Users never know a new version is available |
+| Gap                        | Impact                                           |
+| -------------------------- | ------------------------------------------------ |
+| No `navigateFallback`      | SPA routes show browser offline error on refresh |
+| No `cleanupOutdatedCaches` | Old SW caches accumulate                         |
+| `injectRegister: 'auto'`   | No hook for SW update events                     |
+| No update notification UI  | Users never know a new version is available      |
 
 ### 3.2 Workbox configuration changes (`vite.config.ts`)
 
 ```ts
 VitePWA({
-  registerType: 'prompt',          // changed from 'autoUpdate' — manual control
+  registerType: 'prompt', // changed from 'autoUpdate' — manual control
   strategies: 'generateSW',
-  injectRegister: null,            // changed — register manually via useServiceWorker
+  injectRegister: null, // changed — register manually via useServiceWorker
   workbox: {
     navigateFallback: 'index.html',
     navigateFallbackDenylist: [/\/api\//],
@@ -224,8 +232,8 @@ VitePWA({
       // existing Google Fonts entries unchanged
     ],
   },
-  manifest: false,                 // unchanged — manifest.json in public/
-})
+  manifest: false, // unchanged — manifest.json in public/
+});
 ```
 
 `registerType: 'prompt'` + `injectRegister: null` gives full control over SW registration and update lifecycle from application code.
@@ -274,6 +282,7 @@ Non-intrusive strip rendered inside `_app.tsx` above `<Outlet>` but below `<Offl
 ### 3.6 Mid-game deferred update
 
 When `updateAvailable` becomes true while on a game route:
+
 - Banner is suppressed
 - On navigation away from the game route (back button, game-over), the pending SW activates on next page load naturally (browser handles this via `registerType: 'prompt'` lifecycle)
 - No code needed beyond suppressing the banner on game routes
@@ -297,12 +306,12 @@ Wrapped in the `ServiceWorkerProvider` component.
 
 After this change, the offline behaviour is:
 
-| Scenario | Before | After |
-|---|---|---|
-| Refresh on `/en/game/word-spell` offline | Browser offline error | App loads from cache ✓ |
-| Open app cold offline (first visit was online) | Depends on route | App loads from cache ✓ |
-| First ever load offline | Not possible (cache empty) | Not possible (cache empty) |
-| New game assets (first play of new game) | Online required | Online required for new assets |
+| Scenario                                       | Before                     | After                          |
+| ---------------------------------------------- | -------------------------- | ------------------------------ |
+| Refresh on `/en/game/word-spell` offline       | Browser offline error      | App loads from cache ✓         |
+| Open app cold offline (first visit was online) | Depends on route           | App loads from cache ✓         |
+| First ever load offline                        | Not possible (cache empty) | Not possible (cache empty)     |
+| New game assets (first play of new game)       | Online required            | Online required for new assets |
 
 **Constraint:** first load must always be online. This is fundamental to service worker architecture and cannot be changed.
 
@@ -334,13 +343,13 @@ export const IS_BETA = true; // flip to false when exiting beta
 
 New section on the existing `parent/index.tsx` page (no new route needed). Reads from `app_meta` singleton document.
 
-| Field | Source |
-|---|---|
-| App version | `APP_VERSION` constant |
-| Channel | `IS_BETA ? 'Beta' : 'Stable'` |
-| Install ID | `app_meta.installId` (UUID, already stored) |
-| RxDB schema version | `app_meta.rxdbSchemaVersion` (already stored) |
-| Last updated | SW registration timestamp (from `useServiceWorker`) |
+| Field               | Source                                              |
+| ------------------- | --------------------------------------------------- |
+| App version         | `APP_VERSION` constant                              |
+| Channel             | `IS_BETA ? 'Beta' : 'Stable'`                       |
+| Install ID          | `app_meta.installId` (UUID, already stored)         |
+| RxDB schema version | `app_meta.rxdbSchemaVersion` (already stored)       |
+| Last updated        | SW registration timestamp (from `useServiceWorker`) |
 
 Install ID is useful for user support ("what's your install ID?") without exposing any PII.
 
@@ -359,31 +368,31 @@ _app.tsx
 
 ### New files
 
-| File | Purpose |
-|---|---|
-| `src/lib/version.ts` | `APP_VERSION`, `IS_BETA` constants |
-| `src/lib/service-worker/useServiceWorker.ts` | SW registration + update detection hook |
-| `src/lib/service-worker/ServiceWorkerContext.ts` | Context for update state |
-| `src/lib/service-worker/ServiceWorkerProvider.tsx` | Provider wrapping root |
-| `src/lib/game-engine/useAnswerGameDraftSync.ts` | Draft state persistence hook |
-| `src/components/UpdateBanner.tsx` | SW update notification UI |
+| File                                               | Purpose                                 |
+| -------------------------------------------------- | --------------------------------------- |
+| `src/lib/version.ts`                               | `APP_VERSION`, `IS_BETA` constants      |
+| `src/lib/service-worker/useServiceWorker.ts`       | SW registration + update detection hook |
+| `src/lib/service-worker/ServiceWorkerContext.ts`   | Context for update state                |
+| `src/lib/service-worker/ServiceWorkerProvider.tsx` | Provider wrapping root                  |
+| `src/lib/game-engine/useAnswerGameDraftSync.ts`    | Draft state persistence hook            |
+| `src/components/UpdateBanner.tsx`                  | SW update notification UI               |
 
 ### Modified files
 
-| File | Change |
-|---|---|
-| `vite.config.ts` | Add `navigateFallback`, `cleanupOutdatedCaches`, `registerType: 'prompt'`, `injectRegister: null` |
-| `src/db/schemas/session_history_index.ts` | Add `draftState` field, version 1 → 2 |
-| `src/db/migrations.ts` | Migration for `session_history_index` v1 → v2 (`draftState: null`) |
-| `src/lib/game-engine/session-finder.ts` | Return `draftState` alongside `MoveLog` |
-| `src/components/answer-game/AnswerGameProvider.tsx` | Accept `initialState` prop, guard `INIT_ROUND` effect |
-| `src/components/answer-game/AnswerGame/AnswerGame.tsx` | Pass `initialState` through to `AnswerGameProvider` |
-| `src/components/answer-game/types.ts` | Export `AnswerGameDraftState` type |
-| `src/routes/$locale/_app/game/$gameId.tsx` | Pass `draftState` from loader; skip instructions on resume |
-| `src/routes/__root.tsx` | Mount `ServiceWorkerProvider` |
-| `src/routes/$locale/_app.tsx` | Render `UpdateBanner` above `<Outlet>` |
-| `src/components/Header.tsx` | Add version + Beta badge |
-| `src/routes/$locale/_app/parent/index.tsx` | Add About section |
+| File                                                   | Change                                                                                            |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| `vite.config.ts`                                       | Add `navigateFallback`, `cleanupOutdatedCaches`, `registerType: 'prompt'`, `injectRegister: null` |
+| `src/db/schemas/session_history_index.ts`              | Add `draftState` field, version 1 → 2                                                             |
+| `src/db/migrations.ts`                                 | Migration for `session_history_index` v1 → v2 (`draftState: null`)                                |
+| `src/lib/game-engine/session-finder.ts`                | Return `draftState` alongside `MoveLog`                                                           |
+| `src/components/answer-game/AnswerGameProvider.tsx`    | Accept `initialState` prop, guard `INIT_ROUND` effect                                             |
+| `src/components/answer-game/AnswerGame/AnswerGame.tsx` | Pass `initialState` through to `AnswerGameProvider`                                               |
+| `src/components/answer-game/types.ts`                  | Export `AnswerGameDraftState` type                                                                |
+| `src/routes/$locale/_app/game/$gameId.tsx`             | Pass `draftState` from loader; skip instructions on resume                                        |
+| `src/routes/__root.tsx`                                | Mount `ServiceWorkerProvider`                                                                     |
+| `src/routes/$locale/_app.tsx`                          | Render `UpdateBanner` above `<Outlet>`                                                            |
+| `src/components/Header.tsx`                            | Add version + Beta badge                                                                          |
+| `src/routes/$locale/_app/parent/index.tsx`             | Add About section                                                                                 |
 
 ---
 
@@ -416,10 +425,10 @@ _app.tsx
 
 ## 7. Constraints & Decisions
 
-| Constraint | Detail |
-|---|---|
-| First load requires internet | Fundamental SW limitation — cannot be changed |
-| SW only activates in production | `vite-plugin-pwa` does not register SW in dev mode by design |
-| `draftState` is best-effort | If the browser is killed before the 500ms debounce fires, the last tile move may not be saved — acceptable trade-off |
-| `IS_BETA` is a code constant | Not a feature flag or environment variable — flip it and deploy when exiting beta |
-| Resume skips instructions always | If a user refreshes mid-instructions, they skip to playing — acceptable, instructions are optional |
+| Constraint                       | Detail                                                                                                               |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| First load requires internet     | Fundamental SW limitation — cannot be changed                                                                        |
+| SW only activates in production  | `vite-plugin-pwa` does not register SW in dev mode by design                                                         |
+| `draftState` is best-effort      | If the browser is killed before the 500ms debounce fires, the last tile move may not be saved — acceptable trade-off |
+| `IS_BETA` is a code constant     | Not a feature flag or environment variable — flip it and deploy when exiting beta                                    |
+| Resume skips instructions always | If a user refreshes mid-instructions, they skip to playing — acceptable, instructions are optional                   |
