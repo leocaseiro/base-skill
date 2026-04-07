@@ -38,8 +38,6 @@
   /* Wire shadcn vars from --bs-* tokens; inline style only sets --bs-*, so .dark class wins */
   --foreground: var(--bs-text);
   --background: var(--bs-background);
-  --card: var(--bs-surface, oklch(100% 0 0deg));
-  --card-foreground: var(--bs-text, oklch(14.5% 0 0deg));
   --popover: oklch(100% 0 0deg);
   --popover-foreground: oklch(14.5% 0 0deg);
   --primary: var(--bs-primary);
