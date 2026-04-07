@@ -108,6 +108,43 @@ argTypes: {
 },
 ```
 
+## Running Storybook Tests
+
+Multiple agents may be running Storybook simultaneously (e.g. parallel worktrees). **Never assume an existing Storybook instance is yours.** Always start a fresh one.
+
+### Workflow
+
+```bash
+# 1. Find a free port (start at 6006, scan upward)
+PORT=6006
+while lsof -i :$PORT > /dev/null 2>&1; do PORT=$((PORT + 1)); done
+
+# 2. Start Storybook on that port
+yarn storybook --port $PORT --ci &
+STORYBOOK_PID=$!
+
+# 3. Wait until it responds
+until curl -s http://127.0.0.1:$PORT > /dev/null 2>&1; do sleep 2; done
+
+# 4. Run tests against that port
+yarn test:storybook --url http://127.0.0.1:$PORT
+TEST_EXIT=$?
+
+# 5. Kill only on success — leave running on failure so you can debug
+if [ $TEST_EXIT -eq 0 ]; then
+  kill $STORYBOOK_PID
+fi
+
+exit $TEST_EXIT
+```
+
+### Rules
+
+- **Always start your own instance** — never use a Storybook you didn't start
+- **Always pass `--url`** when running `yarn test:storybook` so it targets your port
+- **Kill on green, leave on red** — a running Storybook lets you inspect failures in the browser
+- **Never use `SKIP_STORYBOOK=1` to work around a port conflict** — that skips the tests entirely; find a free port instead
+
 ## Common Mistakes
 
 | Mistake                                               | Fix                                                                                                                                                                              |
@@ -119,3 +156,5 @@ argTypes: {
 | Forgetting `withRouter` for routing components        | Check if component calls `useNavigate`, `Link`, or reads route params                                                                                                            |
 | Forgetting `withDb` for DB/settings hooks             | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
 | Adding `ThemeProvider` decorator                      | Already global — skip                                                                                                                                                            |
+| `SKIP_STORYBOOK=1` because port 6006 is in use        | Find a free port and start your own instance — never skip to avoid a conflict                                                                                                    |
+| Running `yarn test:storybook` without `--url`         | Without `--url` it defaults to 6006 and may hit the wrong agent's Storybook                                                                                                      |
