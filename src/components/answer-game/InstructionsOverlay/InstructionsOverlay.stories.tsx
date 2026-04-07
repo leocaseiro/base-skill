@@ -1,4 +1,4 @@
-import { withDarkMode } from '../../../../.storybook/decorators';
+import { withDocumentDarkMode } from '../../../../.storybook/decorators';
 import { InstructionsOverlay } from './InstructionsOverlay';
 import type { Meta, StoryObj } from '@storybook/react';
 
@@ -42,7 +42,7 @@ type Story = StoryObj<typeof InstructionsOverlay>;
 export const Default: Story = {};
 
 export const DefaultDark: Story = {
-  decorators: [withDarkMode],
+  decorators: [withDocumentDarkMode],
 };
 
 export const SettingsExpanded: Story = {
@@ -57,5 +57,5 @@ export const SettingsExpandedDark: Story = {
     ...baseArgs,
     bookmarkName: 'Easy Mode',
   },
-  decorators: [withDarkMode],
+  decorators: [withDocumentDarkMode],
 };
