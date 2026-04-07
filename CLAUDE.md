@@ -28,8 +28,10 @@ Name branches after the milestone or feature, e.g. `milestone-3-app-shell`, `fea
 ### Rules
 
 - `master` is protected — no direct commits, no direct file edits
-- Every task starts with `git worktree add ./worktrees/<name>` from the project root
+- Every task starts with `git worktree add ./worktrees/<name>` from the project root — **this includes writing docs, specs, and plans**
 - PRs merge into `master`; worktrees are removed after merge
+
+> **Why this matters for docs/specs/plans:** Planning files committed directly to master bypass the PR review process. Even non-code changes belong on a branch so they can be reviewed, revised, and merged cleanly.
 
 ## Pre-push Quality Gate
 
