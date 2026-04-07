@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import type {
   AnswerGameDraftState,
   AnswerGameState,
@@ -34,7 +34,9 @@ export const useAnswerGameDraftSync = (
 ): void => {
   // Refs so event-listener callbacks always read the latest values
   const latestRef = useRef({ state, sessionId, db });
-  latestRef.current = { state, sessionId, db };
+  useLayoutEffect(() => {
+    latestRef.current = { state, sessionId, db };
+  });
 
   // Debounced write: resets on every state/sessionId/db change
   useEffect(() => {
@@ -57,7 +59,7 @@ export const useAnswerGameDraftSync = (
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [state, sessionId, db]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [state, sessionId, db]);
 
   // Immediate flush on tab hidden
   useEffect(() => {
@@ -81,5 +83,5 @@ export const useAnswerGameDraftSync = (
     document.addEventListener('visibilitychange', flush);
     return () =>
       document.removeEventListener('visibilitychange', flush);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 };
