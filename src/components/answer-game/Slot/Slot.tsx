@@ -36,6 +36,11 @@ export const Slot = ({
     previewLabel,
   } = renderProps;
 
+  // When the slot is used inline (as="span", e.g. SentenceWithGaps inside <p>),
+  // the inner visual element must also be a <span> to avoid invalid
+  // block-in-inline HTML nesting. For list/block contexts, <div> is correct.
+  const InnerTag = Tag === 'span' ? 'span' : 'div';
+
   const ariaLabel = isEmpty
     ? `Slot ${index + 1}, empty`
     : `Slot ${index + 1}, filled with ${label}`;
@@ -70,7 +75,7 @@ export const Slot = ({
       className="relative p-1.5"
     >
       {/* Inner visual slot: carries the state-dependent styling. */}
-      <div
+      <InnerTag
         ref={slotRef as Ref<HTMLDivElement>}
         className={[stateClasses, className].filter(Boolean).join(' ')}
         style={
@@ -125,7 +130,7 @@ export const Slot = ({
             </button>
           </>
         )}
-      </div>
+      </InnerTag>
     </Tag>
   );
 };
