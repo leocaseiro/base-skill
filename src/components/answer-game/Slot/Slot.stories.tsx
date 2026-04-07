@@ -1,5 +1,7 @@
+import React from 'react';
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { AnswerGameProvider } from '../AnswerGameProvider';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
 import { SentenceWithGaps } from './SentenceWithGaps';
 import { Slot } from './Slot';
 import { SlotRow } from './SlotRow';
@@ -245,4 +247,100 @@ export const InlineSentenceGap: Story = {
       </div>
     </AnswerGameProvider>
   ),
+};
+
+// ---------------------------------------------------------------------------
+// 7. PreviewTarget — slot showing drag preview (dashed border, faded label)
+// ---------------------------------------------------------------------------
+
+export const PreviewTarget: Story = {
+  render: () => (
+    <AnswerGameProvider
+      config={{
+        ...baseConfig,
+        gameId: 'slot-preview-target',
+        initialTiles: [
+          makeTile('t0', 'C'),
+          makeTile('t1', 'A'),
+          makeTile('t2', 'T'),
+        ],
+        initialZones: [makeZone(0), makeZone(1), makeZone(2)],
+      }}
+    >
+      <PreviewTargetInner />
+    </AnswerGameProvider>
+  ),
+};
+
+const PreviewTargetInner = () => {
+  const dispatch = useAnswerGameDispatch();
+  React.useEffect(() => {
+    // Simulate: tile t0 is being dragged over slot 1
+    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+  }, [dispatch]);
+
+  return (
+    <SlotRow className="gap-2">
+      <Slot index={0} className="size-14 rounded-lg">
+        {(props) => <LetterContent {...props} />}
+      </Slot>
+      <Slot index={1} className="size-14 rounded-lg">
+        {(props) => <LetterContent {...props} />}
+      </Slot>
+      <Slot index={2} className="size-14 rounded-lg">
+        {(props) => <LetterContent {...props} />}
+      </Slot>
+    </SlotRow>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// 8. PreviewSwap — slot-to-slot swap preview (source shows target's tile)
+// ---------------------------------------------------------------------------
+
+export const PreviewSwap: Story = {
+  render: () => (
+    <AnswerGameProvider
+      config={{
+        ...baseConfig,
+        gameId: 'slot-preview-swap',
+        initialTiles: [
+          makeTile('t0', 'C'),
+          makeTile('t1', 'A'),
+          makeTile('t2', 'T'),
+        ],
+        initialZones: [
+          makeZone(0, 't0'),
+          makeZone(1, 't1'),
+          makeZone(2, 't2'),
+        ],
+      }}
+    >
+      <PreviewSwapInner />
+    </AnswerGameProvider>
+  ),
+};
+
+const PreviewSwapInner = () => {
+  const dispatch = useAnswerGameDispatch();
+  React.useEffect(() => {
+    // Simulate: tile t0 (in slot 0) is being dragged over slot 1 (has t1)
+    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+  }, [dispatch]);
+
+  return (
+    <SlotRow className="gap-2">
+      <Slot index={0} className="size-14 rounded-lg">
+        {(props) => <LetterContent {...props} />}
+      </Slot>
+      <Slot index={1} className="size-14 rounded-lg">
+        {(props) => <LetterContent {...props} />}
+      </Slot>
+      <Slot index={2} className="size-14 rounded-lg">
+        {(props) => <LetterContent {...props} />}
+      </Slot>
+    </SlotRow>
+  );
 };
