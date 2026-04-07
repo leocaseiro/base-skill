@@ -7,6 +7,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
 import appCss from '../styles.css?url';
+import { ServiceWorkerProvider } from '@/lib/service-worker/ServiceWorkerProvider';
 
 /** First paint only: class + color-scheme from system preference (no localStorage). */
 const THEME_INIT_SCRIPT =
@@ -19,7 +20,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => (
       <HeadContent />
     </head>
     <body className="font-sans antialiased">
-      {children}
+      <ServiceWorkerProvider>{children}</ServiceWorkerProvider>
       <TanStackDevtools
         config={{ position: 'bottom-right' }}
         plugins={[

@@ -3,6 +3,7 @@ import { I18nextProvider } from 'react-i18next';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
+import { UpdateBanner } from '@/components/UpdateBanner';
 import { seedThemesOnce } from '@/db/seed-themes';
 import { i18n } from '@/lib/i18n/i18n';
 import { DbProvider } from '@/providers/DbProvider';
@@ -15,6 +16,7 @@ const AppLayout = () => (
         <div className="flex min-h-screen flex-col">
           <Header />
           <OfflineIndicator />
+          <UpdateBanner />
           <main className="flex-1">
             <Outlet />
           </main>

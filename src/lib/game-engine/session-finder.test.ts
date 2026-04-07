@@ -1,6 +1,7 @@
 // src/lib/game-engine/session-finder.test.ts
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { findInProgressSession } from './session-finder';
+import type { AnswerGameDraftState } from '@/components/answer-game/types';
 import type { BaseSkillDatabase } from '@/db/types';
 import {
   createTestDatabase,
@@ -90,11 +91,12 @@ describe('findInProgressSession', () => {
     );
 
     expect(result).not.toBeNull();
-    expect(result?.sessionId).toBe('sess-finder-001');
-    expect(result?.seed).toBe('seed-xyz');
-    expect(result?.moves).toHaveLength(1);
-    expect(result?.moves[0]?.type).toBe('SUBMIT_ANSWER');
-    expect(result?.moves[0]?.args).toEqual({ answer: 'A' });
+    expect(result?.log.sessionId).toBe('sess-finder-001');
+    expect(result?.log.seed).toBe('seed-xyz');
+    expect(result?.log.moves).toHaveLength(1);
+    expect(result?.log.moves[0]?.type).toBe('SUBMIT_ANSWER');
+    expect(result?.log.moves[0]?.args).toEqual({ answer: 'A' });
+    expect(result?.draftState).toBeNull();
   });
 
   it('returns null and marks session abandoned if startedAt is older than 24h', async () => {
@@ -183,7 +185,44 @@ describe('findInProgressSession', () => {
       'word-builder',
       db,
     );
-    expect(result?.moves[0]?.type).toBe('SUBMIT_ANSWER');
-    expect(result?.moves[1]?.type).toBe('NEXT_ROUND');
+    expect(result?.log.moves[0]?.type).toBe('SUBMIT_ANSWER');
+    expect(result?.log.moves[1]?.type).toBe('NEXT_ROUND');
+  });
+
+  it('returns draftState when present on the index document', async () => {
+    const draft: AnswerGameDraftState = {
+      allTiles: [{ id: 't1', label: 'c', value: 'c' }],
+      bankTileIds: ['t1'],
+      zones: [
+        {
+          id: 'z1',
+          index: 0,
+          expectedValue: 'c',
+          placedTileId: null,
+          isWrong: false,
+          isLocked: false,
+        },
+      ],
+      activeSlotIndex: 0,
+      phase: 'playing',
+      roundIndex: 0,
+      retryCount: 0,
+    };
+
+    await db.session_history_index.insert({
+      ...baseIndex,
+      sessionId: 'sess-with-draft',
+      startedAt: new Date().toISOString(),
+      status: 'in-progress',
+      draftState: draft as unknown as Record<string, unknown>,
+    });
+
+    const result = await findInProgressSession(
+      'prof-finder',
+      'word-builder',
+      db,
+    );
+
+    expect(result?.draftState).toEqual(draft);
   });
 });

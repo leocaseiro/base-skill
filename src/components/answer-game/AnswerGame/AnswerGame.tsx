@@ -1,14 +1,25 @@
 import { AnswerGameProvider } from '../AnswerGameProvider';
-import type { AnswerGameConfig } from '../types';
+import type { AnswerGameConfig, AnswerGameDraftState } from '../types';
 import type { ReactNode } from 'react';
 
 interface AnswerGameProps {
   config: AnswerGameConfig;
+  initialState?: AnswerGameDraftState;
+  sessionId?: string;
   children: ReactNode;
 }
 
-const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
-  <AnswerGameProvider config={config}>
+const AnswerGameRoot = ({
+  config,
+  initialState,
+  sessionId,
+  children,
+}: AnswerGameProps) => (
+  <AnswerGameProvider
+    config={config}
+    initialState={initialState}
+    sessionId={sessionId}
+  >
     <div className="flex min-h-0 w-full flex-col items-center">
       {children}
     </div>

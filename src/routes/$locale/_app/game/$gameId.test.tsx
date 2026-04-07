@@ -93,7 +93,9 @@ describe('GameRoute', () => {
       <GameRoute
         config={testConfig}
         initialLog={null}
+        draftState={null}
         sessionId="sess-route-001"
+        seed="seed-route"
         meta={testMeta}
         gameSpecificConfig={null}
         bookmarkId={null}
@@ -112,7 +114,9 @@ describe('GameRoute', () => {
       <GameRoute
         config={testConfig}
         initialLog={null}
+        draftState={null}
         sessionId="sess-route-001"
+        seed="seed-route"
         meta={testMeta}
         gameSpecificConfig={null}
         bookmarkId={null}
