@@ -75,7 +75,8 @@ export type AnswerGameAction =
 
 /**
  * Snapshot of AnswerGameState persisted to session_history_index.draftState.
- * Excludes dragActiveTileId (transient) and 'game-over' phase (cleared on completion).
+ * Excludes config (reconstructable from initialContent/initialState),
+ * dragActiveTileId (transient), and 'game-over' phase (cleared on completion).
  */
 export interface AnswerGameDraftState {
   allTiles: TileItem[];
