@@ -18,6 +18,7 @@ export const Slot = ({
 }: SlotProps) => {
   const {
     renderProps,
+    outerRef,
     slotRef,
     dragRef,
     handleClick,
@@ -55,63 +56,76 @@ export const Slot = ({
     .join(' ');
 
   return (
+    // Outer wrapper: the drop target. p-1.5 expands the hit area ~6 px beyond
+    // the visual slot on all sides (pragmatic-board card pattern). data-zone-index
+    // here ensures touch elementsFromPoint also covers the expanded region.
     <Tag
       ref={
-        slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
+        outerRef as Ref<
+          HTMLLIElement & HTMLSpanElement & HTMLDivElement
+        >
       }
       aria-label={ariaLabel}
       data-zone-index={index}
-      className={[stateClasses, className].filter(Boolean).join(' ')}
-      style={
-        isPreview
-          ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
-          : undefined
-      }
+      className="relative p-1.5"
     >
-      {isEmpty ? (
-        <>
-          {isPreview && previewLabel !== null ? (
-            <span className="text-xl font-bold opacity-50">
-              {previewLabel}
-            </span>
-          ) : (
-            children(renderProps)
-          )}
-          {showCursor ? (
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
-            />
-          ) : null}
-        </>
-      ) : (
-        <>
-          <div
-            className="absolute inset-0 bg-muted/60 shadow-inner"
-            aria-hidden="true"
-          />
-          <button
-            ref={dragRef}
-            type="button"
-            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
-            aria-hidden={
-              isBeingDragged && !isPreview ? 'true' : undefined
-            }
-            style={skeuoStyle}
-            onClick={handleClick}
-            onPointerDown={pointerHandlers.onPointerDown}
-            onPointerMove={pointerHandlers.onPointerMove}
-            onPointerUp={pointerHandlers.onPointerUp}
-            onPointerCancel={pointerHandlers.onPointerCancel}
-          >
+      {/* Inner visual slot: carries the state-dependent styling. */}
+      <div
+        ref={slotRef as Ref<HTMLDivElement>}
+        className={[stateClasses, className].filter(Boolean).join(' ')}
+        style={
+          isPreview
+            ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
+            : undefined
+        }
+      >
+        {isEmpty ? (
+          <>
             {isPreview && previewLabel !== null ? (
-              <span className="text-xl font-bold">{previewLabel}</span>
+              <span className="text-xl font-bold opacity-50">
+                {previewLabel}
+              </span>
             ) : (
               children(renderProps)
             )}
-          </button>
-        </>
-      )}
+            {showCursor ? (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+              />
+            ) : null}
+          </>
+        ) : (
+          <>
+            <div
+              className="absolute inset-0 bg-muted/60 shadow-inner"
+              aria-hidden="true"
+            />
+            <button
+              ref={dragRef}
+              type="button"
+              className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
+              aria-hidden={
+                isBeingDragged && !isPreview ? 'true' : undefined
+              }
+              style={skeuoStyle}
+              onClick={handleClick}
+              onPointerDown={pointerHandlers.onPointerDown}
+              onPointerMove={pointerHandlers.onPointerMove}
+              onPointerUp={pointerHandlers.onPointerUp}
+              onPointerCancel={pointerHandlers.onPointerCancel}
+            >
+              {isPreview && previewLabel !== null ? (
+                <span className="text-xl font-bold">
+                  {previewLabel}
+                </span>
+              ) : (
+                children(renderProps)
+              )}
+            </button>
+          </>
+        )}
+      </div>
     </Tag>
   );
 };

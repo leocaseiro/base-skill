@@ -163,9 +163,11 @@ describe('Slot', () => {
         </ol>
       </Wrapper>,
     );
-    const el = screen.getByRole('listitem');
-    expect(el).toHaveClass('size-14');
-    expect(el).toHaveClass('rounded-lg');
+    // className is forwarded to the inner visual div, not the outer listitem wrapper
+    const inner = screen.getByRole('listitem')
+      .firstElementChild as HTMLElement;
+    expect(inner).toHaveClass('size-14');
+    expect(inner).toHaveClass('rounded-lg');
   });
 
   it('has correct aria-label when empty', () => {
