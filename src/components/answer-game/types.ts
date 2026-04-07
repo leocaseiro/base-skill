@@ -76,3 +76,19 @@ export type AnswerGameAction =
   | { type: 'COMPLETE_GAME' }
   | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
   | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null };
+  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
+
+/**
+ * Snapshot of AnswerGameState persisted to session_history_index.draftState.
+ * Excludes config (reconstructable from initialContent/initialState),
+ * dragActiveTileId (transient), and 'game-over' phase (cleared on completion).
+ */
+export interface AnswerGameDraftState {
+  allTiles: TileItem[];
+  bankTileIds: string[];
+  zones: AnswerZone[];
+  activeSlotIndex: number;
+  phase: 'playing' | 'round-complete';
+  roundIndex: number;
+  retryCount: number;
+}

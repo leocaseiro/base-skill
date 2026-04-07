@@ -6,15 +6,21 @@ import type {
   MoveType,
   ResolvedContent,
 } from './types';
+import type { AnswerGameDraftState } from '@/components/answer-game/types';
 import type { BaseSkillDatabase } from '@/db/types';
 
 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+export interface InProgressSession {
+  log: MoveLog;
+  draftState: AnswerGameDraftState | null;
+}
 
 export async function findInProgressSession(
   profileId: string,
   gameId: string,
   db: BaseSkillDatabase,
-): Promise<MoveLog | null> {
+): Promise<InProgressSession | null> {
   const index = await db.session_history_index
     .findOne({
       selector: { profileId, gameId, status: 'in-progress' },
@@ -56,7 +62,7 @@ export async function findInProgressSession(
     timestamp: new Date(e.timestamp).getTime(),
   }));
 
-  return {
+  const log: MoveLog = {
     gameId: index.gameId,
     sessionId: index.sessionId,
     profileId: index.profileId,
@@ -65,4 +71,10 @@ export async function findInProgressSession(
     initialState: index.initialState as unknown as GameEngineState,
     moves,
   };
+
+  const draftState =
+    (index.draftState as unknown as AnswerGameDraftState | null) ??
+    null;
+
+  return { log, draftState };
 }

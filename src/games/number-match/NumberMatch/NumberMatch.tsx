@@ -9,6 +9,7 @@ import {
 import type { NumberMatchConfig } from '../types';
 import type {
   AnswerGameConfig,
+  AnswerGameDraftState,
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
@@ -28,6 +29,9 @@ import { buildRoundOrder } from '@/games/build-round-order';
 
 interface NumberMatchProps {
   config: NumberMatchConfig;
+  initialState?: AnswerGameDraftState;
+  sessionId?: string;
+  seed?: string;
 }
 
 const NumberMatchSession = ({
@@ -189,14 +193,19 @@ const NumberMatchSession = ({
   );
 };
 
-export const NumberMatch = ({ config }: NumberMatchProps) => {
+export const NumberMatch = ({
+  config,
+  initialState,
+  sessionId,
+  seed,
+}: NumberMatchProps) => {
   const roundsInOrder = config.roundsInOrder === true;
   const [sessionEpoch, setSessionEpoch] = useState(0);
 
   const roundOrder = useMemo(() => {
     void sessionEpoch;
-    return buildRoundOrder(config.rounds.length, roundsInOrder);
-  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
 
   const firstConfigIndex = roundOrder[0];
   const round0 =
@@ -252,7 +261,11 @@ export const NumberMatch = ({ config }: NumberMatchProps) => {
   if (!round0) return null;
 
   return (
-    <AnswerGame config={answerGameConfig}>
+    <AnswerGame
+      config={answerGameConfig}
+      initialState={initialState}
+      sessionId={sessionId}
+    >
       <NumberMatchSession
         numberMatchConfig={config}
         roundOrder={roundOrder}
