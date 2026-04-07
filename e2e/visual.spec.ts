@@ -4,7 +4,15 @@ import type { Page } from '@playwright/test';
 
 async function setDarkMode(page: Page) {
   await page.evaluate(() => {
+    // Suppress all CSS transitions before switching theme to avoid mid-animation screenshots
+    const style = document.createElement('style');
+    style.id = '__no-transitions';
+    style.textContent =
+      '*, *::before, *::after { transition: none !important; animation: none !important; }';
+    document.head.append(style);
+
     document.documentElement.classList.add('dark');
+    document.documentElement.dataset.theme = 'dark';
     document.documentElement.style.colorScheme = 'dark';
   });
 }
