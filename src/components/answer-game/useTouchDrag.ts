@@ -35,12 +35,12 @@ const buildGhost = (
     color: 'var(--card-foreground, #000)',
     fontSize: getComputedStyle(sourceEl).fontSize,
     fontWeight: 'bold',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
     pointerEvents: 'none',
     zIndex: '9999',
     opacity: '0.95',
     userSelect: 'none',
-    transform: 'scale(1.05)',
+    transform: 'scale(1.08)',
   });
   document.body.append(el);
   return { el, halfW, halfH };

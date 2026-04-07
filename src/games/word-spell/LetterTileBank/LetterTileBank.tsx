@@ -30,7 +30,8 @@ const LetterTile = ({ tile }: { tile: TileItem }) => {
 };
 
 export const LetterTileBank = () => {
-  const { allTiles, bankTileIds, config } = useAnswerGameContext();
+  const { allTiles, bankTileIds, config, dragActiveTileId } =
+    useAnswerGameContext();
 
   if (config.inputMethod === 'type') {
     const isTouch = navigator.maxTouchPoints > 0;
@@ -47,9 +48,17 @@ export const LetterTileBank = () => {
 
   return (
     <div className="flex flex-wrap justify-center gap-3">
-      {bankTiles.map((tile) => (
-        <LetterTile key={tile.id} tile={tile} />
-      ))}
+      {bankTiles.map((tile) =>
+        tile.id === dragActiveTileId ? (
+          <div
+            key={tile.id}
+            className="size-14 rounded-xl bg-muted/30 shadow-inner"
+            aria-hidden="true"
+          />
+        ) : (
+          <LetterTile key={tile.id} tile={tile} />
+        ),
+      )}
     </div>
   );
 };
