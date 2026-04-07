@@ -614,9 +614,48 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
   loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
     const { gameId } = params;
     const profileId = 'default';
+    const defaultConfig = makeDefaultConfig(gameId);
+
+    // Route loaders run server-side (SSR) where IndexedDB is unavailable.
+    // Return minimal defaults so the client hydrates and re-runs on the client.
+    if (typeof indexedDB === 'undefined') {
+      const sessionId = nanoid();
+      const seed = nanoid();
+      const initialState: GameEngineState = {
+        phase: 'instructions',
+        roundIndex: 0,
+        score: 0,
+        streak: 0,
+        retryCount: 0,
+        content: STUB_CONTENT,
+        currentRound: {
+          roundId: STUB_CONTENT.rounds[0]?.id ?? '',
+          answer: null,
+          hintsUsed: 0,
+        },
+      };
+      return {
+        config: defaultConfig,
+        initialLog: null,
+        draftState: null,
+        sessionId,
+        seed,
+        meta: {
+          profileId,
+          gameId,
+          gradeBand: defaultConfig.gradeBand,
+          seed,
+          initialContent: STUB_CONTENT,
+          initialState,
+        },
+        gameSpecificConfig: null,
+        bookmarkId: null,
+        bookmarkName: null,
+        bookmarkColor: null,
+      };
+    }
 
     const db = await getOrCreateDatabase();
-    const defaultConfig = makeDefaultConfig(gameId);
     const config = await loadGameConfig(
       gameId,
       profileId,
