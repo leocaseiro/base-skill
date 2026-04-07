@@ -60,6 +60,7 @@ export interface AnswerGameState {
   /** Index of next slot to fill in auto-next-slot mode */
   activeSlotIndex: number;
   dragActiveTileId: string | null;
+  dragHoverZoneIndex: number | null;
   phase: AnswerGamePhase;
   roundIndex: number;
   retryCount: number;
@@ -73,4 +74,5 @@ export type AnswerGameAction =
   | { type: 'EJECT_TILE'; zoneIndex: number }
   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
   | { type: 'COMPLETE_GAME' }
-  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
+  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
+  | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null };
