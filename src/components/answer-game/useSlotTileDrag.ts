@@ -2,6 +2,7 @@ import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
 import { useCallback, useEffect, useRef } from 'react';
+import { useAnswerGameContext } from './useAnswerGameContext';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
 import { useTouchDrag } from './useTouchDrag';
 import type { TouchDragHandlers } from './useTouchDrag';
@@ -48,6 +49,7 @@ export const useSlotTileDrag = ({
   onHoverZone,
 }: UseSlotTileDragOptions): SlotTileDrag => {
   const dispatch = useAnswerGameDispatch();
+  const { bankTileIds } = useAnswerGameContext();
   const dragRef = useRef<HTMLButtonElement>(null);
 
   // Keep stable refs so the HTML5 adapter closure stays current.
@@ -104,19 +106,26 @@ export const useSlotTileDrag = ({
       onDrop: ({ location }) => {
         const targets = location.current.dropTargets;
         const targetZoneIndex = targets[0]?.data['zoneIndex'];
-        const isBankTarget = targets[0]?.data['isBankTarget'];
+        const bankTileId = targets[0]?.data['bankTileId'];
+        const isBankTarget = targets.some(
+          (t) => t.data['isBankTarget'] === true,
+        );
 
         // Always clear drag state first.
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+        dispatch({ type: 'SET_DRAG_HOVER_BANK', tileId: null });
 
         if (targets.length > 0 && typeof targetZoneIndex === 'number') {
           // Confirmed drop on a valid slot — caller handles SWAP_TILES.
           onDropRef.current(currentTileId, targetZoneIndex);
-        } else if (isBankTarget === true) {
-          // Dropped on the tile bank — return tile to bank.
+        } else if (typeof bankTileId === 'string') {
+          // Dropped on a specific bank tile — swap slot tile ↔ bank tile.
+          dispatch({ type: 'SWAP_SLOT_BANK', zoneIndex, bankTileId });
+        } else if (isBankTarget) {
+          // Dropped on the tile bank container (empty hole) — return tile.
           dispatch({ type: 'REMOVE_TILE', zoneIndex });
         }
-        // else: dropped outside a slot — tile stays put (no-op)
+        // else: dropped outside — tile stays put (no-op)
       },
     });
   }, [tileId, zoneIndex, dispatch]);
@@ -130,11 +139,35 @@ export const useSlotTileDrag = ({
     [dispatch, onDrop],
   );
 
-  // Touch: dropped on the tile bank — return tile to bank.
+  // Touch: dropped on the tile bank (empty hole) — return tile to bank.
   const handleTouchDropOnBank = useCallback(() => {
     dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+    dispatch({ type: 'SET_DRAG_HOVER_BANK', tileId: null });
     dispatch({ type: 'REMOVE_TILE', zoneIndex });
   }, [dispatch, zoneIndex]);
+
+  // Touch: dropped on a specific bank tile — swap slot tile ↔ bank tile.
+  const handleTouchDropOnBankTile = useCallback(
+    (bankTileId: string) => {
+      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+      dispatch({ type: 'SET_DRAG_HOVER_BANK', tileId: null });
+      if (bankTileIds.includes(bankTileId)) {
+        dispatch({ type: 'SWAP_SLOT_BANK', zoneIndex, bankTileId });
+      } else {
+        // bankTileId is not currently in the bank (edge case) — just return.
+        dispatch({ type: 'REMOVE_TILE', zoneIndex });
+      }
+    },
+    [dispatch, zoneIndex, bankTileIds],
+  );
+
+  // Touch: hovering over a bank tile hole during drag.
+  const handleTouchHoverBankTile = useCallback(
+    (bankTileId: string | null) => {
+      dispatch({ type: 'SET_DRAG_HOVER_BANK', tileId: bankTileId });
+    },
+    [dispatch],
+  );
 
   // Pointer-events drag — touch / mobile
   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
@@ -152,6 +185,8 @@ export const useSlotTileDrag = ({
         : undefined,
       onDrop: handleTouchDrop,
       onDropOnBank: handleTouchDropOnBank,
+      onDropOnBankTile: handleTouchDropOnBankTile,
+      onHoverBankTile: handleTouchHoverBankTile,
       onHoverZone,
     });
 

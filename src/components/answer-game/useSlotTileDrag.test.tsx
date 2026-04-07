@@ -46,6 +46,10 @@ vi.mock('./useAnswerGameDispatch', () => ({
   useAnswerGameDispatch: () => mockDispatch,
 }));
 
+vi.mock('./useAnswerGameContext', () => ({
+  useAnswerGameContext: () => ({ bankTileIds: ['tile-1', 'tile-2'] }),
+}));
+
 // useTouchDrag uses pointer events — mock it to simplify unit tests here.
 vi.mock('./useTouchDrag', () => ({
   useTouchDrag: () => ({
