@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { JSX } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -31,7 +32,7 @@ export const SaveConfigDialog = ({
   existingNames,
   onSave,
   onCancel,
-}: SaveConfigDialogProps) => {
+}: SaveConfigDialogProps): JSX.Element | null => {
   const { t } = useTranslation('common');
   const [name, setName] = useState(suggestedName);
   const [color, setColor] = useState<BookmarkColorKey>(
