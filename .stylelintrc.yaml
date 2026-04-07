@@ -17,3 +17,11 @@ rules:
   property-no-unknown: true
   color-no-invalid-hex: true
   declaration-block-no-duplicate-properties: true
+  color-named: 'never'
+  declaration-property-value-disallowed-list:
+    - '/^(color|background|background-color|border-color|outline-color|fill|stroke)$/':
+        - '/^#/'
+        - '/^rgb/'
+        - '/^rgba/'
+        - '/^hsl/'
+        - '/^oklch/'

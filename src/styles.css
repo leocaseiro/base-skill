@@ -182,7 +182,7 @@ body {
     ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, var(--sand) 68%, white) 0%,
+      color-mix(in oklab, var(--sand) 68%, oklch(100% 0 0deg)) 0%,
       var(--foam) 44%,
       var(--bg-base) 100%
     );
@@ -229,7 +229,7 @@ body::after {
   background-size: 28px 28px;
   mask-image: radial-gradient(
     circle at 50% 30%,
-    black,
+    oklch(0% 0 0deg),
     transparent 78%
   );
 }
@@ -244,7 +244,11 @@ a {
 code {
   font-size: 0.9em;
   border: 1px solid var(--line);
-  background: color-mix(in oklab, var(--surface-strong) 82%, white 18%);
+  background: color-mix(
+    in oklab,
+    var(--surface-strong) 82%,
+    oklch(100% 0 0deg) 18%
+  );
   border-radius: 7px;
   padding: 2px 7px;
 }
@@ -284,7 +288,11 @@ pre code {
 .feature-card {
   background: linear-gradient(
     165deg,
-    color-mix(in oklab, var(--surface-strong) 93%, white 7%),
+    color-mix(
+      in oklab,
+      var(--surface-strong) 93%,
+      oklch(100% 0 0deg) 7%
+    ),
     var(--surface)
   );
   box-shadow:
@@ -313,7 +321,7 @@ a {
 }
 
 a:hover {
-  color: #246f76;
+  color: var(--lagoon-deep);
 }
 
 .island-kicker {
