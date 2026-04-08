@@ -14,7 +14,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { getConfigFields } from '@/games/config-fields-registry';
+import {
+  getConfigFields,
+  getConfigFormRenderer,
+} from '@/games/config-fields-registry';
 
 type GameCardProps = {
   entry: GameCatalogEntry;
@@ -63,6 +66,7 @@ export const GameCard = ({
   const suggestedName = suggestConfigName(gameTitle, existingNames);
   const hasConfigs = savedConfigs.length > 0;
   const configFields = getConfigFields(entry.id);
+  const configFormRenderer = getConfigFormRenderer(entry.id);
 
   const handleSave = async (name: string, color: BookmarkColorKey) => {
     await onSaveConfig(entry.id, name, color);
@@ -112,6 +116,7 @@ export const GameCard = ({
                   key={sc.id}
                   doc={sc}
                   configFields={configFields}
+                  renderConfigForm={configFormRenderer}
                   onPlay={(id) => onPlayWithConfig(entry.id, id)}
                   onDelete={(id) => void onRemoveConfig(id)}
                   onSave={onUpdateConfig}
