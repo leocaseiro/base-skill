@@ -110,7 +110,7 @@ describe('ConfigFormFields', () => {
 
 describe('nested-select fields', () => {
   it('renders a select for nested-select fields', () => {
-    const fields: ConfigField[] = [
+    const nestedSelectFields: ConfigField[] = [
       {
         type: 'nested-select',
         key: 'skip',
@@ -125,7 +125,7 @@ describe('nested-select fields', () => {
     ];
     render(
       <ConfigFormFields
-        fields={fields}
+        fields={nestedSelectFields}
         config={{ skip: { mode: 'random' } }}
         onChange={vi.fn()}
       />,
@@ -137,7 +137,7 @@ describe('nested-select fields', () => {
 
   it('calls onChange preserving other nested keys when nested-select changes', async () => {
     const onChange = vi.fn();
-    const fields: ConfigField[] = [
+    const nestedSelectFields: ConfigField[] = [
       {
         type: 'nested-select',
         key: 'skip',
@@ -151,7 +151,7 @@ describe('nested-select fields', () => {
     ];
     render(
       <ConfigFormFields
-        fields={fields}
+        fields={nestedSelectFields}
         config={{ skip: { mode: 'random', step: 3 } }}
         onChange={onChange}
       />,
@@ -168,7 +168,7 @@ describe('nested-select fields', () => {
 
 describe('nested-select-or-number fields', () => {
   it('renders type selector and number input when value is numeric', () => {
-    const fields: ConfigField[] = [
+    const nestedSelectOrNumberFields: ConfigField[] = [
       {
         type: 'nested-select-or-number',
         key: 'distractors',
@@ -180,7 +180,7 @@ describe('nested-select-or-number fields', () => {
     ];
     render(
       <ConfigFormFields
-        fields={fields}
+        fields={nestedSelectOrNumberFields}
         config={{ distractors: { source: 'random', count: 3 } }}
         onChange={vi.fn()}
       />,
@@ -196,7 +196,7 @@ describe('nested-select-or-number fields', () => {
   });
 
   it('hides number input and shows all in type selector when value is all', () => {
-    const fields: ConfigField[] = [
+    const nestedSelectOrNumberFields: ConfigField[] = [
       {
         type: 'nested-select-or-number',
         key: 'distractors',
@@ -208,7 +208,7 @@ describe('nested-select-or-number fields', () => {
     ];
     render(
       <ConfigFormFields
-        fields={fields}
+        fields={nestedSelectOrNumberFields}
         config={{ distractors: { source: 'gaps-only', count: 'all' } }}
         onChange={vi.fn()}
       />,
@@ -221,7 +221,7 @@ describe('nested-select-or-number fields', () => {
 
   it('switches to all when type selector changes to all', async () => {
     const onChange = vi.fn();
-    const fields: ConfigField[] = [
+    const nestedSelectOrNumberFields: ConfigField[] = [
       {
         type: 'nested-select-or-number',
         key: 'distractors',
@@ -233,7 +233,7 @@ describe('nested-select-or-number fields', () => {
     ];
     render(
       <ConfigFormFields
-        fields={fields}
+        fields={nestedSelectOrNumberFields}
         config={{ distractors: { count: 3 } }}
         onChange={onChange}
       />,
@@ -250,7 +250,7 @@ describe('nested-select-or-number fields', () => {
 
 describe('visibleWhen', () => {
   it('hides a field when nested visibleWhen condition is not met', () => {
-    const fields: ConfigField[] = [
+    const visibleWhenFields: ConfigField[] = [
       {
         type: 'nested-number',
         key: 'skip',
@@ -263,7 +263,7 @@ describe('visibleWhen', () => {
     ];
     render(
       <ConfigFormFields
-        fields={fields}
+        fields={visibleWhenFields}
         config={{ skip: { mode: 'random', step: 3 } }}
         onChange={vi.fn()}
       />,
@@ -274,7 +274,7 @@ describe('visibleWhen', () => {
   });
 
   it('shows a field when nested visibleWhen condition is met', () => {
-    const fields: ConfigField[] = [
+    const visibleWhenFields: ConfigField[] = [
       {
         type: 'nested-number',
         key: 'skip',
@@ -287,7 +287,7 @@ describe('visibleWhen', () => {
     ];
     render(
       <ConfigFormFields
-        fields={fields}
+        fields={visibleWhenFields}
         config={{ skip: { mode: 'by', step: 3 } }}
         onChange={vi.fn()}
       />,
@@ -296,7 +296,7 @@ describe('visibleWhen', () => {
   });
 
   it('hides a field based on top-level key visibleWhen', () => {
-    const fields: ConfigField[] = [
+    const visibleWhenFields: ConfigField[] = [
       {
         type: 'nested-select',
         key: 'distractors',
@@ -308,7 +308,7 @@ describe('visibleWhen', () => {
     ];
     render(
       <ConfigFormFields
-        fields={fields}
+        fields={visibleWhenFields}
         config={{
           tileBankMode: 'exact',
           distractors: { source: 'random' },
@@ -322,7 +322,7 @@ describe('visibleWhen', () => {
   });
 
   it('shows a field when top-level key visibleWhen condition is met', () => {
-    const fields: ConfigField[] = [
+    const visibleWhenFields: ConfigField[] = [
       {
         type: 'nested-select',
         key: 'distractors',
@@ -334,7 +334,7 @@ describe('visibleWhen', () => {
     ];
     render(
       <ConfigFormFields
-        fields={fields}
+        fields={visibleWhenFields}
         config={{
           tileBankMode: 'distractors',
           distractors: { source: 'random' },
