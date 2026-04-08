@@ -171,6 +171,7 @@ export default [
       '.lintstagedrc.mjs',
       // Git worktrees are separate checkouts; fix/lint from repo root targets main tree only.
       'worktrees/**',
+      '.claude/worktrees/**',
       'storybook-static/**',
       'playwright-report/**',
     ],

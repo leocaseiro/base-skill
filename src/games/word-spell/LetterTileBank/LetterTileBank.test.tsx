@@ -89,14 +89,14 @@ describe('LetterTileBank', () => {
     ).toBeInTheDocument();
   });
 
-  it('tile not in bankTileIds is not rendered', () => {
+  it('placed tile is rendered as a hole, not a button', () => {
     const TestWithPlace = () => {
       const dispatch = useAnswerGameDispatch();
       dispatch({ type: 'INIT_ROUND', tiles, zones });
       dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
       return <LetterTileBank />;
     };
-    render(
+    const { container } = render(
       <AnswerGameProvider config={config}>
         <TestWithPlace />
       </AnswerGameProvider>,
@@ -107,5 +107,8 @@ describe('LetterTileBank', () => {
     expect(
       screen.getByRole('button', { name: 'Letter a' }),
     ).toBeInTheDocument();
+    expect(
+      container.querySelectorAll('[aria-hidden="true"]').length,
+    ).toBeGreaterThan(0);
   });
 });

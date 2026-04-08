@@ -1,5 +1,7 @@
 import type { TileItem } from '@/components/answer-game/types';
+import { skeuoStyle } from '@/components/answer-game/styles';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
 
 const NumberTile = ({ tile }: { tile: TileItem }) => {
@@ -17,7 +19,8 @@ const NumberTile = ({ tile }: { tile: TileItem }) => {
       ref={ref}
       type="button"
       aria-label={`Number ${tile.label}`}
-      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl bg-card text-2xl font-bold shadow-md transition-transform active:scale-95 active:cursor-grabbing"
+      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+      style={skeuoStyle}
       onClick={handleClick}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -30,15 +33,55 @@ const NumberTile = ({ tile }: { tile: TileItem }) => {
 };
 
 export const SortNumbersTileBank = () => {
-  const { allTiles, bankTileIds } = useAnswerGameContext();
-
-  const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
+  const {
+    allTiles,
+    bankTileIds,
+    dragActiveTileId,
+    dragHoverBankTileId,
+  } = useAnswerGameContext();
+  const { bankRef } = useBankDropTarget();
 
   return (
-    <div className="flex flex-wrap justify-center gap-3">
-      {bankTiles.map((tile) => (
-        <NumberTile key={tile.id} tile={tile} />
-      ))}
+    <div
+      ref={bankRef}
+      data-tile-bank=""
+      className="flex flex-wrap justify-center gap-3"
+    >
+      {allTiles.map((tile) => {
+        const inBank = bankTileIds.includes(tile.id);
+        const isDragging = tile.id === dragActiveTileId;
+        const isHoverTarget = tile.id === dragHoverBankTileId;
+
+        if (inBank) {
+          return (
+            <div
+              key={tile.id}
+              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' ring-2 ring-primary ring-offset-2' : ''}`}
+            >
+              <div
+                data-tile-bank-hole={tile.id}
+                className={`size-14 rounded-xl bg-muted/60 shadow-inner${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+                aria-hidden="true"
+              />
+              <div
+                className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
+                aria-hidden={isDragging || undefined}
+              >
+                <NumberTile tile={tile} />
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div
+            key={tile.id}
+            data-tile-bank-hole={tile.id}
+            className={`size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+            aria-hidden="true"
+          />
+        );
+      })}
     </div>
   );
 };

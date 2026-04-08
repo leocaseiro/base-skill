@@ -112,17 +112,17 @@ describe('useTileEvaluation', () => {
     expect(result.current.placeTile).toBeDefined();
   });
 
-  it('lock-auto-eject: EJECT_TILE fires after 1000ms for wrong tile', () => {
+  it('lock-auto-eject: wrong tile is placed and marked wrong (eject handled by slot)', () => {
     const { result } = renderHook(() => useTileEvaluationHarness(), {
       wrapper: createWrapper(baseConfig),
     });
 
     act(() => result.current.placeTile('t2', 0));
     expect(result.current.state.zones[0]?.isWrong).toBe(true);
-
+    // EJECT_TILE is now dispatched by useSlotBehavior, not useTileEvaluation,
+    // so advancing time here should NOT clear the zone.
     act(() => vi.advanceTimersByTime(1000));
-    expect(result.current.state.zones[0]?.placedTileId).toBeNull();
-    expect(result.current.state.zones[0]?.isWrong).toBe(false);
+    expect(result.current.state.zones[0]?.isWrong).toBe(true);
   });
 
   it('reject: no zone placement, only retryCount incremented', () => {

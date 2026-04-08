@@ -16,6 +16,8 @@ export function makeInitialState(
     zones: [],
     activeSlotIndex: 0,
     dragActiveTileId: null,
+    dragHoverZoneIndex: null,
+    dragHoverBankTileId: null,
     phase: 'playing',
     roundIndex: 0,
     retryCount: 0,
@@ -47,8 +49,18 @@ export function answerGameReducer(
 
       const correct = tile.value === zone.expectedValue;
 
+      // A tile placement always ends any active drag for that tile.
+      const dragActiveTileId =
+        state.dragActiveTileId === action.tileId
+          ? null
+          : state.dragActiveTileId;
+
       if (!correct && state.config.wrongTileBehavior === 'reject') {
-        return { ...state, retryCount: state.retryCount + 1 };
+        return {
+          ...state,
+          dragActiveTileId,
+          retryCount: state.retryCount + 1,
+        };
       }
 
       if (correct) {
@@ -79,6 +91,7 @@ export function answerGameReducer(
           state.roundIndex >= state.config.totalRounds - 1;
         return {
           ...state,
+          dragActiveTileId,
           zones: newZones,
           bankTileIds: newBankTileIds,
           activeSlotIndex:
@@ -119,6 +132,7 @@ export function answerGameReducer(
 
       return {
         ...state,
+        dragActiveTileId,
         zones: newZones,
         bankTileIds: newBankTileIds,
         activeSlotIndex: state.activeSlotIndex,
@@ -130,8 +144,13 @@ export function answerGameReducer(
     case 'REMOVE_TILE': {
       const zone = state.zones[action.zoneIndex];
       if (!zone?.placedTileId) return state;
+      const removedTileId = zone.placedTileId;
       return {
         ...state,
+        dragActiveTileId:
+          state.dragActiveTileId === removedTileId
+            ? null
+            : state.dragActiveTileId,
         zones: state.zones.map((z, i) =>
           i === action.zoneIndex
             ? {
@@ -142,7 +161,7 @@ export function answerGameReducer(
               }
             : z,
         ),
-        bankTileIds: [...state.bankTileIds, zone.placedTileId],
+        bankTileIds: [...state.bankTileIds, removedTileId],
       };
     }
 
@@ -150,15 +169,71 @@ export function answerGameReducer(
       const fromZone = state.zones[action.fromZoneIndex];
       const toZone = state.zones[action.toZoneIndex];
       if (!fromZone || !toZone) return state;
+
+      // After the swap: fromZone gets toZone's tile, toZone gets fromZone's tile.
+      // Either zone may become empty (null) when moving a tile to an empty slot.
+      const tileNowInFrom = toZone.placedTileId
+        ? state.allTiles.find((t) => t.id === toZone.placedTileId)
+        : null;
+      const tileNowInTo = fromZone.placedTileId
+        ? state.allTiles.find((t) => t.id === fromZone.placedTileId)
+        : null;
+      // An empty zone is never wrong.
+      const fromCorrect = tileNowInFrom
+        ? tileNowInFrom.value === fromZone.expectedValue
+        : true;
+      const toCorrect = tileNowInTo
+        ? tileNowInTo.value === toZone.expectedValue
+        : true;
+      const shouldLock =
+        state.config.wrongTileBehavior === 'lock-manual' ||
+        state.config.wrongTileBehavior === 'lock-auto-eject';
+
+      const newZones = state.zones.map((z, i) => {
+        if (i === action.fromZoneIndex)
+          return {
+            ...z,
+            placedTileId: toZone.placedTileId,
+            isWrong: toZone.placedTileId !== null && !fromCorrect,
+            isLocked:
+              toZone.placedTileId !== null &&
+              !fromCorrect &&
+              shouldLock,
+          };
+        if (i === action.toZoneIndex)
+          return {
+            ...z,
+            placedTileId: fromZone.placedTileId,
+            isWrong: fromZone.placedTileId !== null && !toCorrect,
+            isLocked:
+              fromZone.placedTileId !== null &&
+              !toCorrect &&
+              shouldLock,
+          };
+        return z;
+      });
+
+      // Clear drag state for the tile that just finished dragging.
+      const dragActiveTileId =
+        state.dragActiveTileId === fromZone.placedTileId
+          ? null
+          : state.dragActiveTileId;
+
+      const allFilledCorrectly = newZones.every(
+        (z) => z.placedTileId !== null && !z.isWrong,
+      );
+      const isLastRound =
+        state.roundIndex >= state.config.totalRounds - 1;
+
       return {
         ...state,
-        zones: state.zones.map((z, i) => {
-          if (i === action.fromZoneIndex)
-            return { ...z, placedTileId: toZone.placedTileId };
-          if (i === action.toZoneIndex)
-            return { ...z, placedTileId: fromZone.placedTileId };
-          return z;
-        }),
+        dragActiveTileId,
+        zones: newZones,
+        phase: allFilledCorrectly
+          ? isLastRound
+            ? 'game-over'
+            : 'round-complete'
+          : 'playing',
       };
     }
 
@@ -170,8 +245,15 @@ export function answerGameReducer(
       if (!zone.isWrong && !zone.isLocked) return state;
 
       if (zone.placedTileId) {
+        const ejectedTileId = zone.placedTileId;
         return {
           ...state,
+          // If the ejected tile was mid-drag, clear drag state so the bank
+          // hole disappears immediately rather than waiting for the drag to end.
+          dragActiveTileId:
+            state.dragActiveTileId === ejectedTileId
+              ? null
+              : state.dragActiveTileId,
           zones: state.zones.map((z, i) =>
             i === action.zoneIndex
               ? {
@@ -182,7 +264,7 @@ export function answerGameReducer(
                 }
               : z,
           ),
-          bankTileIds: [...state.bankTileIds, zone.placedTileId],
+          bankTileIds: [...state.bankTileIds, ejectedTileId],
         };
       }
 
@@ -219,7 +301,51 @@ export function answerGameReducer(
     }
 
     case 'SET_DRAG_ACTIVE': {
-      return { ...state, dragActiveTileId: action.tileId };
+      return {
+        ...state,
+        dragActiveTileId: action.tileId,
+        dragHoverZoneIndex:
+          action.tileId === null ? null : state.dragHoverZoneIndex,
+        dragHoverBankTileId:
+          action.tileId === null ? null : state.dragHoverBankTileId,
+      };
+    }
+
+    case 'SET_DRAG_HOVER': {
+      return { ...state, dragHoverZoneIndex: action.zoneIndex };
+    }
+
+    case 'SET_DRAG_HOVER_BANK': {
+      return { ...state, dragHoverBankTileId: action.tileId };
+    }
+
+    case 'SWAP_SLOT_BANK': {
+      const zone = state.zones[action.zoneIndex];
+      if (!zone?.placedTileId) return state;
+      if (!state.bankTileIds.includes(action.bankTileId)) return state;
+
+      const slotTileId = zone.placedTileId;
+      const newBankTileIds = [
+        ...state.bankTileIds.filter((id) => id !== action.bankTileId),
+        slotTileId,
+      ];
+      const newZones = state.zones.map((z, i) =>
+        i === action.zoneIndex
+          ? {
+              ...z,
+              placedTileId: action.bankTileId,
+              isWrong: false,
+              isLocked: false,
+            }
+          : z,
+      );
+      return {
+        ...state,
+        bankTileIds: newBankTileIds,
+        zones: newZones,
+        dragActiveTileId: null,
+        dragHoverBankTileId: null,
+      };
     }
 
     default: {

@@ -1,6 +1,11 @@
 import type { AnswerGameConfig } from '@/components/answer-game/types';
 import type { ConfigField } from '@/lib/config-fields';
 
+export interface GapDefinition {
+  word: string;
+  distractors?: string[];
+}
+
 export interface WordSpellRound {
   word: string;
   /**
@@ -15,6 +20,8 @@ export interface WordSpellRound {
   sceneImage?: string;
   /** Optional custom audio override instead of TTS */
   audioOverride?: string;
+  /** Gap definitions for sentence-gap mode. Each entry maps to a {N} placeholder. */
+  gaps?: GapDefinition[];
 }
 
 export interface WordSpellConfig extends AnswerGameConfig {
