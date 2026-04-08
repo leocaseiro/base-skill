@@ -95,7 +95,12 @@ export const ConfigFormFields = ({
           | Record<string, unknown>
           | undefined;
         const currentValue = nested?.[field.subKey];
-        const isAll = currentValue === 'all';
+        const selectOptions = field.options ?? [
+          { value: 'all', label: 'all' },
+        ];
+        const isStringOption =
+          typeof currentValue === 'string' &&
+          selectOptions.some((o) => o.value === currentValue);
         return (
           <div
             key={`${field.key}.${field.subKey}`}
@@ -105,10 +110,10 @@ export const ConfigFormFields = ({
             <div className="flex gap-2">
               <select
                 aria-label={`${field.label} type`}
-                value={isAll ? 'all' : 'number'}
+                value={isStringOption ? String(currentValue) : 'number'}
                 onChange={(e) => {
-                  const next =
-                    e.target.value === 'all' ? 'all' : field.min;
+                  const val = e.target.value;
+                  const next = val === 'number' ? field.min : val;
                   onChange({
                     ...config,
                     [field.key]: { ...nested, [field.subKey]: next },
@@ -116,14 +121,22 @@ export const ConfigFormFields = ({
                 }}
                 className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
               >
+                {selectOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
                 <option value="number">number</option>
-                <option value="all">all</option>
               </select>
-              {!isAll && (
+              {!isStringOption && (
                 <input
                   type="number"
                   aria-label={`${field.label} value`}
-                  value={Number(currentValue ?? field.min)}
+                  value={
+                    typeof currentValue === 'number'
+                      ? currentValue
+                      : field.min
+                  }
                   min={field.min}
                   max={field.max}
                   onChange={(e) =>
