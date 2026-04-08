@@ -197,7 +197,7 @@ export const NumeralTileBank = ({
             key={tile.id}
             data-tile-bank-hole={tile.id}
             className={[
-              'rounded-2xl bg-muted/60 shadow-inner transition-all',
+              'relative rounded-2xl bg-muted/60 shadow-inner transition-all',
               holeSizeClass,
               isHoverTarget
                 ? 'border-2 border-dashed border-primary'
@@ -206,7 +206,13 @@ export const NumeralTileBank = ({
               .filter(Boolean)
               .join(' ')}
             aria-hidden="true"
-          />
+          >
+            {isHoverTarget && (
+              <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+                {tile.label}
+              </span>
+            )}
+          </div>
         );
       })}
     </div>

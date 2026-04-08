@@ -103,9 +103,15 @@ export const LetterTileBank = () => {
           <div
             key={tile.id}
             data-tile-bank-hole={tile.id}
-            className={`size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+            className={`relative size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
             aria-hidden="true"
-          />
+          >
+            {isHoverTarget && (
+              <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+                {tile.label}
+              </span>
+            )}
+          </div>
         );
       })}
     </div>
