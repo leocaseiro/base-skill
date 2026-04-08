@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useEffect } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   DiceFace,
@@ -42,6 +43,17 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
     i18n: { language: 'en' },
+  }),
+}));
+
+const bankDropState = vi.hoisted(() => ({ isDragOver: false }));
+
+vi.mock('@/components/answer-game/useBankDropTarget', () => ({
+  useBankDropTarget: () => ({
+    bankRef: { current: null },
+    get isDragOver() {
+      return bankDropState.isDragOver;
+    },
   }),
 }));
 
@@ -123,6 +135,28 @@ describe('DominoTile', () => {
 describe('NumeralTileBank', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    bankDropState.isDragOver = false;
+  });
+
+  it('shows dashed hole preview when dragging a placed tile over the bank', () => {
+    bankDropState.isDragOver = true;
+    const Preview = () => {
+      const dispatch = useAnswerGameDispatch();
+      useEffect(() => {
+        dispatch({ type: 'INIT_ROUND', tiles, zones });
+        dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't1' });
+      }, [dispatch]);
+      return <NumeralTileBank tileStyle="dots" />;
+    };
+    const { container } = render(
+      <AnswerGameProvider config={config}>
+        <Preview />
+      </AnswerGameProvider>,
+    );
+    const hole = container.querySelector('[data-tile-bank-hole="t1"]');
+    expect(hole?.className).toMatch(/border-dashed/);
+    expect(hole?.textContent).toContain('3');
   });
 
   it('renders tiles for all bank tile IDs', () => {

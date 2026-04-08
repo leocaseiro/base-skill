@@ -40,7 +40,7 @@ export const LetterTileBank = () => {
     dragActiveTileId,
     dragHoverBankTileId,
   } = useAnswerGameContext();
-  const { bankRef } = useBankDropTarget();
+  const { bankRef, isDragOver } = useBankDropTarget();
 
   if (config.inputMethod === 'type') {
     const isTouch = navigator.maxTouchPoints > 0;
@@ -62,17 +62,25 @@ export const LetterTileBank = () => {
       {allTiles.map((tile) => {
         const inBank = bankTileIds.includes(tile.id);
         const isDragging = tile.id === dragActiveTileId;
-        const isHoverTarget = tile.id === dragHoverBankTileId;
+        // Occupied bank tile being hovered by a slot tile (HTML5 + touch), OR
+        // slot tile being dragged back over its own bank hole (HTML5 only —
+        // the hole div is not a registered drop target, so we use isDragOver).
+        const isHoverTarget =
+          tile.id === dragHoverBankTileId ||
+          (!dragHoverBankTileId &&
+            isDragOver &&
+            !inBank &&
+            tile.id === dragActiveTileId);
 
         if (inBank) {
           return (
             <div
               key={tile.id}
-              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' ring-2 ring-primary ring-offset-2' : ''}`}
+              className="relative size-14 rounded-xl transition-all"
             >
               <div
                 data-tile-bank-hole={tile.id}
-                className={`size-14 rounded-xl bg-muted/60 shadow-inner${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+                className="size-14 rounded-xl bg-muted/60 shadow-inner"
                 aria-hidden="true"
               />
               <div
@@ -81,6 +89,12 @@ export const LetterTileBank = () => {
               >
                 <LetterTile tile={tile} />
               </div>
+              {isHoverTarget && (
+                <div
+                  className="pointer-events-none absolute inset-0 rounded-xl border-2 border-dashed border-primary"
+                  aria-hidden="true"
+                />
+              )}
             </div>
           );
         }
@@ -89,9 +103,15 @@ export const LetterTileBank = () => {
           <div
             key={tile.id}
             data-tile-bank-hole={tile.id}
-            className={`size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+            className={`relative size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
             aria-hidden="true"
-          />
+          >
+            {isHoverTarget && (
+              <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+                {tile.label}
+              </span>
+            )}
+          </div>
         );
       })}
     </div>

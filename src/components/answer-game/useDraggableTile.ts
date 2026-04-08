@@ -53,6 +53,8 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
       getData: () => ({ bankTileId: tile.id, isBankTarget: true }),
       onDragEnter: () =>
         dispatch({ type: 'SET_DRAG_HOVER_BANK', tileId: tile.id }),
+      onDragLeave: () =>
+        dispatch({ type: 'SET_DRAG_HOVER_BANK', tileId: null }),
     });
     return () => {
       cleanupDraggable();
@@ -75,6 +77,8 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
         placeTile(droppedTileId, zoneIndex);
       },
+      onHoverZone: (zoneIndex) =>
+        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex }),
     });
 
   const handleClick = () => {

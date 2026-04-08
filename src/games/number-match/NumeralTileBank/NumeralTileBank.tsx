@@ -135,7 +135,7 @@ export const NumeralTileBank = ({
     dragActiveTileId,
     dragHoverBankTileId,
   } = useAnswerGameContext();
-  const { bankRef } = useBankDropTarget();
+  const { bankRef, isDragOver } = useBankDropTarget();
   return (
     <div
       ref={bankRef}
@@ -145,24 +145,23 @@ export const NumeralTileBank = ({
       {allTiles.map((tile) => {
         const inBank = bankTileIds.includes(tile.id);
         const isDragging = tile.id === dragActiveTileId;
-        const isHoverTarget = tile.id === dragHoverBankTileId;
+        const isHoverTarget =
+          tile.id === dragHoverBankTileId ||
+          (!dragHoverBankTileId &&
+            isDragOver &&
+            !inBank &&
+            tile.id === dragActiveTileId);
         const numericValue = Number.parseInt(tile.value, 10);
         const isDomino = getIsDomino(tileStyle, numericValue);
         const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
-        const hoverClass = isHoverTarget
-          ? ' border-2 border-dashed border-primary'
-          : '';
 
         if (inBank) {
           return (
             <div
               key={tile.id}
               className={[
-                'relative transition-all',
+                'relative rounded-2xl transition-all',
                 holeSizeClass,
-                isHoverTarget
-                  ? 'rounded-2xl ring-2 ring-primary ring-offset-2'
-                  : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
@@ -172,7 +171,6 @@ export const NumeralTileBank = ({
                 className={[
                   'rounded-2xl bg-muted/60 shadow-inner',
                   holeSizeClass,
-                  hoverClass,
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -184,6 +182,12 @@ export const NumeralTileBank = ({
               >
                 <NumeralTile tile={tile} tileStyle={tileStyle} />
               </div>
+              {isHoverTarget && (
+                <div
+                  className="pointer-events-none absolute inset-0 rounded-2xl border-2 border-dashed border-primary"
+                  aria-hidden="true"
+                />
+              )}
             </div>
           );
         }
@@ -193,14 +197,22 @@ export const NumeralTileBank = ({
             key={tile.id}
             data-tile-bank-hole={tile.id}
             className={[
-              'rounded-2xl bg-muted/60 shadow-inner transition-all',
+              'relative rounded-2xl bg-muted/60 shadow-inner transition-all',
               holeSizeClass,
-              hoverClass,
+              isHoverTarget
+                ? 'border-2 border-dashed border-primary'
+                : '',
             ]
               .filter(Boolean)
               .join(' ')}
             aria-hidden="true"
-          />
+          >
+            {isHoverTarget && (
+              <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+                {tile.label}
+              </span>
+            )}
+          </div>
         );
       })}
     </div>
