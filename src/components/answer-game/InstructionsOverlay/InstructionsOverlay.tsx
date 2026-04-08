@@ -33,7 +33,11 @@ type InstructionsOverlayProps = {
     name: string,
     config: Record<string, unknown>,
   ) => Promise<void>;
-  configFields: ConfigField[];
+  configFields?: ConfigField[];
+  renderConfigForm?: (props: {
+    config: Record<string, unknown>;
+    onChange: (config: Record<string, unknown>) => void;
+  }) => JSX.Element;
 };
 
 export const InstructionsOverlay = ({
@@ -49,6 +53,7 @@ export const InstructionsOverlay = ({
   onSaveBookmark,
   onUpdateBookmark,
   configFields,
+  renderConfigForm,
 }: InstructionsOverlayProps): JSX.Element => {
   const { t } = useTranslation('games');
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -148,11 +153,18 @@ export const InstructionsOverlay = ({
           {/* Expanded: form + save actions */}
           {settingsOpen && (
             <div className="flex flex-col gap-3 bg-muted/30 p-3">
-              <ConfigFormFields
-                fields={configFields}
-                config={config}
-                onChange={onConfigChange}
-              />
+              {renderConfigForm
+                ? renderConfigForm({
+                    config,
+                    onChange: onConfigChange,
+                  })
+                : configFields && (
+                    <ConfigFormFields
+                      fields={configFields}
+                      config={config}
+                      onChange={onConfigChange}
+                    />
+                  )}
 
               <div className="border-t border-border pt-3 flex flex-col gap-2">
                 {bookmarkName && onUpdateBookmark ? (
