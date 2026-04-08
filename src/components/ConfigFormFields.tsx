@@ -1,6 +1,20 @@
 // src/components/ConfigFormFields.tsx
-import type { ConfigField } from '@/lib/config-fields';
+import type { ConfigField, VisibleWhen } from '@/lib/config-fields';
 import type { JSX } from 'react';
+
+const isFieldVisible = (
+  field: ConfigField,
+  config: Record<string, unknown>,
+): boolean => {
+  const vw: VisibleWhen | undefined =
+    'visibleWhen' in field ? field.visibleWhen : undefined;
+  if (!vw) return true;
+  const { key, subKey, value } = vw;
+  const configValue = subKey
+    ? (config[key] as Record<string, unknown> | undefined)?.[subKey]
+    : config[key];
+  return configValue === value;
+};
 
 type ConfigFormFieldsProps = {
   fields: ConfigField[];
@@ -15,6 +29,8 @@ export const ConfigFormFields = ({
 }: ConfigFormFieldsProps): JSX.Element => (
   <div className="flex flex-col gap-3">
     {fields.map((field) => {
+      if (!isFieldVisible(field, config)) return null;
+
       if (field.type === 'select') {
         return (
           <label
@@ -37,6 +53,93 @@ export const ConfigFormFields = ({
               ))}
             </select>
           </label>
+        );
+      }
+
+      if (field.type === 'nested-select') {
+        const nested = config[field.key] as
+          | Record<string, unknown>
+          | undefined;
+        return (
+          <label
+            key={`${field.key}.${field.subKey}`}
+            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+          >
+            {field.label}
+            <select
+              aria-label={field.label}
+              value={String(nested?.[field.subKey] ?? '')}
+              onChange={(e) =>
+                onChange({
+                  ...config,
+                  [field.key]: {
+                    ...nested,
+                    [field.subKey]: e.target.value,
+                  },
+                })
+              }
+              className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+            >
+              {field.options.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        );
+      }
+
+      if (field.type === 'nested-select-or-number') {
+        const nested = config[field.key] as
+          | Record<string, unknown>
+          | undefined;
+        const currentValue = nested?.[field.subKey];
+        const isAll = currentValue === 'all';
+        return (
+          <div
+            key={`${field.key}.${field.subKey}`}
+            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+          >
+            <span>{field.label}</span>
+            <div className="flex gap-2">
+              <select
+                aria-label={`${field.label} type`}
+                value={isAll ? 'all' : 'number'}
+                onChange={(e) => {
+                  const next =
+                    e.target.value === 'all' ? 'all' : field.min;
+                  onChange({
+                    ...config,
+                    [field.key]: { ...nested, [field.subKey]: next },
+                  });
+                }}
+                className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+              >
+                <option value="number">number</option>
+                <option value="all">all</option>
+              </select>
+              {!isAll && (
+                <input
+                  type="number"
+                  aria-label={`${field.label} value`}
+                  value={Number(currentValue ?? field.min)}
+                  min={field.min}
+                  max={field.max}
+                  onChange={(e) =>
+                    onChange({
+                      ...config,
+                      [field.key]: {
+                        ...nested,
+                        [field.subKey]: Number(e.target.value),
+                      },
+                    })
+                  }
+                  className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+                />
+              )}
+            </div>
+          </div>
         );
       }
 
