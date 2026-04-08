@@ -1,187 +1,198 @@
-# SortNumbers Skip & Distractor Config Design
+# SortNumbers Skip & Distractor Config Design (v2)
 
 ## Overview
 
-Extend the SortNumbers game configuration to support structured skip modes (count by Ns,
-random, or consecutive) and configurable distractor sources (random, gaps-only, or
-full-range). This replaces the boolean `allowSkips` field with two discriminated unions
-that make invalid combinations impossible at the type level.
+Extend the SortNumbers game with a **simple/advanced config** system. Simple mode lets
+teachers configure a skip-by sequence in 5 fields. Advanced mode provides full control.
+Also fixes a stale-rounds bug where changing skip mode didn't regenerate rounds.
 
-## Types
+## Config Modes
 
-### SkipConfig (replaces `allowSkips: boolean`)
+### Simple Mode (new, default)
+
+Teacher-friendly config with 5 fields. The system derives the full runtime config.
 
 ```ts
-type SkipConfig =
-  | { mode: 'random' }
-  | { mode: 'consecutive' }
-  | { mode: 'by'; step: number; start: 'range-min' | 'random' };
+type SortNumbersSimpleConfig = {
+  configMode: 'simple';
+  direction: 'ascending' | 'descending';
+  start: number; // first number in sequence
+  step: number; // skip-by value (2 = count by 2s)
+  quantity: number; // how many numbers to sort
+  distractors: boolean; // fill gaps between sequence values
+};
 ```
 
-- `random` — picks `quantity` numbers randomly from the range (current `allowSkips: true`
-  behavior)
-- `consecutive` — picks a consecutive run of `quantity` numbers from a random start within
-  the range (current `allowSkips: false` behavior)
-- `by` — steps through the range by `step`, starting at `range.min` or a random valid
-  position. A valid start is any value where `start + (quantity - 1) * step <= range.max`.
+**Defaults**: direction='ascending', start=2, step=2, quantity=5, distractors=false
 
-### DistractorConfig (new; only used when `tileBankMode === 'distractors'`)
+**Example**: start=2, step=2, quantity=5, distractors=true
 
-```ts
-type DistractorConfig =
-  | { source: 'random'; count: number }
-  | { source: 'gaps-only'; count: number | 'all' }
-  | { source: 'full-range'; count: number | 'all' };
-```
+- Sequence: 2, 4, 6, 8, 10
+- Distractor pool (gaps): 3, 5, 7, 9
+- Tile bank: 2, 3, 4, 5, 6, 7, 8, 9, 10 (shuffled)
+- Direction controls zone ordering (ascending: 2,4,6,8,10 / descending: 10,8,6,4,2)
 
-- `random` — picks extra tiles randomly from the range, excluding the correct sequence
-  (current distractor behavior)
-- `gaps-only` — pool is the numbers skipped over between sequence values (e.g. sequence
-  2,4,6 → gap pool is 1,3,5,7)
-- `full-range` — pool is all numbers in range not in the sequence
-- `count: number` — pick that many from the pool randomly
-- `count: 'all'` — include the entire pool as distractor tiles
+### Advanced Mode (existing, extended)
 
-### Updated `SortNumbersConfig`
+Full control over all config fields. Extends the existing config with a fixed-start option
+for skip mode.
 
 ```ts
-interface SortNumbersConfig extends AnswerGameConfig {
-  component: 'SortNumbers';
+type SortNumbersAdvancedConfig = {
+  configMode: 'advanced';
   direction: 'ascending' | 'descending';
   range: { min: number; max: number };
   quantity: number;
   skip: SkipConfig;
   distractors: DistractorConfig;
-  rounds: SortNumbersRound[];
-}
+  // ...plus all existing AnswerGameConfig fields
+};
 ```
 
-`allowSkips: boolean` is removed. `tileBankMode` and `distractorCount` on
-`SortNumbersConfig` are replaced by the `distractors` union (though `tileBankMode` on the
-base `AnswerGameConfig` remains for `'exact'` mode — when `tileBankMode === 'exact'`, the
-`distractors` field is ignored).
-
-## Round Generation (`build-sort-round.ts`)
-
-### Updated `GenerateOptions`
+### SkipConfig (updated)
 
 ```ts
-interface GenerateOptions {
-  range: { min: number; max: number };
-  quantity: number;
-  skip: SkipConfig;
-  totalRounds: number;
-}
+type SkipConfig =
+  | { mode: 'random' }
+  | { mode: 'consecutive' }
+  | {
+      mode: 'by';
+      step: number;
+      start: 'range-min' | 'random' | number;
+    };
 ```
 
-### `generateSortRounds` branching
+Added `start: number` — a fixed starting value for the sequence.
 
-- `mode: 'consecutive'` — existing logic (random start, `quantity` consecutive numbers)
-- `mode: 'random'` — existing `allowSkips` logic (random pick from pool, no repeats)
-- `mode: 'by'` — enumerate all valid starting points where
-  `start + (quantity - 1) * step <= range.max`, then pick one randomly (if
-  `start === 'random'`) or use `range.min` (if `start === 'range-min'`). Build sequence as
-  `[start, start + step, start + 2*step, ...]`.
-
-### Distractor tile building
-
-A new helper `buildDistractorPool(sequence, range, config: DistractorConfig): number[]`
-computes the pool of candidate distractor numbers, then applies `count`:
-
-- `source: 'random'` — pool = all range numbers not in sequence; pick `count` randomly
-- `source: 'gaps-only'` — pool = numbers between consecutive sequence values (exclusive);
-  if `count === 'all'` include all, else pick `count` randomly
-- `source: 'full-range'` — pool = all range numbers not in sequence; if `count === 'all'`
-  include all, else pick `count` randomly
-
-`buildSortRound` is extended to accept an optional `DistractorConfig` and append distractor
-tiles to the shuffled tile bank when provided and `tileBankMode === 'distractors'`.
-
-## Config Fields (`types.ts`)
-
-### New `ConfigField` types (in `config-fields.ts`)
+### DistractorConfig (unchanged)
 
 ```ts
-| {
-    type: 'nested-select';
-    key: string;
-    subKey: string;
-    label: string;
-    options: { value: string; label: string }[];
-  }
-| {
-    type: 'nested-select-or-number';
-    key: string;
-    subKey: string;
-    label: string;
-    min: number;
-    max: number;
-  }
+type DistractorConfig =
+  | { source: 'random'; count: number | 'all' }
+  | { source: 'gaps-only'; count: number | 'all' }
+  | { source: 'full-range'; count: number | 'all' };
 ```
 
-All existing and new field types gain an optional:
+## Simple Mode Resolver
 
-```ts
-visibleWhen?: { key: string; subKey?: string; value: unknown };
-```
+A pure function `resolveSimpleConfig` derives the full `SortNumbersConfig`:
 
-`ConfigFormFields` skips rendering a field when its `visibleWhen` condition is not met by
-the current config value.
+| Simple field                | Derived runtime config                                               |
+| --------------------------- | -------------------------------------------------------------------- |
+| `start`, `step`, `quantity` | sequence: `[start, start+step, ..., start+(qty-1)*step]`             |
+| `start`, `step`, `quantity` | range: `{ min: start, max: start + (qty-1) * step }`                 |
+| `start`, `step`             | skip: `{ mode: 'by', step, start: startValue }`                      |
+| `distractors: true`         | tileBankMode: 'distractors', `{ source: 'gaps-only', count: 'all' }` |
+| `distractors: false`        | tileBankMode: 'exact'                                                |
+| `direction`                 | passed through to zones ordering                                     |
 
-### `sortNumbersConfigFields` additions
+Remaining `AnswerGameConfig` fields use sensible defaults:
 
-```ts
-// Skip mode
-{ type: 'nested-select', key: 'skip', subKey: 'mode', label: 'Skip mode',
-  options: ['random', 'consecutive', 'by'] }
+- inputMethod: 'drag'
+- wrongTileBehavior: 'lock-manual'
+- ttsEnabled: true
+- roundsInOrder: false
+- totalRounds: 1
 
-// Shown only when skip.mode === 'by'
-{ type: 'nested-number', key: 'skip', subKey: 'step', label: 'Skip step',
-  min: 2, max: 100,
-  visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' } }
+Rounds are always generated fresh from the 5 fields -- no stale check needed.
 
-{ type: 'nested-select', key: 'skip', subKey: 'start', label: 'Skip start',
-  options: ['range-min', 'random'],
-  visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' } }
+## Config Form UX
 
-// Distractor source (shown when tileBankMode === 'distractors')
-{ type: 'nested-select', key: 'distractors', subKey: 'source',
-  label: 'Distractor source',
-  options: ['random', 'gaps-only', 'full-range'],
-  visibleWhen: { key: 'tileBankMode', value: 'distractors' } }
+### Simple Mode Form (5 fields)
 
-// Distractor count
-{ type: 'nested-select-or-number', key: 'distractors', subKey: 'count',
-  label: 'Distractor count', min: 1, max: 20,
-  visibleWhen: { key: 'tileBankMode', value: 'distractors' } }
-```
+| Field       | Type                           | Default   | Constraints      |
+| ----------- | ------------------------------ | --------- | ---------------- |
+| Direction   | select: ascending / descending | ascending |                  |
+| Start       | number input                   | 2         | min: 1           |
+| Skip by     | number input                   | 2         | min: 2, max: 100 |
+| Quantity    | number input                   | 5         | min: 2, max: 8   |
+| Distractors | checkbox                       | off       |                  |
 
-The existing `allowSkips` checkbox entry is removed.
+A live preview shows the sequence (e.g., "Sequence: 2, 4, 6, 8, 10").
 
-## ConfigFormFields renderer (`ConfigFormFields.tsx`)
+### Mode Toggle
 
-- Add `nested-select` rendering branch: reads `(config[key] as obj)[subKey]`, writes back
-  a spread of the nested object
-- Add `nested-select-or-number` rendering branch: a select with an `'all'` option plus a
-  number input shown when the current value is numeric
-- Apply `visibleWhen` check before rendering any field: if the field has `visibleWhen` and
-  `config[key][subKey?] !== value`, skip it
+A toggle at the top switches between Simple and Advanced.
 
-## Error Handling & Edge Cases
+- **Simple to Advanced**: Resolver expands simple config into full advanced config so the
+  teacher can tweak individual fields.
+- **Advanced to Simple**: If the current advanced config can be expressed as simple
+  (mode 'by', gaps-only or exact distractors), convert it. Otherwise reset to simple
+  defaults.
 
-- If `mode: 'by'` and no valid start exists (e.g. `step * (quantity - 1) > range.max -
-range.min`), fall back to `mode: 'consecutive'` for that round and log a warning.
-- If distractor pool is smaller than requested `count`, include the full pool without
-  error.
-- Existing stored configs using `allowSkips: true/false` must be migrated: `true` →
-  `{ mode: 'random' }`, `false` → `{ mode: 'consecutive' }`. A migration utility or
-  default fallback in the config loader handles this.
+### Advanced Mode Form
+
+The existing form, unchanged, plus a new option for `skip.start` when `skip.mode === 'by'`:
+
+- 'range-min' (existing)
+- 'random' (existing)
+- Fixed number input (new)
+
+## Bug Fixes (Advanced Mode)
+
+### Fix 1: Stale check validates skip pattern
+
+Current `roundsStale` in `resolveSortNumbersConfig` only checks quantity + range. Add
+skip-pattern validation:
+
+- **mode 'by'**: sorted sequence diffs must all equal `step`
+- **mode 'consecutive'**: sorted sequence diffs must all equal 1
+- **mode 'random'**: no pattern check (quantity + range sufficient)
+
+### Fix 2: `generateSortRounds` supports `start: number`
+
+When `skip.start` is a number, the sequence starts at that exact value:
+`[start, start+step, ..., start+(quantity-1)*step]`.
+
+Validate that the sequence fits within range. Fall back to consecutive if not.
+
+### Fix 3: Normalization defaults
+
+When config form sends `skip: { mode: 'by' }` without `start`, default to
+`start: 'range-min'` (existing behavior, unchanged).
+
+## Error Handling
+
+- If `mode: 'by'` and no valid start exists (`step * (quantity - 1) > range.max - range.min`),
+  fall back to `mode: 'consecutive'` and log a warning.
+- If distractor pool is smaller than requested `count`, include the full pool.
+- Existing stored configs using `allowSkips: boolean` are migrated:
+  `true` -> `{ mode: 'random' }`, `false` -> `{ mode: 'consecutive' }`.
+- Existing stored configs without `configMode` are treated as advanced mode.
 
 ## Testing
 
-- Unit tests for `generateSortRounds` covering all three skip modes, including edge cases
-  (step too large, start fixed vs random)
-- Unit tests for `buildDistractorPool` covering all three sources and both count variants
-- Updated Storybook stories for `SortNumbers` with `mode: 'by'` + each distractor source
-- `ConfigFormFields` unit tests for `nested-select`, `nested-select-or-number`, and
-  `visibleWhen` conditional rendering
+### Unit tests: `resolveSimpleConfig`
+
+| #   | Scenario                                  | Expected                                      |
+| --- | ----------------------------------------- | --------------------------------------------- |
+| 1   | start=2, step=2, qty=5, distractors=false | sequence [2,4,6,8,10], 5 tiles, exact mode    |
+| 2   | start=2, step=2, qty=5, distractors=true  | sequence [2,4,6,8,10], tiles [2..10], 9 total |
+| 3   | start=5, step=3, qty=4, distractors=false | sequence [5,8,11,14], 4 tiles                 |
+| 4   | direction='descending'                    | zones ordered high to low                     |
+| 5   | start=1, step=1, qty=5 (consecutive edge) | sequence [1,2,3,4,5], no gaps                 |
+
+### Unit tests: stale check fix (advanced mode)
+
+| #   | Scenario                                        | Expected           |
+| --- | ----------------------------------------------- | ------------------ |
+| 6   | Consecutive rounds, skip changed to 'by' step=2 | Stale, regenerated |
+| 7   | Step-2 rounds, skip changed to step=3           | Stale, regenerated |
+| 8   | Rounds match current skip pattern               | Not stale, kept    |
+
+### Unit tests: `generateSortRounds` with `start: number`
+
+| #   | Scenario                             | Expected                            |
+| --- | ------------------------------------ | ----------------------------------- |
+| 9   | start=2, step=2, qty=5, range {1,10} | [2,4,6,8,10]                        |
+| 10  | start=3, step=2, qty=5, range {1,10} | Exceeds range, fallback consecutive |
+| 11  | start outside range                  | Fallback consecutive                |
+
+### Storybook stories
+
+| #   | Story                  | Shows                     |
+| --- | ---------------------- | ------------------------- |
+| 12  | SimpleNoDistractors    | 5 tiles, skip by 2        |
+| 13  | SimpleWithDistractors  | 9 tiles (sequence + gaps) |
+| 14  | SimpleDescending       | zones in descending order |
+| 15  | AdvancedWithFixedStart | advanced mode, start=3    |
