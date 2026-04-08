@@ -39,7 +39,7 @@ export const SortNumbersTileBank = () => {
     dragActiveTileId,
     dragHoverBankTileId,
   } = useAnswerGameContext();
-  const { bankRef } = useBankDropTarget();
+  const { bankRef, isDragOver } = useBankDropTarget();
 
   return (
     <div
@@ -50,7 +50,12 @@ export const SortNumbersTileBank = () => {
       {allTiles.map((tile) => {
         const inBank = bankTileIds.includes(tile.id);
         const isDragging = tile.id === dragActiveTileId;
-        const isHoverTarget = tile.id === dragHoverBankTileId;
+        const isHoverTarget =
+          tile.id === dragHoverBankTileId ||
+          (!dragHoverBankTileId &&
+            isDragOver &&
+            !inBank &&
+            tile.id === dragActiveTileId);
 
         if (inBank) {
           return (

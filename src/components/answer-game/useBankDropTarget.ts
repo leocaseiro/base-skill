@@ -1,5 +1,5 @@
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 
 /**
@@ -10,11 +10,18 @@ import type { RefObject } from 'react';
  * tile is dragged over it. The actual REMOVE_TILE dispatch is handled by
  * useSlotTileDrag's onDrop — the bank target intentionally carries no
  * zoneIndex so that path treats it as "return to bank".
+ *
+ * isDragOver is true while any drag is over the bank container. Bank
+ * components use this to show a dashed-border preview on the dragged
+ * tile's own hole when that tile came from a slot (its hole is not a
+ * registered drop target, so onDragEnter on the individual hole never fires).
  */
 export const useBankDropTarget = (): {
   bankRef: RefObject<HTMLDivElement | null>;
+  isDragOver: boolean;
 } => {
   const bankRef = useRef<HTMLDivElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   useEffect(() => {
     const el = bankRef.current;
@@ -22,8 +29,11 @@ export const useBankDropTarget = (): {
     return dropTargetForElements({
       element: el,
       getData: () => ({ isBankTarget: true }),
+      onDragEnter: () => setIsDragOver(true),
+      onDragLeave: () => setIsDragOver(false),
+      onDrop: () => setIsDragOver(false),
     });
   }, []);
 
-  return { bankRef };
+  return { bankRef, isDragOver };
 };

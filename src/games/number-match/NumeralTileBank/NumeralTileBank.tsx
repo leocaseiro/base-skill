@@ -135,7 +135,7 @@ export const NumeralTileBank = ({
     dragActiveTileId,
     dragHoverBankTileId,
   } = useAnswerGameContext();
-  const { bankRef } = useBankDropTarget();
+  const { bankRef, isDragOver } = useBankDropTarget();
   return (
     <div
       ref={bankRef}
@@ -145,7 +145,12 @@ export const NumeralTileBank = ({
       {allTiles.map((tile) => {
         const inBank = bankTileIds.includes(tile.id);
         const isDragging = tile.id === dragActiveTileId;
-        const isHoverTarget = tile.id === dragHoverBankTileId;
+        const isHoverTarget =
+          tile.id === dragHoverBankTileId ||
+          (!dragHoverBankTileId &&
+            isDragOver &&
+            !inBank &&
+            tile.id === dragActiveTileId);
         const numericValue = Number.parseInt(tile.value, 10);
         const isDomino = getIsDomino(tileStyle, numericValue);
         const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';

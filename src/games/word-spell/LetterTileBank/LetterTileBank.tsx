@@ -40,7 +40,7 @@ export const LetterTileBank = () => {
     dragActiveTileId,
     dragHoverBankTileId,
   } = useAnswerGameContext();
-  const { bankRef } = useBankDropTarget();
+  const { bankRef, isDragOver } = useBankDropTarget();
 
   if (config.inputMethod === 'type') {
     const isTouch = navigator.maxTouchPoints > 0;
@@ -62,7 +62,15 @@ export const LetterTileBank = () => {
       {allTiles.map((tile) => {
         const inBank = bankTileIds.includes(tile.id);
         const isDragging = tile.id === dragActiveTileId;
-        const isHoverTarget = tile.id === dragHoverBankTileId;
+        // Occupied bank tile being hovered by a slot tile (HTML5 + touch), OR
+        // slot tile being dragged back over its own bank hole (HTML5 only —
+        // the hole div is not a registered drop target, so we use isDragOver).
+        const isHoverTarget =
+          tile.id === dragHoverBankTileId ||
+          (!dragHoverBankTileId &&
+            isDragOver &&
+            !inBank &&
+            tile.id === dragActiveTileId);
 
         if (inBank) {
           return (
