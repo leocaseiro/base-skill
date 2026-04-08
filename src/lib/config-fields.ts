@@ -51,6 +51,7 @@ export type ConfigField =
       label: string;
       min: number;
       max: number;
+      options?: { value: string; label: string }[];
       visibleWhen?: VisibleWhen;
     }
   | {
