@@ -56,11 +56,11 @@ export const SortNumbersTileBank = () => {
           return (
             <div
               key={tile.id}
-              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' ring-2 ring-primary ring-offset-2' : ''}`}
+              className="relative size-14 rounded-xl transition-all"
             >
               <div
                 data-tile-bank-hole={tile.id}
-                className={`size-14 rounded-xl bg-muted/60 shadow-inner${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+                className="size-14 rounded-xl bg-muted/60 shadow-inner"
                 aria-hidden="true"
               />
               <div
@@ -69,6 +69,12 @@ export const SortNumbersTileBank = () => {
               >
                 <NumberTile tile={tile} />
               </div>
+              {isHoverTarget && (
+                <div
+                  className="pointer-events-none absolute inset-0 rounded-xl border-2 border-dashed border-primary"
+                  aria-hidden="true"
+                />
+              )}
             </div>
           );
         }
