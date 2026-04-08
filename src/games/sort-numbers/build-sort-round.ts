@@ -32,7 +32,11 @@ export function buildDistractorPool(
       }
     }
   } else {
-    // 'random' and 'full-range' both use all range numbers not in sequence
+    // Both 'random' and 'full-range' draw from the full non-sequence pool.
+    // The difference is in their count contract: 'random' typically uses a
+    // fixed numeric count; 'full-range' is intended for taking many/all
+    // numbers from the range. At runtime the pool is identical — the
+    // distinction is semantic (user intent) and reflected in the UI label.
     pool = Array.from(
       { length: range.max - range.min + 1 },
       (_, i) => range.min + i,
