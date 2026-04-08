@@ -31,8 +31,10 @@ import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
 import { numberMatchConfigFields } from '@/games/number-match/types';
 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
+import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
+import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
-import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
+import { SortNumbersConfigForm } from '@/games/sort-numbers/SortNumbersConfigForm/SortNumbersConfigForm';
 import { wordSpellConfigFields } from '@/games/word-spell/types';
 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
 import { loadGameConfig } from '@/lib/game-engine/config-loader';
@@ -138,26 +140,15 @@ const resizeNumberMatchRounds = (
   return next;
 };
 
-const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
-  gameId: 'sort-numbers',
-  component: 'SortNumbers',
-  inputMethod: 'drag',
-  wrongTileBehavior: 'lock-manual',
-  tileBankMode: 'exact',
-  totalRounds: 8,
-  roundsInOrder: false,
-  ttsEnabled: true,
-  direction: 'ascending',
-  range: { min: 11, max: 99 },
-  quantity: 6,
-  allowSkips: true,
-  rounds: generateSortRounds({
-    range: { min: 11, max: 99 },
-    quantity: 6,
-    allowSkips: true,
-    totalRounds: 8,
-  }),
-});
+const makeDefaultSortNumbersConfig = (): SortNumbersConfig =>
+  resolveSimpleConfig({
+    configMode: 'simple',
+    direction: 'ascending',
+    start: 2,
+    step: 2,
+    quantity: 5,
+    distractors: false,
+  });
 
 const resolveWordSpellConfig = (
   saved: Record<string, unknown> | null,
@@ -217,23 +208,72 @@ const resolveSortNumbersConfig = (
 ): SortNumbersConfig => {
   const base = makeDefaultSortNumbersConfig();
   if (!saved || saved.component !== 'SortNumbers') return base;
+
+  // Simple mode: resolve from 5 fields
+  if (saved.configMode === 'simple') {
+    const skip = saved.skip as
+      | { step?: number; start?: number }
+      | undefined;
+    return resolveSimpleConfig({
+      configMode: 'simple',
+      direction:
+        saved.direction === 'descending' ? 'descending' : 'ascending',
+      start: typeof skip?.start === 'number' ? skip.start : 2,
+      step: typeof skip?.step === 'number' ? skip.step : 2,
+      quantity: typeof saved.quantity === 'number' ? saved.quantity : 5,
+      distractors: saved.tileBankMode === 'distractors',
+    });
+  }
+
+  // Advanced mode (existing logic)
+  // Migrate legacy allowSkips: boolean → skip: SkipConfig
+  let migratedSaved = saved;
+  if (!saved.skip && typeof saved.allowSkips === 'boolean') {
+    migratedSaved = {
+      ...saved,
+      skip: saved.allowSkips
+        ? { mode: 'random' }
+        : { mode: 'consecutive' },
+    };
+  }
+
   const merged: SortNumbersConfig = {
     ...base,
-    ...(saved as Partial<SortNumbersConfig>),
+    ...(migratedSaved as Partial<SortNumbersConfig>),
     gameId: 'sort-numbers',
     component: 'SortNumbers',
   };
+
+  // Existing saved configs without configMode are treated as advanced
+  if (saved.configMode !== 'simple') {
+    merged.configMode = 'advanced';
+  }
+
   const tr = Math.max(1, merged.totalRounds);
   merged.totalRounds = tr;
+
+  // Normalize skip: mode 'by' requires step and start.
+  if (merged.skip.mode === 'by') {
+    const partial = merged.skip as {
+      mode: 'by';
+      step?: number;
+      start?: 'range-min' | 'random' | number;
+    };
+    merged.skip = {
+      mode: 'by',
+      step: typeof partial.step === 'number' ? partial.step : 2,
+      start: partial.start ?? 'range-min',
+    };
+  }
+
   const roundsStale =
     Array.isArray(merged.rounds) &&
-    merged.rounds.some(
-      (r) =>
-        r.sequence.length !== merged.quantity ||
-        r.sequence.some(
-          (v) => v < merged.range.min || v > merged.range.max,
-        ),
-    );
+    isRoundsStale(merged.rounds, {
+      quantity: merged.quantity,
+      range: merged.range,
+      skip: merged.skip,
+    });
+
   if (
     !Array.isArray(merged.rounds) ||
     merged.rounds.length === 0 ||
@@ -243,10 +283,11 @@ const resolveSortNumbersConfig = (
     merged.rounds = generateSortRounds({
       range: merged.range,
       quantity: merged.quantity,
-      allowSkips: merged.allowSkips,
+      skip: merged.skip,
       totalRounds: tr,
     });
   }
+
   return merged;
 };
 
@@ -480,7 +521,9 @@ const SortNumbersGameBody = ({
               }
             : undefined
         }
-        configFields={sortNumbersConfigFields}
+        renderConfigForm={({ config: c, onChange: oc }) => (
+          <SortNumbersConfigForm config={c} onChange={oc} />
+        )}
       />
     );
   }
