@@ -15224,7 +15224,6 @@ _**User**_
 
 _**Agent (composer-2)**_
 
-
 Reading both `$gameId.tsx` files to compare them and implement expanded configuration on `feat/saved-game-configs`.
 
 
@@ -15269,7 +15268,6 @@ I'm implementing pre-game customization UI on the game page to handle saved conf
 I'm merging partial saved configs into defaults and ensuring rounds exist. I'm adding inputMethod, totalRounds, and roundsInOrder fields to NumberMatch and SortNumbers configs. </details></think>
 
 _**Agent (composer-2)**_
-
 
 Checking how the home screen saves configs so we merge saved data with the new panels.
 
@@ -15348,13 +15346,6 @@ I'm implementing dynamic slicing of word spell rounds based on totalRounds. I'm 
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
-_**Agent (composer-2)**_
-
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
 <details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.test.tsx</summary>
 
@@ -15383,7 +15374,6 @@ I'm implementing default value fallbacks for config fields using base values whe
 
 _**Agent (composer-2)**_
 
-
 Implementing in `feat-saved-game-configs`: porting config panels from `fix-touch-drag-active-tile`, adding the requested options, merging loader `gameSpecificConfig` with defaults, and splitting game bodies into subcomponents so hooks stay valid.
 
 
@@ -15400,13 +15390,6 @@ _**Agent (composer-2)**_
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
-
-_**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -15438,13 +15421,6 @@ I'm adjusting rounds array to match totalRounds length, but need to reconsider h
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
-_**Agent (composer-2)**_
-
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
 
 <details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx</summary>
@@ -15457,28 +15433,6 @@ _**Agent (composer-2)**_
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
-
-_**Agent (composer-2)**_
-
-<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
-
-<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx</summary>
-
-</details>
-
-</tool-use>
-
-<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
-<summary>Tool use: **edit_file_v2**</summary>
-
-</details></tool-use>
-
-_**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -15527,10 +15481,18 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
 
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx</summary>
 
+</details>
 
+</tool-use>
 
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
 
 _**Agent (composer-2)**_
 
@@ -15573,13 +15535,6 @@ Done in 1.59s.
 <summary>Tool use: **run_terminal_command_v2**</summary>
 
 </details></tool-use>
-
-_**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -16233,7 +16188,6 @@ I've integrated the saved game configs with the panel components, ensuring panel
 
 _**Agent (composer-2)**_
 
-
 Here’s what was done on **`feat/saved-game-configs`** in the worktree  
 `worktrees/feat-saved-game-configs`, using  
 `worktrees/fix-touch-drag-active-tile/src/routes/$locale/_app/game/$gameId.tsx` as the panel layout reference.
@@ -16280,7 +16234,6 @@ _**Agent (composer-2)**_
 I'm tracing the config save flow from home screen to identify why saved configs are empty. The in-game config panel only updates local React state and doesn't persist to IndexedDB unless using the 'save bookmark/config' flow, which was saving empty `{}`. I'm exploring the codebase to understand how saved_game_configs and useSettings work for persisting last session config. I'm searching for where game configs are persisted and how to implement auto-saving of last-used config. </details></think>
 
 _**Agent (composer-2)**_
-
 
 Tracing how game config flows and whether anything writes it to RxDB/IndexedDB.
 
@@ -16397,13 +16350,6 @@ I'm implementing last-played config persistence using a new RxDB collection. I'm
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
-_**Agent (composer-2)**_
-
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
@@ -16507,13 +16453,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
-_**Agent (composer-2)**_
-
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
 <details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/schemas/settings.ts</summary>
 
@@ -16538,4 +16477,2165 @@ I'm updating the filter to use the new `isLastSessionConfigDoc` helper for consi
 
 **Updating saved configs**
 
-I'm refactoring the saved configs filtering to use the new `isLastSessionConfigDoc` helper for consistency. I'm implementing `getLastSessionConfig` helper using the `lastSessionDocId` utility. I'm saving the last session config with incremental patch or insert, handling both existing and new documents. </details></think>
+I'm refactoring the saved configs filtering to use the new `isLastSessionConfigDoc` helper for consistency. I'm implementing `getLastSessionConfig` helper using the `lastSessionDocId` utility. I'm saving the last session config with incremental patch or insert, handling both existing and new documents. I'm filtering out `__last_session__` configs and updating the loader to load last session when no config ID is present. I'm extracting ANONYMOUS_PROFILE_ID constant to a single location. </details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src",
+  "pattern": "DbProvider"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src",
+  "pattern": "DbProvider",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.test.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.test.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/feat-saved-game-configs/src/routes/$locale/_app.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/feat-saved-game-configs/src/providers/DbProvider.tsx"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/feat-saved-game-configs/src/providers/DbProvider.test.tsx"
+    },
+    {
+      "matchCount": 5,
+      "uri": "worktrees/feat-saved-game-configs/src/lib/game-engine/game-engine-provider.test.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "worktrees/feat-saved-game-configs/src/db/hooks/useSettings.test.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/feat-saved-game-configs/src/db/hooks/useSettings.demo.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/feat-saved-game-configs/src/db/hooks/useRxDB.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/feat-saved-game-configs/src/components/game/GameShell.test.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/feat-saved-game-configs/src/components/game/GameShell.stories.tsx"
+    }
+  ],
+  "totalFiles": 11,
+  "totalMatches": 34
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Implementing constants**
+
+I'm creating constants for last session config IDs with length constraints. I'm adjusting the logic to exclude last-session configs from user-named config lists. 
+
+**Adjusting config filtering**
+
+I'm refactoring the config filtering logic to exclude last-session configs from user-named lists. </details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "**/session*",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src",
+  "pattern": "profileId|anonymous|default"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src",
+  "pattern": "profileId|anonymous|default",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "worktrees/feat-saved-game-configs/src/lib/game-engine/session-recorder.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "worktrees/feat-saved-game-configs/src/lib/game-engine/session-recorder.test.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "worktrees/feat-saved-game-configs/src/lib/game-engine/session-finder.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": "worktrees/feat-saved-game-configs/src/lib/game-engine/session-finder.test.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": "worktrees/feat-saved-game-configs/src/db/schemas/session_history_index.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": "worktrees/feat-saved-game-configs/src/db/schemas/session_history_index.test.ts"
+    },
+    {
+      "matchCount": 4,
+      "uri": "worktrees/feat-saved-game-configs/src/db/schemas/session_history.ts"
+    }
+  ],
+  "totalFiles": 7,
+  "totalMatches": 26
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/lib/game-engine/config-loader.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Aligning profile IDs**
+
+I'm exporting `ANONYMOUS_PROFILE_ID` from `src/db/constants.ts` to align the game route loader with saved configs. 
+
+**Creating anonymous profile module**
+
+I'm creating a new module `src/db/anonymous-profile.ts` to centralize anonymous profile constants and helper functions. I'm implementing the upsert functionality for anonymous profiles with gameId and record data. 
+
+**Handling config persistence**
+
+I'm addressing a potential race condition where the initial config persistence might overwrite user session data before loading completes. I'm implementing a race condition fix where initial config persistence won't overwrite user session data during component mount. 
+
+I'm implementing loader priority logic to fetch config by URL ID, then last session, then default to null. I'm adding safety checks to ensure lastDoc.gameId matches gameId for collision prevention. 
+
+**Updating config persistence**
+
+I'm exporting `lastSessionSavedConfigId` from the db module to avoid circular dependencies in the loader. I'm replacing local `ANONYMOUS_PROFILE_ID` with imported constant and verifying `lastSessionSavedConfigId` format matches maxLength constraint. I'm adding `persistLastSessionConfig` to the hook and passing `gameId` as a prop to `WordSpellGameBody`. 
+
+I'm implementing the `usePersistLastGameConfig` hook to persist game configs with a timeout delay. I'm optimizing the `usePersistLastGameConfig` hook to prevent unnecessary re-renders by using `useRef` for stable config reference. 
+
+**Optimizing config persistence**
+
+I'm implementing debounced persistence with useEffect and JSON.stringify for stable config detection. I'm replacing direct JSON.stringify in dependencies with useMemo to avoid unnecessary re-renders and satisfy ESLint. I'm refactoring the serialization logic to use useRef for caching previous values and reduce unnecessary recalculations. 
+
+**Persisting config changes**
+
+I'm preventing unnecessary persistence by comparing serialized values and only persisting when they differ. 
+
+**Handling double persist**
+
+I'm fixing the double persist issue by adjusting the effect to set prevSerialized after scheduling or in cleanup. I'm adjusting the effect to use a memoized config key for dependencies. </details></think>
+
+_**Agent (composer-2)**_
+
+Confirming: panel state is only in-memory React state; IndexedDB is only read when `?configId=` points to a named save, and the home screen saves `config: {}`. Implementing upsert of a hidden "last session" doc in RxDB (IndexedDB) and loading it when there's no `configId`.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/last-session-game-config.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Updating saved configs**
+
+I'm updating useSavedConfigs to import ANONYMOUS_PROFILE_ID and add persistLastSessionConfig with useCallback. I'm extracting persist last game config logic into a dedicated hook to reduce route file size. </details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Updating game loaders**
+
+I'm adding imports for lastSessionSavedConfigId and usePersistLastGameConfig and updating the loader to use the last session config. I'm fixing the gameId literal 'word-spell' to match the persist key in WordSpellGameBody. I'm handling the named configId case where initial state should preserve last session data on mount. 
+
+**Handling config persistence**
+
+I'm implementing debounced persistence for game config changes to avoid excessive writes during rapid updates. </details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Adding test coverage**
+
+I'm adding unit tests for `usePersistLastGameConfig` and `useSavedConfigs` to ensure they handle null DB state gracefully. </details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Adding test for persistLastSessionConfig**
+
+I'm adding a test to verify that persistLastSessionConfig upserts a hidden document and excludes it from savedConfigs. I'm verifying that persistLastSessionConfig correctly excludes hidden documents from savedConfigs. 
+
+**Testing config persistence**
+
+I'm verifying that persistLastSessionConfig updates the mode correctly in the database. </details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.test.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.test.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Running tests**
+
+I'm fixing the JSON.stringify issue with undefined config values by ensuring consistent serialization. </details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && yarn lint && yarn typecheck && yarn test --run src/db/hooks/useSavedConfigs.test.tsx src/routes/\$locale/_app/game/\$gameId.test.tsx 2>&1</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && yarn lint && yarn typecheck && yarn test --run src/db/hooks/useSavedConfigs.test.tsx src/routes/\$locale/_app/game/\$gameId.test.tsx 2>&1
+```
+
+```
+yarn run v1.22.22
+$ eslint . --max-warnings 0 &amp;&amp; knip --no-config-hints
+
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts
+  16:20  error  Prefer &#96;globalThis&#96; over &#96;window&#96;  unicorn/prefer-global-this
+  23:18  error  Prefer &#96;globalThis&#96; over &#96;window&#96;  unicorn/prefer-global-this
+
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.test.tsx
+  13:1  error  &#96;@/db/last-session-game-config&#96; import should occur before import of &#96;@/providers/DbProvider&#96;  import/order
+
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts
+   11:1  error  &#96;@/db/schemas/saved_game_configs&#96; type import should occur before import of &#96;@/db/last-session-game-config&#96;  import/order
+  116:7  error  This &#96;if&#96; statement can be replaced by a ternary expression                                                  unicorn/prefer-ternary
+
+✖ 5 problems (5 errors, 0 warnings)
+  5 errors and 0 warnings potentially fixable with the &#96;--fix&#96; option.
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+error Command failed with exit code 1.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Replacing conditionals**
+
+I'm replacing the if/else statement with a ternary operator for persistLastSession. </details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.test.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && yarn lint && yarn typecheck && yarn test --run src/db/hooks/useSavedConfigs.test.tsx 2>&1</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && yarn lint && yarn typecheck && yarn test --run src/db/hooks/useSavedConfigs.test.tsx 2>&1
+```
+
+```
+yarn run v1.22.22
+$ eslint . --max-warnings 0 &amp;&amp; knip --no-config-hints
+Done in 8.76s.
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 3.33s.
+yarn run v1.22.22
+$ vitest run --run src/db/hooks/useSavedConfigs.test.tsx
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs
+
+ ✓ src/db/hooks/useSavedConfigs.test.tsx (11 tests) 949ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  20:45:22
+   Duration  1.86s (transform 60ms, setup 48ms, collect 314ms, tests 949ms, environment 352ms, prepare 55ms)
+
+Done in 5.26s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && yarn test --run 2>&1 | tail -25</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && yarn test --run 2>&1 | tail -25
+```
+
+```
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (4 tests) 21ms
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 17ms
+ ✓ src/games/catalog-utils.test.ts (15 tests) 3ms
+ ✓ src/components/answer-game/useGameTTS.test.tsx (4 tests) 31ms
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (8 tests) 5ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 10ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (14 tests) 3ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 4ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+ ✓ src/games/build-round-order.test.ts (4 tests) 2ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 2ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+
+ Test Files  63 passed (63)
+      Tests  286 passed (286)
+   Start at  20:45:30
+   Duration  4.75s (transform 1.59s, setup 5.49s, collect 15.09s, tests 8.78s, environment 32.41s, prepare 3.88s)
+
+Done in 6.27s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && git add src/db/last-session-game-config.ts src/db/hooks/usePersistLastGameConfig.ts src/db/hooks/useSavedConfigs.ts src/db/hooks/useSavedConfigs.test.tsx src/routes/\$locale/_app/game/\$gameId.tsx && git commit --trailer "Made-with: Cursor" -m "$(cat <<'EOF'
+feat(db): persist last in-game settings to IndexedDB via RxDB
+
+Panel tweaks were only React state; named saves used empty config from home.
+Add a reserved saved_game_configs row per game (id last:anonymous:<gameId>)
+updated debounced from the game route, and load it when opening a game
+without ?configId=. Hidden from catalog chips and gameIdsWithConfigs.
+EOF
+)"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && git add src/db/last-session-game-config.ts src/db/hooks/usePersistLastGameConfig.ts src/db/hooks/useSavedConfigs.ts src/db/hooks/useSavedConfigs.test.tsx src/routes/\$locale/_app/game/\$gameId.tsx && git commit --trailer "Made-with: Cursor" -m "$(cat <<'EOF'
+feat(db): persist last in-game settings to IndexedDB via RxDB
+
+Panel tweaks were only React state; named saves used empty config from home.
+Add a reserved saved_game_configs row per game (id last:anonymous:<gameId>)
+updated debounced from the game route, and load it when opening a game
+without ?configId=. Hidden from catalog chips and gameIdsWithConfigs.
+EOF
+)"
+```
+
+```
+[feat/saved-game-configs cf94f40] feat(db): persist last in-game settings to IndexedDB via RxDB
+ 5 files changed, 162 insertions(+), 12 deletions(-)
+ create mode 100644 src/db/hooks/usePersistLastGameConfig.ts
+ create mode 100644 src/db/last-session-game-config.ts
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (139346b)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 5 files
+[STARTED] *.{ts,tsx} — 5 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/last-session-game-config.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/last-session-game-config.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/last-session-game-config.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/useSavedConfigs.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/last-session-game-config.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/routes/$locale/_app/game/$gameId.tsx
+[COMPLETED] *.{ts,tsx} — 5 files
+[COMPLETED] .lintstagedrc.mjs — 5 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs
+
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 141ms
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (3 tests) 151ms
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 175ms
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+Cannot update a component (&#96;NumberMatchSession&#96;) while rendering a different component (&#96;InstructionsOverlay&#96;). To locate the bad setState() call inside &#96;InstructionsOverlay&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/word-spell/WordSpell/WordSpell.test.tsx &gt; WordSpell &gt; renders the game with letter tiles for the first round word
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+Cannot update a component (&#96;WordSpellSession&#96;) while rendering a different component (&#96;InstructionsOverlay&#96;). To locate the bad setState() call inside &#96;InstructionsOverlay&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/session-finder.test.ts (6 tests) 273ms
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (4 tests) 251ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders round counter (1-indexed)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders round counter (1-indexed)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (4 tests) 254ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/LevelRow.test.tsx (4 tests) 299ms
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 309ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders score in sub-bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders score in sub-bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/GameGrid.test.tsx (5 tests) 316ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with title from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; opens SaveConfigDialog when bookmark icon is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/GameCard.test.tsx (9 tests) 372ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 313ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 163ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 489ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 331ms
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 344ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/game/GameShell.test.tsx (9 tests) 623ms
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (3 tests) 139ms
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (4 tests) 129ms
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 137ms
+ ✓ src/db/hooks/useSavedConfigs.test.tsx (11 tests) 1109ms
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; tile not in bankTileIds is not rendered
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (2 tests) 159ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (8 tests) 156ms
+stderr | src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.test.tsx &gt; OrderedLetterSlots &gt; renders one slot per zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.test.tsx &gt; NumberSequenceSlots &gt; renders one slot per zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.test.tsx &gt; OrderedLetterSlots &gt; filled slot shows placed tile label
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlacement&#96;). To locate the bad setState() call inside &#96;TestWithPlacement&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.test.tsx (3 tests) 206ms
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 155ms
+stderr | src/games/number-match/MatchingPairZones/MatchingPairZones.test.tsx &gt; MatchingPairZones &gt; renders one drop zone per zone in context
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/db/create-database.test.ts (3 tests) 155ms
+stderr | src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.test.tsx &gt; NumberSequenceSlots &gt; filled slot shows placed tile label
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlacement&#96;). To locate the bad setState() call inside &#96;TestWithPlacement&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; does not render placed tiles
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.test.tsx (3 tests) 205ms
+ ✓ src/games/number-match/MatchingPairZones/MatchingPairZones.test.tsx (2 tests) 125ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (2 tests) 159ms
+ ✓ src/db/schemas/session_history_index.test.ts (3 tests) 199ms
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 174ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 123ms
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (4 tests) 25ms
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 17ms
+ ✓ src/db/migrations.test.ts (1 test) 112ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; queues "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady is false before the round-complete sound starts
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; gameOverReady is false before the "starts" promise resolves
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/useGameSounds.test.tsx (11 tests) 42ms
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 19ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 17ms
+ ✓ src/components/answer-game/useGameTTS.test.tsx (4 tests) 14ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 23ms
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (8 tests) 4ms
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 25ms
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (3 tests) 16ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 4ms
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 18ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (4 tests) 37ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (4 tests) 114ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (8 tests) 4ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 122ms
+ ✓ src/routes/__root.test.tsx (1 test) 147ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 144ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 14ms
+ ✓ src/games/catalog-utils.test.ts (15 tests) 4ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (14 tests) 3ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/games/build-round-order.test.ts (4 tests) 2ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 3ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+
+ Test Files  63 passed (63)
+      Tests  286 passed (286)
+   Start at  20:45:45
+   Duration  4.31s (transform 1.23s, setup 4.61s, collect 12.62s, tests 9.08s, environment 29.36s, prepare 3.23s)
+
+Done in 4.77s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+Flushing the latest config on unmount so we don't lose changes if we navigate away before the 500ms debounce fires.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Handling config changes**
+
+I'm implementing useRef to track the latest serialized value and only flush on unmount to avoid stale data issues. I'm separating the cleanup effect to ensure unmount-only execution and tracking latest serialized value with useRef. I'm updating configRef on every render to track latest serialized value while keeping gameId stable for cleanup. </details></think>
+
+_**Agent (composer-2)**_
+
+Reverting flush-on-cleanup: it can persist stale state when `serialized` changes before the timer fires.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+**Managing component cleanup**
+
+I'm implementing ref-based flush for cleanup to avoid unnecessary persists during re-renders. I'm ensuring cleanup runs only when gameId changes, not on every render, by leveraging the dependency array correctly. The cleanup for WordSpellGameBody effects runs correctly on unmount when gameId changes or component unmounts. </details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && yarn lint && yarn test --run src/db/hooks/useSavedConfigs.test.tsx 2>&1 | tail -15</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && yarn lint && yarn test --run src/db/hooks/useSavedConfigs.test.tsx 2>&1 | tail -15
+```
+
+```
+yarn run v1.22.22
+$ eslint . --max-warnings 0 &amp;&amp; knip --no-config-hints
+
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts
+  15:3  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the &#96;current&#96; property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts:15:3
+  13 |   const { persistLastSessionConfig } = useSavedConfigs();
+  14 |   const latestRef = useRef({ gameId, config });
+&gt; 15 |   latestRef.current = { gameId, config };
+     |   ^^^^^^^^^^^^^^^^^ Cannot update ref during render
+  16 |
+  17 |   const serialized = JSON.stringify(config);
+  18 |  react-hooks/refs
+
+✖ 1 problem (1 error, 0 warnings)
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+error Command failed with exit code 1.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && yarn lint && yarn test --run 2>&1 | tail -8</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && yarn lint && yarn test --run 2>&1 | tail -8
+```
+
+```
+yarn run v1.22.22
+$ eslint . --max-warnings 0 &amp;&amp; knip --no-config-hints
+Done in 7.51s.
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+
+ Test Files  63 passed (63)
+      Tests  286 passed (286)
+   Start at  20:48:15
+   Duration  4.16s (transform 1.26s, setup 4.85s, collect 12.34s, tests 8.32s, environment 29.84s, prepare 3.13s)
+
+Done in 4.57s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && git add src/db/hooks/usePersistLastGameConfig.ts && git commit --trailer "Made-with: Cursor" --amend --no-edit</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs && git add src/db/hooks/usePersistLastGameConfig.ts && git commit --trailer "Made-with: Cursor" --amend --no-edit
+```
+
+```
+[feat/saved-game-configs e88f2eb] feat(db): persist last in-game settings to IndexedDB via RxDB
+ Date: Sun Apr 5 20:45:40 2026 +1000
+ 5 files changed, 178 insertions(+), 12 deletions(-)
+ create mode 100644 src/db/hooks/usePersistLastGameConfig.ts
+ create mode 100644 src/db/last-session-game-config.ts
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (c87344d)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs/src/db/hooks/usePersistLastGameConfig.ts
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/feat-saved-game-configs
+
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (4 tests) 154ms
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 153ms
+stderr | src/games/number-match/MatchingPairZones/MatchingPairZones.test.tsx &gt; MatchingPairZones &gt; renders one drop zone per zone in context
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 170ms
+ ✓ src/games/number-match/MatchingPairZones/MatchingPairZones.test.tsx (2 tests) 267ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+Cannot update a component (&#96;NumberMatchSession&#96;) while rendering a different component (&#96;InstructionsOverlay&#96;). To locate the bad setState() call inside &#96;InstructionsOverlay&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders round counter (1-indexed)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders round counter (1-indexed)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (4 tests) 231ms
+ ✓ src/db/create-database.test.ts (3 tests) 149ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders score in sub-bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders score in sub-bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/LevelRow.test.tsx (4 tests) 257ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 249ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/GameGrid.test.tsx (5 tests) 278ms
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 261ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/session-finder.test.ts (6 tests) 278ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; opens SaveConfigDialog when bookmark icon is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/GameCard.test.tsx (9 tests) 345ms
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 349ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 303ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 404ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/game/GameShell.test.tsx (9 tests) 591ms
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 172ms
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (3 tests) 110ms
+stderr | src/games/word-spell/WordSpell/WordSpell.test.tsx &gt; WordSpell &gt; renders the game with letter tiles for the first round word
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+Cannot update a component (&#96;WordSpellSession&#96;) while rendering a different component (&#96;InstructionsOverlay&#96;). To locate the bad setState() call inside &#96;InstructionsOverlay&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (4 tests) 188ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (8 tests) 148ms
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (3 tests) 131ms
+stderr | src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.test.tsx &gt; NumberSequenceSlots &gt; renders one slot per zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/db/hooks/useSavedConfigs.test.tsx (11 tests) 1160ms
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with title from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.test.tsx &gt; NumberSequenceSlots &gt; filled slot shows placed tile label
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlacement&#96;). To locate the bad setState() call inside &#96;TestWithPlacement&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.test.tsx &gt; OrderedLetterSlots &gt; renders one slot per zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; does not render placed tiles
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; tile not in bankTileIds is not rendered
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (2 tests) 162ms
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (2 tests) 130ms
+ ✓ src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.test.tsx (3 tests) 167ms
+ ✓ src/db/schemas/session_history_index.test.ts (3 tests) 200ms
+stderr | src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.test.tsx &gt; OrderedLetterSlots &gt; filled slot shows placed tile label
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlacement&#96;). To locate the bad setState() call inside &#96;TestWithPlacement&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.test.tsx (3 tests) 210ms
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 197ms
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 186ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; queues "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady is false before the round-complete sound starts
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/migrations.test.ts (1 test) 133ms
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 184ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; gameOverReady is false before the "starts" promise resolves
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/useGameSounds.test.tsx (11 tests) 35ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 171ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 23ms
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (4 tests) 24ms
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 21ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (8 tests) 4ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 13ms
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 19ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 18ms
+ ✓ src/components/answer-game/useGameTTS.test.tsx (4 tests) 16ms
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (3 tests) 14ms
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 24ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 25ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 11ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (4 tests) 36ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (4 tests) 12ms
+ ✓ src/routes/__root.test.tsx (1 test) 16ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 5ms
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (8 tests) 4ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 33ms
+ ✓ src/games/catalog-utils.test.ts (15 tests) 5ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (14 tests) 3ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/games/build-round-order.test.ts (4 tests) 2ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 2ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+
+ Test Files  63 passed (63)
+      Tests  286 passed (286)
+   Start at  20:48:25
+   Duration  4.20s (transform 1.53s, setup 4.36s, collect 14.76s, tests 8.46s, environment 26.82s, prepare 3.26s)
+
+Done in 5.27s.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+Here’s what was going wrong and what we changed.
+
+### Before
+- The **⚙️ Game Config** panel only updated **React state**. Nothing wrote that object to RxDB.
+- Opening a game **without** `?configId=` always started from **code defaults**.
+- **Named saves** from the home screen still did `save({ ..., config: {} })`, so bookmarks didn’t store real settings either.
+
+So **no**, your tweaks were **not** going to IndexedDB before.
+
+### Now (on `feat/saved-game-configs`, commit `e88f2eb`)
+1. **Last session row** in the same `saved_game_configs` collection RxDB uses (backed by IndexedDB in the browser), with a fixed id:  
+   `last:anonymous:<gameId>` (e.g. `last:anonymous:word-spell`).
+2. **`usePersistLastGameConfig`** (used from each game body):
+   - **Debounced** write (~300ms) after changes.
+   - **Flush on unmount** so leaving the game still saves the latest config from a ref (avoids losing edits if you go home quickly).
+3. **Loader**: if there is **no** `configId`, it loads that **last-session** document and passes it as `gameSpecificConfig`.
+4. **Catalog chips**: those rows are **filtered out** of `savedConfigs` / `gameIdsWithConfigs`, so they don’t show as named presets.
+
+After pulling this branch, change settings, wait a moment or navigate away normally, then use **Play** again (plain link, no chip): you should see your last panel state restored from IndexedDB.
+
+**Still TODO (optional):** wire **Save** on the home card to pass the **current** last-session config (or live snapshot) instead of `{}`, so named bookmarks store real data too. Say if you want that done next.
