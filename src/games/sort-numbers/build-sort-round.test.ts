@@ -142,6 +142,43 @@ describe('generateSortRounds', () => {
     expect(diffs.every((d) => d === 1)).toBe(true);
   });
 
+  it('mode by with numeric start generates sequence from that start', () => {
+    const rounds = generateSortRounds({
+      range: { min: 1, max: 10 },
+      quantity: 5,
+      skip: { mode: 'by', step: 2, start: 2 },
+      totalRounds: 1,
+    });
+    expect(rounds[0]?.sequence).toEqual([2, 4, 6, 8, 10]);
+  });
+
+  it('mode by with numeric start exceeding range falls back to consecutive', () => {
+    const rounds = generateSortRounds({
+      range: { min: 1, max: 10 },
+      quantity: 5,
+      skip: { mode: 'by', step: 2, start: 3 },
+      totalRounds: 1,
+    });
+    // 3+2*4=11 > 10 → fallback to consecutive
+    const seq = rounds[0]?.sequence ?? [];
+    expect(seq).toHaveLength(5);
+    const diffs = seq.slice(1).map((n, i) => n - (seq[i] ?? 0));
+    expect(diffs.every((d) => d === 1)).toBe(true);
+  });
+
+  it('mode by with numeric start outside range falls back to consecutive', () => {
+    const rounds = generateSortRounds({
+      range: { min: 5, max: 20 },
+      quantity: 3,
+      skip: { mode: 'by', step: 2, start: 1 },
+      totalRounds: 1,
+    });
+    const seq = rounds[0]?.sequence ?? [];
+    expect(seq).toHaveLength(3);
+    const diffs = seq.slice(1).map((n, i) => n - (seq[i] ?? 0));
+    expect(diffs.every((d) => d === 1)).toBe(true);
+  });
+
   it('mode consecutive handles quantity larger than range size', () => {
     const rounds = generateSortRounds({
       range: { min: 1, max: 3 },

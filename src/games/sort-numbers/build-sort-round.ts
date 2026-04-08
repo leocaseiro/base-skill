@@ -161,6 +161,22 @@ export function generateSortRounds(
         return generateConsecutiveRound(range, quantity);
       }
 
+      if (typeof start === 'number') {
+        const lastValue = start + (quantity - 1) * step;
+        if (start < range.min || lastValue > range.max) {
+          console.warn(
+            `generateSortRounds: numeric start=${start} produces sequence outside range [${range.min},${range.max}]; falling back to consecutive`,
+          );
+          return generateConsecutiveRound(range, quantity);
+        }
+        return {
+          sequence: Array.from(
+            { length: quantity },
+            (_, i) => start + i * step,
+          ),
+        };
+      }
+
       if (start === 'range-min') {
         return {
           sequence: Array.from(
