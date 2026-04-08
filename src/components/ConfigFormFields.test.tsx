@@ -248,6 +248,89 @@ describe('nested-select-or-number fields', () => {
   });
 });
 
+describe('nested-select-or-number with custom options', () => {
+  const customOptionsFields: ConfigField[] = [
+    {
+      type: 'nested-select-or-number',
+      key: 'skip',
+      subKey: 'start',
+      label: 'Skip start',
+      min: 1,
+      max: 999,
+      options: [
+        { value: 'range-min', label: 'range-min' },
+        { value: 'random', label: 'random' },
+      ],
+    },
+  ];
+
+  it('renders string option selected when value is a string from options', () => {
+    render(
+      <ConfigFormFields
+        fields={customOptionsFields}
+        config={{ skip: { mode: 'by', step: 2, start: 'range-min' } }}
+        onChange={vi.fn()}
+      />,
+    );
+    expect(
+      screen.getByRole('combobox', { name: 'Skip start type' }),
+    ).toHaveValue('range-min');
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+  });
+
+  it('renders number option selected with input when value is a number', () => {
+    render(
+      <ConfigFormFields
+        fields={customOptionsFields}
+        config={{ skip: { mode: 'by', step: 2, start: 5 } }}
+        onChange={vi.fn()}
+      />,
+    );
+    expect(
+      screen.getByRole('combobox', { name: 'Skip start type' }),
+    ).toHaveValue('number');
+    expect(
+      screen.getByRole('spinbutton', { name: 'Skip start value' }),
+    ).toHaveValue(5);
+  });
+
+  it('switches to number input when selecting number option', async () => {
+    const onChange = vi.fn();
+    render(
+      <ConfigFormFields
+        fields={customOptionsFields}
+        config={{ skip: { mode: 'by', step: 2, start: 'range-min' } }}
+        onChange={onChange}
+      />,
+    );
+    await userEvent.selectOptions(
+      screen.getByRole('combobox', { name: 'Skip start type' }),
+      'number',
+    );
+    expect(onChange).toHaveBeenCalledWith({
+      skip: { mode: 'by', step: 2, start: 1 },
+    });
+  });
+
+  it('switches to string value when selecting a string option', async () => {
+    const onChange = vi.fn();
+    render(
+      <ConfigFormFields
+        fields={customOptionsFields}
+        config={{ skip: { mode: 'by', step: 2, start: 5 } }}
+        onChange={onChange}
+      />,
+    );
+    await userEvent.selectOptions(
+      screen.getByRole('combobox', { name: 'Skip start type' }),
+      'random',
+    );
+    expect(onChange).toHaveBeenCalledWith({
+      skip: { mode: 'by', step: 2, start: 'random' },
+    });
+  });
+});
+
 describe('visibleWhen', () => {
   it('hides a field when nested visibleWhen condition is not met', () => {
     const visibleWhenFields: ConfigField[] = [
