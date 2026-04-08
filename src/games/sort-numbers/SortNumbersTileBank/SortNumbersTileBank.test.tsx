@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { useEffect } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { SortNumbersTileBank } from './SortNumbersTileBank';
 import type {
@@ -32,6 +33,17 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
     i18n: { language: 'en' },
+  }),
+}));
+
+const bankDropState = vi.hoisted(() => ({ isDragOver: false }));
+
+vi.mock('@/components/answer-game/useBankDropTarget', () => ({
+  useBankDropTarget: () => ({
+    bankRef: { current: null },
+    get isDragOver() {
+      return bankDropState.isDragOver;
+    },
   }),
 }));
 
@@ -76,6 +88,28 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 describe('SortNumbersTileBank', () => {
+  it('shows dashed hole preview when dragging a placed tile over the bank', () => {
+    bankDropState.isDragOver = true;
+    const Preview = () => {
+      const dispatch = useAnswerGameDispatch();
+      useEffect(() => {
+        dispatch({ type: 'INIT_ROUND', tiles, zones });
+        dispatch({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 0 });
+        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't2' });
+      }, [dispatch]);
+      return <SortNumbersTileBank />;
+    };
+    const { container } = render(
+      <AnswerGameProvider config={config}>
+        <Preview />
+      </AnswerGameProvider>,
+    );
+    const hole = container.querySelector('[data-tile-bank-hole="t2"]');
+    expect(hole?.className).toMatch(/border-dashed/);
+    expect(hole?.textContent).toContain('1');
+    bankDropState.isDragOver = false;
+  });
+
   it('renders bank tiles as buttons', () => {
     render(<SortNumbersTileBank />, { wrapper });
     expect(
