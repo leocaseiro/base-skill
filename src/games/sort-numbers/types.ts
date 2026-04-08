@@ -5,15 +5,29 @@ import type { ConfigField } from '@/lib/config-fields';
 export type SkipConfig =
   | { mode: 'random' }
   | { mode: 'consecutive' }
-  | { mode: 'by'; step: number; start: 'range-min' | 'random' };
+  | {
+      mode: 'by';
+      step: number;
+      start: 'range-min' | 'random' | number;
+    };
 
 export type DistractorConfig =
   | { source: 'random'; count: number | 'all' }
   | { source: 'gaps-only'; count: number | 'all' }
   | { source: 'full-range'; count: number | 'all' };
 
+export type SortNumbersSimpleConfig = {
+  configMode: 'simple';
+  direction: 'ascending' | 'descending';
+  start: number;
+  step: number;
+  quantity: number;
+  distractors: boolean;
+};
+
 export interface SortNumbersConfig extends AnswerGameConfig {
   component: 'SortNumbers';
+  configMode?: 'simple' | 'advanced';
   direction: 'ascending' | 'descending';
   range: { min: number; max: number };
   /** How many numbers to sort per round */
@@ -118,10 +132,12 @@ export const sortNumbersConfigFields: ConfigField[] = [
     visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
   },
   {
-    type: 'nested-select',
+    type: 'nested-select-or-number',
     key: 'skip',
     subKey: 'start',
     label: 'Skip start',
+    min: 1,
+    max: 999,
     options: [
       { value: 'range-min', label: 'range-min' },
       { value: 'random', label: 'random' },
