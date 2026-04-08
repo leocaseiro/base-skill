@@ -1,5 +1,16 @@
+// src/games/sort-numbers/types.ts
 import type { AnswerGameConfig } from '@/components/answer-game/types';
 import type { ConfigField } from '@/lib/config-fields';
+
+export type SkipConfig =
+  | { mode: 'random' }
+  | { mode: 'consecutive' }
+  | { mode: 'by'; step: number; start: 'range-min' | 'random' };
+
+export type DistractorConfig =
+  | { source: 'random'; count: number }
+  | { source: 'gaps-only'; count: number | 'all' }
+  | { source: 'full-range'; count: number | 'all' };
 
 export interface SortNumbersConfig extends AnswerGameConfig {
   component: 'SortNumbers';
@@ -7,7 +18,8 @@ export interface SortNumbersConfig extends AnswerGameConfig {
   range: { min: number; max: number };
   /** How many numbers to sort per round */
   quantity: number;
-  allowSkips: boolean;
+  skip: SkipConfig;
+  distractors: DistractorConfig;
   rounds: SortNumbersRound[];
 }
 
@@ -85,6 +97,57 @@ export const sortNumbersConfigFields: ConfigField[] = [
     min: 1,
     max: 999,
   },
-  { type: 'checkbox', key: 'allowSkips', label: 'Allow skips' },
+  {
+    type: 'nested-select',
+    key: 'skip',
+    subKey: 'mode',
+    label: 'Skip mode',
+    options: [
+      { value: 'random', label: 'random' },
+      { value: 'consecutive', label: 'consecutive' },
+      { value: 'by', label: 'by' },
+    ],
+  },
+  {
+    type: 'nested-number',
+    key: 'skip',
+    subKey: 'step',
+    label: 'Skip step',
+    min: 2,
+    max: 100,
+    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
+  },
+  {
+    type: 'nested-select',
+    key: 'skip',
+    subKey: 'start',
+    label: 'Skip start',
+    options: [
+      { value: 'range-min', label: 'range-min' },
+      { value: 'random', label: 'random' },
+    ],
+    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
+  },
+  {
+    type: 'nested-select',
+    key: 'distractors',
+    subKey: 'source',
+    label: 'Distractor source',
+    options: [
+      { value: 'random', label: 'random' },
+      { value: 'gaps-only', label: 'gaps-only' },
+      { value: 'full-range', label: 'full-range' },
+    ],
+    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+  },
+  {
+    type: 'nested-select-or-number',
+    key: 'distractors',
+    subKey: 'count',
+    label: 'Distractor count',
+    min: 1,
+    max: 20,
+    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+  },
   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
 ];
