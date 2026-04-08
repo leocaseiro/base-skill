@@ -47,6 +47,7 @@ export const useSlotBehavior = (
   const {
     zones,
     allTiles,
+    bankTileIds,
     activeSlotIndex,
     config,
     dragActiveTileId,
@@ -266,10 +267,13 @@ export const useSlotBehavior = (
       triggerPop(el);
     } else if (tileId === null && prevTileId !== null) {
       // Tile left this slot.
-      // If the tile that left matches the previously-active drag tile, this is
-      // a swap/move — the sound was already played in handleDrop.
-      const wasSwapOrMove = prevTileId === prevDragActiveTileId;
-      if (!wasSwapOrMove) {
+      // Suppress the sound only when the tile moved to another slot (swap/move),
+      // where handleDrop already played the sound. If the tile went back to the
+      // bank (REMOVE_TILE via drag), play 'tile-place' here.
+      const movedToSlot =
+        prevTileId === prevDragActiveTileId &&
+        !bankTileIds.includes(prevTileId);
+      if (!movedToSlot) {
         playSound('tile-place');
       }
       startFadeRef.current?.();
@@ -278,6 +282,7 @@ export const useSlotBehavior = (
   }, [
     isWrong,
     tileId,
+    bankTileIds,
     config.wrongTileBehavior,
     dragRef,
     dragActiveTileId,
