@@ -129,6 +129,40 @@ describe('SavedConfigChip', () => {
     );
   });
 
+  it('renders renderConfigForm instead of ConfigFormFields when provided', async () => {
+    render(
+      <SavedConfigChip
+        doc={mockDoc}
+        configFields={fields}
+        onPlay={vi.fn()}
+        onDelete={vi.fn()}
+        onSave={vi.fn()}
+        renderConfigForm={({ config, onChange }) => (
+          <div data-testid="custom-form">
+            Custom form: {String(config.inputMethod)}
+            <button
+              type="button"
+              onClick={() =>
+                onChange({ ...config, inputMethod: 'type' })
+              }
+            >
+              Change
+            </button>
+          </div>
+        )}
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /expand easy mode/i }),
+    );
+    expect(screen.getByTestId('custom-form')).toBeInTheDocument();
+    expect(screen.getByText('Custom form: drag')).toBeInTheDocument();
+    // The generic ConfigFormFields should NOT be rendered
+    expect(
+      screen.queryByLabelText('Input method'),
+    ).not.toBeInTheDocument();
+  });
+
   it('collapses without saving when Cancel is clicked', async () => {
     const onSave = vi.fn();
     render(
