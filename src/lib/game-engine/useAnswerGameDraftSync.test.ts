@@ -58,6 +58,8 @@ const makeState = (
   zones: [makeZone('z1')],
   activeSlotIndex: 0,
   dragActiveTileId: null,
+  dragHoverZoneIndex: null,
+  dragHoverBankTileId: null,
   phase: 'playing',
   roundIndex: 0,
   retryCount: 0,
