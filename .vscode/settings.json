@@ -8,5 +8,5 @@
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true
   },
-  "specstory.cloudSync.enabled": "ask"
+  "specstory.cloudSync.enabled": "always"
 }
