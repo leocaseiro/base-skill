@@ -150,11 +150,12 @@ const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
   direction: 'ascending',
   range: { min: 11, max: 99 },
   quantity: 6,
-  allowSkips: true,
+  skip: { mode: 'random' },
+  distractors: { source: 'random', count: 2 },
   rounds: generateSortRounds({
     range: { min: 11, max: 99 },
     quantity: 6,
-    allowSkips: true,
+    skip: { mode: 'random' },
     totalRounds: 8,
   }),
 });
@@ -217,14 +218,28 @@ const resolveSortNumbersConfig = (
 ): SortNumbersConfig => {
   const base = makeDefaultSortNumbersConfig();
   if (!saved || saved.component !== 'SortNumbers') return base;
+
+  // Migrate legacy allowSkips: boolean → skip: SkipConfig
+  let migratedSaved = saved;
+  if (!saved.skip && typeof saved.allowSkips === 'boolean') {
+    migratedSaved = {
+      ...saved,
+      skip: saved.allowSkips
+        ? { mode: 'random' }
+        : { mode: 'consecutive' },
+    };
+  }
+
   const merged: SortNumbersConfig = {
     ...base,
-    ...(saved as Partial<SortNumbersConfig>),
+    ...(migratedSaved as Partial<SortNumbersConfig>),
     gameId: 'sort-numbers',
     component: 'SortNumbers',
   };
+
   const tr = Math.max(1, merged.totalRounds);
   merged.totalRounds = tr;
+
   const roundsStale =
     Array.isArray(merged.rounds) &&
     merged.rounds.some(
@@ -234,6 +249,7 @@ const resolveSortNumbersConfig = (
           (v) => v < merged.range.min || v > merged.range.max,
         ),
     );
+
   if (
     !Array.isArray(merged.rounds) ||
     merged.rounds.length === 0 ||
@@ -243,10 +259,11 @@ const resolveSortNumbersConfig = (
     merged.rounds = generateSortRounds({
       range: merged.range,
       quantity: merged.quantity,
-      allowSkips: merged.allowSkips,
+      skip: merged.skip,
       totalRounds: tr,
     });
   }
+
   return merged;
 };
 
