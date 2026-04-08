@@ -1,12 +1,18 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { useEffect } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AnswerGameProvider } from '../AnswerGameProvider';
 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
 import { Slot } from './Slot';
-import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type {
+  AnswerGameAction,
+  AnswerGameConfig,
+  AnswerZone,
+  TileItem,
+} from '../types';
 import type { SlotRenderProps } from './useSlotBehavior';
-import type { ReactNode } from 'react';
+import type { Dispatch, ReactNode } from 'react';
+import { playSound } from '@/lib/audio/AudioFeedback';
 
 vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
@@ -96,6 +102,18 @@ function createWrapper(
   Provider.displayName = 'AnswerGameTestWrapper';
   return Provider;
 }
+
+const dispatchHolderRef: {
+  current: Dispatch<AnswerGameAction> | null;
+} = { current: null };
+
+const CaptureDispatch = () => {
+  const dispatch = useAnswerGameDispatch();
+  useEffect(() => {
+    dispatchHolderRef.current = dispatch;
+  }, [dispatch]);
+  return null;
+};
 
 describe('Slot', () => {
   it('renders as li by default', () => {
@@ -198,5 +216,85 @@ describe('Slot', () => {
       'aria-label',
       'Slot 1, filled with A',
     );
+  });
+
+  describe('tile-place sound when a tile leaves the slot', () => {
+    beforeEach(() => {
+      vi.mocked(playSound).mockClear();
+      dispatchHolderRef.current = null;
+    });
+
+    it("does not play 'tile-place' when the tile moves to another slot (swap)", () => {
+      const Wrapper = createWrapper(baseConfig, emptyZones);
+      render(
+        <Wrapper>
+          <CaptureDispatch />
+          <ol>
+            <Slot index={0}>
+              {({ label }: SlotRenderProps) => (
+                <span>{label ?? 'empty'}</span>
+              )}
+            </Slot>
+          </ol>
+        </Wrapper>,
+      );
+      act(() => {
+        dispatchHolderRef.current?.({
+          type: 'PLACE_TILE',
+          tileId: 'tile-1',
+          zoneIndex: 0,
+        });
+      });
+      act(() => {
+        dispatchHolderRef.current?.({
+          type: 'SET_DRAG_ACTIVE',
+          tileId: 'tile-1',
+        });
+      });
+      act(() => {
+        dispatchHolderRef.current?.({
+          type: 'SWAP_TILES',
+          fromZoneIndex: 0,
+          toZoneIndex: 1,
+        });
+      });
+      expect(playSound).not.toHaveBeenCalledWith('tile-place');
+    });
+
+    it("plays 'tile-place' when the tile returns to the bank (remove)", () => {
+      const Wrapper = createWrapper(baseConfig, emptyZones);
+      render(
+        <Wrapper>
+          <CaptureDispatch />
+          <ol>
+            <Slot index={0}>
+              {({ label }: SlotRenderProps) => (
+                <span>{label ?? 'empty'}</span>
+              )}
+            </Slot>
+          </ol>
+        </Wrapper>,
+      );
+      act(() => {
+        dispatchHolderRef.current?.({
+          type: 'PLACE_TILE',
+          tileId: 'tile-1',
+          zoneIndex: 0,
+        });
+      });
+      act(() => {
+        dispatchHolderRef.current?.({
+          type: 'SET_DRAG_ACTIVE',
+          tileId: 'tile-1',
+        });
+      });
+      act(() => {
+        dispatchHolderRef.current?.({
+          type: 'REMOVE_TILE',
+          zoneIndex: 0,
+        });
+      });
+      expect(playSound).toHaveBeenCalledWith('tile-place');
+    });
   });
 });

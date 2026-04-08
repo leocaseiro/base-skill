@@ -63,6 +63,33 @@ export default meta;
 
 type Story = StoryObj<typeof NumeralTileBank>;
 
-export const DotsStyle: Story = { args: { tileStyle: 'dots' } };
+export const Default: Story = { args: { tileStyle: 'dots' } };
 export const FingersStyle: Story = { args: { tileStyle: 'fingers' } };
 export const ObjectsStyle: Story = { args: { tileStyle: 'objects' } };
+
+const DragHoverBankTileSetup = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const dispatch = useAnswerGameDispatch();
+  dispatch({ type: 'INIT_ROUND', tiles, zones });
+  dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+  dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't1' });
+  dispatch({ type: 'SET_DRAG_HOVER_BANK', tileId: 't2' });
+  return <>{children}</>;
+};
+
+export const DragHoverBankTile: Story = {
+  args: { tileStyle: 'dots' },
+  decorators: [
+    withDb,
+    (Story) => (
+      <AnswerGameProvider config={config}>
+        <DragHoverBankTileSetup>
+          <Story />
+        </DragHoverBankTileSetup>
+      </AnswerGameProvider>
+    ),
+  ],
+};

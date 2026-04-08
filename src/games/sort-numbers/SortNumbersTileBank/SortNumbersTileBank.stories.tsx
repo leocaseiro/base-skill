@@ -1,9 +1,12 @@
+import { useEffect } from 'react';
 import { withDarkMode } from '../../../../.storybook/decorators';
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { SortNumbersTileBank } from './SortNumbersTileBank';
 import type { AnswerGameConfig } from '@/components/answer-game/types';
 import type { Meta, StoryObj } from '@storybook/react';
+import type { ReactNode } from 'react';
 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 
 const config: AnswerGameConfig = {
   gameId: 'sort-numbers-story',
@@ -73,4 +76,32 @@ export const Default: Story = {};
 
 export const DefaultDark: Story = {
   decorators: [withDarkMode],
+};
+
+const SortNumbersDragHoverSetup = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const dispatch = useAnswerGameDispatch();
+  useEffect(() => {
+    dispatch({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 0 });
+    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't3' });
+    dispatch({ type: 'SET_DRAG_HOVER_BANK', tileId: 't1' });
+  }, [dispatch]);
+  return <>{children}</>;
+};
+
+/** Tile `1` is in the first slot; dashed hover on bank tile `3`. */
+export const DragHoverBankTile: Story = {
+  decorators: [
+    withDb,
+    (Story) => (
+      <AnswerGameProvider config={config}>
+        <SortNumbersDragHoverSetup>
+          <Story />
+        </SortNumbersDragHoverSetup>
+      </AnswerGameProvider>
+    ),
+  ],
 };

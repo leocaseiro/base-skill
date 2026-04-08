@@ -39,7 +39,7 @@ export const SortNumbersTileBank = () => {
     dragActiveTileId,
     dragHoverBankTileId,
   } = useAnswerGameContext();
-  const { bankRef } = useBankDropTarget();
+  const { bankRef, isDragOver } = useBankDropTarget();
 
   return (
     <div
@@ -50,17 +50,22 @@ export const SortNumbersTileBank = () => {
       {allTiles.map((tile) => {
         const inBank = bankTileIds.includes(tile.id);
         const isDragging = tile.id === dragActiveTileId;
-        const isHoverTarget = tile.id === dragHoverBankTileId;
+        const isHoverTarget =
+          tile.id === dragHoverBankTileId ||
+          (!dragHoverBankTileId &&
+            isDragOver &&
+            !inBank &&
+            tile.id === dragActiveTileId);
 
         if (inBank) {
           return (
             <div
               key={tile.id}
-              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' ring-2 ring-primary ring-offset-2' : ''}`}
+              className="relative size-14 rounded-xl transition-all"
             >
               <div
                 data-tile-bank-hole={tile.id}
-                className={`size-14 rounded-xl bg-muted/60 shadow-inner${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+                className="size-14 rounded-xl bg-muted/60 shadow-inner"
                 aria-hidden="true"
               />
               <div
@@ -69,6 +74,12 @@ export const SortNumbersTileBank = () => {
               >
                 <NumberTile tile={tile} />
               </div>
+              {isHoverTarget && (
+                <div
+                  className="pointer-events-none absolute inset-0 rounded-xl border-2 border-dashed border-primary"
+                  aria-hidden="true"
+                />
+              )}
             </div>
           );
         }
@@ -77,9 +88,15 @@ export const SortNumbersTileBank = () => {
           <div
             key={tile.id}
             data-tile-bank-hole={tile.id}
-            className={`size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+            className={`relative size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
             aria-hidden="true"
-          />
+          >
+            {isHoverTarget && (
+              <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+                {tile.label}
+              </span>
+            )}
+          </div>
         );
       })}
     </div>
