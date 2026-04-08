@@ -8,7 +8,7 @@ export type SkipConfig =
   | { mode: 'by'; step: number; start: 'range-min' | 'random' };
 
 export type DistractorConfig =
-  | { source: 'random'; count: number }
+  | { source: 'random'; count: number | 'all' }
   | { source: 'gaps-only'; count: number | 'all' }
   | { source: 'full-range'; count: number | 'all' };
 
