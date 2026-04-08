@@ -92,9 +92,18 @@ const SortNumbersSession = ({
         return;
       }
 
+      const distractor =
+        sortNumbersConfig.tileBankMode === 'distractors'
+          ? {
+              config: sortNumbersConfig.distractors,
+              range: sortNumbersConfig.range,
+            }
+          : undefined;
+
       const { tiles: nextTiles, zones: nextZones } = buildSortRound(
         nextRound.sequence,
         sortNumbersConfig.direction,
+        distractor,
       );
       dispatch({
         type: 'ADVANCE_ROUND',
@@ -114,6 +123,9 @@ const SortNumbersSession = ({
     roundOrder,
     sortNumbersConfig.rounds,
     sortNumbersConfig.direction,
+    sortNumbersConfig.tileBankMode,
+    sortNumbersConfig.distractors,
+    sortNumbersConfig.range,
   ]);
 
   if (!round) return null;
@@ -181,8 +193,22 @@ export const SortNumbers = ({
     if (!round0) {
       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
     }
-    return buildSortRound(round0.sequence, config.direction);
-  }, [round0, config.direction]);
+    const distractor =
+      config.tileBankMode === 'distractors'
+        ? { config: config.distractors, range: config.range }
+        : undefined;
+    return buildSortRound(
+      round0.sequence,
+      config.direction,
+      distractor,
+    );
+  }, [
+    round0,
+    config.direction,
+    config.tileBankMode,
+    config.distractors,
+    config.range,
+  ]);
 
   const answerGameConfig = useMemo(
     (): AnswerGameConfig => ({

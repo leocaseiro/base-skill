@@ -11,6 +11,10 @@ import { configToTags } from '@/lib/config-tags';
 type SavedConfigChipProps = {
   doc: SavedGameConfigDoc;
   configFields: ConfigField[];
+  renderConfigForm?: (props: {
+    config: Record<string, unknown>;
+    onChange: (config: Record<string, unknown>) => void;
+  }) => JSX.Element;
   onPlay: (id: string) => void;
   onDelete: (id: string) => void;
   onSave: (
@@ -23,6 +27,7 @@ type SavedConfigChipProps = {
 export const SavedConfigChip = ({
   doc,
   configFields,
+  renderConfigForm,
   onPlay,
   onDelete,
   onSave,
@@ -123,11 +128,18 @@ export const SavedConfigChip = ({
       {/* Expanded: inline form */}
       {expanded && (
         <div className="bookmark-bg flex flex-col gap-3 p-3">
-          <ConfigFormFields
-            fields={configFields}
-            config={editConfig}
-            onChange={setEditConfig}
-          />
+          {renderConfigForm ? (
+            renderConfigForm({
+              config: editConfig,
+              onChange: setEditConfig,
+            })
+          ) : (
+            <ConfigFormFields
+              fields={configFields}
+              config={editConfig}
+              onChange={setEditConfig}
+            />
+          )}
           <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
             Bookmark name
             <input
