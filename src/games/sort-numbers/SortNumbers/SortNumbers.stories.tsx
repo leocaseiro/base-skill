@@ -101,3 +101,68 @@ export const DistractorsFullRange: Story = {
     },
   },
 };
+
+export const SimpleNoDistractors: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      configMode: 'simple',
+      direction: 'ascending',
+      quantity: 5,
+      skip: { mode: 'by', step: 2, start: 2 },
+      range: { min: 2, max: 10 },
+      tileBankMode: 'exact',
+      totalRounds: 1,
+      rounds: [{ sequence: [2, 4, 6, 8, 10] }],
+    },
+  },
+};
+
+export const SimpleWithDistractors: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      configMode: 'simple',
+      direction: 'ascending',
+      quantity: 5,
+      skip: { mode: 'by', step: 2, start: 2 },
+      range: { min: 2, max: 10 },
+      tileBankMode: 'distractors',
+      distractors: { source: 'gaps-only', count: 'all' },
+      totalRounds: 1,
+      rounds: [{ sequence: [2, 4, 6, 8, 10] }],
+    },
+  },
+};
+
+export const SimpleDescending: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      configMode: 'simple',
+      direction: 'descending',
+      quantity: 5,
+      skip: { mode: 'by', step: 2, start: 2 },
+      range: { min: 2, max: 10 },
+      tileBankMode: 'exact',
+      totalRounds: 1,
+      rounds: [{ sequence: [2, 4, 6, 8, 10] }],
+    },
+  },
+};
+
+export const AdvancedWithFixedStart: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      configMode: 'advanced',
+      skip: { mode: 'by', step: 2, start: 3 },
+      range: { min: 1, max: 20 },
+      rounds: [
+        { sequence: [3, 5, 7, 9] },
+        { sequence: [3, 5, 7, 9] },
+        { sequence: [3, 5, 7, 9] },
+      ],
+    },
+  },
+};
