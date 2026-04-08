@@ -1,5 +1,6 @@
 // src/components/game/GameShell.test.tsx
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   afterEach,
   beforeEach,
@@ -154,5 +155,51 @@ describe('GameShell', () => {
     expect(
       screen.getByRole('button', { name: /exit/i }),
     ).toBeInTheDocument();
+  });
+
+  it('opens exit confirmation dialog when Exit is clicked', async () => {
+    renderShell();
+    await userEvent.click(
+      screen.getByRole('button', { name: /exit/i }),
+    );
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    expect(
+      screen.getByText(/want to leave the game/i),
+    ).toBeInTheDocument();
+  });
+
+  it('opens exit confirmation dialog when header Back is clicked', async () => {
+    renderShell();
+    await userEvent.click(
+      screen.getByRole('button', { name: /back/i }),
+    );
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+  });
+
+  it('closes dialog when Keep Playing is clicked', async () => {
+    renderShell();
+    await userEvent.click(
+      screen.getByRole('button', { name: /exit/i }),
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /keep playing/i }),
+    );
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('marks session abandoned in DB when Leave Game is clicked', async () => {
+    renderShell();
+    await userEvent.click(
+      screen.getByRole('button', { name: /exit/i }),
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /leave game/i }),
+    );
+
+    // Session should be abandoned in DB
+    const index = await db.session_history_index
+      .findOne('sess-shell-001')
+      .exec();
+    expect(index?.status).toBe('abandoned');
   });
 });
