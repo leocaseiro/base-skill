@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { useEffect } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { LetterTileBank } from './LetterTileBank';
 import type {
@@ -32,6 +33,17 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
     i18n: { language: 'en' },
+  }),
+}));
+
+const bankDropState = vi.hoisted(() => ({ isDragOver: false }));
+
+vi.mock('@/components/answer-game/useBankDropTarget', () => ({
+  useBankDropTarget: () => ({
+    bankRef: { current: null },
+    get isDragOver() {
+      return bankDropState.isDragOver;
+    },
   }),
 }));
 
@@ -76,6 +88,52 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 describe('LetterTileBank', () => {
+  it('shows dashed hole preview when a slot tile is dragged over the bank (isDragOver)', () => {
+    bankDropState.isDragOver = true;
+    const Preview = () => {
+      const dispatch = useAnswerGameDispatch();
+      useEffect(() => {
+        dispatch({ type: 'INIT_ROUND', tiles, zones });
+        dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't1' });
+      }, [dispatch]);
+      return <LetterTileBank />;
+    };
+    const { container } = render(
+      <AnswerGameProvider config={config}>
+        <Preview />
+      </AnswerGameProvider>,
+    );
+    const hole = container.querySelector('[data-tile-bank-hole="t1"]');
+    expect(hole?.className).toMatch(/border-dashed/);
+    expect(hole?.textContent).toContain('c');
+    bankDropState.isDragOver = false;
+  });
+
+  it('shows dashed overlay on a bank tile when drag hovers that bank tile', () => {
+    bankDropState.isDragOver = false;
+    const Preview = () => {
+      const dispatch = useAnswerGameDispatch();
+      useEffect(() => {
+        dispatch({ type: 'INIT_ROUND', tiles, zones });
+        dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't1' });
+        dispatch({ type: 'SET_DRAG_HOVER_BANK', tileId: 't2' });
+      }, [dispatch]);
+      return <LetterTileBank />;
+    };
+    const { container } = render(
+      <AnswerGameProvider config={config}>
+        <Preview />
+      </AnswerGameProvider>,
+    );
+    const overlays = container.querySelectorAll(
+      '.border-dashed.border-primary',
+    );
+    expect(overlays.length).toBeGreaterThanOrEqual(1);
+    bankDropState.isDragOver = false;
+  });
+
   it('renders all bank tiles as buttons', () => {
     render(<LetterTileBank />, { wrapper });
     expect(

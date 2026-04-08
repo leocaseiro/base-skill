@@ -95,3 +95,30 @@ export const WithDistractors: Story = {
     ),
   ],
 };
+
+/** Slot tile `t1` is placed; dashed hover highlight on bank tile `t2` (swap / return target). */
+const DragHoverBankTileSetup = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const dispatch = useAnswerGameDispatch();
+  dispatch({ type: 'INIT_ROUND', tiles, zones });
+  dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+  dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't1' });
+  dispatch({ type: 'SET_DRAG_HOVER_BANK', tileId: 't2' });
+  return <>{children}</>;
+};
+
+export const DragHoverBankTile: Story = {
+  decorators: [
+    withDb,
+    (Story) => (
+      <AnswerGameProvider config={config}>
+        <DragHoverBankTileSetup>
+          <Story />
+        </DragHoverBankTileSetup>
+      </AnswerGameProvider>
+    ),
+  ],
+};
