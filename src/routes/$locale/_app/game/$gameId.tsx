@@ -240,6 +240,22 @@ const resolveSortNumbersConfig = (
   const tr = Math.max(1, merged.totalRounds);
   merged.totalRounds = tr;
 
+  // Normalize skip: mode 'by' requires step and start.
+  // When the config form changes mode to 'by' it only sets mode, leaving
+  // step/start undefined. Guard here so generateSortRounds never receives NaN.
+  if (merged.skip.mode === 'by') {
+    const partial = merged.skip as {
+      mode: 'by';
+      step?: number;
+      start?: 'range-min' | 'random';
+    };
+    merged.skip = {
+      mode: 'by',
+      step: typeof partial.step === 'number' ? partial.step : 2,
+      start: partial.start ?? 'range-min',
+    };
+  }
+
   const roundsStale =
     Array.isArray(merged.rounds) &&
     merged.rounds.some(
