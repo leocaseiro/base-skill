@@ -149,20 +149,14 @@ export const NumeralTileBank = ({
         const numericValue = Number.parseInt(tile.value, 10);
         const isDomino = getIsDomino(tileStyle, numericValue);
         const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
-        const hoverClass = isHoverTarget
-          ? ' border-2 border-dashed border-primary'
-          : '';
 
         if (inBank) {
           return (
             <div
               key={tile.id}
               className={[
-                'relative transition-all',
+                'relative rounded-2xl transition-all',
                 holeSizeClass,
-                isHoverTarget
-                  ? 'rounded-2xl ring-2 ring-primary ring-offset-2'
-                  : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
@@ -172,7 +166,6 @@ export const NumeralTileBank = ({
                 className={[
                   'rounded-2xl bg-muted/60 shadow-inner',
                   holeSizeClass,
-                  hoverClass,
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -184,6 +177,12 @@ export const NumeralTileBank = ({
               >
                 <NumeralTile tile={tile} tileStyle={tileStyle} />
               </div>
+              {isHoverTarget && (
+                <div
+                  className="pointer-events-none absolute inset-0 rounded-2xl border-2 border-dashed border-primary"
+                  aria-hidden="true"
+                />
+              )}
             </div>
           );
         }
@@ -195,7 +194,9 @@ export const NumeralTileBank = ({
             className={[
               'rounded-2xl bg-muted/60 shadow-inner transition-all',
               holeSizeClass,
-              hoverClass,
+              isHoverTarget
+                ? 'border-2 border-dashed border-primary'
+                : '',
             ]
               .filter(Boolean)
               .join(' ')}
