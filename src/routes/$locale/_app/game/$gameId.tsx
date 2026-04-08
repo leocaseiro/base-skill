@@ -31,6 +31,7 @@ import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
 import { numberMatchConfigFields } from '@/games/number-match/types';
 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
+import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
 import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
 import { wordSpellConfigFields } from '@/games/word-spell/types';
@@ -258,13 +259,11 @@ const resolveSortNumbersConfig = (
 
   const roundsStale =
     Array.isArray(merged.rounds) &&
-    merged.rounds.some(
-      (r) =>
-        r.sequence.length !== merged.quantity ||
-        r.sequence.some(
-          (v) => v < merged.range.min || v > merged.range.max,
-        ),
-    );
+    isRoundsStale(merged.rounds, {
+      quantity: merged.quantity,
+      range: merged.range,
+      skip: merged.skip,
+    });
 
   if (
     !Array.isArray(merged.rounds) ||
