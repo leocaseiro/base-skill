@@ -288,6 +288,9 @@ const resolveSortNumbersConfig = (
     });
   }
 
+  // Advanced configs don't support level mode — clear the leaked base default.
+  merged.levelMode = undefined;
+
   return merged;
 };
 
