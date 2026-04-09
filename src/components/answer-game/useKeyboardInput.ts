@@ -25,12 +25,13 @@ export const useKeyboardInput = (): void => {
         return;
       if (event.target instanceof HTMLTextAreaElement) return;
 
-      // Tab / Shift+Tab: navigate between slots like input fields
+      // Tab / Shift+Tab: navigate between slots like input fields.
+      // At the boundaries, let focus escape to the rest of the page.
       if (event.key === 'Tab') {
-        event.preventDefault();
         const delta = event.shiftKey ? -1 : 1;
         const next = state.activeSlotIndex + delta;
         if (next >= 0 && next < state.zones.length) {
+          event.preventDefault();
           dispatch({ type: 'SET_ACTIVE_SLOT', zoneIndex: next });
         }
         return;
