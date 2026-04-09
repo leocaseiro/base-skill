@@ -658,7 +658,7 @@ describe('answerGameReducer', () => {
       expect(state.activeSlotIndex).toBe(1);
     });
 
-    it('does nothing when zone is locked', () => {
+    it('replaces a wrong locked tile when typing over it', () => {
       let state = answerGameReducer(
         makeInitialState(lockManualConfig),
         {
@@ -674,14 +674,21 @@ describe('answerGameReducer', () => {
         value: 'X',
         zoneIndex: 0,
       });
-      // Try to type again on the locked slot
+      // Type again on the locked wrong slot — should replace
       const next = answerGameReducer(state, {
         type: 'TYPE_TILE',
         tileId: 'typed-2',
         value: 'Y',
         zoneIndex: 0,
       });
-      expect(next).toBe(state);
+      expect(next.zones[0].placedTileId).toBe('typed-2');
+      // Old virtual tile cleaned up
+      expect(
+        next.allTiles.find((t) => t.id === 'typed-1'),
+      ).toBeUndefined();
+      expect(
+        next.allTiles.find((t) => t.id === 'typed-2'),
+      ).toBeDefined();
     });
 
     it('with reject behavior: increments retryCount but does not place', () => {

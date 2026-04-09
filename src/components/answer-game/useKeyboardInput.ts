@@ -19,10 +19,22 @@ export const useKeyboardInput = (): void => {
       if (
         event.target instanceof HTMLInputElement &&
         event.key !== 'Backspace' &&
-        event.key !== 'Delete'
+        event.key !== 'Delete' &&
+        event.key !== 'Tab'
       )
         return;
       if (event.target instanceof HTMLTextAreaElement) return;
+
+      // Tab / Shift+Tab: navigate between slots
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        const delta = event.shiftKey ? -1 : 1;
+        const next = state.activeSlotIndex + delta;
+        if (next >= 0 && next < state.zones.length) {
+          dispatch({ type: 'SET_ACTIVE_SLOT', zoneIndex: next });
+        }
+        return;
+      }
 
       // Backspace / Delete: eject the most recently filled *wrong* slot
       if (event.key === 'Backspace' || event.key === 'Delete') {
