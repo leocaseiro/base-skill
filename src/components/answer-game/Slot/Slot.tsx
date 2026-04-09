@@ -56,6 +56,12 @@ export const Slot = ({
           : isWrong
             ? 'border-destructive bg-destructive/10 text-destructive'
             : 'border-primary bg-primary/10 text-primary',
+    // Focus ring on filled active slot (wrong = destructive, correct = primary)
+    !isEmpty && showCursor && isWrong
+      ? 'ring-2 ring-destructive ring-offset-2'
+      : !isEmpty && showCursor && !isWrong
+        ? 'ring-2 ring-primary ring-offset-2'
+        : '',
   ]
     .filter(Boolean)
     .join(' ');
