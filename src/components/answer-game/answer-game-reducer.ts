@@ -27,6 +27,34 @@ export function makeInitialState(
   };
 }
 
+/**
+ * Find the best next activeSlotIndex after a placement or removal.
+ * Priority: first empty slot after `afterIndex`, then first empty slot
+ * anywhere, then first wrong slot anywhere. Returns `fallback` when every
+ * slot is correctly filled.
+ */
+function findNextActiveSlot(
+  zones: AnswerZone[],
+  afterIndex: number,
+  fallback: number,
+): number {
+  // 1. First empty slot after the current action
+  const nextEmpty = zones.findIndex(
+    (z, i) => i > afterIndex && z.placedTileId === null,
+  );
+  if (nextEmpty !== -1) return nextEmpty;
+
+  // 2. First empty slot anywhere (wraps around)
+  const anyEmpty = zones.findIndex((z) => z.placedTileId === null);
+  if (anyEmpty !== -1) return anyEmpty;
+
+  // 3. First wrong slot anywhere (so user can retype)
+  const anyWrong = zones.findIndex((z) => z.isWrong);
+  if (anyWrong !== -1) return anyWrong;
+
+  return fallback;
+}
+
 function resolveCompletionPhase(
   state: AnswerGameState,
 ): AnswerGamePhase {
@@ -80,37 +108,49 @@ export function answerGameReducer(
 
       if (correct) {
         const previousId = zone.placedTileId;
+        const prevIsVirtual = previousId?.startsWith('typed-');
         let newBankTileIds = state.bankTileIds.filter(
           (id) => id !== action.tileId,
         );
-        if (previousId !== null && previousId !== action.tileId) {
-          // Bank tile dropped on an occupied slot: previous occupant returns to bank.
+        if (
+          previousId !== null &&
+          previousId !== action.tileId && // Virtual tiles are discarded; real tiles return to the bank.
+          !prevIsVirtual
+        ) {
           newBankTileIds = [...newBankTileIds, previousId];
         }
+        // Remove displaced virtual tile from allTiles
+        const newAllTiles = prevIsVirtual
+          ? state.allTiles.filter((t) => t.id !== previousId)
+          : state.allTiles;
         const newZone: AnswerZone = {
           ...zone,
           placedTileId: action.tileId,
           isWrong: false,
           isLocked: false,
         };
-        const newZones = state.zones.map((z, i) =>
-          i === action.zoneIndex ? newZone : z,
-        );
-        const nextActiveSlot = newZones.findIndex(
-          (z, i) => i > action.zoneIndex && z.placedTileId === null,
-        );
+        const newZones =
+          newAllTiles === state.allTiles
+            ? state.zones.map((z, i) =>
+                i === action.zoneIndex ? newZone : z,
+              )
+            : state.zones.map((z, i) =>
+                i === action.zoneIndex ? newZone : z,
+              );
         const allFilledCorrectly = newZones.every(
           (z) => z.placedTileId !== null && !z.isWrong,
         );
         return {
           ...state,
+          allTiles: newAllTiles,
           dragActiveTileId,
           zones: newZones,
           bankTileIds: newBankTileIds,
-          activeSlotIndex:
-            nextActiveSlot === -1
-              ? state.activeSlotIndex
-              : nextActiveSlot,
+          activeSlotIndex: findNextActiveSlot(
+            newZones,
+            action.zoneIndex,
+            state.activeSlotIndex,
+          ),
           retryCount: state.retryCount,
           phase: allFilledCorrectly
             ? resolveCompletionPhase(state)
@@ -121,6 +161,8 @@ export function answerGameReducer(
       const shouldLock =
         state.config.wrongTileBehavior === 'lock-manual' ||
         state.config.wrongTileBehavior === 'lock-auto-eject';
+      const previousId = zone.placedTileId;
+      const prevIsVirtual = previousId?.startsWith('typed-');
       const newZone: AnswerZone = {
         ...zone,
         placedTileId: shouldLock ? action.tileId : zone.placedTileId,
@@ -135,17 +177,100 @@ export function answerGameReducer(
         : state.bankTileIds;
       if (
         shouldLock &&
-        zone.placedTileId &&
-        zone.placedTileId !== action.tileId
+        previousId &&
+        previousId !== action.tileId && // Virtual tiles are discarded; real tiles return to the bank.
+        !prevIsVirtual
       ) {
-        newBankTileIds = [...newBankTileIds, zone.placedTileId];
+        newBankTileIds = [...newBankTileIds, previousId];
+      }
+      // Remove displaced virtual tile from allTiles
+      const newAllTiles =
+        shouldLock && prevIsVirtual
+          ? state.allTiles.filter((t) => t.id !== previousId)
+          : state.allTiles;
+
+      return {
+        ...state,
+        allTiles: newAllTiles,
+        dragActiveTileId,
+        zones: newZones,
+        bankTileIds: newBankTileIds,
+        activeSlotIndex: state.activeSlotIndex,
+        retryCount: state.retryCount + 1,
+        phase: 'playing',
+      };
+    }
+
+    case 'TYPE_TILE': {
+      const zone = state.zones[action.zoneIndex];
+      if (!zone) return state;
+      // Allow typing over wrong locked tiles to replace them;
+      // only block correctly-locked tiles (shouldn't exist, but be safe).
+      if (zone.isLocked && !zone.isWrong) return state;
+
+      const virtualTile: TileItem = {
+        id: action.tileId,
+        label: action.value,
+        value: action.value,
+      };
+      const correct =
+        action.value.toLowerCase() === zone.expectedValue.toLowerCase();
+
+      if (!correct && state.config.wrongTileBehavior === 'reject') {
+        return {
+          ...state,
+          retryCount: state.retryCount + 1,
+        };
+      }
+
+      // Clean up the previous wrong virtual tile being replaced
+      const previousId = zone.placedTileId;
+      const prevIsVirtual = previousId?.startsWith('typed-');
+      const baseTiles = prevIsVirtual
+        ? state.allTiles.filter((t) => t.id !== previousId)
+        : state.allTiles;
+      // If replacing a real (non-virtual) tile, return it to the bank
+      let baseBankTileIds = state.bankTileIds;
+      if (previousId && !prevIsVirtual) {
+        baseBankTileIds = [...baseBankTileIds, previousId];
+      }
+
+      const newAllTiles = [...baseTiles, virtualTile];
+      const newZone: AnswerZone = {
+        ...zone,
+        placedTileId: action.tileId,
+        isWrong: !correct,
+        isLocked: !correct,
+      };
+      const newZones = state.zones.map((z, i) =>
+        i === action.zoneIndex ? newZone : z,
+      );
+
+      if (correct) {
+        const allFilledCorrectly = newZones.every(
+          (z) => z.placedTileId !== null && !z.isWrong,
+        );
+        return {
+          ...state,
+          allTiles: newAllTiles,
+          bankTileIds: baseBankTileIds,
+          zones: newZones,
+          activeSlotIndex: findNextActiveSlot(
+            newZones,
+            action.zoneIndex,
+            state.activeSlotIndex,
+          ),
+          phase: allFilledCorrectly
+            ? resolveCompletionPhase(state)
+            : 'playing',
+        };
       }
 
       return {
         ...state,
-        dragActiveTileId,
+        allTiles: newAllTiles,
+        bankTileIds: baseBankTileIds,
         zones: newZones,
-        bankTileIds: newBankTileIds,
         activeSlotIndex: state.activeSlotIndex,
         retryCount: state.retryCount + 1,
         phase: 'playing',
@@ -156,12 +281,18 @@ export function answerGameReducer(
       const zone = state.zones[action.zoneIndex];
       if (!zone?.placedTileId) return state;
       const removedTileId = zone.placedTileId;
+      // Virtual tiles (created by TYPE_TILE) are removed from allTiles
+      // and NOT returned to the bank.
+      const isVirtual = removedTileId.startsWith('typed-');
       return {
         ...state,
         dragActiveTileId:
           state.dragActiveTileId === removedTileId
             ? null
             : state.dragActiveTileId,
+        allTiles: isVirtual
+          ? state.allTiles.filter((t) => t.id !== removedTileId)
+          : state.allTiles,
         zones: state.zones.map((z, i) =>
           i === action.zoneIndex
             ? {
@@ -172,7 +303,11 @@ export function answerGameReducer(
               }
             : z,
         ),
-        bankTileIds: [...state.bankTileIds, removedTileId],
+        bankTileIds: isVirtual
+          ? state.bankTileIds
+          : [...state.bankTileIds, removedTileId],
+        // Move cursor to the cleared slot so the user can retype
+        activeSlotIndex: action.zoneIndex,
       };
     }
 
@@ -253,6 +388,7 @@ export function answerGameReducer(
 
       if (zone.placedTileId) {
         const ejectedTileId = zone.placedTileId;
+        const isVirtual = ejectedTileId.startsWith('typed-');
         return {
           ...state,
           // If the ejected tile was mid-drag, clear drag state so the bank
@@ -261,6 +397,9 @@ export function answerGameReducer(
             state.dragActiveTileId === ejectedTileId
               ? null
               : state.dragActiveTileId,
+          allTiles: isVirtual
+            ? state.allTiles.filter((t) => t.id !== ejectedTileId)
+            : state.allTiles,
           zones: state.zones.map((z, i) =>
             i === action.zoneIndex
               ? {
@@ -271,7 +410,11 @@ export function answerGameReducer(
                 }
               : z,
           ),
-          bankTileIds: [...state.bankTileIds, ejectedTileId],
+          bankTileIds: isVirtual
+            ? state.bankTileIds
+            : [...state.bankTileIds, ejectedTileId],
+          // Move cursor to the ejected slot
+          activeSlotIndex: action.zoneIndex,
         };
       }
 
@@ -287,6 +430,8 @@ export function answerGameReducer(
               }
             : z,
         ),
+        // Move cursor to the ejected slot
+        activeSlotIndex: action.zoneIndex,
       };
     }
 
@@ -366,6 +511,14 @@ export function answerGameReducer(
         dragActiveTileId: null,
         dragHoverBankTileId: null,
       };
+    }
+
+    case 'SET_ACTIVE_SLOT': {
+      const clamped = Math.max(
+        0,
+        Math.min(action.zoneIndex, state.zones.length - 1),
+      );
+      return { ...state, activeSlotIndex: clamped };
     }
 
     default: {

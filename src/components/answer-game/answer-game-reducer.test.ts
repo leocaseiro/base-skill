@@ -602,4 +602,168 @@ describe('answerGameReducer', () => {
     });
     expect(state.dragHoverZoneIndex).toBeNull();
   });
+
+  describe('TYPE_TILE (free-typing virtual tiles)', () => {
+    const lockManualConfig: AnswerGameConfig = {
+      ...config,
+      wrongTileBehavior: 'lock-manual',
+    };
+
+    it('creates a virtual tile and places it as wrong/locked when value does not match', () => {
+      let state = answerGameReducer(
+        makeInitialState(lockManualConfig),
+        {
+          type: 'INIT_ROUND',
+          tiles,
+          zones,
+        },
+      );
+      state = answerGameReducer(state, {
+        type: 'TYPE_TILE',
+        tileId: 'typed-abc',
+        value: 'P',
+        zoneIndex: 0,
+      });
+      expect(state.zones[0]!.placedTileId).toBe('typed-abc');
+      expect(state.zones[0]!.isWrong).toBe(true);
+      expect(state.zones[0]!.isLocked).toBe(true);
+      expect(state.allTiles).toContainEqual({
+        id: 'typed-abc',
+        label: 'P',
+        value: 'P',
+      });
+      // Virtual tile should NOT be in bankTileIds
+      expect(state.bankTileIds).not.toContain('typed-abc');
+      expect(state.retryCount).toBe(1);
+    });
+
+    it('creates a virtual tile as correct when value matches zone', () => {
+      let state = answerGameReducer(
+        makeInitialState(lockManualConfig),
+        {
+          type: 'INIT_ROUND',
+          tiles,
+          zones,
+        },
+      );
+      state = answerGameReducer(state, {
+        type: 'TYPE_TILE',
+        tileId: 'typed-correct',
+        value: 'C',
+        zoneIndex: 0,
+      });
+      expect(state.zones[0]!.placedTileId).toBe('typed-correct');
+      expect(state.zones[0]!.isWrong).toBe(false);
+      expect(state.zones[0]!.isLocked).toBe(false);
+      expect(state.activeSlotIndex).toBe(1);
+    });
+
+    it('replaces a wrong locked tile when typing over it', () => {
+      let state = answerGameReducer(
+        makeInitialState(lockManualConfig),
+        {
+          type: 'INIT_ROUND',
+          tiles,
+          zones,
+        },
+      );
+      // Place a wrong tile first
+      state = answerGameReducer(state, {
+        type: 'TYPE_TILE',
+        tileId: 'typed-1',
+        value: 'X',
+        zoneIndex: 0,
+      });
+      // Type again on the locked wrong slot — should replace
+      const next = answerGameReducer(state, {
+        type: 'TYPE_TILE',
+        tileId: 'typed-2',
+        value: 'Y',
+        zoneIndex: 0,
+      });
+      expect(next.zones[0]?.placedTileId).toBe('typed-2');
+      // Old virtual tile cleaned up
+      expect(
+        next.allTiles.find((t) => t.id === 'typed-1'),
+      ).toBeUndefined();
+      expect(
+        next.allTiles.find((t) => t.id === 'typed-2'),
+      ).toBeDefined();
+    });
+
+    it('with reject behavior: increments retryCount but does not place', () => {
+      const rejectConfig: AnswerGameConfig = {
+        ...config,
+        wrongTileBehavior: 'reject',
+      };
+      let state = answerGameReducer(makeInitialState(rejectConfig), {
+        type: 'INIT_ROUND',
+        tiles,
+        zones,
+      });
+      state = answerGameReducer(state, {
+        type: 'TYPE_TILE',
+        tileId: 'typed-rej',
+        value: 'Z',
+        zoneIndex: 0,
+      });
+      expect(state.zones[0]!.placedTileId).toBeNull();
+      expect(state.retryCount).toBe(1);
+    });
+
+    it('REMOVE_TILE on virtual tile: removes from allTiles, does NOT add to bank', () => {
+      let state = answerGameReducer(
+        makeInitialState(lockManualConfig),
+        {
+          type: 'INIT_ROUND',
+          tiles,
+          zones,
+        },
+      );
+      state = answerGameReducer(state, {
+        type: 'TYPE_TILE',
+        tileId: 'typed-rm',
+        value: 'X',
+        zoneIndex: 0,
+      });
+      const allTilesBefore = state.allTiles.length;
+      state = answerGameReducer(state, {
+        type: 'REMOVE_TILE',
+        zoneIndex: 0,
+      });
+      expect(state.zones[0]!.placedTileId).toBeNull();
+      expect(state.allTiles.length).toBe(allTilesBefore - 1);
+      expect(
+        state.allTiles.find((t) => t.id === 'typed-rm'),
+      ).toBeUndefined();
+      expect(state.bankTileIds).not.toContain('typed-rm');
+    });
+
+    it('EJECT_TILE on virtual tile: removes from allTiles, does NOT add to bank', () => {
+      const autoEjectConfig: AnswerGameConfig = {
+        ...config,
+        wrongTileBehavior: 'lock-auto-eject',
+      };
+      let state = answerGameReducer(makeInitialState(autoEjectConfig), {
+        type: 'INIT_ROUND',
+        tiles,
+        zones,
+      });
+      state = answerGameReducer(state, {
+        type: 'TYPE_TILE',
+        tileId: 'typed-ej',
+        value: 'X',
+        zoneIndex: 0,
+      });
+      state = answerGameReducer(state, {
+        type: 'EJECT_TILE',
+        zoneIndex: 0,
+      });
+      expect(state.zones[0]!.placedTileId).toBeNull();
+      expect(
+        state.allTiles.find((t) => t.id === 'typed-ej'),
+      ).toBeUndefined();
+      expect(state.bankTileIds).not.toContain('typed-ej');
+    });
+  });
 });
