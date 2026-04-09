@@ -47,10 +47,11 @@ export const useTouchKeyboardInput = (): TouchKeyboardInput => {
       const inputEvent = event as InputEvent;
 
       // Backspace / Delete inside the hidden input: eject the most
-      // recently filled slot, mirroring physical keyboard behaviour.
+      // recently filled *wrong* slot, mirroring physical keyboard behaviour.
       if (inputEvent.inputType === 'deleteContentBackward') {
         for (let i = state.activeSlotIndex; i >= 0; i--) {
-          if (state.zones[i]?.placedTileId) {
+          const zone = state.zones[i];
+          if (zone?.placedTileId && (zone.isWrong || zone.isLocked)) {
             dispatch({ type: 'REMOVE_TILE', zoneIndex: i });
             return;
           }
