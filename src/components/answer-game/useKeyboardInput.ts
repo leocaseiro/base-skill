@@ -20,15 +20,16 @@ export const useKeyboardInput = (): void => {
         event.target instanceof HTMLInputElement &&
         event.key !== 'Backspace' &&
         event.key !== 'Delete' &&
-        event.key !== 'Tab'
+        event.key !== 'ArrowLeft' &&
+        event.key !== 'ArrowRight'
       )
         return;
       if (event.target instanceof HTMLTextAreaElement) return;
 
-      // Tab / Shift+Tab: navigate between slots
-      if (event.key === 'Tab') {
-        event.preventDefault();
-        const delta = event.shiftKey ? -1 : 1;
+      // Arrow keys: navigate between slots (WCAG — Tab moves between
+      // widgets, arrows navigate within a widget)
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        const delta = event.key === 'ArrowLeft' ? -1 : 1;
         const next = state.activeSlotIndex + delta;
         if (next >= 0 && next < state.zones.length) {
           dispatch({ type: 'SET_ACTIVE_SLOT', zoneIndex: next });
