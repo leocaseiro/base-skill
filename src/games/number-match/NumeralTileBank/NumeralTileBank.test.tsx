@@ -2,11 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useEffect } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  DiceFace,
-  DominoTile,
-  NumeralTileBank,
-} from './NumeralTileBank';
+import { DominoTile, NumeralTileBank } from './NumeralTileBank';
 import type {
   AnswerGameConfig,
   AnswerZone,
@@ -96,30 +92,28 @@ function wrapper({ children }: { children: ReactNode }) {
   );
 }
 
-describe('DiceFace', () => {
-  it('renders 1 pip for value 1', () => {
-    const { container } = render(<DiceFace value={1} />);
+describe('DominoTile', () => {
+  it('renders 1 pip for value 1 (1+0 split)', () => {
+    const { container } = render(<DominoTile value={1} />);
     expect(container.querySelectorAll('[data-pip]')).toHaveLength(1);
   });
 
-  it('renders 6 pips for value 6', () => {
-    const { container } = render(<DiceFace value={6} />);
+  it('renders 6 pips for value 6 (6+0 split)', () => {
+    const { container } = render(<DominoTile value={6} />);
     expect(container.querySelectorAll('[data-pip]')).toHaveLength(6);
   });
 
-  it('renders 9 cells in the 3×3 grid', () => {
-    const { container } = render(<DiceFace value={1} />);
-    expect(container.querySelectorAll('[data-cell]')).toHaveLength(9);
+  it('renders 18 cells (two 3×3 grids) for any value', () => {
+    const { container } = render(<DominoTile value={1} />);
+    expect(container.querySelectorAll('[data-cell]')).toHaveLength(18);
   });
-});
 
-describe('DominoTile', () => {
-  it('renders 7 pips for value 7 (4+3)', () => {
+  it('renders 7 pips for value 7 (2+5 split)', () => {
     const { container } = render(<DominoTile value={7} />);
     expect(container.querySelectorAll('[data-pip]')).toHaveLength(7);
   });
 
-  it('renders 12 pips for value 12 (6+6)', () => {
+  it('renders 12 pips for value 12 (6+6 split)', () => {
     const { container } = render(<DominoTile value={12} />);
     expect(container.querySelectorAll('[data-pip]')).toHaveLength(12);
   });
@@ -129,6 +123,12 @@ describe('DominoTile', () => {
     expect(
       container.querySelector('[data-divider]'),
     ).toBeInTheDocument();
+  });
+
+  it('renders 0 pips on bottom half for values 1-6', () => {
+    const { container } = render(<DominoTile value={3} />);
+    // Two DiceFace grids: top has 3 pips, bottom has 0 pips
+    expect(container.querySelectorAll('[data-pip]')).toHaveLength(3);
   });
 });
 

@@ -6,14 +6,9 @@ import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
 
 type TileStyle = 'dots' | 'objects' | 'fingers';
 
-const getIsDomino = (tileStyle: TileStyle, numericValue: number) =>
-  tileStyle === 'dots' &&
-  !Number.isNaN(numericValue) &&
-  numericValue > 6 &&
-  numericValue <= 12;
-
 /** Pip positions (0–8) for each die value in a 3×3 grid. */
 const DICE_PIPS: Record<number, number[]> = {
+  0: [],
   1: [4],
   2: [2, 6],
   3: [2, 4, 6],
@@ -22,17 +17,24 @@ const DICE_PIPS: Record<number, number[]> = {
   6: [0, 2, 3, 5, 6, 8],
 };
 
-/** Which two die values add up to n for values 7–12. */
+/** Top/bottom split for domino tiles (smaller value on top). */
 const DOMINO_SPLIT: Record<number, [number, number]> = {
-  7: [4, 3],
+  1: [1, 0],
+  2: [2, 0],
+  3: [3, 0],
+  4: [4, 0],
+  5: [5, 0],
+  6: [6, 0],
+  7: [2, 5],
   8: [4, 4],
-  9: [5, 4],
-  10: [6, 4],
-  11: [6, 5],
+  9: [4, 5],
+  10: [5, 5],
+  11: [5, 6],
   12: [6, 6],
 };
 
-export const DiceFace = ({ value }: { value: number }) => {
+/** Renders one half of a domino (a 3x3 pip grid). Internal only. */
+const DiceFace = ({ value }: { value: number }) => {
   const pips = DICE_PIPS[value] ?? [];
   return (
     <div
@@ -55,15 +57,15 @@ export const DiceFace = ({ value }: { value: number }) => {
 };
 
 export const DominoTile = ({ value }: { value: number }) => {
-  const [left, right] = DOMINO_SPLIT[value] ?? [6, value - 6];
+  const [top, bottom] = DOMINO_SPLIT[value] ?? [value, 0];
   return (
-    <div className="flex items-center gap-0" aria-hidden="true">
-      <DiceFace value={left} />
+    <div className="flex flex-col items-center py-3" aria-hidden="true">
+      <DiceFace value={top} />
       <span
         data-divider=""
-        className="h-10 w-px shrink-0 bg-current opacity-30"
+        className="h-px w-11 shrink-0 bg-current opacity-30"
       />
-      <DiceFace value={right} />
+      <DiceFace value={bottom} />
     </div>
   );
 };
@@ -85,7 +87,7 @@ const NumeralTile = ({
   } = useDraggableTile(tile);
   const numericValue = Number.parseInt(tile.value, 10);
 
-  const isDomino = getIsDomino(tileStyle, numericValue);
+  const isDots = tileStyle === 'dots' && !Number.isNaN(numericValue);
 
   return (
     <button
@@ -94,7 +96,7 @@ const NumeralTile = ({
       aria-label={`Number ${tile.label}`}
       className={[
         'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl p-2 transition-transform active:scale-95 active:cursor-grabbing',
-        isDomino ? 'h-[72px] w-32' : 'size-20',
+        isDots ? 'h-[136px] w-[72px]' : 'size-20',
       ].join(' ')}
       style={skeuoStyle}
       onClick={handleClick}
@@ -103,16 +105,8 @@ const NumeralTile = ({
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
     >
-      {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
-        numericValue <= 6 ? (
-          <DiceFace value={numericValue} />
-        ) : numericValue <= 12 ? (
-          <DominoTile value={numericValue} />
-        ) : (
-          <span className="text-3xl font-bold tabular-nums leading-none">
-            {tile.label}
-          </span>
-        )
+      {isDots ? (
+        <DominoTile value={numericValue} />
       ) : (
         <span className="text-3xl font-bold tabular-nums leading-none">
           {tile.label}
@@ -154,8 +148,11 @@ export const NumeralTileBank = ({
               !inBank &&
               tile.id === dragActiveTileId);
           const numericValue = Number.parseInt(tile.value, 10);
-          const isDomino = getIsDomino(tileStyle, numericValue);
-          const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
+          const isDots =
+            tileStyle === 'dots' && !Number.isNaN(numericValue);
+          const holeSizeClass = isDots
+            ? 'h-[136px] w-[72px]'
+            : 'size-20';
 
           if (inBank) {
             return (
