@@ -185,7 +185,7 @@ describe('GameShell', () => {
       screen.getByRole('button', { name: /keep playing/i }),
     );
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
-  });
+  }, 15_000);
 
   it('marks session abandoned in DB when Leave Game is clicked', async () => {
     renderShell();

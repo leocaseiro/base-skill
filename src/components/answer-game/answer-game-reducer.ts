@@ -21,6 +21,8 @@ export function makeInitialState(
     phase: 'playing',
     roundIndex: 0,
     retryCount: 0,
+    levelIndex: 0,
+    isLevelMode: config.levelMode !== undefined,
   };
 }
 
@@ -293,6 +295,20 @@ export function answerGameReducer(
         phase: 'playing',
         roundIndex: state.roundIndex + 1,
         retryCount: 0,
+      };
+    }
+
+    case 'ADVANCE_LEVEL': {
+      return {
+        ...state,
+        allTiles: action.tiles,
+        bankTileIds: action.tiles.map((t: TileItem) => t.id),
+        zones: action.zones,
+        activeSlotIndex: 0,
+        phase: 'playing',
+        roundIndex: 0,
+        retryCount: 0,
+        levelIndex: state.levelIndex + 1,
       };
     }
 
