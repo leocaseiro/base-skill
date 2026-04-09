@@ -681,7 +681,7 @@ describe('answerGameReducer', () => {
         value: 'Y',
         zoneIndex: 0,
       });
-      expect(next.zones[0].placedTileId).toBe('typed-2');
+      expect(next.zones[0]?.placedTileId).toBe('typed-2');
       // Old virtual tile cleaned up
       expect(
         next.allTiles.find((t) => t.id === 'typed-1'),
