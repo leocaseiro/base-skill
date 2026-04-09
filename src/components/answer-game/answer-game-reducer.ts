@@ -1,6 +1,7 @@
 import type {
   AnswerGameAction,
   AnswerGameConfig,
+  AnswerGamePhase,
   AnswerGameState,
   AnswerZone,
   TileItem,
@@ -24,6 +25,18 @@ export function makeInitialState(
     levelIndex: 0,
     isLevelMode: config.levelMode !== undefined,
   };
+}
+
+function resolveCompletionPhase(
+  state: AnswerGameState,
+): AnswerGamePhase {
+  const isLastRound = state.roundIndex >= state.config.totalRounds - 1;
+  if (!isLastRound) return 'round-complete';
+  if (!state.isLevelMode) return 'game-over';
+  const maxLevels = state.config.levelMode?.maxLevels;
+  if (maxLevels && state.levelIndex + 1 >= maxLevels)
+    return 'game-over';
+  return 'level-complete';
 }
 
 export function answerGameReducer(
@@ -89,8 +102,6 @@ export function answerGameReducer(
         const allFilledCorrectly = newZones.every(
           (z) => z.placedTileId !== null && !z.isWrong,
         );
-        const isLastRound =
-          state.roundIndex >= state.config.totalRounds - 1;
         return {
           ...state,
           dragActiveTileId,
@@ -102,9 +113,7 @@ export function answerGameReducer(
               : nextActiveSlot,
           retryCount: state.retryCount,
           phase: allFilledCorrectly
-            ? isLastRound
-              ? 'game-over'
-              : 'round-complete'
+            ? resolveCompletionPhase(state)
             : 'playing',
         };
       }
@@ -224,17 +233,13 @@ export function answerGameReducer(
       const allFilledCorrectly = newZones.every(
         (z) => z.placedTileId !== null && !z.isWrong,
       );
-      const isLastRound =
-        state.roundIndex >= state.config.totalRounds - 1;
 
       return {
         ...state,
         dragActiveTileId,
         zones: newZones,
         phase: allFilledCorrectly
-          ? isLastRound
-            ? 'game-over'
-            : 'round-complete'
+          ? resolveCompletionPhase(state)
           : 'playing',
       };
     }
@@ -307,7 +312,6 @@ export function answerGameReducer(
         activeSlotIndex: 0,
         phase: 'playing',
         roundIndex: 0,
-        retryCount: 0,
         levelIndex: state.levelIndex + 1,
       };
     }
