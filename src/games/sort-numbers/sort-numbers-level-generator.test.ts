@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createSortNumbersLevelGenerator } from './sort-numbers-level-generator';
 
 describe('createSortNumbersLevelGenerator', () => {
-  it('generates level 0 sequence correctly', () => {
+  it('generate(0) produces level 1 sequence (after completing level 0)', () => {
     const generate = createSortNumbersLevelGenerator({
       start: 2,
       step: 2,
@@ -10,24 +10,6 @@ describe('createSortNumbersLevelGenerator', () => {
       direction: 'ascending',
     });
     const result = generate(0);
-    expect(result).not.toBeNull();
-    expect(result.zones.map((z) => z.expectedValue)).toEqual([
-      '2',
-      '4',
-      '6',
-      '8',
-      '10',
-    ]);
-  });
-
-  it('generates level 1 continuing from where level 0 ended', () => {
-    const generate = createSortNumbersLevelGenerator({
-      start: 2,
-      step: 2,
-      quantity: 5,
-      direction: 'ascending',
-    });
-    const result = generate(1);
     expect(result).not.toBeNull();
     expect(result.zones.map((z) => z.expectedValue)).toEqual([
       '12',
@@ -38,14 +20,14 @@ describe('createSortNumbersLevelGenerator', () => {
     ]);
   });
 
-  it('generates level 2 continuing the pattern', () => {
+  it('generate(1) produces level 2 sequence (after completing level 1)', () => {
     const generate = createSortNumbersLevelGenerator({
       start: 2,
       step: 2,
       quantity: 5,
       direction: 'ascending',
     });
-    const result = generate(2);
+    const result = generate(1);
     expect(result).not.toBeNull();
     expect(result.zones.map((z) => z.expectedValue)).toEqual([
       '22',
@@ -56,6 +38,24 @@ describe('createSortNumbersLevelGenerator', () => {
     ]);
   });
 
+  it('generate(2) produces level 3 sequence', () => {
+    const generate = createSortNumbersLevelGenerator({
+      start: 2,
+      step: 2,
+      quantity: 5,
+      direction: 'ascending',
+    });
+    const result = generate(2);
+    expect(result).not.toBeNull();
+    expect(result.zones.map((z) => z.expectedValue)).toEqual([
+      '32',
+      '34',
+      '36',
+      '38',
+      '40',
+    ]);
+  });
+
   it('descending direction reverses expected zone order', () => {
     const generate = createSortNumbersLevelGenerator({
       start: 2,
@@ -63,12 +63,13 @@ describe('createSortNumbersLevelGenerator', () => {
       quantity: 3,
       direction: 'descending',
     });
+    // generate(0) = after completing level 0, generate level 1
     const result = generate(0);
     expect(result).not.toBeNull();
     expect(result.zones.map((z) => z.expectedValue)).toEqual([
-      '6',
-      '4',
-      '2',
+      '12',
+      '10',
+      '8',
     ]);
   });
 
