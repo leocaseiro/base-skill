@@ -107,22 +107,21 @@ export const AnswerGameProvider = ({
     total: config.totalRounds,
   };
 
-  const usesTouchKeyboard =
-    navigator.maxTouchPoints > 0 && config.inputMethod !== 'drag';
+  const usesTyping = config.inputMethod !== 'drag';
 
   return (
     <GameRoundContext.Provider value={roundProgress}>
       <AnswerGameStateContext.Provider value={state}>
         <AnswerGameDispatchContext.Provider value={dispatch}>
-          {usesTouchKeyboard ? (
+          {usesTyping ? (
             <TouchKeyboardAdapter
               inputMode={config.touchKeyboardInputMode ?? 'text'}
             >
+              <KeyboardInputAdapter />
               {children}
             </TouchKeyboardAdapter>
           ) : (
             <TouchKeyboardContext.Provider value={null}>
-              <KeyboardInputAdapter />
               {children}
             </TouchKeyboardContext.Provider>
           )}

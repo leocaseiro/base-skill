@@ -73,7 +73,7 @@ describe('AnswerGameProvider', () => {
     console.error = consoleError;
   });
 
-  it('provides null TouchKeyboardContext on non-touch devices', () => {
+  it('provides TouchKeyboardContext focusKeyboard fn for type mode on all devices', () => {
     const FocusReader = () => {
       const focusKeyboard = useTouchKeyboard();
       return (
@@ -86,6 +86,27 @@ describe('AnswerGameProvider', () => {
     render(
       <AnswerGameProvider
         config={{ ...gameConfig, inputMethod: 'type' }}
+      >
+        <FocusReader />
+      </AnswerGameProvider>,
+    );
+
+    expect(screen.getByTestId('has-focus')).toHaveTextContent('fn');
+  });
+
+  it('provides null TouchKeyboardContext for drag mode', () => {
+    const FocusReader = () => {
+      const focusKeyboard = useTouchKeyboard();
+      return (
+        <div data-testid="has-focus">
+          {focusKeyboard === null ? 'null' : 'fn'}
+        </div>
+      );
+    };
+
+    render(
+      <AnswerGameProvider
+        config={{ ...gameConfig, inputMethod: 'drag' }}
       >
         <FocusReader />
       </AnswerGameProvider>,

@@ -1,20 +1,18 @@
 import { useEffect } from 'react';
 import { useAnswerGameContext } from './useAnswerGameContext';
-import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+import { useTileEvaluation } from './useTileEvaluation';
 
 export const useKeyboardInput = (): void => {
   const state = useAnswerGameContext();
-  const dispatch = useAnswerGameDispatch();
+  const { placeTile } = useTileEvaluation();
 
   useEffect(() => {
-    if (state.config.inputMethod !== 'type') return;
+    if (state.config.inputMethod === 'drag') return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.target instanceof HTMLInputElement &&
-        !event.target.dataset['touchKeyboard']
-      )
-        return;
+      // Skip all input/textarea targets — the hidden keyboard input
+      // (useTouchKeyboardInput) handles those to avoid double-placement.
+      if (event.target instanceof HTMLInputElement) return;
       if (event.target instanceof HTMLTextAreaElement) return;
 
       const char = event.key.toLowerCase();
@@ -27,11 +25,7 @@ export const useKeyboardInput = (): void => {
       );
       if (!matchingTile) return;
 
-      dispatch({
-        type: 'PLACE_TILE',
-        tileId: matchingTile.id,
-        zoneIndex: state.activeSlotIndex,
-      });
+      placeTile(matchingTile.id, state.activeSlotIndex);
     };
 
     globalThis.addEventListener('keydown', handleKeyDown);
@@ -42,6 +36,6 @@ export const useKeyboardInput = (): void => {
     state.allTiles,
     state.bankTileIds,
     state.activeSlotIndex,
-    dispatch,
+    placeTile,
   ]);
 };
