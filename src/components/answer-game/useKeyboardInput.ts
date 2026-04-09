@@ -12,9 +12,16 @@ export const useKeyboardInput = (): void => {
     if (state.config.inputMethod === 'drag') return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Skip all input/textarea targets — the hidden keyboard input
-      // (useTouchKeyboardInput) handles those to avoid double-placement.
-      if (event.target instanceof HTMLInputElement) return;
+      // Skip input/textarea targets for character keys — the hidden
+      // keyboard input (useTouchKeyboardInput) handles those to avoid
+      // double-placement. Backspace/Delete are allowed through because
+      // an empty hidden input won't fire an input event for them.
+      if (
+        event.target instanceof HTMLInputElement &&
+        event.key !== 'Backspace' &&
+        event.key !== 'Delete'
+      )
+        return;
       if (event.target instanceof HTMLTextAreaElement) return;
 
       // Backspace / Delete: eject the most recently filled slot
