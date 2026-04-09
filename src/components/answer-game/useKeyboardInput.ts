@@ -24,11 +24,12 @@ export const useKeyboardInput = (): void => {
         return;
       if (event.target instanceof HTMLTextAreaElement) return;
 
-      // Backspace / Delete: eject the most recently filled slot
+      // Backspace / Delete: eject the most recently filled *wrong* slot
       if (event.key === 'Backspace' || event.key === 'Delete') {
-        // Search backwards from activeSlotIndex for a filled slot
+        // Search backwards from activeSlotIndex for a wrong/locked slot
         for (let i = state.activeSlotIndex; i >= 0; i--) {
-          if (state.zones[i]?.placedTileId) {
+          const zone = state.zones[i];
+          if (zone?.placedTileId && (zone.isWrong || zone.isLocked)) {
             dispatch({ type: 'REMOVE_TILE', zoneIndex: i });
             return;
           }

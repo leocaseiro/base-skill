@@ -181,6 +181,55 @@ describe('useKeyboardInput', () => {
     unmount();
   });
 
+  it('does NOT remove a correctly-placed tile on Backspace', () => {
+    const filledConfig = makeConfig('type');
+    const correctZones: AnswerZone[] = [
+      {
+        id: 'z0',
+        index: 0,
+        expectedValue: 'c',
+        placedTileId: 't1',
+        isWrong: false,
+        isLocked: false,
+      },
+    ];
+    const initialState = {
+      allTiles: makeTileItems(),
+      bankTileIds: [] as string[],
+      zones: correctZones,
+      activeSlotIndex: 0,
+      phase: 'playing' as const,
+      roundIndex: 0,
+      retryCount: 0,
+      levelIndex: 0,
+    };
+    const CorrectWrapper = ({ children }: { children: ReactNode }) => (
+      <AnswerGameProvider
+        config={filledConfig}
+        initialState={initialState}
+      >
+        {children}
+      </AnswerGameProvider>
+    );
+
+    const { unmount } = renderHook(() => useKeyboardInput(), {
+      wrapper: CorrectWrapper,
+    });
+
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'Backspace',
+          bubbles: true,
+        }),
+      );
+    });
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+
+    unmount();
+  });
+
   it('dispatches REMOVE_TILE on Backspace for the most recently filled slot', () => {
     const filledConfig = makeConfig('type');
     const filledZones: AnswerZone[] = [
