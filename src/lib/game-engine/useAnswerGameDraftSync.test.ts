@@ -63,6 +63,8 @@ const makeState = (
   phase: 'playing',
   roundIndex: 0,
   retryCount: 0,
+  levelIndex: 0,
+  isLevelMode: false,
   ...overrides,
 });
 
