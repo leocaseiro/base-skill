@@ -1,6 +1,7 @@
 // src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { withRouter } from '../../../../.storybook/decorators/withRouter';
+import { createSortNumbersLevelGenerator } from '../sort-numbers-level-generator';
 import { SortNumbers } from './SortNumbers';
 import type { SortNumbersConfig } from '../types';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -163,6 +164,79 @@ export const AdvancedWithFixedStart: Story = {
         { sequence: [3, 5, 7, 9] },
         { sequence: [3, 5, 7, 9] },
       ],
+    },
+  },
+};
+
+export const LevelModeUnlimited: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      configMode: 'simple',
+      direction: 'ascending',
+      quantity: 5,
+      skip: { mode: 'by', step: 2, start: 2 },
+      range: { min: 2, max: 10 },
+      tileBankMode: 'exact',
+      totalRounds: 1,
+      rounds: [{ sequence: [2, 4, 6, 8, 10] }],
+      levelMode: {
+        generateNextLevel: createSortNumbersLevelGenerator({
+          start: 2,
+          step: 2,
+          quantity: 5,
+          direction: 'ascending',
+        }),
+      },
+    },
+  },
+};
+
+export const LevelModeCapped: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      configMode: 'simple',
+      direction: 'ascending',
+      quantity: 3,
+      skip: { mode: 'by', step: 5, start: 5 },
+      range: { min: 5, max: 15 },
+      tileBankMode: 'exact',
+      totalRounds: 1,
+      rounds: [{ sequence: [5, 10, 15] }],
+      levelMode: {
+        maxLevels: 3,
+        generateNextLevel: createSortNumbersLevelGenerator({
+          start: 5,
+          step: 5,
+          quantity: 3,
+          direction: 'ascending',
+        }),
+      },
+    },
+  },
+};
+
+export const LevelModeDescending: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      configMode: 'simple',
+      direction: 'descending',
+      quantity: 4,
+      skip: { mode: 'by', step: 3, start: 3 },
+      range: { min: 3, max: 12 },
+      tileBankMode: 'exact',
+      totalRounds: 1,
+      rounds: [{ sequence: [3, 6, 9, 12] }],
+      levelMode: {
+        generateNextLevel: createSortNumbersLevelGenerator({
+          start: 3,
+          step: 3,
+          quantity: 4,
+          direction: 'descending',
+        }),
+      },
     },
   },
 };
