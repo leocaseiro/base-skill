@@ -2,6 +2,7 @@ type SoundKey =
   | 'correct'
   | 'wrong'
   | 'round-complete'
+  | 'level-complete'
   | 'game-complete'
   | 'tile-place';
 
@@ -11,6 +12,7 @@ const SOUND_PATHS: Record<SoundKey, string> = {
   correct: `${base}/sounds/correct.mp3`,
   wrong: `${base}/sounds/wrong.mp3`,
   'round-complete': `${base}/sounds/round-complete.mp3`,
+  'level-complete': `${base}/sounds/level-complete.mp3`,
   'game-complete': `${base}/sounds/game-complete.mp3`,
   'tile-place': `${base}/sounds/tile-place.mp3`,
 };

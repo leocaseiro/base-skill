@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["dev"],
+      "port": 3000
+    },
+    {
+      "name": "storybook",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["storybook"],
+      "port": 6006
+    },
+    {
+      "name": "e2e-server",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "dist/client", "-p", "4174", "-s"],
+      "port": 4174
+    }
+  ]
+}

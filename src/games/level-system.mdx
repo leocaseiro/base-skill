@@ -1,0 +1,90 @@
+{/* eslint-disable */}
+
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Games/Level System" />
+
+# Level System
+
+The level system adds progressive gameplay to any AnswerGame-based game. Instead
+of a fixed set of rounds, players advance through levels that are generated
+on-the-fly. Each game defines its own level generation logic.
+
+## How It Works
+
+1. Player completes all answer zones in a level
+2. A **Level Complete** screen appears (confetti + "Next Level" / "I'm Done")
+3. Tapping "Next Level" generates the next level via `generateNextLevel`
+4. Tapping "I'm Done" ends the session and shows the Game Over screen
+5. If `maxLevels` is set and reached, the game ends automatically
+
+## Opting In
+
+Add `levelMode` to your `AnswerGameConfig`:
+
+```ts
+levelMode: {
+  // Optional: cap the number of levels. Omit for unlimited.
+  maxLevels: 5,
+  // Required: generates the next level's tiles and zones.
+  // Receives the 0-based index of the just-completed level.
+  generateNextLevel: (completedLevel: number) => {
+    // Return { tiles, zones } or null to end early
+    return buildYourRound(completedLevel);
+  },
+}
+```
+
+When `levelMode` is present, set `totalRounds: 1` (each level is one round).
+Provide the first level via `initialTiles` / `initialZones` as usual.
+
+## SortNumbers Example
+
+SortNumbers uses level mode with unlimited levels. Each level continues the
+number sequence:
+
+```ts
+// Config: start=2, step=2, quantity=5
+// Level 0: 2, 4, 6, 8, 10
+// Level 1: 12, 14, 16, 18, 20
+// Level 2: 22, 24, 26, 28, 30
+
+import { createSortNumbersLevelGenerator } from './sort-numbers/sort-numbers-level-generator';
+
+const generator = createSortNumbersLevelGenerator({
+  start: 2,
+  step: 2,
+  quantity: 5,
+  direction: 'ascending',
+});
+
+const config = {
+  // ...other config
+  totalRounds: 1,
+  levelMode: {
+    generateNextLevel: generator,
+  },
+};
+```
+
+## Unlimited vs Capped
+
+| Config                             | Behavior                             |
+| ---------------------------------- | ------------------------------------ |
+| `levelMode: { generateNextLevel }` | Unlimited — player decides when done |
+| `levelMode: { maxLevels: 5, ... }` | Caps at 5 levels then game over      |
+| No `levelMode`                     | Classic rounds mode (no change)      |
+
+## Sounds
+
+| Phase          | Sound            | Visual             |
+| -------------- | ---------------- | ------------------ |
+| Level complete | `level-complete` | Confetti burst     |
+| Game over      | `game-complete`  | Fireworks confetti |
+
+## Games Using Level Mode
+
+- **SortNumbers** — unlimited levels, continues the sequence pattern
+
+Other games (NumberMatch, WordSpell) can adopt level mode by adding `levelMode`
+to their configs.

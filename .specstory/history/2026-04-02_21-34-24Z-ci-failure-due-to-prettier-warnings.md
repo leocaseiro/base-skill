@@ -2086,7 +2086,6 @@ I'm adjusting testIgnore to exclude visual.spec.ts for all projects, removing th
 
 _**Agent (composer-2)**_
 
-
 Investigating: `@visual` may be stripped or mis-parsed in the GitHub Actions `run` shell, so `--grep-invert` might not apply. Making VR exclusion structural in `playwright.config.ts` so the E2E job can't run `visual.spec.ts` regardless of CLI quoting.
 
 
@@ -2143,7 +2142,6 @@ I'm removing the `testIgnore` option from project level configs since each proje
 
 _**Agent (composer-2)**_
 
-
 Excluding `visual.spec.ts` at the Playwright config level unless `VR_DOCKER=1` or `PLAYWRIGHT_INCLUDE_VISUAL=1`, so E2E CI can't run those tests even if `--grep-invert` is broken or missing in the workflow.
 
 
@@ -2192,13 +2190,6 @@ _**Agent (composer-2)**_
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
-
-_**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2280,13 +2271,6 @@ Total: 3 tests in 2 files
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
-_**Agent (composer-2)**_
-
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
 <details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && PLAYWRIGHT_INCLUDE_VISUAL=1 npx playwright test --project=chromium --list 2>&1</summary>
 
@@ -2311,13 +2295,6 @@ Total: 5 tests in 3 files
 <summary>Tool use: **run_terminal_command_v2**</summary>
 
 </details></tool-use>
-
-_**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2347,7 +2324,6 @@ Total: 5 tests in 3 files
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Here’s what was going wrong and what we changed.
 

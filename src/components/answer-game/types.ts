@@ -25,6 +25,20 @@ export interface AnswerGameConfig {
   initialZones?: AnswerZone[];
   /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
   slotInteraction?: 'ordered' | 'free-swap';
+  /** Level progression — omit for classic rounds-only mode */
+  levelMode?: {
+    /** Max levels. Omit or set to 0 for unlimited. */
+    maxLevels?: number;
+    /**
+     * Called when the player completes a level to generate the next one.
+     * Receives the 0-based index of the just-completed level.
+     * Returns new tiles + zones, or null to end the game early.
+     */
+    generateNextLevel: (completedLevel: number) => {
+      tiles: TileItem[];
+      zones: AnswerZone[];
+    } | null;
+  };
 }
 
 export interface TileItem {
@@ -48,6 +62,7 @@ export interface AnswerZone {
 export type AnswerGamePhase =
   | 'playing'
   | 'round-complete'
+  | 'level-complete'
   | 'game-over';
 
 export interface AnswerGameState {
@@ -66,6 +81,8 @@ export interface AnswerGameState {
   phase: AnswerGamePhase;
   roundIndex: number;
   retryCount: number;
+  levelIndex: number;
+  isLevelMode: boolean;
 }
 
 export type AnswerGameAction =
@@ -75,6 +92,7 @@ export type AnswerGameAction =
   | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
   | { type: 'EJECT_TILE'; zoneIndex: number }
   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+  | { type: 'ADVANCE_LEVEL'; tiles: TileItem[]; zones: AnswerZone[] }
   | { type: 'COMPLETE_GAME' }
   | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
   | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
@@ -91,7 +109,8 @@ export interface AnswerGameDraftState {
   bankTileIds: string[];
   zones: AnswerZone[];
   activeSlotIndex: number;
-  phase: 'playing' | 'round-complete';
+  phase: 'playing' | 'round-complete' | 'level-complete';
   roundIndex: number;
   retryCount: number;
+  levelIndex: number;
 }

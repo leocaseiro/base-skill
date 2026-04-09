@@ -17,6 +17,7 @@ const buildDraft = (
     phase: state.phase,
     roundIndex: state.roundIndex,
     retryCount: state.retryCount,
+    levelIndex: state.levelIndex,
   };
 };
 
