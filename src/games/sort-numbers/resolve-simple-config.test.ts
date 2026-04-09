@@ -123,14 +123,16 @@ describe('resolveSimpleConfig', () => {
       distractors: false,
     };
     const config = resolveSimpleConfig(simple);
+    // generateNextLevel(1) = completed level 1, generate level 2
+    // levelStart = 2 + (1+1) * 5 * 2 = 22
     const nextLevel = config.levelMode!.generateNextLevel(1);
     expect(nextLevel).not.toBeNull();
     expect(nextLevel!.zones.map((z) => z.expectedValue)).toEqual([
-      '12',
-      '14',
-      '16',
-      '18',
-      '20',
+      '22',
+      '24',
+      '26',
+      '28',
+      '30',
     ]);
   });
 });

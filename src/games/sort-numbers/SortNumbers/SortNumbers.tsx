@@ -253,6 +253,7 @@ export const SortNumbers = ({
       initialTiles: tiles,
       initialZones: zones,
       slotInteraction: 'free-swap' as const,
+      levelMode: config.levelMode,
     }),
     [
       config.gameId,
@@ -262,6 +263,7 @@ export const SortNumbers = ({
       config.rounds.length,
       config.roundsInOrder,
       config.ttsEnabled,
+      config.levelMode,
       tiles,
       zones,
     ],

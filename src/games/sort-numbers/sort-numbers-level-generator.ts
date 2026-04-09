@@ -25,7 +25,7 @@ export const createSortNumbersLevelGenerator = (
   const { start, step, quantity, direction, distractor } = options;
 
   return (completedLevel: number) => {
-    const levelStart = start + completedLevel * quantity * step;
+    const levelStart = start + (completedLevel + 1) * quantity * step;
     const sequence = Array.from(
       { length: quantity },
       (_, i) => levelStart + i * step,
