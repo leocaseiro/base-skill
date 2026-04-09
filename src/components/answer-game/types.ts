@@ -88,6 +88,12 @@ export interface AnswerGameState {
 export type AnswerGameAction =
   | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
   | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+  | {
+      type: 'TYPE_TILE';
+      tileId: string;
+      value: string;
+      zoneIndex: number;
+    }
   | { type: 'REMOVE_TILE'; zoneIndex: number }
   | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
   | { type: 'EJECT_TILE'; zoneIndex: number }
@@ -97,7 +103,8 @@ export type AnswerGameAction =
   | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
   | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
   | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
-  | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string };
+  | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string }
+  | { type: 'SET_ACTIVE_SLOT'; zoneIndex: number };
 
 /**
  * Snapshot of AnswerGameState persisted to session_history_index.draftState.

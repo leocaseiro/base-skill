@@ -30,7 +30,6 @@ export const Slot = ({
     label,
     isEmpty,
     isWrong,
-    isActive,
     showCursor,
     isPreview,
     previewLabel,
@@ -49,13 +48,17 @@ export const Slot = ({
     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
     isPreview
       ? 'border-dashed border-primary'
-      : isEmpty && !isActive
+      : isEmpty
         ? 'border-border'
-        : isEmpty && isActive
-          ? 'border-primary ring-2 ring-primary ring-offset-2'
-          : isWrong
-            ? 'border-destructive bg-destructive/10 text-destructive'
-            : 'border-primary bg-primary/10 text-primary',
+        : isWrong
+          ? 'border-destructive bg-destructive/10 text-destructive'
+          : 'border-primary bg-primary/10 text-primary',
+    // Focus ring on active slot (driven by showCursor, works in all modes)
+    showCursor && isWrong
+      ? 'ring-2 ring-destructive ring-offset-2'
+      : showCursor
+        ? 'border-primary ring-2 ring-primary ring-offset-2'
+        : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -128,6 +131,12 @@ export const Slot = ({
                 children(renderProps)
               )}
             </button>
+            {showCursor ? (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-destructive animate-blink"
+              />
+            ) : null}
           </>
         )}
       </InnerTag>

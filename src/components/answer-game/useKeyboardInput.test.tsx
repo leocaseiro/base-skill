@@ -81,7 +81,27 @@ describe('useKeyboardInput', () => {
     unmount();
   });
 
-  it('does nothing when config.inputMethod is not "type"', () => {
+  it('dispatches PLACE_TILE in both mode (keyboard fallback)', () => {
+    const { unmount } = renderHook(() => useKeyboardInput(), {
+      wrapper: makeWrapper('both'),
+    });
+
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
+      );
+    });
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'PLACE_TILE',
+      tileId: 't1',
+      zoneIndex: 0,
+    });
+
+    unmount();
+  });
+
+  it('does nothing when config.inputMethod is drag', () => {
     const { unmount } = renderHook(() => useKeyboardInput(), {
       wrapper: makeWrapper('drag'),
     });
@@ -97,7 +117,7 @@ describe('useKeyboardInput', () => {
     unmount();
   });
 
-  it('does nothing when no bank tile matches the pressed key', () => {
+  it('dispatches TYPE_TILE when no bank tile matches the pressed key', () => {
     const { unmount } = renderHook(() => useKeyboardInput(), {
       wrapper: makeWrapper('type'),
     });
@@ -108,7 +128,13 @@ describe('useKeyboardInput', () => {
       );
     });
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'TYPE_TILE',
+        value: 'x',
+        zoneIndex: 0,
+      }),
+    );
 
     unmount();
   });
@@ -133,7 +159,7 @@ describe('useKeyboardInput', () => {
     unmount();
   });
 
-  it('fires when target is the data-touch-keyboard input', () => {
+  it('skips when target is an HTMLInputElement to avoid double-placement with hidden input', () => {
     const { unmount } = renderHook(() => useKeyboardInput(), {
       wrapper: makeWrapper('type'),
     });
@@ -150,9 +176,106 @@ describe('useKeyboardInput', () => {
       globalThis.dispatchEvent(event);
     });
 
+    expect(mockDispatch).not.toHaveBeenCalled();
+
+    unmount();
+  });
+
+  it('does NOT remove a correctly-placed tile on Backspace', () => {
+    const filledConfig = makeConfig('type');
+    const correctZones: AnswerZone[] = [
+      {
+        id: 'z0',
+        index: 0,
+        expectedValue: 'c',
+        placedTileId: 't1',
+        isWrong: false,
+        isLocked: false,
+      },
+    ];
+    const initialState = {
+      allTiles: makeTileItems(),
+      bankTileIds: [] as string[],
+      zones: correctZones,
+      activeSlotIndex: 0,
+      phase: 'playing' as const,
+      roundIndex: 0,
+      retryCount: 0,
+      levelIndex: 0,
+    };
+    const CorrectWrapper = ({ children }: { children: ReactNode }) => (
+      <AnswerGameProvider
+        config={filledConfig}
+        initialState={initialState}
+      >
+        {children}
+      </AnswerGameProvider>
+    );
+
+    const { unmount } = renderHook(() => useKeyboardInput(), {
+      wrapper: CorrectWrapper,
+    });
+
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'Backspace',
+          bubbles: true,
+        }),
+      );
+    });
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+
+    unmount();
+  });
+
+  it('dispatches REMOVE_TILE on Backspace for the most recently filled slot', () => {
+    const filledConfig = makeConfig('type');
+    const filledZones: AnswerZone[] = [
+      {
+        id: 'z0',
+        index: 0,
+        expectedValue: 'c',
+        placedTileId: 't1',
+        isWrong: true,
+        isLocked: true,
+      },
+    ];
+    const initialState = {
+      allTiles: makeTileItems(),
+      bankTileIds: [] as string[],
+      zones: filledZones,
+      activeSlotIndex: 0,
+      phase: 'playing' as const,
+      roundIndex: 0,
+      retryCount: 1,
+      levelIndex: 0,
+    };
+    const FilledWrapper = ({ children }: { children: ReactNode }) => (
+      <AnswerGameProvider
+        config={filledConfig}
+        initialState={initialState}
+      >
+        {children}
+      </AnswerGameProvider>
+    );
+
+    const { unmount } = renderHook(() => useKeyboardInput(), {
+      wrapper: FilledWrapper,
+    });
+
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'Backspace',
+          bubbles: true,
+        }),
+      );
+    });
+
     expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'PLACE_TILE',
-      tileId: 't1',
+      type: 'REMOVE_TILE',
       zoneIndex: 0,
     });
 
