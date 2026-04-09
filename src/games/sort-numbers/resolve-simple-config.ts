@@ -1,4 +1,5 @@
 import { generateSortRounds } from './build-sort-round';
+import { createSortNumbersLevelGenerator } from './sort-numbers-level-generator';
 import type {
   SkipConfig,
   SortNumbersConfig,
@@ -20,6 +21,13 @@ export const resolveSimpleConfig = (
   const { direction, start, step, quantity, distractors } = simple;
   const range = { min: start, max: start + (quantity - 1) * step };
   const skip: SkipConfig = { mode: 'by', step, start };
+
+  const distractor = distractors
+    ? {
+        config: { source: 'gaps-only' as const, count: 'all' as const },
+        range,
+      }
+    : undefined;
 
   return {
     gameId: 'sort-numbers',
@@ -44,6 +52,15 @@ export const resolveSimpleConfig = (
       skip,
       totalRounds: 1,
     }),
+    levelMode: {
+      generateNextLevel: createSortNumbersLevelGenerator({
+        start,
+        step,
+        quantity,
+        direction,
+        distractor,
+      }),
+    },
   };
 };
 

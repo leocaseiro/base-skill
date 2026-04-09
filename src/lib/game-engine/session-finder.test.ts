@@ -207,6 +207,7 @@ describe('findInProgressSession', () => {
       phase: 'playing',
       roundIndex: 0,
       retryCount: 0,
+      levelIndex: 0,
     };
 
     await db.session_history_index.insert({

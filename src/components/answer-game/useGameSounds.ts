@@ -5,11 +5,13 @@ import { playSound } from '@/lib/audio/AudioFeedback';
 
 export const useGameSounds = (): {
   confettiReady: boolean;
+  levelCompleteReady: boolean;
   gameOverReady: boolean;
 } => {
   const { phase } = useAnswerGameContext();
   const prevPhaseRef = useRef<AnswerGamePhase>(phase);
   const [confettiReady, setConfettiReady] = useState(false);
+  const [levelCompleteReady, setLevelCompleteReady] = useState(false);
   const [gameOverReady, setGameOverReady] = useState(false);
 
   useEffect(() => {
@@ -20,23 +22,40 @@ export const useGameSounds = (): {
 
     let cancelled = false;
 
-    if (phase === 'round-complete') {
-      playSound('round-complete');
-      void Promise.resolve().then(() => {
-        if (!cancelled) setConfettiReady(true);
-      });
-    } else if (phase === 'game-over') {
-      playSound('game-complete');
-      void Promise.resolve().then(() => {
-        if (!cancelled) setGameOverReady(true);
-      });
-    } else {
-      void Promise.resolve().then(() => {
-        if (!cancelled) {
-          setConfettiReady(false);
-          setGameOverReady(false);
-        }
-      });
+    switch (phase) {
+      case 'round-complete': {
+        playSound('round-complete');
+        void Promise.resolve().then(() => {
+          if (!cancelled) setConfettiReady(true);
+        });
+
+        break;
+      }
+      case 'level-complete': {
+        playSound('level-complete');
+        void Promise.resolve().then(() => {
+          if (!cancelled) setLevelCompleteReady(true);
+        });
+
+        break;
+      }
+      case 'game-over': {
+        playSound('game-complete');
+        void Promise.resolve().then(() => {
+          if (!cancelled) setGameOverReady(true);
+        });
+
+        break;
+      }
+      default: {
+        void Promise.resolve().then(() => {
+          if (!cancelled) {
+            setConfettiReady(false);
+            setLevelCompleteReady(false);
+            setGameOverReady(false);
+          }
+        });
+      }
     }
 
     return () => {
@@ -44,5 +63,5 @@ export const useGameSounds = (): {
     };
   }, [phase]);
 
-  return { confettiReady, gameOverReady };
+  return { confettiReady, levelCompleteReady, gameOverReady };
 };

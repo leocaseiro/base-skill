@@ -12,6 +12,7 @@ import type {
 } from '@/components/answer-game/types';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+import { LevelCompleteOverlay } from '@/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
 import { Slot } from '@/components/answer-game/Slot/Slot';
 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
@@ -38,10 +39,11 @@ const SortNumbersSession = ({
   onRestartSession: () => void;
 }) => {
   const { t } = useTranslation('games');
-  const { phase, roundIndex, retryCount, zones } =
+  const { phase, roundIndex, retryCount, zones, levelIndex } =
     useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
-  const { confettiReady, gameOverReady } = useGameSounds();
+  const { confettiReady, levelCompleteReady, gameOverReady } =
+    useGameSounds();
   const navigate = useNavigate();
   const { locale } = useParams({ from: '/$locale' });
   const completionToken = useRef(0);
@@ -65,6 +67,27 @@ const SortNumbersSession = ({
 
   const handlePlayAgain = () => {
     onRestartSession();
+  };
+
+  const handleNextLevel = () => {
+    const generateNextLevel =
+      sortNumbersConfig.levelMode?.generateNextLevel;
+    if (!generateNextLevel) return;
+
+    const nextLevel = generateNextLevel(levelIndex);
+    if (nextLevel) {
+      dispatch({
+        type: 'ADVANCE_LEVEL',
+        tiles: nextLevel.tiles,
+        zones: nextLevel.zones,
+      });
+    } else {
+      dispatch({ type: 'COMPLETE_GAME' });
+    }
+  };
+
+  const handleDone = () => {
+    dispatch({ type: 'COMPLETE_GAME' });
   };
 
   useEffect(() => {
@@ -158,6 +181,13 @@ const SortNumbersSession = ({
         </AnswerGame.Choices>
       </div>
       <ScoreAnimation visible={confettiReady} />
+      {levelCompleteReady ? (
+        <LevelCompleteOverlay
+          level={levelIndex + 1}
+          onNextLevel={handleNextLevel}
+          onDone={handleDone}
+        />
+      ) : null}
       {gameOverReady ? (
         <GameOverOverlay
           retryCount={retryCount}
@@ -223,6 +253,7 @@ export const SortNumbers = ({
       initialTiles: tiles,
       initialZones: zones,
       slotInteraction: 'free-swap' as const,
+      levelMode: config.levelMode,
     }),
     [
       config.gameId,
@@ -232,6 +263,7 @@ export const SortNumbers = ({
       config.rounds.length,
       config.roundsInOrder,
       config.ttsEnabled,
+      config.levelMode,
       tiles,
       zones,
     ],

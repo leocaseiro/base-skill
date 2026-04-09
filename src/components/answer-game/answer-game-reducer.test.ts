@@ -346,6 +346,208 @@ describe('answerGameReducer', () => {
     });
   });
 
+  describe('level mode', () => {
+    const levelConfig: AnswerGameConfig = {
+      gameId: 'test',
+      inputMethod: 'drag',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      totalRounds: 1,
+      ttsEnabled: true,
+      levelMode: {
+        generateNextLevel: () => ({ tiles: [], zones: [] }),
+      },
+    };
+
+    it('makeInitialState sets isLevelMode true when levelMode is present', () => {
+      const state = makeInitialState(levelConfig);
+      expect(state.isLevelMode).toBe(true);
+      expect(state.levelIndex).toBe(0);
+    });
+
+    it('makeInitialState sets isLevelMode false when levelMode is absent', () => {
+      const state = makeInitialState(config);
+      expect(state.isLevelMode).toBe(false);
+      expect(state.levelIndex).toBe(0);
+    });
+
+    it('completing all zones in level mode transitions to level-complete (not game-over)', () => {
+      let state = answerGameReducer(makeInitialState(levelConfig), {
+        type: 'INIT_ROUND',
+        tiles,
+        zones,
+      });
+      state = answerGameReducer(state, {
+        type: 'PLACE_TILE',
+        tileId: 't1',
+        zoneIndex: 0,
+      });
+      state = answerGameReducer(state, {
+        type: 'PLACE_TILE',
+        tileId: 't2',
+        zoneIndex: 1,
+      });
+      state = answerGameReducer(state, {
+        type: 'PLACE_TILE',
+        tileId: 't3',
+        zoneIndex: 2,
+      });
+      expect(state.phase).toBe('level-complete');
+    });
+
+    it('completing all zones with maxLevels reached transitions to game-over', () => {
+      const cappedConfig: AnswerGameConfig = {
+        ...levelConfig,
+        levelMode: {
+          maxLevels: 1,
+          generateNextLevel: () => ({ tiles: [], zones: [] }),
+        },
+      };
+      let state = answerGameReducer(makeInitialState(cappedConfig), {
+        type: 'INIT_ROUND',
+        tiles,
+        zones,
+      });
+      state = answerGameReducer(state, {
+        type: 'PLACE_TILE',
+        tileId: 't1',
+        zoneIndex: 0,
+      });
+      state = answerGameReducer(state, {
+        type: 'PLACE_TILE',
+        tileId: 't2',
+        zoneIndex: 1,
+      });
+      state = answerGameReducer(state, {
+        type: 'PLACE_TILE',
+        tileId: 't3',
+        zoneIndex: 2,
+      });
+      expect(state.phase).toBe('game-over');
+    });
+
+    it('ADVANCE_LEVEL increments levelIndex and resets round state', () => {
+      let state = makeInitialState(levelConfig);
+      state = answerGameReducer(state, {
+        type: 'INIT_ROUND',
+        tiles,
+        zones,
+      });
+      state = { ...state, phase: 'level-complete' as const };
+      const newTiles: TileItem[] = [
+        { id: 'n1', label: 'D', value: 'D' },
+      ];
+      const newZones: AnswerZone[] = [
+        {
+          id: 'nz0',
+          index: 0,
+          expectedValue: 'D',
+          placedTileId: null,
+          isWrong: false,
+          isLocked: false,
+        },
+      ];
+      state = answerGameReducer(state, {
+        type: 'ADVANCE_LEVEL',
+        tiles: newTiles,
+        zones: newZones,
+      });
+      expect(state.levelIndex).toBe(1);
+      expect(state.allTiles).toEqual(newTiles);
+      expect(state.bankTileIds).toEqual(['n1']);
+      expect(state.phase).toBe('playing');
+      expect(state.roundIndex).toBe(0);
+    });
+
+    it('ADVANCE_LEVEL does NOT reset retryCount', () => {
+      let state = makeInitialState(levelConfig);
+      state = answerGameReducer(state, {
+        type: 'INIT_ROUND',
+        tiles,
+        zones,
+      });
+      state = answerGameReducer(state, {
+        type: 'PLACE_TILE',
+        tileId: 't2',
+        zoneIndex: 0,
+      });
+      expect(state.retryCount).toBe(1);
+      state = { ...state, phase: 'level-complete' as const };
+      const newTiles: TileItem[] = [
+        { id: 'n1', label: 'D', value: 'D' },
+      ];
+      const newZones: AnswerZone[] = [
+        {
+          id: 'nz0',
+          index: 0,
+          expectedValue: 'D',
+          placedTileId: null,
+          isWrong: false,
+          isLocked: false,
+        },
+      ];
+      state = answerGameReducer(state, {
+        type: 'ADVANCE_LEVEL',
+        tiles: newTiles,
+        zones: newZones,
+      });
+      expect(state.retryCount).toBe(1);
+    });
+
+    it('SWAP_TILES completing all zones in level mode transitions to level-complete', () => {
+      const swapConfig: AnswerGameConfig = {
+        ...levelConfig,
+        wrongTileBehavior: 'lock-manual',
+      };
+      const twoTiles: TileItem[] = [
+        { id: 's1', label: 'X', value: 'X' },
+        { id: 's2', label: 'Y', value: 'Y' },
+      ];
+      const twoZones: AnswerZone[] = [
+        {
+          id: 'sz0',
+          index: 0,
+          expectedValue: 'X',
+          placedTileId: null,
+          isWrong: false,
+          isLocked: false,
+        },
+        {
+          id: 'sz1',
+          index: 1,
+          expectedValue: 'Y',
+          placedTileId: null,
+          isWrong: false,
+          isLocked: false,
+        },
+      ];
+      let state = answerGameReducer(makeInitialState(swapConfig), {
+        type: 'INIT_ROUND',
+        tiles: twoTiles,
+        zones: twoZones,
+      });
+      // Place tiles in swapped positions
+      state = answerGameReducer(state, {
+        type: 'PLACE_TILE',
+        tileId: 's2',
+        zoneIndex: 0,
+      }); // wrong
+      state = answerGameReducer(state, {
+        type: 'PLACE_TILE',
+        tileId: 's1',
+        zoneIndex: 1,
+      }); // wrong
+      expect(state.phase).toBe('playing');
+      // Swap to correct positions
+      state = answerGameReducer(state, {
+        type: 'SWAP_TILES',
+        fromZoneIndex: 0,
+        toZoneIndex: 1,
+      });
+      expect(state.phase).toBe('level-complete');
+    });
+  });
+
   it('COMPLETE_GAME sets phase to game-over', () => {
     const state = makeInitialState(config);
     const next = answerGameReducer(state, { type: 'COMPLETE_GAME' });
