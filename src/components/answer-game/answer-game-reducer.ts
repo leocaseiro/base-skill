@@ -80,22 +80,35 @@ export function answerGameReducer(
 
       if (correct) {
         const previousId = zone.placedTileId;
+        const prevIsVirtual = previousId?.startsWith('typed-');
         let newBankTileIds = state.bankTileIds.filter(
           (id) => id !== action.tileId,
         );
-        if (previousId !== null && previousId !== action.tileId) {
-          // Bank tile dropped on an occupied slot: previous occupant returns to bank.
+        if (
+          previousId !== null &&
+          previousId !== action.tileId && // Virtual tiles are discarded; real tiles return to the bank.
+          !prevIsVirtual
+        ) {
           newBankTileIds = [...newBankTileIds, previousId];
         }
+        // Remove displaced virtual tile from allTiles
+        const newAllTiles = prevIsVirtual
+          ? state.allTiles.filter((t) => t.id !== previousId)
+          : state.allTiles;
         const newZone: AnswerZone = {
           ...zone,
           placedTileId: action.tileId,
           isWrong: false,
           isLocked: false,
         };
-        const newZones = state.zones.map((z, i) =>
-          i === action.zoneIndex ? newZone : z,
-        );
+        const newZones =
+          newAllTiles === state.allTiles
+            ? state.zones.map((z, i) =>
+                i === action.zoneIndex ? newZone : z,
+              )
+            : state.zones.map((z, i) =>
+                i === action.zoneIndex ? newZone : z,
+              );
         const nextActiveSlot = newZones.findIndex(
           (z, i) => i > action.zoneIndex && z.placedTileId === null,
         );
@@ -104,6 +117,7 @@ export function answerGameReducer(
         );
         return {
           ...state,
+          allTiles: newAllTiles,
           dragActiveTileId,
           zones: newZones,
           bankTileIds: newBankTileIds,
@@ -121,6 +135,8 @@ export function answerGameReducer(
       const shouldLock =
         state.config.wrongTileBehavior === 'lock-manual' ||
         state.config.wrongTileBehavior === 'lock-auto-eject';
+      const previousId = zone.placedTileId;
+      const prevIsVirtual = previousId?.startsWith('typed-');
       const newZone: AnswerZone = {
         ...zone,
         placedTileId: shouldLock ? action.tileId : zone.placedTileId,
@@ -135,14 +151,21 @@ export function answerGameReducer(
         : state.bankTileIds;
       if (
         shouldLock &&
-        zone.placedTileId &&
-        zone.placedTileId !== action.tileId
+        previousId &&
+        previousId !== action.tileId && // Virtual tiles are discarded; real tiles return to the bank.
+        !prevIsVirtual
       ) {
-        newBankTileIds = [...newBankTileIds, zone.placedTileId];
+        newBankTileIds = [...newBankTileIds, previousId];
       }
+      // Remove displaced virtual tile from allTiles
+      const newAllTiles =
+        shouldLock && prevIsVirtual
+          ? state.allTiles.filter((t) => t.id !== previousId)
+          : state.allTiles;
 
       return {
         ...state,
+        allTiles: newAllTiles,
         dragActiveTileId,
         zones: newZones,
         bankTileIds: newBankTileIds,
