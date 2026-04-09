@@ -180,4 +180,56 @@ describe('useKeyboardInput', () => {
 
     unmount();
   });
+
+  it('dispatches REMOVE_TILE on Backspace for the most recently filled slot', () => {
+    const filledConfig = makeConfig('type');
+    const filledZones: AnswerZone[] = [
+      {
+        id: 'z0',
+        index: 0,
+        expectedValue: 'c',
+        placedTileId: 't1',
+        isWrong: true,
+        isLocked: true,
+      },
+    ];
+    const initialState = {
+      allTiles: makeTileItems(),
+      bankTileIds: [] as string[],
+      zones: filledZones,
+      activeSlotIndex: 0,
+      phase: 'playing' as const,
+      roundIndex: 0,
+      retryCount: 1,
+      levelIndex: 0,
+    };
+    const FilledWrapper = ({ children }: { children: ReactNode }) => (
+      <AnswerGameProvider
+        config={filledConfig}
+        initialState={initialState}
+      >
+        {children}
+      </AnswerGameProvider>
+    );
+
+    const { unmount } = renderHook(() => useKeyboardInput(), {
+      wrapper: FilledWrapper,
+    });
+
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'Backspace',
+          bubbles: true,
+        }),
+      );
+    });
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'REMOVE_TILE',
+      zoneIndex: 0,
+    });
+
+    unmount();
+  });
 });
