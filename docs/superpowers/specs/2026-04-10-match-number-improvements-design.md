@@ -81,7 +81,7 @@ This boolean gates rendering in three places:
 
 **8 game modes:**
 
-| Mode                      | Question  | Answer    | n2words      |
+| Mode                      | Question  | Answer    | Conversion   |
 | ------------------------- | --------- | --------- | ------------ |
 | `numeral-to-group`        | 7         | Domino    | —            |
 | `group-to-numeral`        | Dots      | 7         | —            |
@@ -193,5 +193,4 @@ Both reuse the existing `DominoTile` / `DiceFace` components.
 ## Out of Scope
 
 - `objects` and `fingers` tile styles — kept as stubs
-- Numeric ordinal format ("7th") — pending `n2words` upstream contribution
 - Drag preview ghost image (the floating tile during drag) — separate concern
