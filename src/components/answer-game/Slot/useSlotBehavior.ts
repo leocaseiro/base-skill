@@ -73,7 +73,7 @@ export const useSlotBehavior = (
   const isActive = isOrdered && activeSlotIndex === index;
   const showCursor =
     activeSlotIndex === index &&
-    isEmpty &&
+    (isEmpty || isWrong) &&
     config.inputMethod !== 'drag';
   const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
 

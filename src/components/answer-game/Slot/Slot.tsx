@@ -128,6 +128,12 @@ export const Slot = ({
                 children(renderProps)
               )}
             </button>
+            {showCursor ? (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-destructive animate-blink"
+              />
+            ) : null}
           </>
         )}
       </InnerTag>
