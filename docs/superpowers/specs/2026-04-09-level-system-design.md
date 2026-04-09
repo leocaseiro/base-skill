@@ -231,5 +231,4 @@ Each new or changed component gets Storybook coverage:
 
 - Progressive difficulty configuration UI
 - Level selection / replay specific levels
-- Persistence of level progress across sessions
 - Changes to NumberMatch or WordSpell
