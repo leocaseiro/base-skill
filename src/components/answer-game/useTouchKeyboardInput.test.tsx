@@ -1,5 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { AnswerGameProvider } from './AnswerGameProvider';
 import { useTouchKeyboardInput } from './useTouchKeyboardInput';
 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
@@ -60,17 +67,25 @@ const TestHarness = () => {
   return <input ref={hiddenInputRef} data-testid="hidden" />;
 };
 
-const wrapper = ({ children }: { children: ReactNode }) => (
-  <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
-);
+const makeWrapper = (cfg: AnswerGameConfig) => {
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <AnswerGameProvider config={cfg}>{children}</AnswerGameProvider>
+  );
+  return Wrapper;
+};
 
 describe('useTouchKeyboardInput', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     mockDispatch.mockClear();
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('dispatches PLACE_TILE when a matching key is typed into the hidden input', () => {
-    render(<TestHarness />, { wrapper });
+    render(<TestHarness />, { wrapper: makeWrapper(config) });
     const input = screen.getByTestId('hidden');
 
     fireEvent.input(input, {
@@ -86,7 +101,7 @@ describe('useTouchKeyboardInput', () => {
   });
 
   it('clears the input value after each key', () => {
-    render(<TestHarness />, { wrapper });
+    render(<TestHarness />, { wrapper: makeWrapper(config) });
     const input = screen.getByTestId<HTMLInputElement>('hidden');
 
     fireEvent.input(input, {
@@ -98,7 +113,7 @@ describe('useTouchKeyboardInput', () => {
   });
 
   it('does nothing when no bank tile matches the typed character', () => {
-    render(<TestHarness />, { wrapper });
+    render(<TestHarness />, { wrapper: makeWrapper(config) });
     const input = screen.getByTestId('hidden');
 
     fireEvent.input(input, {
@@ -110,7 +125,7 @@ describe('useTouchKeyboardInput', () => {
   });
 
   it('is case-insensitive — uppercase input matches lowercase tile value', () => {
-    render(<TestHarness />, { wrapper });
+    render(<TestHarness />, { wrapper: makeWrapper(config) });
     const input = screen.getByTestId('hidden');
 
     fireEvent.input(input, {
@@ -123,5 +138,128 @@ describe('useTouchKeyboardInput', () => {
       tileId: 't1',
       zoneIndex: 0,
     });
+  });
+});
+
+describe('useTouchKeyboardInput — numeric debounce', () => {
+  const numericTiles: TileItem[] = [
+    { id: 'n1', label: '3', value: '3' },
+    { id: 'n2', label: '12', value: '12' },
+    { id: 'n3', label: '7', value: '7' },
+  ];
+
+  const numericZones: AnswerZone[] = [
+    {
+      id: 'z0',
+      index: 0,
+      expectedValue: '3',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+    {
+      id: 'z1',
+      index: 1,
+      expectedValue: '7',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+    {
+      id: 'z2',
+      index: 2,
+      expectedValue: '12',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+  ];
+
+  const numericConfig: AnswerGameConfig = {
+    gameId: 'sort',
+    inputMethod: 'type',
+    wrongTileBehavior: 'lock-manual',
+    tileBankMode: 'exact',
+    totalRounds: 1,
+    ttsEnabled: false,
+    touchKeyboardInputMode: 'numeric',
+    initialTiles: numericTiles,
+    initialZones: numericZones,
+  };
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockDispatch.mockClear();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('debounces numeric input and matches multi-digit numbers', () => {
+    render(<TestHarness />, { wrapper: makeWrapper(numericConfig) });
+    const input = screen.getByTestId<HTMLInputElement>('hidden');
+
+    // Simulate typing "1" then "2" in quick succession
+    input.value = '1';
+    fireEvent.input(input);
+
+    // No dispatch yet — waiting for debounce
+    expect(mockDispatch).not.toHaveBeenCalled();
+
+    input.value = '12';
+    fireEvent.input(input);
+
+    // Still waiting
+    expect(mockDispatch).not.toHaveBeenCalled();
+
+    // Advance past the debounce timeout (400ms)
+    vi.advanceTimersByTime(400);
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'PLACE_TILE',
+      tileId: 'n2',
+      zoneIndex: 0,
+    });
+  });
+
+  it('matches single-digit numbers after debounce', () => {
+    render(<TestHarness />, { wrapper: makeWrapper(numericConfig) });
+    const input = screen.getByTestId<HTMLInputElement>('hidden');
+
+    input.value = '3';
+    fireEvent.input(input);
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(400);
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'PLACE_TILE',
+      tileId: 'n1',
+      zoneIndex: 0,
+    });
+  });
+
+  it('clears input after debounce fires', () => {
+    render(<TestHarness />, { wrapper: makeWrapper(numericConfig) });
+    const input = screen.getByTestId<HTMLInputElement>('hidden');
+
+    input.value = '7';
+    fireEvent.input(input);
+    vi.advanceTimersByTime(400);
+
+    expect(input.value).toBe('');
+  });
+
+  it('does not dispatch when no tile matches the debounced value', () => {
+    render(<TestHarness />, { wrapper: makeWrapper(numericConfig) });
+    const input = screen.getByTestId<HTMLInputElement>('hidden');
+
+    input.value = '99';
+    fireEvent.input(input);
+    vi.advanceTimersByTime(400);
+
+    expect(mockDispatch).not.toHaveBeenCalled();
   });
 });

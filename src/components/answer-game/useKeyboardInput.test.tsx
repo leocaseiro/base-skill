@@ -81,7 +81,27 @@ describe('useKeyboardInput', () => {
     unmount();
   });
 
-  it('does nothing when config.inputMethod is not "type"', () => {
+  it('dispatches PLACE_TILE in both mode (keyboard fallback)', () => {
+    const { unmount } = renderHook(() => useKeyboardInput(), {
+      wrapper: makeWrapper('both'),
+    });
+
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
+      );
+    });
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'PLACE_TILE',
+      tileId: 't1',
+      zoneIndex: 0,
+    });
+
+    unmount();
+  });
+
+  it('does nothing when config.inputMethod is drag', () => {
     const { unmount } = renderHook(() => useKeyboardInput(), {
       wrapper: makeWrapper('drag'),
     });
@@ -133,7 +153,7 @@ describe('useKeyboardInput', () => {
     unmount();
   });
 
-  it('fires when target is the data-touch-keyboard input', () => {
+  it('skips when target is an HTMLInputElement to avoid double-placement with hidden input', () => {
     const { unmount } = renderHook(() => useKeyboardInput(), {
       wrapper: makeWrapper('type'),
     });
@@ -150,11 +170,7 @@ describe('useKeyboardInput', () => {
       globalThis.dispatchEvent(event);
     });
 
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'PLACE_TILE',
-      tileId: 't1',
-      zoneIndex: 0,
-    });
+    expect(mockDispatch).not.toHaveBeenCalled();
 
     unmount();
   });
