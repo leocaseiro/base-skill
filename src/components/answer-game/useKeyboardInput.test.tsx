@@ -117,7 +117,7 @@ describe('useKeyboardInput', () => {
     unmount();
   });
 
-  it('does nothing when no bank tile matches the pressed key', () => {
+  it('dispatches TYPE_TILE when no bank tile matches the pressed key', () => {
     const { unmount } = renderHook(() => useKeyboardInput(), {
       wrapper: makeWrapper('type'),
     });
@@ -128,7 +128,13 @@ describe('useKeyboardInput', () => {
       );
     });
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'TYPE_TILE',
+        value: 'x',
+        zoneIndex: 0,
+      }),
+    );
 
     unmount();
   });

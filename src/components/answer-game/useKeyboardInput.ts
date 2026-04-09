@@ -4,7 +4,7 @@ import { useTileEvaluation } from './useTileEvaluation';
 
 export const useKeyboardInput = (): void => {
   const state = useAnswerGameContext();
-  const { placeTile } = useTileEvaluation();
+  const { placeTile, typeTile } = useTileEvaluation();
 
   useEffect(() => {
     if (state.config.inputMethod === 'drag') return;
@@ -23,9 +23,12 @@ export const useKeyboardInput = (): void => {
           state.bankTileIds.includes(t.id) &&
           t.value.toLowerCase() === char,
       );
-      if (!matchingTile) return;
 
-      placeTile(matchingTile.id, state.activeSlotIndex);
+      if (matchingTile) {
+        placeTile(matchingTile.id, state.activeSlotIndex);
+      } else {
+        typeTile(char, state.activeSlotIndex);
+      }
     };
 
     globalThis.addEventListener('keydown', handleKeyDown);
@@ -37,5 +40,6 @@ export const useKeyboardInput = (): void => {
     state.bankTileIds,
     state.activeSlotIndex,
     placeTile,
+    typeTile,
   ]);
 };

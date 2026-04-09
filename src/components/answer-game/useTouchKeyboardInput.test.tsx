@@ -112,7 +112,7 @@ describe('useTouchKeyboardInput', () => {
     expect(input.value).toBe('');
   });
 
-  it('does nothing when no bank tile matches the typed character', () => {
+  it('dispatches TYPE_TILE when no bank tile matches the typed character', () => {
     render(<TestHarness />, { wrapper: makeWrapper(config) });
     const input = screen.getByTestId('hidden');
 
@@ -121,7 +121,13 @@ describe('useTouchKeyboardInput', () => {
       nativeEvent: { data: 'z' },
     });
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'TYPE_TILE',
+        value: 'z',
+        zoneIndex: 0,
+      }),
+    );
   });
 
   it('is case-insensitive — uppercase input matches lowercase tile value', () => {
@@ -252,7 +258,7 @@ describe('useTouchKeyboardInput — numeric debounce', () => {
     expect(input.value).toBe('');
   });
 
-  it('does not dispatch when no tile matches the debounced value', () => {
+  it('dispatches TYPE_TILE when no tile matches the debounced numeric value', () => {
     render(<TestHarness />, { wrapper: makeWrapper(numericConfig) });
     const input = screen.getByTestId<HTMLInputElement>('hidden');
 
@@ -260,6 +266,12 @@ describe('useTouchKeyboardInput — numeric debounce', () => {
     fireEvent.input(input);
     vi.advanceTimersByTime(400);
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'TYPE_TILE',
+        value: '99',
+        zoneIndex: 0,
+      }),
+    );
   });
 });
