@@ -142,79 +142,81 @@ export const NumeralTileBank = ({
       data-tile-bank=""
       className="flex flex-wrap justify-center gap-3"
     >
-      {allTiles.map((tile) => {
-        const inBank = bankTileIds.includes(tile.id);
-        const isDragging = tile.id === dragActiveTileId;
-        const isHoverTarget =
-          tile.id === dragHoverBankTileId ||
-          (!dragHoverBankTileId &&
-            isDragOver &&
-            !inBank &&
-            tile.id === dragActiveTileId);
-        const numericValue = Number.parseInt(tile.value, 10);
-        const isDomino = getIsDomino(tileStyle, numericValue);
-        const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
+      {allTiles
+        .filter((t) => !t.id.startsWith('typed-'))
+        .map((tile) => {
+          const inBank = bankTileIds.includes(tile.id);
+          const isDragging = tile.id === dragActiveTileId;
+          const isHoverTarget =
+            tile.id === dragHoverBankTileId ||
+            (!dragHoverBankTileId &&
+              isDragOver &&
+              !inBank &&
+              tile.id === dragActiveTileId);
+          const numericValue = Number.parseInt(tile.value, 10);
+          const isDomino = getIsDomino(tileStyle, numericValue);
+          const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
 
-        if (inBank) {
-          return (
-            <div
-              key={tile.id}
-              className={[
-                'relative rounded-2xl transition-all',
-                holeSizeClass,
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
+          if (inBank) {
+            return (
               <div
-                data-tile-bank-hole={tile.id}
+                key={tile.id}
                 className={[
-                  'rounded-2xl bg-muted/60 shadow-inner',
+                  'relative rounded-2xl transition-all',
                   holeSizeClass,
                 ]
                   .filter(Boolean)
                   .join(' ')}
-                aria-hidden="true"
-              />
-              <div
-                className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
-                aria-hidden={isDragging || undefined}
               >
-                <NumeralTile tile={tile} tileStyle={tileStyle} />
-              </div>
-              {isHoverTarget && (
                 <div
-                  className="pointer-events-none absolute inset-0 rounded-2xl border-2 border-dashed border-primary"
+                  data-tile-bank-hole={tile.id}
+                  className={[
+                    'rounded-2xl bg-muted/60 shadow-inner',
+                    holeSizeClass,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                   aria-hidden="true"
                 />
+                <div
+                  className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
+                  aria-hidden={isDragging || undefined}
+                >
+                  <NumeralTile tile={tile} tileStyle={tileStyle} />
+                </div>
+                {isHoverTarget && (
+                  <div
+                    className="pointer-events-none absolute inset-0 rounded-2xl border-2 border-dashed border-primary"
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <div
+              key={tile.id}
+              data-tile-bank-hole={tile.id}
+              className={[
+                'relative rounded-2xl bg-muted/60 shadow-inner transition-all',
+                holeSizeClass,
+                isHoverTarget
+                  ? 'border-2 border-dashed border-primary'
+                  : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              aria-hidden="true"
+            >
+              {isHoverTarget && (
+                <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+                  {tile.label}
+                </span>
               )}
             </div>
           );
-        }
-
-        return (
-          <div
-            key={tile.id}
-            data-tile-bank-hole={tile.id}
-            className={[
-              'relative rounded-2xl bg-muted/60 shadow-inner transition-all',
-              holeSizeClass,
-              isHoverTarget
-                ? 'border-2 border-dashed border-primary'
-                : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            aria-hidden="true"
-          >
-            {isHoverTarget && (
-              <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
-                {tile.label}
-              </span>
-            )}
-          </div>
-        );
-      })}
+        })}
     </div>
   );
 };
