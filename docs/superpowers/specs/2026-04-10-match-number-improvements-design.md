@@ -87,21 +87,33 @@ This boolean gates rendering in three places:
 | `group-to-numeral`        | Dots      | 7         | —            |
 | `cardinal-number-to-text` | 7         | "seven"   | `toCardinal` |
 | `cardinal-text-to-number` | "seven"   | 7         | `toCardinal` |
-| `ordinal-number-to-text`  | 7         | "seventh" | `toOrdinal`  |
-| `ordinal-text-to-number`  | "seventh" | 7         | `toOrdinal`  |
+| `ordinal-number-to-text`  | "7th"     | "seventh" | `toOrdinal`  |
+| `ordinal-text-to-number`  | "seventh" | "7th"     | `toOrdinal`  |
 | `cardinal-to-ordinal`     | "seven"   | "seventh" | both         |
 | `ordinal-to-cardinal`     | "seventh" | "seven"   | both         |
 
-**Dependency:** `n2words` — tree-shakeable per-locale imports, i18n, zero deps.
-Provides `toCardinal` and `toOrdinal` per locale.
+**Dependency:** `n2words` (only) — tree-shakeable per-locale imports, i18n, zero
+deps. Provides `toCardinal` and `toOrdinal` per locale. No additional ordinal
+suffix packages needed — the numeric ordinal format ("7th" / "7º") is trivial
+inline logic.
+
+**Utility module:** `src/games/number-match/number-words.ts`
+
+- `toCardinalText(n, locale)` → `"seven"` / `"sete"` — wraps
+  `n2words/<locale>.toCardinal`
+- `toOrdinalText(n, locale)` → `"seventh"` / `"sétimo"` — wraps
+  `n2words/<locale>.toOrdinal`
+- `toOrdinalNumber(n, locale)` → `"7th"` / `"7º"` — inline suffix logic
+  (English: 1st/2nd/3rd/Nth; Portuguese: always `º`)
+- Locale map: `'en'` → `n2words/en-AU`, `'pt-BR'` → `n2words/pt-PT`
 
 **Data flow:** Rounds are always generated with numeric values. At render time,
-`n2words` converts to display strings based on the mode. Matching logic always
+the utility converts to display strings based on the mode. Matching logic always
 compares the underlying numeric `value`, never text strings.
 
 **Locale:** Sourced from the existing `useParams({ from: '/$locale' })` router
-param. Map the app locale to `n2words` locale import (e.g. `en` → `en-AU`,
-`pt` → `pt-PT`).
+param (`'en'` | `'pt-BR'`). The utility maps app locales to `n2words` locale
+imports.
 
 **Word tile UI:**
 
@@ -180,6 +192,9 @@ Both reuse the existing `DominoTile` / `DiceFace` components.
   slot sizing, mode gating
 - `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` — domino
   overhaul, tile rendering, hover preview, `tilesShowGroup` prop
+- `src/games/number-match/number-words.ts` — number↔text conversion utility
+  wrapping `n2words`
+- `src/games/number-match/number-words.test.ts` — unit tests for the utility
 - `src/games/number-match/build-numeral-round.ts` — label generation for
   word/ordinal modes
 - `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx` — countable
