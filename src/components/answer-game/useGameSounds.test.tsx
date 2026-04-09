@@ -232,4 +232,110 @@ describe('useGameSounds', () => {
 
     expect(result.current.sounds.gameOverReady).toBe(true);
   });
+
+  it('plays "level-complete" when phase transitions to level-complete', () => {
+    const levelConfig: AnswerGameConfig = {
+      ...baseConfig,
+      totalRounds: 1,
+      levelMode: {
+        generateNextLevel: () => ({ tiles: [], zones: [] }),
+      },
+    };
+    const { result } = renderHook(
+      () => {
+        const dispatch = useAnswerGameDispatch();
+        useGameSounds();
+        return dispatch;
+      },
+      { wrapper: createWrapper(levelConfig) },
+    );
+    act(() => {
+      result.current({ type: 'INIT_ROUND', tiles, zones });
+    });
+    vi.clearAllMocks();
+    act(() => {
+      result.current({
+        type: 'PLACE_TILE',
+        tileId: 't1',
+        zoneIndex: 0,
+      });
+    });
+    expect(playSound).toHaveBeenCalledWith('level-complete');
+  });
+
+  it('levelCompleteReady becomes true on level-complete phase', async () => {
+    const levelConfig: AnswerGameConfig = {
+      ...baseConfig,
+      totalRounds: 1,
+      levelMode: {
+        generateNextLevel: () => ({ tiles: [], zones: [] }),
+      },
+    };
+    const { result } = renderHook(
+      () => {
+        const dispatch = useAnswerGameDispatch();
+        const sounds = useGameSounds();
+        return { dispatch, sounds };
+      },
+      { wrapper: createWrapper(levelConfig) },
+    );
+    act(() => {
+      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+    });
+    await act(async () => {
+      result.current.dispatch({
+        type: 'PLACE_TILE',
+        tileId: 't1',
+        zoneIndex: 0,
+      });
+    });
+    expect(result.current.sounds.levelCompleteReady).toBe(true);
+  });
+
+  it('levelCompleteReady resets when phase leaves level-complete', async () => {
+    const levelConfig: AnswerGameConfig = {
+      ...baseConfig,
+      totalRounds: 1,
+      levelMode: {
+        generateNextLevel: () => ({ tiles: [], zones: [] }),
+      },
+    };
+    const extraTile: TileItem = { id: 't2', label: 'B', value: 'B' };
+    const extraZone: AnswerZone = {
+      id: 'z1',
+      index: 0,
+      expectedValue: 'B',
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    };
+    const { result } = renderHook(
+      () => {
+        const dispatch = useAnswerGameDispatch();
+        const sounds = useGameSounds();
+        return { dispatch, sounds };
+      },
+      { wrapper: createWrapper(levelConfig) },
+    );
+    act(() => {
+      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+    });
+    await act(async () => {
+      result.current.dispatch({
+        type: 'PLACE_TILE',
+        tileId: 't1',
+        zoneIndex: 0,
+      });
+    });
+    expect(result.current.sounds.levelCompleteReady).toBe(true);
+
+    await act(async () => {
+      result.current.dispatch({
+        type: 'ADVANCE_LEVEL',
+        tiles: [extraTile],
+        zones: [extraZone],
+      });
+    });
+    expect(result.current.sounds.levelCompleteReady).toBe(false);
+  });
 });
