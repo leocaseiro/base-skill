@@ -10007,6 +10007,11 @@ mute-stream@^2.0.0:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-2.0.0.tgz#a5446fc0c512b71c83c44d908d5c7b7b4c493b2b"
   integrity sha512-WWdIxpyjEn+FhQJQQv9aQAYlHoNVdzIzUySNV1gHUPDSdZJ3yZn7pAAbQcV7B56Mvu881q9FZV+0Vx2xC44VWA==
 
+n2words@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/n2words/-/n2words-4.0.0.tgz#eb5b836fb7d948c85ff32e9a8ed922b1fa6fe545"
+  integrity sha512-y0TJuqz5IaDYAjhmiqKGM4C20/fNeOuPGIE+AM5v5mMO9G/lYJ9tee45NYR7lwF9bquwP6WW6YVxh3XTwq4xPg==
+
 nanoid@^3.3.11:
   version "3.3.11"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.11.tgz#4f4f112cefbe303202f2199838128936266d185b"
