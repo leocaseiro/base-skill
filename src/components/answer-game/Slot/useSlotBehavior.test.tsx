@@ -177,6 +177,22 @@ describe('useSlotBehavior', () => {
     expect(result.current.result.renderProps.showCursor).toBe(true);
   });
 
+  it('shows cursor in free-swap mode when inputMethod is type', () => {
+    const freeSwapTypeConfig: AnswerGameConfig = {
+      ...baseConfig,
+      slotInteraction: 'free-swap',
+      inputMethod: 'type',
+    };
+
+    const { result } = renderHook(() => useHarness(0, emptyZones), {
+      wrapper: createWrapper(freeSwapTypeConfig),
+    });
+
+    // free-swap + type: isActive is false but cursor still shows on activeSlot
+    expect(result.current.result.renderProps.isActive).toBe(false);
+    expect(result.current.result.renderProps.showCursor).toBe(true);
+  });
+
   it('does not show cursor when inputMethod is drag', () => {
     const orderedDragConfig: AnswerGameConfig = {
       ...baseConfig,
