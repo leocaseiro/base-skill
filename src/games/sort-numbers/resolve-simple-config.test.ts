@@ -4,7 +4,10 @@ import {
   canConvertToSimple,
   resolveSimpleConfig,
 } from './resolve-simple-config';
-import type { SortNumbersConfig } from './types';
+import type {
+  SortNumbersConfig,
+  SortNumbersSimpleConfig,
+} from './types';
 
 describe('resolveSimpleConfig', () => {
   it('start=2, step=2, qty=5, distractors=false produces sequence [2,4,6,8,10] with 5 tiles exact mode', () => {
@@ -93,6 +96,42 @@ describe('resolveSimpleConfig', () => {
     expect(result.ttsEnabled).toBe(true);
     expect(result.roundsInOrder).toBe(false);
     expect(result.totalRounds).toBe(1);
+  });
+
+  it('resolveSimpleConfig produces a levelMode config', () => {
+    const simple: SortNumbersSimpleConfig = {
+      configMode: 'simple',
+      direction: 'ascending',
+      start: 2,
+      step: 2,
+      quantity: 5,
+      distractors: false,
+    };
+    const config = resolveSimpleConfig(simple);
+    expect(config.levelMode).toBeDefined();
+    expect(config.totalRounds).toBe(1);
+    expect(config.rounds).toHaveLength(1);
+  });
+
+  it('resolveSimpleConfig levelMode generateNextLevel produces correct sequence for level 1', () => {
+    const simple: SortNumbersSimpleConfig = {
+      configMode: 'simple',
+      direction: 'ascending',
+      start: 2,
+      step: 2,
+      quantity: 5,
+      distractors: false,
+    };
+    const config = resolveSimpleConfig(simple);
+    const nextLevel = config.levelMode!.generateNextLevel(1);
+    expect(nextLevel).not.toBeNull();
+    expect(nextLevel!.zones.map((z) => z.expectedValue)).toEqual([
+      '12',
+      '14',
+      '16',
+      '18',
+      '20',
+    ]);
   });
 });
 
