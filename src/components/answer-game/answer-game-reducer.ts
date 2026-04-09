@@ -152,16 +152,83 @@ export function answerGameReducer(
       };
     }
 
+    case 'TYPE_TILE': {
+      const zone = state.zones[action.zoneIndex];
+      if (!zone || zone.isLocked) return state;
+
+      const virtualTile: TileItem = {
+        id: action.tileId,
+        label: action.value,
+        value: action.value,
+      };
+      const correct =
+        action.value.toLowerCase() === zone.expectedValue.toLowerCase();
+
+      if (!correct && state.config.wrongTileBehavior === 'reject') {
+        return {
+          ...state,
+          retryCount: state.retryCount + 1,
+        };
+      }
+
+      const newAllTiles = [...state.allTiles, virtualTile];
+      const newZone: AnswerZone = {
+        ...zone,
+        placedTileId: action.tileId,
+        isWrong: !correct,
+        isLocked: !correct,
+      };
+      const newZones = state.zones.map((z, i) =>
+        i === action.zoneIndex ? newZone : z,
+      );
+
+      if (correct) {
+        const nextActiveSlot = newZones.findIndex(
+          (z, i) => i > action.zoneIndex && z.placedTileId === null,
+        );
+        const allFilledCorrectly = newZones.every(
+          (z) => z.placedTileId !== null && !z.isWrong,
+        );
+        return {
+          ...state,
+          allTiles: newAllTiles,
+          zones: newZones,
+          activeSlotIndex:
+            nextActiveSlot === -1
+              ? state.activeSlotIndex
+              : nextActiveSlot,
+          phase: allFilledCorrectly
+            ? resolveCompletionPhase(state)
+            : 'playing',
+        };
+      }
+
+      return {
+        ...state,
+        allTiles: newAllTiles,
+        zones: newZones,
+        activeSlotIndex: state.activeSlotIndex,
+        retryCount: state.retryCount + 1,
+        phase: 'playing',
+      };
+    }
+
     case 'REMOVE_TILE': {
       const zone = state.zones[action.zoneIndex];
       if (!zone?.placedTileId) return state;
       const removedTileId = zone.placedTileId;
+      // Virtual tiles (created by TYPE_TILE) are removed from allTiles
+      // and NOT returned to the bank.
+      const isVirtual = removedTileId.startsWith('typed-');
       return {
         ...state,
         dragActiveTileId:
           state.dragActiveTileId === removedTileId
             ? null
             : state.dragActiveTileId,
+        allTiles: isVirtual
+          ? state.allTiles.filter((t) => t.id !== removedTileId)
+          : state.allTiles,
         zones: state.zones.map((z, i) =>
           i === action.zoneIndex
             ? {
@@ -172,7 +239,9 @@ export function answerGameReducer(
               }
             : z,
         ),
-        bankTileIds: [...state.bankTileIds, removedTileId],
+        bankTileIds: isVirtual
+          ? state.bankTileIds
+          : [...state.bankTileIds, removedTileId],
       };
     }
 
@@ -253,6 +322,7 @@ export function answerGameReducer(
 
       if (zone.placedTileId) {
         const ejectedTileId = zone.placedTileId;
+        const isVirtual = ejectedTileId.startsWith('typed-');
         return {
           ...state,
           // If the ejected tile was mid-drag, clear drag state so the bank
@@ -261,6 +331,9 @@ export function answerGameReducer(
             state.dragActiveTileId === ejectedTileId
               ? null
               : state.dragActiveTileId,
+          allTiles: isVirtual
+            ? state.allTiles.filter((t) => t.id !== ejectedTileId)
+            : state.allTiles,
           zones: state.zones.map((z, i) =>
             i === action.zoneIndex
               ? {
@@ -271,7 +344,9 @@ export function answerGameReducer(
                 }
               : z,
           ),
-          bankTileIds: [...state.bankTileIds, ejectedTileId],
+          bankTileIds: isVirtual
+            ? state.bankTileIds
+            : [...state.bankTileIds, ejectedTileId],
         };
       }
 

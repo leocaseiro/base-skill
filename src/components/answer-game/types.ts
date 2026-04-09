@@ -88,6 +88,12 @@ export interface AnswerGameState {
 export type AnswerGameAction =
   | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
   | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+  | {
+      type: 'TYPE_TILE';
+      tileId: string;
+      value: string;
+      zoneIndex: number;
+    }
   | { type: 'REMOVE_TILE'; zoneIndex: number }
   | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
   | { type: 'EJECT_TILE'; zoneIndex: number }

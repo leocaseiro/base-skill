@@ -13,7 +13,7 @@ const NUMERIC_DEBOUNCE_MS = 400;
 export const useTouchKeyboardInput = (): TouchKeyboardInput => {
   const hiddenInputRef = useRef<HTMLInputElement | null>(null);
   const state = useAnswerGameContext();
-  const { placeTile } = useTileEvaluation();
+  const { placeTile, typeTile } = useTileEvaluation();
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -34,6 +34,8 @@ export const useTouchKeyboardInput = (): TouchKeyboardInput => {
 
       if (matchingTile) {
         placeTile(matchingTile.id, state.activeSlotIndex);
+      } else {
+        typeTile(data, state.activeSlotIndex);
       }
 
       input.value = '';
@@ -78,6 +80,7 @@ export const useTouchKeyboardInput = (): TouchKeyboardInput => {
     state.bankTileIds,
     state.activeSlotIndex,
     placeTile,
+    typeTile,
   ]);
 
   const focusKeyboard = useCallback(() => {
