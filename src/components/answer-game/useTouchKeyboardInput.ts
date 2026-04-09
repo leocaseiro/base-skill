@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAnswerGameContext } from './useAnswerGameContext';
+import { useAnswerGameDispatch } from './useAnswerGameDispatch';
 import { useTileEvaluation } from './useTileEvaluation';
 import type { RefObject } from 'react';
 
@@ -13,6 +14,7 @@ const NUMERIC_DEBOUNCE_MS = 400;
 export const useTouchKeyboardInput = (): TouchKeyboardInput => {
   const hiddenInputRef = useRef<HTMLInputElement | null>(null);
   const state = useAnswerGameContext();
+  const dispatch = useAnswerGameDispatch();
   const { placeTile, typeTile } = useTileEvaluation();
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -43,6 +45,18 @@ export const useTouchKeyboardInput = (): TouchKeyboardInput => {
 
     const handleInput = (event: Event) => {
       const inputEvent = event as InputEvent;
+
+      // Backspace / Delete inside the hidden input: eject the most
+      // recently filled slot, mirroring physical keyboard behaviour.
+      if (inputEvent.inputType === 'deleteContentBackward') {
+        for (let i = state.activeSlotIndex; i >= 0; i--) {
+          if (state.zones[i]?.placedTileId) {
+            dispatch({ type: 'REMOVE_TILE', zoneIndex: i });
+            return;
+          }
+        }
+        return;
+      }
 
       if (isNumeric) {
         // For numeric input, accumulate digits and debounce so multi-digit
@@ -78,7 +92,9 @@ export const useTouchKeyboardInput = (): TouchKeyboardInput => {
     state.config.touchKeyboardInputMode,
     state.allTiles,
     state.bankTileIds,
+    state.zones,
     state.activeSlotIndex,
+    dispatch,
     placeTile,
     typeTile,
   ]);

@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { useAnswerGameContext } from './useAnswerGameContext';
+import { useAnswerGameDispatch } from './useAnswerGameDispatch';
 import { useTileEvaluation } from './useTileEvaluation';
 
 export const useKeyboardInput = (): void => {
   const state = useAnswerGameContext();
+  const dispatch = useAnswerGameDispatch();
   const { placeTile, typeTile } = useTileEvaluation();
 
   useEffect(() => {
@@ -14,6 +16,18 @@ export const useKeyboardInput = (): void => {
       // (useTouchKeyboardInput) handles those to avoid double-placement.
       if (event.target instanceof HTMLInputElement) return;
       if (event.target instanceof HTMLTextAreaElement) return;
+
+      // Backspace / Delete: eject the most recently filled slot
+      if (event.key === 'Backspace' || event.key === 'Delete') {
+        // Search backwards from activeSlotIndex for a filled slot
+        for (let i = state.activeSlotIndex; i >= 0; i--) {
+          if (state.zones[i]?.placedTileId) {
+            dispatch({ type: 'REMOVE_TILE', zoneIndex: i });
+            return;
+          }
+        }
+        return;
+      }
 
       const char = event.key.toLowerCase();
       if (char.length !== 1) return;
@@ -38,7 +52,9 @@ export const useKeyboardInput = (): void => {
     state.config.inputMethod,
     state.allTiles,
     state.bankTileIds,
+    state.zones,
     state.activeSlotIndex,
+    dispatch,
     placeTile,
     typeTile,
   ]);
