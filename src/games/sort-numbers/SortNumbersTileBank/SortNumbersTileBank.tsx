@@ -1,5 +1,6 @@
 import type { TileItem } from '@/components/answer-game/types';
 import { skeuoStyle } from '@/components/answer-game/styles';
+import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
@@ -19,7 +20,7 @@ const NumberTile = ({ tile }: { tile: TileItem }) => {
       ref={ref}
       type="button"
       aria-label={`Number ${tile.label}`}
-      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+      className={`flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums transition-transform active:scale-95 active:cursor-grabbing`}
       style={skeuoStyle}
       onClick={handleClick}
       onPointerDown={onPointerDown}
@@ -94,7 +95,9 @@ export const SortNumbersTileBank = () => {
               aria-hidden="true"
             >
               {isHoverTarget && (
-                <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+                <span
+                  className={`absolute inset-0 flex items-center justify-center ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums opacity-50`}
+                >
                   {tile.label}
                 </span>
               )}
