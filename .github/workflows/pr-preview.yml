@@ -80,9 +80,9 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf preview-staging
-          mkdir -p preview-staging/app preview-staging/storybook
+          mkdir -p preview-staging/app preview-staging/docs
           cp -r dist/client/. preview-staging/app/
-          cp -r storybook-static/. preview-staging/storybook/
+          cp -r storybook-static/. preview-staging/docs/
 
       - name: Deploy preview to gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
@@ -100,10 +100,10 @@ jobs:
           message: |
             ## Preview deployed
 
-            | Target    | URL                                                                                          |
-            | --------- | -------------------------------------------------------------------------------------------- |
-            | App       | https://leocaseiro.github.io/base-skill/pr/${{ steps.version.outputs.pr_number }}/app/       |
-            | Storybook | https://leocaseiro.github.io/base-skill/pr/${{ steps.version.outputs.pr_number }}/storybook/ |
+            | Target    | URL                                                                                    |
+            | --------- | -------------------------------------------------------------------------------------- |
+            | App       | https://leocaseiro.github.io/base-skill/pr/${{ steps.version.outputs.pr_number }}/app/  |
+            | Storybook | https://leocaseiro.github.io/base-skill/pr/${{ steps.version.outputs.pr_number }}/docs/ |
 
             **Version:** `${{ steps.version.outputs.version }}`
             **Commit:** `${{ github.event.pull_request.head.sha }}`
