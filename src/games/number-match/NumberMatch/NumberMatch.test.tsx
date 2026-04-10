@@ -59,8 +59,9 @@ describe('NumberMatch', () => {
     };
     render(<NumberMatch config={groupConfig} />);
     expect(
-      screen.getByRole('button', { name: /tap to hear/i }),
-    ).toBeInTheDocument();
+      screen.getAllByRole('button', { name: /^Dot \d+ of \d+$/ })
+        .length,
+    ).toBeGreaterThan(0);
   });
 
   it('renders one pair zone per round value', () => {
