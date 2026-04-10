@@ -2,10 +2,15 @@ import { useNavigate, useParams } from '@tanstack/react-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildNumeralRound } from '../build-numeral-round';
 import {
+  toCardinalText,
+  toOrdinalNumber,
+  toOrdinalText,
+} from '../number-words';
+import {
   DominoTile,
   NumeralTileBank,
 } from '../NumeralTileBank/NumeralTileBank';
-import type { NumberMatchConfig } from '../types';
+import type { NumberMatchConfig, NumberMatchMode } from '../types';
 import type {
   AnswerGameConfig,
   AnswerGameDraftState,
@@ -25,6 +30,52 @@ import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
 import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
 import { buildRoundOrder } from '@/games/build-round-order';
+
+type NumberWordsLocale = 'en' | 'pt-BR';
+
+const WORD_MODES: ReadonlySet<NumberMatchMode> =
+  new Set<NumberMatchMode>([
+    'cardinal-number-to-text',
+    'cardinal-text-to-number',
+    'ordinal-number-to-text',
+    'ordinal-text-to-number',
+    'cardinal-to-ordinal',
+    'ordinal-to-cardinal',
+  ]);
+
+const isWordMode = (mode: NumberMatchMode): boolean =>
+  WORD_MODES.has(mode);
+
+/** Text shown in the question area for word/ordinal modes. */
+const questionTextForMode = (
+  value: number,
+  mode: NumberMatchMode,
+  locale: NumberWordsLocale,
+): string => {
+  switch (mode) {
+    case 'cardinal-number-to-text': {
+      return String(value);
+    }
+    case 'cardinal-text-to-number': {
+      return toCardinalText(value, locale);
+    }
+    case 'ordinal-number-to-text': {
+      return toOrdinalNumber(value, locale);
+    }
+    case 'ordinal-text-to-number': {
+      return toOrdinalText(value, locale);
+    }
+    case 'cardinal-to-ordinal': {
+      return toCardinalText(value, locale);
+    }
+    case 'ordinal-to-cardinal': {
+      return toOrdinalText(value, locale);
+    }
+    default: {
+      return String(value);
+    }
+  }
+};
 
 interface NumberMatchProps {
   config: NumberMatchConfig;
@@ -48,6 +99,8 @@ const NumberMatchSession = ({
   const { confettiReady, gameOverReady } = useGameSounds();
   const navigate = useNavigate();
   const { locale } = useParams({ from: '/$locale' });
+  const numberWordsLocale: NumberWordsLocale =
+    locale === 'pt-BR' ? 'pt-BR' : 'en';
   const completionToken = useRef(0);
 
   const configRoundIndex = roundOrder[roundIndex];
@@ -96,6 +149,8 @@ const NumberMatchSession = ({
           tileBankMode: numberMatchConfig.tileBankMode,
           distractorCount: numberMatchConfig.distractorCount,
           range: numberMatchConfig.range,
+          mode: numberMatchConfig.mode,
+          locale: numberWordsLocale,
         },
       );
       dispatch({
@@ -118,27 +173,38 @@ const NumberMatchSession = ({
     numberMatchConfig.tileBankMode,
     numberMatchConfig.distractorCount,
     numberMatchConfig.range,
+    numberMatchConfig.mode,
+    numberWordsLocale,
   ]);
 
   if (!round) return null;
 
-  const isDots = numberMatchConfig.tileStyle === 'dots';
-  const slotClass = isDots
-    ? 'h-[136px] w-[72px] rounded-2xl'
-    : 'size-20 rounded-2xl';
+  const { mode, tileStyle } = numberMatchConfig;
+  const tilesShowGroup = mode === 'numeral-to-group';
+  const dotsDominoMode = tilesShowGroup && tileStyle === 'dots';
+  const wordMode = isWordMode(mode);
 
-  const showTextQuestion =
-    numberMatchConfig.mode === 'numeral-to-group' ||
-    numberMatchConfig.mode === 'numeral-to-word' ||
-    numberMatchConfig.mode === 'word-to-numeral';
+  const slotClass = dotsDominoMode
+    ? 'h-[136px] w-[72px] rounded-2xl'
+    : wordMode
+      ? 'min-w-[80px] h-20 rounded-2xl px-2'
+      : 'size-20 rounded-2xl';
+
+  const questionText = questionTextForMode(
+    round.value,
+    mode,
+    numberWordsLocale,
+  );
+  const ttsPrompt =
+    mode === 'group-to-numeral' || mode === 'numeral-to-group'
+      ? String(round.value)
+      : questionText;
 
   return (
     <>
       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
         <AnswerGame.Question>
-          {showTextQuestion ? (
-            <TextQuestion text={String(round.value)} />
-          ) : (
+          {mode === 'group-to-numeral' ? (
             <DotGroupQuestion
               // Remount per round so per-dot count state fully resets,
               // even when two consecutive rounds share the same value.
@@ -146,8 +212,10 @@ const NumberMatchSession = ({
               count={round.value}
               prompt={String(round.value)}
             />
+          ) : (
+            <TextQuestion text={questionText} />
           )}
-          <AudioButton prompt={String(round.value)} />
+          <AudioButton prompt={ttsPrompt} />
         </AnswerGame.Question>
         <AnswerGame.Answer>
           <SlotRow className="gap-4">
@@ -155,9 +223,23 @@ const NumberMatchSession = ({
               <Slot key={zone.id} index={i} className={slotClass}>
                 {({ label }) => {
                   if (!label) return null;
-                  const n = Number.parseInt(label, 10);
-                  if (isDots && !Number.isNaN(n)) {
-                    return <DominoTile value={n} />;
+                  if (dotsDominoMode) {
+                    const n = Number.parseInt(label, 10);
+                    if (!Number.isNaN(n)) {
+                      return <DominoTile value={n} />;
+                    }
+                  }
+                  if (wordMode) {
+                    return (
+                      <span
+                        className={[
+                          'block text-center font-bold leading-tight hyphens-auto break-words',
+                          label.length > 6 ? 'text-sm' : 'text-xl',
+                        ].join(' ')}
+                      >
+                        {label}
+                      </span>
+                    );
                   }
                   return (
                     <span className="text-3xl font-bold tabular-nums">
@@ -170,7 +252,10 @@ const NumberMatchSession = ({
           </SlotRow>
         </AnswerGame.Answer>
         <AnswerGame.Choices>
-          <NumeralTileBank tileStyle={numberMatchConfig.tileStyle} />
+          <NumeralTileBank
+            tileStyle={tileStyle}
+            tilesShowGroup={tilesShowGroup}
+          />
         </AnswerGame.Choices>
       </div>
       <ScoreAnimation visible={confettiReady} />
@@ -193,6 +278,9 @@ export const NumberMatch = ({
 }: NumberMatchProps) => {
   const roundsInOrder = config.roundsInOrder === true;
   const [sessionEpoch, setSessionEpoch] = useState(0);
+  const { locale } = useParams({ from: '/$locale' });
+  const numberWordsLocale: NumberWordsLocale =
+    locale === 'pt-BR' ? 'pt-BR' : 'en';
 
   const roundOrder = useMemo(() => {
     void sessionEpoch;
@@ -214,12 +302,16 @@ export const NumberMatch = ({
       tileBankMode: config.tileBankMode,
       distractorCount: config.distractorCount,
       range: config.range,
+      mode: config.mode,
+      locale: numberWordsLocale,
     });
   }, [
     roundValue,
     config.tileBankMode,
     config.distractorCount,
     config.range,
+    config.mode,
+    numberWordsLocale,
   ]);
 
   const answerGameConfig = useMemo(

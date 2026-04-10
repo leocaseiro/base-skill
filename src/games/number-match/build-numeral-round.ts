@@ -1,13 +1,53 @@
 import { nanoid } from 'nanoid';
+import {
+  toCardinalText,
+  toOrdinalNumber,
+  toOrdinalText,
+} from './number-words';
+import type { NumberMatchMode } from './types';
 import type {
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
 
+type NumberWordsLocale = 'en' | 'pt-BR';
+
 export type NumeralBankOptions = {
   tileBankMode: 'exact' | 'distractors';
   distractorCount?: number;
   range: { min: number; max: number };
+  mode?: NumberMatchMode;
+  locale?: NumberWordsLocale;
+};
+
+/**
+ * Generate the display label for a tile based on the game mode.
+ *
+ * Matching always compares the underlying numeric `value`, so `label` is
+ * purely for display. For word modes, the tile shows the word (cardinal or
+ * ordinal) while the underlying value stays numeric.
+ */
+const labelForMode = (
+  n: number,
+  mode: NumberMatchMode,
+  locale: NumberWordsLocale,
+): string => {
+  switch (mode) {
+    case 'cardinal-number-to-text':
+    case 'ordinal-to-cardinal': {
+      return toCardinalText(n, locale);
+    }
+    case 'ordinal-number-to-text':
+    case 'cardinal-to-ordinal': {
+      return toOrdinalText(n, locale);
+    }
+    case 'ordinal-text-to-number': {
+      return toOrdinalNumber(n, locale);
+    }
+    default: {
+      return String(n);
+    }
+  }
 };
 
 function shuffleInPlace<T>(items: T[]): void {
@@ -62,9 +102,11 @@ export function buildNumeralRound(
   }
 
   shuffleInPlace(numerals);
+  const mode: NumberMatchMode = bank.mode ?? 'numeral-to-group';
+  const locale: NumberWordsLocale = bank.locale ?? 'en';
   const tiles: TileItem[] = numerals.map((n) => ({
     id: nanoid(),
-    label: String(n),
+    label: labelForMode(n, mode, locale),
     value: String(n),
   }));
 
