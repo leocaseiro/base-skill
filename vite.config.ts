@@ -47,7 +47,9 @@ const workboxPlugin = (): Plugin => ({
         globDirectory: outDir,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: `${base}index.html`,
-        navigateFallbackDenylist: [/\/api\//],
+        // Exclude PR preview paths so the production SW does not hijack
+        // navigations to /base-skill/pr/<N>/app|docs/.
+        navigateFallbackDenylist: [/\/api\//, /\/pr\//],
         cleanupOutdatedCaches: true,
         mode: 'production',
         runtimeCaching: [
