@@ -133,7 +133,7 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
   rounds: DEFAULT_NUMBER_MATCH_ROUND_VALUES.map((value) => ({ value })),
 });
 
-const resizeNumberMatchRounds = (
+export const resizeNumberMatchRounds = (
   prev: NumberMatchRound[],
   count: number,
   range: { min: number; max: number },
@@ -146,6 +146,24 @@ const resizeNumberMatchRounds = (
   // round value via the settings panel.
   const fillValueAt = (index: number): number =>
     range.min + (index % span);
+
+  // Detect a collapsed state: every round has the same value even though the
+  // range allows variety. This happens when the user narrows the range down
+  // to a single value (collapsing every round to that value) and then widens
+  // it again — without this check the preserved values stay stuck at the
+  // collapse point and the player sees the same number every round. Also
+  // handles the empty-prev case from a legacy saved config.
+  const firstValue = prev[0]?.value;
+  const allCollapsed =
+    prev.length >= 2 &&
+    span > 1 &&
+    prev.every((r) => r.value === firstValue);
+  if (prev.length === 0 || allCollapsed) {
+    return Array.from({ length: n }, (_, i) => ({
+      value: fillValueAt(i),
+    }));
+  }
+
   const next = prev.slice(0, n).map((r, i) => {
     if (r.value >= range.min && r.value <= range.max) return { ...r };
     return { value: fillValueAt(i) };
