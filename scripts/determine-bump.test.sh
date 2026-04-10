@@ -40,7 +40,13 @@ run_test() {
   printf '%s' "$fixture_content" >"$fixture_file"
 
   local actual
-  actual="$(PR_COMMITS_FILE="$fixture_file" bash "$BUMP_SCRIPT" 999)"
+  local exit_code=0
+  actual="$(PR_COMMITS_FILE="$fixture_file" bash "$BUMP_SCRIPT" 999)" || exit_code=$?
+  if [[ $exit_code -ne 0 ]]; then
+    printf '%bFAIL%b — %s (script exited %d)\n' "$RED" "$RESET" "$description" "$exit_code"
+    fail=$((fail + 1))
+    return
+  fi
 
   if [[ "$actual" == "$expected" ]]; then
     echo "${GREEN}PASS${RESET} — $description"
@@ -142,6 +148,23 @@ run_test "feat(a) + chore(b) → minor" \
 ---
 chore(b): y" \
   "minor"
+
+# 16. Leading --- guard: phantom empty commit must not affect result
+run_test "leading --- separator → skip (no phantom commit)" \
+  "---
+docs: update readme" \
+  "skip"
+
+# 17. Trailing --- guard: trailing separator must not produce phantom commit
+run_test "trailing --- separator → patch" \
+  "fix: handle null
+---" \
+  "patch"
+
+# 18. Scoped breaking change with scope in header → major
+run_test "scoped feat(api)! breaking header → major" \
+  "feat(api)!: drop v1 endpoint" \
+  "major"
 
 # ---------------------------------------------------------------------------
 # Summary
