@@ -16,12 +16,18 @@ concurrency:
   group: visual-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   visual-regression:
     name: Visual Regression (Docker / Chromium)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-node@v6
         with:
