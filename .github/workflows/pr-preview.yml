@@ -1,3 +1,5 @@
+# Builds and deploys a live preview for each PR to GitHub Pages.
+# Only works for PRs from the base repo; fork PRs lack write permissions and secrets.
 name: PR Preview
 
 on:
