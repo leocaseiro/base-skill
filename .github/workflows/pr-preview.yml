@@ -1,0 +1,109 @@
+name: PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [master]
+
+concurrency:
+  group: pr-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  deploy-preview:
+    name: Build and deploy preview
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Compute version and base paths
+        id: version
+        run: |
+          set -euo pipefail
+          BASE_VERSION=$(node -p "require('./package.json').version")
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          VERSION="${BASE_VERSION}-pr.${PR_NUMBER}"
+          APP_BASE="/base-skill/pr/${PR_NUMBER}/app/"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "app_base=${APP_BASE}" >> "$GITHUB_OUTPUT"
+          echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: Build app
+        env:
+          APP_BASE_URL: ${{ steps.version.outputs.app_base }}
+          VITE_APP_VERSION: ${{ steps.version.outputs.version }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_ONEDRIVE_CLIENT_ID: ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}
+          VITE_CF_WORKER_URL: ${{ secrets.VITE_CF_WORKER_URL }}
+          VITE_ANALYTICS_PROVIDER: ${{ vars.VITE_ANALYTICS_PROVIDER }}
+        run: yarn build
+
+      - name: Copy shell to index.html
+        run: cp dist/client/_shell.html dist/client/index.html
+
+      - name: SPA fallback for history routing
+        run: cp dist/client/index.html dist/client/404.html
+
+      - name: Stamp version.json
+        run: |
+          set -euo pipefail
+          BUILD_SHA=$(git rev-parse HEAD)
+          BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          cat > dist/client/version.json <<EOF
+          {
+            "version": "${{ steps.version.outputs.version }}",
+            "buildSha": "${BUILD_SHA}",
+            "buildDate": "${BUILD_DATE}"
+          }
+          EOF
+
+      - name: Build Storybook
+        run: yarn build-storybook --output-dir storybook-static
+
+      - name: Stage preview directory
+        run: |
+          set -euo pipefail
+          rm -rf preview-staging
+          mkdir -p preview-staging/app preview-staging/storybook
+          cp -r dist/client/. preview-staging/app/
+          cp -r storybook-static/. preview-staging/storybook/
+
+      - name: Deploy preview to gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: preview-staging
+          target-folder: pr/${{ steps.version.outputs.pr_number }}
+          clean: true
+          commit-message: 'deploy: PR #${{ steps.version.outputs.pr_number }} preview (${{ steps.version.outputs.version }})'
+
+      - name: Comment PR with preview URLs
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: pr-preview
+          message: |
+            ## Preview deployed
+
+            | Target    | URL                                                                                          |
+            | --------- | -------------------------------------------------------------------------------------------- |
+            | App       | https://leocaseiro.github.io/base-skill/pr/${{ steps.version.outputs.pr_number }}/app/       |
+            | Storybook | https://leocaseiro.github.io/base-skill/pr/${{ steps.version.outputs.pr_number }}/storybook/ |
+
+            **Version:** `${{ steps.version.outputs.version }}`
+            **Commit:** `${{ github.event.pull_request.head.sha }}`
+
+            Previews are kept forever — no cleanup on close.
