@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/40 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">40/40 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">3/150 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">9 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/40 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">40/40 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">3/155 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">9 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -4126,7 +4126,7 @@ onLevelChange: (level: GameLevel | &#39;&#39;) =&gt; void</code></pre>
       <div class="badges">
         <label for="c-26-games-number-match-numbermatch-props" class="badge ok as-toggle">4 prop types</label>
         <label for="c-26-games-number-match-numbermatch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-26-games-number-match-numbermatch-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-26-games-number-match-numbermatch-stories" class="badge ok as-toggle">10 stories</label>
         
       </div>
     </div>
@@ -4204,30 +4204,86 @@ sessionId?: string</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Numeral To Word</span>
+                <span class="ex-name">Cardinal Number To Text</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const NumeralToWord = () =&gt; &lt;NumberMatch
+              <pre><code>const CardinalNumberToText = () =&gt; &lt;NumberMatch
     config={{
       ...baseConfig,
-      mode: &#39;numeral-to-word&#39;,
+      mode: &#39;cardinal-number-to-text&#39;,
       tileStyle: &#39;fingers&#39;,
     }} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Word To Numeral</span>
+                <span class="ex-name">Cardinal Text To Number</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const WordToNumeral = () =&gt; &lt;NumberMatch
+              <pre><code>const CardinalTextToNumber = () =&gt; &lt;NumberMatch
     config={{
       ...baseConfig,
-      mode: &#39;word-to-numeral&#39;,
-      tileStyle: &#39;objects&#39;,
+      mode: &#39;cardinal-text-to-number&#39;,
+      tileStyle: &#39;fingers&#39;,
+    }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Ordinal Number To Text</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const OrdinalNumberToText = () =&gt; &lt;NumberMatch
+    config={{
+      ...baseConfig,
+      mode: &#39;ordinal-number-to-text&#39;,
+      tileStyle: &#39;fingers&#39;,
+    }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Ordinal Text To Number</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const OrdinalTextToNumber = () =&gt; &lt;NumberMatch
+    config={{
+      ...baseConfig,
+      mode: &#39;ordinal-text-to-number&#39;,
+      tileStyle: &#39;fingers&#39;,
+    }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Cardinal To Ordinal</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const CardinalToOrdinal = () =&gt; &lt;NumberMatch
+    config={{
+      ...baseConfig,
+      mode: &#39;cardinal-to-ordinal&#39;,
+      tileStyle: &#39;fingers&#39;,
+    }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Ordinal To Cardinal</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const OrdinalToCardinal = () =&gt; &lt;NumberMatch
+    config={{
+      ...baseConfig,
+      mode: &#39;ordinal-to-cardinal&#39;,
+      tileStyle: &#39;fingers&#39;,
     }} /&gt;;</code></pre>
             </div>
             <div class="note ok">
@@ -4271,9 +4327,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NumeralTileBank</h2>
       <div class="badges">
-        <label for="c-27-games-number-match-numeraltilebank-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-27-games-number-match-numeraltilebank-props" class="badge ok as-toggle">2 prop types</label>
         <label for="c-27-games-number-match-numeraltilebank-info" class="badge info as-toggle">1 info</label>
-        <label for="c-27-games-number-match-numeraltilebank-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-27-games-number-match-numeraltilebank-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -4305,11 +4361,13 @@ sessionId?: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">1 prop type</span>
+              <span class="badge ok">2 prop types</span>
             </div>
             <pre><code>Component: src/games/number-match/NumeralTileBank/NumeralTileBank.tsx::NumeralTileBank</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
+            <pre><code>tilesShowGroup: boolean
+
+tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
           </div>
         </div>
     
@@ -4332,7 +4390,7 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;NumeralTileBank tileStyle=&quot;dots&quot; /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;NumeralTileBank tileStyle=&quot;dots&quot; tilesShowGroup /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -4341,7 +4399,7 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const FingersStyle = () =&gt; &lt;NumeralTileBank tileStyle=&quot;fingers&quot; /&gt;;</code></pre>
+              <pre><code>const FingersStyle = () =&gt; &lt;NumeralTileBank tileStyle=&quot;fingers&quot; tilesShowGroup /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -4350,7 +4408,16 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const ObjectsStyle = () =&gt; &lt;NumeralTileBank tileStyle=&quot;objects&quot; /&gt;;</code></pre>
+              <pre><code>const ObjectsStyle = () =&gt; &lt;NumeralTileBank tileStyle=&quot;objects&quot; tilesShowGroup /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Word Tiles</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WordTiles = () =&gt; &lt;NumeralTileBank tileStyle=&quot;dots&quot; tilesShowGroup={false} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -4359,7 +4426,7 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const DragHoverBankTile = () =&gt; &lt;NumeralTileBank tileStyle=&quot;dots&quot; /&gt;;</code></pre>
+              <pre><code>const DragHoverBankTile = () =&gt; &lt;NumeralTileBank tileStyle=&quot;dots&quot; tilesShowGroup /&gt;;</code></pre>
             </div>
         </div>
     
