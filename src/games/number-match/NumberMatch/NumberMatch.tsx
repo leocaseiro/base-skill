@@ -140,6 +140,9 @@ const NumberMatchSession = ({
             <TextQuestion text={String(round.value)} />
           ) : (
             <DotGroupQuestion
+              // Remount per round so per-dot count state fully resets,
+              // even when two consecutive rounds share the same value.
+              key={`round-${roundIndex}`}
               count={round.value}
               prompt={String(round.value)}
             />
