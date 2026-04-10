@@ -115,6 +115,11 @@ jobs:
         if: steps.bump.outputs.bumped == 'true' && github.actor != 'github-actions[bot]'
         env:
           NEW_VERSION: ${{ steps.bump.outputs.new_version }}
+          # Bypass the local pre-push quality gate — every check in the hook
+          # (lint, typecheck, unit, storybook, VR, e2e) already ran in ci.yml
+          # on the merging PR. The runner also uses dash as /bin/sh, which
+          # chokes on the hook's bash-isms further down the script.
+          SKIP_PREPUSH: 1
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
