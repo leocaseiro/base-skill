@@ -90,12 +90,13 @@ jobs:
 
       - name: Stamp version.json
         run: |
-          ACTUAL_SHA=$(git rev-parse HEAD)
+          set -euo pipefail
+          BUILD_SHA=$(git rev-parse HEAD)
           BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           cat > dist/client/version.json <<EOF
           {
             "version": "${{ steps.version.outputs.version }}",
-            "buildSha": "${ACTUAL_SHA}",
+            "buildSha": "${BUILD_SHA}",
             "buildDate": "${BUILD_DATE}"
           }
           EOF
