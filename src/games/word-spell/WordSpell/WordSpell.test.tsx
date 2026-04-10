@@ -31,14 +31,15 @@ vi.mock('@/db/hooks/useSettings', () => ({
 
 vi.mock('@/lib/audio/AudioFeedback', () => ({
   playSound: vi.fn(),
-  queueSound: vi.fn().mockResolvedValue(),
-  whenSoundEnds: vi.fn().mockResolvedValue(),
+  queueSound: vi.fn().mockImplementation(() => Promise.resolve()),
+  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
 }));
 
 vi.mock('canvas-confetti', () => ({
-  default: Object.assign(vi.fn().mockResolvedValue(), {
-    reset: vi.fn(),
-  }),
+  default: Object.assign(
+    vi.fn().mockImplementation(() => Promise.resolve()),
+    { reset: vi.fn() },
+  ),
 }));
 
 const config: WordSpellConfig = {
