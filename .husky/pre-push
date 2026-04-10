@@ -17,6 +17,14 @@
 # Either start it manually before pushing, or set START_STORYBOOK=1
 # to have this hook start and stop it automatically.
 
+# Global skip — POSIX-safe so it works under dash (husky v9 invokes this hook
+# via `sh`, ignoring the shebang). Must come before `set -euo pipefail` because
+# dash rejects `-o pipefail`.
+if [ "${SKIP_PREPUSH:-0}" = "1" ]; then
+  echo "  ⚠ All pre-push checks (skipped — SKIP_PREPUSH=1)"
+  exit 0
+fi
+
 set -euo pipefail
 
 # ── colour helpers ─────────────────────────────────────────────────────────────
@@ -32,12 +40,6 @@ fail()  { echo -e "${RED}  ✗ ${1}${RESET}"; }
 skip()  { echo -e "${YELLOW}  ⚠ ${1} (skipped)${RESET}"; }
 info()  { echo -e "${CYAN}${BOLD}▶ ${1}${RESET}"; }
 divider(){ echo -e "${BOLD}──────────────────────────────────────────${RESET}"; }
-
-# ── global skip ────────────────────────────────────────────────────────────────
-if [[ "${SKIP_PREPUSH:-0}" == "1" ]]; then
-  skip "All pre-push checks (SKIP_PREPUSH=1)"
-  exit 0
-fi
 
 divider
 echo -e "${BOLD}  Pre-push checks${RESET}"
