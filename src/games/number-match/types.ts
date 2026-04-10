@@ -7,13 +7,19 @@ export interface NumberMatchRound {
   objectImage?: string;
 }
 
+export type NumberMatchMode =
+  | 'numeral-to-group'
+  | 'group-to-numeral'
+  | 'cardinal-number-to-text'
+  | 'cardinal-text-to-number'
+  | 'ordinal-number-to-text'
+  | 'ordinal-text-to-number'
+  | 'cardinal-to-ordinal'
+  | 'ordinal-to-cardinal';
+
 export interface NumberMatchConfig extends AnswerGameConfig {
   component: 'NumberMatch';
-  mode:
-    | 'numeral-to-group'
-    | 'group-to-numeral'
-    | 'numeral-to-word'
-    | 'word-to-numeral';
+  mode: NumberMatchMode;
   /** Visual style for quantity/group tiles */
   tileStyle: 'dots' | 'objects' | 'fingers';
   range: { min: number; max: number };
@@ -48,8 +54,24 @@ export const numberMatchConfigFields: ConfigField[] = [
     options: [
       { value: 'numeral-to-group', label: 'numeral → group' },
       { value: 'group-to-numeral', label: 'group → numeral' },
-      { value: 'numeral-to-word', label: 'numeral → word' },
-      { value: 'word-to-numeral', label: 'word → numeral' },
+      {
+        value: 'cardinal-number-to-text',
+        label: 'cardinal number → text',
+      },
+      {
+        value: 'cardinal-text-to-number',
+        label: 'cardinal text → number',
+      },
+      {
+        value: 'ordinal-number-to-text',
+        label: 'ordinal number → text',
+      },
+      {
+        value: 'ordinal-text-to-number',
+        label: 'ordinal text → number',
+      },
+      { value: 'cardinal-to-ordinal', label: 'cardinal → ordinal' },
+      { value: 'ordinal-to-cardinal', label: 'ordinal → cardinal' },
     ],
   },
   {

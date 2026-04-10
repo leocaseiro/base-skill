@@ -147,7 +147,7 @@ describe('NumeralTileBank', () => {
         dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't1' });
       }, [dispatch]);
-      return <NumeralTileBank tileStyle="dots" />;
+      return <NumeralTileBank tileStyle="dots" tilesShowGroup={true} />;
     };
     const { container } = render(
       <AnswerGameProvider config={config}>
@@ -160,7 +160,9 @@ describe('NumeralTileBank', () => {
   });
 
   it('renders tiles for all bank tile IDs', () => {
-    render(<NumeralTileBank tileStyle="dots" />, { wrapper });
+    render(<NumeralTileBank tileStyle="dots" tilesShowGroup={true} />, {
+      wrapper,
+    });
     expect(
       screen.getByRole('button', { name: /3/i }),
     ).toBeInTheDocument();
@@ -170,7 +172,9 @@ describe('NumeralTileBank', () => {
   });
 
   it('calls speak() with the tile label on click when ttsEnabled', async () => {
-    render(<NumeralTileBank tileStyle="dots" />, { wrapper });
+    render(<NumeralTileBank tileStyle="dots" tilesShowGroup={true} />, {
+      wrapper,
+    });
     await userEvent.click(screen.getByRole('button', { name: /3/i }));
     expect(speak).toHaveBeenCalledWith(
       '3',
@@ -183,7 +187,7 @@ describe('NumeralTileBank', () => {
       const dispatch = useAnswerGameDispatch();
       dispatch({ type: 'INIT_ROUND', tiles, zones });
       dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
-      return <NumeralTileBank tileStyle="dots" />;
+      return <NumeralTileBank tileStyle="dots" tilesShowGroup={true} />;
     };
     const { container } = render(
       <AnswerGameProvider config={config}>

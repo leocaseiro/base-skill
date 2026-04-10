@@ -70,12 +70,16 @@ export const DominoTile = ({ value }: { value: number }) => {
   );
 };
 
+const isLongWord = (label: string): boolean => label.length > 6;
+
 const NumeralTile = ({
   tile,
   tileStyle,
+  tilesShowGroup,
 }: {
   tile: TileItem;
   tileStyle: TileStyle;
+  tilesShowGroup: boolean;
 }) => {
   const {
     ref,
@@ -87,7 +91,17 @@ const NumeralTile = ({
   } = useDraggableTile(tile);
   const numericValue = Number.parseInt(tile.value, 10);
 
-  const isDots = tileStyle === 'dots' && !Number.isNaN(numericValue);
+  const showDomino =
+    tilesShowGroup &&
+    tileStyle === 'dots' &&
+    !Number.isNaN(numericValue);
+  const isWordTile =
+    !tilesShowGroup && Number.isNaN(Number(tile.label));
+  const sizeClass = showDomino
+    ? 'h-[136px] w-[72px]'
+    : isWordTile
+      ? 'min-w-[80px] h-20 px-2'
+      : 'size-20';
 
   return (
     <button
@@ -96,7 +110,7 @@ const NumeralTile = ({
       aria-label={`Number ${tile.label}`}
       className={[
         'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl p-2 transition-transform active:scale-95 active:cursor-grabbing',
-        isDots ? 'h-[136px] w-[72px]' : 'size-20',
+        sizeClass,
       ].join(' ')}
       style={skeuoStyle}
       onClick={handleClick}
@@ -105,8 +119,17 @@ const NumeralTile = ({
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
     >
-      {isDots ? (
+      {showDomino ? (
         <DominoTile value={numericValue} />
+      ) : isWordTile ? (
+        <span
+          className={[
+            'block text-center font-bold leading-tight hyphens-auto break-words',
+            isLongWord(tile.label) ? 'text-sm' : 'text-xl',
+          ].join(' ')}
+        >
+          {tile.label}
+        </span>
       ) : (
         <span className="text-3xl font-bold tabular-nums leading-none">
           {tile.label}
@@ -118,10 +141,12 @@ const NumeralTile = ({
 
 export interface NumeralTileBankProps {
   tileStyle: TileStyle;
+  tilesShowGroup: boolean;
 }
 
 export const NumeralTileBank = ({
   tileStyle,
+  tilesShowGroup,
 }: NumeralTileBankProps) => {
   const {
     allTiles,
@@ -148,11 +173,17 @@ export const NumeralTileBank = ({
               !inBank &&
               tile.id === dragActiveTileId);
           const numericValue = Number.parseInt(tile.value, 10);
-          const isDots =
-            tileStyle === 'dots' && !Number.isNaN(numericValue);
-          const holeSizeClass = isDots
+          const showDomino =
+            tilesShowGroup &&
+            tileStyle === 'dots' &&
+            !Number.isNaN(numericValue);
+          const isWordTile =
+            !tilesShowGroup && Number.isNaN(Number(tile.label));
+          const holeSizeClass = showDomino
             ? 'h-[136px] w-[72px]'
-            : 'size-20';
+            : isWordTile
+              ? 'min-w-[80px] h-20'
+              : 'size-20';
 
           if (inBank) {
             return (
@@ -179,7 +210,11 @@ export const NumeralTileBank = ({
                   className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
                   aria-hidden={isDragging || undefined}
                 >
-                  <NumeralTile tile={tile} tileStyle={tileStyle} />
+                  <NumeralTile
+                    tile={tile}
+                    tileStyle={tileStyle}
+                    tilesShowGroup={tilesShowGroup}
+                  />
                 </div>
                 {isHoverTarget && (
                   <div

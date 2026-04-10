@@ -132,6 +132,57 @@ test('@visual NumberMatch numeral-to-group layout dark', async ({
   );
 });
 
+async function selectNumberMatchMode(
+  page: Page,
+  mode: string,
+): Promise<void> {
+  await page.goto('/en/game/number-match');
+  await page
+    .getByRole('button', { name: /let's go/i })
+    .waitFor({ state: 'visible' });
+  // Open settings panel and switch the mode before starting the round.
+  await page.getByRole('button', { name: /settings/i }).click();
+  await page.getByLabel('Mode', { exact: true }).selectOption(mode);
+  await page.getByRole('button', { name: /let's go/i }).click();
+  await page
+    .getByRole('button', { name: 'Hear the question' })
+    .waitFor({ state: 'visible' });
+}
+
+// Fixes the `group-to-numeral` regression: dot-group shown as question,
+// numeric tiles in the bank, square slot matching the numeric answer style.
+test('@visual NumberMatch group-to-numeral layout', async ({
+  page,
+}) => {
+  await selectNumberMatchMode(page, 'group-to-numeral');
+  await expect(page).toHaveScreenshot(
+    'number-match-group-to-numeral.png',
+    { fullPage: true },
+  );
+});
+
+// One cardinal word-tile mode — verifies word rendering in tiles/slots.
+test('@visual NumberMatch cardinal-number-to-text layout', async ({
+  page,
+}) => {
+  await selectNumberMatchMode(page, 'cardinal-number-to-text');
+  await expect(page).toHaveScreenshot(
+    'number-match-cardinal-number-to-text.png',
+    { fullPage: true },
+  );
+});
+
+// One ordinal mode — exercises ordinal word conversion path.
+test('@visual NumberMatch ordinal-number-to-text layout', async ({
+  page,
+}) => {
+  await selectNumberMatchMode(page, 'ordinal-number-to-text');
+  await expect(page).toHaveScreenshot(
+    'number-match-ordinal-number-to-text.png',
+    { fullPage: true },
+  );
+});
+
 // Focused domino tile bank shots — isolate the vertical pip-based tiles
 // (top/bottom 3x3 pip grids, horizontal divider, unified 72x136px size) from
 // unrelated layout so regressions in the DominoTile are easy to spot.
