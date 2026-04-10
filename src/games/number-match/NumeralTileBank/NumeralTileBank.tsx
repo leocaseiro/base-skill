@@ -241,11 +241,25 @@ export const NumeralTileBank = ({
                 .join(' ')}
               aria-hidden="true"
             >
-              {isHoverTarget && (
-                <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
-                  {tile.label}
-                </span>
-              )}
+              {isHoverTarget &&
+                (showDomino ? (
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-50">
+                    <DominoTile value={numericValue} />
+                  </div>
+                ) : isWordTile ? (
+                  <span
+                    className={[
+                      'pointer-events-none absolute inset-0 flex items-center justify-center px-2 text-center font-bold leading-tight hyphens-auto break-words opacity-50',
+                      isLongWord(tile.label) ? 'text-sm' : 'text-xl',
+                    ].join(' ')}
+                  >
+                    {tile.label}
+                  </span>
+                ) : (
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+                    {tile.label}
+                  </span>
+                ))}
             </div>
           );
         })}
