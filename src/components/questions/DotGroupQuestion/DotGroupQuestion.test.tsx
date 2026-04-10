@@ -107,22 +107,31 @@ describe('DotGroupQuestion', () => {
     );
   });
 
-  it('tapping an already-numbered dot does nothing', async () => {
+  it('tapping an already-numbered dot re-speaks its number without changing state', async () => {
     const user = userEvent.setup();
     render(<DotGroupQuestion count={3} prompt="three dots" />, {
       wrapper: Wrapper,
     });
-    const [first] = screen.getAllByRole('button', {
+    const [first, second] = screen.getAllByRole('button', {
       name: /^Dot \d+ of 3$/,
     });
 
     await user.click(first!);
     expect(first).toHaveTextContent('1');
-    expect(speak).toHaveBeenCalledTimes(1);
+    await user.click(second!);
+    expect(second).toHaveTextContent('2');
+    expect(speak).toHaveBeenCalledTimes(2);
 
+    // Re-tapping the first dot should re-speak "one" but not change its number
+    // and not affect the next-value counter.
     await user.click(first!);
     expect(first).toHaveTextContent('1');
-    expect(speak).toHaveBeenCalledTimes(1);
+    expect(speak).toHaveBeenCalledTimes(3);
+    expect(speak).toHaveBeenNthCalledWith(
+      3,
+      'one',
+      expect.objectContaining({ rate: 1 }),
+    );
   });
 
   it('resets state when count prop changes', async () => {

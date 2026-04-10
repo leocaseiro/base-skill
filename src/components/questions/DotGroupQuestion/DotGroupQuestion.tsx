@@ -37,17 +37,23 @@ export const DotGroupQuestion = ({
   }
 
   const handleDotTap = (index: number) => {
+    const wordLocale = locale === 'pt-BR' ? 'pt-BR' : 'en';
+    const existing = assignedCounts[index];
+    if (existing !== null && existing !== undefined) {
+      // Already-numbered dot: re-speak its number, don't change state.
+      speakPrompt(toCardinalText(existing, wordLocale));
+      return;
+    }
+    let maxAssigned = 0;
+    for (const v of assignedCounts) {
+      if (v !== null && v > maxAssigned) maxAssigned = v;
+    }
+    const nextValue = maxAssigned + 1;
+    speakPrompt(toCardinalText(nextValue, wordLocale));
     setState((previous) => {
       if (previous.assigned[index] !== null) return previous;
       const nextAssigned = [...previous.assigned];
-      let maxAssigned = 0;
-      for (const v of previous.assigned) {
-        if (v !== null && v > maxAssigned) maxAssigned = v;
-      }
-      const nextValue = maxAssigned + 1;
       nextAssigned[index] = nextValue;
-      const wordLocale = locale === 'pt-BR' ? 'pt-BR' : 'en';
-      speakPrompt(toCardinalText(nextValue, wordLocale));
       return { count: previous.count, assigned: nextAssigned };
     });
   };
