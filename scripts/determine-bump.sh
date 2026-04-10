@@ -15,12 +15,15 @@ PR_NUMBER="$1"
 # Read commits into an array. Each element is one full commit text (headline + body).
 commits=()
 
-if [[ -n "${PR_COMMITS_FILE:-}" ]]; then
-  # Test mode: read from file. Commits separated by lines containing exactly "---".
-  current=""
+# Populates the global `commits` array from a multi-commit string on stdin.
+# Commits are separated by lines containing exactly "---".
+parse_commits() {
+  local current=""
   while IFS= read -r line || [[ -n "$line" ]]; do
     if [[ "$line" == "---" ]]; then
-      commits+=("$current")
+      if [[ -n "$current" ]]; then
+        commits+=("$current")
+      fi
       current=""
     else
       if [[ -n "$current" ]]; then
@@ -29,11 +32,15 @@ if [[ -n "${PR_COMMITS_FILE:-}" ]]; then
         current="$line"
       fi
     fi
-  done <"$PR_COMMITS_FILE"
-  # Capture any trailing commit not followed by ---
+  done
   if [[ -n "$current" ]]; then
     commits+=("$current")
   fi
+}
+
+if [[ -n "${PR_COMMITS_FILE:-}" ]]; then
+  # Test mode: read from file. Commits separated by lines containing exactly "---".
+  parse_commits <"$PR_COMMITS_FILE"
 else
   # Live mode: fetch commits from the PR via gh CLI.
   raw=""
@@ -41,22 +48,7 @@ else
     echo "Error fetching PR $PR_NUMBER: $raw" >&2
     exit 1
   fi
-  current=""
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    if [[ "$line" == "---" ]]; then
-      commits+=("$current")
-      current=""
-    else
-      if [[ -n "$current" ]]; then
-        current="$current"$'\n'"$line"
-      else
-        current="$line"
-      fi
-    fi
-  done <<<"$raw"
-  if [[ -n "$current" ]]; then
-    commits+=("$current")
-  fi
+  parse_commits <<<"$raw"
 fi
 
 # If no commits were found, default to patch.
