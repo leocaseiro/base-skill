@@ -8,6 +8,14 @@ interface SlotProps {
   as?: 'li' | 'span' | 'div';
   className?: string;
   children: (props: SlotRenderProps) => ReactNode;
+  /**
+   * Optional custom preview renderer. Invoked during drag-hover or swap
+   * preview when there is a `previewLabel`. Lets a game render a visual
+   * preview (e.g. a domino face) instead of the default bold text. Must
+   * apply its own opacity/styling. When omitted, the default
+   * `<span>{previewLabel}</span>` is used.
+   */
+  renderPreview?: (previewLabel: string) => ReactNode;
 }
 
 export const Slot = ({
@@ -15,6 +23,7 @@ export const Slot = ({
   as: Tag = 'li',
   className,
   children,
+  renderPreview,
 }: SlotProps) => {
   const {
     renderProps,
@@ -90,9 +99,13 @@ export const Slot = ({
         {isEmpty ? (
           <>
             {isPreview && previewLabel !== null ? (
-              <span className="text-xl font-bold opacity-50">
-                {previewLabel}
-              </span>
+              renderPreview ? (
+                renderPreview(previewLabel)
+              ) : (
+                <span className="text-xl font-bold opacity-50">
+                  {previewLabel}
+                </span>
+              )
             ) : (
               children(renderProps)
             )}
@@ -124,9 +137,13 @@ export const Slot = ({
               onPointerCancel={pointerHandlers.onPointerCancel}
             >
               {isPreview && previewLabel !== null ? (
-                <span className="text-xl font-bold">
-                  {previewLabel}
-                </span>
+                renderPreview ? (
+                  renderPreview(previewLabel)
+                ) : (
+                  <span className="text-xl font-bold">
+                    {previewLabel}
+                  </span>
+                )
               ) : (
                 children(renderProps)
               )}

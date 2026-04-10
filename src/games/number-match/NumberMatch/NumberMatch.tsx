@@ -220,7 +220,42 @@ const NumberMatchSession = ({
         <AnswerGame.Answer>
           <SlotRow className="gap-4">
             {zones.map((zone, i) => (
-              <Slot key={zone.id} index={i} className={slotClass}>
+              <Slot
+                key={zone.id}
+                index={i}
+                className={slotClass}
+                renderPreview={(previewLabel) => {
+                  if (dotsDominoMode) {
+                    const n = Number.parseInt(previewLabel, 10);
+                    if (!Number.isNaN(n)) {
+                      return (
+                        <div className="opacity-50">
+                          <DominoTile value={n} />
+                        </div>
+                      );
+                    }
+                  }
+                  if (wordMode) {
+                    return (
+                      <span
+                        className={[
+                          'block text-center font-bold leading-tight hyphens-auto break-words opacity-50',
+                          previewLabel.length > 6
+                            ? 'text-sm'
+                            : 'text-xl',
+                        ].join(' ')}
+                      >
+                        {previewLabel}
+                      </span>
+                    );
+                  }
+                  return (
+                    <span className="text-3xl font-bold tabular-nums opacity-50">
+                      {previewLabel}
+                    </span>
+                  );
+                }}
+              >
                 {({ label }) => {
                   if (!label) return null;
                   if (dotsDominoMode) {
