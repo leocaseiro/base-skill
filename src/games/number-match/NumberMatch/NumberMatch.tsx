@@ -2,7 +2,6 @@ import { useNavigate, useParams } from '@tanstack/react-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildNumeralRound } from '../build-numeral-round';
 import {
-  DiceFace,
   DominoTile,
   NumeralTileBank,
 } from '../NumeralTileBank/NumeralTileBank';
@@ -43,7 +42,7 @@ const NumberMatchSession = ({
   roundOrder: readonly number[];
   onRestartSession: () => void;
 }) => {
-  const { phase, roundIndex, retryCount, zones, allTiles } =
+  const { phase, roundIndex, retryCount, zones } =
     useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
   const { confettiReady, gameOverReady } = useGameSounds();
@@ -123,13 +122,10 @@ const NumberMatchSession = ({
 
   if (!round) return null;
 
-  const allDice = allTiles.every((t) => {
-    const n = Number.parseInt(t.value, 10);
-    return !Number.isNaN(n) && n <= 6;
-  });
-  const slotClass = allDice
-    ? 'size-20 rounded-2xl'
-    : 'h-[72px] w-32 rounded-2xl';
+  const isDots = numberMatchConfig.tileStyle === 'dots';
+  const slotClass = isDots
+    ? 'h-[136px] w-[72px] rounded-2xl'
+    : 'size-20 rounded-2xl';
 
   const showTextQuestion =
     numberMatchConfig.mode === 'numeral-to-group' ||
@@ -157,15 +153,8 @@ const NumberMatchSession = ({
                 {({ label }) => {
                   if (!label) return null;
                   const n = Number.parseInt(label, 10);
-                  if (
-                    numberMatchConfig.tileStyle === 'dots' &&
-                    !Number.isNaN(n)
-                  ) {
-                    return n <= 6 ? (
-                      <DiceFace value={n} />
-                    ) : (
-                      <DominoTile value={n} />
-                    );
+                  if (isDots && !Number.isNaN(n)) {
+                    return <DominoTile value={n} />;
                   }
                   return (
                     <span className="text-3xl font-bold tabular-nums">
