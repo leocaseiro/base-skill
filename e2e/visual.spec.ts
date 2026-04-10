@@ -162,6 +162,54 @@ test('@visual NumberMatch domino tile bank dark', async ({ page }) => {
   );
 });
 
+// Countable dots — the DotGroupQuestion renders individually tappable dots
+// that assign sequential counts when tapped. Switch to group-to-numeral mode
+// via the Settings panel before starting so dots are the question.
+// Math.random is pinned to a constant so the round value (and therefore the
+// dot count) is reproducible across runs, independent of how many times the
+// config resolver consumes random state while the Settings panel opens.
+async function openNumberMatchWithDots(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    Math.random = () => 0.37;
+  });
+  await page.goto('/en/game/number-match');
+  await page
+    .getByRole('button', { name: /settings/i })
+    .first()
+    .click();
+  await page
+    .getByLabel('Mode', { exact: true })
+    .selectOption('group-to-numeral');
+  await page.getByRole('button', { name: /let's go/i }).click();
+  await page
+    .getByRole('button', { name: /^Dot 1 of/i })
+    .waitFor({ state: 'visible' });
+}
+
+test('@visual NumberMatch countable dots initial', async ({ page }) => {
+  await openNumberMatchWithDots(page);
+  const dotGroup = page
+    .getByRole('button', { name: /^Dot 1 of/i })
+    .locator('..');
+  await expect(dotGroup).toHaveScreenshot(
+    'number-match-countable-dots-initial.png',
+  );
+});
+
+test('@visual NumberMatch countable dots partially tapped', async ({
+  page,
+}) => {
+  await openNumberMatchWithDots(page);
+  await page.getByRole('button', { name: /^Dot 1 of/i }).click();
+  await page.getByRole('button', { name: /^Dot 2 of/i }).click();
+  const dotGroup = page
+    .getByRole('button', { name: /^Dot 1 of/i })
+    .locator('..');
+  await expect(dotGroup).toHaveScreenshot(
+    'number-match-countable-dots-partial.png',
+  );
+});
+
 // ── SortNumbers ──────────────────────────────────────────────────────────────
 
 test('@visual SortNumbers mid-game layout', async ({ page }) => {
