@@ -38,7 +38,7 @@ const DiceFace = ({ value }: { value: number }) => {
   const pips = DICE_PIPS[value] ?? [];
   return (
     <div
-      className="grid grid-cols-3 grid-rows-3 gap-1 p-1"
+      className="grid grid-cols-3 grid-rows-3 gap-1 py-3 px-1"
       aria-hidden="true"
     >
       {Array.from({ length: 9 }, (_, i) => (
