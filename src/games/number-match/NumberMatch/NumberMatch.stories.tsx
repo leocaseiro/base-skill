@@ -35,22 +35,62 @@ export const GroupToNumeral: Story = {
   args: { config: { ...baseConfig, mode: 'group-to-numeral' } },
 };
 
-export const NumeralToWord: Story = {
+export const CardinalNumberToText: Story = {
   args: {
     config: {
       ...baseConfig,
-      mode: 'numeral-to-word',
+      mode: 'cardinal-number-to-text',
       tileStyle: 'fingers',
     },
   },
 };
 
-export const WordToNumeral: Story = {
+export const CardinalTextToNumber: Story = {
   args: {
     config: {
       ...baseConfig,
-      mode: 'word-to-numeral',
-      tileStyle: 'objects',
+      mode: 'cardinal-text-to-number',
+      tileStyle: 'fingers',
+    },
+  },
+};
+
+export const OrdinalNumberToText: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      mode: 'ordinal-number-to-text',
+      tileStyle: 'fingers',
+    },
+  },
+};
+
+export const OrdinalTextToNumber: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      mode: 'ordinal-text-to-number',
+      tileStyle: 'fingers',
+    },
+  },
+};
+
+export const CardinalToOrdinal: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      mode: 'cardinal-to-ordinal',
+      tileStyle: 'fingers',
+    },
+  },
+};
+
+export const OrdinalToCardinal: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      mode: 'ordinal-to-cardinal',
+      tileStyle: 'fingers',
     },
   },
 };

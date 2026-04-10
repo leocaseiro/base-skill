@@ -27,6 +27,14 @@ const tiles: TileItem[] = [
   { id: 't5', label: '5', value: '5' },
 ];
 
+const wordTiles: TileItem[] = [
+  { id: 'w1', label: 'one', value: '1' },
+  { id: 'w2', label: 'two', value: '2' },
+  { id: 'w3', label: 'three', value: '3' },
+  { id: 'w4', label: 'seventeen', value: '17' },
+  { id: 'w5', label: 'twenty-two', value: '22' },
+];
+
 const zones: AnswerZone[] = [
   {
     id: 'z0',
@@ -44,10 +52,16 @@ const InitProvider = ({ children }: { children: ReactNode }) => {
   return <>{children}</>;
 };
 
+const InitWordProvider = ({ children }: { children: ReactNode }) => {
+  const dispatch = useAnswerGameDispatch();
+  dispatch({ type: 'INIT_ROUND', tiles: wordTiles, zones });
+  return <>{children}</>;
+};
+
 const meta: Meta<typeof NumeralTileBank> = {
   component: NumeralTileBank,
   tags: ['autodocs'],
-  args: { tileStyle: 'dots' },
+  args: { tileStyle: 'dots', tilesShowGroup: true },
   decorators: [
     withDb,
     (Story) => (
@@ -63,9 +77,29 @@ export default meta;
 
 type Story = StoryObj<typeof NumeralTileBank>;
 
-export const Default: Story = { args: { tileStyle: 'dots' } };
-export const FingersStyle: Story = { args: { tileStyle: 'fingers' } };
-export const ObjectsStyle: Story = { args: { tileStyle: 'objects' } };
+export const Default: Story = {
+  args: { tileStyle: 'dots', tilesShowGroup: true },
+};
+export const FingersStyle: Story = {
+  args: { tileStyle: 'fingers', tilesShowGroup: true },
+};
+export const ObjectsStyle: Story = {
+  args: { tileStyle: 'objects', tilesShowGroup: true },
+};
+
+export const WordTiles: Story = {
+  args: { tileStyle: 'dots', tilesShowGroup: false },
+  decorators: [
+    withDb,
+    (Story) => (
+      <AnswerGameProvider config={config}>
+        <InitWordProvider>
+          <Story />
+        </InitWordProvider>
+      </AnswerGameProvider>
+    ),
+  ],
+};
 
 const DragHoverBankTileSetup = ({
   children,
@@ -81,7 +115,7 @@ const DragHoverBankTileSetup = ({
 };
 
 export const DragHoverBankTile: Story = {
-  args: { tileStyle: 'dots' },
+  args: { tileStyle: 'dots', tilesShowGroup: true },
   decorators: [
     withDb,
     (Story) => (
