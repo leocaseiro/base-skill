@@ -20,6 +20,7 @@
     "test:vr:report": "playwright show-report",
     "storybook": "storybook dev --port 6006",
     "build-storybook": "storybook build",
+    "test:scripts": "bash scripts/determine-bump.test.sh",
     "test:storybook": "test-storybook",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0 && knip --no-config-hints",
