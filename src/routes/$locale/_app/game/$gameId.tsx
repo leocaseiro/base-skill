@@ -96,12 +96,25 @@ const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
   wrongTileBehavior: 'lock-auto-eject',
   tileBankMode: 'exact',
   totalRounds: 8,
-  roundsInOrder: false,
+  // Deterministic order by default. `buildRoundOrder` shuffles when this is
+  // false using a nanoid-based seed (crypto.getRandomValues) which VR tests
+  // cannot pin, causing baseline drift. Users can still opt into shuffling
+  // via the settings panel.
+  roundsInOrder: true,
   ttsEnabled: true,
   mode: 'picture',
   tileUnit: 'letter',
   rounds: sliceWordSpellRounds(8),
 };
+
+/**
+ * Deterministic default round values for NumberMatch. Using a fixed sequence
+ * (rather than `Math.random`) keeps VR baselines stable across runs — nanoid
+ * seeds in the route loader bypass any Math.random pin, so the only reliable
+ * fix is to remove randomness from the default config entirely. Users still
+ * customise via the settings panel.
+ */
+const DEFAULT_NUMBER_MATCH_ROUND_VALUES: readonly number[] = [5, 8, 3];
 
 const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
   gameId: 'number-match',
@@ -111,14 +124,13 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
   tileBankMode: 'distractors',
   distractorCount: 2,
   totalRounds: 3,
-  roundsInOrder: false,
+  // Deterministic order by default — see DEFAULT_WORD_SPELL_CONFIG comment.
+  roundsInOrder: true,
   ttsEnabled: true,
   mode: 'numeral-to-group',
   tileStyle: 'dots',
   range: { min: 1, max: 12 },
-  rounds: Array.from({ length: 3 }, () => ({
-    value: Math.floor(Math.random() * 12) + 1,
-  })),
+  rounds: DEFAULT_NUMBER_MATCH_ROUND_VALUES.map((value) => ({ value })),
 });
 
 const resizeNumberMatchRounds = (
@@ -128,14 +140,18 @@ const resizeNumberMatchRounds = (
 ): NumberMatchRound[] => {
   const n = Math.max(1, Math.min(count, 50));
   const span = Math.max(1, range.max - range.min + 1);
-  const next = prev.slice(0, n).map((r) => {
+  // Deterministic fill: cycle through the range starting at `range.min`. This
+  // avoids `Math.random` so defaults stay stable (see note above) and is
+  // simple enough for users to understand at a glance. They can override any
+  // round value via the settings panel.
+  const fillValueAt = (index: number): number =>
+    range.min + (index % span);
+  const next = prev.slice(0, n).map((r, i) => {
     if (r.value >= range.min && r.value <= range.max) return { ...r };
-    return { value: range.min + Math.floor(Math.random() * span) };
+    return { value: fillValueAt(i) };
   });
   while (next.length < n) {
-    next.push({
-      value: range.min + Math.floor(Math.random() * span),
-    });
+    next.push({ value: fillValueAt(next.length) });
   }
   return next;
 };
