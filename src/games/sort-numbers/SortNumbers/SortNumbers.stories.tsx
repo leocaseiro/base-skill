@@ -240,3 +240,23 @@ export const LevelModeDescending: Story = {
     },
   },
 };
+
+export const TenSlotsLongLabels: Story = {
+  args: {
+    config: {
+      ...baseConfig,
+      totalRounds: 1,
+      quantity: 10,
+      range: { min: 1000, max: 10_000 },
+      distractors: { source: 'random', count: 0 },
+      rounds: [
+        {
+          sequence: [
+            1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+            10_000,
+          ],
+        },
+      ],
+    },
+  },
+};
