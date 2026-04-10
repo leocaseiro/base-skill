@@ -16,6 +16,7 @@ import { LevelCompleteOverlay } from '@/components/answer-game/LevelCompleteOver
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
 import { Slot } from '@/components/answer-game/Slot/Slot';
 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useGameSounds } from '@/components/answer-game/useGameSounds';
@@ -155,7 +156,7 @@ const SortNumbersSession = ({
 
   return (
     <>
-      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+      <div className="flex w-full max-w-4xl flex-col items-center justify-center gap-8 px-4 py-6">
         <AnswerGame.Question>
           <p className="text-center text-lg font-semibold text-foreground">
             {directionLabel}
@@ -170,7 +171,11 @@ const SortNumbersSession = ({
                 className="size-14 rounded-lg"
               >
                 {({ label }) => (
-                  <span className="text-2xl font-bold">{label}</span>
+                  <span
+                    className={`${getNumericTileFontClass(label?.length ?? 0, 56)} font-bold tabular-nums`}
+                  >
+                    {label}
+                  </span>
                 )}
               </Slot>
             ))}
