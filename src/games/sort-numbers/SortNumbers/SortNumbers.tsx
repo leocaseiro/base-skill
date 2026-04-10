@@ -273,8 +273,9 @@ export const SortNumbers = ({
 
   return (
     <AnswerGame
+      key={sessionEpoch}
       config={answerGameConfig}
-      initialState={initialState}
+      initialState={sessionEpoch === 0 ? initialState : undefined}
       sessionId={sessionId}
     >
       <SortNumbersSession
