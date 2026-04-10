@@ -132,6 +132,36 @@ test('@visual NumberMatch numeral-to-group layout dark', async ({
   );
 });
 
+// Focused domino tile bank shots — isolate the vertical pip-based tiles
+// (top/bottom 3x3 pip grids, horizontal divider, unified 72x136px size) from
+// unrelated layout so regressions in the DominoTile are easy to spot.
+test('@visual NumberMatch domino tile bank', async ({ page }) => {
+  await page.goto('/en/game/number-match');
+  await page.getByRole('button', { name: /let's go/i }).click();
+  await page
+    .getByRole('button', { name: 'Hear the question' })
+    .waitFor({ state: 'visible' });
+  const tileBank = page.locator('[data-tile-bank]');
+  await tileBank.waitFor({ state: 'visible' });
+  await expect(tileBank).toHaveScreenshot(
+    'number-match-domino-tile-bank.png',
+  );
+});
+
+test('@visual NumberMatch domino tile bank dark', async ({ page }) => {
+  await page.goto('/en/game/number-match');
+  await page.getByRole('button', { name: /let's go/i }).click();
+  await page
+    .getByRole('button', { name: 'Hear the question' })
+    .waitFor({ state: 'visible' });
+  const tileBank = page.locator('[data-tile-bank]');
+  await tileBank.waitFor({ state: 'visible' });
+  await setDarkMode(page);
+  await expect(tileBank).toHaveScreenshot(
+    'number-match-domino-tile-bank-dark.png',
+  );
+});
+
 // ── SortNumbers ──────────────────────────────────────────────────────────────
 
 test('@visual SortNumbers mid-game layout', async ({ page }) => {
