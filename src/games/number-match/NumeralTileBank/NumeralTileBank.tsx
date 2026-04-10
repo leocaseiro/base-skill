@@ -1,5 +1,6 @@
 import type { TileItem } from '@/components/answer-game/types';
 import { skeuoStyle } from '@/components/answer-game/styles';
+import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
@@ -131,7 +132,9 @@ const NumeralTile = ({
           {tile.label}
         </span>
       ) : (
-        <span className="text-3xl font-bold tabular-nums leading-none">
+        <span
+          className={`${getNumericTileFontClass(tile.label.length, 80)} font-bold tabular-nums leading-none`}
+        >
           {tile.label}
         </span>
       )}
@@ -256,7 +259,9 @@ export const NumeralTileBank = ({
                     {tile.label}
                   </span>
                 ) : (
-                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+                  <span
+                    className={`pointer-events-none absolute inset-0 flex items-center justify-center ${getNumericTileFontClass(tile.label.length, 80)} font-bold tabular-nums opacity-50`}
+                  >
                     {tile.label}
                   </span>
                 ))}
