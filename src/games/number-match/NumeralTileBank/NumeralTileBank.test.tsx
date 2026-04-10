@@ -156,7 +156,9 @@ describe('NumeralTileBank', () => {
     );
     const hole = container.querySelector('[data-tile-bank-hole="t1"]');
     expect(hole?.className).toMatch(/border-dashed/);
-    expect(hole?.textContent).toContain('3');
+    // In dots+group mode the preview renders a DominoTile (not plain text).
+    // Value 3 → DOMINO_SPLIT[3] = [3, 0] → 3 total pips.
+    expect(hole?.querySelectorAll('[data-pip]')).toHaveLength(3);
   });
 
   it('renders tiles for all bank tile IDs', () => {
