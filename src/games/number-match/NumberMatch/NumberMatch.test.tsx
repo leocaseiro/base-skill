@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { NumberMatch } from './NumberMatch';
 import type { NumberMatchConfig } from '../types';
@@ -26,6 +27,18 @@ vi.mock('@/db/hooks/useSettings', () => ({
       preferredVoiceURI: undefined,
     },
     update: vi.fn(),
+  }),
+}));
+
+vi.mock('@/lib/audio/AudioFeedback', () => ({
+  playSound: vi.fn(),
+  queueSound: vi.fn().mockResolvedValue(),
+  whenSoundEnds: vi.fn().mockResolvedValue(),
+}));
+
+vi.mock('canvas-confetti', () => ({
+  default: Object.assign(vi.fn().mockResolvedValue(), {
+    reset: vi.fn(),
   }),
 }));
 
@@ -81,5 +94,58 @@ describe('NumberMatch', () => {
     expect(
       screen.getAllByRole('button', { name: /^Number \d+$/ }),
     ).toHaveLength(4);
+  });
+});
+
+describe('NumberMatch Play again', () => {
+  it('resets the game to round 1 after game-over with roundsInOrder: true', async () => {
+    const user = userEvent.setup();
+
+    const oneRoundConfig: NumberMatchConfig = {
+      gameId: 'number-match-test',
+      component: 'NumberMatch',
+      inputMethod: 'type',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      totalRounds: 1,
+      roundsInOrder: true,
+      ttsEnabled: false,
+      mode: 'numeral-to-group',
+      tileStyle: 'dots',
+      range: { min: 1, max: 5 },
+      rounds: [{ value: 1 }],
+    };
+
+    render(<NumberMatch config={oneRoundConfig} />);
+
+    // Game starts in playing phase — 1 answer slot visible, no game-over dialog
+    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(
+      screen.queryByRole('dialog', { name: 'Game complete' }),
+    ).not.toBeInTheDocument();
+
+    // Type '1' to correctly fill the only slot → phase transitions to game-over
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: '1', bubbles: true }),
+      );
+    });
+
+    // Game-over overlay appears
+    await screen.findByRole('button', { name: 'Play again' });
+    expect(
+      screen.getByRole('dialog', { name: 'Game complete' }),
+    ).toBeInTheDocument();
+
+    // Click "Play again"
+    await user.click(
+      screen.getByRole('button', { name: 'Play again' }),
+    );
+
+    // Overlay is gone and game has restarted at round 1
+    expect(
+      screen.queryByRole('dialog', { name: 'Game complete' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByRole('listitem')).toHaveLength(1);
   });
 });
