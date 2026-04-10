@@ -97,7 +97,9 @@ const config = defineConfig({
     },
   },
   define: {
-    'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(
+      process.env['VITE_APP_VERSION'] ?? version,
+    ),
   },
   ssr: {
     // workbox-window ships only CJS; bundle it so the SSR server can import it
