@@ -1,579 +1,509 @@
 # Phonics Word Library — Design
 
-> **Status:** Draft · **Owner:** @leocaseiro · **Region focus:** AUS → UK → US
-> (BR shape-ready) · **Target games:** WordSpell, future word games
-> **Scope:** Read-only seed corpus (~100 words) + async filter API + WordSpell integration
+> **Status:** Draft v2 · **Owner:** @leocaseiro · **Region focus:** AUS → UK → US (BR shape-ready) · **Target games:** WordSpell, future word games
+> **Scope:** This spec covers **P1** only — the read-only static library, builder functions, ~650-word seed corpus, filter API, and WordSpell integration. P2 (dev authoring form) and P3 (runtime user word bags) are separate projects with their own specs.
 
 ## 1. Goal
 
-Today WordSpell rounds are hand-authored per config. A parent who wants "words
-the child can read using Phase 2 sounds, 1 syllable only" has no way to express
-that — they'd have to curate the list themselves. This spec introduces a
-**phonics-aware word library** that lets a parent (or future UI) filter the
-shared corpus by region, phase, grapheme, phoneme, and syllable count, and have
-WordSpell generate rounds from the result.
+Today WordSpell rounds are hand-authored per config. A teacher who wants "words the child can read using the graphemes they already know" has no way to express that — they'd have to curate the list themselves.
 
-The library is the foundation other word games (Word Builder, Read Aloud) will
-share later — this spec covers the data, filter API, and WordSpell adapter
-only. Filter UI is explicitly out of scope here and gets its own follow-up.
+This spec introduces a **phonics-aware word library** that lets a teacher (or future UI) filter the shared corpus by region, level, grapheme subset, phoneme subset, and syllable count, and have WordSpell generate rounds from the result. The library is seeded from an Australian 8-level phonics progression (~700 raw words, ~650 after removing proper nouns) and is the foundation other word games (Word Builder, Read Aloud) will share later.
 
-## 2. Teaching model
+## 2. Project decomposition
 
-Words are the primary entity. Each word carries an array of phase memberships
-keyed by region, so a single corpus supports multiple phonics programmes.
+This feature breaks into three independent sub-projects. Each gets its own spec→plan→implementation cycle.
 
-Four regions are modelled in the data shape from day one: `aus`, `uk`, `us`,
-`br`. The first seed corpus targets **AUS (primary), UK, US**. BR is
-shape-ready but lightly seeded — we don't block on sourcing pt-BR content.
+| Project                               | Scope                                                                                                                | Depends on            |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| **P1 — Static library** _(this spec)_ | Types, chunk layout, builder functions, ~650-word seed corpus, filter API, WordSpell integration                     | Nothing               |
+| **P2 — Dev authoring form**           | Storybook form + Vite middleware that reads/writes the P1 JSON chunk files; add/update/delete with confirmation      | P1's types + builders |
+| **P3 — Runtime user word bags**       | IndexedDB-backed user-created word bags, CRUD UI, export/import, new `WordSpellConfig.source = { type: 'word-bag' }` | P1's types            |
 
-Phase taxonomies (used by the filter UI to group words; not a teaching
-authority):
+Build order is P1 → P2 → P3.
 
-| Region | Source                                                     | Phase id examples                     |
-| ------ | ---------------------------------------------------------- | ------------------------------------- |
-| `uk`   | Letters and Sounds (DfE, 2007) — Crown copyright, reusable | `phase2`, `phase3`, `phase5`          |
-| `aus`  | Australian Curriculum v9 phonics progression (CC-BY)       | `f.unit1`, `f.unit7`, `y1.unit3`      |
-| `us`   | Public-domain state scope-and-sequence (e.g. CKLA)         | `k.wk4`, `g1.wk12`                    |
-| `br`   | BNCC phonics order — vogais → sílabas simples → dígrafos   | `bncc.vogais`, `bncc.silabas-simples` |
+## 3. Teaching model
 
-Proprietary programmes (Jolly Phonics, InitiaLit, Reading Wonders, Fountas &
-Pinnell) are deliberately not copied; the AUS/US/UK phase ids above are
-_informed by_ free references only.
+Words are the primary entity. Each region has its own teaching progression, stored as a list of numbered **levels**.
 
-## 3. Data model
+"Level" is a neutral integer — the number only has meaning within a region's curriculum. UK pedagogy calls them "phases"; AUS calls them "levels" or "stages"; US calls them "units" within a grade. Storage uses the integer; display strings come from a per-region label table:
+
+```ts
+// src/data/words/levels.ts
+export const LEVEL_LABELS: Record<Region, (level: number) => string> = {
+  aus: (n) => `Level ${n}`,
+  uk: (n) => `Phase ${n}`,
+  us: (n) => `K Unit ${n}`,
+  br: (n) => `Unidade ${n}`,
+};
+```
+
+Four regions are modelled: `aus`, `uk`, `us`, `br`. AUS is seeded with all 8 levels from the source word list. UK/US start empty and get filled incrementally via P2. BR is shape-ready but unseeded.
+
+Proprietary programmes (Jolly Phonics, InitiaLit, Reading Wonders, Fountas & Pinnell) are not copied. The AUS levels are taken from a public synthetic-phonics progression; UK/US levels (when seeded) come from public references (UK Letters and Sounds DfE 2007, US CKLA / Core Knowledge) only.
+
+## 4. Data model — normalized split
+
+Two tables, joined on `word`. One captures invariant facts; the other captures per-region teaching facts.
 
 ```ts
 // src/data/words/types.ts
 
 export type Region = 'aus' | 'uk' | 'us' | 'br';
 
-export interface PhonemeByRegion {
-  aus?: string;
-  uk?: string;
-  us?: string;
-  br?: string;
+/** Invariant per spelling. Lives in src/data/words/core/. */
+export interface WordCore {
+  word: string;
+  syllableCount: number;
+  /** When present: syllables.join('') === word. */
+  syllables?: string[];
+  /** Cross-spelling links (colour ↔ color, mum ↔ mom). Just the word strings. */
+  variants?: string[];
 }
 
 export interface Grapheme {
-  g: string; // 'c', 'ch', 'igh', 'a_e'
-  p: string | PhonemeByRegion; // phoneme: canonical OR per-region
-  span?: [number, number]; // set for split digraphs only (a_e, i_e)
+  /** 'sh', 'ch', 'a_e', 'igh'. */
+  g: string;
+  /** IPA phoneme. Silent letters store ''. */
+  p: string;
+  /** For split digraphs only. Letter positions in the word. */
+  span?: [number, number];
 }
 
-export interface WordEntry {
-  word: string; // canonical surface spelling
-  regions?: Region[]; // omitted = all regions
-  variants?: string[]; // linked alternate spellings (aluminium ↔ aluminum)
-  syllables: string[]; // ['sun','set']; .length === count; .join('')===word
-  ipa: string | Partial<Record<Region, string>>; // canonical OR per-region
-  graphemes: Grapheme[]; // .map(x => x.g).join('')===word
-  phases?: Partial<Record<Region, string[]>>;
-  tags?: string[]; // freeform: 'cvc', 'animal', 'food'
+/** Per-region teaching facts. Lives in src/data/words/curriculum/<region>/. */
+export interface CurriculumEntry {
+  /** Foreign key into WordCore. */
+  word: string;
+  /** Ordered position within this region's progression. */
+  level: number;
+  /** Full-word IPA. Flat string — region is implicit from the file location. */
+  ipa: string;
+  /** graphemes.map(g => g.g.replace('_', '')).join('') === word. */
+  graphemes: Grapheme[];
 }
 
-export interface WordFilter {
-  region: Region; // required — single selected region
-  phases?: string[]; // OR-match against entry.phases[region]
-  grapheme?: string; // 'c' or 'ch'
-  phoneme?: string; // IPA symbol, e.g. 'ʃ' or 'k'
-  syllablesEq?: number;
-  syllablesMin?: number;
-  syllablesMax?: number;
-  tags?: string[]; // OR-match
-}
-```
-
-### 3.1 Region handling — two cases
-
-**Case A — same spelling, different sound** (`tomato`, `bath`, `privacy`,
-`vitamin`, `schedule`, `either`, `garage`): one entry, per-region `ipa`,
-per-region phoneme values inside `graphemes[].p` where the sound differs.
-
-```json
-{
-  "word": "tomato",
-  "regions": ["aus", "uk", "us"],
-  "syllables": ["to", "ma", "to"],
-  "ipa": {
-    "aus": "/təˈmɑːtəʊ/",
-    "uk": "/təˈmɑːtəʊ/",
-    "us": "/təˈmeɪtoʊ/"
-  },
-  "graphemes": [
-    { "g": "t", "p": "t" },
-    { "g": "o", "p": "ə" },
-    { "g": "m", "p": "m" },
-    { "g": "a", "p": { "aus": "ɑː", "uk": "ɑː", "us": "eɪ" } },
-    { "g": "t", "p": "t" },
-    { "g": "o", "p": { "aus": "əʊ", "uk": "əʊ", "us": "oʊ" } }
-  ]
+/** The shape filterWords() returns — already joined. */
+export interface WordHit {
+  word: string;
+  region: Region;
+  level: number;
+  syllableCount: number;
+  syllables?: string[];
+  variants?: string[];
+  /** Present only for Tier 2-enriched entries. */
+  ipa?: string;
+  graphemes?: Grapheme[];
 }
 ```
 
-**Case B — different spelling** (`aluminium`/`aluminum`, `colour`/`color`,
-`mum`/`mom`, `grey`/`gray`, `favourite`/`favorite`): two entries linked by
-bidirectional `variants[]`, each with its own `regions[]`.
+### 4.1 Two tiers of enrichment
 
-```json
-{
-  "word": "aluminium",
-  "regions": ["aus", "uk"],
-  "variants": ["aluminum"],
-  "syllables": ["al", "u", "min", "i", "um"],
-  "ipa": { "aus": "/ˌæljəˈmɪniəm/", "uk": "/ˌæljəˈmɪniəm/" },
-  "graphemes": []
-}
-```
+| Tier       | Fields                                                               | Authoring cost                    | Filter support                                                                      |
+| ---------- | -------------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------- |
+| **Tier 1** | `WordCore` (word, syllableCount, variants) + `CurriculumEntry.level` | Codegen from source list          | `level`, `levels`, `syllableCount*`                                                 |
+| **Tier 2** | `CurriculumEntry.ipa` + `graphemes[]`                                | Codegen best-effort + hand review | Adds `graphemesAllowed`, `graphemesRequired`, `phonemesAllowed`, `phonemesRequired` |
 
-```json
-{
-  "word": "aluminum",
-  "regions": ["us"],
-  "variants": ["aluminium"],
-  "syllables": ["a", "lu", "mi", "num"],
-  "ipa": { "us": "/əˈluːmɪnəm/" },
-  "graphemes": []
-}
-```
+Tier 1 is populated for **all** seeded words (all ~650). Tier 2 is populated by codegen for words whose grapheme split is unambiguous given the level's grapheme set (expected ~90% of levels 1–4, ~60% of levels 5–8) and hand-reviewed thereafter. Words missing Tier 2 fields are **excluded** from Tier 2 filters — never silently accepted.
 
-> Note: `graphemes` is elided above for brevity — real entries always populate
-> it. See § 3.2 for the authoring rules and the `tomato` / `cat` / `child`
-> examples in § 3.1 and § 6.2.
+### 4.2 Region handling
 
-### 3.2 Grapheme-phoneme mapping
+**Case A — same spelling, different sound** (`car`, `tomato`, `bath`):
+One `WordCore`. Multiple `CurriculumEntry` rows, one per region, each with its own `ipa` and `graphemes[]`. No nested per-region map inside entries.
 
-The `graphemes` array is the killer field for phonics teaching. It distinguishes
-_the same letter pronounced differently_ (`c` as /k/ in `cat` vs `c` as /s/ in
-`city`) and _the same sound spelled differently_ (`/k/` as `c` in `cat`, as `k`
-in `kite`, as `ck` in `duck`).
+**Case B — different spelling** (`colour`/`color`, `aluminium`/`aluminum`):
+Two separate `WordCore` rows linked by bidirectional `variants[]`. Each appears only in the curriculum files of the regions that use that spelling. `colour` is in `curriculum/aus/` and `curriculum/uk/` but never in `curriculum/us/`; `color` is the opposite.
 
-Rules for authoring:
+### 4.3 Grapheme-phoneme authoring rules
 
-- Digraphs (`ch`, `sh`, `th`, `ng`, `qu`) are a **single** grapheme, not two.
+- Digraphs (`ch`, `sh`, `th`, `ng`, `qu`) are a **single** grapheme.
 - Trigraphs (`igh`, `air`, `ear`) are a single grapheme.
-- Split digraphs (`a_e` in `cake`, `i_e` in `kite`) use underscore notation and
-  store `span: [startIndex, endIndex]` so the renderer can highlight the two
-  halves — WordSpell today doesn't use `span`, but it's cheap to store now.
-- Silent letters get `p: ''` and still contribute to `syllables`.
-- Digraphs must not cross `syllables` boundaries. Build-time test warns if they
-  do.
+- Split digraphs (`a_e` in `cake`, `i_e` in `kite`) use underscore notation and store `span: [startIndex, endIndex]`. The invariant `graphemes.map(g => g.g.replace('_', '')).join('') === word` accounts for the underscore.
+- Silent letters get `p: ''` and still contribute to `word`.
+- Digraphs must not cross syllable boundaries. Build-time test warns if they do.
+- `ipa` is broad phonemic transcription (no narrow detail, no secondary stress unless disambiguating).
 
-### 3.3 Phoneme notation
+### 4.4 Proper nouns are skipped
 
-Storage uses **IPA symbols** only (`ʃ`, `ɪ`, `ŋ`, `θ`, `ð`, `tʃ`, `dʒ`). A
-small `phonemeCode` alias table (`src/data/words/phoneme-codes.ts`) maps
-teacher-friendly codes (`sh`, `th_voiceless`, `th_voiced`, `ch`, `ng`) to IPA
-for filter UIs that want to show plain text. The data never stores codes — only
-IPA.
+The source word list contains proper nouns (`Nat`, `Sam`, `Kim`, `Meg`, `Phil`, `Troy`, `Mason`, `Pete`, `Duke`, `Friday`, `Vincent`). The codegen script filters them out by a simple first-letter-capitalized rule. They are not in the seed corpus. If we need them later (names-teaching mode), a dedicated chunk can be added — not in P1.
 
-## 4. File layout
+## 5. File layout
 
-```
+```text
 src/data/words/
-  types.ts             # WordEntry, Grapheme, Region, PhonemeByRegion, WordFilter
-  phases.ts            # per-region phase lookup (id, label, description)
-  phoneme-codes.ts     # teacher-code ↔ IPA alias table
-  filter.ts            # async filterWords(), in-memory chunk cache
-  adapters.ts          # toWordSpellRound(entry) and future adapters
-  words.schema.json    # JSON schema for chunk entries — IDE validation
-  words.test.ts        # loads every chunk JSON, runs invariants
-  index.ts             # public API re-exports
-  chunks/
-    core.json           # SATPIN, mdgock, ckeur, hbffllss (~40)
-    digraphs.json       # ch sh th ng (~20)
-    long-vowels.json    # ai ee igh oa oo ar or ur ow oi (~15)
-    split-digraphs.json # a_e i_e o_e u_e (~10)
-    multi-syllable.json # sunset, chicken, tomato, elephant (~10)
-    regional.json       # aluminium/aluminum, colour/color (~5)
+  types.ts                 # WordCore, CurriculumEntry, Grapheme, Region, WordFilter, WordHit
+  levels.ts                # per-region label formatters + level → grapheme-set lookups
+  phoneme-codes.ts         # teacher-code ↔ IPA alias table (sh, ch, th_voiceless…)
+  builders.ts              # makeWordCore, makeGraphemes, makeCurriculumEntry, validateEntry
+  writer.ts                # pure upsert/remove helpers — consumed by P2, lives here so invariants stay DRY
+  filter.ts                # async filterWords() + chunk cache + two-file join
+  adapters.ts              # toWordSpellRound(WordHit)
+  words.test.ts            # invariant harness over every chunk file
+  index.ts                 # public API re-exports
+
+  core/
+    level1.json            # ~40 WordCore rows (SATPIN)
+    level2.json            # ~55 WordCore rows (mdgockeur)
+    level3.json            # ~60 WordCore rows (bhfljvwxyz)
+    level4.json            # ~75 WordCore rows (digraphs + quirky graphemes)
+    level5.json            # ~115 WordCore rows (long vowels ai/ee/oa/igh/oo)
+    level6.json            # ~140 WordCore rows (oi/oy/oo/ou/ow/er/ir/ur/ar/or)
+    level7.json            # ~120 WordCore rows (split digraphs + vowel-at-end y/e/o)
+    level8.json            # ~90 WordCore rows (aw/ew/ou/air/are/ear/eer/ore/dge/tch)
+
+  curriculum/
+    aus/
+      level1.json          # CurriculumEntry rows — 1:1 with core/level1.json
+      level2.json          # …
+      level3.json
+      level4.json
+      level5.json
+      level6.json
+      level7.json
+      level8.json
+    uk/                    # empty directory — stub .gitkeep, seeded via P2 later
+    us/                    # empty directory — stub .gitkeep
+    br/                    # empty directory — shape-ready, no content
 ```
 
-Chunk files are JSON (not TS). IDE validation comes from `words.schema.json`,
-which is generated from `types.ts` via a dev-time script and checked in.
+Chunks are JSON (not TS). A build step generates a JSON schema from `types.ts` for optional IDE validation.
 
-## 5. Storage strategy
+The `core/levelN.json` chunking uses AUS levels because that's the source of truth. A UK-only chunking (e.g. `curriculum/uk/phase3.json` referencing words that span `core/level1..6.json`) is fine — the filter just loads the needed core chunks on demand.
 
-Library data is bundled as JSON chunks, **lazy-loaded at runtime via Vite's
-`import.meta.glob`**, and cached in a module-level `Map`. Not persisted to
-RxDB/IndexedDB.
+## 6. Storage strategy
 
-### 5.1 Why not IndexedDB
+Library data ships as static JSON chunks, **lazy-loaded via Vite's `import.meta.glob`** and cached in module-level `Map`s. **Not persisted to RxDB/IndexedDB.**
 
-Per [`docs/adrs/0001-rxdb-without-tanstack-query.md`](../../adrs/0001-rxdb-without-tanstack-query.md),
-RxDB collections hold user-generated or frequently-mutated state (saved configs,
-bookmarks, session history). The word library is the opposite: read-only,
-ships with the app, replaced whole on every deploy, identical for every user.
-IDB's strengths (persistence, indexed queries, mutation) target problems the
-library doesn't have.
+### 6.1 Why not IndexedDB for P1
 
-Concretely, for a ~100-entry corpus:
+Per [`docs/adrs/0001-rxdb-without-tanstack-query.md`](../../adrs/0001-rxdb-without-tanstack-query.md), RxDB collections hold user-generated or frequently-mutated state. The P1 library is the opposite: read-only, ships with the app, replaced whole on every deploy, identical for every user.
 
-| Concern           | JSON + in-memory `.filter()` | RxDB collection + indexes    |
-| ----------------- | ---------------------------- | ---------------------------- |
-| Query performance | ~10µs over 100 entries       | ~1ms (IDB round-trip)        |
-| Cold start        | One lazy chunk fetch (~30KB) | Fetch + seed + open IDB      |
-| Schema evolution  | Redeploy JSON                | Migration on every data bump |
-| Bundle/disk cost  | ~30–50KB gzipped             | Same + collection schema     |
-| Test story        | Vitest reads JSON            | Integration test needs IDB   |
+For ~650 words:
 
-`Array.filter` over 100 objects is ~10 microseconds. An IDB query — even an
-indexed one — costs more than that on the same corpus because of the
-structured-clone bridge.
+| Concern           | JSON + in-memory filter | RxDB collection + indexes    |
+| ----------------- | ----------------------- | ---------------------------- |
+| Query performance | ~50µs over 650 entries  | ~1ms (IDB round-trip)        |
+| Cold start        | One-time chunk fetch    | Fetch + seed + open IDB      |
+| Schema evolution  | Redeploy JSON           | Migration on every data bump |
+| Bundle/disk cost  | ~100 KB gzipped total   | Same + collection schema     |
+| Test story        | Vitest reads JSON       | Integration test needs IDB   |
 
-### 5.2 When to revisit
+`Array.filter` over 650 objects is tens of microseconds. IDB's strengths target problems the static library doesn't have.
 
-Two triggers would flip the decision toward RxDB. Either is sufficient:
+**P3 is different.** User word bags are mutable per-user state — they go in RxDB/IndexedDB. The P1 filter API is built to merge cleanly with P3's bag-sourced words later: the `WordSpellConfig.source` discriminated union adds a `'word-bag'` variant, and both paths produce the same `WordHit[]` shape downstream.
 
-1. **Corpus grows past ~1,000 words** _and_ filter queries become a measured
-   frame-time bottleneck (not a guess).
-2. **User-editable / teacher-uploaded word lists** — e.g. a parent imports the
-   child's weekly spelling list. That data is mutable and per-user and
-   deserves to live alongside bookmarks in RxDB.
+### 6.2 Async signature protects future refactors
 
-Neither applies to the K–Y2 seed corpus.
+`filterWords()` returns `Promise<WordHit[]>`. If the corpus grows past ~5,000 words and we eventually swap the in-memory implementation for a SQLite-wasm-backed one, the public API doesn't change — only `filter.ts` internals.
 
-### 5.3 The async signature protects future refactors
-
-`filterWords()` returns `Promise<WordEntry[]>`. If we later swap the in-memory
-implementation for an RxDB-backed one, the public API doesn't change — only
-`filter.ts` internals. WordSpell, future games, and the filter UI keep working
-against the same async call.
-
-## 6. Filter API
+### 6.3 Chunk loading
 
 ```ts
-// src/data/words/filter.ts
-import type { WordEntry, WordFilter } from './types';
-
-const chunkLoaders = import.meta.glob<{ default: WordEntry[] }>(
-  './chunks/*.json',
+const coreLoaders = import.meta.glob<{ default: WordCore[] }>(
+  './core/level*.json',
 );
-
-const cache = new Map<string, WordEntry[]>();
-
-async function loadAllChunks(): Promise<WordEntry[]> {
-  if (cache.has('__all__')) return cache.get('__all__')!;
-
-  const entries = await Promise.all(
-    Object.entries(chunkLoaders).map(async ([path, load]) => {
-      const mod = await load();
-      cache.set(path, mod.default);
-      return mod.default;
-    }),
-  );
-  const flat = entries.flat();
-  cache.set('__all__', flat);
-  return flat;
-}
-
-export async function filterWords(
-  filter: WordFilter,
-): Promise<WordEntry[]> {
-  const all = await loadAllChunks();
-  return all.filter((entry) => entryMatches(entry, filter));
-}
+const ausLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+  './curriculum/aus/level*.json',
+);
+// Same pattern for uk/, us/, br/ — resolved dynamically from the filter's region.
 ```
 
-### 6.1 Matching semantics
+Both sides are lazy-loaded on the first `filterWords()` call (or the first call that targets a given region) and cached. Workbox precaches them automatically in the service-worker asset manifest.
 
-- `region` is **required**. Entries whose `regions` array doesn't include it
-  are excluded. Entries that omit `regions` are treated as `['aus','uk','us','br']`.
-- `phases` matches against `entry.phases[region]` only — UK phases never leak
-  into AUS filters.
-- `grapheme` + `phoneme` must match **the same** `Grapheme` inside the entry.
-  That's how "c = /k/" distinguishes from "c = /s/".
-- `phoneme` alone matches any grapheme whose resolved phoneme (after
-  per-region lookup) equals the value.
-- `syllablesEq` / `syllablesMin` / `syllablesMax` are all optional; when
-  multiple are set, all must hold.
-- `tags` is an OR-match — any intersection passes.
-
-### 6.2 Example calls
+## 7. Filter API
 
 ```ts
-// "1-syllable words for /k/ spelled 'c', AUS region"
-await filterWords({
-  region: 'aus',
-  grapheme: 'c',
-  phoneme: 'k',
-  syllablesEq: 1,
-});
-// → ['cat', 'cot', 'cup', ...]   NOT 'city' (c=/s/)   NOT 'child' (grapheme='ch')
+// src/data/words/types.ts
+export interface WordFilter {
+  region: Region; // required
 
-// "any /k/ regardless of spelling, 1 syllable"
-await filterWords({ region: 'aus', phoneme: 'k', syllablesEq: 1 });
-// → ['cat', 'kite', 'duck', ...]
+  // Curriculum scope (Tier 1)
+  level?: number;
+  levels?: number[];
+  levelRange?: [number, number];
 
-// "UK Phase 2 words"
-await filterWords({ region: 'uk', phases: ['phase2'] });
+  // Structural (Tier 1)
+  syllableCountEq?: number;
+  syllableCountRange?: [number, number];
 
-// "AUS Foundation Unit 3, digraph 'ch' for /tʃ/"
-await filterWords({
-  region: 'aus',
-  phases: ['f.unit3'],
-  grapheme: 'ch',
-  phoneme: 'tʃ',
-});
+  // Phonics (Tier 2 — require graphemes[] present)
+  graphemesAllowed?: string[]; // every grapheme in the word ∈ this set
+  graphemesRequired?: string[]; // word must contain ≥1 of these
+  phonemesAllowed?: string[]; // every phoneme in the word ∈ this set
+  phonemesRequired?: string[]; // word must contain ≥1 of these
+
+  /** Default true. Controls fallback-to-AUS behavior for unseeded regions. */
+  fallbackToAus?: boolean;
+}
+
+export interface FilterResult {
+  hits: WordHit[];
+  /** Set when the filter targeted a non-AUS region with no data and fell back. */
+  usedFallback?: { from: Region; to: 'aus' };
+}
 ```
 
-### 6.3 Why load all chunks, not a manifest
+### 7.1 Matching semantics
 
-- **Total corpus ≈ 100 words ≈ ~30–50 KB gzipped** — smaller than a single icon
-  font. Targeted loading saves bytes that don't matter.
-- **One-time cost.** After the first `filterWords` call, everything is in the
-  `__all__` cache; subsequent calls are synchronous-fast.
-- **No manifest to maintain.** Vite's `import.meta.glob` auto-discovers chunks.
-- **Service worker precaches them automatically.** Workbox picks up every
-  code-split chunk in its asset manifest during build. Offline mode works on
-  first install without extra config.
+- `region` is required.
+- `level` / `levels` / `levelRange` are OR-combined within the level dimension, AND-combined with everything else.
+- `syllableCountRange: [min, max]` is inclusive.
+- `graphemesAllowed`: a word passes only if **every** grapheme in the word's `graphemes[]` is in the allowed set. Words without `graphemes[]` (Tier 1 only) are **excluded** when this field is set.
+- `graphemesRequired`: a word passes if **at least one** of the required graphemes appears in the word's `graphemes[]`. Excluded if `graphemes[]` absent.
+- `phonemesAllowed` / `phonemesRequired`: same logic but on `graphemes[].p` values.
+- All predicates AND together.
 
-If the corpus ever grows past ~1,000 words we add a manifest and do region-
-scoped loading then. YAGNI for now.
+### 7.2 AUS fallback
 
-## 7. Syllables
+When a filter targets `region: 'uk'` (or `'us'`, `'br'`) and no words match — typically because that region's curriculum is empty or doesn't cover the requested level — `filterWords()` re-runs the same filter against `region: 'aus'` and returns `usedFallback: { from: 'uk', to: 'aus' }` alongside the hits.
 
-### 7.1 Storage
+The fallback is **per-query**: if even one word matches in the target region, no fallback kicks in. The caller (game config, UI) can inspect `usedFallback` and decide whether to show "showing Australian equivalents" notice.
 
-`syllables` is an array of strings: `['sun', 'set']`. Length is the count,
-concatenation must equal `word`. The array doubles as the chunks rendered in
-WordSpell's existing `tileUnit: 'syllable'` mode.
+Callers can opt out with `fallbackToAus: false` to get a strict region-scoped query (returns empty hits instead of falling back).
+
+### 7.3 Example calls
+
+```ts
+// Child is mid-level-2: knows SATPIN + m/d/g/o, not yet c/k/ck/e/u/r
+await filterWords({
+  region: 'aus',
+  levels: [1, 2],
+  graphemesAllowed: ['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o'],
+  syllableCountEq: 1,
+});
+// → ['sit', 'sat', 'pin', 'pan', 'pad', 'dog', 'dot', 'mad', 'mat', ...]
+// 'cat' excluded (has 'c'); 'red' excluded (has 'r' and 'e')
+
+// Teacher disambiguating 'c' making /k/ vs /s/
+await filterWords({
+  region: 'aus',
+  graphemesRequired: ['c'],
+  phonemesRequired: ['k'],
+});
+// → ['cat', 'cup', 'cap', 'car', 'cactus']
+// 'city' excluded ('c' grapheme but no /k/ phoneme)
+// 'pack' excluded (has /k/ but via 'ck' grapheme, not 'c')
+
+// Target /sh/ digraph practice
+await filterWords({
+  region: 'aus',
+  graphemesRequired: ['sh'],
+});
+// → ['ship', 'shop', 'shed', 'fish', 'dish', 'wish', 'shin', ...]
+
+// UK filter with no UK data yet → falls back to AUS
+const result = await filterWords({ region: 'uk', level: 3 });
+// result.hits = AUS level 3 words
+// result.usedFallback = { from: 'uk', to: 'aus' }
+```
+
+## 8. Builder functions
+
+The builders are pure, deterministic, and used by **three** consumers:
+
+1. The **codegen script** that seeds the corpus from `words-list.md`
+2. The **invariant test harness** (validation)
+3. **P2's dev authoring form** (same validation + in-form preview)
+
+```ts
+// src/data/words/builders.ts
+
+/** Heuristic: counts vowel groups, handles silent-e. Override with opts.syllables. */
+export const makeWordCore = (
+  word: string,
+  opts?: { syllables?: string[]; variants?: string[] },
+): WordCore;
+
+/**
+ * Splits `word` into graphemes using `levelGraphemes` as the known set
+ * (longest-match-first). Returns best-effort spans. Caller reviews ambiguous cases.
+ * Returns `null` if the word can't be split cleanly (missing graphemes, ambiguity).
+ */
+export const makeGraphemes = (
+  word: string,
+  levelGraphemes: string[],
+  phonemeByGrapheme?: Record<string, string>,
+): Grapheme[] | null;
+
+/** Composes WordCore + CurriculumEntry with defaults; callers override specifics. */
+export const makeCurriculumEntry = (
+  word: string,
+  level: number,
+  opts: {
+    levelGraphemes: string[];
+    ipa?: string; // if omitted, derived from graphemes[].p
+    graphemes?: Grapheme[]; // if omitted, derived via makeGraphemes
+  },
+): CurriculumEntry | null;
+
+/** Full invariant check. Returns structured errors so P2 can surface them. */
+export const validateEntry = (
+  core: WordCore,
+  curriculum: CurriculumEntry,
+): { ok: true } | { ok: false; errors: ValidationError[] };
+
+export interface ValidationError {
+  field: 'word' | 'syllables' | 'graphemes' | 'ipa' | 'level';
+  message: string;
+}
+```
+
+### 8.1 The codegen script
+
+A one-shot Node script at `scripts/seed-word-library.ts`:
+
+1. Parses `docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md` into `{ level, levelGraphemes, words[] }` blocks.
+2. Drops proper nouns (`/^[A-Z]/`).
+3. For each word, calls `makeWordCore` + `makeCurriculumEntry` with `levelGraphemes` from that level's grapheme set.
+4. Splits results into two buckets:
+   - **Success**: full Tier-2 entry — gets written to the appropriate `core/levelN.json` + `curriculum/aus/levelN.json`.
+   - **Needs review**: Tier-1 only (builders returned `null` for graphemes/ipa) — gets written with `WordCore` only and **no** `CurriculumEntry.graphemes` / `ipa`. Listed in a `codegen-review.md` report for later enrichment via P2.
+5. Dedups within a level (a word can appear in level 1 and level 2 but not twice in level 1).
+6. Formats output with Prettier.
+7. Writes files deterministically so re-running produces zero diff if inputs unchanged.
+
+The script runs once as part of the seed task. It's not part of the app build and doesn't need to be re-run per dev session — the JSON chunks are committed.
+
+## 9. Syllables
+
+### 9.1 Storage
+
+`WordCore.syllables` is an optional string array: `['sun', 'set']`. Length is the count; concatenation must equal `word`. Tier 1 words without `syllables[]` still have `syllableCount` for length filtering.
+
+When present, the array doubles as the chunks rendered in WordSpell's existing `tileUnit: 'syllable'` mode.
 
 Tricky cases:
 
-- **Silent `e` does not get its own syllable.** `cake` → `['cake']`, 1 syllable.
-- **Digraphs never cross syllable boundaries.** `chicken` → `['chick', 'en']`,
-  not `['chic', 'ken']`.
-- **Regional syllable disagreement** (`fire`: 1 in AUS/UK, often 2 in US) uses
-  the canonical spelling's dominant regional count. Document the choice in a
-  comment in the chunk file. If it matters enough to diverge later, escalate
-  to per-region `syllables` — not today.
+- Silent `e` does not get its own syllable. `cake` → `['cake']`, count 1.
+- Digraphs never cross syllable boundaries. `chicken` → `['chick', 'en']`, not `['chic', 'ken']`.
+- Regional syllable disagreement (e.g. US pronounces `fire` with two syllables, AUS/UK with one) uses the canonical spelling's dominant regional count. If it matters enough to diverge later, we escalate to per-region syllables — not in P1.
 
-### 7.2 Authoring
+### 9.2 Authoring
 
-- **Manual first.** Every seed entry has hand-written `syllables`. At 100
-  words this is tractable and produces the cleanest data.
-- **Algorithmic backfill later.** When we scale past 100, a build step using
-  the `syllable` npm package produces counts automatically for new imports.
-  Manual overrides always win; the algorithm runs only where `syllables` is
-  absent from the source. Not part of this spec's scope — called out so the
-  data shape is ready.
+Level 1–3 words (simple CVC, one syllable): codegen script sets `syllableCount: 1` and `syllables: [word]` automatically.
 
-## 8. Build-time validation
+Level 5+ multi-syllable words: codegen sets `syllableCount` via a vowel-group heuristic (`syllable` npm package, offline-installed) and leaves `syllables[]` undefined. Hand-review fills in the array via P2 when needed for syllable-mode games.
 
-A new vitest file `src/data/words/words.test.ts` loads every JSON chunk from
-disk and asserts invariants. Runs as part of the existing `yarn test` pre-push
-gate — no new tooling.
+## 10. Build-time validation
 
-```ts
-// src/data/words/words.test.ts
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
-import type { WordEntry } from './types';
+`src/data/words/words.test.ts` loads every `core/*.json` and `curriculum/<region>/*.json` file and asserts:
 
-const chunksDir = join(__dirname, 'chunks');
-const chunks = readdirSync(chunksDir).filter((f) =>
-  f.endsWith('.json'),
-);
+1. **`syllables.join('') === word`** when `syllables` is present.
+2. **`graphemes.map(g => g.g.replace('_', '')).join('') === word`** when `graphemes` is present.
+3. **Every `CurriculumEntry.word`** has a matching `WordCore` in the same level's core file.
+4. **No orphan `WordCore`** — every core row must have at least one curriculum entry in at least one region (modulo P2 work-in-progress; warnings, not errors, for missing curricula).
+5. **Variants backlink** — if `A.variants = ['B']` then `B.variants` must include `'A'`.
+6. **No duplicate `word` within a single level's core file**. A word can appear in multiple levels.
+7. **Phase/level consistency** — every `CurriculumEntry` lives in a file whose filename matches its `level` field.
+8. **Proper nouns absent** — no entry starts with an uppercase letter (unless explicitly allowed later).
+9. **Graphemes don't cross syllable boundaries** when both are present.
 
-describe.each(chunks)('chunk %s', (chunkFile) => {
-  const entries = JSON.parse(
-    readFileSync(join(chunksDir, chunkFile), 'utf-8'),
-  ) as WordEntry[];
+Invariants are reused by P2's writer — the same validator runs in the dev form before a write is persisted.
 
-  it.each(entries.map((e) => [e.word, e] as const))(
-    '"%s" passes invariants',
-    (_, entry) => {
-      expect(entry.syllables.join('')).toBe(entry.word);
-      expect(entry.graphemes.map((g) => g.g).join('')).toBe(entry.word);
-
-      // Region ↔ IPA coverage
-      if (typeof entry.ipa !== 'string') {
-        for (const region of entry.regions ?? [
-          'aus',
-          'uk',
-          'us',
-          'br',
-        ]) {
-          expect(entry.ipa[region]).toBeDefined();
-        }
-      }
-
-      // Per-region grapheme phoneme coverage
-      for (const g of entry.graphemes) {
-        if (typeof g.p !== 'string') {
-          for (const region of entry.regions ?? [
-            'aus',
-            'uk',
-            'us',
-            'br',
-          ]) {
-            expect(g.p[region]).toBeDefined();
-          }
-        }
-      }
-    },
-  );
-});
-```
-
-Additional asserts in the same file:
-
-- **Variants backlink** — if entry A has `variants: ['B']`, entry B must exist
-  and must have `variants` including `'A'`.
-- **No duplicate `word` within a single `regions` set.** Two entries can share
-  a surface spelling only if their `regions` arrays are disjoint (e.g. a
-  future homograph with per-region distinction).
-- **Phase id shape.** Every phase id in `entry.phases[region]` must exist in
-  `phases.ts` for that region. Prevents typos like `phase22`.
-
-## 9. WordSpell integration
+## 11. WordSpell integration
 
 Two non-breaking additions.
 
-### 9.1 New round source on `WordSpellConfig`
+### 11.1 `WordSpellConfig.source`
 
 ```ts
 // src/games/word-spell/types.ts
+export type WordSpellSource = {
+  type: 'word-library';
+  filter: WordFilter;
+  limit?: number;
+};
+// P3 later adds: | { type: 'word-bag'; bagId: string };
+
 export interface WordSpellConfig extends AnswerGameConfig {
   // ...existing fields
-  rounds?: WordSpellRound[]; // existing — explicit rounds (back-compat)
-  source?: {
-    type: 'word-library';
-    filter: WordFilter;
-    limit?: number; // default = totalRounds
-  };
+  rounds?: WordSpellRound[]; // explicit authoring — still wins when set
+  source?: WordSpellSource;
 }
 ```
 
-If `rounds` is set, it wins (explicit authoring beats filter). If `source` is
-set and `rounds` is absent, WordSpell calls `filterWords(source.filter)`, picks
-`limit` entries, maps each through `toWordSpellRound()`, and uses the result as
-the round list.
+If `rounds` is set, it wins (explicit authoring beats filter). If `source` is set and `rounds` is absent, a new `useLibraryRounds` hook calls `filterWords(source.filter)`, picks `limit` entries (defaults to `totalRounds`), and feeds them to WordSpell via `toWordSpellRound`.
 
-### 9.2 Adapter
+### 11.2 Adapter
 
 ```ts
 // src/data/words/adapters.ts
-import type { WordEntry } from './types';
+import type { WordHit } from './types';
 import type { WordSpellRound } from '@/games/word-spell/types';
 
-export const toWordSpellRound = (entry: WordEntry): WordSpellRound => ({
-  // '-' matches the existing split regex at WordSpell.tsx:35 so syllable mode
-  // renders chunks without any change to segmentsForWord().
-  word: entry.syllables.join('-'),
+/** Joins syllables with '-' so WordSpell's existing segmentsForWord splits them. */
+export const toWordSpellRound = (hit: WordHit): WordSpellRound => ({
+  word: hit.syllables ? hit.syllables.join('-') : hit.word,
 });
 ```
 
-### 9.3 Wiring inside `WordSpell`
+### 11.3 Hook wiring
 
-The fetch happens during the existing **loading phase** per
-[`docs/game-engine.md:1390`](../../game-engine.md#L1390). No new UI.
+`useLibraryRounds(config)` resolves either explicit `rounds` (sync) or library-driven `source` (async), returns `{ rounds, isLoading, usedFallback }`. WordSpell mounts it above its existing render and shows a brief loading state while async resolution runs. Legacy configs (with explicit `rounds`) short-circuit synchronously — no user-visible change.
 
-```ts
-useEffect(() => {
-  if (!wordSpellConfig.source) return; // legacy explicit-rounds path unchanged
-  let cancelled = false;
-  void (async () => {
-    const entries = await filterWords(wordSpellConfig.source!.filter);
-    if (cancelled) return;
-    const limit =
-      wordSpellConfig.source!.limit ?? wordSpellConfig.totalRounds;
-    setRounds(entries.slice(0, limit).map(toWordSpellRound));
-  })();
-  return () => {
-    cancelled = true;
-  };
-}, [wordSpellConfig]);
-```
+### 11.4 Ordering / sampling
 
-### 9.4 Ordering / sampling
+`filterWords()` returns entries in a deterministic order — alphabetical by region+level filename, then source-file order within each chunk. `.slice(0, limit)` gives the same first-N for the same filter. The existing `roundsInOrder: false` config controls shuffling downstream in `buildRoundOrder`; it applies after the library filter produces the round list, so no new shuffling logic at this layer.
 
-`filterWords()` returns entries in a **deterministic order** — alphabetical by
-chunk filename (which `import.meta.glob` uses), then source-file order within
-each chunk. `entries.slice(0, limit)` therefore gives the same first-N every
-time for the same filter. For randomised selection the existing
-`roundsInOrder: false` config field controls shuffling downstream in
-`buildRoundOrder`; it applies after the library filter produces the round
-list, so no new shuffling logic is needed at this layer.
+## 12. Seed corpus (~650 words)
 
-## 10. Seed corpus (~100 words)
+Distribution is driven by the source file at `docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md`:
 
-Distribution skewed to K–Year 2, mapping 1:1 onto chunk files:
+| Level | Grapheme set                           | Raw words | After dedup + proper-noun filter |
+| ----- | -------------------------------------- | --------- | -------------------------------- |
+| 1     | `s a t p i n`                          | ~44       | ~40                              |
+| 2     | `m d g o c k ck e u r`                 | ~62       | ~55                              |
+| 3     | `b h f l j v w x y z`                  | ~66       | ~60                              |
+| 4     | `sh ch th (both) qu ng wh ph g c`      | ~80       | ~75                              |
+| 5     | `ai ay ea ee ie igh oa ow ew ue`       | ~120      | ~115                             |
+| 6     | `oi oy oo (both) ou ow er ir ur ar or` | ~150      | ~140                             |
+| 7     | `a_e e_e i_e o_e u_e + vowel-at-end`   | ~130      | ~120                             |
+| 8     | `aw ew ou air are ear eer ore dge tch` | ~95       | ~90                              |
 
-- **`core.json` (~40)** — UK Phase 2 / AUS Foundation units 1–5. SATPIN +
-  mdgock + ckeur + hbffllss. Examples: `cat`, `sat`, `pin`, `tap`, `dog`,
-  `map`, `run`, `big`, `sun`, `bed`, `hot`, `cup`, `duck`, `fish`. All 1
-  syllable, mostly CVC.
-- **`digraphs.json` (~20)** — UK Phase 3 / AUS Foundation units 6–8.
-  Consonant digraphs `ch`, `sh`, `th` (voiced + voiceless), `ng`. Examples:
-  `ship`, `chop`, `thin`, `this`, `ring`, `chat`, `shop`, `that`.
-- **`long-vowels.json` (~15)** — UK Phase 3 / AUS Foundation units 9–10.
-  Long-vowel digraphs and trigraphs `ai`, `ee`, `igh`, `oa`, `oo`, `ar`,
-  `or`, `ur`, `ow`, `oi`. Examples: `rain`, `feet`, `night`, `boat`,
-  `cool`, `car`, `for`, `girl`, `cow`, `coin`.
-- **`split-digraphs.json` (~10)** — UK Phase 5 / AUS Year 1. `a_e`, `i_e`,
-  `o_e`, `u_e`. Examples: `cake`, `kite`, `bone`, `cube`, `name`, `time`,
-  `home`.
-- **`multi-syllable.json` (~10)** — 2–3 syllable K–Y2 vocabulary. Examples:
-  `sunset`, `catnap`, `rabbit`, `chicken`, `kitten`, `garden`, `hello`,
-  `elephant`. One entry per word.
-- **`regional.json` (~5)** — region-variant showcase. `tomato` (Case A),
-  `aluminium` + `aluminum` (Case B pair), `colour` + `color` (Case B pair),
-  `mum` + `mom` (Case B pair). Demonstrates both region-handling cases in
-  tests and stories.
+Counts are approximate — the codegen script's dedup pass produces the exact numbers. All ~650 ship with **Tier 1 data**. Tier 2 enrichment coverage is expected to be ~90% for levels 1–4 (straightforward one-letter-one-phoneme splits) and ~60% for levels 5–8 (split digraphs, vowel ambiguity, multi-syllable edge cases). The ~100-word remainder lands in `codegen-review.md` for hand-review via P2.
 
-This distribution is the commit spec, not an aspiration — the seeding PR
-creates these files with exactly these counts.
+No regional showcase chunk in P1. Region variants (`colour`/`color`, `mum`/`mom`) are introduced via P2's dev form after the base corpus lands — they're specific hand-authored cases, not part of the source word list.
 
-## 11. Out of scope for this spec
+## 13. Out of scope for P1
 
-These are real follow-up features, not deferred parts of this one. Each gets
-its own spec.
+These get their own specs.
 
-- **Parent filter UI** — new controls in the WordSpell config form that let a
-  parent compose a `WordFilter`. This spec commits to the data shape the UI
-  will consume; UI work is a separate plan.
-- **pt-BR seed corpus** beyond the shape stub. Once the `en` pipeline is
-  proven end-to-end, a follow-up can hand-author the BNCC vogais / sílabas
-  simples set.
-- **Bulk import pipeline** (CMU Pronouncing Dictionary, Wiktionary, Moby) for
-  scaling past ~100 words. Requires an ingest script, provenance tracking,
-  and a validation pass. Revisit when the corpus needs to grow.
-- **Algorithmic syllable splitting** beyond counts. Current seed is 100%
-  manually authored. Algorithmic backfill on import is a future concern.
-- **Stress marks beyond IPA primary stress** (`ˈ`). No secondary stress (`ˌ`)
-  unless the word needs it for disambiguation.
-- **RxDB-backed library** — blocked on the two triggers in § 5.2.
-- **Second word game adapters** (Word Builder, Read Aloud). Their adapters
-  live in `src/data/words/adapters.ts` when those games ship, not now.
+- **P2 — dev authoring form.** Storybook UI + Vite middleware for reading/writing the JSON chunks with add/update/delete (confirmation dialog). Dev-only, never ships to prod.
+- **P3 — runtime user word bags.** IndexedDB-backed user-created word bags, CRUD UI in-app, export/import, new `WordSpellConfig.source = { type: 'word-bag' }`. Tier 1 only (no IPA authoring UI for parents).
+- **Parent filter UI.** Controls in the WordSpell config form that let a parent compose a `WordFilter`. Waits on P2 maturity.
+- **UK/US seed corpora.** Shape-ready from day one but unseeded. Added incrementally via P2. AUS fallback covers the gap until then.
+- **pt-BR seed corpus.** Shape-ready, no content.
+- **Bulk import pipeline** (CMU Pronouncing Dictionary, Wiktionary) for scaling past ~2,000 words. Not needed for K–Y2.
+- **Algorithmic syllable splitting** (beyond counts). Codegen uses counts-only; the array form is hand-authored via P2 when needed.
+- **RxDB-backed P1 library.** Blocked on corpus size and measured performance cost, neither of which applies now.
+- **Second word-game adapters** (Word Builder, Read Aloud). Adapters land in `src/data/words/adapters.ts` when those games ship.
 
-## 12. Open questions
+## 14. Open questions
 
-None at design time. All region / scale / data-model / storage decisions are
-committed above.
+None at design time. All region / scale / shape / filter / fallback decisions are committed above.
 
-## 13. Affected files (new)
+## 15. Affected files — new
 
-| File                                        | Purpose                                       |
-| ------------------------------------------- | --------------------------------------------- |
-| `src/data/words/types.ts`                   | Types (`WordEntry`, `Grapheme`, `WordFilter`) |
-| `src/data/words/phases.ts`                  | Per-region phase lookup tables                |
-| `src/data/words/phoneme-codes.ts`           | Teacher-code ↔ IPA alias table                |
-| `src/data/words/filter.ts`                  | Async `filterWords()` + chunk cache           |
-| `src/data/words/adapters.ts`                | `toWordSpellRound()`                          |
-| `src/data/words/words.schema.json`          | Generated JSON schema for IDE validation      |
-| `src/data/words/words.test.ts`              | Invariants + loader for all chunk JSON        |
-| `src/data/words/index.ts`                   | Public API re-exports                         |
-| `src/data/words/chunks/core.json`           | ~40 Phase 2 CVC words                         |
-| `src/data/words/chunks/digraphs.json`       | ~20 Phase 3 consonant digraphs                |
-| `src/data/words/chunks/long-vowels.json`    | ~15 Phase 3 long-vowel digraphs/trigraphs     |
-| `src/data/words/chunks/split-digraphs.json` | ~10 Phase 5 split digraphs                    |
-| `src/data/words/chunks/multi-syllable.json` | ~10 2–3 syllable words                        |
-| `src/data/words/chunks/regional.json`       | ~5 region-variant showcase words              |
+| File                                             | Purpose                                                                                      |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `src/data/words/types.ts`                        | `WordCore`, `CurriculumEntry`, `Grapheme`, `Region`, `WordFilter`, `WordHit`, `FilterResult` |
+| `src/data/words/levels.ts`                       | Per-region label formatters + level → grapheme-set lookups                                   |
+| `src/data/words/phoneme-codes.ts`                | Teacher-code ↔ IPA alias table                                                               |
+| `src/data/words/builders.ts`                     | `makeWordCore`, `makeGraphemes`, `makeCurriculumEntry`, `validateEntry`                      |
+| `src/data/words/writer.ts`                       | Pure upsert/remove helpers (consumed by P2)                                                  |
+| `src/data/words/filter.ts`                       | Async `filterWords()` + chunk cache + two-file join + AUS fallback                           |
+| `src/data/words/adapters.ts`                     | `toWordSpellRound()`                                                                         |
+| `src/data/words/words.test.ts`                   | Invariants over every chunk file                                                             |
+| `src/data/words/index.ts`                        | Public API re-exports                                                                        |
+| `src/data/words/core/level{1..8}.json`           | `WordCore[]` per level                                                                       |
+| `src/data/words/curriculum/aus/level{1..8}.json` | `CurriculumEntry[]` per AUS level                                                            |
+| `src/data/words/curriculum/{uk,us,br}/.gitkeep`  | Empty stubs (shape-ready)                                                                    |
+| `scripts/seed-word-library.ts`                   | One-shot codegen script                                                                      |
+| `src/games/word-spell/useLibraryRounds.ts`       | Hook resolving `source` → rounds                                                             |
+| `src/games/word-spell/useLibraryRounds.test.tsx` | Hook tests                                                                                   |
 
-## 14. Affected files (edited)
+## 16. Affected files — edited
 
-| File                                           | Change                                 |
-| ---------------------------------------------- | -------------------------------------- |
-| `src/games/word-spell/types.ts`                | Add `source?: { type, filter, limit }` |
-| `src/games/word-spell/WordSpell/WordSpell.tsx` | Resolve `source` → rounds on load      |
+| File                                                   | Change                                                                                                                                 |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/games/word-spell/types.ts`                        | Make `rounds` optional, add `source?: WordSpellSource`                                                                                 |
+| `src/games/word-spell/WordSpell/WordSpell.tsx`         | Mount `useLibraryRounds`, render loading state, handle `usedFallback` banner hook-up (banner UI itself deferred to the filter-UI spec) |
+| `src/games/word-spell/WordSpell/WordSpell.stories.tsx` | Add `LibrarySourced` story                                                                                                             |
