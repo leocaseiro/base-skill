@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/40 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">40/40 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">3/163 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">9 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/40 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">40/40 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">3/164 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">9 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -6046,7 +6046,7 @@ sessionId?: string</code></pre>
       <div class="badges">
         <label for="c-39-games-word-spell-wordspell-props" class="badge ok as-toggle">4 prop types</label>
         <label for="c-39-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-39-games-word-spell-wordspell-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-39-games-word-spell-wordspell-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -6180,6 +6180,35 @@ sessionId?: string</code></pre>
               
               
               <pre><code>const LockManualWrongTile = () =&gt; &lt;WordSpell config={{ ...baseConfig, wrongTileBehavior: &#39;lock-manual&#39; }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Library Sourced</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LibrarySourced = () =&gt; &lt;WordSpell
+    config={{
+      gameId: &#39;word-spell-library-sourced&#39;,
+      component: &#39;WordSpell&#39;,
+      inputMethod: &#39;drag&#39;,
+      wrongTileBehavior: &#39;lock-auto-eject&#39;,
+      tileBankMode: &#39;exact&#39;,
+      totalRounds: 4,
+      roundsInOrder: true,
+      ttsEnabled: false,
+      mode: &#39;recall&#39;,
+      tileUnit: &#39;letter&#39;,
+      source: {
+        type: &#39;word-library&#39;,
+        filter: {
+          region: &#39;aus&#39;,
+          levels: [1, 2],
+          syllableCountEq: 1,
+        },
+      },
+    }} /&gt;;</code></pre>
             </div>
         </div>
     
