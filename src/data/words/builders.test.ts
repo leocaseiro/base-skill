@@ -1,6 +1,11 @@
 // src/data/words/builders.test.ts
 import { describe, expect, it } from 'vitest';
-import { makeGraphemes, makeWordCore } from './builders';
+import {
+  makeCurriculumEntry,
+  makeGraphemes,
+  makeWordCore,
+  validateEntry,
+} from './builders';
 import { graphemePool } from './levels';
 
 describe('makeWordCore', () => {
@@ -96,6 +101,89 @@ describe('makeGraphemes', () => {
     for (const word of ['cat', 'ship', 'thing', 'pack']) {
       const result = makeGraphemes(word, L4);
       expect(result!.map((g) => g.g).join('')).toBe(word);
+    }
+  });
+});
+
+describe('makeCurriculumEntry', () => {
+  const L2 = graphemePool(2);
+
+  it('builds a CurriculumEntry with graphemes derived from the level set', () => {
+    const entry = makeCurriculumEntry('cat', 2, {
+      levelGraphemes: L2,
+      ipa: 'kæt',
+    });
+    expect(entry).not.toBeNull();
+    expect(entry!.word).toBe('cat');
+    expect(entry!.level).toBe(2);
+    expect(entry!.ipa).toBe('kæt');
+    expect(entry!.graphemes.map((g) => g.g)).toEqual(['c', 'a', 't']);
+  });
+
+  it('returns null when graphemes cannot be derived', () => {
+    const entry = makeCurriculumEntry('zip', 2, { levelGraphemes: L2 });
+    expect(entry).toBeNull();
+  });
+
+  it('accepts explicit graphemes override', () => {
+    const entry = makeCurriculumEntry('cake', 7, {
+      levelGraphemes: [...L2, 'a_e'],
+      ipa: 'keɪk',
+      graphemes: [
+        { g: 'c', p: 'k' },
+        { g: 'a_e', p: 'eɪ', span: [1, 3] },
+        { g: 'k', p: 'k' },
+      ],
+    });
+    expect(entry!.graphemes).toHaveLength(3);
+    expect(entry!.graphemes[1]!.g).toBe('a_e');
+  });
+});
+
+describe('validateEntry', () => {
+  const core = { word: 'cat', syllableCount: 1 };
+  const good = {
+    word: 'cat',
+    level: 2,
+    ipa: 'kæt',
+    graphemes: [
+      { g: 'c', p: 'k' },
+      { g: 'a', p: 'æ' },
+      { g: 't', p: 't' },
+    ],
+  };
+
+  it('passes valid entries', () => {
+    expect(validateEntry(core, good)).toEqual({ ok: true });
+  });
+
+  it('rejects grapheme mismatch', () => {
+    const bad = { ...good, graphemes: [{ g: 'c', p: 'k' }] };
+    const result = validateEntry(core, bad);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors[0]!.field).toBe('graphemes');
+    }
+  });
+
+  it('rejects word mismatch between core and curriculum', () => {
+    const mismatched = { ...good, word: 'dog' };
+    const result = validateEntry(core, mismatched);
+    expect(result.ok).toBe(false);
+  });
+
+  it('rejects syllables that do not join to the word', () => {
+    const badCore = {
+      word: 'cat',
+      syllableCount: 1,
+      syllables: ['ca'],
+    };
+    const result = validateEntry(badCore, good);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.some((e) => e.field === 'syllables')).toBe(
+        true,
+      );
     }
   });
 });

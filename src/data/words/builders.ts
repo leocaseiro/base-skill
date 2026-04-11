@@ -1,5 +1,10 @@
 // src/data/words/builders.ts
-import type { Grapheme, WordCore } from './types';
+import type {
+  CurriculumEntry,
+  Grapheme,
+  ValidationError,
+  WordCore,
+} from './types';
 
 /**
  * Counts syllables via vowel-group heuristic with silent-e subtraction.
@@ -69,4 +74,77 @@ export const makeWordCore = (
   if (opts.syllables) base.syllables = opts.syllables;
   if (opts.variants) base.variants = opts.variants;
   return base;
+};
+
+export const makeCurriculumEntry = (
+  word: string,
+  level: number,
+  opts: {
+    levelGraphemes: readonly string[];
+    ipa?: string;
+    graphemes?: Grapheme[];
+    phonemeByGrapheme?: Record<string, string>;
+  },
+): CurriculumEntry | null => {
+  const graphemes =
+    opts.graphemes ??
+    makeGraphemes(word, opts.levelGraphemes, opts.phonemeByGrapheme);
+  if (graphemes === null) return null;
+  return {
+    word,
+    level,
+    ipa: opts.ipa ?? graphemes.map((g) => g.p).join(''),
+    graphemes,
+  };
+};
+
+export const validateEntry = (
+  core: WordCore,
+  curriculum: CurriculumEntry,
+): { ok: true } | { ok: false; errors: ValidationError[] } => {
+  const errors: ValidationError[] = [];
+
+  if (core.word !== curriculum.word) {
+    errors.push({
+      field: 'word',
+      message: `core.word "${core.word}" !== curriculum.word "${curriculum.word}"`,
+    });
+  }
+
+  if (core.syllables && core.syllables.join('') !== core.word) {
+    errors.push({
+      field: 'syllables',
+      message: `syllables.join('') "${core.syllables.join('')}" !== word "${core.word}"`,
+    });
+  }
+
+  if (core.syllables && core.syllables.length !== core.syllableCount) {
+    errors.push({
+      field: 'syllables',
+      message: `syllables.length (${core.syllables.length}) !== syllableCount (${core.syllableCount})`,
+    });
+  }
+
+  const concat = curriculum.graphemes
+    .map((g) => g.g.replace('_', ''))
+    .join('');
+  if (concat !== curriculum.word) {
+    errors.push({
+      field: 'graphemes',
+      message: `graphemes concat "${concat}" !== word "${curriculum.word}"`,
+    });
+  }
+
+  if (!curriculum.ipa || curriculum.ipa.trim() === '') {
+    errors.push({ field: 'ipa', message: 'ipa is empty' });
+  }
+
+  if (curriculum.level < 1 || !Number.isInteger(curriculum.level)) {
+    errors.push({
+      field: 'level',
+      message: `level must be a positive integer, got ${curriculum.level}`,
+    });
+  }
+
+  return errors.length === 0 ? { ok: true } : { ok: false, errors };
 };
