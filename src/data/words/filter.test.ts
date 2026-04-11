@@ -1,4 +1,3 @@
-// src/data/words/filter.test.ts
 import { describe, expect, it } from 'vitest';
 import { entryMatches } from './filter';
 import type { WordHit } from './types';
