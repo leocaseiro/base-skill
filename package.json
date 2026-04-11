@@ -23,6 +23,7 @@
     "test:scripts": "bash scripts/determine-bump.test.sh",
     "test:storybook": "test-storybook",
     "typecheck": "tsc --noEmit",
+    "word:seed": "tsx scripts/seed-word-library.ts",
     "lint": "eslint . --max-warnings 0 && knip --no-config-hints",
     "lint:css": "stylelint 'src/**/*.css'",
     "lint:md": "markdownlint-cli2 '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees'",
