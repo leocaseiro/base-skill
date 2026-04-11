@@ -121,7 +121,29 @@ Two separate `WordCore` rows linked by bidirectional `variants[]`. Each appears 
 - Digraphs must not cross syllable boundaries. Build-time test warns if they do.
 - `ipa` is broad phonemic transcription (no narrow detail, no secondary stress unless disambiguating).
 
-### 4.4 Proper nouns are skipped
+### 4.4 Level grapheme pools are grapheme-phoneme units, not strings
+
+A single orthographic grapheme can teach different phonemes at different levels. In the AUS source, `c` appears at **level 2** (saying /k/, as in `cat`) and again at **level 4** (saying /s/, as in `cent`, `citrus`). Same for `g` (/g/ in `dog` at level 2, /dʒ/ in `gem` at level 4) and `th` (voiceless /θ/ and voiced /ð/).
+
+Modelling level pools as flat `string[]` would collide these variants — a single `'c'` entry can't say "this is the /k/ sound" vs "this is the /s/ sound". The library instead uses an explicit unit type:
+
+```ts
+// src/data/words/levels.ts
+export interface LevelGraphemeUnit {
+  /** Orthographic form: 'c', 'sh', 'igh', 'a_e'. */
+  g: string;
+  /** IPA of the sound this unit teaches at this level: 'k', 's', 'ʃ', 'aɪ'. */
+  p: string;
+  /** Optional teacher label: 'soft c', 'th voiced'. */
+  name?: string;
+}
+```
+
+`GRAPHEMES_BY_LEVEL: Record<number, readonly LevelGraphemeUnit[]>` stores **each variant** as its own entry. `cumulativeGraphemes(4)` returns both `{ g: 'c', p: 'k' }` and `{ g: 'c', p: 's' }`. Code that only needs the orthographic pool (e.g. the structural splitter in `makeGraphemes`) derives it via `units.map(u => u.g)` and dedupes.
+
+This matches the existing `Grapheme { g, p, span? }` instance type and makes the filter semantics in §7.1 work unchanged: a Tier-2 query like `{ graphemesRequired: ['c'], phonemesRequired: ['k'] }` correctly picks `cat` (whose Tier-2 entry has `{ g: 'c', p: 'k' }`) over `city` (whose Tier-2 entry has `{ g: 'c', p: 's' }`).
+
+### 4.5 Proper nouns are skipped
 
 The source word list contains proper nouns (`Nat`, `Sam`, `Kim`, `Meg`, `Phil`, `Troy`, `Mason`, `Pete`, `Duke`, `Friday`, `Vincent`). The codegen script filters them out by a simple first-letter-capitalized rule. They are not in the seed corpus. If we need them later (names-teaching mode), a dedicated chunk can be added — not in P1.
 
