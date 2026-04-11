@@ -85,6 +85,19 @@ export const reconstructWord = (
   return out;
 };
 
+/**
+ * Accepts a hyphenation split only when it cleanly divides the word into
+ * 2+ parts AND every part is at least 2 characters. Filters out orphan-letter
+ * splits (e.g. Hypher's `vegan → ve-g-an`) that would look broken in the UI.
+ */
+export const acceptHyphenation = (
+  parts: readonly string[],
+): string[] | undefined => {
+  if (parts.length < 2) return undefined;
+  if (parts.some((p) => p.length < 2)) return undefined;
+  return [...parts];
+};
+
 export const makeWordCore = (
   word: string,
   opts: { syllables?: string[]; variants?: string[] } = {},

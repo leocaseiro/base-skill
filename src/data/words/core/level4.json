@@ -1,7 +1,8 @@
 [
   {
     "word": "alphabet",
-    "syllableCount": 3
+    "syllableCount": 3,
+    "syllables": ["al", "pha", "bet"]
   },
   {
     "word": "bang",
@@ -57,7 +58,8 @@
   },
   {
     "word": "citrus",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["cit", "rus"]
   },
   {
     "word": "cloth",
@@ -81,7 +83,8 @@
   },
   {
     "word": "dolphin",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["dol", "phin"]
   },
   {
     "word": "dong",
@@ -105,7 +108,8 @@
   },
   {
     "word": "graphic",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["graph", "ic"]
   },
   {
     "word": "hang",
@@ -117,7 +121,8 @@
   },
   {
     "word": "liquid",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["liq", "uid"]
   },
   {
     "word": "lush",
@@ -125,7 +130,8 @@
   },
   {
     "word": "magic",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["mag", "ic"]
   },
   {
     "word": "mince",
@@ -141,7 +147,8 @@
   },
   {
     "word": "phonics",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["phon", "ics"]
   },
   {
     "word": "quack",

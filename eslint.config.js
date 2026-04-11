@@ -162,6 +162,15 @@ export default [
     },
   },
   {
+    // Ambient module shims for CJS packages without `@types/*` — these are
+    // type-only declarations, not runtime code, so the named-export rule
+    // does not apply.
+    files: ['**/*.d.ts'],
+    rules: {
+      'import/no-default-export': 'off',
+    },
+  },
+  {
     // TanStack Router output; ships with undescribed blanket eslint-disable
     ignores: [
       'eslint.config.js',

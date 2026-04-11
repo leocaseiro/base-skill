@@ -99,6 +99,8 @@
     "fake-indexeddb": "^6.2.5",
     "http-server": "^14.1.1",
     "husky": "^9.1.7",
+    "hyphenation.en-us": "^0.2.1",
+    "hypher": "^0.2.5",
     "jsdom": "^28.1.0",
     "knip": "^6.1.1",
     "lint-staged": "^16.4.0",
