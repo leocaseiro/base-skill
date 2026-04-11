@@ -121,22 +121,11 @@ const CONSONANTS = new Set([
 ]);
 
 /**
- * Phonemes that can be held indefinitely (nasals, liquids, fricatives).
- * These are synthesized WITHOUT a trailing schwa, then silence-trimmed
- * and stretched with `atempo` so the looped segment is pure consonant —
- * otherwise the hover-to-blend UX sounds like "sssuuu" instead of "sss".
- * Plosives/affricates/glides still need the schwa because eSpeak emits
- * silence for bare stops (see buildKirshenbaumInput).
+ * Fricatives get synthesised bare and looped tight: the consonant is
+ * already a steady-state hiss, so removing the schwa anchor keeps the
+ * sustain sounding like "sssss" instead of "sssuuu".
  */
-const SUSTAINABLE = new Set<string>([
-  // Nasals
-  'm',
-  'n',
-  'ŋ',
-  // Liquids
-  'l',
-  'r',
-  // Fricatives
+const SUSTAINABLE_FRICATIVES = new Set<string>([
   'f',
   'v',
   's',
@@ -147,16 +136,45 @@ const SUSTAINABLE = new Set<string>([
   'ʒ',
 ]);
 
+/**
+ * Nasals + liquids render as a brief burst when bare (eSpeak only emits
+ * ~27 ms of actual consonant for `[[n]]`), so 4x stretching sounds choppy.
+ * Keeping the `[[X@]]` anchor plus a 2x atempo stretch gives a smooth
+ * ~650 ms release that matches the natural pronunciation the user asked
+ * for ("n was better before"). These are NOT marked loopable since the
+ * schwa tail would chant on loop — one playback per hover is enough.
+ */
+const SUSTAINABLE_SONORANTS = new Set<string>([
+  'm',
+  'n',
+  'ŋ',
+  'l',
+  'r',
+]);
+
+/**
+ * Short vowels the user asked to sustain during hover-blend. They're
+ * already long enough that 2x atempo gives a clearly held vowel; we
+ * mark them loopable so a long hover holds the vowel indefinitely.
+ */
+const SUSTAINABLE_VOWELS = new Set<string>(['ɪ', 'æ']);
+
 const buildKirshenbaumInput = (ipa: string): string => {
   const code = IPA_TO_KIRSH[ipa];
   if (!code) throw new Error(`No Kirshenbaum mapping for IPA "${ipa}"`);
-  // Sustainable consonants (continuants) render cleanly on their own.
-  // Non-sustainable consonants — stops, affricates, glides — render as
-  // digital silence unless anchored to a following schwa, so they get
-  // `[[X@]]`. Vowels and diphthongs always render alone.
-  if (SUSTAINABLE.has(ipa)) return `[[${code}]]`;
-  return CONSONANTS.has(ipa) ? `[[${code}@]]` : `[[${code}]]`;
+  // Fricatives render cleanly on their own. Sonorants keep the legacy
+  // schwa anchor because bare eSpeak output is too short to stretch.
+  // Non-sustainable consonants — plosives, affricates, glides — use
+  // `[[XE]]` (the /ɛ/ anchor) so chips say "teh"/"peh" instead of
+  // "tuh"/"puh". Vowels and diphthongs always render alone.
+  if (SUSTAINABLE_FRICATIVES.has(ipa)) return `[[${code}]]`;
+  if (SUSTAINABLE_SONORANTS.has(ipa)) return `[[${code}@]]`;
+  if (CONSONANTS.has(ipa)) return `[[${code}E]]`;
+  return `[[${code}]]`;
 };
+
+const isLoopable = (ipa: string): boolean =>
+  SUSTAINABLE_FRICATIVES.has(ipa) || SUSTAINABLE_VOWELS.has(ipa);
 
 const corpusPhonemes = (): string[] => {
   const seen = new Set<string>();
@@ -241,25 +259,49 @@ const main = (): void => {
   const concatLines: string[] = [];
   let cursor = 0;
 
-  // For sustainable phonemes only: strip the leading/trailing silence
-  // eSpeak leaves around the bare consonant, stretch 4x with chained
-  // atempo (each call is capped at 0.5), then apply a 5 ms fade at each
-  // end so the loop seam has no click. Threshold is −60 dB because voiced
-  // fricatives like [[v]] peak around −27 dB but average far lower, so a
-  // stricter threshold would wipe them out entirely.
-  const SUSTAIN_FILTER =
+  // Fricatives: bare consonant + 4x atempo stretch + tight trim. The
+  // −60 dB threshold catches low-energy voiced fricatives like [[v]]
+  // that would be wiped out at −40 dB. 5 ms fades smooth the loop seam.
+  const FRICATIVE_FILTER =
     'silenceremove=start_periods=1:start_threshold=-60dB:' +
     'stop_periods=-1:stop_threshold=-60dB,' +
     'atempo=0.5,atempo=0.5,' +
     'afade=t=in:st=0:d=0.005,' +
     'areverse,afade=t=in:st=0:d=0.005,areverse';
 
+  // Sonorants (nasals + liquids): stretch 2x via atempo so the bursty
+  // eSpeak rendering of `[[X@]]` produces a smooth ~650 ms release.
+  // Keeps the schwa so the chip speaks the phoneme naturally — the
+  // user explicitly preferred this over the tight bare-consonant loop.
+  const SONORANT_FILTER =
+    'silenceremove=start_periods=1:start_threshold=-40dB:' +
+    'stop_periods=-1:stop_threshold=-40dB,' +
+    'atempo=0.5,' +
+    'afade=t=in:st=0:d=0.02,' +
+    'areverse,afade=t=in:st=0:d=0.02,areverse';
+
+  // Sustainable vowels: strip edge silence, stretch 2x so a single hover
+  // pass holds the vowel for ~1.3 s, short fades for loop cleanup.
+  const VOWEL_FILTER =
+    'silenceremove=start_periods=1:start_threshold=-40dB:' +
+    'stop_periods=-1:stop_threshold=-40dB,' +
+    'atempo=0.5,' +
+    'afade=t=in:st=0:d=0.01,' +
+    'areverse,afade=t=in:st=0:d=0.01,areverse';
+
+  const pickFilter = (ipa: string): string | null => {
+    if (SUSTAINABLE_FRICATIVES.has(ipa)) return FRICATIVE_FILTER;
+    if (SUSTAINABLE_SONORANTS.has(ipa)) return SONORANT_FILTER;
+    if (SUSTAINABLE_VOWELS.has(ipa)) return VOWEL_FILTER;
+    return null;
+  };
+
   for (const [i, ipa] of phonemes.entries()) {
     const safe = i.toString().padStart(3, '0');
     const rawWav = path.join(tmpDir, `raw-${safe}.wav`);
     const normWav = path.join(tmpDir, `norm-${safe}.wav`);
     synthesizePhoneme(ipa, rawWav);
-    const loopable = SUSTAINABLE.has(ipa);
+    const filter = pickFilter(ipa);
     const ffmpegArgs = [
       '-y',
       '-i',
@@ -269,10 +311,11 @@ const main = (): void => {
       '-ac',
       '1',
     ];
-    if (loopable) ffmpegArgs.push('-af', SUSTAIN_FILTER);
+    if (filter !== null) ffmpegArgs.push('-af', filter);
     ffmpegArgs.push(normWav);
     execFileSync('ffmpeg', ffmpegArgs);
     const dur = probeDurationSec(normWav);
+    const loopable = isLoopable(ipa);
     sprite[ipa] = {
       start: Math.round(cursor * 1000),
       duration: Math.round(dur * 1000),
