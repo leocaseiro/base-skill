@@ -1,4 +1,3 @@
-// src/data/words/filter.ts
 import type { WordFilter, WordHit } from './types';
 
 const inRange = (
@@ -29,31 +28,30 @@ export const entryMatches = (
   )
     return false;
 
-  const tier2Active =
+  const hasGraphemeFilter =
     filter.graphemesAllowed !== undefined ||
     filter.graphemesRequired !== undefined ||
     filter.phonemesAllowed !== undefined ||
     filter.phonemesRequired !== undefined;
 
-  if (tier2Active && !hit.graphemes) return false;
+  if (!hasGraphemeFilter) return true;
+  if (!hit.graphemes) return false;
 
-  if (hit.graphemes) {
-    if (filter.graphemesAllowed) {
-      const allowed = new Set(filter.graphemesAllowed);
-      if (!hit.graphemes.every((g) => allowed.has(g.g))) return false;
-    }
-    if (filter.graphemesRequired) {
-      const required = new Set(filter.graphemesRequired);
-      if (!hit.graphemes.some((g) => required.has(g.g))) return false;
-    }
-    if (filter.phonemesAllowed) {
-      const allowed = new Set(filter.phonemesAllowed);
-      if (!hit.graphemes.every((g) => allowed.has(g.p))) return false;
-    }
-    if (filter.phonemesRequired) {
-      const required = new Set(filter.phonemesRequired);
-      if (!hit.graphemes.some((g) => required.has(g.p))) return false;
-    }
+  if (filter.graphemesAllowed) {
+    const allowed = new Set(filter.graphemesAllowed);
+    if (!hit.graphemes.every((g) => allowed.has(g.g))) return false;
+  }
+  if (filter.graphemesRequired) {
+    const required = new Set(filter.graphemesRequired);
+    if (!hit.graphemes.some((g) => required.has(g.g))) return false;
+  }
+  if (filter.phonemesAllowed) {
+    const allowed = new Set(filter.phonemesAllowed);
+    if (!hit.graphemes.every((g) => allowed.has(g.p))) return false;
+  }
+  if (filter.phonemesRequired) {
+    const required = new Set(filter.phonemesRequired);
+    if (!hit.graphemes.some((g) => required.has(g.p))) return false;
   }
 
   return true;
