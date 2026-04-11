@@ -1,0 +1,30 @@
+import{j as e}from"./iframe-BbgSCQ6W.js";import{G as h}from"./GameCard-VQyxKuXZ.js";import{B as t}from"./button-HpSJU9uv.js";import{u as w}from"./useTranslation-d1IdozSj.js";import"./preload-helper-PPVm8Dsz.js";import"./utils-BQHNewu7.js";import"./index-CDRW1F5I.js";import"./index-bW7hMSpx.js";import"./index-BEMJEV05.js";import"./index-BiF1z4Mh.js";import"./index-B0drBMpi.js";import"./index-B0czKuIC.js";import"./index-CD1drhkp.js";import"./tslib.es6--Hu8dhvm.js";import"./index-B59FG3-n.js";import"./input-CbszHyzA.js";import"./bookmark-colors-Wuas97gq.js";import"./SavedConfigChip-DvZyWlwM.js";import"./ConfigFormFields-vm_YYUqj.js";import"./config-tags-D6T5qQ_Q.js";import"./card-Cau6SjdF.js";import"./sort-numbers-level-generator-CE-KkRP3.js";import"./index.browser-BY9c7rfI.js";import"./createLucideIcon-D6LNckFz.js";import"./index-BQuqc4N8.js";const c=({entries:g,savedConfigs:u,onSaveConfig:l,onRemoveConfig:f,onUpdateConfig:y,onPlay:v,onPlayWithConfig:C,page:n,totalPages:a,onPageChange:p})=>{const{t:r}=w("common");return e.jsxs("div",{className:"flex flex-col gap-6",children:[g.length===0?e.jsx("p",{className:"py-16 text-center text-muted-foreground",children:"No games found"}):e.jsx("div",{className:"grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4",children:g.map(d=>e.jsx(h,{entry:d,savedConfigs:u.filter(x=>x.gameId===d.id),onSaveConfig:l,onRemoveConfig:f,onUpdateConfig:y,onPlay:v,onPlayWithConfig:C},d.id))}),a>1&&e.jsxs("nav",{className:"flex items-center justify-center gap-3","aria-label":"Pagination",children:[e.jsx(t,{variant:"outline",size:"sm",disabled:n<=1,onClick:()=>p(n-1),children:r("pagination.previous")}),e.jsx("span",{className:"text-sm text-muted-foreground",children:r("pagination.pageOf",{page:n,total:a})}),e.jsx(t,{variant:"outline",size:"sm",disabled:n>=a,onClick:()=>p(n+1),children:r("pagination.next")})]}),a<=1&&e.jsxs("nav",{className:"flex items-center justify-center gap-3","aria-label":"Pagination",children:[e.jsx(t,{variant:"outline",size:"sm",disabled:!0,children:r("pagination.previous")}),e.jsx(t,{variant:"outline",size:"sm",disabled:!0,children:r("pagination.next")})]})]})};c.__docgenInfo={description:"",methods:[],displayName:"GameGrid",props:{entries:{required:!0,tsType:{name:"Array",elements:[{name:"GameCatalogEntry"}],raw:"GameCatalogEntry[]"},description:""},savedConfigs:{required:!0,tsType:{name:"Array",elements:[{name:"SavedGameConfigDoc"}],raw:"SavedGameConfigDoc[]"},description:""},onSaveConfig:{required:!0,tsType:{name:"signature",type:"function",raw:`(
+  gameId: string,
+  name: string,
+  color: BookmarkColorKey,
+) => Promise<void>`,signature:{arguments:[{type:{name:"string"},name:"gameId"},{type:{name:"string"},name:"name"},{type:{name:"BookmarkColorKey"},name:"color"}],return:{name:"Promise",elements:[{name:"void"}],raw:"Promise<void>"}}},description:""},onRemoveConfig:{required:!0,tsType:{name:"signature",type:"function",raw:"(configId: string) => Promise<void>",signature:{arguments:[{type:{name:"string"},name:"configId"}],return:{name:"Promise",elements:[{name:"void"}],raw:"Promise<void>"}}},description:""},onUpdateConfig:{required:!0,tsType:{name:"signature",type:"function",raw:`(
+  configId: string,
+  config: Record<string, unknown>,
+  name: string,
+) => Promise<void>`,signature:{arguments:[{type:{name:"string"},name:"configId"},{type:{name:"Record",elements:[{name:"string"},{name:"unknown"}],raw:"Record<string, unknown>"},name:"config"},{type:{name:"string"},name:"name"}],return:{name:"Promise",elements:[{name:"void"}],raw:"Promise<void>"}}},description:""},onPlay:{required:!0,tsType:{name:"signature",type:"function",raw:"(gameId: string) => void",signature:{arguments:[{type:{name:"string"},name:"gameId"}],return:{name:"void"}}},description:""},onPlayWithConfig:{required:!0,tsType:{name:"signature",type:"function",raw:"(gameId: string, configId: string) => void",signature:{arguments:[{type:{name:"string"},name:"gameId"},{type:{name:"string"},name:"configId"}],return:{name:"void"}}},description:""},page:{required:!0,tsType:{name:"number"},description:""},totalPages:{required:!0,tsType:{name:"number"},description:""},onPageChange:{required:!0,tsType:{name:"signature",type:"function",raw:"(page: number) => void",signature:{arguments:[{type:{name:"number"},name:"page"}],return:{name:"void"}}},description:""}}};const I=[{id:"word-spell",titleKey:"word-spell",descriptionKey:"word-spell-description",levels:["PK","K","1"],subject:"reading"},{id:"number-match",titleKey:"number-match",descriptionKey:"number-match-description",levels:["1","2"],subject:"math"}],Q={component:c,tags:["autodocs"],args:{entries:I,savedConfigs:[],page:1,totalPages:1},argTypes:{onSaveConfig:{action:"configSaved"},onRemoveConfig:{action:"configRemoved"},onUpdateConfig:{action:"configUpdated"},onPlay:{action:"played"},onPlayWithConfig:{action:"playedWithConfig"},onPageChange:{action:"pageChanged"}}},i={},o={args:{savedConfigs:[{id:"cfg-1",profileId:"default",gameId:"word-spell",name:"Easy Mode",config:{},color:"indigo",createdAt:new Date().toISOString()}]}},s={args:{page:2,totalPages:5}},m={args:{entries:[]}};i.parameters={...i.parameters,docs:{...i.parameters?.docs,source:{originalSource:"{}",...i.parameters?.docs?.source}}};o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:`{
+  args: {
+    savedConfigs: [{
+      id: 'cfg-1',
+      profileId: 'default',
+      gameId: 'word-spell',
+      name: 'Easy Mode',
+      config: {},
+      color: 'indigo',
+      createdAt: new Date().toISOString()
+    }]
+  }
+}`,...o.parameters?.docs?.source}}};s.parameters={...s.parameters,docs:{...s.parameters?.docs,source:{originalSource:`{
+  args: {
+    page: 2,
+    totalPages: 5
+  }
+}`,...s.parameters?.docs?.source}}};m.parameters={...m.parameters,docs:{...m.parameters?.docs,source:{originalSource:`{
+  args: {
+    entries: []
+  }
+}`,...m.parameters?.docs?.source}}};const V=["Default","WithSavedConfig","Paginated","Empty"];export{i as Default,m as Empty,s as Paginated,o as WithSavedConfig,V as __namedExportsOrder,Q as default};
