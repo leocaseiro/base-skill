@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { filterWords } from './filter';
 import { ALL_REGIONS, LEVEL_LABELS } from './levels';
+import { playPhoneme } from './phoneme-audio';
 import type {
   FilterResult,
   Grapheme,
@@ -283,13 +284,18 @@ const keyGraphemes = (graphemes: Grapheme[]): KeyedGrapheme[] => {
 const GraphemeChips = ({ graphemes }: { graphemes: Grapheme[] }) => (
   <div className="flex flex-wrap gap-1">
     {keyGraphemes(graphemes).map((gr) => (
-      <span
+      <button
         key={gr.key}
-        title={gr.p}
-        className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs"
+        type="button"
+        title={`${gr.g} → /${gr.p}/`}
+        aria-label={`Play phoneme ${gr.p}`}
+        onClick={() => {
+          void playPhoneme(gr.p);
+        }}
+        className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs transition-colors hover:bg-muted/70"
       >
         {gr.g}
-      </span>
+      </button>
     ))}
   </div>
 );
