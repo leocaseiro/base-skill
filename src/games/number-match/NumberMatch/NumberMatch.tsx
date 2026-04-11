@@ -22,6 +22,7 @@ import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOv
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
 import { Slot } from '@/components/answer-game/Slot/Slot';
 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
 import { useGameSounds } from '@/components/answer-game/useGameSounds';
@@ -202,7 +203,7 @@ const NumberMatchSession = ({
 
   return (
     <>
-      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+      <div className="flex w-full max-w-4xl flex-col items-center justify-center gap-8 px-4 py-6">
         <AnswerGame.Question>
           {mode === 'group-to-numeral' ? (
             <DotGroupQuestion
@@ -250,7 +251,9 @@ const NumberMatchSession = ({
                     );
                   }
                   return (
-                    <span className="text-3xl font-bold tabular-nums opacity-50">
+                    <span
+                      className={`${getNumericTileFontClass(previewLabel.length, 80)} font-bold tabular-nums opacity-50`}
+                    >
                       {previewLabel}
                     </span>
                   );
@@ -277,7 +280,9 @@ const NumberMatchSession = ({
                     );
                   }
                   return (
-                    <span className="text-3xl font-bold tabular-nums">
+                    <span
+                      className={`${getNumericTileFontClass(label.length, 80)} font-bold tabular-nums`}
+                    >
                       {label}
                     </span>
                   );

@@ -2,6 +2,9 @@ import { expect, test } from '@playwright/test';
 import { seedMathRandom } from './seed-math-random';
 import type { Page } from '@playwright/test';
 
+const MOBILE_VIEWPORT = { width: 390, height: 844 };
+const TABLET_PORTRAIT_VIEWPORT = { width: 768, height: 1024 };
+
 async function setDarkMode(page: Page) {
   await page.evaluate(() => {
     // Suppress all CSS transitions before switching theme to avoid mid-animation screenshots
@@ -128,6 +131,36 @@ test('@visual NumberMatch numeral-to-group layout dark', async ({
   await setDarkMode(page);
   await expect(page).toHaveScreenshot(
     'number-match-numeral-to-group-dark.png',
+    { fullPage: true },
+  );
+});
+
+test('@visual NumberMatch numeral-to-group layout mobile', async ({
+  page,
+}) => {
+  await page.setViewportSize(MOBILE_VIEWPORT);
+  await page.goto('/en/game/number-match');
+  await page.getByRole('button', { name: /let's go/i }).click();
+  await page
+    .getByRole('button', { name: 'Hear the question' })
+    .waitFor({ state: 'visible' });
+  await expect(page).toHaveScreenshot(
+    'number-match-numeral-to-group-mobile.png',
+    { fullPage: true },
+  );
+});
+
+test('@visual NumberMatch numeral-to-group layout tablet portrait', async ({
+  page,
+}) => {
+  await page.setViewportSize(TABLET_PORTRAIT_VIEWPORT);
+  await page.goto('/en/game/number-match');
+  await page.getByRole('button', { name: /let's go/i }).click();
+  await page
+    .getByRole('button', { name: 'Hear the question' })
+    .waitFor({ state: 'visible' });
+  await expect(page).toHaveScreenshot(
+    'number-match-numeral-to-group-tablet-portrait.png',
     { fullPage: true },
   );
 });
@@ -286,6 +319,35 @@ test('@visual SortNumbers mid-game layout dark', async ({ page }) => {
   await expect(page).toHaveScreenshot('sort-numbers-dark.png', {
     fullPage: true,
   });
+});
+
+test('@visual SortNumbers mid-game layout mobile', async ({ page }) => {
+  await page.setViewportSize(MOBILE_VIEWPORT);
+  await page.goto('/en/game/sort-numbers');
+  await page.getByRole('button', { name: /let's go/i }).click();
+  await page
+    .getByRole('button', { name: /^Number /i })
+    .first()
+    .waitFor({ state: 'visible' });
+  await expect(page).toHaveScreenshot('sort-numbers-mobile.png', {
+    fullPage: true,
+  });
+});
+
+test('@visual SortNumbers mid-game layout tablet portrait', async ({
+  page,
+}) => {
+  await page.setViewportSize(TABLET_PORTRAIT_VIEWPORT);
+  await page.goto('/en/game/sort-numbers');
+  await page.getByRole('button', { name: /let's go/i }).click();
+  await page
+    .getByRole('button', { name: /^Number /i })
+    .first()
+    .waitFor({ state: 'visible' });
+  await expect(page).toHaveScreenshot(
+    'sort-numbers-tablet-portrait.png',
+    { fullPage: true },
+  );
 });
 
 // ── InstructionsOverlay ──────────────────────────────────────────────────────
