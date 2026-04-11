@@ -5,7 +5,6 @@ name: PR Preview
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [master]
 
 concurrency:
   group: pr-preview-${{ github.event.pull_request.number }}
