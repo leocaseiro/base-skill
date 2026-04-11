@@ -1,6 +1,7 @@
 interface SpriteEntry {
   start: number;
   duration: number;
+  loopable?: boolean;
 }
 
 export type PhonemeSprite = Record<string, SpriteEntry>;
@@ -8,9 +9,15 @@ export type PhonemeSprite = Record<string, SpriteEntry>;
 const SPRITE_URL = '/audio/phonemes.mp3';
 const MANIFEST_URL = '/audio/phonemes.json';
 
-let audio: HTMLAudioElement | null = null;
+let audioCtx: AudioContext | null = null;
+let bufferPromise: Promise<AudioBuffer> | null = null;
 let spritePromise: Promise<PhonemeSprite> | null = null;
-let stopTimer: ReturnType<typeof setTimeout> | null = null;
+let currentSource: AudioBufferSourceNode | null = null;
+
+const getContext = (): AudioContext => {
+  audioCtx ??= new AudioContext();
+  return audioCtx;
+};
 
 const loadSprite = (): Promise<PhonemeSprite> => {
   spritePromise ??= fetch(MANIFEST_URL).then(
@@ -19,51 +26,90 @@ const loadSprite = (): Promise<PhonemeSprite> => {
   return spritePromise;
 };
 
-const getAudio = (): HTMLAudioElement => {
-  audio ??= new Audio(SPRITE_URL);
-  return audio;
+const loadBuffer = (): Promise<AudioBuffer> => {
+  bufferPromise ??= (async () => {
+    const ctx = getContext();
+    const res = await fetch(SPRITE_URL);
+    const arrayBuffer = await res.arrayBuffer();
+    return ctx.decodeAudioData(arrayBuffer);
+  })();
+  return bufferPromise;
+};
+
+const stopCurrent = (): void => {
+  if (currentSource === null) return;
+  try {
+    currentSource.stop();
+  } catch {
+    // already stopped
+  }
+  currentSource.disconnect();
+  currentSource = null;
 };
 
 /**
- * Plays a single phoneme clip from the audio sprite. Silently skips if the
- * sprite is unloadable or the IPA is not in the manifest — this is a dev
- * demo helper, not a production playback primitive.
+ * Plays a single phoneme clip from the audio sprite. When `opts.sustain`
+ * is true and the phoneme is marked loopable in the manifest, the clip
+ * loops seamlessly until `stopPhoneme` is called — used by the grapheme
+ * chip hover-to-blend UX. Silently skips on any load error or unknown IPA.
  */
-export const playPhoneme = async (ipa: string): Promise<void> => {
+export const playPhoneme = async (
+  ipa: string,
+  opts: { sustain?: boolean } = {},
+): Promise<void> => {
   let sprite: PhonemeSprite;
+  let buffer: AudioBuffer;
   try {
-    sprite = await loadSprite();
+    [sprite, buffer] = await Promise.all([loadSprite(), loadBuffer()]);
   } catch {
     return;
   }
   const entry = sprite[ipa];
   if (!entry) return;
 
-  if (stopTimer !== null) {
-    globalThis.clearTimeout(stopTimer);
-    stopTimer = null;
+  stopCurrent();
+
+  const ctx = getContext();
+  if (ctx.state === 'suspended') {
+    try {
+      await ctx.resume();
+    } catch {
+      // proceed; playback may still work on user gesture
+    }
   }
 
-  const el = getAudio();
-  el.pause();
-  el.currentTime = entry.start / 1000;
-  try {
-    await el.play();
-  } catch {
-    return;
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ctx.destination);
+
+  const startSec = entry.start / 1000;
+  const durationSec = entry.duration / 1000;
+  const shouldLoop = Boolean(opts.sustain && entry.loopable);
+
+  if (shouldLoop) {
+    source.loop = true;
+    source.loopStart = startSec;
+    source.loopEnd = startSec + durationSec;
+    source.start(0, startSec);
+  } else {
+    source.start(0, startSec, durationSec);
   }
 
-  stopTimer = globalThis.setTimeout(() => {
-    el.pause();
-    stopTimer = null;
-  }, entry.duration);
+  currentSource = source;
+  source.addEventListener('ended', () => {
+    if (currentSource === source) {
+      currentSource = null;
+    }
+  });
+};
+
+export const stopPhoneme = (): void => {
+  stopCurrent();
 };
 
 export const __resetPhonemeAudioForTests = (): void => {
-  audio = null;
+  stopCurrent();
+  audioCtx = null;
+  bufferPromise = null;
   spritePromise = null;
-  if (stopTimer !== null) {
-    globalThis.clearTimeout(stopTimer);
-    stopTimer = null;
-  }
 };

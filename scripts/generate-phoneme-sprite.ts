@@ -118,6 +118,32 @@ const CONSONANTS = new Set([
   'kw',
 ]);
 
+/**
+ * Phonemes that can be held indefinitely (nasals, liquids, fricatives) —
+ * these get post-processed with `atempo=0.5` (stretch) and `silenceremove`
+ * (trim schwa/silence tails) so a looping playback produces a clean,
+ * seamless sustained sound. Plosives, affricates, and glides stay at
+ * natural speed since they are inherently impulsive.
+ */
+const SUSTAINABLE = new Set<string>([
+  // Nasals
+  'm',
+  'n',
+  'ŋ',
+  // Liquids
+  'l',
+  'r',
+  // Fricatives
+  'f',
+  'v',
+  's',
+  'z',
+  'θ',
+  'ð',
+  'ʃ',
+  'ʒ',
+]);
+
 const buildKirshenbaumInput = (ipa: string): string => {
   const code = IPA_TO_KIRSH[ipa];
   if (!code) throw new Error(`No Kirshenbaum mapping for IPA "${ipa}"`);
@@ -201,17 +227,29 @@ const main = (): void => {
   interface SpriteEntry {
     start: number;
     duration: number;
+    loopable?: boolean;
   }
   const sprite: Record<string, SpriteEntry> = {};
   const concatLines: string[] = [];
   let cursor = 0;
+
+  // Stretch audible middle via atempo, then trim silence, then apply a
+  // short fade at both ends so a looping playback has no click at the
+  // loop point. Applied only to sustainable phonemes.
+  const SUSTAIN_FILTER =
+    'atempo=0.5,' +
+    'silenceremove=start_periods=1:start_threshold=-40dB:' +
+    'stop_periods=-1:stop_threshold=-40dB,' +
+    'afade=t=in:st=0:d=0.02,' +
+    'areverse,afade=t=in:st=0:d=0.02,areverse';
 
   for (const [i, ipa] of phonemes.entries()) {
     const safe = i.toString().padStart(3, '0');
     const rawWav = path.join(tmpDir, `raw-${safe}.wav`);
     const normWav = path.join(tmpDir, `norm-${safe}.wav`);
     synthesizePhoneme(ipa, rawWav);
-    execFileSync('ffmpeg', [
+    const loopable = SUSTAINABLE.has(ipa);
+    const ffmpegArgs = [
       '-y',
       '-i',
       rawWav,
@@ -219,12 +257,15 @@ const main = (): void => {
       SAMPLE_RATE.toString(),
       '-ac',
       '1',
-      normWav,
-    ]);
+    ];
+    if (loopable) ffmpegArgs.push('-af', SUSTAIN_FILTER);
+    ffmpegArgs.push(normWav);
+    execFileSync('ffmpeg', ffmpegArgs);
     const dur = probeDurationSec(normWav);
     sprite[ipa] = {
       start: Math.round(cursor * 1000),
       duration: Math.round(dur * 1000),
+      ...(loopable ? { loopable: true } : {}),
     };
     concatLines.push(`file '${normWav}'`, `file '${silenceWav}'`);
     cursor += dur + GAP_SEC;
