@@ -2,195 +2,195 @@
   {
     "word": "alphabet",
     "level": 4,
-    "ipa": "",
+    "ipa": "ælfæbet",
     "graphemes": [
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "ph",
-        "p": ""
+        "p": "f"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "bang",
     "level": 4,
-    "ipa": "",
+    "ipa": "bæŋ",
     "graphemes": [
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "bling",
     "level": 4,
-    "ipa": "",
+    "ipa": "blɪŋ",
     "graphemes": [
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "cash",
     "level": 4,
-    "ipa": "",
+    "ipa": "kæʃ",
     "graphemes": [
       {
         "g": "c",
-        "p": ""
+        "p": "k"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       }
     ]
   },
   {
     "word": "cent",
     "level": 4,
-    "ipa": "",
+    "ipa": "sent",
     "graphemes": [
       {
         "g": "c",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "chap",
     "level": 4,
-    "ipa": "",
+    "ipa": "tʃæp",
     "graphemes": [
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "chat",
     "level": 4,
-    "ipa": "",
+    "ipa": "tʃæt",
     "graphemes": [
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "check",
     "level": 4,
-    "ipa": "",
+    "ipa": "tʃek",
     "graphemes": [
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "ck",
-        "p": ""
+        "p": "k"
       }
     ]
   },
   {
     "word": "chess",
     "level": 4,
-    "ipa": "",
+    "ipa": "tʃes",
     "graphemes": [
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "s",
@@ -201,42 +201,42 @@
   {
     "word": "chest",
     "level": 4,
-    "ipa": "",
+    "ipa": "tʃest",
     "graphemes": [
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "chill",
     "level": 4,
-    "ipa": "",
+    "ipa": "tʃɪl",
     "graphemes": [
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "l",
@@ -247,157 +247,157 @@
   {
     "word": "chin",
     "level": 4,
-    "ipa": "",
+    "ipa": "tʃɪn",
     "graphemes": [
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "chip",
     "level": 4,
-    "ipa": "",
+    "ipa": "tʃɪp",
     "graphemes": [
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "chop",
     "level": 4,
-    "ipa": "",
+    "ipa": "tʃɒp",
     "graphemes": [
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "citrus",
     "level": 4,
-    "ipa": "",
+    "ipa": "sɪtrʌs",
     "graphemes": [
       {
         "g": "c",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "r",
-        "p": ""
+        "p": "r"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "cloth",
     "level": 4,
-    "ipa": "",
+    "ipa": "klɒθ",
     "graphemes": [
       {
         "g": "c",
-        "p": ""
+        "p": "k"
       },
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "th",
-        "p": ""
+        "p": "θ"
       }
     ]
   },
   {
     "word": "crush",
     "level": 4,
-    "ipa": "",
+    "ipa": "krʌʃ",
     "graphemes": [
       {
         "g": "c",
-        "p": ""
+        "p": "k"
       },
       {
         "g": "r",
-        "p": ""
+        "p": "r"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       }
     ]
   },
   {
     "word": "dance",
     "level": 4,
-    "ipa": "",
+    "ipa": "dæns",
     "graphemes": [
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "c",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "e",
@@ -408,333 +408,333 @@
   {
     "word": "dash",
     "level": 4,
-    "ipa": "",
+    "ipa": "dæʃ",
     "graphemes": [
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       }
     ]
   },
   {
     "word": "dish",
     "level": 4,
-    "ipa": "",
+    "ipa": "dɪʃ",
     "graphemes": [
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       }
     ]
   },
   {
     "word": "dolphin",
     "level": 4,
-    "ipa": "",
+    "ipa": "dɒlfɪn",
     "graphemes": [
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "ph",
-        "p": ""
+        "p": "f"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "dong",
     "level": 4,
-    "ipa": "",
+    "ipa": "dɒŋ",
     "graphemes": [
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "fifth",
     "level": 4,
-    "ipa": "",
+    "ipa": "fɪfθ",
     "graphemes": [
       {
         "g": "f",
-        "p": ""
+        "p": "f"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "f",
-        "p": ""
+        "p": "f"
       },
       {
         "g": "th",
-        "p": ""
+        "p": "θ"
       }
     ]
   },
   {
     "word": "fish",
     "level": 4,
-    "ipa": "",
+    "ipa": "fɪʃ",
     "graphemes": [
       {
         "g": "f",
-        "p": ""
+        "p": "f"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       }
     ]
   },
   {
     "word": "gel",
     "level": 4,
-    "ipa": "",
+    "ipa": "dʒel",
     "graphemes": [
       {
         "g": "g",
-        "p": ""
+        "p": "dʒ"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       }
     ]
   },
   {
     "word": "gem",
     "level": 4,
-    "ipa": "",
+    "ipa": "dʒem",
     "graphemes": [
       {
         "g": "g",
-        "p": ""
+        "p": "dʒ"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "m",
-        "p": ""
+        "p": "m"
       }
     ]
   },
   {
     "word": "graphic",
     "level": 4,
-    "ipa": "",
+    "ipa": "græfɪk",
     "graphemes": [
       {
         "g": "g",
-        "p": ""
+        "p": "g"
       },
       {
         "g": "r",
-        "p": ""
+        "p": "r"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "ph",
-        "p": ""
+        "p": "f"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "c",
-        "p": ""
+        "p": "k"
       }
     ]
   },
   {
     "word": "hang",
     "level": 4,
-    "ipa": "",
+    "ipa": "hæŋ",
     "graphemes": [
       {
         "g": "h",
-        "p": ""
+        "p": "h"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "inch",
     "level": 4,
-    "ipa": "",
+    "ipa": "ɪntʃ",
     "graphemes": [
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       }
     ]
   },
   {
     "word": "liquid",
     "level": 4,
-    "ipa": "",
+    "ipa": "lɪkwɪd",
     "graphemes": [
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "qu",
-        "p": ""
+        "p": "kw"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       }
     ]
   },
   {
     "word": "lush",
     "level": 4,
-    "ipa": "",
+    "ipa": "lʌʃ",
     "graphemes": [
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       }
     ]
   },
   {
     "word": "magic",
     "level": 4,
-    "ipa": "",
+    "ipa": "mædʒɪk",
     "graphemes": [
       {
         "g": "m",
-        "p": ""
+        "p": "m"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "g",
-        "p": ""
+        "p": "dʒ"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "c",
-        "p": ""
+        "p": "k"
       }
     ]
   },
   {
     "word": "mince",
     "level": 4,
-    "ipa": "",
+    "ipa": "mɪns",
     "graphemes": [
       {
         "g": "m",
-        "p": ""
+        "p": "m"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "c",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "e",
@@ -745,210 +745,210 @@
   {
     "word": "moth",
     "level": 4,
-    "ipa": "",
+    "ipa": "mɒθ",
     "graphemes": [
       {
         "g": "m",
-        "p": ""
+        "p": "m"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "th",
-        "p": ""
+        "p": "θ"
       }
     ]
   },
   {
     "word": "much",
     "level": 4,
-    "ipa": "",
+    "ipa": "mʌtʃ",
     "graphemes": [
       {
         "g": "m",
-        "p": ""
+        "p": "m"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       }
     ]
   },
   {
     "word": "phonics",
     "level": 4,
-    "ipa": "",
+    "ipa": "fɒnɪks",
     "graphemes": [
       {
         "g": "ph",
-        "p": ""
+        "p": "f"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "c",
-        "p": ""
+        "p": "k"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "quack",
     "level": 4,
-    "ipa": "",
+    "ipa": "kwæk",
     "graphemes": [
       {
         "g": "qu",
-        "p": ""
+        "p": "kw"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "ck",
-        "p": ""
+        "p": "k"
       }
     ]
   },
   {
     "word": "quest",
     "level": 4,
-    "ipa": "",
+    "ipa": "kwest",
     "graphemes": [
       {
         "g": "qu",
-        "p": ""
+        "p": "kw"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "quick",
     "level": 4,
-    "ipa": "",
+    "ipa": "kwɪk",
     "graphemes": [
       {
         "g": "qu",
-        "p": ""
+        "p": "kw"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "ck",
-        "p": ""
+        "p": "k"
       }
     ]
   },
   {
     "word": "quilt",
     "level": 4,
-    "ipa": "",
+    "ipa": "kwɪlt",
     "graphemes": [
       {
         "g": "qu",
-        "p": ""
+        "p": "kw"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "quit",
     "level": 4,
-    "ipa": "",
+    "ipa": "kwɪt",
     "graphemes": [
       {
         "g": "qu",
-        "p": ""
+        "p": "kw"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "quiz",
     "level": 4,
-    "ipa": "",
+    "ipa": "kwɪz",
     "graphemes": [
       {
         "g": "qu",
-        "p": ""
+        "p": "kw"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "z",
-        "p": ""
+        "p": "z"
       }
     ]
   },
   {
     "word": "quoll",
     "level": 4,
-    "ipa": "",
+    "ipa": "kwɒl",
     "graphemes": [
       {
         "g": "qu",
-        "p": ""
+        "p": "kw"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "l",
@@ -959,518 +959,518 @@
   {
     "word": "rang",
     "level": 4,
-    "ipa": "",
+    "ipa": "ræŋ",
     "graphemes": [
       {
         "g": "r",
-        "p": ""
+        "p": "r"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "rash",
     "level": 4,
-    "ipa": "",
+    "ipa": "ræʃ",
     "graphemes": [
       {
         "g": "r",
-        "p": ""
+        "p": "r"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       }
     ]
   },
   {
     "word": "rich",
     "level": 4,
-    "ipa": "",
+    "ipa": "rɪtʃ",
     "graphemes": [
       {
         "g": "r",
-        "p": ""
+        "p": "r"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       }
     ]
   },
   {
     "word": "ring",
     "level": 4,
-    "ipa": "",
+    "ipa": "rɪŋ",
     "graphemes": [
       {
         "g": "r",
-        "p": ""
+        "p": "r"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "shed",
     "level": 4,
-    "ipa": "",
+    "ipa": "ʃed",
     "graphemes": [
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       }
     ]
   },
   {
     "word": "shelf",
     "level": 4,
-    "ipa": "",
+    "ipa": "ʃelf",
     "graphemes": [
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "f",
-        "p": ""
+        "p": "f"
       }
     ]
   },
   {
     "word": "shin",
     "level": 4,
-    "ipa": "",
+    "ipa": "ʃɪn",
     "graphemes": [
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "ship",
     "level": 4,
-    "ipa": "",
+    "ipa": "ʃɪp",
     "graphemes": [
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "shop",
     "level": 4,
-    "ipa": "",
+    "ipa": "ʃɒp",
     "graphemes": [
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "sing",
     "level": 4,
-    "ipa": "",
+    "ipa": "sɪŋ",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "sling",
     "level": 4,
-    "ipa": "",
+    "ipa": "slɪŋ",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "song",
     "level": 4,
-    "ipa": "",
+    "ipa": "sɒŋ",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "squid",
     "level": 4,
-    "ipa": "",
+    "ipa": "skwɪd",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "qu",
-        "p": ""
+        "p": "kw"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       }
     ]
   },
   {
     "word": "squint",
     "level": 4,
-    "ipa": "",
+    "ipa": "skwɪnt",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "qu",
-        "p": ""
+        "p": "kw"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "squish",
     "level": 4,
-    "ipa": "",
+    "ipa": "skwɪʃ",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "qu",
-        "p": ""
+        "p": "kw"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       }
     ]
   },
   {
     "word": "such",
     "level": 4,
-    "ipa": "",
+    "ipa": "sʌtʃ",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "ch",
-        "p": ""
+        "p": "tʃ"
       }
     ]
   },
   {
     "word": "sung",
     "level": 4,
-    "ipa": "",
+    "ipa": "sʌŋ",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "that",
     "level": 4,
-    "ipa": "",
+    "ipa": "ðæt",
     "graphemes": [
       {
         "g": "th",
-        "p": ""
+        "p": "ð"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "them",
     "level": 4,
-    "ipa": "",
+    "ipa": "ðem",
     "graphemes": [
       {
         "g": "th",
-        "p": ""
+        "p": "ð"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "m",
-        "p": ""
+        "p": "m"
       }
     ]
   },
   {
     "word": "thick",
     "level": 4,
-    "ipa": "",
+    "ipa": "θɪk",
     "graphemes": [
       {
         "g": "th",
-        "p": ""
+        "p": "θ"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "ck",
-        "p": ""
+        "p": "k"
       }
     ]
   },
   {
     "word": "thin",
     "level": 4,
-    "ipa": "",
+    "ipa": "θɪn",
     "graphemes": [
       {
         "g": "th",
-        "p": ""
+        "p": "θ"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "thing",
     "level": 4,
-    "ipa": "",
+    "ipa": "θɪŋ",
     "graphemes": [
       {
         "g": "th",
-        "p": ""
+        "p": "θ"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "this",
     "level": 4,
-    "ipa": "",
+    "ipa": "ðɪs",
     "graphemes": [
       {
         "g": "th",
-        "p": ""
+        "p": "ð"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "thong",
     "level": 4,
-    "ipa": "",
+    "ipa": "θɒŋ",
     "graphemes": [
       {
         "g": "th",
-        "p": ""
+        "p": "θ"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "ng",
-        "p": ""
+        "p": "ŋ"
       }
     ]
   },
   {
     "word": "when",
     "level": 4,
-    "ipa": "",
+    "ipa": "wen",
     "graphemes": [
       {
         "g": "wh",
-        "p": ""
+        "p": "w"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "whiff",
     "level": 4,
-    "ipa": "",
+    "ipa": "wɪf",
     "graphemes": [
       {
         "g": "wh",
-        "p": ""
+        "p": "w"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "f",
-        "p": ""
+        "p": "f"
       },
       {
         "g": "f",
@@ -1481,38 +1481,38 @@
   {
     "word": "whip",
     "level": 4,
-    "ipa": "",
+    "ipa": "wɪp",
     "graphemes": [
       {
         "g": "wh",
-        "p": ""
+        "p": "w"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "wish",
     "level": 4,
-    "ipa": "",
+    "ipa": "wɪʃ",
     "graphemes": [
       {
         "g": "w",
-        "p": ""
+        "p": "w"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "sh",
-        "p": ""
+        "p": "ʃ"
       }
     ]
   }
