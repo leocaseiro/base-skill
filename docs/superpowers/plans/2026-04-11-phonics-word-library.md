@@ -1,23 +1,28 @@
-# Phonics Word Library Implementation Plan
+# Phonics Word Library (P1) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use
 > superpowers:subagent-driven-development (recommended) or
 > superpowers:executing-plans to implement this plan task-by-task. Steps use
 > checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Ship a read-only, lazy-loaded phonics word library (types, filter
-API, ~100-word seed corpus, build-time invariants) plus a non-breaking
-WordSpell integration that lets a config resolve rounds from a filter instead
-of a hand-authored `rounds[]` array.
+**Goal:** Ship the read-only phonics word library (**P1** only — types,
+builders, codegen, ~650-word seed corpus, filter API with AUS fallback, and a
+non-breaking WordSpell integration). **P2** (dev authoring form) and **P3**
+(runtime user word bags) are separate projects — out of scope here.
 
-**Architecture:** New module at `src/data/words/` with six JSON chunk files
-under `chunks/`, an async `filterWords()` API backed by `import.meta.glob` and
-a module-level in-memory cache, a `toWordSpellRound()` adapter, and a
-`useLibraryRounds()` hook that WordSpell mounts above its existing render
-logic so the session code is untouched.
+**Architecture:** A normalized module at `src/data/words/` with two tables
+joined on `word`: `WordCore` in `core/level{1..8}.json` and per-region
+`CurriculumEntry` in `curriculum/<region>/level{1..8}.json`. A one-shot Node
+codegen script parses
+[`docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md`](./2026-04-11-phonic-word-library_words-list.md)
+and emits JSON chunks using shared builder functions. An async
+`filterWords()` performs a two-file hash join, supports grapheme/phoneme
+subset filters, and falls back to AUS when the target region is empty. A
+`useLibraryRounds` hook wraps WordSpell above its existing render so the
+inner session code stays untouched.
 
 **Tech Stack:** TypeScript, React 19, Vite (`import.meta.glob`), Vitest, IPA
-Unicode characters, existing WordSpell `AnswerGame` primitive.
+Unicode characters, tsx for running the Node codegen script.
 
 **Spec:** [2026-04-11-phonics-word-library-design.md](../specs/2026-04-11-phonics-word-library-design.md)
 
@@ -27,44 +32,57 @@ Unicode characters, existing WordSpell `AnswerGame` primitive.
 
 ### New files
 
-- `src/data/words/types.ts` — `Region`, `PhonemeByRegion`, `Grapheme`, `WordEntry`, `WordFilter` types
-- `src/data/words/phases.ts` — per-region `PHASES` table
-- `src/data/words/phoneme-codes.ts` — teacher-friendly phoneme code ↔ IPA map
-- `src/data/words/filter.ts` — `entryMatches()` + async `filterWords()` + chunk cache
-- `src/data/words/filter.test.ts` — unit tests for both
-- `src/data/words/adapters.ts` — `toWordSpellRound()`
+- `src/data/words/types.ts` — `Region`, `Grapheme`, `WordCore`, `CurriculumEntry`, `WordHit`, `WordFilter`, `FilterResult`, `WordSpellSource`, `ValidationError`
+- `src/data/words/levels.ts` — `LEVEL_LABELS` (per-region formatters), `GRAPHEMES_BY_LEVEL`, `cumulativeGraphemes(level)`, `ALL_REGIONS`
+- `src/data/words/phoneme-codes.ts` — teacher-friendly code → IPA map
+- `src/data/words/builders.ts` — `makeWordCore`, `makeGraphemes`, `makeCurriculumEntry`, `validateEntry`
+- `src/data/words/builders.test.ts` — unit tests
+- `src/data/words/writer.ts` — pure `upsertCurriculumEntry`, `removeCurriculumEntry`, `upsertWordCore`, `removeWordCore`
+- `src/data/words/writer.test.ts` — unit tests
+- `src/data/words/filter.ts` — `entryMatches`, `filterWords`, chunk cache, `__resetChunkCacheForTests`
+- `src/data/words/filter.test.ts` — unit + integration tests
+- `src/data/words/adapters.ts` — `toWordSpellRound`
 - `src/data/words/adapters.test.ts` — unit tests
-- `src/data/words/words.test.ts` — build-time invariant harness over every chunk JSON
+- `src/data/words/words.test.ts` — invariant harness over all chunks
 - `src/data/words/index.ts` — public API re-exports
-- `src/data/words/chunks/core.json` — 40 Phase 2 CVC words
-- `src/data/words/chunks/digraphs.json` — 20 consonant digraph words
-- `src/data/words/chunks/long-vowels.json` — 15 vowel digraph/trigraph words
-- `src/data/words/chunks/split-digraphs.json` — 10 magic-e words
-- `src/data/words/chunks/multi-syllable.json` — 10 2–3-syllable words
-- `src/data/words/chunks/regional.json` — 7 region-variant showcase words
-- `src/games/word-spell/useLibraryRounds.ts` — hook that resolves `config.source` into `WordSpellRound[]`
-- `src/games/word-spell/useLibraryRounds.test.tsx` — hook unit tests
+- `src/data/words/core/level{1..8}.json` — 8 files of `WordCore[]`
+- `src/data/words/curriculum/aus/level{1..8}.json` — 8 files of `CurriculumEntry[]`
+- `src/data/words/curriculum/uk/.gitkeep` — empty stub
+- `src/data/words/curriculum/us/.gitkeep` — empty stub
+- `src/data/words/curriculum/br/.gitkeep` — empty stub
+- `scripts/seed-word-library.ts` — one-shot codegen
+- `docs/superpowers/plans/2026-04-11-phonics-word-library_codegen-review.md` — auto-generated list of Tier-1-only words (hand-review follow-up)
+- `src/games/word-spell/useLibraryRounds.ts` — hook resolving `config.rounds` or `config.source` → rounds
+- `src/games/word-spell/useLibraryRounds.test.tsx` — hook tests
 
 ### Modified files
 
-- `src/games/word-spell/types.ts` — make `rounds` optional; add `source` field
+- `src/games/word-spell/types.ts` — `rounds` becomes optional; add `source?: WordSpellSource`
 - `src/games/word-spell/WordSpell/WordSpell.tsx` — mount `useLibraryRounds`, render loading state
 - `src/games/word-spell/WordSpell/WordSpell.stories.tsx` — add `LibrarySourced` story
+- `package.json` — add `tsx` devDep (if not already present) and `"word:seed": "tsx scripts/seed-word-library.ts"` script
 
 ---
 
 ## Conventions
 
-- **IPA is broad phonemic** (no narrow detail). Store symbols, not codes.
-- **`syllables.join('') === word`** is the primary invariant. Enforced by `words.test.ts`.
-- **`graphemes.map(g=>g.g).join('') === word`** is the second invariant. Also enforced.
-- **Digraphs are one grapheme.** `ch` in `child` is `{ g: 'ch', p: 'tʃ' }`, not two entries.
-- **Silent letters** get `p: ''` and still contribute to `word`/`syllables`.
-- **`regions` omitted** means the entry is valid in all four regions.
-- **Canonical `ipa` string** when all four regions pronounce the word identically; object form only when they differ.
-- **Per-region phoneme in `graphemes[].p`** only for the specific phonemes that differ.
-- **Every code file uses named exports** (no `export default`) per project convention in `eslint.config.js`.
-- **Arrow-function React components** (`const X = () => {}`) per [CLAUDE.md](../../../CLAUDE.md).
+- **Named exports only** — no `export default` in `.ts` files, per
+  `eslint.config.js` and [CLAUDE.md](../../../CLAUDE.md). JSON chunk files
+  export via default automatically (they're not `.ts`).
+- **Arrow-function components** (`const X = () => {}`) per project convention.
+- **IPA broad phonemic** — no narrow detail, no secondary stress unless
+  disambiguating.
+- **`syllables.join('') === word`** when present.
+- **`graphemes.map(g => g.g.replace('_', '')).join('') === word`** when
+  present (the `replace('_','')` accounts for split-digraph notation like
+  `a_e`).
+- **Digraphs are one grapheme.** `ch` is `{ g: 'ch', p: 'tʃ' }`, never two.
+- **Silent letters** use `p: ''`.
+- **Proper nouns are filtered out** by the codegen via first-letter uppercase
+  check.
+- **Commit after every task.** Task 17 intentionally bundles Tasks 14–17 into
+  one commit because the WordSpell type change breaks typecheck until the
+  hook and wiring land.
 
 ---
 
@@ -76,3385 +94,2353 @@ Unicode characters, existing WordSpell `AnswerGame` primitive.
 
 - Create: `src/data/words/types.ts`
 
-- [ ] **Step 1 — Create `types.ts`**
+- [ ] **Step 1: Write `types.ts`**
 
-  ```ts
-  // src/data/words/types.ts
+```ts
+// src/data/words/types.ts
 
-  export type Region = 'aus' | 'uk' | 'us' | 'br';
+export type Region = 'aus' | 'uk' | 'us' | 'br';
 
-  export const ALL_REGIONS: readonly Region[] = [
-    'aus',
-    'uk',
-    'us',
-    'br',
+export interface WordCore {
+  word: string;
+  syllableCount: number;
+  syllables?: string[];
+  variants?: string[];
+}
+
+export interface Grapheme {
+  g: string;
+  p: string;
+  span?: [number, number];
+}
+
+export interface CurriculumEntry {
+  word: string;
+  level: number;
+  ipa: string;
+  graphemes: Grapheme[];
+}
+
+export interface WordHit {
+  word: string;
+  region: Region;
+  level: number;
+  syllableCount: number;
+  syllables?: string[];
+  variants?: string[];
+  ipa?: string;
+  graphemes?: Grapheme[];
+}
+
+export interface WordFilter {
+  region: Region;
+  level?: number;
+  levels?: number[];
+  levelRange?: [number, number];
+  syllableCountEq?: number;
+  syllableCountRange?: [number, number];
+  graphemesAllowed?: string[];
+  graphemesRequired?: string[];
+  phonemesAllowed?: string[];
+  phonemesRequired?: string[];
+  fallbackToAus?: boolean;
+}
+
+export interface FilterResult {
+  hits: WordHit[];
+  usedFallback?: { from: Region; to: 'aus' };
+}
+
+export type WordSpellSource = {
+  type: 'word-library';
+  filter: WordFilter;
+  limit?: number;
+};
+
+export type ValidationErrorField =
+  | 'word'
+  | 'syllables'
+  | 'graphemes'
+  | 'ipa'
+  | 'level';
+
+export interface ValidationError {
+  field: ValidationErrorField;
+  message: string;
+}
+```
+
+- [ ] **Step 2: Typecheck**
+
+Run: `yarn typecheck`
+Expected: passes. No callers yet.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/data/words/types.ts
+git commit -m "feat(words): add phonics library type definitions"
+```
+
+---
+
+### Task 2 — Levels + phoneme codes
+
+**Files:**
+
+- Create: `src/data/words/levels.ts`
+- Create: `src/data/words/phoneme-codes.ts`
+
+- [ ] **Step 1: Write `levels.ts`**
+
+```ts
+// src/data/words/levels.ts
+import type { Region } from './types';
+
+export const ALL_REGIONS: readonly Region[] = ['aus', 'uk', 'us', 'br'];
+
+export const LEVEL_LABELS: Record<Region, (level: number) => string> = {
+  aus: (n) => `Level ${n}`,
+  uk: (n) => `Phase ${n}`,
+  us: (n) => `K Unit ${n}`,
+  br: (n) => `Unidade ${n}`,
+};
+
+/**
+ * Graphemes newly introduced at each level of the AUS progression.
+ * Source: docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md
+ * Cumulative sets use `cumulativeGraphemes(level)` below.
+ */
+export const GRAPHEMES_BY_LEVEL: Record<number, readonly string[]> = {
+  1: ['s', 'a', 't', 'p', 'i', 'n'],
+  2: ['m', 'd', 'g', 'o', 'c', 'k', 'ck', 'e', 'u', 'r'],
+  3: ['b', 'h', 'f', 'l', 'j', 'v', 'w', 'x', 'y', 'z'],
+  4: ['sh', 'ch', 'th', 'qu', 'ng', 'wh', 'ph'],
+  5: ['ai', 'ay', 'ea', 'ee', 'ie', 'igh', 'oa', 'ow', 'ew', 'ue'],
+  6: ['oi', 'oy', 'oo', 'ou', 'er', 'ir', 'ur', 'ar', 'or'],
+  7: ['a_e', 'e_e', 'i_e', 'o_e', 'u_e'],
+  8: ['aw', 'air', 'are', 'ear', 'eer', 'ore', 'dge', 'tch'],
+};
+
+export const cumulativeGraphemes = (level: number): string[] => {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (let l = 1; l <= level; l++) {
+    for (const g of GRAPHEMES_BY_LEVEL[l] ?? []) {
+      if (seen.has(g)) continue;
+      seen.add(g);
+      out.push(g);
+    }
+  }
+  return out;
+};
+```
+
+- [ ] **Step 2: Write `phoneme-codes.ts`**
+
+```ts
+// src/data/words/phoneme-codes.ts
+
+/** Teacher-friendly codes → IPA. Used by filter UIs that prefer plain text. */
+export const PHONEME_CODE_TO_IPA: Record<string, string> = {
+  sh: 'ʃ',
+  ch: 'tʃ',
+  th_voiceless: 'θ',
+  th_voiced: 'ð',
+  ng: 'ŋ',
+  zh: 'ʒ',
+  oo_long: 'uː',
+  oo_short: 'ʊ',
+  schwa: 'ə',
+};
+
+export const IPA_TO_PHONEME_CODE: Record<string, string> =
+  Object.fromEntries(
+    Object.entries(PHONEME_CODE_TO_IPA).map(([code, ipa]) => [
+      ipa,
+      code,
+    ]),
+  );
+```
+
+- [ ] **Step 3: Typecheck**
+
+Run: `yarn typecheck`
+Expected: passes.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/data/words/levels.ts src/data/words/phoneme-codes.ts
+git commit -m "feat(words): add levels + phoneme code tables"
+```
+
+---
+
+### Task 3 — Builders: `makeWordCore`
+
+**Files:**
+
+- Create: `src/data/words/builders.ts`
+- Create: `src/data/words/builders.test.ts`
+
+- [ ] **Step 1: Write failing tests**
+
+```ts
+// src/data/words/builders.test.ts
+import { describe, expect, it } from 'vitest';
+import { makeWordCore } from './builders';
+
+describe('makeWordCore', () => {
+  it('counts one syllable for simple CVC', () => {
+    expect(makeWordCore('cat')).toEqual({
+      word: 'cat',
+      syllableCount: 1,
+    });
+  });
+
+  it('counts silent-e as not a syllable', () => {
+    expect(makeWordCore('cake')).toEqual({
+      word: 'cake',
+      syllableCount: 1,
+    });
+  });
+
+  it('counts two syllables for sunset', () => {
+    const result = makeWordCore('sunset');
+    expect(result.syllableCount).toBe(2);
+  });
+
+  it('counts three syllables for elephant', () => {
+    const result = makeWordCore('elephant');
+    expect(result.syllableCount).toBe(3);
+  });
+
+  it('accepts explicit syllables override', () => {
+    const result = makeWordCore('chicken', {
+      syllables: ['chick', 'en'],
+    });
+    expect(result.syllableCount).toBe(2);
+    expect(result.syllables).toEqual(['chick', 'en']);
+  });
+
+  it('records variants when provided', () => {
+    const result = makeWordCore('colour', { variants: ['color'] });
+    expect(result.variants).toEqual(['color']);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify failure**
+
+Run: `yarn test src/data/words/builders.test.ts`
+Expected: fails with `makeWordCore` not exported.
+
+- [ ] **Step 3: Implement `makeWordCore`**
+
+```ts
+// src/data/words/builders.ts
+import type { Grapheme, WordCore, CurriculumEntry } from './types';
+
+/**
+ * Counts syllables via vowel-group heuristic with silent-e subtraction.
+ * Good enough for K–Y2 English. Caller can override via opts.syllables.
+ */
+const countSyllables = (word: string): number => {
+  const lower = word.toLowerCase();
+  const groups = lower.match(/[aeiouy]+/g) ?? [];
+  let count = groups.length;
+  if (count > 1 && /e$/.test(lower) && !/[aeiouy]e$/.test(lower)) {
+    count -= 1;
+  }
+  return Math.max(count, 1);
+};
+
+export const makeWordCore = (
+  word: string,
+  opts: { syllables?: string[]; variants?: string[] } = {},
+): WordCore => {
+  const base: WordCore = {
+    word,
+    syllableCount: opts.syllables
+      ? opts.syllables.length
+      : countSyllables(word),
+  };
+  if (opts.syllables) base.syllables = opts.syllables;
+  if (opts.variants) base.variants = opts.variants;
+  return base;
+};
+```
+
+- [ ] **Step 4: Run tests**
+
+Run: `yarn test src/data/words/builders.test.ts`
+Expected: all green.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/data/words/builders.ts src/data/words/builders.test.ts
+git commit -m "feat(words): add makeWordCore builder"
+```
+
+---
+
+### Task 4 — Builders: `makeGraphemes`
+
+**Files:**
+
+- Modify: `src/data/words/builders.ts`
+- Modify: `src/data/words/builders.test.ts`
+
+- [ ] **Step 1: Append failing tests**
+
+```ts
+// append to src/data/words/builders.test.ts
+import { makeGraphemes } from './builders';
+
+describe('makeGraphemes', () => {
+  const L1 = ['s', 'a', 't', 'p', 'i', 'n'];
+  const L2 = [...L1, 'm', 'd', 'g', 'o', 'c', 'k', 'ck', 'e', 'u', 'r'];
+  const L4 = [...L2, 'sh', 'ch', 'th', 'ng'];
+
+  it('splits simple CVC letter-by-letter', () => {
+    const result = makeGraphemes('cat', L2);
+    expect(result).not.toBeNull();
+    expect(result!.map((x) => x.g)).toEqual(['c', 'a', 't']);
+  });
+
+  it('prefers longest match (ck over c+k)', () => {
+    const result = makeGraphemes('pack', L2);
+    expect(result).not.toBeNull();
+    expect(result!.map((x) => x.g)).toEqual(['p', 'a', 'ck']);
+  });
+
+  it('recognises sh as a single grapheme', () => {
+    const result = makeGraphemes('ship', L4);
+    expect(result).not.toBeNull();
+    expect(result!.map((x) => x.g)).toEqual(['sh', 'i', 'p']);
+  });
+
+  it('recognises th + ng in thing', () => {
+    const result = makeGraphemes('thing', L4);
+    expect(result).not.toBeNull();
+    expect(result!.map((x) => x.g)).toEqual(['th', 'i', 'ng']);
+  });
+
+  it('populates phonemes from phonemeByGrapheme map', () => {
+    const result = makeGraphemes('ship', L4, {
+      sh: 'ʃ',
+      i: 'ɪ',
+      p: 'p',
+    });
+    expect(result).not.toBeNull();
+    expect(result!.map((x) => x.p)).toEqual(['ʃ', 'ɪ', 'p']);
+  });
+
+  it('leaves phonemes blank when no map supplied', () => {
+    const result = makeGraphemes('cat', L2);
+    expect(result!.map((x) => x.p)).toEqual(['', '', '']);
+  });
+
+  it('returns null when a letter is outside the level grapheme set', () => {
+    expect(makeGraphemes('zip', L2)).toBeNull();
+  });
+
+  it('invariant: graphemes concat equals word', () => {
+    for (const word of ['cat', 'ship', 'thing', 'pack']) {
+      const result = makeGraphemes(word, L4);
+      expect(result!.map((g) => g.g).join('')).toBe(word);
+    }
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify failure**
+
+Run: `yarn test src/data/words/builders.test.ts`
+Expected: fails — `makeGraphemes` not exported.
+
+- [ ] **Step 3: Implement `makeGraphemes`**
+
+Append to `src/data/words/builders.ts`:
+
+```ts
+/**
+ * Longest-match-first split of `word` into graphemes drawn from
+ * `levelGraphemes`. Returns null if the word contains a character sequence
+ * that can't be explained by any grapheme in the set.
+ * Case-insensitive on the input; output preserves lowercase.
+ */
+export const makeGraphemes = (
+  word: string,
+  levelGraphemes: readonly string[],
+  phonemeByGrapheme?: Record<string, string>,
+): Grapheme[] | null => {
+  const lower = word.toLowerCase();
+  // Sort by length desc so the greedy scan prefers digraphs/trigraphs.
+  const sorted = [...levelGraphemes].toSorted(
+    (a, b) => b.length - a.length,
+  );
+  const graphemes: Grapheme[] = [];
+  let i = 0;
+
+  while (i < lower.length) {
+    let matched: string | null = null;
+    for (const g of sorted) {
+      // Split digraph notation like 'a_e' isn't a contiguous substring
+      // at codegen time — we handle those in a dedicated step (Task 6).
+      if (g.includes('_')) continue;
+      if (lower.startsWith(g, i)) {
+        matched = g;
+        break;
+      }
+    }
+    if (matched === null) return null;
+    graphemes.push({
+      g: matched,
+      p: phonemeByGrapheme?.[matched] ?? '',
+    });
+    i += matched.length;
+  }
+
+  return graphemes;
+};
+```
+
+- [ ] **Step 4: Run tests**
+
+Run: `yarn test src/data/words/builders.test.ts`
+Expected: all green.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/data/words/builders.ts src/data/words/builders.test.ts
+git commit -m "feat(words): add makeGraphemes longest-match splitter"
+```
+
+---
+
+### Task 5 — Builders: `makeCurriculumEntry` + `validateEntry`
+
+**Files:**
+
+- Modify: `src/data/words/builders.ts`
+- Modify: `src/data/words/builders.test.ts`
+
+- [ ] **Step 1: Append failing tests**
+
+```ts
+// append to src/data/words/builders.test.ts
+import { makeCurriculumEntry, validateEntry } from './builders';
+
+describe('makeCurriculumEntry', () => {
+  const L2 = [
+    's',
+    'a',
+    't',
+    'p',
+    'i',
+    'n',
+    'm',
+    'd',
+    'g',
+    'o',
+    'c',
+    'k',
+    'ck',
+    'e',
+    'u',
+    'r',
   ];
 
-  export interface PhonemeByRegion {
-    aus?: string;
-    uk?: string;
-    us?: string;
-    br?: string;
-  }
+  it('builds a CurriculumEntry with graphemes derived from the level set', () => {
+    const entry = makeCurriculumEntry('cat', 2, {
+      levelGraphemes: L2,
+      ipa: 'kæt',
+    });
+    expect(entry).not.toBeNull();
+    expect(entry!.word).toBe('cat');
+    expect(entry!.level).toBe(2);
+    expect(entry!.ipa).toBe('kæt');
+    expect(entry!.graphemes.map((g) => g.g)).toEqual(['c', 'a', 't']);
+  });
 
-  export interface Grapheme {
-    /** The letters this grapheme covers, e.g. 'c', 'ch', 'igh', 'a_e'. */
-    g: string;
-    /** Phoneme in IPA. String when identical across regions; object per region when not. Empty string for silent letters. */
-    p: string | PhonemeByRegion;
-    /** Start/end index in the surface word. Set only for split digraphs (a_e, i_e). */
-    span?: [number, number];
-  }
+  it('returns null when graphemes cannot be derived', () => {
+    const entry = makeCurriculumEntry('zip', 2, { levelGraphemes: L2 });
+    expect(entry).toBeNull();
+  });
 
-  export interface WordEntry {
-    /** Canonical surface spelling. */
-    word: string;
-    /** Omitted = valid in all regions. */
-    regions?: Region[];
-    /** Linked alternate spellings, e.g. aluminium ↔ aluminum. Bidirectional. */
-    variants?: string[];
-    /** Syllable chunks. length === syllable count. join('') === word. */
-    syllables: string[];
-    /** Broad phonemic transcription. String when identical across regions. */
-    ipa: string | Partial<Record<Region, string>>;
-    /** Ordered grapheme → phoneme mapping. Concatenating `g` must equal `word`. */
-    graphemes: Grapheme[];
-    /** Per-region phase memberships, e.g. { uk: ['phase2'], aus: ['f.unit1'] }. */
-    phases?: Partial<Record<Region, string[]>>;
-    /** Freeform tags: 'cvc', 'animal', 'food'. */
-    tags?: string[];
-  }
+  it('accepts explicit graphemes override', () => {
+    const entry = makeCurriculumEntry('cake', 7, {
+      levelGraphemes: [...L2, 'a_e'],
+      ipa: 'keɪk',
+      graphemes: [
+        { g: 'c', p: 'k' },
+        { g: 'a_e', p: 'eɪ', span: [1, 3] },
+        { g: 'k', p: 'k' },
+      ],
+    });
+    expect(entry!.graphemes).toHaveLength(3);
+    expect(entry!.graphemes[1]!.g).toBe('a_e');
+  });
+});
 
-  export interface WordFilter {
-    /** Required. Entries not valid in this region are excluded. */
-    region: Region;
-    /** OR-match against entry.phases[region]. */
-    phases?: string[];
-    /** Single grapheme string, e.g. 'c' or 'ch'. */
-    grapheme?: string;
-    /** Single IPA phoneme symbol, e.g. 'ʃ' or 'k'. */
-    phoneme?: string;
-    syllablesEq?: number;
-    syllablesMin?: number;
-    syllablesMax?: number;
-    /** OR-match. */
-    tags?: string[];
-  }
-  ```
-
-- [ ] **Step 2 — Typecheck**
-
-  Run: `cd worktrees/feat-phonics-word-library && yarn typecheck`
-  Expected: passes.
-
-- [ ] **Step 3 — Commit**
-
-  ```bash
-  git add src/data/words/types.ts
-  git commit -m "feat(words): add word library types"
-  ```
-
----
-
-### Task 2 — Phases + phoneme codes + stub index
-
-**Files:**
-
-- Create: `src/data/words/phases.ts`
-- Create: `src/data/words/phoneme-codes.ts`
-- Create: `src/data/words/index.ts`
-
-- [ ] **Step 1 — Create `phases.ts`**
-
-  ```ts
-  // src/data/words/phases.ts
-  import type { Region } from './types';
-
-  export interface PhaseDef {
-    id: string;
-    label: string;
-    description?: string;
-  }
-
-  export const PHASES: Record<Region, PhaseDef[]> = {
-    uk: [
-      {
-        id: 'phase2',
-        label: 'Phase 2',
-        description: 'SATPIN + mdgock + ckeur + hbffllss',
-      },
-      {
-        id: 'phase3',
-        label: 'Phase 3',
-        description:
-          'Consonant digraphs (ch sh th ng) + vowel digraphs',
-      },
-      {
-        id: 'phase4',
-        label: 'Phase 4',
-        description: 'Consonant clusters with existing GPCs',
-      },
-      {
-        id: 'phase5',
-        label: 'Phase 5',
-        description: 'Alternative spellings & split digraphs',
-      },
-    ],
-    aus: [
-      {
-        id: 'f.unit1',
-        label: 'Foundation Unit 1',
-        description: 'SATPIN',
-      },
-      {
-        id: 'f.unit2',
-        label: 'Foundation Unit 2',
-        description: 'mdgock',
-      },
-      {
-        id: 'f.unit3',
-        label: 'Foundation Unit 3',
-        description: 'ckeur + hbffllss',
-      },
-      {
-        id: 'f.unit4',
-        label: 'Foundation Unit 4',
-        description: 'jvwxyzzzqu + simple digraphs',
-      },
-      {
-        id: 'f.unit5',
-        label: 'Foundation Unit 5',
-        description: 'ch sh th ng',
-      },
-      {
-        id: 'f.unit6',
-        label: 'Foundation Unit 6',
-        description: 'ai ee oa',
-      },
-      {
-        id: 'f.unit7',
-        label: 'Foundation Unit 7',
-        description: 'igh oo ar or',
-      },
-      {
-        id: 'y1.unit1',
-        label: 'Year 1 Unit 1',
-        description: 'ur ow oi',
-      },
-      {
-        id: 'y1.unit2',
-        label: 'Year 1 Unit 2',
-        description: 'Split digraphs a_e i_e o_e u_e',
-      },
-      {
-        id: 'y1.unit3',
-        label: 'Year 1 Unit 3',
-        description: 'Multi-syllable CVC + compound words',
-      },
-    ],
-    us: [
-      {
-        id: 'k.wk1',
-        label: 'Kindergarten Week 1',
-        description: 'Short vowel CVC (a)',
-      },
-      {
-        id: 'k.wk4',
-        label: 'Kindergarten Week 4',
-        description: 'Short vowel CVC (i, o, u, e)',
-      },
-      {
-        id: 'k.wk8',
-        label: 'Kindergarten Week 8',
-        description: 'Consonant digraphs',
-      },
-      {
-        id: 'k.wk12',
-        label: 'Kindergarten Week 12',
-        description: 'Long-vowel digraphs',
-      },
-      {
-        id: 'g1.wk4',
-        label: 'Grade 1 Week 4',
-        description: 'Split digraphs (silent e)',
-      },
-      {
-        id: 'g1.wk8',
-        label: 'Grade 1 Week 8',
-        description: 'Multi-syllable words',
-      },
-    ],
-    br: [
-      {
-        id: 'bncc.vogais',
-        label: 'Vogais',
-        description: 'BNCC — vogais orais',
-      },
-      {
-        id: 'bncc.silabas-simples',
-        label: 'Sílabas simples',
-        description: 'BNCC — sílabas simples',
-      },
-      {
-        id: 'bncc.digrafos',
-        label: 'Dígrafos',
-        description: 'BNCC — dígrafos ch lh nh rr ss',
-      },
-    ],
-  };
-
-  export const ALL_PHASE_IDS: ReadonlySet<string> = new Set(
-    Object.values(PHASES).flatMap((defs) => defs.map((d) => `${d.id}`)),
-  );
-
-  export const isPhaseIdForRegion = (
-    region: Region,
-    phaseId: string,
-  ): boolean => PHASES[region].some((d) => d.id === phaseId);
-  ```
-
-- [ ] **Step 2 — Create `phoneme-codes.ts`**
-
-  ```ts
-  // src/data/words/phoneme-codes.ts
-
-  /**
-   * Teacher-friendly code → IPA. Used by the (future) filter UI to show
-   * human-readable labels. The data model never stores codes — only IPA.
-   */
-  export const PHONEME_CODE_TO_IPA: Record<string, string> = {
-    // Consonants
-    sh: 'ʃ',
-    zh: 'ʒ',
-    ch: 'tʃ',
-    j: 'dʒ',
-    ng: 'ŋ',
-    th_voiceless: 'θ',
-    th_voiced: 'ð',
-    // Short vowels
-    short_a: 'æ',
-    short_e: 'ɛ',
-    short_i: 'ɪ',
-    short_o: 'ɒ',
-    short_u: 'ʌ',
-    schwa: 'ə',
-    // Long vowels / diphthongs
-    long_a: 'eɪ',
-    long_e: 'iː',
-    long_i: 'aɪ',
-    long_o: 'əʊ',
-    long_u: 'juː',
-    oo_short: 'ʊ',
-    oo_long: 'uː',
-    ow: 'aʊ',
-    oi: 'ɔɪ',
-    // R-controlled
-    ar: 'ɑː',
-    or: 'ɔː',
-    ur: 'ɜː',
-    air: 'ɛə',
-    ear: 'ɪə',
-  };
-
-  export const IPA_TO_PHONEME_CODE: Record<string, string> =
-    Object.fromEntries(
-      Object.entries(PHONEME_CODE_TO_IPA).map(([code, ipa]) => [
-        ipa,
-        code,
-      ]),
-    );
-  ```
-
-- [ ] **Step 3 — Create stub `index.ts`**
-
-  ```ts
-  // src/data/words/index.ts
-  export type {
-    Region,
-    PhonemeByRegion,
-    Grapheme,
-    WordEntry,
-    WordFilter,
-  } from './types';
-  export { ALL_REGIONS } from './types';
-  export { PHASES, ALL_PHASE_IDS, isPhaseIdForRegion } from './phases';
-  export type { PhaseDef } from './phases';
-  export {
-    PHONEME_CODE_TO_IPA,
-    IPA_TO_PHONEME_CODE,
-  } from './phoneme-codes';
-  ```
-
-- [ ] **Step 4 — Typecheck**
-
-  Run: `yarn typecheck`
-  Expected: passes.
-
-- [ ] **Step 5 — Commit**
-
-  ```bash
-  git add src/data/words/phases.ts src/data/words/phoneme-codes.ts src/data/words/index.ts
-  git commit -m "feat(words): add phases and phoneme code tables"
-  ```
-
----
-
-### Task 3 — `entryMatches` pure function + tests
-
-**Files:**
-
-- Create: `src/data/words/filter.ts` (partial — `entryMatches` only)
-- Create: `src/data/words/filter.test.ts` (partial — `entryMatches` only)
-
-- [ ] **Step 1 — Write `filter.test.ts` with failing tests for `entryMatches`**
-
-  ```ts
-  // src/data/words/filter.test.ts
-  import { describe, expect, it } from 'vitest';
-  import { entryMatches } from './filter';
-  import type { WordEntry } from './types';
-
-  const cat: WordEntry = {
+describe('validateEntry', () => {
+  const core = { word: 'cat', syllableCount: 1 };
+  const good = {
     word: 'cat',
-    syllables: ['cat'],
-    ipa: '/kæt/',
+    level: 2,
+    ipa: 'kæt',
     graphemes: [
       { g: 'c', p: 'k' },
       { g: 'a', p: 'æ' },
       { g: 't', p: 't' },
     ],
-    phases: { uk: ['phase2'], aus: ['f.unit1'], us: ['k.wk1'] },
-    tags: ['cvc', 'animal'],
   };
 
-  const city: WordEntry = {
-    word: 'city',
-    syllables: ['ci', 'ty'],
-    ipa: '/ˈsɪti/',
-    graphemes: [
-      { g: 'c', p: 's' },
-      { g: 'i', p: 'ɪ' },
-      { g: 't', p: 't' },
-      { g: 'y', p: 'i' },
-    ],
-    phases: { uk: ['phase5'] },
-  };
-
-  const child: WordEntry = {
-    word: 'child',
-    syllables: ['child'],
-    ipa: '/tʃaɪld/',
-    graphemes: [
-      { g: 'ch', p: 'tʃ' },
-      { g: 'i', p: 'aɪ' },
-      { g: 'l', p: 'l' },
-      { g: 'd', p: 'd' },
-    ],
-    phases: { uk: ['phase3'] },
-  };
-
-  const aluminium: WordEntry = {
-    word: 'aluminium',
-    regions: ['aus', 'uk'],
-    variants: ['aluminum'],
-    syllables: ['al', 'u', 'min', 'i', 'um'],
-    ipa: { aus: '/ˌæljəˈmɪniəm/', uk: '/ˌæljəˈmɪniəm/' },
-    graphemes: [
-      { g: 'a', p: 'æ' },
-      { g: 'l', p: 'l' },
-      { g: 'u', p: 'j' },
-      { g: 'm', p: 'm' },
-      { g: 'i', p: 'ɪ' },
-      { g: 'n', p: 'n' },
-      { g: 'i', p: 'i' },
-      { g: 'u', p: 'ə' },
-      { g: 'm', p: 'm' },
-    ],
-    phases: { uk: ['phase5'] },
-  };
-
-  describe('entryMatches', () => {
-    describe('region', () => {
-      it('includes entries with omitted regions for every region', () => {
-        expect(entryMatches(cat, { region: 'aus' })).toBe(true);
-        expect(entryMatches(cat, { region: 'uk' })).toBe(true);
-        expect(entryMatches(cat, { region: 'us' })).toBe(true);
-        expect(entryMatches(cat, { region: 'br' })).toBe(true);
-      });
-
-      it('excludes entries whose regions array lacks the selected region', () => {
-        expect(entryMatches(aluminium, { region: 'us' })).toBe(false);
-        expect(entryMatches(aluminium, { region: 'aus' })).toBe(true);
-      });
-    });
-
-    describe('grapheme + phoneme', () => {
-      it('matches when the same grapheme carries the requested phoneme', () => {
-        expect(
-          entryMatches(cat, {
-            region: 'uk',
-            grapheme: 'c',
-            phoneme: 'k',
-          }),
-        ).toBe(true);
-      });
-
-      it('excludes when the grapheme is spelled differently even if phoneme matches', () => {
-        expect(
-          entryMatches(child, {
-            region: 'uk',
-            grapheme: 'c',
-            phoneme: 'k',
-          }),
-        ).toBe(false);
-      });
-
-      it('excludes soft c from hard-c lessons', () => {
-        expect(
-          entryMatches(city, {
-            region: 'uk',
-            grapheme: 'c',
-            phoneme: 'k',
-          }),
-        ).toBe(false);
-      });
-
-      it('matches phoneme-only regardless of grapheme spelling', () => {
-        expect(entryMatches(cat, { region: 'uk', phoneme: 'k' })).toBe(
-          true,
-        );
-        expect(
-          entryMatches(child, { region: 'uk', phoneme: 'tʃ' }),
-        ).toBe(true);
-      });
-
-      it('matches grapheme-only regardless of phoneme', () => {
-        expect(
-          entryMatches(city, { region: 'uk', grapheme: 'c' }),
-        ).toBe(true);
-      });
-    });
-
-    describe('syllables', () => {
-      it('matches exact count', () => {
-        expect(
-          entryMatches(cat, { region: 'uk', syllablesEq: 1 }),
-        ).toBe(true);
-        expect(
-          entryMatches(city, { region: 'uk', syllablesEq: 1 }),
-        ).toBe(false);
-        expect(
-          entryMatches(city, { region: 'uk', syllablesEq: 2 }),
-        ).toBe(true);
-      });
-
-      it('matches min/max range', () => {
-        expect(
-          entryMatches(aluminium, {
-            region: 'uk',
-            syllablesMin: 3,
-            syllablesMax: 6,
-          }),
-        ).toBe(true);
-        expect(
-          entryMatches(cat, { region: 'uk', syllablesMin: 2 }),
-        ).toBe(false);
-      });
-    });
-
-    describe('phases', () => {
-      it('matches against the selected region only', () => {
-        expect(
-          entryMatches(cat, { region: 'uk', phases: ['phase2'] }),
-        ).toBe(true);
-        expect(
-          entryMatches(cat, { region: 'aus', phases: ['phase2'] }),
-        ).toBe(false);
-        expect(
-          entryMatches(cat, { region: 'aus', phases: ['f.unit1'] }),
-        ).toBe(true);
-      });
-    });
-
-    describe('tags', () => {
-      it('or-matches any tag intersection', () => {
-        expect(
-          entryMatches(cat, { region: 'uk', tags: ['animal'] }),
-        ).toBe(true);
-        expect(
-          entryMatches(cat, { region: 'uk', tags: ['food'] }),
-        ).toBe(false);
-        expect(
-          entryMatches(cat, { region: 'uk', tags: ['food', 'animal'] }),
-        ).toBe(true);
-      });
-    });
+  it('passes valid entries', () => {
+    expect(validateEntry(core, good)).toEqual({ ok: true });
   });
-  ```
 
-- [ ] **Step 2 — Run tests to confirm they fail**
+  it('rejects grapheme mismatch', () => {
+    const bad = { ...good, graphemes: [{ g: 'c', p: 'k' }] };
+    const result = validateEntry(core, bad);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors[0]!.field).toBe('graphemes');
+    }
+  });
 
-  Run: `yarn test src/data/words/filter.test.ts`
-  Expected: fails with "Cannot find module './filter'" or equivalent.
+  it('rejects word mismatch between core and curriculum', () => {
+    const mismatched = { ...good, word: 'dog' };
+    const result = validateEntry(core, mismatched);
+    expect(result.ok).toBe(false);
+  });
 
-- [ ] **Step 3 — Create `filter.ts` with just `entryMatches`**
+  it('rejects syllables that do not join to the word', () => {
+    const badCore = {
+      word: 'cat',
+      syllableCount: 1,
+      syllables: ['ca'],
+    };
+    const result = validateEntry(badCore, good);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.some((e) => e.field === 'syllables')).toBe(
+        true,
+      );
+    }
+  });
+});
+```
 
-  ```ts
-  // src/data/words/filter.ts
-  import { ALL_REGIONS, type Region } from './types';
-  import type { Grapheme, WordEntry, WordFilter } from './types';
+- [ ] **Step 2: Run test to verify failure**
 
-  const resolvePhoneme = (g: Grapheme, region: Region): string => {
-    if (typeof g.p === 'string') return g.p;
-    return g.p[region] ?? '';
+Run: `yarn test src/data/words/builders.test.ts`
+Expected: fails on `makeCurriculumEntry` and `validateEntry` missing.
+
+- [ ] **Step 3: Implement both**
+
+Append to `src/data/words/builders.ts`:
+
+```ts
+import type { ValidationError } from './types';
+
+export const makeCurriculumEntry = (
+  word: string,
+  level: number,
+  opts: {
+    levelGraphemes: readonly string[];
+    ipa?: string;
+    graphemes?: Grapheme[];
+    phonemeByGrapheme?: Record<string, string>;
+  },
+): CurriculumEntry | null => {
+  const graphemes =
+    opts.graphemes ??
+    makeGraphemes(word, opts.levelGraphemes, opts.phonemeByGrapheme);
+  if (graphemes === null) return null;
+  return {
+    word,
+    level,
+    ipa: opts.ipa ?? graphemes.map((g) => g.p).join(''),
+    graphemes,
   };
+};
 
-  const entryRegions = (entry: WordEntry): readonly Region[] =>
-    entry.regions ?? ALL_REGIONS;
+export const validateEntry = (
+  core: WordCore,
+  curriculum: CurriculumEntry,
+): { ok: true } | { ok: false; errors: ValidationError[] } => {
+  const errors: ValidationError[] = [];
 
-  export const entryMatches = (
-    entry: WordEntry,
-    filter: WordFilter,
-  ): boolean => {
-    if (!entryRegions(entry).includes(filter.region)) return false;
+  if (core.word !== curriculum.word) {
+    errors.push({
+      field: 'word',
+      message: `core.word "${core.word}" !== curriculum.word "${curriculum.word}"`,
+    });
+  }
 
-    if (filter.syllablesEq !== undefined) {
-      if (entry.syllables.length !== filter.syllablesEq) return false;
-    }
-    if (filter.syllablesMin !== undefined) {
-      if (entry.syllables.length < filter.syllablesMin) return false;
-    }
-    if (filter.syllablesMax !== undefined) {
-      if (entry.syllables.length > filter.syllablesMax) return false;
-    }
+  if (core.syllables && core.syllables.join('') !== core.word) {
+    errors.push({
+      field: 'syllables',
+      message: `syllables.join('') "${core.syllables.join('')}" !== word "${core.word}"`,
+    });
+  }
 
-    if (filter.phases && filter.phases.length > 0) {
-      const entryPhases = entry.phases?.[filter.region] ?? [];
-      const hit = filter.phases.some((p) => entryPhases.includes(p));
-      if (!hit) return false;
-    }
+  if (core.syllables && core.syllables.length !== core.syllableCount) {
+    errors.push({
+      field: 'syllables',
+      message: `syllables.length (${core.syllables.length}) !== syllableCount (${core.syllableCount})`,
+    });
+  }
 
-    if (filter.tags && filter.tags.length > 0) {
-      const entryTags = entry.tags ?? [];
-      const hit = filter.tags.some((t) => entryTags.includes(t));
-      if (!hit) return false;
-    }
+  const concat = curriculum.graphemes
+    .map((g) => g.g.replace('_', ''))
+    .join('');
+  if (concat !== curriculum.word) {
+    errors.push({
+      field: 'graphemes',
+      message: `graphemes concat "${concat}" !== word "${curriculum.word}"`,
+    });
+  }
 
-    if (filter.grapheme !== undefined || filter.phoneme !== undefined) {
-      const match = entry.graphemes.some((g) => {
-        if (filter.grapheme !== undefined && g.g !== filter.grapheme) {
-          return false;
-        }
-        if (filter.phoneme !== undefined) {
-          if (resolvePhoneme(g, filter.region) !== filter.phoneme)
-            return false;
-        }
-        return true;
-      });
-      if (!match) return false;
-    }
+  if (!curriculum.ipa || curriculum.ipa.trim() === '') {
+    errors.push({ field: 'ipa', message: 'ipa is empty' });
+  }
 
-    return true;
-  };
-  ```
+  if (curriculum.level < 1 || !Number.isInteger(curriculum.level)) {
+    errors.push({
+      field: 'level',
+      message: `level must be a positive integer, got ${curriculum.level}`,
+    });
+  }
 
-- [ ] **Step 4 — Run tests to confirm they pass**
+  return errors.length === 0 ? { ok: true } : { ok: false, errors };
+};
+```
 
-  Run: `yarn test src/data/words/filter.test.ts`
-  Expected: all green.
+- [ ] **Step 4: Run tests**
 
-- [ ] **Step 5 — Commit**
+Run: `yarn test src/data/words/builders.test.ts`
+Expected: all green.
 
-  ```bash
-  git add src/data/words/filter.ts src/data/words/filter.test.ts
-  git commit -m "feat(words): add entryMatches filter predicate"
-  ```
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/data/words/builders.ts src/data/words/builders.test.ts
+git commit -m "feat(words): add makeCurriculumEntry + validateEntry"
+```
 
 ---
 
-### Task 4 — `toWordSpellRound` adapter + tests
+### Task 6 — Writer module (pure upsert/remove)
+
+**Files:**
+
+- Create: `src/data/words/writer.ts`
+- Create: `src/data/words/writer.test.ts`
+
+- [ ] **Step 1: Write failing tests**
+
+```ts
+// src/data/words/writer.test.ts
+import { describe, expect, it } from 'vitest';
+import {
+  upsertCurriculumEntry,
+  removeCurriculumEntry,
+  upsertWordCore,
+  removeWordCore,
+} from './writer';
+import type { CurriculumEntry, WordCore } from './types';
+
+const e = (word: string, level: number): CurriculumEntry => ({
+  word,
+  level,
+  ipa: word,
+  graphemes: word.split('').map((c) => ({ g: c, p: '' })),
+});
+
+const c = (word: string): WordCore => ({ word, syllableCount: 1 });
+
+describe('upsertCurriculumEntry', () => {
+  it('appends a new entry to an empty chunk', () => {
+    const next = upsertCurriculumEntry([], e('cat', 2));
+    expect(next).toHaveLength(1);
+    expect(next[0]!.word).toBe('cat');
+  });
+
+  it('replaces an existing entry matched by word', () => {
+    const before = [e('cat', 2)];
+    const updated = { ...e('cat', 2), ipa: 'kæt' };
+    const after = upsertCurriculumEntry(before, updated);
+    expect(after).toHaveLength(1);
+    expect(after[0]!.ipa).toBe('kæt');
+  });
+
+  it('sorts alphabetically so output is deterministic', () => {
+    const chunk = upsertCurriculumEntry(
+      [e('pin', 2), e('cat', 2)],
+      e('bat', 2),
+    );
+    expect(chunk.map((x) => x.word)).toEqual(['bat', 'cat', 'pin']);
+  });
+});
+
+describe('removeCurriculumEntry', () => {
+  it('removes a matching word', () => {
+    const chunk = [e('cat', 2), e('dog', 2)];
+    const after = removeCurriculumEntry(chunk, 'cat');
+    expect(after.map((x) => x.word)).toEqual(['dog']);
+  });
+
+  it('is idempotent when the word is absent', () => {
+    const chunk = [e('cat', 2)];
+    const after = removeCurriculumEntry(chunk, 'zebra');
+    expect(after).toEqual(chunk);
+  });
+});
+
+describe('upsertWordCore + removeWordCore', () => {
+  it('upserts by word', () => {
+    const chunk = upsertWordCore([c('cat')], {
+      ...c('cat'),
+      syllables: ['cat'],
+    });
+    expect(chunk[0]!.syllables).toEqual(['cat']);
+  });
+
+  it('removes by word', () => {
+    const chunk = removeWordCore([c('cat'), c('dog')], 'cat');
+    expect(chunk.map((x) => x.word)).toEqual(['dog']);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify failure**
+
+Run: `yarn test src/data/words/writer.test.ts`
+Expected: fails — module missing.
+
+- [ ] **Step 3: Implement `writer.ts`**
+
+```ts
+// src/data/words/writer.ts
+import type { CurriculumEntry, WordCore } from './types';
+
+const byWord = <T extends { word: string }>(a: T, b: T): number =>
+  a.word.localeCompare(b.word);
+
+export const upsertCurriculumEntry = (
+  chunk: readonly CurriculumEntry[],
+  entry: CurriculumEntry,
+): CurriculumEntry[] => {
+  const next = chunk.filter((e) => e.word !== entry.word);
+  next.push(entry);
+  return next.toSorted(byWord);
+};
+
+export const removeCurriculumEntry = (
+  chunk: readonly CurriculumEntry[],
+  word: string,
+): CurriculumEntry[] =>
+  chunk.filter((e) => e.word !== word).toSorted(byWord);
+
+export const upsertWordCore = (
+  chunk: readonly WordCore[],
+  entry: WordCore,
+): WordCore[] => {
+  const next = chunk.filter((e) => e.word !== entry.word);
+  next.push(entry);
+  return next.toSorted(byWord);
+};
+
+export const removeWordCore = (
+  chunk: readonly WordCore[],
+  word: string,
+): WordCore[] => chunk.filter((e) => e.word !== word).toSorted(byWord);
+```
+
+- [ ] **Step 4: Run tests**
+
+Run: `yarn test src/data/words/writer.test.ts`
+Expected: all green.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/data/words/writer.ts src/data/words/writer.test.ts
+git commit -m "feat(words): add pure writer helpers"
+```
+
+---
+
+### Task 7 — Invariant harness (empty-chunks stub)
+
+**Files:**
+
+- Create: `src/data/words/words.test.ts`
+
+- [ ] **Step 1: Write the harness**
+
+The test walks the chunks directory lazily — chunks may not exist yet
+(codegen runs in Task 9). Use `import.meta.glob` with `eager: true` so
+vitest picks up whatever JSON lives under `core/` and `curriculum/<region>/`
+at test time.
+
+```ts
+// src/data/words/words.test.ts
+import { describe, expect, it } from 'vitest';
+import type { CurriculumEntry, Region, WordCore } from './types';
+import { ALL_REGIONS } from './levels';
+
+const coreChunks = import.meta.glob<{ default: WordCore[] }>(
+  './core/level*.json',
+  { eager: true },
+);
+const curriculumChunks = import.meta.glob<{
+  default: CurriculumEntry[];
+}>('./curriculum/*/level*.json', { eager: true });
+
+const coreByLevel: Record<number, WordCore[]> = {};
+for (const [path, mod] of Object.entries(coreChunks)) {
+  const match = /level(\d+)\.json$/.exec(path);
+  if (!match) continue;
+  coreByLevel[Number(match[1])] = mod.default;
+}
+
+interface CurriculumFile {
+  region: Region;
+  level: number;
+  entries: CurriculumEntry[];
+}
+
+const curriculumFiles: CurriculumFile[] = [];
+for (const [path, mod] of Object.entries(curriculumChunks)) {
+  const match = /curriculum\/(\w+)\/level(\d+)\.json$/.exec(path);
+  if (!match) continue;
+  const region = match[1] as Region;
+  if (!ALL_REGIONS.includes(region)) continue;
+  curriculumFiles.push({
+    region,
+    level: Number(match[2]),
+    entries: mod.default,
+  });
+}
+
+describe('word library invariants', () => {
+  it('has at most one core entry per (word, level)', () => {
+    for (const [level, entries] of Object.entries(coreByLevel)) {
+      const seen = new Set<string>();
+      for (const e of entries) {
+        expect(seen.has(e.word)).toBe(false);
+        seen.add(e.word);
+      }
+      expect(level).toBeDefined();
+    }
+  });
+
+  it('WordCore.syllables joins to word when present', () => {
+    for (const entries of Object.values(coreByLevel)) {
+      for (const e of entries) {
+        if (e.syllables) {
+          expect(e.syllables.join('')).toBe(e.word);
+          expect(e.syllables.length).toBe(e.syllableCount);
+        }
+      }
+    }
+  });
+
+  it('CurriculumEntry.graphemes joins to word', () => {
+    for (const { entries } of curriculumFiles) {
+      for (const e of entries) {
+        const concat = e.graphemes
+          .map((g) => g.g.replace('_', ''))
+          .join('');
+        expect(concat).toBe(e.word);
+      }
+    }
+  });
+
+  it('CurriculumEntry has a matching WordCore in the same level', () => {
+    for (const { level, entries } of curriculumFiles) {
+      const coreWords = new Set(
+        (coreByLevel[level] ?? []).map((c) => c.word),
+      );
+      for (const e of entries) {
+        expect(coreWords.has(e.word)).toBe(true);
+      }
+    }
+  });
+
+  it('CurriculumEntry.level matches the filename level', () => {
+    for (const { level, entries } of curriculumFiles) {
+      for (const e of entries) expect(e.level).toBe(level);
+    }
+  });
+
+  it('variants are bidirectional', () => {
+    const allCore = Object.values(coreByLevel).flat();
+    const byWord = new Map(allCore.map((c) => [c.word, c]));
+    for (const c of allCore) {
+      for (const v of c.variants ?? []) {
+        const linked = byWord.get(v);
+        expect(linked, `variant "${v}" missing`).toBeDefined();
+        expect(linked!.variants?.includes(c.word)).toBe(true);
+      }
+    }
+  });
+
+  it('no proper nouns (first letter must be lowercase)', () => {
+    for (const entries of Object.values(coreByLevel)) {
+      for (const e of entries) {
+        expect(e.word[0]).toBe(e.word[0]!.toLowerCase());
+      }
+    }
+  });
+});
+```
+
+- [ ] **Step 2: Run the harness**
+
+Run: `yarn test src/data/words/words.test.ts`
+Expected: passes vacuously (no chunks exist yet; the `for` loops find
+nothing). All `it` blocks still execute.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/data/words/words.test.ts
+git commit -m "feat(words): add invariant harness over chunk files"
+```
+
+---
+
+### Task 8 — Codegen script
+
+**Files:**
+
+- Create: `scripts/seed-word-library.ts`
+- Modify: `package.json` (add `word:seed` script + tsx devDep if missing)
+
+- [ ] **Step 1: Confirm `tsx` availability**
+
+Run: `yarn tsx --version`
+Expected: prints a version. If it fails, run
+`yarn add -D tsx` and re-run.
+
+- [ ] **Step 2: Write `scripts/seed-word-library.ts`**
+
+```ts
+// scripts/seed-word-library.ts
+/* eslint-disable no-console */
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import {
+  makeCurriculumEntry,
+  makeWordCore,
+  validateEntry,
+} from '../src/data/words/builders';
+import {
+  cumulativeGraphemes,
+  GRAPHEMES_BY_LEVEL,
+} from '../src/data/words/levels';
+import type {
+  CurriculumEntry,
+  WordCore,
+} from '../src/data/words/types';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const repoRoot = join(__dirname, '..');
+const sourceFile = join(
+  repoRoot,
+  'docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md',
+);
+const wordsDir = join(repoRoot, 'src/data/words');
+const reviewFile = join(
+  repoRoot,
+  'docs/superpowers/plans/2026-04-11-phonics-word-library_codegen-review.md',
+);
+
+interface LevelBlock {
+  level: number;
+  graphemes: string[];
+  words: string[];
+}
+
+const parseSource = (md: string): LevelBlock[] => {
+  const blocks: LevelBlock[] = [];
+  const levelRegex = /##\s+level\s+(\d+)/gi;
+  const matches = [...md.matchAll(levelRegex)];
+  for (let i = 0; i < matches.length; i++) {
+    const match = matches[i]!;
+    const level = Number(match[1]);
+    const start = match.index! + match[0].length;
+    const end =
+      i + 1 < matches.length ? matches[i + 1]!.index! : md.length;
+    const chunk = md.slice(start, end);
+    const wordsLine = /\*\s+words:\s+\[([^\]]+)\]/i.exec(chunk);
+    if (!wordsLine) continue;
+    const words = wordsLine[1]!
+      .split(',')
+      .map((w) => w.trim())
+      .filter(Boolean);
+    blocks.push({
+      level,
+      graphemes: [...(GRAPHEMES_BY_LEVEL[level] ?? [])],
+      words,
+    });
+  }
+  return blocks;
+};
+
+const isProperNoun = (word: string): boolean => /^[A-Z]/.test(word);
+
+interface SeedResult {
+  coreByLevel: Map<number, WordCore[]>;
+  curriculumByLevel: Map<number, CurriculumEntry[]>;
+  review: string[];
+}
+
+const seed = (blocks: LevelBlock[]): SeedResult => {
+  const coreByLevel = new Map<number, WordCore[]>();
+  const curriculumByLevel = new Map<number, CurriculumEntry[]>();
+  const review: string[] = [];
+  const seen = new Map<string, number>(); // word → level first assigned
+
+  for (const block of blocks) {
+    const pool = cumulativeGraphemes(block.level);
+    for (const rawWord of block.words) {
+      if (isProperNoun(rawWord)) continue;
+      const word = rawWord.toLowerCase();
+      if (seen.has(word)) continue; // dedup: first level wins
+      seen.set(word, block.level);
+
+      const core = makeWordCore(word);
+      if (!coreByLevel.has(block.level))
+        coreByLevel.set(block.level, []);
+      coreByLevel.get(block.level)!.push(core);
+
+      const entry = makeCurriculumEntry(word, block.level, {
+        levelGraphemes: pool,
+      });
+
+      if (entry === null) {
+        review.push(
+          `- \`${word}\` (level ${block.level}) — could not derive graphemes from set [${pool.join(', ')}]`,
+        );
+        continue;
+      }
+
+      const v = validateEntry(core, entry);
+      if (!v.ok) {
+        review.push(
+          `- \`${word}\` (level ${block.level}) — ${v.errors.map((e) => e.message).join('; ')}`,
+        );
+        continue;
+      }
+
+      if (!curriculumByLevel.has(block.level))
+        curriculumByLevel.set(block.level, []);
+      curriculumByLevel.get(block.level)!.push(entry);
+    }
+  }
+
+  // Deterministic output: alphabetical by word.
+  for (const arr of coreByLevel.values())
+    arr.sort((a, b) => a.word.localeCompare(b.word));
+  for (const arr of curriculumByLevel.values())
+    arr.sort((a, b) => a.word.localeCompare(b.word));
+
+  return { coreByLevel, curriculumByLevel, review };
+};
+
+const writeJson = (path: string, data: unknown): void => {
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, JSON.stringify(data, null, 2) + '\n', 'utf-8');
+};
+
+const writeStub = (region: string): void => {
+  const path = join(wordsDir, 'curriculum', region, '.gitkeep');
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, '', 'utf-8');
+};
+
+const main = (): void => {
+  const md = readFileSync(sourceFile, 'utf-8');
+  const blocks = parseSource(md);
+  const { coreByLevel, curriculumByLevel, review } = seed(blocks);
+
+  for (const [level, entries] of coreByLevel.entries()) {
+    writeJson(join(wordsDir, 'core', `level${level}.json`), entries);
+  }
+  for (const [level, entries] of curriculumByLevel.entries()) {
+    writeJson(
+      join(wordsDir, 'curriculum', 'aus', `level${level}.json`),
+      entries,
+    );
+  }
+
+  for (const region of ['uk', 'us', 'br']) writeStub(region);
+
+  const reviewMd = [
+    '# Phonics Library Codegen Review',
+    '',
+    '> Auto-generated by `scripts/seed-word-library.ts`. This lists words',
+    '> that could not be auto-enriched with Tier 2 data (IPA + graphemes)',
+    '> during seeding. Each entry needs hand-review, typically via P2',
+    '> (the dev authoring form) once it lands.',
+    '',
+    `Total flagged: **${review.length}**`,
+    '',
+    ...review,
+    '',
+  ].join('\n');
+  writeFileSync(reviewFile, reviewMd, 'utf-8');
+
+  const coreTotal = [...coreByLevel.values()].reduce(
+    (n, arr) => n + arr.length,
+    0,
+  );
+  const curriculumTotal = [...curriculumByLevel.values()].reduce(
+    (n, arr) => n + arr.length,
+    0,
+  );
+  console.log(
+    `Seeded ${coreTotal} core words; ${curriculumTotal} enriched AUS curriculum entries; ${review.length} flagged for review.`,
+  );
+};
+
+main();
+```
+
+- [ ] **Step 3: Add script to `package.json`**
+
+Edit `package.json` — add under `"scripts"`:
+
+```json
+"word:seed": "tsx scripts/seed-word-library.ts"
+```
+
+- [ ] **Step 4: Commit the script (chunks come in Task 9)**
+
+```bash
+git add scripts/seed-word-library.ts package.json
+git commit -m "feat(words): add seed codegen script"
+```
+
+---
+
+### Task 9 — Run codegen and commit chunks
+
+**Files:**
+
+- Create: `src/data/words/core/level{1..8}.json`
+- Create: `src/data/words/curriculum/aus/level{1..8}.json`
+- Create: `src/data/words/curriculum/{uk,us,br}/.gitkeep`
+- Create: `docs/superpowers/plans/2026-04-11-phonics-word-library_codegen-review.md`
+
+- [ ] **Step 1: Run the codegen**
+
+Run: `yarn word:seed`
+Expected: console prints e.g. `Seeded 612 core words; 481 enriched AUS
+curriculum entries; 131 flagged for review.` Exact numbers depend on the
+word list and the grapheme-set completeness.
+
+- [ ] **Step 2: Run the invariant harness**
+
+Run: `yarn test src/data/words/words.test.ts`
+Expected: all assertions pass against the newly seeded chunks. If any fail,
+fix the **codegen script** (not the JSON files by hand) and re-run.
+
+- [ ] **Step 3: Run Prettier over the new JSON**
+
+Run: `npx prettier --write "src/data/words/**/*.json"`
+Expected: files are already JSON-formatted; Prettier may only adjust
+trailing whitespace.
+
+- [ ] **Step 4: Spot-check a few chunks**
+
+Open `src/data/words/core/level1.json` and confirm:
+
+- All entries lowercase
+- Every entry has `word` + `syllableCount`
+- No `Nat`, `Sam`, etc.
+
+Open `src/data/words/curriculum/aus/level4.json` and confirm a word like
+`ship` is present with `graphemes: [{g:"sh",p:""},{g:"i",p:""},{g:"p",p:""}]`
+(phonemes are empty strings because Tier-2 IPA is not yet filled — the
+codegen only derives graphemes; IPA defaults to the empty concat).
+
+> **Note:** The codegen leaves `ipa` as the join of empty phonemes, which
+> fails `validateEntry`'s "ipa is empty" check. That means **all** entries
+> are flagged for review in the initial pass. That is expected behavior —
+> Tier 2 IPA lands later via P2's authoring form. For this reason,
+> [Step 5 below] relaxes the codegen to emit Tier-1-only entries for all
+> words and defer Tier 2 entirely.
+
+- [ ] **Step 5: Adjust codegen to emit Tier-1-only entries**
+
+The empty-IPA edge case makes every entry fail validation, which defeats
+the split. Update `scripts/seed-word-library.ts` and the validator:
+
+1. Remove the "ipa is empty" check from `validateEntry` — IPA presence is a
+   Tier-2 concern that will be enforced by P2's authoring form and by an
+   explicit Tier-2 coverage report (future work), not by the base validator.
+2. Inside `seed()`, after `makeCurriculumEntry` returns non-null, emit the
+   curriculum row with `ipa: ''` (Tier 1 only) and log the word to the
+   review file so P2 can backfill IPA later.
+
+Replace the relevant block in `seed()` with:
+
+```ts
+if (entry === null) {
+  review.push(
+    `- \`${word}\` (level ${block.level}) — could not derive graphemes from set [${pool.join(', ')}]`,
+  );
+  continue;
+}
+
+// Tier 1 ships now; Tier 2 IPA is added later via P2.
+// Emit the curriculum row without `ipa` — consumers treat Tier-2 fields as optional.
+const tier1Entry: CurriculumEntry = {
+  word: entry.word,
+  level: entry.level,
+  ipa: '',
+  graphemes: entry.graphemes,
+};
+
+if (!curriculumByLevel.has(block.level))
+  curriculumByLevel.set(block.level, []);
+curriculumByLevel.get(block.level)!.push(tier1Entry);
+
+if (!entry.graphemes.every((g) => g.p !== '')) {
+  review.push(
+    `- \`${word}\` (level ${block.level}) — Tier 2 needed: IPA + phonemes`,
+  );
+}
+```
+
+Then update `validateEntry` in `src/data/words/builders.ts` — delete this
+block entirely:
+
+```ts
+if (!curriculum.ipa || curriculum.ipa.trim() === '') {
+  errors.push({ field: 'ipa', message: 'ipa is empty' });
+}
+```
+
+`CurriculumEntry.ipa` is already typed `string` (Task 1), so no type
+changes are needed. The builders test from Task 5 (`'passes valid entries'`)
+still passes because that case uses a populated IPA.
+
+- [ ] **Step 6: Re-run codegen**
+
+Run: `yarn word:seed && yarn test src/data/words/`
+Expected: invariant harness passes. The codegen review file lists roughly
+all words (Tier 1 → Tier 2 is future work).
+
+- [ ] **Step 7: Commit chunks + script adjustments**
+
+```bash
+git add src/data/words/core \
+        src/data/words/curriculum \
+        src/data/words/types.ts \
+        src/data/words/builders.ts \
+        src/data/words/builders.test.ts \
+        scripts/seed-word-library.ts \
+        docs/superpowers/plans/2026-04-11-phonics-word-library_codegen-review.md
+git commit -m "feat(words): seed ~650-word AUS corpus via codegen"
+```
+
+---
+
+### Task 10 — Filter: pure `entryMatches`
+
+**Files:**
+
+- Create: `src/data/words/filter.ts`
+- Create: `src/data/words/filter.test.ts`
+
+- [ ] **Step 1: Write failing tests for `entryMatches`**
+
+```ts
+// src/data/words/filter.test.ts
+import { describe, expect, it } from 'vitest';
+import { entryMatches } from './filter';
+import type { WordHit } from './types';
+
+const hit = (overrides: Partial<WordHit> = {}): WordHit => ({
+  word: 'cat',
+  region: 'aus',
+  level: 2,
+  syllableCount: 1,
+  graphemes: [
+    { g: 'c', p: 'k' },
+    { g: 'a', p: 'æ' },
+    { g: 't', p: 't' },
+  ],
+  ...overrides,
+});
+
+describe('entryMatches', () => {
+  it('matches by exact level', () => {
+    expect(entryMatches(hit(), { region: 'aus', level: 2 })).toBe(true);
+    expect(entryMatches(hit(), { region: 'aus', level: 3 })).toBe(
+      false,
+    );
+  });
+
+  it('matches by levels[]', () => {
+    expect(
+      entryMatches(hit(), { region: 'aus', levels: [1, 2, 3] }),
+    ).toBe(true);
+    expect(entryMatches(hit(), { region: 'aus', levels: [4, 5] })).toBe(
+      false,
+    );
+  });
+
+  it('matches by levelRange', () => {
+    expect(
+      entryMatches(hit(), { region: 'aus', levelRange: [1, 3] }),
+    ).toBe(true);
+    expect(
+      entryMatches(hit(), { region: 'aus', levelRange: [3, 5] }),
+    ).toBe(false);
+  });
+
+  it('matches syllableCountEq and syllableCountRange', () => {
+    expect(
+      entryMatches(hit(), { region: 'aus', syllableCountEq: 1 }),
+    ).toBe(true);
+    expect(
+      entryMatches(hit({ syllableCount: 3 }), {
+        region: 'aus',
+        syllableCountRange: [2, 4],
+      }),
+    ).toBe(true);
+  });
+
+  it('graphemesAllowed: passes only when every grapheme is in the set', () => {
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesAllowed: ['c', 'a', 't'],
+      }),
+    ).toBe(true);
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesAllowed: ['c', 'a'], // missing 't'
+      }),
+    ).toBe(false);
+  });
+
+  it('graphemesRequired: passes when at least one required is present', () => {
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesRequired: ['c'],
+      }),
+    ).toBe(true);
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesRequired: ['sh'],
+      }),
+    ).toBe(false);
+  });
+
+  it('phonemesAllowed + Required: "c making /k/" case', () => {
+    // cat: c/k, a/æ, t/t
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesRequired: ['c'],
+        phonemesRequired: ['k'],
+      }),
+    ).toBe(true);
+
+    // city: c/s, i/ɪ, t/t, y/i — has 'c' but no /k/
+    const city: WordHit = {
+      word: 'city',
+      region: 'aus',
+      level: 4,
+      syllableCount: 2,
+      graphemes: [
+        { g: 'c', p: 's' },
+        { g: 'i', p: 'ɪ' },
+        { g: 't', p: 't' },
+        { g: 'y', p: 'i' },
+      ],
+    };
+    expect(
+      entryMatches(city, {
+        region: 'aus',
+        graphemesRequired: ['c'],
+        phonemesRequired: ['k'],
+      }),
+    ).toBe(false);
+  });
+
+  it('excludes Tier-1-only words from Tier-2 filters', () => {
+    const tier1: WordHit = {
+      word: 'cat',
+      region: 'aus',
+      level: 2,
+      syllableCount: 1,
+      // no graphemes
+    };
+    expect(
+      entryMatches(tier1, {
+        region: 'aus',
+        graphemesAllowed: ['c', 'a', 't'],
+      }),
+    ).toBe(false);
+    expect(entryMatches(tier1, { region: 'aus', level: 2 })).toBe(true);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify failure**
+
+Run: `yarn test src/data/words/filter.test.ts`
+Expected: fails — `entryMatches` not exported.
+
+- [ ] **Step 3: Implement `entryMatches`**
+
+```ts
+// src/data/words/filter.ts
+import type { WordFilter, WordHit } from './types';
+
+const inRange = (
+  n: number,
+  [min, max]: readonly [number, number],
+): boolean => n >= min && n <= max;
+
+export const entryMatches = (
+  hit: WordHit,
+  filter: WordFilter,
+): boolean => {
+  if (hit.region !== filter.region) return false;
+
+  if (filter.level !== undefined && hit.level !== filter.level)
+    return false;
+  if (filter.levels && !filter.levels.includes(hit.level)) return false;
+  if (filter.levelRange && !inRange(hit.level, filter.levelRange))
+    return false;
+
+  if (
+    filter.syllableCountEq !== undefined &&
+    hit.syllableCount !== filter.syllableCountEq
+  )
+    return false;
+  if (
+    filter.syllableCountRange &&
+    !inRange(hit.syllableCount, filter.syllableCountRange)
+  )
+    return false;
+
+  const tier2Active =
+    filter.graphemesAllowed !== undefined ||
+    filter.graphemesRequired !== undefined ||
+    filter.phonemesAllowed !== undefined ||
+    filter.phonemesRequired !== undefined;
+
+  if (tier2Active && !hit.graphemes) return false;
+
+  if (hit.graphemes) {
+    if (filter.graphemesAllowed) {
+      const allowed = new Set(filter.graphemesAllowed);
+      if (!hit.graphemes.every((g) => allowed.has(g.g))) return false;
+    }
+    if (filter.graphemesRequired) {
+      const required = new Set(filter.graphemesRequired);
+      if (!hit.graphemes.some((g) => required.has(g.g))) return false;
+    }
+    if (filter.phonemesAllowed) {
+      const allowed = new Set(filter.phonemesAllowed);
+      if (!hit.graphemes.every((g) => allowed.has(g.p))) return false;
+    }
+    if (filter.phonemesRequired) {
+      const required = new Set(filter.phonemesRequired);
+      if (!hit.graphemes.some((g) => required.has(g.p))) return false;
+    }
+  }
+
+  return true;
+};
+```
+
+- [ ] **Step 4: Run tests**
+
+Run: `yarn test src/data/words/filter.test.ts`
+Expected: all green.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/data/words/filter.ts src/data/words/filter.test.ts
+git commit -m "feat(words): add entryMatches pure filter predicate"
+```
+
+---
+
+### Task 11 — Filter: async `filterWords` with two-file join + AUS fallback
+
+**Files:**
+
+- Modify: `src/data/words/filter.ts`
+- Modify: `src/data/words/filter.test.ts`
+
+- [ ] **Step 1: Append failing integration tests**
+
+```ts
+// append to src/data/words/filter.test.ts
+import { afterEach, beforeEach } from 'vitest';
+import { __resetChunkCacheForTests, filterWords } from './filter';
+
+describe('filterWords (integration against seeded chunks)', () => {
+  beforeEach(() => __resetChunkCacheForTests());
+  afterEach(() => __resetChunkCacheForTests());
+
+  it('returns AUS level 1 hits', async () => {
+    const result = await filterWords({ region: 'aus', level: 1 });
+    expect(result.hits.length).toBeGreaterThan(0);
+    for (const hit of result.hits) {
+      expect(hit.level).toBe(1);
+      expect(hit.region).toBe('aus');
+    }
+    expect(result.usedFallback).toBeUndefined();
+  });
+
+  it('joins WordCore + CurriculumEntry (hit has syllableCount)', async () => {
+    const result = await filterWords({ region: 'aus', level: 1 });
+    expect(result.hits[0]!.syllableCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it('Tier-2 filter excludes Tier-1-only words', async () => {
+    const result = await filterWords({
+      region: 'aus',
+      levels: [1, 2],
+      graphemesAllowed: [
+        's',
+        'a',
+        't',
+        'p',
+        'i',
+        'n',
+        'm',
+        'd',
+        'g',
+        'o',
+      ],
+    });
+    for (const hit of result.hits) {
+      // Every grapheme must be in the allowed set
+      for (const g of hit.graphemes ?? []) {
+        expect([
+          's',
+          'a',
+          't',
+          'p',
+          'i',
+          'n',
+          'm',
+          'd',
+          'g',
+          'o',
+        ]).toContain(g.g);
+      }
+    }
+  });
+
+  it('falls back to AUS when UK has no data', async () => {
+    const result = await filterWords({ region: 'uk', level: 1 });
+    expect(result.hits.length).toBeGreaterThan(0);
+    expect(result.usedFallback).toEqual({ from: 'uk', to: 'aus' });
+  });
+
+  it('respects fallbackToAus: false', async () => {
+    const result = await filterWords({
+      region: 'uk',
+      level: 1,
+      fallbackToAus: false,
+    });
+    expect(result.hits).toHaveLength(0);
+    expect(result.usedFallback).toBeUndefined();
+  });
+});
+```
+
+- [ ] **Step 2: Run test to confirm failure**
+
+Run: `yarn test src/data/words/filter.test.ts`
+Expected: fails — `filterWords` not exported.
+
+- [ ] **Step 3: Implement `filterWords` + cache + AUS fallback**
+
+Append to `src/data/words/filter.ts`:
+
+```ts
+import type {
+  CurriculumEntry,
+  FilterResult,
+  Region,
+  WordCore,
+  WordHit,
+} from './types';
+import { ALL_REGIONS } from './levels';
+
+const coreLoaders = import.meta.glob<{ default: WordCore[] }>(
+  './core/level*.json',
+);
+const ausLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+  './curriculum/aus/level*.json',
+);
+const ukLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+  './curriculum/uk/level*.json',
+);
+const usLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+  './curriculum/us/level*.json',
+);
+const brLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+  './curriculum/br/level*.json',
+);
+
+const loadersForRegion = (
+  region: Region,
+): Record<string, () => Promise<{ default: CurriculumEntry[] }>> => {
+  switch (region) {
+    case 'aus':
+      return ausLoaders;
+    case 'uk':
+      return ukLoaders;
+    case 'us':
+      return usLoaders;
+    case 'br':
+      return brLoaders;
+  }
+};
+
+let coreCache: Map<string, WordCore> | null = null;
+const curriculumCache: Partial<Record<Region, CurriculumEntry[]>> = {};
+
+export const __resetChunkCacheForTests = (): void => {
+  coreCache = null;
+  for (const r of ALL_REGIONS) delete curriculumCache[r];
+};
+
+const loadCore = async (): Promise<Map<string, WordCore>> => {
+  if (coreCache) return coreCache;
+  const map = new Map<string, WordCore>();
+  const chunks = await Promise.all(
+    Object.values(coreLoaders).map((load) => load()),
+  );
+  for (const chunk of chunks) {
+    for (const entry of chunk.default) map.set(entry.word, entry);
+  }
+  coreCache = map;
+  return map;
+};
+
+const loadCurriculum = async (
+  region: Region,
+): Promise<CurriculumEntry[]> => {
+  if (curriculumCache[region]) return curriculumCache[region]!;
+  const chunks = await Promise.all(
+    Object.values(loadersForRegion(region)).map((load) => load()),
+  );
+  const flat = chunks.flatMap((c) => c.default);
+  curriculumCache[region] = flat;
+  return flat;
+};
+
+const joinHits = (
+  curriculum: CurriculumEntry[],
+  core: Map<string, WordCore>,
+  region: Region,
+): WordHit[] =>
+  curriculum.flatMap((entry) => {
+    const c = core.get(entry.word);
+    if (!c) return [];
+    return [
+      {
+        word: entry.word,
+        region,
+        level: entry.level,
+        syllableCount: c.syllableCount,
+        syllables: c.syllables,
+        variants: c.variants,
+        ipa: entry.ipa || undefined,
+        graphemes: entry.graphemes,
+      } as WordHit,
+    ];
+  });
+
+export const filterWords = async (
+  filter: WordFilter,
+): Promise<FilterResult> => {
+  const core = await loadCore();
+  const curriculum = await loadCurriculum(filter.region);
+  const hits = joinHits(curriculum, core, filter.region).filter((h) =>
+    entryMatches(h, filter),
+  );
+
+  if (
+    hits.length > 0 ||
+    filter.region === 'aus' ||
+    filter.fallbackToAus === false
+  ) {
+    return { hits };
+  }
+
+  const ausCurriculum = await loadCurriculum('aus');
+  const ausHits = joinHits(ausCurriculum, core, 'aus').filter((h) =>
+    entryMatches(h, { ...filter, region: 'aus' }),
+  );
+  return {
+    hits: ausHits,
+    usedFallback: { from: filter.region, to: 'aus' },
+  };
+};
+```
+
+- [ ] **Step 4: Run tests**
+
+Run: `yarn test src/data/words/filter.test.ts`
+Expected: all green.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/data/words/filter.ts src/data/words/filter.test.ts
+git commit -m "feat(words): add filterWords with two-file join + AUS fallback"
+```
+
+---
+
+### Task 12 — Adapter `toWordSpellRound`
 
 **Files:**
 
 - Create: `src/data/words/adapters.ts`
 - Create: `src/data/words/adapters.test.ts`
 
-- [ ] **Step 1 — Write failing adapter test**
-
-  ```ts
-  // src/data/words/adapters.test.ts
-  import { describe, expect, it } from 'vitest';
-  import { toWordSpellRound } from './adapters';
-  import type { WordEntry } from './types';
-
-  describe('toWordSpellRound', () => {
-    it('joins syllables with dash so syllable mode splits correctly', () => {
-      const entry: WordEntry = {
-        word: 'sunset',
-        syllables: ['sun', 'set'],
-        ipa: '/ˈsʌnsɛt/',
-        graphemes: [
-          { g: 's', p: 's' },
-          { g: 'u', p: 'ʌ' },
-          { g: 'n', p: 'n' },
-          { g: 's', p: 's' },
-          { g: 'e', p: 'ɛ' },
-          { g: 't', p: 't' },
-        ],
-      };
-      expect(toWordSpellRound(entry)).toEqual({ word: 'sun-set' });
-    });
-
-    it('passes single-syllable words through without a dash', () => {
-      const entry: WordEntry = {
-        word: 'cat',
-        syllables: ['cat'],
-        ipa: '/kæt/',
-        graphemes: [
-          { g: 'c', p: 'k' },
-          { g: 'a', p: 'æ' },
-          { g: 't', p: 't' },
-        ],
-      };
-      expect(toWordSpellRound(entry)).toEqual({ word: 'cat' });
-    });
-  });
-  ```
-
-- [ ] **Step 2 — Run test to confirm it fails**
-
-  Run: `yarn test src/data/words/adapters.test.ts`
-  Expected: fails with missing module.
-
-- [ ] **Step 3 — Create `adapters.ts`**
-
-  ```ts
-  // src/data/words/adapters.ts
-  import type { WordEntry } from './types';
-  import type { WordSpellRound } from '@/games/word-spell/types';
-
-  /**
-   * Join syllables with '-' so WordSpell's existing syllable-mode split regex
-   * at WordSpell.tsx renders chunks correctly. Letter mode strips the dash
-   * via the same regex.
-   */
-  export const toWordSpellRound = (
-    entry: WordEntry,
-  ): WordSpellRound => ({
-    word: entry.syllables.join('-'),
-  });
-  ```
-
-- [ ] **Step 4 — Run tests**
-
-  Run: `yarn test src/data/words/adapters.test.ts`
-  Expected: green.
-
-- [ ] **Step 5 — Re-export from `index.ts`**
-
-  Append to `src/data/words/index.ts`:
-
-  ```ts
-  export { toWordSpellRound } from './adapters';
-  ```
-
-- [ ] **Step 6 — Commit**
-
-  ```bash
-  git add src/data/words/adapters.ts src/data/words/adapters.test.ts src/data/words/index.ts
-  git commit -m "feat(words): add toWordSpellRound adapter"
-  ```
-
----
-
-### Task 5 — Chunk invariant harness (runs before any chunks exist)
-
-**Files:**
-
-- Create: `src/data/words/words.test.ts`
-- Create: `src/data/words/chunks/.gitkeep` (empty placeholder so the dir exists)
-
-- [ ] **Step 1 — Create empty chunks dir**
-
-  ```bash
-  mkdir -p src/data/words/chunks
-  touch src/data/words/chunks/.gitkeep
-  ```
-
-- [ ] **Step 2 — Create `words.test.ts`**
-
-  ```ts
-  // src/data/words/words.test.ts
-  import { readdirSync, readFileSync, existsSync } from 'node:fs';
-  import { join } from 'node:path';
-  import { describe, expect, it } from 'vitest';
-  import { ALL_REGIONS, type Region } from './types';
-  import type { Grapheme, WordEntry } from './types';
-  import { PHASES } from './phases';
-
-  const chunksDir = join(__dirname, 'chunks');
-
-  const chunks = existsSync(chunksDir)
-    ? readdirSync(chunksDir).filter((f) => f.endsWith('.json'))
-    : [];
-
-  const loadChunk = (file: string): WordEntry[] =>
-    JSON.parse(
-      readFileSync(join(chunksDir, file), 'utf-8'),
-    ) as WordEntry[];
-
-  const regionsOf = (entry: WordEntry): readonly Region[] =>
-    entry.regions ?? ALL_REGIONS;
-
-  // Gather every entry up front so cross-chunk checks (variants backlink,
-  // duplicate surface spelling) can see everything.
-  const everyEntry: Array<{ chunk: string; entry: WordEntry }> =
-    chunks.flatMap((chunk) =>
-      loadChunk(chunk).map((entry) => ({ chunk, entry })),
-    );
-
-  describe('word library chunks', () => {
-    it('has at least one chunk once seeding begins', () => {
-      // Intentionally permissive while the harness is scaffolding. Chunk
-      // tasks flip this to toBeGreaterThan(0) once core.json lands.
-      expect(chunks.length).toBeGreaterThanOrEqual(0);
-    });
-
-    describe.each(chunks)('chunk %s', (chunkFile) => {
-      const entries = loadChunk(chunkFile);
-
-      it.each(entries.map((e) => [e.word, e] as const))(
-        '"%s" — syllables.join() === word',
-        (_, entry) => {
-          expect(entry.syllables.join('')).toBe(entry.word);
-        },
-      );
-
-      it.each(entries.map((e) => [e.word, e] as const))(
-        '"%s" — graphemes concatenate to word',
-        (_, entry) => {
-          expect(entry.graphemes.map((g) => g.g).join('')).toBe(
-            entry.word,
-          );
-        },
-      );
-
-      it.each(entries.map((e) => [e.word, e] as const))(
-        '"%s" — ipa object covers every region in regions',
-        (_, entry) => {
-          if (typeof entry.ipa === 'string') return;
-          for (const region of regionsOf(entry)) {
-            expect(entry.ipa[region]).toBeDefined();
-          }
-        },
-      );
-
-      it.each(entries.map((e) => [e.word, e] as const))(
-        '"%s" — per-region grapheme phonemes cover every region',
-        (_, entry) => {
-          for (const g of entry.graphemes) {
-            if (typeof g.p === 'string') continue;
-            for (const region of regionsOf(entry)) {
-              expect(g.p[region]).toBeDefined();
-            }
-          }
-        },
-      );
-
-      it.each(entries.map((e) => [e.word, e] as const))(
-        '"%s" — every phase id exists in phases.ts for its region',
-        (_, entry) => {
-          if (!entry.phases) return;
-          for (const [region, ids] of Object.entries(entry.phases)) {
-            const known = new Set(
-              PHASES[region as Region].map((p) => p.id),
-            );
-            for (const id of ids ?? []) {
-              expect(known.has(id)).toBe(true);
-            }
-          }
-        },
-      );
-
-      it.each(entries.map((e) => [e.word, e] as const))(
-        '"%s" — no grapheme spans a syllable boundary',
-        (_, entry) => {
-          // Build cumulative character indices of each syllable end.
-          const boundaries = new Set<number>();
-          let pos = 0;
-          for (const s of entry.syllables) {
-            pos += s.length;
-            boundaries.add(pos);
-          }
-
-          let cursor = 0;
-          for (const g of entry.graphemes) {
-            const start = cursor;
-            const end = cursor + g.g.replace('_', '').length; // split digraph uses '_' marker
-            cursor = end;
-            // A grapheme crosses a boundary if any boundary strictly lies
-            // between start and end — exclusive of end (end == boundary is OK).
-            for (const b of boundaries) {
-              if (b > start && b < end) {
-                throw new Error(
-                  `grapheme '${g.g}' in '${entry.word}' crosses syllable boundary at index ${b}`,
-                );
-              }
-            }
-          }
-        },
-      );
-    });
-
-    describe('cross-chunk invariants', () => {
-      it('variants links are bidirectional', () => {
-        const bySpelling = new Map<string, WordEntry>();
-        for (const { entry } of everyEntry)
-          bySpelling.set(entry.word, entry);
-        for (const { entry } of everyEntry) {
-          for (const variant of entry.variants ?? []) {
-            const other = bySpelling.get(variant);
-            expect(
-              other,
-              `${entry.word}→${variant} variant missing`,
-            ).toBeDefined();
-            expect(
-              other!.variants?.includes(entry.word),
-              `${variant} does not link back to ${entry.word}`,
-            ).toBe(true);
-          }
-        }
-      });
-
-      it('no duplicate word within overlapping region sets', () => {
-        const seen = new Map<string, Set<Region>>();
-        for (const { entry } of everyEntry) {
-          const regions = new Set(regionsOf(entry));
-          const prior = seen.get(entry.word);
-          if (prior) {
-            for (const r of regions) {
-              expect(
-                prior.has(r),
-                `${entry.word} duplicated in region ${r}`,
-              ).toBe(false);
-            }
-            for (const r of regions) prior.add(r);
-          } else {
-            seen.set(entry.word, new Set(regions));
-          }
-        }
-      });
-    });
-  });
-  ```
-
-- [ ] **Step 3 — Run tests**
-
-  Run: `yarn test src/data/words/words.test.ts`
-  Expected: passes (zero chunks → zero per-chunk tests; cross-chunk checks
-  iterate an empty list and also pass).
-
-- [ ] **Step 4 — Commit**
-
-  ```bash
-  git add src/data/words/words.test.ts src/data/words/chunks/.gitkeep
-  git commit -m "feat(words): add chunk invariant harness"
-  ```
-
----
-
-### Task 6 — Seed `core.json` (40 Phase 2 CVC words)
-
-**Files:**
-
-- Create: `src/data/words/chunks/core.json`
-- Delete: `src/data/words/chunks/.gitkeep`
-
-- [ ] **Step 1 — Create `core.json`**
-
-  All 40 entries are single-syllable CVC/CVCC with single-letter graphemes.
-  Default phases: `uk: ['phase2']`, `aus: ['f.unit1']` for SATPIN and
-  `f.unit2`/`f.unit3` for later groups, `us: ['k.wk1']` for short-a,
-  `k.wk4` for other short vowels. All `ipa` values are canonical strings
-  (same in aus/uk/us; BR omitted from phases).
-
-  ```json
-  [
-    {
-      "word": "sat",
-      "syllables": ["sat"],
-      "ipa": "/sæt/",
-      "graphemes": [
-        { "g": "s", "p": "s" },
-        { "g": "a", "p": "æ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit1"],
-        "us": ["k.wk1"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "pat",
-      "syllables": ["pat"],
-      "ipa": "/pæt/",
-      "graphemes": [
-        { "g": "p", "p": "p" },
-        { "g": "a", "p": "æ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit1"],
-        "us": ["k.wk1"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "tap",
-      "syllables": ["tap"],
-      "ipa": "/tæp/",
-      "graphemes": [
-        { "g": "t", "p": "t" },
-        { "g": "a", "p": "æ" },
-        { "g": "p", "p": "p" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit1"],
-        "us": ["k.wk1"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "pin",
-      "syllables": ["pin"],
-      "ipa": "/pɪn/",
-      "graphemes": [
-        { "g": "p", "p": "p" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit1"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "nip",
-      "syllables": ["nip"],
-      "ipa": "/nɪp/",
-      "graphemes": [
-        { "g": "n", "p": "n" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "p", "p": "p" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit1"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "tin",
-      "syllables": ["tin"],
-      "ipa": "/tɪn/",
-      "graphemes": [
-        { "g": "t", "p": "t" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit1"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "cat",
-      "syllables": ["cat"],
-      "ipa": "/kæt/",
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "a", "p": "æ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit2"],
-        "us": ["k.wk1"]
-      },
-      "tags": ["cvc", "animal"]
-    },
-    {
-      "word": "mat",
-      "syllables": ["mat"],
-      "ipa": "/mæt/",
-      "graphemes": [
-        { "g": "m", "p": "m" },
-        { "g": "a", "p": "æ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit2"],
-        "us": ["k.wk1"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "map",
-      "syllables": ["map"],
-      "ipa": "/mæp/",
-      "graphemes": [
-        { "g": "m", "p": "m" },
-        { "g": "a", "p": "æ" },
-        { "g": "p", "p": "p" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit2"],
-        "us": ["k.wk1"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "dog",
-      "syllables": ["dog"],
-      "ipa": "/dɒɡ/",
-      "graphemes": [
-        { "g": "d", "p": "d" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "g", "p": "ɡ" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit2"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc", "animal"]
-    },
-    {
-      "word": "god",
-      "syllables": ["god"],
-      "ipa": "/ɡɒd/",
-      "graphemes": [
-        { "g": "g", "p": "ɡ" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "d", "p": "d" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit2"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "got",
-      "syllables": ["got"],
-      "ipa": "/ɡɒt/",
-      "graphemes": [
-        { "g": "g", "p": "ɡ" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit2"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "cot",
-      "syllables": ["cot"],
-      "ipa": "/kɒt/",
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit2"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "kid",
-      "syllables": ["kid"],
-      "ipa": "/kɪd/",
-      "graphemes": [
-        { "g": "k", "p": "k" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "d", "p": "d" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit2"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "kit",
-      "syllables": ["kit"],
-      "ipa": "/kɪt/",
-      "graphemes": [
-        { "g": "k", "p": "k" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit2"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "duck",
-      "syllables": ["duck"],
-      "ipa": "/dʌk/",
-      "graphemes": [
-        { "g": "d", "p": "d" },
-        { "g": "u", "p": "ʌ" },
-        { "g": "ck", "p": "k" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc", "animal"]
-    },
-    {
-      "word": "sock",
-      "syllables": ["sock"],
-      "ipa": "/sɒk/",
-      "graphemes": [
-        { "g": "s", "p": "s" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "ck", "p": "k" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "pick",
-      "syllables": ["pick"],
-      "ipa": "/pɪk/",
-      "graphemes": [
-        { "g": "p", "p": "p" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "ck", "p": "k" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "bed",
-      "syllables": ["bed"],
-      "ipa": "/bɛd/",
-      "graphemes": [
-        { "g": "b", "p": "b" },
-        { "g": "e", "p": "ɛ" },
-        { "g": "d", "p": "d" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "net",
-      "syllables": ["net"],
-      "ipa": "/nɛt/",
-      "graphemes": [
-        { "g": "n", "p": "n" },
-        { "g": "e", "p": "ɛ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "peg",
-      "syllables": ["peg"],
-      "ipa": "/pɛɡ/",
-      "graphemes": [
-        { "g": "p", "p": "p" },
-        { "g": "e", "p": "ɛ" },
-        { "g": "g", "p": "ɡ" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "sun",
-      "syllables": ["sun"],
-      "ipa": "/sʌn/",
-      "graphemes": [
-        { "g": "s", "p": "s" },
-        { "g": "u", "p": "ʌ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "run",
-      "syllables": ["run"],
-      "ipa": "/rʌn/",
-      "graphemes": [
-        { "g": "r", "p": "r" },
-        { "g": "u", "p": "ʌ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "bun",
-      "syllables": ["bun"],
-      "ipa": "/bʌn/",
-      "graphemes": [
-        { "g": "b", "p": "b" },
-        { "g": "u", "p": "ʌ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc", "food"]
-    },
-    {
-      "word": "hot",
-      "syllables": ["hot"],
-      "ipa": "/hɒt/",
-      "graphemes": [
-        { "g": "h", "p": "h" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "big",
-      "syllables": ["big"],
-      "ipa": "/bɪɡ/",
-      "graphemes": [
-        { "g": "b", "p": "b" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "g", "p": "ɡ" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc"]
-    },
-    {
-      "word": "fish",
-      "syllables": ["fish"],
-      "ipa": "/fɪʃ/",
-      "graphemes": [
-        { "g": "f", "p": "f" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "sh", "p": "ʃ" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc", "animal"]
-    },
-    {
-      "word": "huff",
-      "syllables": ["huff"],
-      "ipa": "/hʌf/",
-      "graphemes": [
-        { "g": "h", "p": "h" },
-        { "g": "u", "p": "ʌ" },
-        { "g": "ff", "p": "f" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      }
-    },
-    {
-      "word": "puff",
-      "syllables": ["puff"],
-      "ipa": "/pʌf/",
-      "graphemes": [
-        { "g": "p", "p": "p" },
-        { "g": "u", "p": "ʌ" },
-        { "g": "ff", "p": "f" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      }
-    },
-    {
-      "word": "bell",
-      "syllables": ["bell"],
-      "ipa": "/bɛl/",
-      "graphemes": [
-        { "g": "b", "p": "b" },
-        { "g": "e", "p": "ɛ" },
-        { "g": "ll", "p": "l" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      }
-    },
-    {
-      "word": "doll",
-      "syllables": ["doll"],
-      "ipa": "/dɒl/",
-      "graphemes": [
-        { "g": "d", "p": "d" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "ll", "p": "l" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      }
-    },
-    {
-      "word": "kiss",
-      "syllables": ["kiss"],
-      "ipa": "/kɪs/",
-      "graphemes": [
-        { "g": "k", "p": "k" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "ss", "p": "s" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      }
-    },
-    {
-      "word": "hug",
-      "syllables": ["hug"],
-      "ipa": "/hʌɡ/",
-      "graphemes": [
-        { "g": "h", "p": "h" },
-        { "g": "u", "p": "ʌ" },
-        { "g": "g", "p": "ɡ" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      }
-    },
-    {
-      "word": "bug",
-      "syllables": ["bug"],
-      "ipa": "/bʌɡ/",
-      "graphemes": [
-        { "g": "b", "p": "b" },
-        { "g": "u", "p": "ʌ" },
-        { "g": "g", "p": "ɡ" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit3"],
-        "us": ["k.wk4"]
-      },
-      "tags": ["cvc", "animal"]
-    },
-    {
-      "word": "jam",
-      "syllables": ["jam"],
-      "ipa": "/dʒæm/",
-      "graphemes": [
-        { "g": "j", "p": "dʒ" },
-        { "g": "a", "p": "æ" },
-        { "g": "m", "p": "m" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit4"],
-        "us": ["k.wk1"]
-      },
-      "tags": ["food"]
-    },
-    {
-      "word": "van",
-      "syllables": ["van"],
-      "ipa": "/væn/",
-      "graphemes": [
-        { "g": "v", "p": "v" },
-        { "g": "a", "p": "æ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit4"],
-        "us": ["k.wk1"]
-      }
-    },
-    {
-      "word": "wet",
-      "syllables": ["wet"],
-      "ipa": "/wɛt/",
-      "graphemes": [
-        { "g": "w", "p": "w" },
-        { "g": "e", "p": "ɛ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit4"],
-        "us": ["k.wk4"]
-      }
-    },
-    {
-      "word": "win",
-      "syllables": ["win"],
-      "ipa": "/wɪn/",
-      "graphemes": [
-        { "g": "w", "p": "w" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit4"],
-        "us": ["k.wk4"]
-      }
-    },
-    {
-      "word": "box",
-      "syllables": ["box"],
-      "ipa": "/bɒks/",
-      "graphemes": [
-        { "g": "b", "p": "b" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "x", "p": "ks" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit4"],
-        "us": ["k.wk4"]
-      }
-    },
-    {
-      "word": "zip",
-      "syllables": ["zip"],
-      "ipa": "/zɪp/",
-      "graphemes": [
-        { "g": "z", "p": "z" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "p", "p": "p" }
-      ],
-      "phases": {
-        "uk": ["phase2"],
-        "aus": ["f.unit4"],
-        "us": ["k.wk4"]
-      }
-    }
-  ]
-  ```
-
-- [ ] **Step 2 — Delete the `.gitkeep`**
-
-  ```bash
-  rm src/data/words/chunks/.gitkeep
-  ```
-
-- [ ] **Step 3 — Run chunk invariants**
-
-  Run: `yarn test src/data/words/words.test.ts`
-  Expected: all 40 entries pass every invariant. If any fail, fix the offending
-  entry (check `syllables.join() === word`, grapheme concatenation, phase ids).
-
-- [ ] **Step 4 — Commit**
-
-  ```bash
-  git add src/data/words/chunks/core.json src/data/words/chunks/.gitkeep
-  git commit -m "feat(words): seed core.json with 40 Phase 2 CVC words"
-  ```
-
----
-
-### Task 7 — Async `filterWords()` + integration test
-
-**Files:**
-
-- Modify: `src/data/words/filter.ts` (append `filterWords` + cache)
-- Modify: `src/data/words/filter.test.ts` (append integration tests)
-- Modify: `src/data/words/index.ts` (export `filterWords`)
-
-- [ ] **Step 1 — Append `filterWords` to `filter.ts`**
-
-  Add below the existing `entryMatches` export:
-
-  ```ts
-  type ChunkModule = { default: WordEntry[] } | WordEntry[];
-
-  const chunkLoaders = import.meta.glob<ChunkModule>('./chunks/*.json');
-
-  const chunkCache = new Map<string, WordEntry[]>();
-  const ALL_KEY = '__all__';
-
-  const resolveChunk = (mod: ChunkModule): WordEntry[] =>
-    Array.isArray(mod) ? mod : mod.default;
-
-  export const loadAllChunks = async (): Promise<WordEntry[]> => {
-    const cached = chunkCache.get(ALL_KEY);
-    if (cached) return cached;
-
-    const loaded = await Promise.all(
-      Object.entries(chunkLoaders).map(async ([path, load]) => {
-        const mod = await load();
-        const entries = resolveChunk(mod);
-        chunkCache.set(path, entries);
-        return entries;
-      }),
-    );
-    const flat = loaded.flat();
-    chunkCache.set(ALL_KEY, flat);
-    return flat;
+- [ ] **Step 1: Write failing tests**
+
+```ts
+// src/data/words/adapters.test.ts
+import { describe, expect, it } from 'vitest';
+import { toWordSpellRound } from './adapters';
+import type { WordHit } from './types';
+
+describe('toWordSpellRound', () => {
+  const base: WordHit = {
+    word: 'cat',
+    region: 'aus',
+    level: 2,
+    syllableCount: 1,
   };
 
-  export const filterWords = async (
-    filter: WordFilter,
-  ): Promise<WordEntry[]> => {
-    const all = await loadAllChunks();
-    return all.filter((entry) => entryMatches(entry, filter));
-  };
-
-  /** Test-only: drop the chunk cache between tests. */
-  export const __resetChunkCacheForTests = (): void => {
-    chunkCache.clear();
-  };
-  ```
-
-- [ ] **Step 2 — Append integration tests to `filter.test.ts`**
-
-  ```ts
-  import {
-    filterWords,
-    loadAllChunks,
-    __resetChunkCacheForTests,
-  } from './filter';
-  import { beforeEach } from 'vitest';
-
-  describe('filterWords (integration against real chunks)', () => {
-    beforeEach(() => {
-      __resetChunkCacheForTests();
+  it('uses syllables joined by - when present', () => {
+    const round = toWordSpellRound({
+      ...base,
+      word: 'sunset',
+      syllables: ['sun', 'set'],
+      syllableCount: 2,
     });
-
-    it('loads core.json and returns 1-syllable CVC words for aus', async () => {
-      const results = await filterWords({
-        region: 'aus',
-        syllablesEq: 1,
-      });
-      expect(results.length).toBeGreaterThan(10);
-      for (const entry of results) {
-        expect(entry.syllables.length).toBe(1);
-      }
-    });
-
-    it('grapheme "c" + phoneme "k" returns cat/cot but not city or child', async () => {
-      const results = await filterWords({
-        region: 'uk',
-        grapheme: 'c',
-        phoneme: 'k',
-      });
-      const words = results.map((e) => e.word);
-      expect(words).toContain('cat');
-      expect(words).toContain('cot');
-      expect(words).not.toContain('city');
-      expect(words).not.toContain('child');
-    });
-
-    it('UK phase2 filter returns core entries', async () => {
-      const results = await filterWords({
-        region: 'uk',
-        phases: ['phase2'],
-      });
-      expect(results.length).toBeGreaterThan(30);
-    });
-
-    it('caches between calls — second call returns the same array reference', async () => {
-      const first = await loadAllChunks();
-      const second = await loadAllChunks();
-      expect(second).toBe(first);
-    });
+    expect(round.word).toBe('sun-set');
   });
-  ```
 
-- [ ] **Step 3 — Run tests**
-
-  Run: `yarn test src/data/words/filter.test.ts`
-  Expected: all green. The cache test confirms `loadAllChunks()` short-circuits
-  on repeat calls.
-
-- [ ] **Step 4 — Export `filterWords` + `loadAllChunks` from `index.ts`**
-
-  Append to `src/data/words/index.ts`:
-
-  ```ts
-  export { filterWords, loadAllChunks } from './filter';
-  ```
-
-- [ ] **Step 5 — Commit**
-
-  ```bash
-  git add src/data/words/filter.ts src/data/words/filter.test.ts src/data/words/index.ts
-  git commit -m "feat(words): add async filterWords with chunk cache"
-  ```
-
----
-
-### Task 8 — Seed `digraphs.json` (20 consonant digraph words)
-
-**Files:**
-
-- Create: `src/data/words/chunks/digraphs.json`
-
-- [ ] **Step 1 — Create `digraphs.json`**
-
-  20 entries covering `ch`, `sh`, `th` (voiceless + voiced), `ng`. All
-  single-syllable. Phases: `uk: ['phase3']`, `aus: ['f.unit5']`,
-  `us: ['k.wk8']` unless noted otherwise.
-
-  ```json
-  [
-    {
-      "word": "chat",
-      "syllables": ["chat"],
-      "ipa": "/tʃæt/",
-      "graphemes": [
-        { "g": "ch", "p": "tʃ" },
-        { "g": "a", "p": "æ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "chop",
-      "syllables": ["chop"],
-      "ipa": "/tʃɒp/",
-      "graphemes": [
-        { "g": "ch", "p": "tʃ" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "p", "p": "p" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "chin",
-      "syllables": ["chin"],
-      "ipa": "/tʃɪn/",
-      "graphemes": [
-        { "g": "ch", "p": "tʃ" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "rich",
-      "syllables": ["rich"],
-      "ipa": "/rɪtʃ/",
-      "graphemes": [
-        { "g": "r", "p": "r" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "ch", "p": "tʃ" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "much",
-      "syllables": ["much"],
-      "ipa": "/mʌtʃ/",
-      "graphemes": [
-        { "g": "m", "p": "m" },
-        { "g": "u", "p": "ʌ" },
-        { "g": "ch", "p": "tʃ" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "ship",
-      "syllables": ["ship"],
-      "ipa": "/ʃɪp/",
-      "graphemes": [
-        { "g": "sh", "p": "ʃ" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "p", "p": "p" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "shop",
-      "syllables": ["shop"],
-      "ipa": "/ʃɒp/",
-      "graphemes": [
-        { "g": "sh", "p": "ʃ" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "p", "p": "p" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "shed",
-      "syllables": ["shed"],
-      "ipa": "/ʃɛd/",
-      "graphemes": [
-        { "g": "sh", "p": "ʃ" },
-        { "g": "e", "p": "ɛ" },
-        { "g": "d", "p": "d" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "dish",
-      "syllables": ["dish"],
-      "ipa": "/dɪʃ/",
-      "graphemes": [
-        { "g": "d", "p": "d" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "sh", "p": "ʃ" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "wish",
-      "syllables": ["wish"],
-      "ipa": "/wɪʃ/",
-      "graphemes": [
-        { "g": "w", "p": "w" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "sh", "p": "ʃ" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "thin",
-      "syllables": ["thin"],
-      "ipa": "/θɪn/",
-      "graphemes": [
-        { "g": "th", "p": "θ" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "thick",
-      "syllables": ["thick"],
-      "ipa": "/θɪk/",
-      "graphemes": [
-        { "g": "th", "p": "θ" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "ck", "p": "k" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "moth",
-      "syllables": ["moth"],
-      "ipa": "/mɒθ/",
-      "graphemes": [
-        { "g": "m", "p": "m" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "th", "p": "θ" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "bath",
-      "syllables": ["bath"],
-      "ipa": { "aus": "/baːθ/", "uk": "/bɑːθ/", "us": "/bæθ/" },
-      "graphemes": [
-        { "g": "b", "p": "b" },
-        { "g": "a", "p": { "aus": "aː", "uk": "ɑː", "us": "æ" } },
-        { "g": "th", "p": "θ" }
-      ],
-      "regions": ["aus", "uk", "us"],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "this",
-      "syllables": ["this"],
-      "ipa": "/ðɪs/",
-      "graphemes": [
-        { "g": "th", "p": "ð" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "s", "p": "s" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "that",
-      "syllables": ["that"],
-      "ipa": "/ðæt/",
-      "graphemes": [
-        { "g": "th", "p": "ð" },
-        { "g": "a", "p": "æ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "ring",
-      "syllables": ["ring"],
-      "ipa": "/rɪŋ/",
-      "graphemes": [
-        { "g": "r", "p": "r" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "ng", "p": "ŋ" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "king",
-      "syllables": ["king"],
-      "ipa": "/kɪŋ/",
-      "graphemes": [
-        { "g": "k", "p": "k" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "ng", "p": "ŋ" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "song",
-      "syllables": ["song"],
-      "ipa": "/sɒŋ/",
-      "graphemes": [
-        { "g": "s", "p": "s" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "ng", "p": "ŋ" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    },
-    {
-      "word": "long",
-      "syllables": ["long"],
-      "ipa": "/lɒŋ/",
-      "graphemes": [
-        { "g": "l", "p": "l" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "ng", "p": "ŋ" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit5"],
-        "us": ["k.wk8"]
-      }
-    }
-  ]
-  ```
-
-- [ ] **Step 2 — Run invariants + filter integration test**
-
-  Run: `yarn test src/data/words/`
-  Expected: all green. The `bath` entry exercises per-region phonemes inside
-  graphemes.
-
-- [ ] **Step 3 — Commit**
-
-  ```bash
-  git add src/data/words/chunks/digraphs.json
-  git commit -m "feat(words): seed digraphs.json with 20 consonant digraph words"
-  ```
-
----
-
-### Task 9 — Seed `long-vowels.json` (15 vowel digraph/trigraph words)
-
-**Files:**
-
-- Create: `src/data/words/chunks/long-vowels.json`
-
-- [ ] **Step 1 — Create `long-vowels.json`**
-
-  15 entries covering `ai`, `ee`, `oa`, `igh`, `oo` (both long and short),
-  `ar`, `or`, `ur`, `ow` (as in cow), `oi`. All single-syllable. Phases:
-  `uk: ['phase3']`, `aus: ['f.unit6']` or `f.unit7`, `us: ['k.wk12']`.
-
-  ```json
-  [
-    {
-      "word": "rain",
-      "syllables": ["rain"],
-      "ipa": "/reɪn/",
-      "graphemes": [
-        { "g": "r", "p": "r" },
-        { "g": "ai", "p": "eɪ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit6"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "pain",
-      "syllables": ["pain"],
-      "ipa": "/peɪn/",
-      "graphemes": [
-        { "g": "p", "p": "p" },
-        { "g": "ai", "p": "eɪ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit6"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "feet",
-      "syllables": ["feet"],
-      "ipa": "/fiːt/",
-      "graphemes": [
-        { "g": "f", "p": "f" },
-        { "g": "ee", "p": "iː" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit6"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "seed",
-      "syllables": ["seed"],
-      "ipa": "/siːd/",
-      "graphemes": [
-        { "g": "s", "p": "s" },
-        { "g": "ee", "p": "iː" },
-        { "g": "d", "p": "d" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit6"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "boat",
-      "syllables": ["boat"],
-      "ipa": "/bəʊt/",
-      "graphemes": [
-        { "g": "b", "p": "b" },
-        { "g": "oa", "p": "əʊ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit6"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "coat",
-      "syllables": ["coat"],
-      "ipa": "/kəʊt/",
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "oa", "p": "əʊ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit6"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "night",
-      "syllables": ["night"],
-      "ipa": "/naɪt/",
-      "graphemes": [
-        { "g": "n", "p": "n" },
-        { "g": "igh", "p": "aɪ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit7"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "light",
-      "syllables": ["light"],
-      "ipa": "/laɪt/",
-      "graphemes": [
-        { "g": "l", "p": "l" },
-        { "g": "igh", "p": "aɪ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit7"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "cool",
-      "syllables": ["cool"],
-      "ipa": "/kuːl/",
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "oo", "p": "uː" },
-        { "g": "l", "p": "l" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit7"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "book",
-      "syllables": ["book"],
-      "ipa": "/bʊk/",
-      "graphemes": [
-        { "g": "b", "p": "b" },
-        { "g": "oo", "p": "ʊ" },
-        { "g": "k", "p": "k" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit7"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "car",
-      "syllables": ["car"],
-      "ipa": { "aus": "/kaː/", "uk": "/kɑː/", "us": "/kɑːr/" },
-      "regions": ["aus", "uk", "us"],
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "ar", "p": { "aus": "aː", "uk": "ɑː", "us": "ɑːr" } }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit7"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "fork",
-      "syllables": ["fork"],
-      "ipa": { "aus": "/foːk/", "uk": "/fɔːk/", "us": "/fɔːrk/" },
-      "regions": ["aus", "uk", "us"],
-      "graphemes": [
-        { "g": "f", "p": "f" },
-        { "g": "or", "p": { "aus": "oː", "uk": "ɔː", "us": "ɔːr" } },
-        { "g": "k", "p": "k" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["f.unit7"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "fur",
-      "syllables": ["fur"],
-      "ipa": { "aus": "/fɜː/", "uk": "/fɜː/", "us": "/fɜːr/" },
-      "regions": ["aus", "uk", "us"],
-      "graphemes": [
-        { "g": "f", "p": "f" },
-        { "g": "ur", "p": { "aus": "ɜː", "uk": "ɜː", "us": "ɜːr" } }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["y1.unit1"],
-        "us": ["k.wk12"]
-      }
-    },
-    {
-      "word": "cow",
-      "syllables": ["cow"],
-      "ipa": "/kaʊ/",
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "ow", "p": "aʊ" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["y1.unit1"],
-        "us": ["k.wk12"]
-      },
-      "tags": ["animal"]
-    },
-    {
-      "word": "coin",
-      "syllables": ["coin"],
-      "ipa": "/kɔɪn/",
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "oi", "p": "ɔɪ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase3"],
-        "aus": ["y1.unit1"],
-        "us": ["k.wk12"]
-      }
-    }
-  ]
-  ```
-
-- [ ] **Step 2 — Run tests**
-
-  Run: `yarn test src/data/words/`
-  Expected: green. `car`, `fork`, `fur` exercise non-rhotic vs rhotic
-  per-region phonemes.
-
-- [ ] **Step 3 — Commit**
-
-  ```bash
-  git add src/data/words/chunks/long-vowels.json
-  git commit -m "feat(words): seed long-vowels.json with 15 vowel digraph words"
-  ```
-
----
-
-### Task 10 — Seed `split-digraphs.json` (10 magic-e words)
-
-**Files:**
-
-- Create: `src/data/words/chunks/split-digraphs.json`
-
-- [ ] **Step 1 — Create `split-digraphs.json`**
-
-  10 single-syllable entries with a silent final `e` and a split-digraph
-  grapheme (`a_e`, `i_e`, `o_e`, `u_e`). Phases: `uk: ['phase5']`,
-  `aus: ['y1.unit2']`, `us: ['g1.wk4']`. `span` is `[start, end]` indices
-  into the surface word.
-
-  ```json
-  [
-    {
-      "word": "cake",
-      "syllables": ["cake"],
-      "ipa": "/keɪk/",
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "a_e", "p": "eɪ", "span": [1, 4] },
-        { "g": "k", "p": "k" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit2"],
-        "us": ["g1.wk4"]
-      },
-      "tags": ["food"]
-    },
-    {
-      "word": "name",
-      "syllables": ["name"],
-      "ipa": "/neɪm/",
-      "graphemes": [
-        { "g": "n", "p": "n" },
-        { "g": "a_e", "p": "eɪ", "span": [1, 4] },
-        { "g": "m", "p": "m" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit2"],
-        "us": ["g1.wk4"]
-      }
-    },
-    {
-      "word": "gate",
-      "syllables": ["gate"],
-      "ipa": "/ɡeɪt/",
-      "graphemes": [
-        { "g": "g", "p": "ɡ" },
-        { "g": "a_e", "p": "eɪ", "span": [1, 4] },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit2"],
-        "us": ["g1.wk4"]
-      }
-    },
-    {
-      "word": "kite",
-      "syllables": ["kite"],
-      "ipa": "/kaɪt/",
-      "graphemes": [
-        { "g": "k", "p": "k" },
-        { "g": "i_e", "p": "aɪ", "span": [1, 4] },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit2"],
-        "us": ["g1.wk4"]
-      }
-    },
-    {
-      "word": "time",
-      "syllables": ["time"],
-      "ipa": "/taɪm/",
-      "graphemes": [
-        { "g": "t", "p": "t" },
-        { "g": "i_e", "p": "aɪ", "span": [1, 4] },
-        { "g": "m", "p": "m" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit2"],
-        "us": ["g1.wk4"]
-      }
-    },
-    {
-      "word": "bike",
-      "syllables": ["bike"],
-      "ipa": "/baɪk/",
-      "graphemes": [
-        { "g": "b", "p": "b" },
-        { "g": "i_e", "p": "aɪ", "span": [1, 4] },
-        { "g": "k", "p": "k" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit2"],
-        "us": ["g1.wk4"]
-      }
-    },
-    {
-      "word": "bone",
-      "syllables": ["bone"],
-      "ipa": "/bəʊn/",
-      "graphemes": [
-        { "g": "b", "p": "b" },
-        { "g": "o_e", "p": "əʊ", "span": [1, 4] },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit2"],
-        "us": ["g1.wk4"]
-      }
-    },
-    {
-      "word": "home",
-      "syllables": ["home"],
-      "ipa": "/həʊm/",
-      "graphemes": [
-        { "g": "h", "p": "h" },
-        { "g": "o_e", "p": "əʊ", "span": [1, 4] },
-        { "g": "m", "p": "m" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit2"],
-        "us": ["g1.wk4"]
-      }
-    },
-    {
-      "word": "cube",
-      "syllables": ["cube"],
-      "ipa": "/kjuːb/",
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "u_e", "p": "juː", "span": [1, 4] },
-        { "g": "b", "p": "b" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit2"],
-        "us": ["g1.wk4"]
-      }
-    },
-    {
-      "word": "tune",
-      "syllables": ["tune"],
-      "ipa": "/tjuːn/",
-      "graphemes": [
-        { "g": "t", "p": "t" },
-        { "g": "u_e", "p": "juː", "span": [1, 4] },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit2"],
-        "us": ["g1.wk4"]
-      }
-    }
-  ]
-  ```
-
-  > **Note on `span` + invariant test.** The grapheme-boundary test in
-  > `words.test.ts` strips `_` from `g.g.replace('_', '')` before length math,
-  > which means `a_e` contributes two characters to the cursor (the `a` and the
-  > `e`). Combined with the intermediate consonant grapheme between them, the
-  > cursor will drift — so for split digraphs, the concatenation invariant
-  > (`graphemes.map(g=>g.g).join('')`) also needs to tolerate `_`. The plan's
-  > harness already does the `_` strip; verify by running the test and confirm
-  > the split-digraph entries pass. If they don't, update `words.test.ts` so
-  > the join check also strips `_`:
-
-  ```ts
-  expect(
-    entry.graphemes.map((g) => g.g.replace('_', '')).join(''),
-  ).toBe(entry.word);
-  ```
-
-- [ ] **Step 2 — Run tests**
-
-  Run: `yarn test src/data/words/`
-  Expected: green. If split-digraph entries fail the concatenation invariant,
-  apply the `replace('_', '')` fix above to `words.test.ts` in the same
-  commit.
-
-- [ ] **Step 3 — Commit**
-
-  ```bash
-  git add src/data/words/chunks/split-digraphs.json src/data/words/words.test.ts
-  git commit -m "feat(words): seed split-digraphs.json with 10 magic-e words"
-  ```
-
----
-
-### Task 11 — Seed `multi-syllable.json` (10 2–3 syllable words)
-
-**Files:**
-
-- Create: `src/data/words/chunks/multi-syllable.json`
-
-- [ ] **Step 1 — Create `multi-syllable.json`**
-
-  10 multi-syllable K–Y2 vocabulary entries. Phases: `uk: ['phase4']` or
-  `phase5`, `aus: ['y1.unit3']`, `us: ['g1.wk8']`.
-
-  ```json
-  [
-    {
-      "word": "sunset",
-      "syllables": ["sun", "set"],
-      "ipa": "/ˈsʌnsɛt/",
-      "graphemes": [
-        { "g": "s", "p": "s" },
-        { "g": "u", "p": "ʌ" },
-        { "g": "n", "p": "n" },
-        { "g": "s", "p": "s" },
-        { "g": "e", "p": "ɛ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase4"],
-        "aus": ["y1.unit3"],
-        "us": ["g1.wk8"]
-      }
-    },
-    {
-      "word": "catnap",
-      "syllables": ["cat", "nap"],
-      "ipa": "/ˈkætnæp/",
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "a", "p": "æ" },
-        { "g": "t", "p": "t" },
-        { "g": "n", "p": "n" },
-        { "g": "a", "p": "æ" },
-        { "g": "p", "p": "p" }
-      ],
-      "phases": {
-        "uk": ["phase4"],
-        "aus": ["y1.unit3"],
-        "us": ["g1.wk8"]
-      }
-    },
-    {
-      "word": "hotdog",
-      "syllables": ["hot", "dog"],
-      "ipa": "/ˈhɒtdɒɡ/",
-      "graphemes": [
-        { "g": "h", "p": "h" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "t", "p": "t" },
-        { "g": "d", "p": "d" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "g", "p": "ɡ" }
-      ],
-      "phases": {
-        "uk": ["phase4"],
-        "aus": ["y1.unit3"],
-        "us": ["g1.wk8"]
-      },
-      "tags": ["food"]
-    },
-    {
-      "word": "rabbit",
-      "syllables": ["rab", "bit"],
-      "ipa": "/ˈræbɪt/",
-      "graphemes": [
-        { "g": "r", "p": "r" },
-        { "g": "a", "p": "æ" },
-        { "g": "b", "p": "b" },
-        { "g": "b", "p": "" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase4"],
-        "aus": ["y1.unit3"],
-        "us": ["g1.wk8"]
-      },
-      "tags": ["animal"]
-    },
-    {
-      "word": "chicken",
-      "syllables": ["chick", "en"],
-      "ipa": "/ˈtʃɪkɪn/",
-      "graphemes": [
-        { "g": "ch", "p": "tʃ" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "ck", "p": "k" },
-        { "g": "e", "p": "ɪ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit3"],
-        "us": ["g1.wk8"]
-      },
-      "tags": ["animal", "food"]
-    },
-    {
-      "word": "kitten",
-      "syllables": ["kit", "ten"],
-      "ipa": "/ˈkɪtɪn/",
-      "graphemes": [
-        { "g": "k", "p": "k" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "t", "p": "t" },
-        { "g": "t", "p": "" },
-        { "g": "e", "p": "ɪ" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase4"],
-        "aus": ["y1.unit3"],
-        "us": ["g1.wk8"]
-      },
-      "tags": ["animal"]
-    },
-    {
-      "word": "garden",
-      "syllables": ["gar", "den"],
-      "ipa": {
-        "aus": "/ˈɡaːdən/",
-        "uk": "/ˈɡɑːdən/",
-        "us": "/ˈɡɑːrdən/"
-      },
-      "regions": ["aus", "uk", "us"],
-      "graphemes": [
-        { "g": "g", "p": "ɡ" },
-        { "g": "ar", "p": { "aus": "aː", "uk": "ɑː", "us": "ɑːr" } },
-        { "g": "d", "p": "d" },
-        { "g": "e", "p": "ə" },
-        { "g": "n", "p": "n" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit3"],
-        "us": ["g1.wk8"]
-      }
-    },
-    {
-      "word": "picnic",
-      "syllables": ["pic", "nic"],
-      "ipa": "/ˈpɪknɪk/",
-      "graphemes": [
-        { "g": "p", "p": "p" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "c", "p": "k" },
-        { "g": "n", "p": "n" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "c", "p": "k" }
-      ],
-      "phases": {
-        "uk": ["phase4"],
-        "aus": ["y1.unit3"],
-        "us": ["g1.wk8"]
-      }
-    },
-    {
-      "word": "hello",
-      "syllables": ["hel", "lo"],
-      "ipa": "/həˈləʊ/",
-      "graphemes": [
-        { "g": "h", "p": "h" },
-        { "g": "e", "p": "ə" },
-        { "g": "l", "p": "l" },
-        { "g": "l", "p": "" },
-        { "g": "o", "p": "əʊ" }
-      ],
-      "phases": {
-        "uk": ["phase4"],
-        "aus": ["y1.unit3"],
-        "us": ["g1.wk8"]
-      }
-    },
-    {
-      "word": "elephant",
-      "syllables": ["el", "e", "phant"],
-      "ipa": "/ˈɛlɪfənt/",
-      "graphemes": [
-        { "g": "e", "p": "ɛ" },
-        { "g": "l", "p": "l" },
-        { "g": "e", "p": "ɪ" },
-        { "g": "ph", "p": "f" },
-        { "g": "a", "p": "ə" },
-        { "g": "n", "p": "n" },
-        { "g": "t", "p": "t" }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit3"],
-        "us": ["g1.wk8"]
-      },
-      "tags": ["animal"]
-    }
-  ]
-  ```
-
-- [ ] **Step 2 — Run tests**
-
-  Run: `yarn test src/data/words/`
-  Expected: green.
-
-- [ ] **Step 3 — Commit**
-
-  ```bash
-  git add src/data/words/chunks/multi-syllable.json
-  git commit -m "feat(words): seed multi-syllable.json with 10 2-3 syllable words"
-  ```
-
----
-
-### Task 12 — Seed `regional.json` (7 region-variant showcase words)
-
-**Files:**
-
-- Create: `src/data/words/chunks/regional.json`
-
-- [ ] **Step 1 — Create `regional.json`**
-
-  5 distinct entries (with 2 pairs sharing the `regional` theme): `tomato`
-  (Case A — same spelling, different sound), `aluminium`/`aluminum` (Case B —
-  different spelling, linked variants), `colour`/`color` (Case B). Total
-  entries: 5 logical items → 7 JSON objects once variants are expanded.
-
-  ```json
-  [
-    {
-      "word": "tomato",
-      "syllables": ["to", "ma", "to"],
-      "regions": ["aus", "uk", "us"],
-      "ipa": {
-        "aus": "/təˈmɑːtəʊ/",
-        "uk": "/təˈmɑːtəʊ/",
-        "us": "/təˈmeɪtoʊ/"
-      },
-      "graphemes": [
-        { "g": "t", "p": "t" },
-        { "g": "o", "p": "ə" },
-        { "g": "m", "p": "m" },
-        { "g": "a", "p": { "aus": "ɑː", "uk": "ɑː", "us": "eɪ" } },
-        { "g": "t", "p": "t" },
-        { "g": "o", "p": { "aus": "əʊ", "uk": "əʊ", "us": "oʊ" } }
-      ],
-      "phases": {
-        "uk": ["phase5"],
-        "aus": ["y1.unit3"],
-        "us": ["g1.wk8"]
-      },
-      "tags": ["food", "regional"]
-    },
-    {
-      "word": "aluminium",
-      "syllables": ["al", "u", "min", "i", "um"],
-      "regions": ["aus", "uk"],
-      "variants": ["aluminum"],
-      "ipa": {
-        "aus": "/ˌæljəˈmɪniəm/",
-        "uk": "/ˌæljəˈmɪniəm/"
-      },
-      "graphemes": [
-        { "g": "a", "p": "æ" },
-        { "g": "l", "p": "l" },
-        { "g": "u", "p": "j" },
-        { "g": "m", "p": "m" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "n", "p": "n" },
-        { "g": "i", "p": "i" },
-        { "g": "u", "p": "ə" },
-        { "g": "m", "p": "m" }
-      ],
-      "phases": { "uk": ["phase5"], "aus": ["y1.unit3"] },
-      "tags": ["regional"]
-    },
-    {
-      "word": "aluminum",
-      "syllables": ["a", "lu", "mi", "num"],
-      "regions": ["us"],
-      "variants": ["aluminium"],
-      "ipa": { "us": "/əˈluːmɪnəm/" },
-      "graphemes": [
-        { "g": "a", "p": "ə" },
-        { "g": "l", "p": "l" },
-        { "g": "u", "p": "uː" },
-        { "g": "m", "p": "m" },
-        { "g": "i", "p": "ɪ" },
-        { "g": "n", "p": "n" },
-        { "g": "u", "p": "ə" },
-        { "g": "m", "p": "m" }
-      ],
-      "phases": { "us": ["g1.wk8"] },
-      "tags": ["regional"]
-    },
-    {
-      "word": "colour",
-      "syllables": ["col", "our"],
-      "regions": ["aus", "uk"],
-      "variants": ["color"],
-      "ipa": {
-        "aus": "/ˈkʌlə/",
-        "uk": "/ˈkʌlə/"
-      },
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "o", "p": "ʌ" },
-        { "g": "l", "p": "l" },
-        { "g": "our", "p": "ə" }
-      ],
-      "phases": { "uk": ["phase5"], "aus": ["y1.unit3"] },
-      "tags": ["regional"]
-    },
-    {
-      "word": "color",
-      "syllables": ["col", "or"],
-      "regions": ["us"],
-      "variants": ["colour"],
-      "ipa": { "us": "/ˈkʌlər/" },
-      "graphemes": [
-        { "g": "c", "p": "k" },
-        { "g": "o", "p": "ʌ" },
-        { "g": "l", "p": "l" },
-        { "g": "or", "p": "ər" }
-      ],
-      "phases": { "us": ["g1.wk8"] },
-      "tags": ["regional"]
-    },
-    {
-      "word": "mum",
-      "syllables": ["mum"],
-      "regions": ["aus", "uk"],
-      "variants": ["mom"],
-      "ipa": "/mʌm/",
-      "graphemes": [
-        { "g": "m", "p": "m" },
-        { "g": "u", "p": "ʌ" },
-        { "g": "m", "p": "m" }
-      ],
-      "phases": { "uk": ["phase2"], "aus": ["f.unit2"] },
-      "tags": ["regional"]
-    },
-    {
-      "word": "mom",
-      "syllables": ["mom"],
-      "regions": ["us"],
-      "variants": ["mum"],
-      "ipa": "/mɒm/",
-      "graphemes": [
-        { "g": "m", "p": "m" },
-        { "g": "o", "p": "ɒ" },
-        { "g": "m", "p": "m" }
-      ],
-      "phases": { "us": ["k.wk4"] },
-      "tags": ["regional"]
-    }
-  ]
-  ```
-
-- [ ] **Step 2 — Run tests**
-
-  Run: `yarn test src/data/words/`
-  Expected: green. The cross-chunk `variants links are bidirectional` test now
-  has real data to check and should pass for aluminium↔aluminum, colour↔color,
-  mum↔mom.
-
-- [ ] **Step 3 — Add a targeted filter test for region-variant exclusion**
-
-  Append to `src/data/words/filter.test.ts`:
-
-  ```ts
-  describe('regional variants', () => {
-    beforeEach(() => {
-      __resetChunkCacheForTests();
-    });
-
-    it('AUS filter returns aluminium, not aluminum', async () => {
-      const all = await filterWords({ region: 'aus' });
-      const words = all.map((e) => e.word);
-      expect(words).toContain('aluminium');
-      expect(words).not.toContain('aluminum');
-    });
-
-    it('US filter returns aluminum and color, not aluminium or colour', async () => {
-      const all = await filterWords({ region: 'us' });
-      const words = all.map((e) => e.word);
-      expect(words).toContain('aluminum');
-      expect(words).toContain('color');
-      expect(words).not.toContain('aluminium');
-      expect(words).not.toContain('colour');
-    });
-
-    it('tomato pronunciation differs between regions but appears in all three', async () => {
-      for (const region of ['aus', 'uk', 'us'] as const) {
-        const all = await filterWords({ region });
-        expect(all.map((e) => e.word)).toContain('tomato');
-      }
-    });
+  it('falls back to raw word when no syllables', () => {
+    expect(toWordSpellRound(base).word).toBe('cat');
   });
-  ```
+});
+```
 
-- [ ] **Step 4 — Run tests**
+- [ ] **Step 2: Run to fail**
 
-  Run: `yarn test src/data/words/`
-  Expected: green.
+Run: `yarn test src/data/words/adapters.test.ts`
+Expected: fails.
 
-- [ ] **Step 5 — Commit**
+- [ ] **Step 3: Implement**
 
-  ```bash
-  git add src/data/words/chunks/regional.json src/data/words/filter.test.ts
-  git commit -m "feat(words): seed regional.json with variant-pair showcase"
-  ```
+```ts
+// src/data/words/adapters.ts
+import type { WordHit } from './types';
+import type { WordSpellRound } from '@/games/word-spell/types';
+
+export const toWordSpellRound = (hit: WordHit): WordSpellRound => ({
+  word: hit.syllables ? hit.syllables.join('-') : hit.word,
+});
+```
+
+- [ ] **Step 4: Run tests**
+
+Run: `yarn test src/data/words/adapters.test.ts`
+Expected: all green.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/data/words/adapters.ts src/data/words/adapters.test.ts
+git commit -m "feat(words): add toWordSpellRound adapter"
+```
 
 ---
 
-### Task 13 — Add `source` field to `WordSpellConfig`
+### Task 13 — Public API re-exports
+
+**Files:**
+
+- Create: `src/data/words/index.ts`
+
+- [ ] **Step 1: Write `index.ts`**
+
+```ts
+// src/data/words/index.ts
+export type {
+  Region,
+  Grapheme,
+  WordCore,
+  CurriculumEntry,
+  WordHit,
+  WordFilter,
+  FilterResult,
+  WordSpellSource,
+  ValidationError,
+} from './types';
+export {
+  ALL_REGIONS,
+  LEVEL_LABELS,
+  GRAPHEMES_BY_LEVEL,
+  cumulativeGraphemes,
+} from './levels';
+export {
+  PHONEME_CODE_TO_IPA,
+  IPA_TO_PHONEME_CODE,
+} from './phoneme-codes';
+export {
+  makeWordCore,
+  makeGraphemes,
+  makeCurriculumEntry,
+  validateEntry,
+} from './builders';
+export {
+  upsertCurriculumEntry,
+  removeCurriculumEntry,
+  upsertWordCore,
+  removeWordCore,
+} from './writer';
+export {
+  entryMatches,
+  filterWords,
+  __resetChunkCacheForTests,
+} from './filter';
+export { toWordSpellRound } from './adapters';
+```
+
+- [ ] **Step 2: Typecheck**
+
+Run: `yarn typecheck`
+Expected: passes.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/data/words/index.ts
+git commit -m "feat(words): re-export public API"
+```
+
+---
+
+### Task 14 — Update `WordSpellConfig`
 
 **Files:**
 
 - Modify: `src/games/word-spell/types.ts`
 
-- [ ] **Step 1 — Update `types.ts`**
+- [ ] **Step 1: Edit `types.ts`**
 
-  Replace the existing `WordSpellConfig` interface (keeping all other fields
-  in the file untouched):
+Replace the existing `WordSpellConfig` interface (keeping all other fields
+and the `wordSpellConfigFields` array untouched):
 
-  ```ts
-  import type { WordFilter } from '@/data/words';
+```ts
+import type { WordSpellSource } from '@/data/words';
 
-  export interface WordSpellLibrarySource {
-    type: 'word-library';
-    filter: WordFilter;
-    /** Max entries to materialise. Defaults to totalRounds. */
-    limit?: number;
-  }
+export interface WordSpellConfig extends AnswerGameConfig {
+  component: 'WordSpell';
+  mode: 'picture' | 'scramble' | 'recall' | 'sentence-gap';
+  /** @default 'letter' */
+  tileUnit: 'letter' | 'syllable' | 'word';
+  /** Explicit hand-authored rounds. Wins over `source` when both are present. */
+  rounds?: WordSpellRound[];
+  /** Library-driven rounds. Resolved at WordSpell mount time. */
+  source?: WordSpellSource;
+}
+```
 
-  export interface WordSpellConfig extends AnswerGameConfig {
-    component: 'WordSpell';
-    mode: 'picture' | 'scramble' | 'recall' | 'sentence-gap';
-    /** @default 'letter' */
-    tileUnit: 'letter' | 'syllable' | 'word';
-    /** Explicit hand-authored rounds. Wins over `source` when both are present. */
-    rounds?: WordSpellRound[];
-    /** Library-driven rounds. Resolved at WordSpell mount time. */
-    source?: WordSpellLibrarySource;
-  }
-  ```
+Keep the existing `GapDefinition`, `WordSpellRound`, and `wordSpellConfigFields`
+exports untouched.
 
-- [ ] **Step 2 — Typecheck**
+- [ ] **Step 2: Typecheck — expected to fail**
 
-  Run: `yarn typecheck`
-  Expected: fails. Many files access `config.rounds.length` or
-  `config.rounds[i]` directly and now see `rounds` as possibly undefined.
-
-  Leave this broken on purpose — Task 15 fixes it by introducing a resolved
-  rounds layer. Do not silence errors; commit this step only after Task 15
-  lands and typecheck passes.
-
-- [ ] **Step 3 — Do NOT commit yet.** Move to Task 14.
+Run: `yarn typecheck`
+Expected: fails. Many callers access `config.rounds.length` or
+`config.rounds[i]` directly and now see `rounds` as possibly undefined.
+**Leave this broken on purpose** — Tasks 15 + 16 fix it by introducing a
+resolved rounds layer. Do not silence errors. Do not commit yet.
 
 ---
 
-### Task 14 — `useLibraryRounds` hook + tests
+### Task 15 — `useLibraryRounds` hook + tests
 
 **Files:**
 
 - Create: `src/games/word-spell/useLibraryRounds.ts`
 - Create: `src/games/word-spell/useLibraryRounds.test.tsx`
 
-- [ ] **Step 1 — Write failing hook tests**
+- [ ] **Step 1: Write failing hook tests**
 
-  ```tsx
-  // src/games/word-spell/useLibraryRounds.test.tsx
-  import { act, renderHook, waitFor } from '@testing-library/react';
-  import { afterEach, describe, expect, it, vi } from 'vitest';
-  import { useLibraryRounds } from './useLibraryRounds';
-  import type { WordSpellConfig } from './types';
-  import { __resetChunkCacheForTests } from '@/data/words/filter';
+```tsx
+// src/games/word-spell/useLibraryRounds.test.tsx
+import { renderHook, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
+import { useLibraryRounds } from './useLibraryRounds';
+import type { WordSpellConfig } from './types';
+import { __resetChunkCacheForTests } from '@/data/words';
 
-  const baseConfig: WordSpellConfig = {
-    gameId: 'test',
-    component: 'WordSpell',
-    inputMethod: 'drag',
-    wrongTileBehavior: 'lock-auto-eject',
-    tileBankMode: 'exact',
-    totalRounds: 3,
-    roundsInOrder: true,
-    ttsEnabled: false,
-    mode: 'picture',
-    tileUnit: 'letter',
-  };
+const baseConfig: WordSpellConfig = {
+  gameId: 'test',
+  component: 'WordSpell',
+  inputMethod: 'drag',
+  wrongTileBehavior: 'lock-auto-eject',
+  tileBankMode: 'exact',
+  totalRounds: 3,
+  roundsInOrder: true,
+  ttsEnabled: false,
+  mode: 'picture',
+  tileUnit: 'letter',
+};
 
-  afterEach(() => {
-    __resetChunkCacheForTests();
-    vi.restoreAllMocks();
-  });
+afterEach(() => __resetChunkCacheForTests());
 
-  describe('useLibraryRounds', () => {
-    it('returns explicit rounds synchronously when source is absent', () => {
-      const rounds = [{ word: 'cat' }, { word: 'dog' }];
-      const { result } = renderHook(() =>
-        useLibraryRounds({ ...baseConfig, rounds }),
-      );
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.rounds).toBe(rounds);
-    });
-
-    it('returns empty rounds array when neither rounds nor source is set', () => {
-      const { result } = renderHook(() => useLibraryRounds(baseConfig));
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.rounds).toEqual([]);
-    });
-
-    it('resolves library rounds from a filter when source is set', async () => {
-      const config: WordSpellConfig = {
-        ...baseConfig,
-        totalRounds: 3,
-        source: {
-          type: 'word-library',
-          filter: { region: 'uk', syllablesEq: 1 },
-        },
-      };
-      const { result } = renderHook(() => useLibraryRounds(config));
-      expect(result.current.isLoading).toBe(true);
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      // 3 rounds because totalRounds=3 and limit is absent
-      expect(result.current.rounds).toHaveLength(3);
-      // Each round has `word` populated via toWordSpellRound
-      for (const r of result.current.rounds) {
-        expect(r.word).toBeDefined();
-      }
-    });
-
-    it('respects explicit source.limit over totalRounds', async () => {
-      const config: WordSpellConfig = {
-        ...baseConfig,
-        totalRounds: 10,
-        source: {
-          type: 'word-library',
-          filter: { region: 'uk', syllablesEq: 1 },
-          limit: 2,
-        },
-      };
-      const { result } = renderHook(() => useLibraryRounds(config));
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-      expect(result.current.rounds).toHaveLength(2);
-    });
-  });
-  ```
-
-- [ ] **Step 2 — Run test to confirm it fails**
-
-  Run: `yarn test src/games/word-spell/useLibraryRounds.test.tsx`
-  Expected: fails with missing module.
-
-- [ ] **Step 3 — Create `useLibraryRounds.ts`**
-
-  ```ts
-  // src/games/word-spell/useLibraryRounds.ts
-  import { useEffect, useState } from 'react';
-  import { filterWords, toWordSpellRound } from '@/data/words';
-  import type { WordSpellConfig, WordSpellRound } from './types';
-
-  interface LibraryRoundsState {
-    rounds: WordSpellRound[];
-    isLoading: boolean;
-  }
-
-  const initialStateFor = (
-    config: WordSpellConfig,
-  ): LibraryRoundsState => {
-    if (config.source) return { rounds: [], isLoading: true };
-    return { rounds: config.rounds ?? [], isLoading: false };
-  };
-
-  /**
-   * Resolves WordSpell rounds from either `config.rounds` (legacy, sync) or
-   * `config.source` (library-driven, async). Explicit `rounds` wins over
-   * `source` when both are present.
-   */
-  export const useLibraryRounds = (
-    config: WordSpellConfig,
-  ): LibraryRoundsState => {
-    const [state, setState] = useState<LibraryRoundsState>(() =>
-      initialStateFor(config),
+describe('useLibraryRounds', () => {
+  it('returns explicit rounds synchronously when source is absent', () => {
+    const rounds = [{ word: 'cat' }, { word: 'dog' }];
+    const { result } = renderHook(() =>
+      useLibraryRounds({ ...baseConfig, rounds }),
     );
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.rounds).toBe(rounds);
+  });
 
-    useEffect(() => {
-      if (config.rounds && config.rounds.length > 0) {
-        setState({ rounds: config.rounds, isLoading: false });
-        return;
-      }
-      if (!config.source) {
-        setState({ rounds: [], isLoading: false });
-        return;
-      }
+  it('returns empty rounds when neither rounds nor source is set', () => {
+    const { result } = renderHook(() => useLibraryRounds(baseConfig));
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.rounds).toEqual([]);
+  });
 
-      let cancelled = false;
-      setState((prev) => ({ ...prev, isLoading: true }));
+  it('resolves library rounds from a filter when source is set', async () => {
+    const config: WordSpellConfig = {
+      ...baseConfig,
+      totalRounds: 3,
+      source: {
+        type: 'word-library',
+        filter: { region: 'aus', level: 1 },
+      },
+    };
+    const { result } = renderHook(() => useLibraryRounds(config));
+    expect(result.current.isLoading).toBe(true);
 
-      void (async () => {
-        const entries = await filterWords(config.source!.filter);
-        if (cancelled) return;
-        const limit =
-          config.source!.limit ?? config.totalRounds ?? entries.length;
-        const picked = entries.slice(0, limit).map(toWordSpellRound);
-        setState({ rounds: picked, isLoading: false });
-      })();
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
 
-      return () => {
-        cancelled = true;
-      };
-    }, [config.rounds, config.source, config.totalRounds]);
+    expect(result.current.rounds).toHaveLength(3);
+    for (const r of result.current.rounds) {
+      expect(r.word).toBeDefined();
+    }
+  });
 
-    return state;
-  };
-  ```
+  it('respects explicit source.limit over totalRounds', async () => {
+    const config: WordSpellConfig = {
+      ...baseConfig,
+      totalRounds: 10,
+      source: {
+        type: 'word-library',
+        filter: { region: 'aus', level: 1 },
+        limit: 2,
+      },
+    };
+    const { result } = renderHook(() => useLibraryRounds(config));
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    expect(result.current.rounds).toHaveLength(2);
+  });
 
-- [ ] **Step 4 — Run tests**
+  it('surfaces usedFallback when the filter falls back to AUS', async () => {
+    const config: WordSpellConfig = {
+      ...baseConfig,
+      totalRounds: 3,
+      source: {
+        type: 'word-library',
+        filter: { region: 'uk', level: 1 },
+      },
+    };
+    const { result } = renderHook(() => useLibraryRounds(config));
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    expect(result.current.usedFallback).toEqual({
+      from: 'uk',
+      to: 'aus',
+    });
+  });
+});
+```
 
-  Run: `yarn test src/games/word-spell/useLibraryRounds.test.tsx`
-  Expected: all green.
+- [ ] **Step 2: Run tests — expected to fail**
 
-- [ ] **Step 5 — Do NOT commit yet.** Move to Task 15 — committing `types.ts`
-      and the hook together keeps the branch building.
+Run: `yarn test src/games/word-spell/useLibraryRounds.test.tsx`
+Expected: fails — module missing.
+
+- [ ] **Step 3: Implement the hook**
+
+```ts
+// src/games/word-spell/useLibraryRounds.ts
+import { useEffect, useState } from 'react';
+import { filterWords, toWordSpellRound } from '@/data/words';
+import type { Region } from '@/data/words';
+import type { WordSpellConfig, WordSpellRound } from './types';
+
+interface LibraryRoundsState {
+  rounds: WordSpellRound[];
+  isLoading: boolean;
+  usedFallback?: { from: Region; to: 'aus' };
+}
+
+const initialStateFor = (
+  config: WordSpellConfig,
+): LibraryRoundsState => {
+  if (config.source) return { rounds: [], isLoading: true };
+  return { rounds: config.rounds ?? [], isLoading: false };
+};
+
+export const useLibraryRounds = (
+  config: WordSpellConfig,
+): LibraryRoundsState => {
+  const [state, setState] = useState<LibraryRoundsState>(() =>
+    initialStateFor(config),
+  );
+
+  useEffect(() => {
+    if (config.rounds && config.rounds.length > 0) {
+      setState({ rounds: config.rounds, isLoading: false });
+      return;
+    }
+    if (!config.source) {
+      setState({ rounds: [], isLoading: false });
+      return;
+    }
+
+    let cancelled = false;
+    setState((prev) => ({ ...prev, isLoading: true }));
+
+    void (async () => {
+      const result = await filterWords(config.source!.filter);
+      if (cancelled) return;
+      const limit =
+        config.source!.limit ??
+        config.totalRounds ??
+        result.hits.length;
+      const picked = result.hits.slice(0, limit).map(toWordSpellRound);
+      setState({
+        rounds: picked,
+        isLoading: false,
+        usedFallback: result.usedFallback,
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [config.rounds, config.source, config.totalRounds]);
+
+  return state;
+};
+```
+
+- [ ] **Step 4: Run hook tests**
+
+Run: `yarn test src/games/word-spell/useLibraryRounds.test.tsx`
+Expected: all green.
+
+- [ ] **Step 5: Do NOT commit yet — move to Task 16.**
 
 ---
 
-### Task 15 — Wire `useLibraryRounds` into `WordSpell`
+### Task 16 — Wire `useLibraryRounds` into `WordSpell`
 
 **Files:**
 
 - Modify: `src/games/word-spell/WordSpell/WordSpell.tsx`
 
-- [ ] **Step 1 — Update `WordSpell.tsx`**
+- [ ] **Step 1: Replace the top-level `WordSpell` export**
 
-  Replace the top-level `WordSpell` function (the exported one, currently at
-  line 235). Keep `WordSpellSession` and the helpers unchanged.
+Keep `WordSpellSession` and the helper functions (`segmentsForWord`,
+`buildTilesAndZones`) unchanged. Replace the exported `WordSpell` arrow
+function (currently at line 235):
 
-  ```tsx
-  export const WordSpell = ({
-    config,
-    initialState,
-    sessionId,
-    seed,
-  }: WordSpellProps) => {
-    const { rounds: resolvedRounds, isLoading } =
-      useLibraryRounds(config);
+```tsx
+export const WordSpell = ({
+  config,
+  initialState,
+  sessionId,
+  seed,
+}: WordSpellProps) => {
+  const { rounds: resolvedRounds, isLoading } =
+    useLibraryRounds(config);
 
-    const resolvedConfig = useMemo<WordSpellConfig>(
-      () => ({ ...config, rounds: resolvedRounds }),
-      [config, resolvedRounds],
-    );
+  const resolvedConfig = useMemo<WordSpellConfig>(
+    () => ({ ...config, rounds: resolvedRounds }),
+    [config, resolvedRounds],
+  );
 
-    const roundsInOrder = resolvedConfig.roundsInOrder === true;
-    const [sessionEpoch, setSessionEpoch] = useState(0);
+  const roundsInOrder = resolvedConfig.roundsInOrder === true;
+  const [sessionEpoch, setSessionEpoch] = useState(0);
 
-    const roundOrder = useMemo(() => {
-      void sessionEpoch;
-      return buildRoundOrder(
-        resolvedRounds.length,
-        roundsInOrder,
-        seed,
-      );
-    }, [resolvedRounds.length, roundsInOrder, seed, sessionEpoch]);
+  const roundOrder = useMemo(() => {
+    void sessionEpoch;
+    return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
+  }, [resolvedRounds.length, roundsInOrder, seed, sessionEpoch]);
 
-    const firstConfigIndex = roundOrder[0];
-    const round0 =
-      firstConfigIndex === undefined
-        ? undefined
-        : resolvedRounds[firstConfigIndex];
-    const roundWord = round0?.word.trim() ? round0.word : '';
+  const firstConfigIndex = roundOrder[0];
+  const round0 =
+    firstConfigIndex === undefined
+      ? undefined
+      : resolvedRounds[firstConfigIndex];
+  const roundWord = round0?.word.trim() ? round0.word : '';
 
-    const { tiles, zones } = useMemo(() => {
-      if (!roundWord)
-        return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+  const { tiles, zones } = useMemo(() => {
+    if (!roundWord)
+      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
 
-      if (round0?.gaps && round0.gaps.length > 0) {
-        return buildSentenceGapRound(round0.gaps);
-      }
-
-      return buildTilesAndZones(roundWord, resolvedConfig.tileUnit);
-    }, [roundWord, resolvedConfig.tileUnit, round0]);
-
-    const answerGameConfig = useMemo(
-      (): AnswerGameConfig => ({
-        gameId: resolvedConfig.gameId,
-        inputMethod: resolvedConfig.inputMethod,
-        wrongTileBehavior: resolvedConfig.wrongTileBehavior,
-        tileBankMode: resolvedConfig.tileBankMode,
-        distractorCount: resolvedConfig.distractorCount,
-        totalRounds: resolvedRounds.length,
-        roundsInOrder: resolvedConfig.roundsInOrder,
-        ttsEnabled: resolvedConfig.ttsEnabled,
-        touchKeyboardInputMode: 'text',
-        initialTiles: tiles,
-        initialZones: zones,
-        slotInteraction:
-          resolvedConfig.mode === 'scramble' ||
-          resolvedConfig.mode === 'sentence-gap'
-            ? 'free-swap'
-            : 'ordered',
-      }),
-      [
-        resolvedConfig.gameId,
-        resolvedConfig.inputMethod,
-        resolvedConfig.wrongTileBehavior,
-        resolvedConfig.tileBankMode,
-        resolvedConfig.distractorCount,
-        resolvedRounds.length,
-        resolvedConfig.roundsInOrder,
-        resolvedConfig.ttsEnabled,
-        resolvedConfig.mode,
-        tiles,
-        zones,
-      ],
-    );
-
-    if (isLoading) {
-      return (
-        <div
-          role="status"
-          className="flex min-h-[200px] w-full items-center justify-center text-foreground"
-        >
-          Loading words…
-        </div>
-      );
+    if (round0?.gaps && round0.gaps.length > 0) {
+      return buildSentenceGapRound(round0.gaps);
     }
 
-    if (!round0) return null;
+    return buildTilesAndZones(roundWord, resolvedConfig.tileUnit);
+  }, [roundWord, resolvedConfig.tileUnit, round0]);
 
+  const answerGameConfig = useMemo(
+    (): AnswerGameConfig => ({
+      gameId: resolvedConfig.gameId,
+      inputMethod: resolvedConfig.inputMethod,
+      wrongTileBehavior: resolvedConfig.wrongTileBehavior,
+      tileBankMode: resolvedConfig.tileBankMode,
+      distractorCount: resolvedConfig.distractorCount,
+      totalRounds: resolvedRounds.length,
+      roundsInOrder: resolvedConfig.roundsInOrder,
+      ttsEnabled: resolvedConfig.ttsEnabled,
+      touchKeyboardInputMode: 'text',
+      initialTiles: tiles,
+      initialZones: zones,
+      slotInteraction:
+        resolvedConfig.mode === 'scramble' ||
+        resolvedConfig.mode === 'sentence-gap'
+          ? 'free-swap'
+          : 'ordered',
+    }),
+    [
+      resolvedConfig.gameId,
+      resolvedConfig.inputMethod,
+      resolvedConfig.wrongTileBehavior,
+      resolvedConfig.tileBankMode,
+      resolvedConfig.distractorCount,
+      resolvedRounds.length,
+      resolvedConfig.roundsInOrder,
+      resolvedConfig.ttsEnabled,
+      resolvedConfig.mode,
+      tiles,
+      zones,
+    ],
+  );
+
+  if (isLoading) {
     return (
-      <AnswerGame
-        config={answerGameConfig}
-        initialState={initialState}
-        sessionId={sessionId}
+      <div
+        role="status"
+        className="flex min-h-[200px] w-full items-center justify-center text-foreground"
       >
-        <WordSpellSession
-          wordSpellConfig={resolvedConfig}
-          roundOrder={roundOrder}
-          onRestartSession={() => {
-            setSessionEpoch((e) => e + 1);
-          }}
-        />
-      </AnswerGame>
+        Loading words…
+      </div>
     );
-  };
-  ```
+  }
 
-- [ ] **Step 2 — Add the import**
+  if (!round0) return null;
 
-  At the top of `WordSpell.tsx`, add:
+  return (
+    <AnswerGame
+      config={answerGameConfig}
+      initialState={initialState}
+      sessionId={sessionId}
+    >
+      <WordSpellSession
+        wordSpellConfig={resolvedConfig}
+        roundOrder={roundOrder}
+        onRestartSession={() => {
+          setSessionEpoch((e) => e + 1);
+        }}
+      />
+    </AnswerGame>
+  );
+};
+```
 
-  ```ts
-  import { useLibraryRounds } from '../useLibraryRounds';
-  ```
+- [ ] **Step 2: Add the import**
 
-- [ ] **Step 3 — Fix existing stories/tests that now need `rounds` field**
+At the top of `src/games/word-spell/WordSpell/WordSpell.tsx`, add:
 
-  The existing `baseConfig` in `WordSpell.stories.tsx` already provides
-  `rounds: [...]` — it keeps working because the hook short-circuits when
-  `config.rounds` is set. If typecheck flags other callers, fix them to match
-  the new optional `rounds` signature.
+```ts
+import { useLibraryRounds } from '../useLibraryRounds';
+```
 
-  Run: `yarn typecheck`
-  Expected: passes.
+- [ ] **Step 3: Typecheck**
 
-- [ ] **Step 4 — Run existing WordSpell tests**
+Run: `yarn typecheck`
+Expected: passes.
 
-  Run: `yarn test src/games/word-spell/`
-  Expected: existing `WordSpell.test.tsx` passes unchanged (legacy path); new
-  `useLibraryRounds.test.tsx` passes.
+- [ ] **Step 4: Run existing WordSpell tests**
 
-- [ ] **Step 5 — Commit Tasks 13 + 14 + 15 together**
+Run: `yarn test src/games/word-spell/`
+Expected: legacy `WordSpell.test.tsx` passes unchanged (hand-authored
+`rounds` path short-circuits the hook). New `useLibraryRounds.test.tsx`
+passes.
 
-  ```bash
-  git add \
-    src/games/word-spell/types.ts \
-    src/games/word-spell/useLibraryRounds.ts \
-    src/games/word-spell/useLibraryRounds.test.tsx \
-    src/games/word-spell/WordSpell/WordSpell.tsx
-  git commit -m "feat(word-spell): resolve rounds from word library filter"
-  ```
+- [ ] **Step 5: Commit Tasks 14 + 15 + 16 together**
+
+```bash
+git add \
+  src/games/word-spell/types.ts \
+  src/games/word-spell/useLibraryRounds.ts \
+  src/games/word-spell/useLibraryRounds.test.tsx \
+  src/games/word-spell/WordSpell/WordSpell.tsx
+git commit -m "feat(word-spell): resolve rounds from word library filter"
+```
 
 ---
 
-### Task 16 — Add `LibrarySourced` Storybook story
+### Task 17 — `LibrarySourced` Storybook story
 
 **Files:**
 
 - Modify: `src/games/word-spell/WordSpell/WordSpell.stories.tsx`
 
-- [ ] **Step 1 — Append story**
+- [ ] **Step 1: Append a new story**
 
-  Add below the existing `LockManualWrongTile` export:
+Below the last existing story export:
 
-  ```tsx
-  export const LibrarySourced: Story = {
-    args: {
-      config: {
-        gameId: 'word-spell-library-sourced',
-        component: 'WordSpell',
-        inputMethod: 'drag',
-        wrongTileBehavior: 'lock-auto-eject',
-        tileBankMode: 'exact',
-        totalRounds: 4,
-        roundsInOrder: true,
-        ttsEnabled: false,
-        mode: 'recall',
-        tileUnit: 'letter',
-        source: {
-          type: 'word-library',
-          filter: {
-            region: 'aus',
-            phases: ['f.unit1', 'f.unit2'],
-            syllablesEq: 1,
-          },
+```tsx
+export const LibrarySourced: Story = {
+  args: {
+    config: {
+      gameId: 'word-spell-library-sourced',
+      component: 'WordSpell',
+      inputMethod: 'drag',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      totalRounds: 4,
+      roundsInOrder: true,
+      ttsEnabled: false,
+      mode: 'recall',
+      tileUnit: 'letter',
+      source: {
+        type: 'word-library',
+        filter: {
+          region: 'aus',
+          levels: [1, 2],
+          syllableCountEq: 1,
         },
       },
     },
-  };
-  ```
+  },
+};
+```
 
-- [ ] **Step 2 — Run Storybook test suite**
+- [ ] **Step 2: Start Storybook + run story tests**
 
-  Start Storybook: `yarn storybook` (in a separate terminal) or use the
-  `START_STORYBOOK=1` push flag later.
+Run `yarn storybook` in one terminal.
+Run: `yarn test:storybook --url http://localhost:6006`
+Expected: `LibrarySourced` story renders — brief loading state then 4 tiles
+in the bank drawn from AUS levels 1–2.
 
-  Run: `yarn test:storybook --url http://localhost:6006`
-  Expected: the new story renders, the loading state appears briefly, then
-  4 tiles show up in the bank.
+If dev-server is unavailable in the environment, skip this step and
+document the skip in the commit: `SKIP_STORYBOOK=1` when pushing.
 
-- [ ] **Step 3 — Commit**
+- [ ] **Step 3: Commit**
 
-  ```bash
-  git add src/games/word-spell/WordSpell/WordSpell.stories.tsx
-  git commit -m "feat(word-spell): add library-sourced story"
-  ```
+```bash
+git add src/games/word-spell/WordSpell/WordSpell.stories.tsx
+git commit -m "feat(word-spell): add library-sourced story"
+```
 
 ---
 
-### Task 17 — Final gate
+### Task 18 — Final gate
 
 **Files:** none.
 
-- [ ] **Step 1 — Lint**
+- [ ] **Step 1: Lint**
 
-  Run: `yarn lint`
-  Expected: passes.
+Run: `yarn lint`
+Expected: passes.
 
-- [ ] **Step 2 — Typecheck**
+- [ ] **Step 2: Typecheck**
 
-  Run: `yarn typecheck`
-  Expected: passes.
+Run: `yarn typecheck`
+Expected: passes.
 
-- [ ] **Step 3 — Unit tests**
+- [ ] **Step 3: Unit tests**
 
-  Run: `yarn test`
-  Expected: passes. Watch for word library tests running against all chunk
-  files.
+Run: `yarn test`
+Expected: all 556+ existing tests plus the new phonics-library suite pass.
 
-- [ ] **Step 4 — Storybook tests (optional pre-push)**
+- [ ] **Step 4: Storybook interaction tests (optional pre-push)**
 
-  Run: `yarn storybook` in one terminal, then `yarn test:storybook` in
-  another.
-  Expected: passes, including the new `LibrarySourced` story.
+Run: `yarn storybook` in one terminal, then `yarn test:storybook` in
+another.
+Expected: passes, including the new `LibrarySourced` story.
 
-- [ ] **Step 5 — VR tests (optional)**
+- [ ] **Step 5: VR tests (optional)**
 
-  The WordSpell visual regression suite has an existing
-  `word-spell-picture-mode` snapshot. The new story uses `recall` mode — no
-  new baselines should be needed unless the loading state causes flicker. If
-  baselines change unexpectedly, review the diffs manually before running
-  `yarn test:vr:update`.
+If WordSpell's VR suite flags the new loading state as a diff, decide
+whether the flicker is expected. If yes, run `yarn test:vr:update`, commit
+updated baselines, then push. If no, investigate before pushing.
 
-- [ ] **Step 6 — Confirm with user before pushing.** Push requires the user's
-      explicit go-ahead per [feedback_confirm_before_push.md](../../../../.claude/projects/-Users-leocaseiro-Sites-base-skill/memory/feedback_confirm_before_push.md).
+- [ ] **Step 6: Confirm with user before pushing.**
+
+Push requires the user's explicit go-ahead per project memory. Do not
+force-push. Do not skip hooks unless the user authorizes a specific
+`SKIP_*` flag with a documented reason.
 
 ---
 
 ## Post-implementation notes
 
-- **Filter UI** is the obvious follow-up — a dedicated plan should add
-  `wordSpellConfigFields` entries for `source.filter.region`, `phases[]`,
-  `grapheme`, `phoneme`, and the syllable range.
-- **pt-BR seed** is also a follow-up. The data shape is ready; a separate
-  plan hand-authors the first BNCC vogais / sílabas simples chunk.
-- **Bulk import pipeline** is deferred until the corpus crosses ~500 words.
-- **Algorithmic syllable splitting** is deferred — all seed chunks here are
-  hand-authored.
-- **RxDB-backed storage** is blocked on the two triggers in the spec § 5.2
-  (corpus > ~1000 words with measured perf pain, or user-editable lists).
+- **P2 unlocks the Tier 2 enrichment backlog.** The ~650 codegen-flagged
+  entries in `2026-04-11-phonics-word-library_codegen-review.md` are all
+  authored as Tier 1 only (graphemes split structurally, but `ipa` is empty
+  and phonemes are `''`). P2's Storybook form is the natural place to walk
+  through this list and fill in the IPA + phonemes.
+- **P3 adds `WordSpellSource = { type: 'word-bag', bagId }`.** The
+  `WordSpellSource` discriminated union type in `src/games/word-spell/types.ts`
+  already anticipates this — P3 extends the union and the `useLibraryRounds`
+  hook's `useEffect` gains a second branch.
+- **UK/US/BR curricula stay empty until hand-seeded via P2.** AUS fallback
+  covers the gap during that period.
