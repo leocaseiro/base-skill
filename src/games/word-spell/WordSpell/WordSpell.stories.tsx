@@ -78,3 +78,28 @@ export const WithDistractors: Story = {
 export const LockManualWrongTile: Story = {
   args: { config: { ...baseConfig, wrongTileBehavior: 'lock-manual' } },
 };
+
+export const LibrarySourced: Story = {
+  args: {
+    config: {
+      gameId: 'word-spell-library-sourced',
+      component: 'WordSpell',
+      inputMethod: 'drag',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      totalRounds: 4,
+      roundsInOrder: true,
+      ttsEnabled: false,
+      mode: 'recall',
+      tileUnit: 'letter',
+      source: {
+        type: 'word-library',
+        filter: {
+          region: 'aus',
+          levels: [1, 2],
+          syllableCountEq: 1,
+        },
+      },
+    },
+  },
+};
