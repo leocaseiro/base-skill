@@ -110,16 +110,31 @@ export const ObjectsStyle: Story = {
   },
 };
 
+const numeralToGroupLongLabelsConfig: NumberMatchConfig = {
+  ...baseConfig,
+  mode: 'numeral-to-group',
+  tileStyle: 'dots',
+  tileBankMode: 'distractors',
+  distractorCount: 3,
+  range: { min: 10_000, max: 99_999 },
+  rounds: [{ value: 10_002 }, { value: 19_467 }, { value: 99_999 }],
+};
+
 export const NumeralToGroupLongLabels: Story = {
-  args: {
-    config: {
-      ...baseConfig,
-      mode: 'numeral-to-group',
-      tileStyle: 'dots',
-      tileBankMode: 'distractors',
-      distractorCount: 3,
-      range: { min: 10_000, max: 99_999 },
-      rounds: [{ value: 10_002 }, { value: 19_467 }, { value: 99_999 }],
-    },
-  },
+  args: { config: numeralToGroupLongLabelsConfig },
+};
+
+export const NumeralToGroupLongLabelsMobile: Story = {
+  args: { config: numeralToGroupLongLabelsConfig },
+  parameters: { viewport: { defaultViewport: 'mobileLg' } },
+};
+
+export const NumeralToGroupLongLabelsTabletPortrait: Story = {
+  args: { config: numeralToGroupLongLabelsConfig },
+  parameters: { viewport: { defaultViewport: 'tabletPortrait' } },
+};
+
+export const NumeralToGroupLongLabelsDesktop: Story = {
+  args: { config: numeralToGroupLongLabelsConfig },
+  parameters: { viewport: { defaultViewport: 'desktop' } },
 };
