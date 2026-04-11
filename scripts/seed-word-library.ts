@@ -41,7 +41,7 @@ const parseSource = (md: string): LevelBlock[] => {
     const end =
       i + 1 < matches.length ? matches[i + 1]!.index : md.length;
     const chunk = md.slice(start, end);
-    const wordsLine = /\*\s+words:\s+\[([^\]]+)\]/i.exec(chunk);
+    const wordsLine = /[*-]\s+words:\s+\[([^\]]+)\]/i.exec(chunk);
     if (!wordsLine) continue;
     const words = wordsLine[1]!
       .split(',')
@@ -90,7 +90,16 @@ const seed = (blocks: LevelBlock[]): SeedResult => {
         continue;
       }
 
-      const v = validateEntry(core, entry);
+      // Tier 1 ships now; Tier 2 IPA is added later via P2.
+      // Emit the curriculum row without ipa — consumers treat Tier-2 fields as optional.
+      const tier1Entry: CurriculumEntry = {
+        word: entry.word,
+        level: entry.level,
+        ipa: '',
+        graphemes: entry.graphemes,
+      };
+
+      const v = validateEntry(core, tier1Entry);
       if (!v.ok) {
         review.push(
           `- \`${word}\` (level ${block.level}) — ${v.errors.map((e) => e.message).join('; ')}`,
@@ -100,7 +109,13 @@ const seed = (blocks: LevelBlock[]): SeedResult => {
 
       if (!curriculumByLevel.has(block.level))
         curriculumByLevel.set(block.level, []);
-      curriculumByLevel.get(block.level)!.push(entry);
+      curriculumByLevel.get(block.level)!.push(tier1Entry);
+
+      if (!entry.graphemes.every((g) => g.p !== '')) {
+        review.push(
+          `- \`${word}\` (level ${block.level}) — Tier 2 needed: IPA + phonemes`,
+        );
+      }
     }
   }
 
