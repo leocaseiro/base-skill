@@ -240,3 +240,37 @@ export const LevelModeDescending: Story = {
     },
   },
 };
+
+const tenSlotsLongLabelsConfig: SortNumbersConfig = {
+  ...baseConfig,
+  totalRounds: 1,
+  quantity: 10,
+  range: { min: 1000, max: 10_000 },
+  distractors: { source: 'random', count: 0 },
+  rounds: [
+    {
+      sequence: [
+        1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000,
+      ],
+    },
+  ],
+};
+
+export const TenSlotsLongLabels: Story = {
+  args: { config: tenSlotsLongLabelsConfig },
+};
+
+export const TenSlotsLongLabelsMobile: Story = {
+  args: { config: tenSlotsLongLabelsConfig },
+  parameters: { viewport: { defaultViewport: 'mobileLg' } },
+};
+
+export const TenSlotsLongLabelsTabletPortrait: Story = {
+  args: { config: tenSlotsLongLabelsConfig },
+  parameters: { viewport: { defaultViewport: 'tabletPortrait' } },
+};
+
+export const TenSlotsLongLabelsDesktop: Story = {
+  args: { config: tenSlotsLongLabelsConfig },
+  parameters: { viewport: { defaultViewport: 'desktop' } },
+};
