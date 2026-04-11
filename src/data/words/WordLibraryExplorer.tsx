@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { filterWords } from './filter';
 import { ALL_REGIONS, LEVEL_LABELS } from './levels';
-import { playPhoneme } from './phoneme-audio';
+import { playPhoneme, stopPhoneme } from './phoneme-audio';
 import type {
   FilterResult,
   Grapheme,
@@ -292,6 +292,14 @@ const GraphemeChips = ({ graphemes }: { graphemes: Grapheme[] }) => (
         onClick={() => {
           void playPhoneme(gr.p);
         }}
+        onPointerEnter={() => {
+          void playPhoneme(gr.p, { sustain: true });
+        }}
+        onPointerLeave={stopPhoneme}
+        onFocus={() => {
+          void playPhoneme(gr.p, { sustain: true });
+        }}
+        onBlur={stopPhoneme}
         className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs transition-colors hover:bg-muted/70"
       >
         {gr.g}
