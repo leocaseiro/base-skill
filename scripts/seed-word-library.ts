@@ -10,6 +10,7 @@ import {
 import { graphemePool } from '../src/data/words/levels';
 import type {
   CurriculumEntry,
+  Grapheme,
   WordCore,
 } from '../src/data/words/types';
 
@@ -20,10 +21,23 @@ const sourceFile = path.join(
   'docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md',
 );
 const wordsDir = path.join(repoRoot, 'src/data/words');
+const tier2File = path.join(wordsDir, 'tier2-aus.json');
 const reviewFile = path.join(
   repoRoot,
   'docs/superpowers/plans/2026-04-11-phonics-word-library_codegen-review.md',
 );
+
+interface Tier2Entry {
+  word: string;
+  ipa: string;
+  graphemes: Grapheme[];
+}
+
+const loadTier2 = (): Map<string, Tier2Entry> => {
+  const raw = readFileSync(tier2File, 'utf8');
+  const list = JSON.parse(raw) as Tier2Entry[];
+  return new Map(list.map((e) => [e.word, e]));
+};
 
 interface LevelBlock {
   level: number;
@@ -41,7 +55,7 @@ const parseSource = (md: string): LevelBlock[] => {
     const end =
       i + 1 < matches.length ? matches[i + 1]!.index : md.length;
     const chunk = md.slice(start, end);
-    const wordsLine = /\*\s+words:\s+\[([^\]]+)\]/i.exec(chunk);
+    const wordsLine = /[*-]\s+words:\s+\[([^\]]+)\]/i.exec(chunk);
     if (!wordsLine) continue;
     const words = wordsLine[1]!
       .split(',')
@@ -65,6 +79,7 @@ const seed = (blocks: LevelBlock[]): SeedResult => {
   const curriculumByLevel = new Map<number, CurriculumEntry[]>();
   const review: string[] = [];
   const seen = new Map<string, number>(); // word → level first assigned
+  const tier2ByWord = loadTier2();
 
   for (const block of blocks) {
     const pool = graphemePool(block.level);
@@ -79,9 +94,17 @@ const seed = (blocks: LevelBlock[]): SeedResult => {
         coreByLevel.set(block.level, []);
       coreByLevel.get(block.level)!.push(core);
 
-      const entry = makeCurriculumEntry(word, block.level, {
-        levelGraphemes: pool,
-      });
+      const tier2 = tier2ByWord.get(word);
+      const entry = tier2
+        ? {
+            word,
+            level: block.level,
+            ipa: tier2.ipa,
+            graphemes: tier2.graphemes,
+          }
+        : makeCurriculumEntry(word, block.level, {
+            levelGraphemes: pool,
+          });
 
       if (entry === null) {
         review.push(
@@ -101,6 +124,12 @@ const seed = (blocks: LevelBlock[]): SeedResult => {
       if (!curriculumByLevel.has(block.level))
         curriculumByLevel.set(block.level, []);
       curriculumByLevel.get(block.level)!.push(entry);
+
+      if (!tier2) {
+        review.push(
+          `- \`${word}\` (level ${block.level}) — missing from tier2-aus.json`,
+        );
+      }
     }
   }
 

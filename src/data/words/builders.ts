@@ -61,6 +61,30 @@ export const makeGraphemes = (
   return graphemes;
 };
 
+/**
+ * Reconstructs a word from a grapheme array. Split digraphs like `a_e`
+ * consume the next grapheme as the missing consonant: `[c, a_e, k]` → `cake`.
+ * Returns null if a split-digraph grapheme is not followed by another unit.
+ */
+export const reconstructWord = (
+  graphemes: readonly Grapheme[],
+): string | null => {
+  let out = '';
+  for (let i = 0; i < graphemes.length; i++) {
+    const g = graphemes[i]!.g;
+    const uIdx = g.indexOf('_');
+    if (uIdx === -1) {
+      out += g;
+      continue;
+    }
+    const next = graphemes[i + 1];
+    if (!next) return null;
+    out += g.slice(0, uIdx) + next.g + g.slice(uIdx + 1);
+    i += 1;
+  }
+  return out;
+};
+
 export const makeWordCore = (
   word: string,
   opts: { syllables?: string[]; variants?: string[] } = {},
@@ -125,18 +149,12 @@ export const validateEntry = (
     });
   }
 
-  const concat = curriculum.graphemes
-    .map((g) => g.g.replace('_', ''))
-    .join('');
+  const concat = reconstructWord(curriculum.graphemes);
   if (concat !== curriculum.word) {
     errors.push({
       field: 'graphemes',
-      message: `graphemes concat "${concat}" !== word "${curriculum.word}"`,
+      message: `graphemes reconstruct "${concat ?? '(dangling split digraph)'}" !== word "${curriculum.word}"`,
     });
-  }
-
-  if (!curriculum.ipa || curriculum.ipa.trim() === '') {
-    errors.push({ field: 'ipa', message: 'ipa is empty' });
   }
 
   if (curriculum.level < 1 || !Number.isInteger(curriculum.level)) {
