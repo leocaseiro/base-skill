@@ -33,7 +33,7 @@ Unicode characters, tsx for running the Node codegen script.
 ### New files
 
 - `src/data/words/types.ts` — `Region`, `Grapheme`, `WordCore`, `CurriculumEntry`, `WordHit`, `WordFilter`, `FilterResult`, `WordSpellSource`, `ValidationError`
-- `src/data/words/levels.ts` — `LEVEL_LABELS` (per-region formatters), `GRAPHEMES_BY_LEVEL`, `cumulativeGraphemes(level)`, `ALL_REGIONS`
+- `src/data/words/levels.ts` — `LevelGraphemeUnit`, `LEVEL_LABELS` (per-region formatters), `GRAPHEMES_BY_LEVEL`, `cumulativeGraphemes(level)`, `graphemePool(level)`, `ALL_REGIONS`
 - `src/data/words/phoneme-codes.ts` — teacher-friendly code → IPA map
 - `src/data/words/builders.ts` — `makeWordCore`, `makeGraphemes`, `makeCurriculumEntry`, `validateEntry`
 - `src/data/words/builders.test.ts` — unit tests
@@ -78,6 +78,13 @@ Unicode characters, tsx for running the Node codegen script.
   `a_e`).
 - **Digraphs are one grapheme.** `ch` is `{ g: 'ch', p: 'tʃ' }`, never two.
 - **Silent letters** use `p: ''`.
+- **Level pools are grapheme-phoneme units**, not strings. A single
+  orthographic form like `c` can appear twice in the cumulative pool —
+  once as `{ g: 'c', p: 'k' }` (level 2, as in `cat`) and once as
+  `{ g: 'c', p: 's' }` (level 4, as in `cent`). The structural splitter
+  derives a deduped string pool via `graphemePool(level)`; filter
+  queries keep both variants addressable via
+  `graphemesRequired: ['c']` + `phonemesRequired: ['k']`.
 - **Proper nouns are filtered out** by the codegen via first-letter uppercase
   check.
 - **Commit after every task.** Task 17 intentionally bundles Tasks 14–17 into
@@ -207,32 +214,147 @@ export const LEVEL_LABELS: Record<Region, (level: number) => string> = {
 };
 
 /**
- * Graphemes newly introduced at each level of the AUS progression.
- * Source: docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md
+ * A single grapheme-phoneme pairing taught at a given level. A grapheme like
+ * `c` appears twice across the AUS progression — once at level 2 teaching /k/,
+ * once at level 4 teaching /s/. Modelling each as its own unit keeps both
+ * variants addressable in the cumulative pool and in filter queries.
+ */
+export interface LevelGraphemeUnit {
+  /** Orthographic form: `c`, `sh`, `igh`, `a_e`. */
+  g: string;
+  /** IPA of the sound this unit teaches at this level: `k`, `s`, `ʃ`, `aɪ`. */
+  p: string;
+  /** Optional teacher label: `soft c`, `th voiced`. */
+  name?: string;
+}
+
+/**
+ * Grapheme-phoneme units newly introduced at each level of the AUS
+ * progression. Source:
+ * docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md
  * Cumulative sets use `cumulativeGraphemes(level)` below.
  */
-export const GRAPHEMES_BY_LEVEL: Record<number, readonly string[]> = {
-  1: ['s', 'a', 't', 'p', 'i', 'n'],
-  2: ['m', 'd', 'g', 'o', 'c', 'k', 'ck', 'e', 'u', 'r'],
-  3: ['b', 'h', 'f', 'l', 'j', 'v', 'w', 'x', 'y', 'z'],
-  4: ['sh', 'ch', 'th', 'qu', 'ng', 'wh', 'ph'],
-  5: ['ai', 'ay', 'ea', 'ee', 'ie', 'igh', 'oa', 'ow', 'ew', 'ue'],
-  6: ['oi', 'oy', 'oo', 'ou', 'er', 'ir', 'ur', 'ar', 'or'],
-  7: ['a_e', 'e_e', 'i_e', 'o_e', 'u_e'],
-  8: ['aw', 'air', 'are', 'ear', 'eer', 'ore', 'dge', 'tch'],
+export const GRAPHEMES_BY_LEVEL: Record<
+  number,
+  readonly LevelGraphemeUnit[]
+> = {
+  1: [
+    { g: 's', p: 's' },
+    { g: 'a', p: 'æ' },
+    { g: 't', p: 't' },
+    { g: 'p', p: 'p' },
+    { g: 'i', p: 'ɪ' },
+    { g: 'n', p: 'n' },
+  ],
+  2: [
+    { g: 'm', p: 'm' },
+    { g: 'd', p: 'd' },
+    { g: 'g', p: 'g' },
+    { g: 'o', p: 'ɒ' },
+    { g: 'c', p: 'k' },
+    { g: 'k', p: 'k' },
+    { g: 'ck', p: 'k' },
+    { g: 'e', p: 'e' },
+    { g: 'u', p: 'ʌ' },
+    { g: 'r', p: 'r' },
+  ],
+  3: [
+    { g: 'b', p: 'b' },
+    { g: 'h', p: 'h' },
+    { g: 'f', p: 'f' },
+    { g: 'l', p: 'l' },
+    { g: 'j', p: 'dʒ' },
+    { g: 'v', p: 'v' },
+    { g: 'w', p: 'w' },
+    { g: 'x', p: 'ks' },
+    { g: 'y', p: 'j' },
+    { g: 'z', p: 'z' },
+  ],
+  4: [
+    { g: 'sh', p: 'ʃ' },
+    { g: 'ch', p: 'tʃ' },
+    { g: 'th', p: 'θ', name: 'th voiceless' },
+    { g: 'th', p: 'ð', name: 'th voiced' },
+    { g: 'qu', p: 'kw' },
+    { g: 'ng', p: 'ŋ' },
+    { g: 'wh', p: 'w' },
+    { g: 'ph', p: 'f' },
+    { g: 'g', p: 'dʒ', name: 'soft g' },
+    { g: 'c', p: 's', name: 'soft c' },
+  ],
+  5: [
+    { g: 'ai', p: 'eɪ' },
+    { g: 'ay', p: 'eɪ' },
+    { g: 'ea', p: 'iː' },
+    { g: 'ee', p: 'iː' },
+    { g: 'ie', p: 'aɪ' },
+    { g: 'igh', p: 'aɪ' },
+    { g: 'oa', p: 'oʊ' },
+    { g: 'ow', p: 'oʊ' },
+    { g: 'ew', p: 'juː' },
+    { g: 'ue', p: 'juː' },
+  ],
+  6: [
+    { g: 'oi', p: 'ɔɪ' },
+    { g: 'oy', p: 'ɔɪ' },
+    { g: 'oo', p: 'uː', name: 'oo long' },
+    { g: 'oo', p: 'ʊ', name: 'oo short' },
+    { g: 'ou', p: 'aʊ' },
+    { g: 'er', p: 'ɜː' },
+    { g: 'ir', p: 'ɜː' },
+    { g: 'ur', p: 'ɜː' },
+    { g: 'ar', p: 'ɑː' },
+    { g: 'or', p: 'ɔː' },
+  ],
+  7: [
+    { g: 'a_e', p: 'eɪ' },
+    { g: 'e_e', p: 'iː' },
+    { g: 'i_e', p: 'aɪ' },
+    { g: 'o_e', p: 'oʊ' },
+    { g: 'u_e', p: 'juː' },
+  ],
+  8: [
+    { g: 'aw', p: 'ɔː' },
+    { g: 'air', p: 'eə' },
+    { g: 'are', p: 'eə' },
+    { g: 'ear', p: 'ɪə' },
+    { g: 'eer', p: 'ɪə' },
+    { g: 'ore', p: 'ɔː' },
+    { g: 'dge', p: 'dʒ' },
+    { g: 'tch', p: 'tʃ' },
+  ],
 };
 
-export const cumulativeGraphemes = (level: number): string[] => {
-  const out: string[] = [];
+/**
+ * Returns all LevelGraphemeUnits introduced at or before `level`, preserving
+ * introduction order and keeping multiple variants of the same orthography
+ * (e.g. both `c=/k/` and `c=/s/` at level 4+).
+ */
+export const cumulativeGraphemes = (
+  level: number,
+): LevelGraphemeUnit[] => {
+  const out: LevelGraphemeUnit[] = [];
   const seen = new Set<string>();
   for (let l = 1; l <= level; l++) {
-    for (const g of GRAPHEMES_BY_LEVEL[l] ?? []) {
-      if (seen.has(g)) continue;
-      seen.add(g);
-      out.push(g);
+    for (const unit of GRAPHEMES_BY_LEVEL[l] ?? []) {
+      const key = `${unit.g}|${unit.p}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(unit);
     }
   }
   return out;
+};
+
+/**
+ * Deduped orthographic pool for structural word splitting. Used by
+ * `makeGraphemes` — the splitter only needs to know which grapheme forms
+ * exist, not which phoneme each one teaches.
+ */
+export const graphemePool = (level: number): string[] => {
+  const seen = new Set<string>();
+  for (const unit of cumulativeGraphemes(level)) seen.add(unit.g);
+  return [...seen];
 };
 ```
 
@@ -398,11 +520,14 @@ git commit -m "feat(words): add makeWordCore builder"
 ```ts
 // append to src/data/words/builders.test.ts
 import { makeGraphemes } from './builders';
+import { graphemePool } from './levels';
 
 describe('makeGraphemes', () => {
-  const L1 = ['s', 'a', 't', 'p', 'i', 'n'];
-  const L2 = [...L1, 'm', 'd', 'g', 'o', 'c', 'k', 'ck', 'e', 'u', 'r'];
-  const L4 = [...L2, 'sh', 'ch', 'th', 'ng'];
+  // graphemePool dedupes the orthographic forms; the phoneme each form
+  // teaches at its level comes from GRAPHEMES_BY_LEVEL itself and is not
+  // needed by the structural splitter.
+  const L2 = graphemePool(2);
+  const L4 = graphemePool(4);
 
   it('splits simple CVC letter-by-letter', () => {
     const result = makeGraphemes('cat', L2);
@@ -536,24 +661,7 @@ git commit -m "feat(words): add makeGraphemes longest-match splitter"
 import { makeCurriculumEntry, validateEntry } from './builders';
 
 describe('makeCurriculumEntry', () => {
-  const L2 = [
-    's',
-    'a',
-    't',
-    'p',
-    'i',
-    'n',
-    'm',
-    'd',
-    'g',
-    'o',
-    'c',
-    'k',
-    'ck',
-    'e',
-    'u',
-    'r',
-  ];
+  const L2 = graphemePool(2);
 
   it('builds a CurriculumEntry with graphemes derived from the level set', () => {
     const entry = makeCurriculumEntry('cat', 2, {
@@ -1044,10 +1152,7 @@ import {
   makeWordCore,
   validateEntry,
 } from '../src/data/words/builders';
-import {
-  cumulativeGraphemes,
-  GRAPHEMES_BY_LEVEL,
-} from '../src/data/words/levels';
+import { graphemePool } from '../src/data/words/levels';
 import type {
   CurriculumEntry,
   WordCore,
@@ -1067,7 +1172,6 @@ const reviewFile = join(
 
 interface LevelBlock {
   level: number;
-  graphemes: string[];
   words: string[];
 }
 
@@ -1088,11 +1192,7 @@ const parseSource = (md: string): LevelBlock[] => {
       .split(',')
       .map((w) => w.trim())
       .filter(Boolean);
-    blocks.push({
-      level,
-      graphemes: [...(GRAPHEMES_BY_LEVEL[level] ?? [])],
-      words,
-    });
+    blocks.push({ level, words });
   }
   return blocks;
 };
@@ -1112,7 +1212,7 @@ const seed = (blocks: LevelBlock[]): SeedResult => {
   const seen = new Map<string, number>(); // word → level first assigned
 
   for (const block of blocks) {
-    const pool = cumulativeGraphemes(block.level);
+    const pool = graphemePool(block.level);
     for (const rawWord of block.words) {
       if (isProperNoun(rawWord)) continue;
       const word = rawWord.toLowerCase();
@@ -1914,11 +2014,13 @@ export type {
   WordSpellSource,
   ValidationError,
 } from './types';
+export type { LevelGraphemeUnit } from './levels';
 export {
   ALL_REGIONS,
   LEVEL_LABELS,
   GRAPHEMES_BY_LEVEL,
   cumulativeGraphemes,
+  graphemePool,
 } from './levels';
 export {
   PHONEME_CODE_TO_IPA,
