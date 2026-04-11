@@ -135,10 +135,6 @@ export const validateEntry = (
     });
   }
 
-  if (!curriculum.ipa || curriculum.ipa.trim() === '') {
-    errors.push({ field: 'ipa', message: 'ipa is empty' });
-  }
-
   if (curriculum.level < 1 || !Number.isInteger(curriculum.level)) {
     errors.push({
       field: 'level',
