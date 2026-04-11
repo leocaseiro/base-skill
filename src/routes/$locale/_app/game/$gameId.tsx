@@ -189,7 +189,9 @@ const resolveWordSpellConfig = (
 ): WordSpellConfig => {
   const base: WordSpellConfig = {
     ...DEFAULT_WORD_SPELL_CONFIG,
-    rounds: DEFAULT_WORD_SPELL_CONFIG.rounds.map((r) => ({ ...r })),
+    rounds: (DEFAULT_WORD_SPELL_CONFIG.rounds ?? []).map((r) => ({
+      ...r,
+    })),
   };
   if (!saved || saved.component !== 'WordSpell') return base;
   const merged: WordSpellConfig = {
