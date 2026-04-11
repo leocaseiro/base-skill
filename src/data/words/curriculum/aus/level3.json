@@ -1,0 +1,724 @@
+[
+  {
+    "word": "bat",
+    "level": 3,
+    "ipa": "bæt",
+    "graphemes": [
+      {
+        "g": "b",
+        "p": "b"
+      },
+      {
+        "g": "a",
+        "p": "æ"
+      },
+      {
+        "g": "t",
+        "p": "t"
+      }
+    ]
+  },
+  {
+    "word": "bed",
+    "level": 3,
+    "ipa": "bed",
+    "graphemes": [
+      {
+        "g": "b",
+        "p": "b"
+      },
+      {
+        "g": "e",
+        "p": "e"
+      },
+      {
+        "g": "d",
+        "p": "d"
+      }
+    ]
+  },
+  {
+    "word": "beg",
+    "level": 3,
+    "ipa": "beg",
+    "graphemes": [
+      {
+        "g": "b",
+        "p": "b"
+      },
+      {
+        "g": "e",
+        "p": "e"
+      },
+      {
+        "g": "g",
+        "p": "g"
+      }
+    ]
+  },
+  {
+    "word": "big",
+    "level": 3,
+    "ipa": "bɪg",
+    "graphemes": [
+      {
+        "g": "b",
+        "p": "b"
+      },
+      {
+        "g": "i",
+        "p": "ɪ"
+      },
+      {
+        "g": "g",
+        "p": "g"
+      }
+    ]
+  },
+  {
+    "word": "bin",
+    "level": 3,
+    "ipa": "bɪn",
+    "graphemes": [
+      {
+        "g": "b",
+        "p": "b"
+      },
+      {
+        "g": "i",
+        "p": "ɪ"
+      },
+      {
+        "g": "n",
+        "p": "n"
+      }
+    ]
+  },
+  {
+    "word": "bit",
+    "level": 3,
+    "ipa": "bɪt",
+    "graphemes": [
+      {
+        "g": "b",
+        "p": "b"
+      },
+      {
+        "g": "i",
+        "p": "ɪ"
+      },
+      {
+        "g": "t",
+        "p": "t"
+      }
+    ]
+  },
+  {
+    "word": "box",
+    "level": 3,
+    "ipa": "bɒks",
+    "graphemes": [
+      {
+        "g": "b",
+        "p": "b"
+      },
+      {
+        "g": "o",
+        "p": "ɒ"
+      },
+      {
+        "g": "x",
+        "p": "ks"
+      }
+    ]
+  },
+  {
+    "word": "bug",
+    "level": 3,
+    "ipa": "bʌg",
+    "graphemes": [
+      {
+        "g": "b",
+        "p": "b"
+      },
+      {
+        "g": "u",
+        "p": "ʌ"
+      },
+      {
+        "g": "g",
+        "p": "g"
+      }
+    ]
+  },
+  {
+    "word": "bun",
+    "level": 3,
+    "ipa": "bʌn",
+    "graphemes": [
+      {
+        "g": "b",
+        "p": "b"
+      },
+      {
+        "g": "u",
+        "p": "ʌ"
+      },
+      {
+        "g": "n",
+        "p": "n"
+      }
+    ]
+  },
+  {
+    "word": "dob",
+    "level": 3,
+    "ipa": "dɒb",
+    "graphemes": [
+      {
+        "g": "d",
+        "p": "d"
+      },
+      {
+        "g": "o",
+        "p": "ɒ"
+      },
+      {
+        "g": "b",
+        "p": "b"
+      }
+    ]
+  },
+  {
+    "word": "fox",
+    "level": 3,
+    "ipa": "fɒks",
+    "graphemes": [
+      {
+        "g": "f",
+        "p": "f"
+      },
+      {
+        "g": "o",
+        "p": "ɒ"
+      },
+      {
+        "g": "x",
+        "p": "ks"
+      }
+    ]
+  },
+  {
+    "word": "hat",
+    "level": 3,
+    "ipa": "hæt",
+    "graphemes": [
+      {
+        "g": "h",
+        "p": "h"
+      },
+      {
+        "g": "a",
+        "p": "æ"
+      },
+      {
+        "g": "t",
+        "p": "t"
+      }
+    ]
+  },
+  {
+    "word": "hen",
+    "level": 3,
+    "ipa": "hen",
+    "graphemes": [
+      {
+        "g": "h",
+        "p": "h"
+      },
+      {
+        "g": "e",
+        "p": "e"
+      },
+      {
+        "g": "n",
+        "p": "n"
+      }
+    ]
+  },
+  {
+    "word": "hid",
+    "level": 3,
+    "ipa": "hɪd",
+    "graphemes": [
+      {
+        "g": "h",
+        "p": "h"
+      },
+      {
+        "g": "i",
+        "p": "ɪ"
+      },
+      {
+        "g": "d",
+        "p": "d"
+      }
+    ]
+  },
+  {
+    "word": "hit",
+    "level": 3,
+    "ipa": "hɪt",
+    "graphemes": [
+      {
+        "g": "h",
+        "p": "h"
+      },
+      {
+        "g": "i",
+        "p": "ɪ"
+      },
+      {
+        "g": "t",
+        "p": "t"
+      }
+    ]
+  },
+  {
+    "word": "hot",
+    "level": 3,
+    "ipa": "hɒt",
+    "graphemes": [
+      {
+        "g": "h",
+        "p": "h"
+      },
+      {
+        "g": "o",
+        "p": "ɒ"
+      },
+      {
+        "g": "t",
+        "p": "t"
+      }
+    ]
+  },
+  {
+    "word": "hug",
+    "level": 3,
+    "ipa": "hʌg",
+    "graphemes": [
+      {
+        "g": "h",
+        "p": "h"
+      },
+      {
+        "g": "u",
+        "p": "ʌ"
+      },
+      {
+        "g": "g",
+        "p": "g"
+      }
+    ]
+  },
+  {
+    "word": "hum",
+    "level": 3,
+    "ipa": "hʌm",
+    "graphemes": [
+      {
+        "g": "h",
+        "p": "h"
+      },
+      {
+        "g": "u",
+        "p": "ʌ"
+      },
+      {
+        "g": "m",
+        "p": "m"
+      }
+    ]
+  },
+  {
+    "word": "hut",
+    "level": 3,
+    "ipa": "hʌt",
+    "graphemes": [
+      {
+        "g": "h",
+        "p": "h"
+      },
+      {
+        "g": "u",
+        "p": "ʌ"
+      },
+      {
+        "g": "t",
+        "p": "t"
+      }
+    ]
+  },
+  {
+    "word": "jet",
+    "level": 3,
+    "ipa": "dʒet",
+    "graphemes": [
+      {
+        "g": "j",
+        "p": "dʒ"
+      },
+      {
+        "g": "e",
+        "p": "e"
+      },
+      {
+        "g": "t",
+        "p": "t"
+      }
+    ]
+  },
+  {
+    "word": "job",
+    "level": 3,
+    "ipa": "dʒɒb",
+    "graphemes": [
+      {
+        "g": "j",
+        "p": "dʒ"
+      },
+      {
+        "g": "o",
+        "p": "ɒ"
+      },
+      {
+        "g": "b",
+        "p": "b"
+      }
+    ]
+  },
+  {
+    "word": "jog",
+    "level": 3,
+    "ipa": "dʒɒg",
+    "graphemes": [
+      {
+        "g": "j",
+        "p": "dʒ"
+      },
+      {
+        "g": "o",
+        "p": "ɒ"
+      },
+      {
+        "g": "g",
+        "p": "g"
+      }
+    ]
+  },
+  {
+    "word": "jug",
+    "level": 3,
+    "ipa": "dʒʌg",
+    "graphemes": [
+      {
+        "g": "j",
+        "p": "dʒ"
+      },
+      {
+        "g": "u",
+        "p": "ʌ"
+      },
+      {
+        "g": "g",
+        "p": "g"
+      }
+    ]
+  },
+  {
+    "word": "led",
+    "level": 3,
+    "ipa": "led",
+    "graphemes": [
+      {
+        "g": "l",
+        "p": "l"
+      },
+      {
+        "g": "e",
+        "p": "e"
+      },
+      {
+        "g": "d",
+        "p": "d"
+      }
+    ]
+  },
+  {
+    "word": "leg",
+    "level": 3,
+    "ipa": "leg",
+    "graphemes": [
+      {
+        "g": "l",
+        "p": "l"
+      },
+      {
+        "g": "e",
+        "p": "e"
+      },
+      {
+        "g": "g",
+        "p": "g"
+      }
+    ]
+  },
+  {
+    "word": "lip",
+    "level": 3,
+    "ipa": "lɪp",
+    "graphemes": [
+      {
+        "g": "l",
+        "p": "l"
+      },
+      {
+        "g": "i",
+        "p": "ɪ"
+      },
+      {
+        "g": "p",
+        "p": "p"
+      }
+    ]
+  },
+  {
+    "word": "log",
+    "level": 3,
+    "ipa": "lɒg",
+    "graphemes": [
+      {
+        "g": "l",
+        "p": "l"
+      },
+      {
+        "g": "o",
+        "p": "ɒ"
+      },
+      {
+        "g": "g",
+        "p": "g"
+      }
+    ]
+  },
+  {
+    "word": "lot",
+    "level": 3,
+    "ipa": "lɒt",
+    "graphemes": [
+      {
+        "g": "l",
+        "p": "l"
+      },
+      {
+        "g": "o",
+        "p": "ɒ"
+      },
+      {
+        "g": "t",
+        "p": "t"
+      }
+    ]
+  },
+  {
+    "word": "mat",
+    "level": 3,
+    "ipa": "mæt",
+    "graphemes": [
+      {
+        "g": "m",
+        "p": "m"
+      },
+      {
+        "g": "a",
+        "p": "æ"
+      },
+      {
+        "g": "t",
+        "p": "t"
+      }
+    ]
+  },
+  {
+    "word": "rag",
+    "level": 3,
+    "ipa": "ræg",
+    "graphemes": [
+      {
+        "g": "r",
+        "p": "r"
+      },
+      {
+        "g": "a",
+        "p": "æ"
+      },
+      {
+        "g": "g",
+        "p": "g"
+      }
+    ]
+  },
+  {
+    "word": "rap",
+    "level": 3,
+    "ipa": "ræp",
+    "graphemes": [
+      {
+        "g": "r",
+        "p": "r"
+      },
+      {
+        "g": "a",
+        "p": "æ"
+      },
+      {
+        "g": "p",
+        "p": "p"
+      }
+    ]
+  },
+  {
+    "word": "rob",
+    "level": 3,
+    "ipa": "rɒb",
+    "graphemes": [
+      {
+        "g": "r",
+        "p": "r"
+      },
+      {
+        "g": "o",
+        "p": "ɒ"
+      },
+      {
+        "g": "b",
+        "p": "b"
+      }
+    ]
+  },
+  {
+    "word": "sag",
+    "level": 3,
+    "ipa": "sæg",
+    "graphemes": [
+      {
+        "g": "s",
+        "p": "s"
+      },
+      {
+        "g": "a",
+        "p": "æ"
+      },
+      {
+        "g": "g",
+        "p": "g"
+      }
+    ]
+  },
+  {
+    "word": "tub",
+    "level": 3,
+    "ipa": "tʌb",
+    "graphemes": [
+      {
+        "g": "t",
+        "p": "t"
+      },
+      {
+        "g": "u",
+        "p": "ʌ"
+      },
+      {
+        "g": "b",
+        "p": "b"
+      }
+    ]
+  },
+  {
+    "word": "wax",
+    "level": 3,
+    "ipa": "wæks",
+    "graphemes": [
+      {
+        "g": "w",
+        "p": "w"
+      },
+      {
+        "g": "a",
+        "p": "æ"
+      },
+      {
+        "g": "x",
+        "p": "ks"
+      }
+    ]
+  },
+  {
+    "word": "web",
+    "level": 3,
+    "ipa": "web",
+    "graphemes": [
+      {
+        "g": "w",
+        "p": "w"
+      },
+      {
+        "g": "e",
+        "p": "e"
+      },
+      {
+        "g": "b",
+        "p": "b"
+      }
+    ]
+  },
+  {
+    "word": "win",
+    "level": 3,
+    "ipa": "wɪn",
+    "graphemes": [
+      {
+        "g": "w",
+        "p": "w"
+      },
+      {
+        "g": "i",
+        "p": "ɪ"
+      },
+      {
+        "g": "n",
+        "p": "n"
+      }
+    ]
+  },
+  {
+    "word": "zip",
+    "level": 3,
+    "ipa": "zɪp",
+    "graphemes": [
+      {
+        "g": "z",
+        "p": "z"
+      },
+      {
+        "g": "i",
+        "p": "ɪ"
+      },
+      {
+        "g": "p",
+        "p": "p"
+      }
+    ]
+  }
+]
