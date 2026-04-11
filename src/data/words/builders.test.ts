@@ -1,6 +1,7 @@
 // src/data/words/builders.test.ts
 import { describe, expect, it } from 'vitest';
 import {
+  acceptHyphenation,
   makeCurriculumEntry,
   makeGraphemes,
   makeWordCore,
@@ -44,6 +45,35 @@ describe('makeWordCore', () => {
   it('records variants when provided', () => {
     const result = makeWordCore('colour', { variants: ['color'] });
     expect(result.variants).toEqual(['color']);
+  });
+});
+
+describe('acceptHyphenation', () => {
+  it('returns undefined for a single-part split', () => {
+    expect(acceptHyphenation(['cat'])).toBeUndefined();
+  });
+
+  it('returns undefined for an empty split', () => {
+    expect(acceptHyphenation([])).toBeUndefined();
+  });
+
+  it('accepts a clean two-part split', () => {
+    expect(acceptHyphenation(['com', 'pare'])).toEqual(['com', 'pare']);
+  });
+
+  it('rejects splits that orphan a single letter', () => {
+    expect(acceptHyphenation(['ve', 'g', 'an'])).toBeUndefined();
+  });
+
+  it('rejects splits with an empty part', () => {
+    expect(acceptHyphenation(['com', ''])).toBeUndefined();
+  });
+
+  it('returns a fresh array (does not alias the input)', () => {
+    const input = ['um', 'brel', 'la'];
+    const result = acceptHyphenation(input);
+    expect(result).toEqual(input);
+    expect(result).not.toBe(input);
   });
 });
 

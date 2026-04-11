@@ -9,11 +9,13 @@
   },
   {
     "word": "airport",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["air", "port"]
   },
   {
     "word": "airway",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["air", "way"]
   },
   {
     "word": "badge",
@@ -29,11 +31,13 @@
   },
   {
     "word": "before",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["be", "fore"]
   },
   {
     "word": "beware",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["be", "ware"]
   },
   {
     "word": "blew",
@@ -45,7 +49,8 @@
   },
   {
     "word": "career",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["ca", "reer"]
   },
   {
     "word": "cashew",
@@ -73,7 +78,8 @@
   },
   {
     "word": "compare",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["com", "pare"]
   },
   {
     "word": "core",
@@ -81,11 +87,13 @@
   },
   {
     "word": "country",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["coun", "try"]
   },
   {
     "word": "couple",
-    "syllableCount": 1
+    "syllableCount": 2,
+    "syllables": ["cou", "ple"]
   },
   {
     "word": "cousin",
@@ -109,7 +117,8 @@
   },
   {
     "word": "double",
-    "syllableCount": 1
+    "syllableCount": 2,
+    "syllables": ["dou", "ble"]
   },
   {
     "word": "draw",
@@ -125,7 +134,8 @@
   },
   {
     "word": "explore",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["ex", "plore"]
   },
   {
     "word": "fair",
@@ -185,7 +195,8 @@
   },
   {
     "word": "impair",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["im", "pair"]
   },
   {
     "word": "itch",
@@ -225,7 +236,8 @@
   },
   {
     "word": "nourish",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["nour", "ish"]
   },
   {
     "word": "pair",
@@ -241,7 +253,8 @@
   },
   {
     "word": "pawpaw",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["paw", "paw"]
   },
   {
     "word": "pear",
@@ -249,7 +262,8 @@
   },
   {
     "word": "prepare",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["pre", "pare"]
   },
   {
     "word": "rare",
@@ -261,7 +275,8 @@
   },
   {
     "word": "repair",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["re", "pair"]
   },
   {
     "word": "saw",
@@ -353,11 +368,13 @@
   },
   {
     "word": "trouble",
-    "syllableCount": 1
+    "syllableCount": 2,
+    "syllables": ["trou", "ble"]
   },
   {
     "word": "unfair",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["un", "fair"]
   },
   {
     "word": "watch",
