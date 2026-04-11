@@ -89,7 +89,7 @@ export const LibrarySourced: Story = {
       tileBankMode: 'exact',
       totalRounds: 4,
       roundsInOrder: true,
-      ttsEnabled: false,
+      ttsEnabled: true,
       mode: 'recall',
       tileUnit: 'letter',
       source: {
