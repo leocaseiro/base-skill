@@ -2,866 +2,866 @@
   {
     "word": "an",
     "level": 1,
-    "ipa": "",
+    "ipa": "æn",
     "graphemes": [
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "ant",
     "level": 1,
-    "ipa": "",
+    "ipa": "ænt",
     "graphemes": [
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "ants",
     "level": 1,
-    "ipa": "",
+    "ipa": "ænts",
     "graphemes": [
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "as",
     "level": 1,
-    "ipa": "",
+    "ipa": "æs",
     "graphemes": [
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "at",
     "level": 1,
-    "ipa": "",
+    "ipa": "æt",
     "graphemes": [
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "in",
     "level": 1,
-    "ipa": "",
+    "ipa": "ɪn",
     "graphemes": [
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "it",
     "level": 1,
-    "ipa": "",
+    "ipa": "ɪt",
     "graphemes": [
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "nap",
     "level": 1,
-    "ipa": "",
+    "ipa": "næp",
     "graphemes": [
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "naps",
     "level": 1,
-    "ipa": "",
+    "ipa": "næps",
     "graphemes": [
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "nip",
     "level": 1,
-    "ipa": "",
+    "ipa": "nɪp",
     "graphemes": [
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "nips",
     "level": 1,
-    "ipa": "",
+    "ipa": "nɪps",
     "graphemes": [
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "nit",
     "level": 1,
-    "ipa": "",
+    "ipa": "nɪt",
     "graphemes": [
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "nits",
     "level": 1,
-    "ipa": "",
+    "ipa": "nɪts",
     "graphemes": [
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "pan",
     "level": 1,
-    "ipa": "",
+    "ipa": "pæn",
     "graphemes": [
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "pans",
     "level": 1,
-    "ipa": "",
+    "ipa": "pæns",
     "graphemes": [
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "pant",
     "level": 1,
-    "ipa": "",
+    "ipa": "pænt",
     "graphemes": [
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "pants",
     "level": 1,
-    "ipa": "",
+    "ipa": "pænts",
     "graphemes": [
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "pat",
     "level": 1,
-    "ipa": "",
+    "ipa": "pæt",
     "graphemes": [
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "pats",
     "level": 1,
-    "ipa": "",
+    "ipa": "pæts",
     "graphemes": [
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "pin",
     "level": 1,
-    "ipa": "",
+    "ipa": "pɪn",
     "graphemes": [
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "pins",
     "level": 1,
-    "ipa": "",
+    "ipa": "pɪns",
     "graphemes": [
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "pips",
     "level": 1,
-    "ipa": "",
+    "ipa": "pɪps",
     "graphemes": [
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "pit",
     "level": 1,
-    "ipa": "",
+    "ipa": "pɪt",
     "graphemes": [
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "pits",
     "level": 1,
-    "ipa": "",
+    "ipa": "pɪts",
     "graphemes": [
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "sap",
     "level": 1,
-    "ipa": "",
+    "ipa": "sæp",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "sat",
     "level": 1,
-    "ipa": "",
+    "ipa": "sæt",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "sin",
     "level": 1,
-    "ipa": "",
+    "ipa": "sɪn",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "sip",
     "level": 1,
-    "ipa": "",
+    "ipa": "sɪp",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "sit",
     "level": 1,
-    "ipa": "",
+    "ipa": "sɪt",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "sits",
     "level": 1,
-    "ipa": "",
+    "ipa": "sɪts",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "snap",
     "level": 1,
-    "ipa": "",
+    "ipa": "snæp",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "snip",
     "level": 1,
-    "ipa": "",
+    "ipa": "snɪp",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "spat",
     "level": 1,
-    "ipa": "",
+    "ipa": "spæt",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "spin",
     "level": 1,
-    "ipa": "",
+    "ipa": "spɪn",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "spit",
     "level": 1,
-    "ipa": "",
+    "ipa": "spɪt",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "spits",
     "level": 1,
-    "ipa": "",
+    "ipa": "spɪts",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "tan",
     "level": 1,
-    "ipa": "",
+    "ipa": "tæn",
     "graphemes": [
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "tap",
     "level": 1,
-    "ipa": "",
+    "ipa": "tæp",
     "graphemes": [
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "taps",
     "level": 1,
-    "ipa": "",
+    "ipa": "tæps",
     "graphemes": [
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   },
   {
     "word": "tin",
     "level": 1,
-    "ipa": "",
+    "ipa": "tɪn",
     "graphemes": [
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "tip",
     "level": 1,
-    "ipa": "",
+    "ipa": "tɪp",
     "graphemes": [
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "tips",
     "level": 1,
-    "ipa": "",
+    "ipa": "tɪps",
     "graphemes": [
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       },
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       }
     ]
   }

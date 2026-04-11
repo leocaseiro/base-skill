@@ -2,722 +2,722 @@
   {
     "word": "bat",
     "level": 3,
-    "ipa": "",
+    "ipa": "bæt",
     "graphemes": [
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "bed",
     "level": 3,
-    "ipa": "",
+    "ipa": "bed",
     "graphemes": [
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       }
     ]
   },
   {
     "word": "beg",
     "level": 3,
-    "ipa": "",
+    "ipa": "beg",
     "graphemes": [
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "g",
-        "p": ""
+        "p": "g"
       }
     ]
   },
   {
     "word": "big",
     "level": 3,
-    "ipa": "",
+    "ipa": "bɪg",
     "graphemes": [
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "g",
-        "p": ""
+        "p": "g"
       }
     ]
   },
   {
     "word": "bin",
     "level": 3,
-    "ipa": "",
+    "ipa": "bɪn",
     "graphemes": [
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "bit",
     "level": 3,
-    "ipa": "",
+    "ipa": "bɪt",
     "graphemes": [
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "box",
     "level": 3,
-    "ipa": "",
+    "ipa": "bɒks",
     "graphemes": [
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "x",
-        "p": ""
+        "p": "ks"
       }
     ]
   },
   {
     "word": "bug",
     "level": 3,
-    "ipa": "",
+    "ipa": "bʌg",
     "graphemes": [
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "g",
-        "p": ""
+        "p": "g"
       }
     ]
   },
   {
     "word": "bun",
     "level": 3,
-    "ipa": "",
+    "ipa": "bʌn",
     "graphemes": [
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "dob",
     "level": 3,
-    "ipa": "",
+    "ipa": "dɒb",
     "graphemes": [
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       }
     ]
   },
   {
     "word": "fox",
     "level": 3,
-    "ipa": "",
+    "ipa": "fɒks",
     "graphemes": [
       {
         "g": "f",
-        "p": ""
+        "p": "f"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "x",
-        "p": ""
+        "p": "ks"
       }
     ]
   },
   {
     "word": "hat",
     "level": 3,
-    "ipa": "",
+    "ipa": "hæt",
     "graphemes": [
       {
         "g": "h",
-        "p": ""
+        "p": "h"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "hen",
     "level": 3,
-    "ipa": "",
+    "ipa": "hen",
     "graphemes": [
       {
         "g": "h",
-        "p": ""
+        "p": "h"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "hid",
     "level": 3,
-    "ipa": "",
+    "ipa": "hɪd",
     "graphemes": [
       {
         "g": "h",
-        "p": ""
+        "p": "h"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       }
     ]
   },
   {
     "word": "hit",
     "level": 3,
-    "ipa": "",
+    "ipa": "hɪt",
     "graphemes": [
       {
         "g": "h",
-        "p": ""
+        "p": "h"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "hot",
     "level": 3,
-    "ipa": "",
+    "ipa": "hɒt",
     "graphemes": [
       {
         "g": "h",
-        "p": ""
+        "p": "h"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "hug",
     "level": 3,
-    "ipa": "",
+    "ipa": "hʌg",
     "graphemes": [
       {
         "g": "h",
-        "p": ""
+        "p": "h"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "g",
-        "p": ""
+        "p": "g"
       }
     ]
   },
   {
     "word": "hum",
     "level": 3,
-    "ipa": "",
+    "ipa": "hʌm",
     "graphemes": [
       {
         "g": "h",
-        "p": ""
+        "p": "h"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "m",
-        "p": ""
+        "p": "m"
       }
     ]
   },
   {
     "word": "hut",
     "level": 3,
-    "ipa": "",
+    "ipa": "hʌt",
     "graphemes": [
       {
         "g": "h",
-        "p": ""
+        "p": "h"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "jet",
     "level": 3,
-    "ipa": "",
+    "ipa": "dʒet",
     "graphemes": [
       {
         "g": "j",
-        "p": ""
+        "p": "dʒ"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "job",
     "level": 3,
-    "ipa": "",
+    "ipa": "dʒɒb",
     "graphemes": [
       {
         "g": "j",
-        "p": ""
+        "p": "dʒ"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       }
     ]
   },
   {
     "word": "jog",
     "level": 3,
-    "ipa": "",
+    "ipa": "dʒɒg",
     "graphemes": [
       {
         "g": "j",
-        "p": ""
+        "p": "dʒ"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "g",
-        "p": ""
+        "p": "g"
       }
     ]
   },
   {
     "word": "jug",
     "level": 3,
-    "ipa": "",
+    "ipa": "dʒʌg",
     "graphemes": [
       {
         "g": "j",
-        "p": ""
+        "p": "dʒ"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "g",
-        "p": ""
+        "p": "g"
       }
     ]
   },
   {
     "word": "led",
     "level": 3,
-    "ipa": "",
+    "ipa": "led",
     "graphemes": [
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "d",
-        "p": ""
+        "p": "d"
       }
     ]
   },
   {
     "word": "leg",
     "level": 3,
-    "ipa": "",
+    "ipa": "leg",
     "graphemes": [
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "g",
-        "p": ""
+        "p": "g"
       }
     ]
   },
   {
     "word": "lip",
     "level": 3,
-    "ipa": "",
+    "ipa": "lɪp",
     "graphemes": [
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "log",
     "level": 3,
-    "ipa": "",
+    "ipa": "lɒg",
     "graphemes": [
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "g",
-        "p": ""
+        "p": "g"
       }
     ]
   },
   {
     "word": "lot",
     "level": 3,
-    "ipa": "",
+    "ipa": "lɒt",
     "graphemes": [
       {
         "g": "l",
-        "p": ""
+        "p": "l"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "mat",
     "level": 3,
-    "ipa": "",
+    "ipa": "mæt",
     "graphemes": [
       {
         "g": "m",
-        "p": ""
+        "p": "m"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       }
     ]
   },
   {
     "word": "rag",
     "level": 3,
-    "ipa": "",
+    "ipa": "ræg",
     "graphemes": [
       {
         "g": "r",
-        "p": ""
+        "p": "r"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "g",
-        "p": ""
+        "p": "g"
       }
     ]
   },
   {
     "word": "rap",
     "level": 3,
-    "ipa": "",
+    "ipa": "ræp",
     "graphemes": [
       {
         "g": "r",
-        "p": ""
+        "p": "r"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   },
   {
     "word": "rob",
     "level": 3,
-    "ipa": "",
+    "ipa": "rɒb",
     "graphemes": [
       {
         "g": "r",
-        "p": ""
+        "p": "r"
       },
       {
         "g": "o",
-        "p": ""
+        "p": "ɒ"
       },
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       }
     ]
   },
   {
     "word": "sag",
     "level": 3,
-    "ipa": "",
+    "ipa": "sæg",
     "graphemes": [
       {
         "g": "s",
-        "p": ""
+        "p": "s"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "g",
-        "p": ""
+        "p": "g"
       }
     ]
   },
   {
     "word": "tub",
     "level": 3,
-    "ipa": "",
+    "ipa": "tʌb",
     "graphemes": [
       {
         "g": "t",
-        "p": ""
+        "p": "t"
       },
       {
         "g": "u",
-        "p": ""
+        "p": "ʌ"
       },
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       }
     ]
   },
   {
     "word": "wax",
     "level": 3,
-    "ipa": "",
+    "ipa": "wæks",
     "graphemes": [
       {
         "g": "w",
-        "p": ""
+        "p": "w"
       },
       {
         "g": "a",
-        "p": ""
+        "p": "æ"
       },
       {
         "g": "x",
-        "p": ""
+        "p": "ks"
       }
     ]
   },
   {
     "word": "web",
     "level": 3,
-    "ipa": "",
+    "ipa": "web",
     "graphemes": [
       {
         "g": "w",
-        "p": ""
+        "p": "w"
       },
       {
         "g": "e",
-        "p": ""
+        "p": "e"
       },
       {
         "g": "b",
-        "p": ""
+        "p": "b"
       }
     ]
   },
   {
     "word": "win",
     "level": 3,
-    "ipa": "",
+    "ipa": "wɪn",
     "graphemes": [
       {
         "g": "w",
-        "p": ""
+        "p": "w"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "n",
-        "p": ""
+        "p": "n"
       }
     ]
   },
   {
     "word": "zip",
     "level": 3,
-    "ipa": "",
+    "ipa": "zɪp",
     "graphemes": [
       {
         "g": "z",
-        "p": ""
+        "p": "z"
       },
       {
         "g": "i",
-        "p": ""
+        "p": "ɪ"
       },
       {
         "g": "p",
-        "p": ""
+        "p": "p"
       }
     ]
   }
