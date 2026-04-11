@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildSentenceGapRound } from '../build-sentence-gap-round';
 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
+import { useLibraryRounds } from '../useLibraryRounds';
 import type { WordSpellConfig } from '../types';
 import type {
   AnswerGameConfig,
@@ -90,11 +91,16 @@ const WordSpellSession = ({
   const navigate = useNavigate();
   const completionToken = useRef(0);
 
+  const rounds = useMemo(
+    () => wordSpellConfig.rounds ?? [],
+    [wordSpellConfig.rounds],
+  );
+
   const configRoundIndex = roundOrder[roundIndex];
   const round =
     configRoundIndex === undefined
       ? undefined
-      : wordSpellConfig.rounds[configRoundIndex];
+      : rounds[configRoundIndex];
 
   useRoundTTS(round?.word ?? '');
 
@@ -127,7 +133,7 @@ const WordSpellSession = ({
       const nextRound =
         nextConfigIndex === undefined
           ? undefined
-          : wordSpellConfig.rounds[nextConfigIndex];
+          : rounds[nextConfigIndex];
       const word = nextRound?.word.trim() ?? '';
       if (!word) {
         dispatch({ type: 'COMPLETE_GAME' });
@@ -161,7 +167,7 @@ const WordSpellSession = ({
     roundIndex,
     dispatch,
     roundOrder,
-    wordSpellConfig.rounds,
+    rounds,
     wordSpellConfig.tileUnit,
   ]);
 
@@ -238,66 +244,84 @@ export const WordSpell = ({
   sessionId,
   seed,
 }: WordSpellProps) => {
-  const roundsInOrder = config.roundsInOrder === true;
+  const { rounds: resolvedRounds, isLoading } =
+    useLibraryRounds(config);
+
+  const resolvedConfig = useMemo<WordSpellConfig>(
+    () => ({ ...config, rounds: resolvedRounds }),
+    [config, resolvedRounds],
+  );
+
+  const roundsInOrder = resolvedConfig.roundsInOrder === true;
   const [sessionEpoch, setSessionEpoch] = useState(0);
 
   const roundOrder = useMemo(() => {
     void sessionEpoch;
-    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
-  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
+    return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
+  }, [resolvedRounds.length, roundsInOrder, seed, sessionEpoch]);
 
   const firstConfigIndex = roundOrder[0];
   const round0 =
     firstConfigIndex === undefined
       ? undefined
-      : config.rounds[firstConfigIndex];
+      : resolvedRounds[firstConfigIndex];
   const roundWord = round0?.word.trim() ? round0.word : '';
 
   const { tiles, zones } = useMemo(() => {
     if (!roundWord)
       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
 
-    // Sentence-gap with gaps array
     if (round0?.gaps && round0.gaps.length > 0) {
       return buildSentenceGapRound(round0.gaps);
     }
 
-    // Default: letter/syllable/word spelling
-    return buildTilesAndZones(roundWord, config.tileUnit);
-  }, [roundWord, config.tileUnit, round0]);
+    return buildTilesAndZones(roundWord, resolvedConfig.tileUnit);
+  }, [roundWord, resolvedConfig.tileUnit, round0]);
 
   const answerGameConfig = useMemo(
     (): AnswerGameConfig => ({
-      gameId: config.gameId,
-      inputMethod: config.inputMethod,
-      wrongTileBehavior: config.wrongTileBehavior,
-      tileBankMode: config.tileBankMode,
-      distractorCount: config.distractorCount,
-      totalRounds: config.rounds.length,
-      roundsInOrder: config.roundsInOrder,
-      ttsEnabled: config.ttsEnabled,
+      gameId: resolvedConfig.gameId,
+      inputMethod: resolvedConfig.inputMethod,
+      wrongTileBehavior: resolvedConfig.wrongTileBehavior,
+      tileBankMode: resolvedConfig.tileBankMode,
+      distractorCount: resolvedConfig.distractorCount,
+      totalRounds: resolvedRounds.length,
+      roundsInOrder: resolvedConfig.roundsInOrder,
+      ttsEnabled: resolvedConfig.ttsEnabled,
       touchKeyboardInputMode: 'text',
       initialTiles: tiles,
       initialZones: zones,
       slotInteraction:
-        config.mode === 'scramble' || config.mode === 'sentence-gap'
+        resolvedConfig.mode === 'scramble' ||
+        resolvedConfig.mode === 'sentence-gap'
           ? 'free-swap'
           : 'ordered',
     }),
     [
-      config.gameId,
-      config.inputMethod,
-      config.wrongTileBehavior,
-      config.tileBankMode,
-      config.distractorCount,
-      config.rounds.length,
-      config.roundsInOrder,
-      config.ttsEnabled,
-      config.mode,
+      resolvedConfig.gameId,
+      resolvedConfig.inputMethod,
+      resolvedConfig.wrongTileBehavior,
+      resolvedConfig.tileBankMode,
+      resolvedConfig.distractorCount,
+      resolvedRounds.length,
+      resolvedConfig.roundsInOrder,
+      resolvedConfig.ttsEnabled,
+      resolvedConfig.mode,
       tiles,
       zones,
     ],
   );
+
+  if (isLoading) {
+    return (
+      <div
+        role="status"
+        className="flex min-h-[200px] w-full items-center justify-center text-foreground"
+      >
+        Loading words…
+      </div>
+    );
+  }
 
   if (!round0) return null;
 
@@ -309,7 +333,7 @@ export const WordSpell = ({
       sessionId={sessionId}
     >
       <WordSpellSession
-        wordSpellConfig={config}
+        wordSpellConfig={resolvedConfig}
         roundOrder={roundOrder}
         onRestartSession={() => {
           setSessionEpoch((e) => e + 1);
