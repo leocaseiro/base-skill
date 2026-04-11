@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { reconstructWord } from './builders';
 import { ALL_REGIONS } from './levels';
 import type { CurriculumEntry, Region, WordCore } from './types';
 
@@ -59,13 +60,10 @@ describe('word library invariants', () => {
     }
   });
 
-  it('CurriculumEntry.graphemes joins to word', () => {
+  it('CurriculumEntry.graphemes reconstructs the word', () => {
     for (const { entries } of curriculumFiles) {
       for (const e of entries) {
-        const concat = e.graphemes
-          .map((g) => g.g.replace('_', ''))
-          .join('');
-        expect(concat).toBe(e.word);
+        expect(reconstructWord(e.graphemes)).toBe(e.word);
       }
     }
   });

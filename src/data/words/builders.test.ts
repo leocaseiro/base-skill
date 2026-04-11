@@ -172,6 +172,41 @@ describe('validateEntry', () => {
     expect(result.ok).toBe(false);
   });
 
+  it('accepts split-digraph grapheme that consumes the next unit', () => {
+    const cakeCore = { word: 'cake', syllableCount: 1 };
+    const cakeEntry = {
+      word: 'cake',
+      level: 5,
+      ipa: 'keɪk',
+      graphemes: [
+        { g: 'c', p: 'k' },
+        { g: 'a_e', p: 'eɪ' },
+        { g: 'k', p: 'k' },
+      ],
+    };
+    expect(validateEntry(cakeCore, cakeEntry)).toEqual({ ok: true });
+  });
+
+  it('rejects a dangling split-digraph with no following unit', () => {
+    const badCore = { word: 'ca', syllableCount: 1 };
+    const badEntry = {
+      word: 'ca',
+      level: 5,
+      ipa: 'keɪ',
+      graphemes: [
+        { g: 'c', p: 'k' },
+        { g: 'a_e', p: 'eɪ' },
+      ],
+    };
+    const result = validateEntry(badCore, badEntry);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.some((e) => e.field === 'graphemes')).toBe(
+        true,
+      );
+    }
+  });
+
   it('rejects syllables that do not join to the word', () => {
     const badCore = {
       word: 'cat',
