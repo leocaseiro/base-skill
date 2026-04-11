@@ -144,9 +144,9 @@ describe('filterWords (integration against seeded chunks)', () => {
   it('returns AUS level 1 hits', async () => {
     const result = await filterWords({ region: 'aus', level: 1 });
     expect(result.hits.length).toBeGreaterThan(0);
-    for (const hit of result.hits) {
-      expect(hit.level).toBe(1);
-      expect(hit.region).toBe('aus');
+    for (const h of result.hits) {
+      expect(h.level).toBe(1);
+      expect(h.region).toBe('aus');
     }
     expect(result.usedFallback).toBeUndefined();
   });
@@ -173,8 +173,8 @@ describe('filterWords (integration against seeded chunks)', () => {
         'o',
       ],
     });
-    for (const hit of result.hits) {
-      for (const g of hit.graphemes ?? []) {
+    for (const h of result.hits) {
+      for (const g of h.graphemes ?? []) {
         expect([
           's',
           'a',
