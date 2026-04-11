@@ -1,7 +1,7 @@
 import type { CurriculumEntry, WordCore } from './types';
 
 const byWord = <T extends { word: string }>(a: T, b: T): number =>
-  a.word.localeCompare(b.word);
+  a.word.localeCompare(b.word, 'en');
 
 export const upsertCurriculumEntry = (
   chunk: readonly CurriculumEntry[],
