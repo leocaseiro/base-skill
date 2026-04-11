@@ -104,11 +104,11 @@ const seed = (blocks: LevelBlock[]): SeedResult => {
     }
   }
 
-  // Deterministic output: alphabetical by word.
+  // Deterministic output: alphabetical by word, locale-pinned to match writer.ts.
   for (const arr of coreByLevel.values())
-    arr.sort((a, b) => a.word.localeCompare(b.word));
+    arr.sort((a, b) => a.word.localeCompare(b.word, 'en'));
   for (const arr of curriculumByLevel.values())
-    arr.sort((a, b) => a.word.localeCompare(b.word));
+    arr.sort((a, b) => a.word.localeCompare(b.word, 'en'));
 
   return { coreByLevel, curriculumByLevel, review };
 };
