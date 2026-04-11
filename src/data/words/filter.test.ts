@@ -1,5 +1,9 @@
-import { describe, expect, it } from 'vitest';
-import { entryMatches } from './filter';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import {
+  __resetChunkCacheForTests,
+  entryMatches,
+  filterWords,
+} from './filter';
 import type { WordHit } from './types';
 
 const hit = (overrides: Partial<WordHit> = {}): WordHit => ({
@@ -130,5 +134,76 @@ describe('entryMatches', () => {
       }),
     ).toBe(false);
     expect(entryMatches(tier1, { region: 'aus', level: 2 })).toBe(true);
+  });
+});
+
+describe('filterWords (integration against seeded chunks)', () => {
+  beforeEach(() => __resetChunkCacheForTests());
+  afterEach(() => __resetChunkCacheForTests());
+
+  it('returns AUS level 1 hits', async () => {
+    const result = await filterWords({ region: 'aus', level: 1 });
+    expect(result.hits.length).toBeGreaterThan(0);
+    for (const hit of result.hits) {
+      expect(hit.level).toBe(1);
+      expect(hit.region).toBe('aus');
+    }
+    expect(result.usedFallback).toBeUndefined();
+  });
+
+  it('joins WordCore + CurriculumEntry (hit has syllableCount)', async () => {
+    const result = await filterWords({ region: 'aus', level: 1 });
+    expect(result.hits[0]!.syllableCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it('Tier-2 filter excludes Tier-1-only words', async () => {
+    const result = await filterWords({
+      region: 'aus',
+      levels: [1, 2],
+      graphemesAllowed: [
+        's',
+        'a',
+        't',
+        'p',
+        'i',
+        'n',
+        'm',
+        'd',
+        'g',
+        'o',
+      ],
+    });
+    for (const hit of result.hits) {
+      for (const g of hit.graphemes ?? []) {
+        expect([
+          's',
+          'a',
+          't',
+          'p',
+          'i',
+          'n',
+          'm',
+          'd',
+          'g',
+          'o',
+        ]).toContain(g.g);
+      }
+    }
+  });
+
+  it('falls back to AUS when UK has no data', async () => {
+    const result = await filterWords({ region: 'uk', level: 1 });
+    expect(result.hits.length).toBeGreaterThan(0);
+    expect(result.usedFallback).toEqual({ from: 'uk', to: 'aus' });
+  });
+
+  it('respects fallbackToAus: false', async () => {
+    const result = await filterWords({
+      region: 'uk',
+      level: 1,
+      fallbackToAus: false,
+    });
+    expect(result.hits).toHaveLength(0);
+    expect(result.usedFallback).toBeUndefined();
   });
 });

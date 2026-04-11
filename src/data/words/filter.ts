@@ -1,4 +1,12 @@
-import type { WordFilter, WordHit } from './types';
+import { ALL_REGIONS } from './levels';
+import type {
+  CurriculumEntry,
+  FilterResult,
+  Region,
+  WordCore,
+  WordFilter,
+  WordHit,
+} from './types';
 
 const inRange = (
   n: number,
@@ -55,4 +63,121 @@ export const entryMatches = (
   }
 
   return true;
+};
+
+const coreLoaders = import.meta.glob<{ default: WordCore[] }>(
+  './core/level*.json',
+);
+const ausLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+  './curriculum/aus/level*.json',
+);
+const ukLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+  './curriculum/uk/level*.json',
+);
+const usLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+  './curriculum/us/level*.json',
+);
+const brLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+  './curriculum/br/level*.json',
+);
+
+const loadersForRegion = (
+  region: Region,
+): Record<string, () => Promise<{ default: CurriculumEntry[] }>> => {
+  switch (region) {
+    case 'aus': {
+      return ausLoaders;
+    }
+    case 'uk': {
+      return ukLoaders;
+    }
+    case 'us': {
+      return usLoaders;
+    }
+    case 'br': {
+      return brLoaders;
+    }
+  }
+};
+
+let coreCache: Map<string, WordCore> | null = null;
+const curriculumCache: Partial<Record<Region, CurriculumEntry[]>> = {};
+
+export const __resetChunkCacheForTests = (): void => {
+  coreCache = null;
+  for (const r of ALL_REGIONS) delete curriculumCache[r];
+};
+
+const loadCore = async (): Promise<Map<string, WordCore>> => {
+  if (coreCache) return coreCache;
+  const map = new Map<string, WordCore>();
+  const chunks = await Promise.all(
+    Object.values(coreLoaders).map((load) => load()),
+  );
+  for (const chunk of chunks) {
+    for (const entry of chunk.default) map.set(entry.word, entry);
+  }
+  coreCache = map;
+  return map;
+};
+
+const loadCurriculum = async (
+  region: Region,
+): Promise<CurriculumEntry[]> => {
+  if (curriculumCache[region]) return curriculumCache[region];
+  const chunks = await Promise.all(
+    Object.values(loadersForRegion(region)).map((load) => load()),
+  );
+  const flat = chunks.flatMap((c) => c.default);
+  curriculumCache[region] = flat;
+  return flat;
+};
+
+const joinHits = (
+  curriculum: CurriculumEntry[],
+  core: Map<string, WordCore>,
+  region: Region,
+): WordHit[] =>
+  curriculum.flatMap((entry) => {
+    const c = core.get(entry.word);
+    if (!c) return [];
+    return [
+      {
+        word: entry.word,
+        region,
+        level: entry.level,
+        syllableCount: c.syllableCount,
+        syllables: c.syllables,
+        variants: c.variants,
+        ipa: entry.ipa || undefined,
+        graphemes: entry.graphemes,
+      } as WordHit,
+    ];
+  });
+
+export const filterWords = async (
+  filter: WordFilter,
+): Promise<FilterResult> => {
+  const core = await loadCore();
+  const curriculum = await loadCurriculum(filter.region);
+  const hits = joinHits(curriculum, core, filter.region).filter((h) =>
+    entryMatches(h, filter),
+  );
+
+  if (
+    hits.length > 0 ||
+    filter.region === 'aus' ||
+    filter.fallbackToAus === false
+  ) {
+    return { hits };
+  }
+
+  const ausCurriculum = await loadCurriculum('aus');
+  const ausHits = joinHits(ausCurriculum, core, 'aus').filter((h) =>
+    entryMatches(h, { ...filter, region: 'aus' }),
+  );
+  return {
+    hits: ausHits,
+    usedFallback: { from: filter.region, to: 'aus' },
+  };
 };
