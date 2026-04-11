@@ -304,7 +304,14 @@ const ResultCard = ({ hit }: ResultCardProps) => (
   <Card>
     <CardHeader>
       <CardTitle className="flex items-start justify-between gap-2">
-        <span className="text-2xl font-bold">{hit.word}</span>
+        <div className="flex flex-col">
+          <span className="text-2xl font-bold">{hit.word}</span>
+          {hit.syllables ? (
+            <span className="text-sm font-medium text-muted-foreground">
+              {hit.syllables.join('·')}
+            </span>
+          ) : null}
+        </div>
         <Button
           type="button"
           variant="outline"
@@ -325,9 +332,6 @@ const ResultCard = ({ hit }: ResultCardProps) => (
       <div className="flex flex-wrap gap-1 text-xs">
         <Badge>L{hit.level}</Badge>
         <Badge>{hit.syllableCount} syl</Badge>
-        {hit.syllables ? (
-          <Badge>{hit.syllables.join('-')}</Badge>
-        ) : null}
       </div>
       {hit.graphemes ? (
         <GraphemeChips graphemes={hit.graphemes} />
