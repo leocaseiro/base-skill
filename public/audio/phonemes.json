@@ -33,162 +33,162 @@
   },
   "f": {
     "start": 7877,
-    "duration": 625,
+    "duration": 417,
     "loopable": true
   },
   "g": {
-    "start": 8751,
+    "start": 8544,
     "duration": 706
   },
   "h": {
-    "start": 9708,
+    "start": 9500,
     "duration": 732
   },
   "iː": {
-    "start": 10690,
+    "start": 10482,
     "duration": 699
   },
   "j": {
-    "start": 11639,
+    "start": 11431,
     "duration": 785
   },
   "juː": {
-    "start": 12674,
+    "start": 12467,
     "duration": 834
   },
   "k": {
-    "start": 13758,
+    "start": 13550,
     "duration": 760
   },
   "ks": {
-    "start": 14768,
+    "start": 14560,
     "duration": 855
   },
   "kw": {
-    "start": 15873,
+    "start": 15666,
     "duration": 886
   },
   "l": {
-    "start": 17010,
-    "duration": 652,
+    "start": 16802,
+    "duration": 238,
     "loopable": true
   },
   "m": {
-    "start": 17912,
-    "duration": 689,
+    "start": 17290,
+    "duration": 130,
     "loopable": true
   },
   "n": {
-    "start": 18851,
-    "duration": 657,
+    "start": 17671,
+    "duration": 131,
     "loopable": true
   },
   "oʊ": {
-    "start": 19758,
+    "start": 18051,
     "duration": 751
   },
   "p": {
-    "start": 20759,
+    "start": 19052,
     "duration": 744
   },
   "r": {
-    "start": 21753,
-    "duration": 682,
+    "start": 20047,
+    "duration": 283,
     "loopable": true
   },
   "s": {
-    "start": 22685,
-    "duration": 643,
+    "start": 20580,
+    "duration": 445,
     "loopable": true
   },
   "t": {
-    "start": 23579,
+    "start": 21275,
     "duration": 753
   },
   "tʃ": {
-    "start": 24582,
+    "start": 22278,
     "duration": 776
   },
   "uː": {
-    "start": 25608,
+    "start": 23304,
     "duration": 751
   },
   "v": {
-    "start": 26609,
-    "duration": 762,
+    "start": 24305,
+    "duration": 267,
     "loopable": true
   },
   "w": {
-    "start": 27621,
+    "start": 24822,
     "duration": 774
   },
   "z": {
-    "start": 28645,
-    "duration": 711,
+    "start": 25846,
+    "duration": 314,
     "loopable": true
   },
   "æ": {
-    "start": 29606,
-    "duration": 431
+    "start": 26410,
+    "duration": 689
   },
   "ð": {
-    "start": 30287,
-    "duration": 688,
+    "start": 27349,
+    "duration": 268,
     "loopable": true
   },
   "ŋ": {
-    "start": 31225,
-    "duration": 755,
+    "start": 27867,
+    "duration": 182,
     "loopable": true
   },
   "ɑː": {
-    "start": 32231,
+    "start": 28299,
     "duration": 772
   },
   "ɒ": {
-    "start": 33252,
-    "duration": 431
+    "start": 29321,
+    "duration": 658
   },
   "ɔɪ": {
-    "start": 33933,
+    "start": 30229,
     "duration": 761
   },
   "ɔː": {
-    "start": 34945,
+    "start": 31240,
     "duration": 772
   },
   "ɛə": {
-    "start": 35966,
+    "start": 32262,
     "duration": 772
   },
   "ɜː": {
-    "start": 36988,
+    "start": 33283,
     "duration": 751
   },
   "ɪ": {
-    "start": 37989,
+    "start": 34285,
     "duration": 637
   },
   "ɪə": {
-    "start": 38876,
+    "start": 35172,
     "duration": 730
   },
   "ʃ": {
-    "start": 39856,
-    "duration": 695,
+    "start": 36152,
+    "duration": 420,
     "loopable": true
   },
   "ʊ": {
-    "start": 40802,
+    "start": 36822,
     "duration": 678
   },
   "ʌ": {
-    "start": 41730,
+    "start": 37750,
     "duration": 658
   },
   "θ": {
-    "start": 42638,
-    "duration": 498,
+    "start": 38658,
+    "duration": 322,
     "loopable": true
   }
 }
