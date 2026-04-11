@@ -64,10 +64,12 @@ const IPA_TO_KIRSH: Record<string, string> = {
   ks: 'ks',
   kw: 'kw',
   juː: 'ju:',
-  // Short vowels
+  // Short vowels. `æ` and `ɒ` use `a` and `0` respectively because the
+  // canonical Kirshenbaum codes `&` and `A` render as digital silence in
+  // the en-US voice (verified via volumedetect against bare eSpeak output).
   e: 'E',
-  æ: '&',
-  ɒ: 'A',
+  æ: 'a',
+  ɒ: '0',
   ʌ: 'V',
   ʊ: 'U',
   ɪ: 'I',
@@ -119,11 +121,12 @@ const CONSONANTS = new Set([
 ]);
 
 /**
- * Phonemes that can be held indefinitely (nasals, liquids, fricatives) —
- * these get post-processed with `atempo=0.5` (stretch) and `silenceremove`
- * (trim schwa/silence tails) so a looping playback produces a clean,
- * seamless sustained sound. Plosives, affricates, and glides stay at
- * natural speed since they are inherently impulsive.
+ * Phonemes that can be held indefinitely (nasals, liquids, fricatives).
+ * These are synthesized WITHOUT a trailing schwa, then silence-trimmed
+ * and stretched with `atempo` so the looped segment is pure consonant —
+ * otherwise the hover-to-blend UX sounds like "sssuuu" instead of "sss".
+ * Plosives/affricates/glides still need the schwa because eSpeak emits
+ * silence for bare stops (see buildKirshenbaumInput).
  */
 const SUSTAINABLE = new Set<string>([
   // Nasals
@@ -147,6 +150,11 @@ const SUSTAINABLE = new Set<string>([
 const buildKirshenbaumInput = (ipa: string): string => {
   const code = IPA_TO_KIRSH[ipa];
   if (!code) throw new Error(`No Kirshenbaum mapping for IPA "${ipa}"`);
+  // Sustainable consonants (continuants) render cleanly on their own.
+  // Non-sustainable consonants — stops, affricates, glides — render as
+  // digital silence unless anchored to a following schwa, so they get
+  // `[[X@]]`. Vowels and diphthongs always render alone.
+  if (SUSTAINABLE.has(ipa)) return `[[${code}]]`;
   return CONSONANTS.has(ipa) ? `[[${code}@]]` : `[[${code}]]`;
 };
 
@@ -233,15 +241,18 @@ const main = (): void => {
   const concatLines: string[] = [];
   let cursor = 0;
 
-  // Stretch audible middle via atempo, then trim silence, then apply a
-  // short fade at both ends so a looping playback has no click at the
-  // loop point. Applied only to sustainable phonemes.
+  // For sustainable phonemes only: strip the leading/trailing silence
+  // eSpeak leaves around the bare consonant, stretch 4x with chained
+  // atempo (each call is capped at 0.5), then apply a 5 ms fade at each
+  // end so the loop seam has no click. Threshold is −60 dB because voiced
+  // fricatives like [[v]] peak around −27 dB but average far lower, so a
+  // stricter threshold would wipe them out entirely.
   const SUSTAIN_FILTER =
-    'atempo=0.5,' +
-    'silenceremove=start_periods=1:start_threshold=-40dB:' +
-    'stop_periods=-1:stop_threshold=-40dB,' +
-    'afade=t=in:st=0:d=0.02,' +
-    'areverse,afade=t=in:st=0:d=0.02,areverse';
+    'silenceremove=start_periods=1:start_threshold=-60dB:' +
+    'stop_periods=-1:stop_threshold=-60dB,' +
+    'atempo=0.5,atempo=0.5,' +
+    'afade=t=in:st=0:d=0.005,' +
+    'areverse,afade=t=in:st=0:d=0.005,areverse';
 
   for (const [i, ipa] of phonemes.entries()) {
     const safe = i.toString().padStart(3, '0');
