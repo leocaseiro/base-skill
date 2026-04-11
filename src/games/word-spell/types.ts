@@ -1,4 +1,5 @@
 import type { AnswerGameConfig } from '@/components/answer-game/types';
+import type { WordSpellSource } from '@/data/words';
 import type { ConfigField } from '@/lib/config-fields';
 
 export interface GapDefinition {
@@ -29,7 +30,10 @@ export interface WordSpellConfig extends AnswerGameConfig {
   mode: 'picture' | 'scramble' | 'recall' | 'sentence-gap';
   /** @default 'letter' */
   tileUnit: 'letter' | 'syllable' | 'word';
-  rounds: WordSpellRound[];
+  /** Explicit hand-authored rounds. Wins over `source` when both are present. */
+  rounds?: WordSpellRound[];
+  /** Library-driven rounds. Resolved at WordSpell mount time. */
+  source?: WordSpellSource;
 }
 
 export const wordSpellConfigFields: ConfigField[] = [
