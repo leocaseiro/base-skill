@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Rocket Countdown — SortNumbers Theme Concept</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #0a0a2e;
+        color: white;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        overflow: hidden;
+        height: 100vh;
+      }
+
+      .scene {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+        background: linear-gradient(
+          180deg,
+          #0a0a2e 0%,
+          #111144 40%,
+          #1a1a5e 70%,
+          #252560 100%
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Stars */
+      .star {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+      }
+      .star.twinkle {
+        animation: twinkle 3s ease-in-out infinite;
+      }
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* === ROCKET === */
+      .rocket-area {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 10;
+      }
+
+      .rocket {
+        position: relative;
+        width: 140px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Nose cone */
+      .nose {
+        width: 0;
+        height: 0;
+        border-left: 50px solid transparent;
+        border-right: 50px solid transparent;
+        border-bottom: 70px solid #e2e8f0;
+        position: relative;
+        z-index: 2;
+      }
+      .nose::after {
+        content: '';
+        position: absolute;
+        top: 30px;
+        left: -30px;
+        width: 0;
+        height: 0;
+        border-left: 30px solid transparent;
+        border-right: 30px solid transparent;
+        border-bottom: 40px solid #cbd5e1;
+      }
+
+      /* Body */
+      .body {
+        width: 100px;
+        background: linear-gradient(
+          90deg,
+          #94a3b8,
+          #e2e8f0 30%,
+          #e2e8f0 70%,
+          #94a3b8
+        );
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 12px 0 20px;
+        position: relative;
+        z-index: 2;
+        min-height: 180px;
+        justify-content: center;
+      }
+
+      /* Porthole / Window — THE DROP TARGET */
+      .porthole {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 35% 35%,
+          #1e3a5f,
+          #0a1628
+        );
+        border: 4px solid #64748b;
+        box-shadow:
+          inset 0 2px 8px rgba(0, 0, 0, 0.6),
+          0 0 0 3px #94a3b8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transition: all 0.3s ease;
+      }
+      .porthole.drop-ready {
+        border-color: #fde68a;
+        box-shadow:
+          inset 0 2px 8px rgba(0, 0, 0, 0.6),
+          0 0 0 3px #fde68a,
+          0 0 24px rgba(253, 230, 138, 0.4);
+      }
+      .porthole.correct {
+        border-color: #86efac;
+        box-shadow:
+          inset 0 2px 8px rgba(0, 0, 0, 0.6),
+          0 0 0 3px #86efac,
+          0 0 24px rgba(134, 239, 172, 0.4);
+        background: radial-gradient(
+          circle at 35% 35%,
+          #14532d,
+          #052e16
+        );
+      }
+      .porthole.wrong {
+        border-color: #fca5a5;
+        box-shadow:
+          inset 0 2px 8px rgba(0, 0, 0, 0.6),
+          0 0 0 3px #fca5a5,
+          0 0 24px rgba(252, 165, 165, 0.4);
+        animation: portShake 0.4s ease-in-out;
+      }
+      @keyframes portShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-4px);
+        }
+        50% {
+          transform: translateX(4px);
+        }
+        75% {
+          transform: translateX(-2px);
+        }
+      }
+
+      .porthole-number {
+        font-size: 28px;
+        font-weight: 900;
+        color: #86efac;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .porthole.correct .porthole-number {
+        opacity: 1;
+      }
+
+      /* Porthole label */
+      .porthole-label {
+        position: absolute;
+        bottom: -22px;
+        font-size: 11px;
+        color: #94a3b8;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      /* Fins */
+      .fins {
+        display: flex;
+        justify-content: space-between;
+        width: 140px;
+        position: relative;
+        z-index: 1;
+        margin-top: -10px;
+      }
+      .fin-left,
+      .fin-right {
+        width: 30px;
+        height: 50px;
+        background: #ef4444;
+        border-radius: 0 0 0 16px;
+      }
+      .fin-right {
+        border-radius: 0 0 16px 0;
+      }
+      .fin-base {
+        width: 100px;
+        height: 20px;
+        background: linear-gradient(180deg, #94a3b8, #64748b);
+        border-radius: 0 0 8px 8px;
+      }
+
+      /* Exhaust / flame */
+      .exhaust {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: -4px;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+      .exhaust.active {
+        opacity: 1;
+      }
+      .flame-inner {
+        width: 40px;
+        height: 60px;
+        border-radius: 0 0 50% 50%;
+        background: linear-gradient(180deg, #fbbf24, #f97316, #ef4444);
+        animation: flicker 0.15s ease-in-out infinite alternate;
+      }
+      .flame-outer {
+        width: 60px;
+        height: 40px;
+        border-radius: 0 0 50% 50%;
+        background: linear-gradient(
+          180deg,
+          #f97316 0%,
+          rgba(239, 68, 68, 0.3) 100%
+        );
+        margin-top: -30px;
+        animation: flicker 0.2s ease-in-out infinite alternate;
+      }
+      @keyframes flicker {
+        0% {
+          transform: scaleX(0.95) scaleY(0.98);
+        }
+        100% {
+          transform: scaleX(1.05) scaleY(1.02);
+        }
+      }
+
+      /* Launch animation */
+      .rocket-area.launching {
+        animation: liftoff 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      @keyframes liftoff {
+        0% {
+          transform: translateY(0);
+        }
+        30% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(-120vh);
+        }
+      }
+
+      /* === COMPLETED NUMBERS — shown on rocket body === */
+      .completed-numbers {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+        padding: 4px 8px;
+        max-width: 90px;
+      }
+      .completed-num {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid #86efac;
+        animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+      @keyframes popIn {
+        0% {
+          transform: scale(0);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      /* === NUMBER TILES — draggable === */
+      .tile-bank {
+        position: fixed;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 16px 24px;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 20;
+        max-width: 90vw;
+      }
+
+      .tile {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        font-weight: 800;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        user-select: none;
+        touch-action: none;
+        border: 3px solid #a5b4fc;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease,
+          opacity 0.3s ease;
+      }
+      .tile:hover {
+        transform: scale(1.08);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+      }
+      .tile:active {
+        cursor: grabbing;
+        transform: scale(0.95);
+      }
+      .tile.used {
+        opacity: 0.3;
+        pointer-events: none;
+      }
+
+      /* Tile being dragged */
+      .tile.dragging {
+        position: fixed;
+        z-index: 100;
+        pointer-events: none;
+        transform: scale(1.1);
+        box-shadow: 0 8px 30px rgba(99, 102, 241, 0.6);
+      }
+
+      /* === HUD === */
+      .hud {
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 50;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+        border-radius: 24px;
+        padding: 8px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .hud-label {
+        color: #fde68a;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .hud-progress {
+        color: #86efac;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .hud-direction {
+        color: #a5b4fc;
+        font-size: 12px;
+        background: rgba(99, 102, 241, 0.2);
+        border: 1px solid rgba(165, 180, 252, 0.3);
+        border-radius: 12px;
+        padding: 4px 12px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+      .hud-direction:hover {
+        background: rgba(99, 102, 241, 0.4);
+      }
+      .hud-last {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 6px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #57534e, #78716c);
+        color: #d6d3d1;
+        font-weight: 800;
+        font-size: 15px;
+        border: 2px solid #a8a29e;
+      }
+      .hud-last.done {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        border-color: #86efac;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+      }
+
+      /* === GROUND / LAUNCH PAD === */
+      .launchpad {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 120px;
+        background: linear-gradient(
+          180deg,
+          transparent 0%,
+          rgba(30, 30, 60, 0.8) 30%,
+          #1a1a3e 100%
+        );
+        z-index: 5;
+      }
+      .pad-surface {
+        position: absolute;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 12px;
+        background: linear-gradient(90deg, #475569, #64748b, #475569);
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      }
+      .pad-legs {
+        position: absolute;
+        bottom: 88px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 160px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .pad-leg {
+        width: 8px;
+        height: 14px;
+        background: #475569;
+        border-radius: 0 0 4px 4px;
+      }
+
+      /* Celebration */
+      .celebration {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 200;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(12px);
+        border-radius: 24px;
+        padding: 32px 48px;
+        border: 2px solid rgba(99, 102, 241, 0.3);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease;
+      }
+      .celebration.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .celebration h2 {
+        font-size: 28px;
+        color: #a5b4fc;
+        margin-bottom: 8px;
+      }
+      .celebration p {
+        color: #94a3b8;
+        font-size: 16px;
+      }
+      .celebration .emoji {
+        font-size: 64px;
+        margin-bottom: 12px;
+        display: block;
+      }
+      .celebration button {
+        margin-top: 16px;
+        padding: 10px 28px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        font-weight: 700;
+        font-size: 15px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+      }
+      .celebration button:hover {
+        filter: brightness(1.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hud">
+      <span class="hud-label">🚀 Rocket Launch</span>
+      <span class="hud-last" id="hudLast">?</span>
+      <span class="hud-progress" id="progress">0 / 5</span>
+      <span
+        class="hud-direction"
+        id="dirLabel"
+        onclick="toggleDirection()"
+        >Countdown ↓</span
+      >
+    </div>
+
+    <div class="scene" id="scene">
+      <!-- Stars -->
+      <div
+        class="star twinkle"
+        style="top: 5%; left: 10%; width: 3px; height: 3px"
+      ></div>
+      <div
+        class="star twinkle"
+        style="
+          top: 12%;
+          left: 25%;
+          width: 2px;
+          height: 2px;
+          animation-delay: 1s;
+        "
+      ></div>
+      <div
+        class="star"
+        style="
+          top: 8%;
+          left: 40%;
+          width: 2px;
+          height: 2px;
+          opacity: 0.5;
+        "
+      ></div>
+      <div
+        class="star twinkle"
+        style="
+          top: 15%;
+          left: 60%;
+          width: 3px;
+          height: 3px;
+          animation-delay: 0.5s;
+        "
+      ></div>
+      <div
+        class="star twinkle"
+        style="
+          top: 4%;
+          left: 75%;
+          width: 2px;
+          height: 2px;
+          animation-delay: 1.8s;
+        "
+      ></div>
+      <div
+        class="star"
+        style="
+          top: 20%;
+          left: 85%;
+          width: 3px;
+          height: 3px;
+          opacity: 0.4;
+        "
+      ></div>
+      <div
+        class="star twinkle"
+        style="
+          top: 10%;
+          left: 50%;
+          width: 2px;
+          height: 2px;
+          animation-delay: 2.2s;
+        "
+      ></div>
+      <div
+        class="star"
+        style="
+          top: 18%;
+          left: 15%;
+          width: 2px;
+          height: 2px;
+          opacity: 0.6;
+        "
+      ></div>
+
+      <!-- Rocket -->
+      <div class="rocket-area" id="rocketArea">
+        <div class="rocket">
+          <div class="nose"></div>
+          <div class="body">
+            <div class="completed-numbers" id="completedNums"></div>
+            <div class="porthole" id="porthole">
+              <span class="porthole-number" id="portholeNum"></span>
+              <span class="porthole-label">Drop here</span>
+            </div>
+          </div>
+          <div class="fins">
+            <div class="fin-left"></div>
+            <div class="fin-base"></div>
+            <div class="fin-right"></div>
+          </div>
+        </div>
+        <div class="exhaust" id="exhaust">
+          <div class="flame-inner"></div>
+          <div class="flame-outer"></div>
+        </div>
+      </div>
+
+      <!-- Launch pad -->
+      <div class="launchpad">
+        <div class="pad-surface"></div>
+        <div class="pad-legs">
+          <div class="pad-leg"></div>
+          <div class="pad-leg"></div>
+          <div class="pad-leg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Number tiles -->
+    <div class="tile-bank" id="tileBank"></div>
+
+    <!-- Celebration -->
+    <div class="celebration" id="celebration">
+      <span class="emoji">🚀🌟🎉</span>
+      <h2>Liftoff!</h2>
+      <p>The rocket launched successfully!</p>
+      <button onclick="resetGame()">Launch again</button>
+    </div>
+
+    <script>
+      // Game config
+      const numbers = [10, 8, 6, 4, 2];
+      let direction = 'desc'; // 'desc' or 'asc'
+      let sorted = [...numbers].sort((a, b) => b - a);
+      let currentStep = 0;
+
+      const porthole = document.getElementById('porthole');
+      const portholeNum = document.getElementById('portholeNum');
+      const completedNums = document.getElementById('completedNums');
+      const tileBank = document.getElementById('tileBank');
+      const progressEl = document.getElementById('progress');
+      const hudLast = document.getElementById('hudLast');
+      const dirLabel = document.getElementById('dirLabel');
+      const rocketArea = document.getElementById('rocketArea');
+      const exhaust = document.getElementById('exhaust');
+
+      function toggleDirection() {
+        direction = direction === 'desc' ? 'asc' : 'desc';
+        sorted =
+          direction === 'desc'
+            ? [...numbers].sort((a, b) => b - a)
+            : [...numbers].sort((a, b) => a - b);
+        dirLabel.textContent =
+          direction === 'desc' ? 'Countdown ↓' : 'Fuel up ↑';
+        resetGame();
+      }
+
+      // Drag state
+      let dragTile = null;
+      let dragClone = null;
+      let offsetX = 0,
+        offsetY = 0;
+
+      // Build tiles
+      const shuffled = [...numbers].sort(() => Math.random() - 0.5);
+      shuffled.forEach((num) => {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.textContent = num;
+        tile.dataset.num = num;
+
+        // Mouse events
+        tile.addEventListener('mousedown', startDrag);
+        tile.addEventListener('touchstart', startDrag, {
+          passive: false,
+        });
+
+        tileBank.appendChild(tile);
+      });
+
+      function startDrag(e) {
+        e.preventDefault();
+        const tile = e.currentTarget;
+        if (tile.classList.contains('used')) return;
+
+        dragTile = tile;
+        const rect = tile.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        offsetX = clientX - rect.left;
+        offsetY = clientY - rect.top;
+
+        // Create drag clone
+        dragClone = tile.cloneNode(true);
+        dragClone.classList.add('dragging');
+        dragClone.style.width = rect.width + 'px';
+        dragClone.style.height = rect.height + 'px';
+        dragClone.style.left = rect.left + 'px';
+        dragClone.style.top = rect.top + 'px';
+        document.body.appendChild(dragClone);
+
+        tile.style.opacity = '0.3';
+        porthole.classList.add('drop-ready');
+
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchmove', onDrag, {
+          passive: false,
+        });
+        document.addEventListener('touchend', endDrag);
+      }
+
+      function onDrag(e) {
+        if (!dragClone) return;
+        e.preventDefault();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        dragClone.style.left = clientX - offsetX + 'px';
+        dragClone.style.top = clientY - offsetY + 'px';
+      }
+
+      function endDrag(e) {
+        if (!dragClone || !dragTile) return;
+
+        const clientX = e.changedTouches
+          ? e.changedTouches[0].clientX
+          : e.clientX;
+        const clientY = e.changedTouches
+          ? e.changedTouches[0].clientY
+          : e.clientY;
+
+        // Check if dropped on porthole
+        const pRect = porthole.getBoundingClientRect();
+        const overPorthole =
+          clientX >= pRect.left &&
+          clientX <= pRect.right &&
+          clientY >= pRect.top &&
+          clientY <= pRect.bottom;
+
+        const num = parseInt(dragTile.dataset.num);
+        const expected = sorted[currentStep];
+
+        if (overPorthole && num === expected) {
+          handleCorrect(num);
+        } else if (overPorthole) {
+          handleWrong();
+          dragTile.style.opacity = '1';
+        } else {
+          dragTile.style.opacity = '1';
+        }
+
+        // Cleanup
+        porthole.classList.remove('drop-ready');
+        dragClone.remove();
+        dragClone = null;
+
+        document.removeEventListener('mousemove', onDrag);
+        document.removeEventListener('mouseup', endDrag);
+        document.removeEventListener('touchmove', onDrag);
+        document.removeEventListener('touchend', endDrag);
+
+        dragTile = null;
+      }
+
+      function handleCorrect(num) {
+        // Mark tile as used
+        dragTile.classList.add('used');
+        dragTile.style.opacity = '0.3';
+
+        // Flash porthole green
+        porthole.classList.add('correct');
+        portholeNum.textContent = num;
+
+        // Update HUD
+        hudLast.textContent = num;
+        hudLast.classList.add('done');
+
+        // Add to completed numbers on rocket body
+        const badge = document.createElement('div');
+        badge.className = 'completed-num';
+        badge.textContent = num;
+        completedNums.appendChild(badge);
+
+        currentStep++;
+        progressEl.textContent = currentStep + ' / ' + sorted.length;
+
+        // Reset porthole after brief flash
+        setTimeout(() => {
+          porthole.classList.remove('correct');
+          portholeNum.textContent = '';
+        }, 600);
+
+        // Check win
+        if (currentStep >= sorted.length) {
+          setTimeout(() => {
+            // Launch!
+            exhaust.classList.add('active');
+            setTimeout(() => {
+              rocketArea.classList.add('launching');
+              setTimeout(() => {
+                document
+                  .getElementById('celebration')
+                  .classList.add('show');
+              }, 1200);
+            }, 800);
+          }, 700);
+        }
+      }
+
+      function handleWrong() {
+        porthole.classList.add('wrong');
+        setTimeout(() => porthole.classList.remove('wrong'), 500);
+      }
+
+      function resetGame() {
+        currentStep = 0;
+        progressEl.textContent = '0 / ' + sorted.length;
+        hudLast.textContent = '?';
+        hudLast.classList.remove('done');
+        completedNums.innerHTML = '';
+        porthole.classList.remove('correct', 'wrong', 'drop-ready');
+        portholeNum.textContent = '';
+        exhaust.classList.remove('active');
+        rocketArea.classList.remove('launching');
+        document.getElementById('celebration').classList.remove('show');
+
+        // Reset tiles
+        tileBank.innerHTML = '';
+        const reshuffled = [...numbers].sort(() => Math.random() - 0.5);
+        reshuffled.forEach((num) => {
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          tile.textContent = num;
+          tile.dataset.num = num;
+          tile.addEventListener('mousedown', startDrag);
+          tile.addEventListener('touchstart', startDrag, {
+            passive: false,
+          });
+          tileBank.appendChild(tile);
+        });
+      }
+
+      progressEl.textContent = '0 / ' + sorted.length;
+    </script>
+  </body>
+</html>
