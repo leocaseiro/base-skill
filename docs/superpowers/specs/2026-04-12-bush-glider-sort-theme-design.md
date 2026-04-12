@@ -85,8 +85,8 @@ tap/click input rather than drag. The Bush Glider theme builds on this pattern:
 2. **After correct tap:** camera pans smoothly to centre the **next target tree**
 3. **Pan timing:** camera begins panning as the glider starts its flight, arriving
    together
-4. **Arrow hint:** a bouncing arrow appears above the next target after the camera
-   settles, helping younger players locate it
+4. **Next target highlight:** the golden pulsing badge on the next tree is the only
+   visual cue — no arrow or pointer overlays
 
 ### Parallax Layers (back to front)
 
@@ -221,7 +221,6 @@ SortNumbersBushGlider
 │       ├── BushTree (per tree: icon + number badge + state)
 │       └── GliderCharacter (positioned, animated)
 ├── BushGliderHUD (progress, direction)
-├── BushGliderArrowHint (bouncing indicator)
 └── CelebrationOverlay (round/level/game complete)
 ```
 
@@ -261,4 +260,4 @@ This allows both UIs to coexist and be selected per-game configuration.
 An interactive HTML prototype demonstrating the camera-follow parallax, tap-in-order
 mechanic, and glider animation is available at:
 
-`.superpowers/brainstorm/37795-1775993970/content/camera-parallax-v2.html`
+`prototypes/bush-glider-sort-theme.html`

@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Bush Glider — Camera-Follow Parallax Demo v2</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #0a0a1a;
+        color: white;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        overflow: hidden;
+        height: 100vh;
+      }
+
+      .hud {
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 100;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        border-radius: 24px;
+        padding: 8px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .hud-label {
+        color: #fde68a;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .hud-progress {
+        color: #86efac;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .hud-direction {
+        color: #a5b4fc;
+        font-size: 12px;
+      }
+
+      .instructions {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        border-radius: 16px;
+        padding: 10px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 13px;
+        color: #94a3b8;
+        text-align: center;
+      }
+      .instructions strong {
+        color: #fde68a;
+      }
+
+      /* === VIEWPORT === */
+      .viewport {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* === SCENE — wider than viewport === */
+      .scene {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 250vw;
+        height: 100vh;
+        transition: transform 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* === PARALLAX LAYERS === */
+      .layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transition: transform 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .layer-sky {
+        background: linear-gradient(
+          180deg,
+          #0a0a2e 0%,
+          #111144 20%,
+          #1a1a4e 40%,
+          #1b3a2e 65%,
+          #1b4332 80%,
+          #2d6a4f 100%
+        );
+      }
+
+      .star {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+      }
+      .star.twinkle {
+        animation: twinkle 3s ease-in-out infinite;
+      }
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .moon {
+        position: absolute;
+        top: 8%;
+        right: 15%;
+        width: 60px;
+        height: 60px;
+        background: radial-gradient(
+          circle at 35% 35%,
+          #fef9c3,
+          #fde68a
+        );
+        border-radius: 50%;
+        box-shadow:
+          0 0 40px rgba(253, 230, 138, 0.3),
+          0 0 80px rgba(253, 230, 138, 0.1);
+      }
+
+      .layer-hills {
+        pointer-events: none;
+      }
+      .hill {
+        position: absolute;
+        bottom: 20%;
+        border-radius: 50%;
+        background: #143d2b;
+        opacity: 0.7;
+      }
+
+      .layer-ground {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 22%;
+        background: linear-gradient(
+          180deg,
+          #2d6a4f 0%,
+          #1b4332 40%,
+          #14532d 100%
+        );
+      }
+      .grass {
+        position: absolute;
+        bottom: 100%;
+        font-size: 18px;
+        animation: sway 4s ease-in-out infinite;
+      }
+      @keyframes sway {
+        0%,
+        100% {
+          transform: rotate(-3deg);
+        }
+        50% {
+          transform: rotate(3deg);
+        }
+      }
+
+      /* === TREES === */
+      .tree {
+        position: absolute;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          transform 0.3s ease,
+          filter 0.3s ease;
+        z-index: 10;
+      }
+      .tree:hover {
+        transform: scale(1.08);
+      }
+      .tree.completed .tree-icon {
+        filter: brightness(1.2)
+          drop-shadow(0 0 8px rgba(34, 197, 94, 0.4));
+      }
+
+      .tree-icon {
+        font-size: 72px;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+        transition: transform 0.4s ease;
+      }
+      .tree:hover .tree-icon {
+        transform: translateY(-4px);
+      }
+
+      .tree-number {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 18px;
+        margin: -12px auto 0;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease;
+        border: 3px solid;
+      }
+
+      .tree-number.waiting {
+        background: linear-gradient(135deg, #57534e, #78716c);
+        color: #d6d3d1;
+        border-color: #a8a29e;
+      }
+      .tree-number.next {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        border-color: #fde68a;
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      .tree-number.done {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        border-color: #86efac;
+        box-shadow: 0 0 14px rgba(34, 197, 94, 0.5);
+      }
+      .tree-number.wrong {
+        animation: shake 0.5s ease-in-out;
+        background: linear-gradient(
+          135deg,
+          #ef4444,
+          #dc2626
+        ) !important;
+        border-color: #fca5a5 !important;
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.5) !important;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.12);
+        }
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        20% {
+          transform: translateX(-6px);
+        }
+        40% {
+          transform: translateX(6px);
+        }
+        60% {
+          transform: translateX(-4px);
+        }
+        80% {
+          transform: translateX(4px);
+        }
+      }
+
+      .tree-check {
+        color: #86efac;
+        font-size: 12px;
+        margin-top: 2px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .tree.completed .tree-check {
+        opacity: 1;
+      }
+
+      /* === GLIDER === */
+      .glider {
+        position: absolute;
+        z-index: 50;
+        font-size: 44px;
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+        pointer-events: none;
+      }
+      .glider.gliding {
+        transition:
+          left 1s cubic-bezier(0.4, 0, 0.2, 1),
+          bottom 1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .glider.face-right {
+        transform: scaleX(-1);
+      }
+      .glider.face-left {
+        transform: scaleX(1);
+      }
+
+      .glider.gliding .glider-body {
+        animation: wingFlap 0.3s ease-in-out infinite;
+      }
+      @keyframes wingFlap {
+        0%,
+        100% {
+          transform: scaleY(1);
+        }
+        50% {
+          transform: scaleY(1.1) scaleX(1.05);
+        }
+      }
+
+      /* Trail */
+      .trail-particle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: rgba(253, 230, 138, 0.6);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 45;
+        animation: trailFade 0.8s ease-out forwards;
+      }
+      @keyframes trailFade {
+        0% {
+          opacity: 0.8;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.2) translateY(10px);
+        }
+      }
+
+      /* Leaves */
+      .leaf {
+        position: absolute;
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 45;
+        animation: leafFall 1.2s ease-out forwards;
+      }
+      @keyframes leafFall {
+        0% {
+          opacity: 1;
+          transform: translate(0, 0) rotate(0deg);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(var(--lx), var(--ly)) rotate(var(--lr));
+        }
+      }
+
+      /* Celebration */
+      .celebration {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 200;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(12px);
+        border-radius: 24px;
+        padding: 32px 48px;
+        border: 2px solid rgba(134, 239, 172, 0.3);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease;
+      }
+      .celebration.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .celebration h2 {
+        font-size: 28px;
+        color: #86efac;
+        margin-bottom: 8px;
+      }
+      .celebration p {
+        color: #a5b4fc;
+        font-size: 16px;
+      }
+      .celebration .emoji {
+        font-size: 64px;
+        margin-bottom: 12px;
+        display: block;
+      }
+      .celebration button {
+        margin-top: 16px;
+        padding: 10px 28px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        font-weight: 700;
+        font-size: 15px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+      }
+      .celebration button:hover {
+        filter: brightness(1.1);
+      }
+
+      /* Fireflies */
+      .firefly {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #fde68a;
+        border-radius: 50%;
+        box-shadow: 0 0 8px rgba(253, 230, 138, 0.6);
+        animation: fireflyFloat var(--duration) ease-in-out infinite;
+        opacity: 0;
+        z-index: 5;
+      }
+      @keyframes fireflyFloat {
+        0% {
+          opacity: 0;
+          transform: translate(0, 0);
+        }
+        25% {
+          opacity: 0.8;
+        }
+        50% {
+          opacity: 0.4;
+          transform: translate(var(--fx), var(--fy));
+        }
+        75% {
+          opacity: 0.9;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(0, 0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hud">
+      <span class="hud-label">🐿️ Bush Glider</span>
+      <span class="hud-progress" id="progress">0 / 7</span>
+      <span class="hud-direction">Sort ascending ↑</span>
+    </div>
+
+    <div class="instructions">
+      <strong>Click the trees</strong> in ascending number order to
+      guide the sugar glider through the bush 🌿
+    </div>
+
+    <div class="viewport" id="viewport">
+      <div class="scene" id="scene">
+        <!-- Sky -->
+        <div class="layer layer-sky" id="layerSky">
+          <div
+            class="star twinkle"
+            style="
+              top: 5%;
+              left: 5%;
+              width: 3px;
+              height: 3px;
+              animation-delay: 0s;
+            "
+          ></div>
+          <div
+            class="star twinkle"
+            style="
+              top: 12%;
+              left: 15%;
+              width: 2px;
+              height: 2px;
+              animation-delay: 1.2s;
+            "
+          ></div>
+          <div
+            class="star"
+            style="
+              top: 3%;
+              left: 25%;
+              width: 2px;
+              height: 2px;
+              opacity: 0.5;
+            "
+          ></div>
+          <div
+            class="star twinkle"
+            style="
+              top: 18%;
+              left: 35%;
+              width: 3px;
+              height: 3px;
+              animation-delay: 0.6s;
+            "
+          ></div>
+          <div
+            class="star"
+            style="
+              top: 8%;
+              left: 45%;
+              width: 2px;
+              height: 2px;
+              opacity: 0.4;
+            "
+          ></div>
+          <div
+            class="star twinkle"
+            style="
+              top: 14%;
+              left: 55%;
+              width: 3px;
+              height: 3px;
+              animation-delay: 2s;
+            "
+          ></div>
+          <div
+            class="star"
+            style="
+              top: 6%;
+              left: 65%;
+              width: 2px;
+              height: 2px;
+              opacity: 0.6;
+            "
+          ></div>
+          <div
+            class="star twinkle"
+            style="
+              top: 10%;
+              left: 78%;
+              width: 2px;
+              height: 2px;
+              animation-delay: 1.5s;
+            "
+          ></div>
+          <div
+            class="star twinkle"
+            style="
+              top: 4%;
+              left: 88%;
+              width: 3px;
+              height: 3px;
+              animation-delay: 0.8s;
+            "
+          ></div>
+          <div class="moon"></div>
+
+          <div
+            class="firefly"
+            style="
+              top: 50%;
+              left: 10%;
+              --fx: 20px;
+              --fy: -30px;
+              --duration: 5s;
+              animation-delay: 0s;
+            "
+          ></div>
+          <div
+            class="firefly"
+            style="
+              top: 60%;
+              left: 25%;
+              --fx: -15px;
+              --fy: -20px;
+              --duration: 4s;
+              animation-delay: 1s;
+            "
+          ></div>
+          <div
+            class="firefly"
+            style="
+              top: 45%;
+              left: 42%;
+              --fx: 25px;
+              --fy: -15px;
+              --duration: 6s;
+              animation-delay: 2s;
+            "
+          ></div>
+          <div
+            class="firefly"
+            style="
+              top: 55%;
+              left: 58%;
+              --fx: -10px;
+              --fy: -25px;
+              --duration: 4.5s;
+              animation-delay: 0.5s;
+            "
+          ></div>
+          <div
+            class="firefly"
+            style="
+              top: 65%;
+              left: 72%;
+              --fx: 15px;
+              --fy: -20px;
+              --duration: 5.5s;
+              animation-delay: 1.5s;
+            "
+          ></div>
+          <div
+            class="firefly"
+            style="
+              top: 48%;
+              left: 88%;
+              --fx: -20px;
+              --fy: -18px;
+              --duration: 5s;
+              animation-delay: 2.5s;
+            "
+          ></div>
+        </div>
+
+        <!-- Hills -->
+        <div class="layer layer-hills" id="layerHills">
+          <div
+            class="hill"
+            style="left: -5%; width: 35vw; height: 18vh; bottom: 22%"
+          ></div>
+          <div
+            class="hill"
+            style="
+              left: 18%;
+              width: 30vw;
+              height: 14vh;
+              bottom: 24%;
+              opacity: 0.5;
+            "
+          ></div>
+          <div
+            class="hill"
+            style="left: 38%; width: 40vw; height: 16vh; bottom: 22%"
+          ></div>
+          <div
+            class="hill"
+            style="
+              left: 60%;
+              width: 35vw;
+              height: 15vh;
+              bottom: 23%;
+              opacity: 0.6;
+            "
+          ></div>
+          <div
+            class="hill"
+            style="
+              left: 80%;
+              width: 30vw;
+              height: 13vh;
+              bottom: 25%;
+              opacity: 0.5;
+            "
+          ></div>
+        </div>
+
+        <!-- Ground + Trees -->
+        <div class="layer" id="layerGround">
+          <div class="layer-ground">
+            <div class="grass" style="left: 3%; animation-delay: 0s">
+              🌿
+            </div>
+            <div class="grass" style="left: 10%; animation-delay: 0.5s">
+              🌾
+            </div>
+            <div class="grass" style="left: 18%; animation-delay: 1s">
+              🌿
+            </div>
+            <div class="grass" style="left: 26%; animation-delay: 0.3s">
+              🌾
+            </div>
+            <div class="grass" style="left: 34%; animation-delay: 0.8s">
+              🌿
+            </div>
+            <div class="grass" style="left: 42%; animation-delay: 1.2s">
+              🌾
+            </div>
+            <div class="grass" style="left: 50%; animation-delay: 0.2s">
+              🌿
+            </div>
+            <div class="grass" style="left: 58%; animation-delay: 0.7s">
+              🌾
+            </div>
+            <div class="grass" style="left: 66%; animation-delay: 0.4s">
+              🌿
+            </div>
+            <div class="grass" style="left: 74%; animation-delay: 0.9s">
+              🌾
+            </div>
+            <div class="grass" style="left: 82%; animation-delay: 1.1s">
+              🌿
+            </div>
+            <div class="grass" style="left: 90%; animation-delay: 0.6s">
+              🌾
+            </div>
+          </div>
+
+          <!-- Trees spread across the wide scene -->
+          <div
+            class="tree"
+            id="tree-0"
+            style="left: 4%; bottom: 28%"
+            data-index="0"
+          >
+            <div class="tree-icon">🌳</div>
+            <div class="tree-number waiting" id="num-0">3</div>
+            <div class="tree-check">✓</div>
+          </div>
+          <div
+            class="tree"
+            id="tree-1"
+            style="left: 15%; bottom: 33%"
+            data-index="1"
+          >
+            <div class="tree-icon">🌲</div>
+            <div class="tree-number waiting" id="num-1">8</div>
+            <div class="tree-check">✓</div>
+          </div>
+          <div
+            class="tree"
+            id="tree-2"
+            style="left: 26%; bottom: 25%"
+            data-index="2"
+          >
+            <div class="tree-icon">🌳</div>
+            <div class="tree-number waiting" id="num-2">1</div>
+            <div class="tree-check">✓</div>
+          </div>
+          <div
+            class="tree"
+            id="tree-3"
+            style="left: 38%; bottom: 31%"
+            data-index="3"
+          >
+            <div class="tree-icon">🌲</div>
+            <div class="tree-number waiting" id="num-3">12</div>
+            <div class="tree-check">✓</div>
+          </div>
+          <div
+            class="tree"
+            id="tree-4"
+            style="left: 52%; bottom: 26%"
+            data-index="4"
+          >
+            <div class="tree-icon">🌳</div>
+            <div class="tree-number waiting" id="num-4">5</div>
+            <div class="tree-check">✓</div>
+          </div>
+          <div
+            class="tree"
+            id="tree-5"
+            style="left: 66%; bottom: 35%"
+            data-index="5"
+          >
+            <div class="tree-icon">🌲</div>
+            <div class="tree-number waiting" id="num-5">15</div>
+            <div class="tree-check">✓</div>
+          </div>
+          <div
+            class="tree"
+            id="tree-6"
+            style="left: 80%; bottom: 28%"
+            data-index="6"
+          >
+            <div class="tree-icon">🌳</div>
+            <div class="tree-number waiting" id="num-6">10</div>
+            <div class="tree-check">✓</div>
+          </div>
+
+          <!-- Glider -->
+          <div
+            class="glider face-right"
+            id="glider"
+            style="left: 4%; bottom: 38%"
+          >
+            <span class="glider-body">🐿️</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Celebration -->
+    <div class="celebration" id="celebration">
+      <span class="emoji">🎉🐿️🎉</span>
+      <h2>Well done!</h2>
+      <p>The sugar glider made it through the bush!</p>
+      <button onclick="resetGame()">Play again</button>
+    </div>
+
+    <script>
+      const numbers = [3, 8, 1, 12, 5, 15, 10];
+      const sorted = [...numbers].sort((a, b) => a - b); // [1, 3, 5, 8, 10, 12, 15]
+      let currentStep = 0;
+      let isGliding = false;
+
+      const scene = document.getElementById('scene');
+      const layerSky = document.getElementById('layerSky');
+      const layerHills = document.getElementById('layerHills');
+      const glider = document.getElementById('glider');
+      const progressEl = document.getElementById('progress');
+      const viewport = document.getElementById('viewport');
+
+      const PARALLAX_SKY = 0.08;
+      const PARALLAX_HILLS = 0.3;
+
+      // Find tree index by number value
+      function treeIndexForNumber(num) {
+        return numbers.indexOf(num);
+      }
+
+      // Pan camera to center a tree in viewport
+      function panToTree(treeIdx) {
+        const treeEl = document.getElementById('tree-' + treeIdx);
+        const treePct = parseFloat(treeEl.style.left) / 100;
+        const sceneWidth = scene.offsetWidth;
+        const viewWidth = viewport.offsetWidth;
+
+        const treePixel = treePct * sceneWidth;
+        let offsetX = -(treePixel - viewWidth / 2);
+
+        // Clamp
+        const maxOffset = 0;
+        const minOffset = -(sceneWidth - viewWidth);
+        offsetX = Math.max(minOffset, Math.min(maxOffset, offsetX));
+
+        // Apply parallax layers
+        layerSky.style.transform = `translateX(${offsetX * PARALLAX_SKY}px)`;
+        layerHills.style.transform = `translateX(${offsetX * PARALLAX_HILLS}px)`;
+        scene.style.transform = `translateX(${offsetX}px)`;
+      }
+
+      function highlightNext() {
+        if (currentStep >= sorted.length) return;
+        const targetNum = sorted[currentStep];
+        const treeIdx = treeIndexForNumber(targetNum);
+
+        // Clear previous highlights
+        document.querySelectorAll('.tree-number.next').forEach((el) => {
+          el.classList.remove('next');
+          el.classList.add('waiting');
+        });
+
+        const numEl = document.getElementById('num-' + treeIdx);
+        if (numEl && !numEl.classList.contains('done')) {
+          numEl.classList.remove('waiting');
+          numEl.classList.add('next');
+        }
+
+        // Pan camera to show the next target tree
+        panToTree(treeIdx);
+      }
+
+      // Click handlers
+      document.querySelectorAll('.tree').forEach((treeEl) => {
+        treeEl.addEventListener('click', () => {
+          if (isGliding) return;
+          const idx = parseInt(treeEl.dataset.index);
+          const clickedNum = numbers[idx];
+          const expectedNum = sorted[currentStep];
+
+          if (clickedNum === expectedNum) {
+            handleCorrect(idx, treeEl);
+          } else {
+            handleWrong(idx);
+          }
+        });
+      });
+
+      function handleCorrect(treeIdx, treeEl) {
+        isGliding = true;
+        const treeLeft = treeEl.style.left;
+        const treeBottom = treeEl.style.bottom;
+
+        // Face direction of travel
+        const gliderLeft = parseFloat(glider.style.left);
+        const targetLeft = parseFloat(treeLeft);
+        if (targetLeft > gliderLeft) {
+          glider.classList.add('face-right');
+          glider.classList.remove('face-left');
+        } else {
+          glider.classList.remove('face-right');
+          glider.classList.add('face-left');
+        }
+
+        // Animate glider
+        glider.classList.add('gliding');
+        glider.style.left = treeLeft;
+        glider.style.bottom = parseFloat(treeBottom) + 10 + '%';
+
+        // Trail particles
+        spawnTrail(
+          gliderLeft,
+          targetLeft,
+          parseFloat(glider.style.bottom),
+          parseFloat(treeBottom) + 10,
+        );
+
+        // Pan camera to follow glider to target
+        panToTree(treeIdx);
+
+        setTimeout(() => {
+          glider.classList.remove('gliding');
+
+          // Mark complete
+          treeEl.classList.add('completed');
+          const numEl = document.getElementById('num-' + treeIdx);
+          numEl.classList.remove('next');
+          numEl.classList.add('done');
+
+          spawnLeaves(treeEl);
+
+          currentStep++;
+          progressEl.textContent = currentStep + ' / ' + sorted.length;
+
+          if (currentStep >= sorted.length) {
+            setTimeout(() => {
+              document
+                .getElementById('celebration')
+                .classList.add('show');
+            }, 600);
+          } else {
+            // Key fix: after a short pause, pan to the NEXT target
+            setTimeout(() => {
+              highlightNext();
+              isGliding = false;
+            }, 400);
+          }
+        }, 1100);
+      }
+
+      function handleWrong(treeIdx) {
+        const numEl = document.getElementById('num-' + treeIdx);
+        numEl.classList.add('wrong');
+        setTimeout(() => numEl.classList.remove('wrong'), 600);
+      }
+
+      function spawnTrail(fromX, toX, fromY, toY) {
+        const count = 8;
+        for (let i = 0; i < count; i++) {
+          setTimeout(() => {
+            const particle = document.createElement('div');
+            particle.className = 'trail-particle';
+            const progress = i / count;
+            const x = fromX + (toX - fromX) * progress;
+            const y = fromY + (toY - fromY) * progress;
+            // Arc upward in the middle
+            const arc = Math.sin(progress * Math.PI) * 6;
+            particle.style.left = x + '%';
+            particle.style.bottom = y + arc + '%';
+            document
+              .getElementById('layerGround')
+              .appendChild(particle);
+            setTimeout(() => particle.remove(), 800);
+          }, i * 100);
+        }
+      }
+
+      function spawnLeaves(treeEl) {
+        const leaves = ['🍃', '🌿', '🍂'];
+        for (let i = 0; i < 6; i++) {
+          const leaf = document.createElement('div');
+          leaf.className = 'leaf';
+          leaf.textContent =
+            leaves[Math.floor(Math.random() * leaves.length)];
+          leaf.style.left =
+            parseFloat(treeEl.style.left) +
+            (Math.random() * 3 - 1.5) +
+            '%';
+          leaf.style.bottom = parseFloat(treeEl.style.bottom) + 8 + '%';
+          leaf.style.setProperty(
+            '--lx',
+            Math.random() * 70 - 35 + 'px',
+          );
+          leaf.style.setProperty(
+            '--ly',
+            Math.random() * 50 + 20 + 'px',
+          );
+          leaf.style.setProperty('--lr', Math.random() * 360 + 'deg');
+          leaf.style.animationDelay = Math.random() * 0.3 + 's';
+          document.getElementById('layerGround').appendChild(leaf);
+          setTimeout(() => leaf.remove(), 1500);
+        }
+      }
+
+      function resetGame() {
+        currentStep = 0;
+        isGliding = false;
+        progressEl.textContent = '0 / ' + sorted.length;
+        document.getElementById('celebration').classList.remove('show');
+
+        document
+          .querySelectorAll('.tree')
+          .forEach((t) => t.classList.remove('completed'));
+        document.querySelectorAll('.tree-number').forEach((n) => {
+          n.classList.remove('done', 'next', 'wrong');
+          n.classList.add('waiting');
+        });
+
+        glider.style.left = '4%';
+        glider.style.bottom = '38%';
+        glider.classList.add('face-right');
+        glider.classList.remove('face-left', 'gliding');
+
+        scene.style.transform = 'translateX(0)';
+        layerSky.style.transform = 'translateX(0)';
+        layerHills.style.transform = 'translateX(0)';
+
+        // Pan to first target
+        highlightNext();
+      }
+
+      // Start: pan to the first target tree
+      highlightNext();
+    </script>
+  </body>
+</html>
