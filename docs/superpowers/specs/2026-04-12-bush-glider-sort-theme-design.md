@@ -85,8 +85,9 @@ tap/click input rather than drag. The Bush Glider theme builds on this pattern:
 2. **After correct tap:** camera pans smoothly to centre the **next target tree**
 3. **Pan timing:** camera begins panning as the glider starts its flight, arriving
    together
-4. **Next target highlight:** the golden pulsing badge on the next tree is the only
-   visual cue — no arrow or pointer overlays
+4. **No answer hints:** the next target tree is NOT highlighted — all untapped trees
+   look identical (grey badges). The child must read the numbers and decide which
+   comes next. This is the core learning exercise.
 
 ### Parallax Layers (back to front)
 
@@ -153,17 +154,23 @@ sceneTranslateX = clampedOffset * 1.0
 - Pill-shaped container with frosted glass effect (backdrop-filter blur)
 - Shows:
   - Animal icon + game name ("Bush Glider")
+  - **Last completed number** — grey "?" badge at start, turns green and shows the
+    last correctly tapped number after each step. Tells the child where they are
+    without revealing the next answer.
   - Progress counter ("3 / 7")
   - Sort direction indicator ("Sort ascending ↑" or "Sort descending ↓")
 
 ## Number Badge States
 
-| State             | Background                         | Border  | Shadow                | Text       |
-| ----------------- | ---------------------------------- | ------- | --------------------- | ---------- |
-| Waiting           | Grey gradient (#57534e → #78716c)  | #a8a29e | None                  | Light grey |
-| Next target       | Gold gradient (#f59e0b → #d97706)  | #fde68a | Gold glow, pulse anim | White      |
-| Completed         | Green gradient (#22c55e → #16a34a) | #86efac | Green glow            | White      |
-| Wrong (momentary) | Red gradient (#ef4444 → #dc2626)   | #fca5a5 | Red glow, shake anim  | White      |
+| State             | Background                         | Border  | Shadow               | Text       |
+| ----------------- | ---------------------------------- | ------- | -------------------- | ---------- |
+| Waiting (default) | Grey gradient (#57534e → #78716c)  | #a8a29e | None                 | Light grey |
+| Completed         | Green gradient (#22c55e → #16a34a) | #86efac | Green glow           | White      |
+| Wrong (momentary) | Red gradient (#ef4444 → #dc2626)   | #fca5a5 | Red glow, shake anim | White      |
+
+**No "next target" state.** All untapped trees use the same waiting style. The child
+must identify the correct next number by reading the badges — this is the core
+learning objective of the game.
 
 ## Tree Layout Algorithm
 
