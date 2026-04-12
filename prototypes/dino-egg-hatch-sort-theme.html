@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dino Egg Hatch — SortNumbers Theme Prototype</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: linear-gradient(180deg, #fef3c7 0%, #fde68a 20%, #d9f99d 50%, #86efac 75%, #4d7c0f 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow: hidden; height: 100vh;
+  }
+
+  /* HUD */
+  .hud {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    z-index: 100; display: flex; gap: 16px; align-items: center;
+    background: rgba(101,63,13,0.7); backdrop-filter: blur(8px);
+    border-radius: 24px; padding: 8px 20px; border: 1px solid rgba(255,255,255,0.15);
+  }
+  .hud-label { color: #fde68a; font-size: 13px; font-weight: 600; }
+  .hud-progress { color: #86efac; font-size: 13px; font-weight: 700; }
+  .hud-last {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 28px; height: 28px; padding: 0 6px; border-radius: 50%;
+    background: linear-gradient(135deg, #57534e, #78716c);
+    color: #d6d3d1; font-weight: 800; font-size: 15px;
+    border: 2px solid #a8a29e; transition: all 0.3s ease;
+  }
+  .hud-last.done {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white; border-color: #86efac;
+    box-shadow: 0 0 10px rgba(34,197,94,0.4);
+  }
+
+  /* Scene */
+  .scene {
+    width: 100vw; height: 100vh; position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Volcano background */
+  .volcano {
+    position: fixed; bottom: 0; right: -40px; width: 300px; height: 200px;
+    z-index: 1; opacity: 0.6;
+  }
+  .volcano-body {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 150px solid transparent;
+    border-right: 150px solid transparent;
+    border-bottom: 200px solid #78350f;
+  }
+  .volcano-crater {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 20px; background: #450a0a;
+    border-radius: 50%; z-index: 2;
+  }
+  .lava-glow {
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    width: 40px; height: 30px; background: radial-gradient(circle, rgba(249,115,22,0.6), transparent);
+    border-radius: 50%; animation: lavaGlow 2s ease-in-out infinite;
+  }
+  @keyframes lavaGlow {
+    0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
+    50% { opacity: 0.8; transform: translateX(-50%) scale(1.2); }
+  }
+
+  /* Prehistoric plants */
+  .plant {
+    position: fixed; font-size: 40px; z-index: 2; opacity: 0.7;
+    animation: sway 5s ease-in-out infinite;
+  }
+  @keyframes sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+  /* === NEST === */
+  .nest-area {
+    position: relative; z-index: 10;
+    display: flex; flex-direction: column; align-items: center;
+    margin-top: -40px;
+  }
+
+  .nest {
+    position: relative;
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    padding: 20px 30px 30px;
+    max-width: 420px;
+    min-height: 120px;
+    align-items: flex-end;
+  }
+
+  /* Nest bowl shape */
+  .nest-bowl {
+    position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+    width: 110%; height: 60px;
+    background: radial-gradient(ellipse at 50% 0%, #92400e 0%, #78350f 40%, #451a03 100%);
+    border-radius: 0 0 50% 50%;
+    z-index: -1;
+  }
+  .nest-sticks {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    width: 115%; height: 30px;
+    background: repeating-linear-gradient(
+      75deg,
+      transparent 0px, transparent 8px,
+      #a16207 8px, #a16207 10px,
+      transparent 10px, transparent 14px
+    );
+    opacity: 0.5; border-radius: 50%;
+  }
+  .nest-label {
+    text-align: center; margin-bottom: 8px;
+    font-size: 14px; color: #78350f; font-weight: 600;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+  }
+
+  /* === EGG SLOTS in nest === */
+  .egg-slot {
+    width: 64px; height: 78px; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.3s ease;
+  }
+
+  .egg-shell {
+    width: 58px; height: 72px;
+    background: linear-gradient(180deg, #e7e5e4, #d6d3d1);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    border: 3px solid #a8a29e;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    transition: all 0.4s ease;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+  .egg-shell.drop-target {
+    border-color: #fde68a;
+    box-shadow: 0 0 20px rgba(253,230,138,0.5), 0 3px 8px rgba(0,0,0,0.15);
+  }
+
+  /* Hatched state */
+  .egg-slot.hatched .egg-shell {
+    background: transparent; border: none; box-shadow: none;
+  }
+  .egg-slot.hatched .egg-crack { opacity: 0; }
+
+  /* Crack lines */
+  .egg-crack {
+    position: absolute; top: 50%; left: 10%; right: 10%;
+    height: 3px; opacity: 0;
+    background: repeating-linear-gradient(90deg, #78716c 0px, #78716c 6px, transparent 6px, transparent 10px);
+    transform: translateY(-50%);
+    transition: opacity 0.3s ease;
+  }
+  .egg-shell.cracking .egg-crack { opacity: 1; }
+
+  /* Baby dino */
+  .baby-dino {
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%) scale(0);
+    font-size: 36px; z-index: 5;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  }
+  .egg-slot.hatched .baby-dino {
+    transform: translateX(-50%) scale(1);
+  }
+
+  /* Number on egg */
+  .egg-number {
+    font-weight: 800; font-size: 20px; color: #78716c;
+    position: relative; z-index: 2;
+    opacity: 0; transition: opacity 0.3s ease;
+  }
+  .egg-slot.placed .egg-number { opacity: 1; }
+
+  /* Hatched egg shell fragments at bottom */
+  .shell-fragment {
+    position: absolute; bottom: 5px; font-size: 12px; opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .egg-slot.hatched .shell-fragment { opacity: 0.6; }
+
+  /* Happy dance on completion */
+  .egg-slot.dancing .baby-dino {
+    animation: happyDance 0.5s ease-in-out infinite;
+  }
+  @keyframes happyDance {
+    0%, 100% { transform: translateX(-50%) scale(1) rotate(0deg); }
+    25% { transform: translateX(-50%) scale(1.1) rotate(-10deg); }
+    75% { transform: translateX(-50%) scale(1.1) rotate(10deg); }
+  }
+
+  /* === TILE BANK (eggs to drag) === */
+  .tile-bank {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    padding: 16px 24px;
+    background: rgba(120,53,15,0.3); backdrop-filter: blur(8px);
+    border-radius: 20px; border: 1px solid rgba(255,255,255,0.15);
+    z-index: 20; max-width: 90vw;
+  }
+
+  .egg-tile {
+    width: 52px; height: 64px; position: relative;
+    cursor: grab; user-select: none; touch-action: none;
+    transition: transform 0.15s ease, opacity 0.3s ease;
+  }
+  .egg-tile:hover { transform: scale(1.08) translateY(-3px); }
+  .egg-tile:active { cursor: grabbing; }
+  .egg-tile.used { opacity: 0.2; pointer-events: none; }
+  .egg-tile.dragging {
+    position: fixed; z-index: 100; pointer-events: none;
+    transform: scale(1.12);
+  }
+
+  .egg-tile-shape {
+    width: 100%; height: 100%;
+    background: linear-gradient(180deg, #fef3c7, #fde68a, #fbbf24);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    border: 3px solid #d97706;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 18px; color: #78350f;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    position: relative;
+  }
+  /* Speckles on eggs */
+  .egg-tile-shape::before {
+    content: ''; position: absolute; inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at 30% 25%, rgba(120,53,15,0.15) 2px, transparent 2px),
+                radial-gradient(circle at 65% 40%, rgba(120,53,15,0.12) 2px, transparent 2px),
+                radial-gradient(circle at 45% 65%, rgba(120,53,15,0.1) 2px, transparent 2px),
+                radial-gradient(circle at 70% 70%, rgba(120,53,15,0.13) 2px, transparent 2px);
+  }
+
+  /* Celebration */
+  .celebration {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    z-index: 200; text-align: center;
+    background: rgba(255,255,255,0.9); backdrop-filter: blur(12px);
+    border-radius: 24px; padding: 32px 48px;
+    border: 2px solid rgba(74,222,128,0.3);
+    opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .celebration.show { opacity: 1; pointer-events: auto; }
+  .celebration h2 { font-size: 28px; color: #16a34a; margin-bottom: 8px; }
+  .celebration p { color: #64748b; font-size: 16px; }
+  .celebration .emoji { font-size: 64px; margin-bottom: 12px; display: block; }
+  .celebration button {
+    margin-top: 16px; padding: 10px 28px; border-radius: 20px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white; font-weight: 700; font-size: 15px; border: none;
+    cursor: pointer; box-shadow: 0 4px 16px rgba(34,197,94,0.3);
+  }
+
+  /* Footprint particles */
+  .footprint {
+    position: absolute; font-size: 10px; pointer-events: none; z-index: 45;
+    animation: footFade 1s ease-out forwards;
+  }
+  @keyframes footFade {
+    0% { opacity: 0.8; transform: scale(0.5); }
+    50% { opacity: 0.6; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.8) translateY(10px); }
+  }
+
+  /* Ground texture */
+  .ground {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
+    background: linear-gradient(180deg, transparent, rgba(77,124,15,0.4));
+    z-index: 1; pointer-events: none;
+  }
+
+  /* Dino varieties */
+  .dino-colors {
+    --d0: '🦕'; --d1: '🦖'; --d2: '🐊'; --d3: '🦎';
+  }
+</style>
+</head>
+<body>
+
+<div class="hud">
+  <span class="hud-label">🦕 Dino Hatch</span>
+  <span class="hud-last" id="hudLast">?</span>
+  <span class="hud-progress" id="progress">0 / 6</span>
+</div>
+
+<div class="scene">
+  <!-- Volcano -->
+  <div class="volcano">
+    <div class="volcano-crater"></div>
+    <div class="lava-glow"></div>
+    <div class="volcano-body"></div>
+  </div>
+
+  <!-- Plants -->
+  <div class="plant" style="bottom: 80px; left: 20px;">🌴</div>
+  <div class="plant" style="bottom: 100px; left: 60px; font-size: 30px; animation-delay: -1s;">🌿</div>
+  <div class="plant" style="bottom: 70px; right: 30px; font-size: 35px; animation-delay: -2s;">🌴</div>
+  <div class="plant" style="bottom: 90px; right: 80px; font-size: 28px; animation-delay: -0.5s;">🌿</div>
+  <div class="plant" style="top: 30%; left: 5%; font-size: 24px; animation-delay: -1.5s;">🪨</div>
+  <div class="plant" style="top: 35%; right: 8%; font-size: 28px; animation-delay: -3s;">🪨</div>
+
+  <!-- Nest -->
+  <div class="nest-area">
+    <div class="nest-label">🪹 Sort the eggs into the nest!</div>
+    <div class="nest" id="nest">
+      <div class="nest-bowl"></div>
+      <div class="nest-sticks"></div>
+      <!-- Egg slots created by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Draggable eggs -->
+<div class="tile-bank" id="tileBank"></div>
+
+<!-- Celebration -->
+<div class="celebration" id="celebration">
+  <span class="emoji">🦕🎉🦖</span>
+  <h2>All hatched!</h2>
+  <p>The baby dinos are so happy!</p>
+  <button onclick="resetGame()">Hatch more</button>
+</div>
+
+<div class="ground"></div>
+
+<script>
+  const DINOS = ['🦕', '🦖', '🐢', '🦎', '🐸', '🐲'];
+  const numbers = [3, 6, 9, 12, 15, 18];
+  const sorted = [...numbers].sort((a, b) => a - b);
+  let currentStep = 0;
+
+  const nest = document.getElementById('nest');
+  const tileBankEl = document.getElementById('tileBank');
+  const progressEl = document.getElementById('progress');
+  const hudLast = document.getElementById('hudLast');
+
+  let dragTile = null;
+  let dragClone = null;
+  let dragOffX = 0, dragOffY = 0;
+
+  // Create egg slots in the nest
+  const slots = [];
+  sorted.forEach((num, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'egg-slot';
+    slot.id = 'slot-' + i;
+
+    const shell = document.createElement('div');
+    shell.className = 'egg-shell';
+    shell.id = 'shell-' + i;
+
+    const crack = document.createElement('div');
+    crack.className = 'egg-crack';
+    shell.appendChild(crack);
+
+    const numLabel = document.createElement('div');
+    numLabel.className = 'egg-number';
+    numLabel.id = 'num-' + i;
+    shell.appendChild(numLabel);
+
+    slot.appendChild(shell);
+
+    // Baby dino (hidden initially)
+    const dino = document.createElement('div');
+    dino.className = 'baby-dino';
+    dino.id = 'dino-' + i;
+    dino.textContent = DINOS[i % DINOS.length];
+    slot.appendChild(dino);
+
+    // Shell fragments
+    const fragL = document.createElement('div');
+    fragL.className = 'shell-fragment';
+    fragL.style.left = '8px';
+    fragL.textContent = '🥚';
+    slot.appendChild(fragL);
+    const fragR = document.createElement('div');
+    fragR.className = 'shell-fragment';
+    fragR.style.right = '8px';
+    fragR.textContent = '🥚';
+    slot.appendChild(fragR);
+
+    nest.appendChild(slot);
+    slots.push(slot);
+  });
+
+  // Build draggable egg tiles
+  function buildTiles() {
+    tileBankEl.innerHTML = '';
+    const shuffled = [...numbers].sort(() => Math.random() - 0.5);
+    shuffled.forEach(num => {
+      const tile = document.createElement('div');
+      tile.className = 'egg-tile';
+      tile.dataset.num = num;
+
+      const shape = document.createElement('div');
+      shape.className = 'egg-tile-shape';
+      shape.textContent = num;
+      tile.appendChild(shape);
+
+      tile.addEventListener('mousedown', startDrag);
+      tile.addEventListener('touchstart', startDrag, { passive: false });
+      tileBankEl.appendChild(tile);
+    });
+  }
+  buildTiles();
+
+  function startDrag(e) {
+    e.preventDefault();
+    const tile = e.currentTarget;
+    if (tile.classList.contains('used')) return;
+
+    dragTile = tile;
+    const rect = tile.getBoundingClientRect();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    dragOffX = cx - rect.left;
+    dragOffY = cy - rect.top;
+
+    dragClone = tile.cloneNode(true);
+    dragClone.classList.add('dragging');
+    dragClone.style.width = rect.width + 'px';
+    dragClone.style.height = rect.height + 'px';
+    dragClone.style.left = rect.left + 'px';
+    dragClone.style.top = rect.top + 'px';
+    document.body.appendChild(dragClone);
+
+    tile.style.opacity = '0.3';
+
+    // Highlight next empty slot
+    if (currentStep < slots.length) {
+      document.getElementById('shell-' + currentStep).classList.add('drop-target');
+    }
+
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchmove', onDrag, { passive: false });
+    document.addEventListener('touchend', endDrag);
+  }
+
+  function onDrag(e) {
+    if (!dragClone) return;
+    e.preventDefault();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    dragClone.style.left = (cx - dragOffX) + 'px';
+    dragClone.style.top = (cy - dragOffY) + 'px';
+  }
+
+  function endDrag(e) {
+    if (!dragClone || !dragTile) return;
+
+    const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+    const cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+
+    const nRect = nest.getBoundingClientRect();
+    const overNest = (
+      cx >= nRect.left && cx <= nRect.right &&
+      cy >= nRect.top && cy <= nRect.bottom
+    );
+
+    const num = parseInt(dragTile.dataset.num);
+    const expected = sorted[currentStep];
+
+    if (overNest && num === expected) {
+      handleCorrect(num);
+    } else if (overNest) {
+      handleWrong();
+      dragTile.style.opacity = '1';
+    } else {
+      dragTile.style.opacity = '1';
+    }
+
+    // Remove drop target
+    slots.forEach((_, i) => {
+      document.getElementById('shell-' + i).classList.remove('drop-target');
+    });
+
+    dragClone.remove();
+    dragClone = null;
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', endDrag);
+    document.removeEventListener('touchmove', onDrag);
+    document.removeEventListener('touchend', endDrag);
+    dragTile = null;
+  }
+
+  function handleCorrect(num) {
+    dragTile.classList.add('used');
+    dragTile.style.opacity = '0.2';
+
+    const slot = slots[currentStep];
+    const shell = document.getElementById('shell-' + currentStep);
+    const numLabel = document.getElementById('num-' + currentStep);
+
+    // Phase 1: Show number on egg
+    slot.classList.add('placed');
+    numLabel.textContent = num;
+
+    // Phase 2: Crack the egg
+    setTimeout(() => {
+      shell.classList.add('cracking');
+    }, 300);
+
+    // Phase 3: Hatch!
+    setTimeout(() => {
+      slot.classList.add('hatched');
+      spawnFootprints(slot);
+    }, 800);
+
+    // Update HUD
+    hudLast.textContent = num;
+    hudLast.classList.add('done');
+
+    currentStep++;
+    progressEl.textContent = currentStep + ' / ' + sorted.length;
+
+    if (currentStep >= sorted.length) {
+      setTimeout(() => {
+        // All dinos dance!
+        slots.forEach(s => s.classList.add('dancing'));
+        setTimeout(() => {
+          document.getElementById('celebration').classList.add('show');
+        }, 1500);
+      }, 1000);
+    }
+  }
+
+  function handleWrong() {
+    if (currentStep < slots.length) {
+      const shell = document.getElementById('shell-' + currentStep);
+      shell.style.animation = 'none';
+      shell.offsetHeight;
+      shell.style.animation = 'shake 0.4s ease-in-out';
+    }
+  }
+
+  const shakeStyle = document.createElement('style');
+  shakeStyle.textContent = `
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-2px); }
+    }
+  `;
+  document.head.appendChild(shakeStyle);
+
+  function spawnFootprints(slot) {
+    const rect = slot.getBoundingClientRect();
+    const nestRect = nest.getBoundingClientRect();
+    for (let i = 0; i < 4; i++) {
+      const fp = document.createElement('div');
+      fp.className = 'footprint';
+      fp.textContent = '🐾';
+      fp.style.left = (rect.left - nestRect.left + 10 + Math.random() * 40) + 'px';
+      fp.style.top = (rect.top - nestRect.top + 20 + Math.random() * 30) + 'px';
+      fp.style.animationDelay = (Math.random() * 0.3) + 's';
+      nest.appendChild(fp);
+      setTimeout(() => fp.remove(), 1200);
+    }
+  }
+
+  function resetGame() {
+    currentStep = 0;
+    progressEl.textContent = '0 / ' + sorted.length;
+    hudLast.textContent = '?';
+    hudLast.classList.remove('done');
+    document.getElementById('celebration').classList.remove('show');
+
+    slots.forEach((slot, i) => {
+      slot.classList.remove('placed', 'hatched', 'dancing');
+      const shell = document.getElementById('shell-' + i);
+      shell.classList.remove('cracking', 'drop-target');
+      shell.style.animation = '';
+      const numLabel = document.getElementById('num-' + i);
+      numLabel.textContent = '';
+    });
+
+    buildTiles();
+  }
+
+  progressEl.textContent = '0 / ' + sorted.length;
+</script>
+</body>
+</html>
