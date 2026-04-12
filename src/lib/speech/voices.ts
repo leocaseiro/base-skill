@@ -1,3 +1,5 @@
+import { safeGetVoices } from './safe-get-voices';
+
 export function getVoiceByName(
   name: string,
 ): SpeechSynthesisVoice | undefined {
@@ -7,7 +9,7 @@ export function getVoiceByName(
   if (!synth) {
     return undefined;
   }
-  return synth.getVoices().find((v) => v.name === name);
+  return safeGetVoices(synth).find((v) => v.name === name);
 }
 
 export function getVoicesForLanguage(
@@ -19,7 +21,7 @@ export function getVoicesForLanguage(
   if (!synth) {
     return [];
   }
-  const voices = synth.getVoices();
+  const voices = safeGetVoices(synth);
   const prefix = lang.split('-')[0]?.toLowerCase() ?? lang;
   return voices.filter(
     (v) =>
