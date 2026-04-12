@@ -42,6 +42,34 @@
         font-size: 13px;
         font-weight: 600;
       }
+      .hud-target {
+        color: #e2e8f0;
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .hud-target-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 6px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #57534e, #78716c);
+        color: #d6d3d1;
+        font-weight: 800;
+        font-size: 15px;
+        border: 2px solid #a8a29e;
+      }
+      .hud-target-num.done {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        border-color: #86efac;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+      }
       .hud-progress {
         color: #86efac;
         font-size: 13px;
@@ -234,13 +262,6 @@
         color: #d6d3d1;
         border-color: #a8a29e;
       }
-      .tree-number.next {
-        background: linear-gradient(135deg, #f59e0b, #d97706);
-        color: white;
-        border-color: #fde68a;
-        box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
-        animation: pulse 1.5s ease-in-out infinite;
-      }
       .tree-number.done {
         background: linear-gradient(135deg, #22c55e, #16a34a);
         color: white;
@@ -256,15 +277,6 @@
         ) !important;
         border-color: #fca5a5 !important;
         box-shadow: 0 0 20px rgba(239, 68, 68, 0.5) !important;
-      }
-      @keyframes pulse {
-        0%,
-        100% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.12);
-        }
       }
       @keyframes shake {
         0%,
@@ -458,6 +470,9 @@
   <body>
     <div class="hud">
       <span class="hud-label">🐿️ Bush Glider</span>
+      <span class="hud-target" id="hudTarget"
+        ><span class="hud-target-num" id="hudTargetNum">?</span></span
+      >
       <span class="hud-progress" id="progress">0 / 7</span>
       <span class="hud-direction">Sort ascending ↑</span>
     </div>
@@ -817,6 +832,7 @@
       const layerHills = document.getElementById('layerHills');
       const glider = document.getElementById('glider');
       const progressEl = document.getElementById('progress');
+      const hudTargetNum = document.getElementById('hudTargetNum');
       const viewport = document.getElementById('viewport');
 
       const PARALLAX_SKY = 0.08;
@@ -849,23 +865,16 @@
       }
 
       function highlightNext() {
-        if (currentStep >= sorted.length) return;
-        const targetNum = sorted[currentStep];
-        const treeIdx = treeIndexForNumber(targetNum);
-
-        // Clear previous highlights
-        document.querySelectorAll('.tree-number.next').forEach((el) => {
-          el.classList.remove('next');
-          el.classList.add('waiting');
-        });
-
-        const numEl = document.getElementById('num-' + treeIdx);
-        if (numEl && !numEl.classList.contains('done')) {
-          numEl.classList.remove('waiting');
-          numEl.classList.add('next');
+        if (currentStep >= sorted.length) {
+          hudTargetNum.textContent = '✓';
+          return;
         }
 
-        // Pan camera to show the next target tree
+        // No highlight on the next target — the child must
+        // read the numbers and decide which is next.
+        // Pan camera to show a mix of remaining trees.
+        const targetNum = sorted[currentStep];
+        const treeIdx = treeIndexForNumber(targetNum);
         panToTree(treeIdx);
       }
 
@@ -887,6 +896,11 @@
 
       function handleCorrect(treeIdx, treeEl) {
         isGliding = true;
+
+        // Update HUD to show the number just tapped (last completed)
+        hudTargetNum.textContent = numbers[treeIdx];
+        hudTargetNum.classList.add('done');
+
         const treeLeft = treeEl.style.left;
         const treeBottom = treeEl.style.bottom;
 
@@ -1005,6 +1019,8 @@
         currentStep = 0;
         isGliding = false;
         progressEl.textContent = '0 / ' + sorted.length;
+        hudTargetNum.textContent = '?';
+        hudTargetNum.classList.remove('done');
         document.getElementById('celebration').classList.remove('show');
 
         document
