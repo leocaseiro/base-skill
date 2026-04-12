@@ -7,7 +7,7 @@ interface ErrorBoundaryProps {
 }
 
 interface ErrorBoundaryState {
-  error: unknown | null;
+  error: unknown;
 }
 
 export class ErrorBoundary extends Component<
