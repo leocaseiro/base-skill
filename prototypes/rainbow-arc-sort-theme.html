@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Rainbow Arc — SortNumbers Theme Prototype</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: linear-gradient(
+          180deg,
+          #e0f2fe 0%,
+          #bae6fd 40%,
+          #7dd3fc 70%,
+          #86efac 90%,
+          #4ade80 100%
+        );
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* HUD */
+      .hud {
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 100;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(8px);
+        border-radius: 24px;
+        padding: 8px 20px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+      .hud-label {
+        color: #6366f1;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .hud-progress {
+        color: #16a34a;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .hud-last {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 6px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        color: #94a3b8;
+        font-weight: 800;
+        font-size: 15px;
+        border: 2px solid #cbd5e1;
+        transition: all 0.3s ease;
+      }
+      .hud-last.done {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        border-color: #86efac;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+      }
+
+      /* Clouds */
+      .cloud {
+        position: fixed;
+        font-size: 48px;
+        opacity: 0.5;
+        animation: drift var(--speed) linear infinite;
+      }
+      @keyframes drift {
+        0% {
+          transform: translateX(100vw);
+        }
+        100% {
+          transform: translateX(-150px);
+        }
+      }
+
+      /* Rainbow container */
+      .rainbow-area {
+        position: relative;
+        width: 500px;
+        height: 260px;
+        margin-top: 80px;
+        z-index: 10;
+      }
+
+      /* Each rainbow band is a half-circle ring */
+      .band {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        border-radius: 999px 999px 0 0;
+        border-style: solid;
+        border-bottom: none;
+        transition:
+          border-color 0.6s ease,
+          filter 0.3s ease;
+      }
+
+      /* Band glow on fill */
+      .band.filled {
+        filter: drop-shadow(0 0 8px var(--glow));
+      }
+
+      /* Drop zone highlight */
+      .band.drop-target {
+        filter: drop-shadow(0 0 16px rgba(253, 230, 138, 0.6));
+      }
+
+      /* Ghost number label on empty bands */
+      .band-label {
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-weight: 800;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.12);
+        pointer-events: none;
+        transition: all 0.4s ease;
+      }
+      .band.filled .band-label {
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Sparkle on completion */
+      .sparkle {
+        position: absolute;
+        font-size: 20px;
+        pointer-events: none;
+        z-index: 50;
+        animation: sparklePop 0.8s ease-out forwards;
+      }
+      @keyframes sparklePop {
+        0% {
+          opacity: 1;
+          transform: scale(0) rotate(0deg);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.2) rotate(180deg);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.5) rotate(360deg) translateY(-30px);
+        }
+      }
+
+      /* Tile bank */
+      .tile-bank {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 16px 24px;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        z-index: 20;
+        max-width: 90vw;
+      }
+
+      /* Arc-shaped tiles! */
+      .arc-tile {
+        position: relative;
+        width: 72px;
+        height: 40px;
+        cursor: grab;
+        user-select: none;
+        touch-action: none;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease,
+          opacity 0.3s ease;
+      }
+      .arc-tile:hover {
+        transform: scale(1.08) translateY(-2px);
+      }
+      .arc-tile:active {
+        cursor: grabbing;
+      }
+      .arc-tile.used {
+        opacity: 0.25;
+        pointer-events: none;
+      }
+      .arc-tile.dragging {
+        position: fixed;
+        z-index: 100;
+        pointer-events: none;
+        transform: scale(1.12);
+      }
+
+      .arc-tile-shape {
+        width: 100%;
+        height: 100%;
+        border-radius: 40px 40px 0 0;
+        border: 4px solid #cbd5e1;
+        border-bottom: none;
+        background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 18px;
+        color: #64748b;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        padding-bottom: 4px;
+      }
+      .arc-tile:hover .arc-tile-shape {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Celebration */
+      .celebration {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 200;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        border-radius: 24px;
+        padding: 32px 48px;
+        border: 2px solid rgba(99, 102, 241, 0.2);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      }
+      .celebration.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .celebration h2 {
+        font-size: 28px;
+        color: #6366f1;
+        margin-bottom: 8px;
+      }
+      .celebration p {
+        color: #64748b;
+        font-size: 16px;
+      }
+      .celebration .emoji {
+        font-size: 64px;
+        margin-bottom: 12px;
+        display: block;
+      }
+      .celebration button {
+        margin-top: 16px;
+        padding: 10px 28px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        font-weight: 700;
+        font-size: 15px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+      }
+
+      /* Full rainbow shimmer */
+      .rainbow-area.complete {
+        animation: shimmer 2s ease-in-out infinite;
+      }
+      @keyframes shimmer {
+        0%,
+        100% {
+          filter: brightness(1);
+        }
+        50% {
+          filter: brightness(1.15);
+        }
+      }
+
+      /* Ground */
+      .ground {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: linear-gradient(
+          180deg,
+          transparent,
+          rgba(74, 222, 128, 0.3)
+        );
+        z-index: 1;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hud">
+      <span class="hud-label">🌈 Rainbow</span>
+      <span class="hud-last" id="hudLast">?</span>
+      <span class="hud-progress" id="progress">0 / 7</span>
+    </div>
+
+    <!-- Clouds -->
+    <div class="cloud" style="top: 8%; --speed: 25s">☁️</div>
+    <div
+      class="cloud"
+      style="
+        top: 15%;
+        --speed: 35s;
+        animation-delay: -10s;
+        font-size: 36px;
+      "
+    >
+      ☁️
+    </div>
+    <div
+      class="cloud"
+      style="
+        top: 5%;
+        --speed: 30s;
+        animation-delay: -20s;
+        font-size: 40px;
+      "
+    >
+      ☁️
+    </div>
+
+    <!-- Rainbow -->
+    <div class="rainbow-area" id="rainbowArea"></div>
+
+    <!-- Tile bank -->
+    <div class="tile-bank" id="tileBank"></div>
+
+    <!-- Celebration -->
+    <div class="celebration" id="celebration">
+      <span class="emoji">🌈✨🎉</span>
+      <h2>Beautiful Rainbow!</h2>
+      <p>You painted all the colours!</p>
+      <button onclick="resetGame()">Paint again</button>
+    </div>
+
+    <div class="ground"></div>
+
+    <script>
+      // Rainbow colours — fill order is inside-out (violet first → red last)
+      // so the rainbow GROWS from smallest inner band to largest outer band
+      const COLORS_OUTSIDE_IN = [
+        {
+          color: '#ef4444',
+          glow: 'rgba(239,68,68,0.4)',
+          border: '#fca5a5',
+        }, // Red (outer)
+        {
+          color: '#f97316',
+          glow: 'rgba(249,115,22,0.4)',
+          border: '#fdba74',
+        }, // Orange
+        {
+          color: '#eab308',
+          glow: 'rgba(234,179,8,0.4)',
+          border: '#fde047',
+        }, // Yellow
+        {
+          color: '#22c55e',
+          glow: 'rgba(34,197,94,0.4)',
+          border: '#86efac',
+        }, // Green
+        {
+          color: '#3b82f6',
+          glow: 'rgba(59,130,246,0.4)',
+          border: '#93c5fd',
+        }, // Blue
+        {
+          color: '#6366f1',
+          glow: 'rgba(99,102,241,0.4)',
+          border: '#a5b4fc',
+        }, // Indigo
+        {
+          color: '#a855f7',
+          glow: 'rgba(168,85,247,0.4)',
+          border: '#d8b4fe',
+        }, // Violet (inner)
+      ];
+
+      const numbers = [2, 4, 6, 8, 10, 12, 14];
+      const sorted = [...numbers].sort((a, b) => a - b);
+      let currentStep = 0;
+
+      const rainbowArea = document.getElementById('rainbowArea');
+      const tileBankEl = document.getElementById('tileBank');
+      const progressEl = document.getElementById('progress');
+      const hudLast = document.getElementById('hudLast');
+
+      // Drag state
+      let dragTile = null;
+      let dragClone = null;
+      let dragOffX = 0,
+        dragOffY = 0;
+
+      // Build rainbow bands (grey initially)
+      const bandWidth = 28;
+      const baseSize = 500;
+      const bands = [];
+
+      // Fill order: inside-out (index 6=violet first, 0=red last)
+      const COLORS = [...COLORS_OUTSIDE_IN];
+      const fillOrder = COLORS.map((_, i) => i).reverse(); // [6,5,4,3,2,1,0]
+
+      COLORS.forEach((c, i) => {
+        const size = baseSize - i * (bandWidth * 2 + 8);
+        const band = document.createElement('div');
+        band.className = 'band';
+        band.id = 'band-' + i;
+        band.style.width = size + 'px';
+        band.style.height = size / 2 + 'px';
+        band.style.marginLeft = -(size / 2) + 'px';
+        band.style.borderWidth = bandWidth + 'px';
+        band.style.borderColor = '#d1d5db'; // grey
+        band.style.setProperty('--glow', c.glow);
+
+        // Number label
+        const label = document.createElement('div');
+        label.className = 'band-label';
+        label.id = 'band-label-' + i;
+        band.appendChild(label);
+
+        rainbowArea.appendChild(band);
+        bands.push({ el: band, colorData: c, filled: false });
+      });
+
+      // Build arc-shaped tiles
+      function buildTiles() {
+        tileBankEl.innerHTML = '';
+        const shuffled = [...numbers].sort(() => Math.random() - 0.5);
+        shuffled.forEach((num) => {
+          const tile = document.createElement('div');
+          tile.className = 'arc-tile';
+          tile.dataset.num = num;
+
+          const shape = document.createElement('div');
+          shape.className = 'arc-tile-shape';
+          shape.textContent = num;
+          tile.appendChild(shape);
+
+          tile.addEventListener('mousedown', startDrag);
+          tile.addEventListener('touchstart', startDrag, {
+            passive: false,
+          });
+          tileBankEl.appendChild(tile);
+        });
+      }
+      buildTiles();
+
+      function startDrag(e) {
+        e.preventDefault();
+        const tile = e.currentTarget;
+        if (tile.classList.contains('used')) return;
+
+        dragTile = tile;
+        const rect = tile.getBoundingClientRect();
+        const cx = e.touches ? e.touches[0].clientX : e.clientX;
+        const cy = e.touches ? e.touches[0].clientY : e.clientY;
+        dragOffX = cx - rect.left;
+        dragOffY = cy - rect.top;
+
+        dragClone = tile.cloneNode(true);
+        dragClone.classList.add('dragging');
+        dragClone.style.width = rect.width + 'px';
+        dragClone.style.height = rect.height + 'px';
+        dragClone.style.left = rect.left + 'px';
+        dragClone.style.top = rect.top + 'px';
+        document.body.appendChild(dragClone);
+
+        tile.style.opacity = '0.3';
+
+        // Highlight the next empty band as drop target (inside-out)
+        if (currentStep < bands.length) {
+          bands[fillOrder[currentStep]].el.classList.add('drop-target');
+        }
+
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchmove', onDrag, {
+          passive: false,
+        });
+        document.addEventListener('touchend', endDrag);
+      }
+
+      function onDrag(e) {
+        if (!dragClone) return;
+        e.preventDefault();
+        const cx = e.touches ? e.touches[0].clientX : e.clientX;
+        const cy = e.touches ? e.touches[0].clientY : e.clientY;
+        dragClone.style.left = cx - dragOffX + 'px';
+        dragClone.style.top = cy - dragOffY + 'px';
+      }
+
+      function endDrag(e) {
+        if (!dragClone || !dragTile) return;
+
+        const cx = e.changedTouches
+          ? e.changedTouches[0].clientX
+          : e.clientX;
+        const cy = e.changedTouches
+          ? e.changedTouches[0].clientY
+          : e.clientY;
+
+        // Check drop on rainbow area
+        const rRect = rainbowArea.getBoundingClientRect();
+        const overRainbow =
+          cx >= rRect.left &&
+          cx <= rRect.right &&
+          cy >= rRect.top &&
+          cy <= rRect.bottom;
+
+        const num = parseInt(dragTile.dataset.num);
+        const expected = sorted[currentStep];
+
+        if (overRainbow && num === expected) {
+          handleCorrect(num);
+        } else if (overRainbow) {
+          handleWrong();
+          dragTile.style.opacity = '1';
+        } else {
+          dragTile.style.opacity = '1';
+        }
+
+        // Remove drop target highlight
+        bands.forEach((b) => b.el.classList.remove('drop-target'));
+
+        dragClone.remove();
+        dragClone = null;
+        document.removeEventListener('mousemove', onDrag);
+        document.removeEventListener('mouseup', endDrag);
+        document.removeEventListener('touchmove', onDrag);
+        document.removeEventListener('touchend', endDrag);
+        dragTile = null;
+      }
+
+      function handleCorrect(num) {
+        dragTile.classList.add('used');
+        dragTile.style.opacity = '0.25';
+
+        // Fill the band with colour (inside-out)
+        const bandIdx = fillOrder[currentStep];
+        const band = bands[bandIdx];
+        const c = band.colorData;
+        band.el.style.borderColor = c.color;
+        band.el.classList.add('filled');
+        band.filled = true;
+
+        // Show number on band
+        const label = document.getElementById('band-label-' + bandIdx);
+        label.textContent = num;
+
+        // Sparkle effect
+        spawnSparkles(band.el);
+
+        // Update HUD
+        hudLast.textContent = num;
+        hudLast.classList.add('done');
+
+        currentStep++;
+        progressEl.textContent = currentStep + ' / ' + sorted.length;
+
+        if (currentStep >= sorted.length) {
+          setTimeout(() => {
+            rainbowArea.classList.add('complete');
+            setTimeout(() => {
+              document
+                .getElementById('celebration')
+                .classList.add('show');
+            }, 800);
+          }, 400);
+        }
+      }
+
+      function handleWrong() {
+        // Shake the next empty band (inside-out)
+        if (currentStep < bands.length) {
+          const band = bands[fillOrder[currentStep]].el;
+          band.style.animation = 'none';
+          band.offsetHeight; // trigger reflow
+          band.style.animation = 'shake 0.4s ease-in-out';
+        }
+      }
+
+      // Add shake keyframes dynamically
+      const shakeStyle = document.createElement('style');
+      shakeStyle.textContent = `
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-2px); }
+    }
+  `;
+      document.head.appendChild(shakeStyle);
+
+      function spawnSparkles(bandEl) {
+        const rect = bandEl.getBoundingClientRect();
+        const areaRect = rainbowArea.getBoundingClientRect();
+        const sparkles = ['✨', '⭐', '💫'];
+
+        for (let i = 0; i < 5; i++) {
+          const s = document.createElement('div');
+          s.className = 'sparkle';
+          s.textContent =
+            sparkles[Math.floor(Math.random() * sparkles.length)];
+          s.style.left =
+            rect.left -
+            areaRect.left +
+            Math.random() * rect.width +
+            'px';
+          s.style.top =
+            rect.top - areaRect.top + Math.random() * 30 + 'px';
+          s.style.animationDelay = Math.random() * 0.3 + 's';
+          rainbowArea.appendChild(s);
+          setTimeout(() => s.remove(), 1200);
+        }
+      }
+
+      function resetGame() {
+        currentStep = 0;
+        progressEl.textContent = '0 / ' + sorted.length;
+        hudLast.textContent = '?';
+        hudLast.classList.remove('done');
+        rainbowArea.classList.remove('complete');
+        document.getElementById('celebration').classList.remove('show');
+
+        // Reset bands to grey
+        bands.forEach((b, i) => {
+          b.el.style.borderColor = '#d1d5db';
+          b.el.classList.remove('filled', 'drop-target');
+          b.el.style.animation = '';
+          b.filled = false;
+          const label = document.getElementById('band-label-' + i);
+          label.textContent = '';
+        });
+
+        buildTiles();
+      }
+
+      progressEl.textContent = '0 / ' + sorted.length;
+    </script>
+  </body>
+</html>
