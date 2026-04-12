@@ -30,11 +30,13 @@ const config: KnipConfig = {
     'playwright.config.ts',
     'eslint.config.js',
     'e2e/**/*.ts',
+    'scripts/**/*.ts',
   ],
   project: [
     'src/**/*.{js,mjs,cjs,ts,mts,cts,tsx}',
     '.storybook/**/*.{ts,tsx}',
     'e2e/**/*.ts',
+    'scripts/**/*.ts',
     '*.{js,mjs,cjs,ts,mts,cts}',
   ],
   ignore: ['**/*.test.ts', '**/*.test.tsx', 'src/test-setup.ts'],

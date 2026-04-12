@@ -197,7 +197,8 @@
   },
   {
     "word": "magpie",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["mag", "pie"]
   },
   {
     "word": "mail",
@@ -277,7 +278,8 @@
   },
   {
     "word": "rescue",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["res", "cue"]
   },
   {
     "word": "right",
@@ -421,7 +423,8 @@
   },
   {
     "word": "untie",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["un", "tie"]
   },
   {
     "word": "wait",

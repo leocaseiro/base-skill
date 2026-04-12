@@ -2,7 +2,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import english from 'hyphenation.en-us';
+import Hypher from 'hypher';
 import {
+  acceptHyphenation,
   makeCurriculumEntry,
   makeWordCore,
   validateEntry,
@@ -13,6 +16,14 @@ import type {
   Grapheme,
   WordCore,
 } from '../src/data/words/types';
+
+// Looser than hypher's default (leftmin 2 / rightmin 3) so two-syllable
+// words like `bunny` and `happy` actually split. Stricter than 1/1 to
+// avoid orphan-letter tails like `elephant → ele-phan-t`.
+const hypher = new Hypher({ ...english, leftmin: 2, rightmin: 2 });
+
+const hyphenate = (word: string): string[] | undefined =>
+  acceptHyphenation(hypher.hyphenate(word));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.join(__dirname, '..');
@@ -89,7 +100,8 @@ const seed = (blocks: LevelBlock[]): SeedResult => {
       if (seen.has(word)) continue; // dedup: first level wins
       seen.set(word, block.level);
 
-      const core = makeWordCore(word);
+      const syllables = hyphenate(word);
+      const core = makeWordCore(word, syllables ? { syllables } : {});
       if (!coreByLevel.has(block.level))
         coreByLevel.set(block.level, []);
       coreByLevel.get(block.level)!.push(core);
