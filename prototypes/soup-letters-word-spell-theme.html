@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Soup Letters — WordSpell Theme Prototype</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%; overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(180deg, #fef3c7 0%, #fde68a 30%, #fed7aa 60%, #fdba74 100%);
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+  }
+
+  /* ── HUD ── */
+  .hud {
+    position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+    z-index: 200; display: flex; gap: 16px; align-items: center;
+    background: rgba(120, 30, 10, 0.75); backdrop-filter: blur(8px);
+    border-radius: 24px; padding: 8px 22px;
+    border: 2px solid rgba(255,255,255,0.15);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .hud-emoji { font-size: 28px; line-height: 1; }
+  .hud-progress { color: #fde68a; font-size: 14px; font-weight: 700; }
+  .hud-hint { color: #fff; font-size: 13px; font-weight: 600; opacity: 0.8; }
+
+  /* ── Scene ── */
+  .scene {
+    width: 100vw; height: 100vh; position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start;
+    padding-top: 70px;
+  }
+
+  /* ── Prompt ── */
+  .prompt-area {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: 8px; z-index: 50;
+  }
+  .prompt-emoji {
+    font-size: 64px; line-height: 1;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    animation: emojiFloat 3s ease-in-out infinite;
+  }
+  @keyframes emojiFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .prompt-length {
+    margin-top: 4px; font-size: 14px; font-weight: 700;
+    color: #7c2d12; opacity: 0.7;
+  }
+
+  /* ── Plate (drop targets) ── */
+  .plate {
+    position: relative; z-index: 50;
+    background: radial-gradient(ellipse at 50% 40%, #ffffff, #f5f5f4 60%, #e7e5e4 100%);
+    border-radius: 50%;
+    padding: 18px 32px;
+    display: flex; gap: 8px; align-items: center; justify-content: center;
+    box-shadow:
+      0 6px 0 #d6d3d1,
+      0 8px 20px rgba(0,0,0,0.15),
+      inset 0 -4px 12px rgba(0,0,0,0.05);
+    border: 3px solid #d6d3d1;
+    margin-bottom: 12px;
+    min-width: 200px;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .plate.celebrate {
+    animation: plateGlow 0.6s ease-in-out 3;
+    box-shadow:
+      0 6px 0 #d6d3d1,
+      0 0 30px rgba(251,191,36,0.6),
+      0 0 60px rgba(251,191,36,0.3);
+  }
+  @keyframes plateGlow {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+
+  .slot {
+    width: 52px; height: 56px;
+    border-radius: 12px;
+    background: rgba(168,162,158,0.15);
+    border: 3px dashed rgba(120,113,108,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 800;
+    color: transparent;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .slot.active {
+    border-color: rgba(120,113,108,0.6);
+    background: rgba(168,162,158,0.25);
+  }
+  .slot.filled {
+    border: 3px solid #b45309;
+    background: linear-gradient(145deg, #fbbf24, #f59e0b, #d97706);
+    color: #7c2d12;
+    border-radius: 14px;
+    box-shadow:
+      inset 0 2px 4px rgba(255,255,255,0.5),
+      inset 0 -2px 4px rgba(0,0,0,0.15),
+      0 3px 8px rgba(0,0,0,0.2);
+    animation: slotPlop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes slotPlop {
+    0% { transform: scale(0.3) translateY(-30px); opacity: 0.5; }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .slot.shake {
+    animation: slotShake 0.4s ease-in-out;
+  }
+  @keyframes slotShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(4px); }
+  }
+
+  /* ── Soup Bowl ── */
+  .bowl-wrapper {
+    position: relative; z-index: 30;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  /* Steam */
+  .steam-container {
+    position: relative; width: 200px; height: 50px;
+    margin-bottom: -10px; z-index: 31;
+  }
+  .steam {
+    position: absolute; bottom: 0;
+    width: 12px; height: 40px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    filter: blur(6px);
+    animation: steamRise 3s ease-in-out infinite;
+  }
+  .steam:nth-child(1) { left: 40px; animation-delay: 0s; }
+  .steam:nth-child(2) { left: 80px; animation-delay: 0.8s; width: 14px; }
+  .steam:nth-child(3) { left: 120px; animation-delay: 1.6s; width: 10px; }
+  .steam:nth-child(4) { left: 155px; animation-delay: 0.4s; width: 11px; }
+  .steam:nth-child(5) { left: 60px; animation-delay: 2.2s; width: 9px; }
+  @keyframes steamRise {
+    0% { opacity: 0; transform: translateY(0) scaleX(1); }
+    30% { opacity: 0.6; }
+    70% { opacity: 0.3; transform: translateY(-35px) scaleX(1.8); }
+    100% { opacity: 0; transform: translateY(-55px) scaleX(2.2); }
+  }
+
+  .bowl {
+    position: relative;
+    width: min(85vw, 380px);
+    height: min(45vw, 210px);
+    background: linear-gradient(180deg, #dc2626 0%, #b91c1c 40%, #991b1b 100%);
+    border-radius: 0 0 50% 50% / 0 0 60% 60%;
+    border-top: none;
+    box-shadow:
+      0 8px 0 #7f1d1d,
+      0 12px 30px rgba(0,0,0,0.3),
+      inset 0 4px 20px rgba(0,0,0,0.2);
+    overflow: hidden;
+  }
+
+  /* Bowl rim */
+  .bowl-rim {
+    position: absolute; top: -14px; left: -8px; right: -8px;
+    height: 28px;
+    background: linear-gradient(180deg, #ef4444, #dc2626);
+    border-radius: 50%;
+    box-shadow:
+      0 2px 0 #b91c1c,
+      inset 0 -4px 8px rgba(0,0,0,0.15);
+    z-index: 2;
+  }
+
+  /* Broth */
+  .broth {
+    position: absolute; top: 10px; left: 8px; right: 8px; bottom: 8px;
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 40%, #d97706 100%);
+    border-radius: 0 0 50% 50% / 0 0 55% 55%;
+    box-shadow: inset 0 4px 15px rgba(0,0,0,0.15);
+    overflow: hidden;
+  }
+
+  /* Broth surface shimmer */
+  .broth::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 30%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%);
+    border-radius: inherit;
+  }
+  .broth::after {
+    content: '';
+    position: absolute; top: 5px; left: 15%; width: 70%; height: 12px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    animation: shimmer 4s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%, 100% { transform: translateX(-5px) scaleX(0.9); opacity: 0.4; }
+    50% { transform: translateX(5px) scaleX(1.1); opacity: 0.7; }
+  }
+
+  /* Bowl handles */
+  .bowl-handle {
+    position: absolute; top: 10px;
+    width: 36px; height: 50px;
+    border: 8px solid #dc2626;
+    border-radius: 50%;
+    box-shadow: 2px 2px 0 #7f1d1d;
+    z-index: 0;
+  }
+  .bowl-handle.left { left: -22px; }
+  .bowl-handle.right { right: -22px; }
+
+  /* Bowl wiggle celebration */
+  .bowl-wrapper.celebrate .bowl {
+    animation: bowlWiggle 0.5s ease-in-out 3;
+  }
+  @keyframes bowlWiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+  }
+
+  /* ── Letter tiles in soup ── */
+  .letter-tile {
+    position: absolute;
+    width: 48px; height: 52px;
+    background: linear-gradient(145deg, #fcd34d, #fbbf24, #f59e0b);
+    border: 3px solid #d97706;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 900;
+    color: #78350f;
+    cursor: grab;
+    z-index: 40;
+    box-shadow:
+      inset 0 2px 5px rgba(255,255,255,0.5),
+      inset 0 -3px 5px rgba(0,0,0,0.12),
+      0 3px 8px rgba(0,0,0,0.2);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    /* Pasta puff look */
+    text-transform: uppercase;
+  }
+  .letter-tile::before {
+    content: '';
+    position: absolute; top: 4px; left: 6px; right: 6px; height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.4), transparent);
+    border-radius: 10px 10px 50% 50%;
+    pointer-events: none;
+  }
+  .letter-tile.dragging {
+    cursor: grabbing;
+    transform: scale(1.18) rotate(-3deg);
+    box-shadow:
+      0 12px 30px rgba(0,0,0,0.3),
+      inset 0 2px 5px rgba(255,255,255,0.5);
+    z-index: 300;
+    transition: none;
+  }
+  .letter-tile.returning {
+    transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.3s ease;
+  }
+
+  /* Bob animation for tiles in soup */
+  @keyframes bob1 {
+    0%, 100% { transform: translateY(0px) rotate(-2deg); }
+    50% { transform: translateY(-6px) rotate(2deg); }
+  }
+  @keyframes bob2 {
+    0%, 100% { transform: translateY(0px) rotate(3deg); }
+    50% { transform: translateY(-8px) rotate(-1deg); }
+  }
+  @keyframes bob3 {
+    0%, 100% { transform: translateY(-3px) rotate(1deg); }
+    50% { transform: translateY(3px) rotate(-3deg); }
+  }
+
+  /* ── Splash ripple ── */
+  .splash {
+    position: absolute; pointer-events: none; z-index: 45;
+    width: 60px; height: 20px;
+    border: 3px solid rgba(255,255,255,0.6);
+    border-radius: 50%;
+    animation: splashRipple 0.6s ease-out forwards;
+  }
+  @keyframes splashRipple {
+    0% { transform: scale(0.3); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+
+  /* ── Next Word Button ── */
+  .next-btn {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    z-index: 200;
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    color: white; font-size: 18px; font-weight: 800;
+    border: none; border-radius: 20px;
+    padding: 14px 36px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #15803d, 0 8px 20px rgba(0,0,0,0.2);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    display: none;
+  }
+  .next-btn:active {
+    transform: translateX(-50%) translateY(3px);
+    box-shadow: 0 3px 0 #15803d, 0 4px 10px rgba(0,0,0,0.2);
+  }
+  .next-btn.visible { display: block; animation: btnPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes btnPop {
+    0% { transform: translateX(-50%) scale(0); }
+    100% { transform: translateX(-50%) scale(1); }
+  }
+
+  /* ── Completion Screen ── */
+  .complete-screen {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  .complete-screen.visible { display: flex; }
+  .complete-card {
+    background: white; border-radius: 24px; padding: 40px 50px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: cardPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes cardPop {
+    0% { transform: scale(0) rotate(-10deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .complete-card .big-emoji { font-size: 72px; margin-bottom: 12px; }
+  .complete-card h2 { font-size: 28px; color: #b91c1c; margin-bottom: 8px; }
+  .complete-card p { font-size: 16px; color: #78716c; margin-bottom: 20px; }
+  .restart-btn {
+    background: linear-gradient(145deg, #dc2626, #b91c1c);
+    color: white; font-size: 16px; font-weight: 700;
+    border: none; border-radius: 16px;
+    padding: 12px 32px; cursor: pointer;
+    box-shadow: 0 4px 0 #7f1d1d;
+  }
+  .restart-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #7f1d1d; }
+
+  /* ── Confetti ── */
+  .confetti-piece {
+    position: fixed; z-index: 400; pointer-events: none;
+    width: 10px; height: 10px; border-radius: 2px;
+  }
+
+  /* ── Responsive adjustments ── */
+  @media (max-height: 650px) {
+    .prompt-emoji { font-size: 48px; }
+    .plate { padding: 12px 24px; }
+    .slot { width: 44px; height: 48px; font-size: 22px; }
+    .bowl { height: min(40vw, 180px); }
+    .letter-tile { width: 42px; height: 46px; font-size: 20px; }
+    .scene { padding-top: 58px; }
+  }
+  @media (max-width: 380px) {
+    .slot { width: 42px; height: 46px; font-size: 20px; }
+    .letter-tile { width: 40px; height: 44px; font-size: 20px; }
+    .plate { gap: 6px; padding: 14px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HUD -->
+<div class="hud">
+  <span class="hud-emoji" id="hudEmoji"></span>
+  <span class="hud-progress" id="hudProgress"></span>
+  <span class="hud-hint" id="hudHint"></span>
+</div>
+
+<!-- Scene -->
+<div class="scene" id="scene">
+  <!-- Prompt -->
+  <div class="prompt-area">
+    <div class="prompt-emoji" id="promptEmoji"></div>
+    <div class="prompt-length" id="promptLength"></div>
+  </div>
+
+  <!-- Plate with slots -->
+  <div class="plate" id="plate"></div>
+
+  <!-- Soup bowl -->
+  <div class="bowl-wrapper" id="bowlWrapper">
+    <div class="steam-container">
+      <div class="steam"></div>
+      <div class="steam"></div>
+      <div class="steam"></div>
+      <div class="steam"></div>
+      <div class="steam"></div>
+    </div>
+    <div class="bowl" id="bowl">
+      <div class="bowl-rim"></div>
+      <div class="bowl-handle left"></div>
+      <div class="bowl-handle right"></div>
+      <div class="broth" id="broth">
+        <!-- Letter tiles injected here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Next Button -->
+<button class="next-btn" id="nextBtn">Next Word</button>
+
+<!-- Completion -->
+<div class="complete-screen" id="completeScreen">
+  <div class="complete-card">
+    <div class="big-emoji">🍲</div>
+    <h2>Soup-er Speller!</h2>
+    <p>You spelled all the words!</p>
+    <button class="restart-btn" id="restartBtn">Play Again</button>
+  </div>
+</div>
+
+<script>
+/* ── Word Data ── */
+const WORDS = [
+  { emoji: '🐱', word: 'cat' },
+  { emoji: '🐶', word: 'dog' },
+  { emoji: '🐸', word: 'frog' },
+  { emoji: '🌟', word: 'star' },
+  { emoji: '🐝', word: 'bee' },
+];
+
+const EXTRA_LETTERS = 'abcdefghijklmnopqrstuvwxyz';
+const BOB_ANIMATIONS = ['bob1', 'bob2', 'bob3'];
+
+let currentWordIdx = 0;
+let currentSlotIdx = 0;
+let tiles = [];
+let dragging = null;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let wordComplete = false;
+
+/* ── DOM refs ── */
+const $ = (id) => document.getElementById(id);
+const broth = $('broth');
+const plate = $('plate');
+const scene = $('scene');
+
+/* ── Helpers ── */
+const shuffle = (arr) => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+const randomBetween = (min, max) => Math.random() * (max - min) + min;
+
+const getDistractors = (word, count) => {
+  const wordLetters = new Set(word.split(''));
+  const pool = EXTRA_LETTERS.split('').filter(l => !wordLetters.has(l));
+  const shuffled = shuffle(pool);
+  return shuffled.slice(0, count);
+};
+
+/* ── Setup a word round ── */
+const setupWord = () => {
+  wordComplete = false;
+  currentSlotIdx = 0;
+  tiles = [];
+  dragging = null;
+
+  const { emoji, word } = WORDS[currentWordIdx];
+
+  /* HUD */
+  $('hudEmoji').textContent = emoji;
+  $('hudProgress').textContent = `${currentWordIdx + 1} / ${WORDS.length}`;
+  $('hudHint').textContent = `${word.length} letters`;
+
+  /* Prompt */
+  $('promptEmoji').textContent = emoji;
+  $('promptLength').textContent = `Spell it! (${word.length} letters)`;
+
+  /* Plate slots */
+  plate.innerHTML = '';
+  for (let i = 0; i < word.length; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'slot' + (i === 0 ? ' active' : '');
+    slot.dataset.index = i;
+    slot.dataset.letter = word[i];
+    plate.appendChild(slot);
+  }
+
+  /* Letters for soup */
+  broth.querySelectorAll('.letter-tile').forEach(t => t.remove());
+
+  const wordLetters = word.split('');
+  const distractors = getDistractors(word, 3 + Math.floor(Math.random() * 2));
+  const allLetters = shuffle([...wordLetters, ...distractors]);
+
+  const brothRect = broth.getBoundingClientRect();
+  const tileSize = 48;
+  const padding = 10;
+
+  allLetters.forEach((letter, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'letter-tile';
+    tile.textContent = letter;
+    tile.dataset.letter = letter;
+
+    /* Position randomly within broth area */
+    const maxX = Math.max(brothRect.width - tileSize - padding * 2, 60);
+    const maxY = Math.max(brothRect.height - tileSize - padding * 2, 30);
+    const x = padding + randomBetween(0, maxX);
+    const y = padding + 12 + randomBetween(0, maxY);
+
+    tile.style.left = x + 'px';
+    tile.style.top = y + 'px';
+
+    /* Bob animation */
+    const bobAnim = BOB_ANIMATIONS[i % BOB_ANIMATIONS.length];
+    const duration = randomBetween(2.5, 4);
+    const delay = randomBetween(0, 2);
+    tile.style.animation = `${bobAnim} ${duration}s ${delay}s ease-in-out infinite`;
+
+    tile.dataset.origX = x;
+    tile.dataset.origY = y;
+
+    broth.appendChild(tile);
+    tiles.push(tile);
+  });
+
+  /* Hide next button */
+  $('nextBtn').classList.remove('visible');
+  plate.classList.remove('celebrate');
+  $('bowlWrapper').classList.remove('celebrate');
+};
+
+/* ── Drag handling ── */
+const getPos = (e) => {
+  const t = e.touches ? e.touches[0] : e;
+  return { x: t.clientX, y: t.clientY };
+};
+
+const onDragStart = (e) => {
+  if (wordComplete) return;
+  const tile = e.target.closest('.letter-tile');
+  if (!tile || tile.classList.contains('returning')) return;
+
+  e.preventDefault();
+  dragging = tile;
+  const pos = getPos(e);
+  const rect = tile.getBoundingClientRect();
+
+  dragOffsetX = pos.x - rect.left;
+  dragOffsetY = pos.y - rect.top;
+
+  /* Move tile to scene level for correct positioning */
+  const sceneRect = scene.getBoundingClientRect();
+  tile.style.position = 'fixed';
+  tile.style.left = rect.left + 'px';
+  tile.style.top = rect.top + 'px';
+  tile.style.animation = 'none';
+  tile.classList.add('dragging');
+
+  document.body.appendChild(tile);
+};
+
+const onDragMove = (e) => {
+  if (!dragging) return;
+  e.preventDefault();
+  const pos = getPos(e);
+  dragging.style.left = (pos.x - dragOffsetX) + 'px';
+  dragging.style.top = (pos.y - dragOffsetY) + 'px';
+};
+
+const onDragEnd = (e) => {
+  if (!dragging) return;
+  e.preventDefault();
+  const tile = dragging;
+  dragging = null;
+  tile.classList.remove('dragging');
+
+  /* Check if over the active slot */
+  const activeSlot = plate.querySelector('.slot.active');
+  if (!activeSlot) {
+    returnTileToBroth(tile);
+    return;
+  }
+
+  const slotRect = activeSlot.getBoundingClientRect();
+  const tileRect = tile.getBoundingClientRect();
+  const tileCenterX = tileRect.left + tileRect.width / 2;
+  const tileCenterY = tileRect.top + tileRect.height / 2;
+
+  /* Generous hit area for kids */
+  const hitPadding = 30;
+  const isOverSlot =
+    tileCenterX >= slotRect.left - hitPadding &&
+    tileCenterX <= slotRect.right + hitPadding &&
+    tileCenterY >= slotRect.top - hitPadding &&
+    tileCenterY <= slotRect.bottom + hitPadding;
+
+  if (!isOverSlot) {
+    returnTileToBroth(tile);
+    return;
+  }
+
+  /* Check if letter is correct */
+  const expectedLetter = activeSlot.dataset.letter;
+  if (tile.dataset.letter === expectedLetter) {
+    handleCorrect(tile, activeSlot);
+  } else {
+    handleWrong(tile, activeSlot);
+  }
+};
+
+const handleCorrect = (tile, slot) => {
+  /* Remove tile from DOM (it's on body now) */
+  tile.remove();
+
+  /* Fill slot */
+  slot.classList.remove('active');
+  slot.classList.add('filled');
+  slot.textContent = tile.dataset.letter.toUpperCase();
+  slot.style.color = '#78350f';
+
+  currentSlotIdx++;
+
+  /* Remove tile from tiles array */
+  const idx = tiles.indexOf(tile);
+  if (idx > -1) tiles.splice(idx, 1);
+
+  /* Advance to next slot or complete */
+  const nextSlot = plate.querySelector(`.slot[data-index="${currentSlotIdx}"]`);
+  if (nextSlot) {
+    nextSlot.classList.add('active');
+  } else {
+    handleWordComplete();
+  }
+};
+
+const handleWrong = (tile, slot) => {
+  /* Shake the slot */
+  slot.classList.add('shake');
+  setTimeout(() => slot.classList.remove('shake'), 400);
+
+  /* Return tile with splash */
+  returnTileToBroth(tile, true);
+};
+
+const returnTileToBroth = (tile, withSplash = false) => {
+  /* Calculate broth position for return */
+  const brothRect = broth.getBoundingClientRect();
+  const origX = parseFloat(tile.dataset.origX);
+  const origY = parseFloat(tile.dataset.origY);
+  const targetLeft = brothRect.left + origX;
+  const targetTop = brothRect.top + origY;
+
+  tile.classList.add('returning');
+  tile.style.left = targetLeft + 'px';
+  tile.style.top = targetTop + 'px';
+
+  if (withSplash) {
+    setTimeout(() => {
+      createSplash(targetLeft + 24, targetTop + 10);
+    }, 300);
+  }
+
+  setTimeout(() => {
+    tile.classList.remove('returning');
+    /* Move back into broth */
+    if (tile.parentNode === document.body) {
+      tile.style.position = 'absolute';
+      tile.style.left = origX + 'px';
+      tile.style.top = origY + 'px';
+      const bobAnim = BOB_ANIMATIONS[Math.floor(Math.random() * 3)];
+      const duration = randomBetween(2.5, 4);
+      tile.style.animation = `${bobAnim} ${duration}s ease-in-out infinite`;
+      broth.appendChild(tile);
+    }
+  }, 450);
+};
+
+const createSplash = (x, y) => {
+  const splash = document.createElement('div');
+  splash.className = 'splash';
+  splash.style.left = (x - 30) + 'px';
+  splash.style.top = (y - 10) + 'px';
+  splash.style.position = 'fixed';
+  document.body.appendChild(splash);
+  setTimeout(() => splash.remove(), 600);
+};
+
+/* ── Word complete ── */
+const handleWordComplete = () => {
+  wordComplete = true;
+  plate.classList.add('celebrate');
+  $('bowlWrapper').classList.add('celebrate');
+
+  /* Confetti */
+  spawnConfetti();
+
+  /* Show next or complete */
+  if (currentWordIdx < WORDS.length - 1) {
+    setTimeout(() => {
+      $('nextBtn').classList.add('visible');
+    }, 800);
+  } else {
+    setTimeout(() => {
+      $('completeScreen').classList.add('visible');
+    }, 1200);
+  }
+};
+
+/* ── Confetti ── */
+const CONFETTI_COLORS = ['#dc2626', '#fbbf24', '#22c55e', '#3b82f6', '#a855f7', '#f97316'];
+
+const spawnConfetti = () => {
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    piece.style.left = randomBetween(10, 90) + 'vw';
+    piece.style.top = '-20px';
+    piece.style.width = randomBetween(6, 12) + 'px';
+    piece.style.height = randomBetween(6, 12) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    document.body.appendChild(piece);
+
+    const destX = randomBetween(-80, 80);
+    const destY = randomBetween(window.innerHeight * 0.5, window.innerHeight + 100);
+    const rot = randomBetween(0, 720);
+    const dur = randomBetween(1, 2.5);
+
+    piece.animate([
+      { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
+      { transform: `translate(${destX}px, ${destY}px) rotate(${rot}deg)`, opacity: 0 }
+    ], { duration: dur * 1000, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', fill: 'forwards' });
+
+    setTimeout(() => piece.remove(), dur * 1000 + 100);
+  }
+};
+
+/* ── Navigation ── */
+$('nextBtn').addEventListener('click', () => {
+  currentWordIdx++;
+  setupWord();
+});
+
+$('restartBtn').addEventListener('click', () => {
+  currentWordIdx = 0;
+  $('completeScreen').classList.remove('visible');
+  setupWord();
+});
+
+/* ── Event listeners (mouse + touch) ── */
+document.addEventListener('mousedown', onDragStart);
+document.addEventListener('mousemove', onDragMove);
+document.addEventListener('mouseup', onDragEnd);
+document.addEventListener('touchstart', onDragStart, { passive: false });
+document.addEventListener('touchmove', onDragMove, { passive: false });
+document.addEventListener('touchend', onDragEnd, { passive: false });
+
+/* ── Init ── */
+setupWord();
+</script>
+</body>
+</html>

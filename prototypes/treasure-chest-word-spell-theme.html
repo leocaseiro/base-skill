@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Treasure Chest — WordSpell Theme Prototype</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        overflow: hidden;
+        height: 100vh;
+        height: 100dvh;
+        width: 100vw;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      /* --- Sky & Ocean --- */
+      .scene {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(180deg, #87CEEB 0%, #5bb8f5 30%, #1a8fd8 48%, #0e6fb5 52%, #1565a0 55%, #d2b48c 56%, #c2a06a 70%, #e8d5a8 100%);
+      }
+
+      /* Ocean waves */
+      .waves {
+        position: absolute;
+        top: 48%;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        overflow: hidden;
+        z-index: 2;
+      }
+      .wave {
+        position: absolute;
+        width: 200%;
+        height: 30px;
+        bottom: 0;
+        left: -50%;
+        border-radius: 40%;
+      }
+      .wave1 {
+        background: rgba(255,255,255,0.25);
+        animation: waveMove 6s ease-in-out infinite;
+        bottom: 25px;
+      }
+      .wave2 {
+        background: rgba(255,255,255,0.15);
+        animation: waveMove 8s ease-in-out infinite reverse;
+        bottom: 15px;
+      }
+      .wave3 {
+        background: rgba(210, 180, 140, 0.6);
+        animation: waveMove 5s ease-in-out infinite;
+        bottom: 0;
+      }
+      @keyframes waveMove {
+        0%, 100% { transform: translateX(-5%); }
+        50% { transform: translateX(5%); }
+      }
+
+      /* Palm trees */
+      .palm {
+        position: absolute;
+        z-index: 3;
+        font-size: clamp(60px, 12vw, 120px);
+        filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+      }
+      .palm-left {
+        left: 2%;
+        top: 25%;
+      }
+      .palm-right {
+        right: 2%;
+        top: 28%;
+        transform: scaleX(-1);
+      }
+
+      /* Clouds */
+      .cloud {
+        position: absolute;
+        font-size: clamp(30px, 6vw, 60px);
+        opacity: 0.7;
+        animation: cloudDrift 20s linear infinite;
+      }
+      .cloud1 { top: 5%; left: -10%; animation-duration: 25s; }
+      .cloud2 { top: 12%; left: -20%; animation-duration: 35s; font-size: clamp(20px, 4vw, 45px); }
+      .cloud3 { top: 3%; left: -30%; animation-duration: 30s; opacity: 0.5; }
+      @keyframes cloudDrift {
+        from { transform: translateX(0); }
+        to { transform: translateX(calc(100vw + 100%)); }
+      }
+
+      /* Sun */
+      .sun {
+        position: absolute;
+        top: 5%;
+        right: 15%;
+        font-size: clamp(40px, 8vw, 80px);
+        z-index: 1;
+        animation: sunPulse 3s ease-in-out infinite;
+      }
+      @keyframes sunPulse {
+        0%, 100% { filter: drop-shadow(0 0 15px rgba(255,200,0,0.6)); }
+        50% { filter: drop-shadow(0 0 30px rgba(255,200,0,0.9)); }
+      }
+
+      /* --- HUD --- */
+      .hud {
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 100;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        background: rgba(60, 30, 10, 0.85);
+        backdrop-filter: blur(8px);
+        border-radius: 20px;
+        padding: 6px 16px;
+        border: 2px solid #c8941e;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,220,100,0.2);
+      }
+      .hud-emoji {
+        font-size: clamp(24px, 5vw, 36px);
+        line-height: 1;
+      }
+      .hud-word {
+        color: #fde68a;
+        font-size: clamp(14px, 3vw, 18px);
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+      .hud-progress {
+        color: #d4a44a;
+        font-size: clamp(11px, 2.5vw, 14px);
+        font-weight: 600;
+      }
+
+      /* --- Chest Area --- */
+      .chest-area {
+        position: absolute;
+        top: 38%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Treasure chest */
+      .chest {
+        position: relative;
+        width: clamp(220px, 55vw, 380px);
+        height: clamp(140px, 28vw, 220px);
+      }
+
+      /* Chest lid */
+      .chest-lid {
+        position: absolute;
+        top: 0;
+        left: 5%;
+        width: 90%;
+        height: 45%;
+        background: linear-gradient(180deg, #a0622e 0%, #8B4513 40%, #6b3410 100%);
+        border-radius: 50% 50% 0 0 / 70% 70% 0 0;
+        border: 3px solid #5a2d0e;
+        border-bottom: none;
+        transform-origin: bottom center;
+        transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 12;
+        box-shadow: inset 0 -5px 15px rgba(0,0,0,0.3), 0 -3px 10px rgba(0,0,0,0.2);
+      }
+      .chest-lid::before {
+        content: '';
+        position: absolute;
+        top: 30%;
+        left: 10%;
+        right: 10%;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #c8941e, transparent);
+        border-radius: 2px;
+      }
+      .chest-lid::after {
+        content: '';
+        position: absolute;
+        top: 55%;
+        left: 10%;
+        right: 10%;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #c8941e, transparent);
+        border-radius: 2px;
+      }
+      .chest.open .chest-lid {
+        transform: rotateX(-110deg);
+      }
+
+      /* Lid clasp */
+      .lid-clasp {
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 30px;
+        height: 12px;
+        background: #c8941e;
+        border-radius: 0 0 6px 6px;
+        z-index: 13;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      }
+
+      /* Chest body */
+      .chest-body {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 62%;
+        background: linear-gradient(180deg, #8B4513 0%, #6b3410 60%, #5a2d0e 100%);
+        border: 3px solid #5a2d0e;
+        border-radius: 4px 4px 8px 8px;
+        z-index: 11;
+        box-shadow: inset 0 5px 15px rgba(0,0,0,0.2), 0 8px 20px rgba(0,0,0,0.4);
+      }
+      /* Chest metal bands */
+      .chest-body::before {
+        content: '';
+        position: absolute;
+        top: 15%;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #8B6914, #c8941e, #e8c84a, #c8941e, #8B6914);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      }
+      .chest-body::after {
+        content: '';
+        position: absolute;
+        bottom: 20%;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #8B6914, #c8941e, #e8c84a, #c8941e, #8B6914);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      }
+
+      /* Corner rivets */
+      .rivet {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: radial-gradient(circle at 35% 35%, #e8c84a, #8B6914);
+        border-radius: 50%;
+        z-index: 14;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      }
+      .rivet-tl { top: 48%; left: 4%; }
+      .rivet-tr { top: 48%; right: 4%; }
+      .rivet-bl { bottom: 6%; left: 4%; }
+      .rivet-br { bottom: 6%; right: 4%; }
+
+      /* Lock panel (drop targets) */
+      .lock-panel {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 15;
+        display: flex;
+        gap: clamp(6px, 1.5vw, 12px);
+        padding: 8px 14px;
+        background: linear-gradient(180deg, #4a3520, #3a2515);
+        border-radius: 8px;
+        border: 2px solid #c8941e;
+        box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
+      }
+
+      /* Individual lock slot */
+      .lock-slot {
+        width: clamp(36px, 9vw, 56px);
+        height: clamp(42px, 10vw, 64px);
+        background: linear-gradient(180deg, #2a1a0e, #1a0e05);
+        border: 2px solid #8B6914;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+        position: relative;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .lock-slot.hover-valid {
+        border-color: #e8c84a;
+        box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 12px rgba(232,200,74,0.5);
+      }
+      .lock-slot.filled {
+        background: linear-gradient(180deg, #c8941e, #a07018);
+        border-color: #e8c84a;
+        box-shadow: inset 0 1px 3px rgba(255,255,255,0.3), 0 0 8px rgba(232,200,74,0.4);
+      }
+      .lock-slot .slot-letter {
+        font-size: clamp(18px, 5vw, 28px);
+        font-weight: 900;
+        color: #3a2515;
+        text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+        opacity: 0;
+        transform: scale(0);
+        transition: opacity 0.3s, transform 0.3s;
+      }
+      .lock-slot.filled .slot-letter {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      /* Glow on correct placement */
+      @keyframes slotGlow {
+        0% { box-shadow: inset 0 1px 3px rgba(255,255,255,0.3), 0 0 8px rgba(232,200,74,0.4); }
+        50% { box-shadow: inset 0 1px 3px rgba(255,255,255,0.3), 0 0 25px rgba(255,215,0,0.9), 0 0 50px rgba(255,215,0,0.4); }
+        100% { box-shadow: inset 0 1px 3px rgba(255,255,255,0.3), 0 0 8px rgba(232,200,74,0.4); }
+      }
+      .lock-slot.just-filled {
+        animation: slotGlow 0.6s ease-out;
+      }
+
+      /* Panel shake */
+      @keyframes panelShake {
+        0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+        20% { transform: translate(-50%, -50%) translateX(-8px); }
+        40% { transform: translate(-50%, -50%) translateX(8px); }
+        60% { transform: translate(-50%, -50%) translateX(-5px); }
+        80% { transform: translate(-50%, -50%) translateX(5px); }
+      }
+      .lock-panel.shake {
+        animation: panelShake 0.4s ease-out;
+      }
+
+      /* --- Golden glow from chest --- */
+      .chest-glow {
+        position: absolute;
+        top: -40%;
+        left: -20%;
+        width: 140%;
+        height: 100%;
+        background: radial-gradient(ellipse at 50% 80%, rgba(255,215,0,0.8) 0%, rgba(255,180,0,0.4) 30%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.6s ease-out;
+        z-index: 10;
+        pointer-events: none;
+      }
+      .chest.open .chest-glow {
+        opacity: 1;
+        animation: glowPulse 1.5s ease-in-out infinite;
+      }
+      @keyframes glowPulse {
+        0%, 100% { opacity: 0.8; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+      }
+
+      /* Light rays */
+      .light-rays {
+        position: absolute;
+        top: -80%;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.8s;
+        z-index: 9;
+        pointer-events: none;
+      }
+      .chest.open .light-rays { opacity: 1; }
+      .ray {
+        position: absolute;
+        bottom: 50%;
+        left: 50%;
+        width: 4px;
+        height: 0;
+        background: linear-gradient(to top, rgba(255,215,0,0.8), transparent);
+        transform-origin: bottom center;
+        border-radius: 2px;
+      }
+      .chest.open .ray {
+        animation: rayGrow 0.8s ease-out forwards;
+      }
+      @keyframes rayGrow {
+        to { height: 120px; }
+      }
+
+      /* Treasure overflow */
+      .treasure-overflow {
+        position: absolute;
+        top: 20%;
+        left: 10%;
+        width: 80%;
+        height: 80%;
+        z-index: 13;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+      .chest.open .treasure-overflow { opacity: 1; }
+      .treasure-item {
+        position: absolute;
+        font-size: clamp(16px, 4vw, 28px);
+        opacity: 0;
+      }
+      .chest.open .treasure-item {
+        animation: treasureSpill 1.2s ease-out forwards;
+      }
+      @keyframes treasureSpill {
+        0% { opacity: 0; transform: translateY(0) scale(0.5); }
+        30% { opacity: 1; transform: translateY(var(--ty)) translateX(var(--tx)) scale(1); }
+        100% { opacity: 1; transform: translateY(var(--ty2)) translateX(var(--tx)) scale(1); }
+      }
+
+      /* --- Coin bank (bottom) --- */
+      .coin-bank {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 32%;
+        z-index: 20;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        gap: clamp(8px, 2vw, 16px);
+        padding: 10px clamp(12px, 4vw, 40px);
+      }
+
+      /* Gold coin tile */
+      .coin {
+        width: clamp(44px, 11vw, 66px);
+        height: clamp(44px, 11vw, 66px);
+        border-radius: 50%;
+        background: radial-gradient(circle at 38% 35%, #ffd700, #daa520 50%, #b8860b 100%);
+        border: 3px solid #8B6914;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(18px, 5vw, 28px);
+        font-weight: 900;
+        color: #5a2d0e;
+        text-transform: uppercase;
+        cursor: grab;
+        position: relative;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.2);
+        transition: transform 0.15s, box-shadow 0.15s;
+        z-index: 21;
+        text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+      }
+      .coin::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        right: 4px;
+        bottom: 4px;
+        border-radius: 50%;
+        border: 2px solid rgba(139,105,20,0.5);
+      }
+      .coin:active {
+        cursor: grabbing;
+      }
+      .coin.dragging {
+        opacity: 0.6;
+        transform: scale(0.9);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      }
+      .coin.used {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0);
+        transition: all 0.3s;
+      }
+
+      /* Floating drag ghost */
+      .drag-ghost {
+        position: fixed;
+        width: clamp(50px, 12vw, 72px);
+        height: clamp(50px, 12vw, 72px);
+        border-radius: 50%;
+        background: radial-gradient(circle at 38% 35%, #ffd700, #daa520 50%, #b8860b 100%);
+        border: 3px solid #e8c84a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(20px, 5.5vw, 30px);
+        font-weight: 900;
+        color: #5a2d0e;
+        text-transform: uppercase;
+        pointer-events: none;
+        z-index: 1000;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.5), 0 0 20px rgba(255,215,0,0.4), inset 0 2px 4px rgba(255,255,255,0.4);
+        text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+        transform: translate(-50%, -50%) scale(1.15);
+        display: none;
+      }
+      .drag-ghost::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        right: 4px;
+        bottom: 4px;
+        border-radius: 50%;
+        border: 2px solid rgba(139,105,20,0.5);
+      }
+
+      /* --- Celebration overlay --- */
+      .celebration {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 200;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .celebration.active {
+        opacity: 1;
+      }
+      .confetti-piece {
+        position: absolute;
+        font-size: clamp(14px, 3vw, 24px);
+        opacity: 0;
+      }
+      .celebration.active .confetti-piece {
+        animation: confettiFall var(--dur) ease-out forwards;
+        animation-delay: var(--delay);
+      }
+      @keyframes confettiFall {
+        0% { opacity: 1; transform: translateY(-20px) rotate(0deg) scale(0); }
+        20% { opacity: 1; transform: translateY(var(--mid-y)) rotate(var(--rot)) scale(1); }
+        100% { opacity: 0; transform: translateY(var(--end-y)) rotate(var(--rot2)) scale(0.5); }
+      }
+
+      /* --- Next word button --- */
+      .next-btn {
+        position: fixed;
+        bottom: clamp(20px, 5vh, 40px);
+        left: 50%;
+        transform: translateX(-50%) scale(0);
+        z-index: 300;
+        padding: 12px 32px;
+        font-size: clamp(16px, 4vw, 22px);
+        font-weight: 800;
+        color: #3a2515;
+        background: linear-gradient(180deg, #ffd700, #daa520);
+        border: 3px solid #8B6914;
+        border-radius: 30px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.3);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        letter-spacing: 1px;
+      }
+      .next-btn.visible {
+        transform: translateX(-50%) scale(1);
+      }
+      .next-btn:hover {
+        filter: brightness(1.1);
+      }
+      .next-btn:active {
+        transform: translateX(-50%) scale(0.95);
+      }
+
+      /* --- Coin bounce-back --- */
+      @keyframes bounceback {
+        0% { transform: translate(-50%, -50%) scale(1.15); }
+        40% { transform: translate(-50%, -50%) scale(1.15) translateY(20px); }
+        100% { transform: translate(-50%, -50%) scale(1.15) translateY(0); opacity: 0; }
+      }
+
+      /* --- All-complete screen --- */
+      .complete-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(ellipse at center, rgba(255,215,0,0.3), rgba(0,0,0,0.7));
+        z-index: 500;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.6s;
+      }
+      .complete-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .complete-overlay h1 {
+        font-size: clamp(32px, 8vw, 60px);
+        color: #ffd700;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.5), 0 0 30px rgba(255,215,0,0.5);
+        margin-bottom: 10px;
+      }
+      .complete-overlay p {
+        font-size: clamp(18px, 4vw, 28px);
+        color: #fff;
+        margin-bottom: 24px;
+      }
+      .complete-overlay button {
+        padding: 14px 36px;
+        font-size: clamp(16px, 4vw, 22px);
+        font-weight: 800;
+        color: #3a2515;
+        background: linear-gradient(180deg, #ffd700, #daa520);
+        border: 3px solid #8B6914;
+        border-radius: 30px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scene">
+      <!-- Sky decorations -->
+      <div class="sun">&#x2600;&#xFE0F;</div>
+      <div class="cloud cloud1">&#x2601;&#xFE0F;</div>
+      <div class="cloud cloud2">&#x2601;&#xFE0F;</div>
+      <div class="cloud cloud3">&#x2601;&#xFE0F;</div>
+
+      <!-- Waves -->
+      <div class="waves">
+        <div class="wave wave1"></div>
+        <div class="wave wave2"></div>
+        <div class="wave wave3"></div>
+      </div>
+
+      <!-- Palm trees -->
+      <div class="palm palm-left">&#x1F334;</div>
+      <div class="palm palm-right">&#x1F334;</div>
+
+      <!-- HUD -->
+      <div class="hud" id="hud">
+        <span class="hud-emoji" id="hudEmoji"></span>
+        <span class="hud-word" id="hudWord">_ _ _</span>
+        <span class="hud-progress" id="hudProgress">1 / 5</span>
+      </div>
+
+      <!-- Chest area -->
+      <div class="chest-area">
+        <div class="chest" id="chest">
+          <!-- Glow effect -->
+          <div class="chest-glow"></div>
+          <!-- Light rays -->
+          <div class="light-rays" id="lightRays"></div>
+          <!-- Treasure overflow -->
+          <div class="treasure-overflow" id="treasureOverflow"></div>
+          <!-- Lid -->
+          <div class="chest-lid">
+            <div class="lid-clasp"></div>
+          </div>
+          <!-- Body -->
+          <div class="chest-body">
+            <!-- Rivets -->
+            <div class="rivet rivet-tl"></div>
+            <div class="rivet rivet-tr"></div>
+            <div class="rivet rivet-bl"></div>
+            <div class="rivet rivet-br"></div>
+            <!-- Lock panel -->
+            <div class="lock-panel" id="lockPanel"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coin bank -->
+      <div class="coin-bank" id="coinBank"></div>
+    </div>
+
+    <!-- Drag ghost -->
+    <div class="drag-ghost" id="dragGhost"></div>
+
+    <!-- Celebration -->
+    <div class="celebration" id="celebration"></div>
+
+    <!-- Next word button -->
+    <button class="next-btn" id="nextBtn">Next Word &#x27A1;&#xFE0F;</button>
+
+    <!-- All complete -->
+    <div class="complete-overlay" id="completeOverlay">
+      <h1>&#x1F3C6; Treasure Found! &#x1F3C6;</h1>
+      <p>You spelled every word!</p>
+      <button onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script>
+      // --- WORD LIST ---
+      const WORDS = [
+        { emoji: '\u{1F431}', word: 'cat' },
+        { emoji: '\u{1F436}', word: 'dog' },
+        { emoji: '\u{1F438}', word: 'frog' },
+        { emoji: '\u{2B50}', word: 'star' },
+        { emoji: '\u{1F41D}', word: 'bee' },
+      ];
+
+      const DISTRACTOR_POOL = 'abcdefghijklmnopqrstuvwxyz';
+
+      let currentWordIndex = 0;
+      let filledSlots = 0;
+      let nextExpectedIndex = 0;
+      let isDragging = false;
+      let dragLetter = '';
+      let dragCoinEl = null;
+
+      // DOM refs
+      const lockPanel = document.getElementById('lockPanel');
+      const coinBank = document.getElementById('coinBank');
+      const dragGhost = document.getElementById('dragGhost');
+      const hudEmoji = document.getElementById('hudEmoji');
+      const hudWord = document.getElementById('hudWord');
+      const hudProgress = document.getElementById('hudProgress');
+      const chest = document.getElementById('chest');
+      const nextBtn = document.getElementById('nextBtn');
+      const celebration = document.getElementById('celebration');
+      const lightRays = document.getElementById('lightRays');
+      const treasureOverflow = document.getElementById('treasureOverflow');
+      const completeOverlay = document.getElementById('completeOverlay');
+
+      // --- AUDIO FEEDBACK (Web Audio API) ---
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      function playClick() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.15);
+      }
+
+      function playWrong() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.25);
+      }
+
+      function playFanfare() {
+        const notes = [523, 659, 784, 1047];
+        notes.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.12);
+          gain.gain.setValueAtTime(0.25, audioCtx.currentTime + i * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.12 + 0.4);
+          osc.start(audioCtx.currentTime + i * 0.12);
+          osc.stop(audioCtx.currentTime + i * 0.12 + 0.4);
+        });
+      }
+
+      // --- GAME SETUP ---
+      function setupWord() {
+        const { emoji, word } = WORDS[currentWordIndex];
+        filledSlots = 0;
+        nextExpectedIndex = 0;
+
+        // HUD
+        hudEmoji.textContent = emoji;
+        hudWord.textContent = word.split('').map(() => '_').join(' ');
+        hudProgress.textContent = `${currentWordIndex + 1} / ${WORDS.length}`;
+
+        // Lock panel slots
+        lockPanel.innerHTML = '';
+        lockPanel.classList.remove('shake');
+        for (let i = 0; i < word.length; i++) {
+          const slot = document.createElement('div');
+          slot.className = 'lock-slot';
+          slot.dataset.index = i;
+          slot.dataset.letter = word[i];
+          const letterSpan = document.createElement('span');
+          letterSpan.className = 'slot-letter';
+          letterSpan.textContent = word[i].toUpperCase();
+          slot.appendChild(letterSpan);
+          lockPanel.appendChild(slot);
+        }
+
+        // Coins: word letters + distractors
+        coinBank.innerHTML = '';
+        const wordLetters = word.split('');
+        const distractors = getDistractors(word, 4);
+        const allLetters = shuffle([...wordLetters, ...distractors]);
+
+        allLetters.forEach((letter, i) => {
+          const coin = document.createElement('div');
+          coin.className = 'coin';
+          coin.textContent = letter.toUpperCase();
+          coin.dataset.letter = letter;
+          coin.style.animationDelay = `${i * 0.05}s`;
+          coinBank.appendChild(coin);
+          addDragListeners(coin);
+        });
+
+        // Reset chest
+        chest.classList.remove('open');
+        nextBtn.classList.remove('visible');
+        celebration.classList.remove('active');
+        celebration.innerHTML = '';
+
+        // Setup light rays
+        setupLightRays();
+        // Setup treasure overflow items
+        setupTreasureOverflow();
+      }
+
+      function getDistractors(word, count) {
+        const wordSet = new Set(word.split(''));
+        const available = DISTRACTOR_POOL.split('').filter(l => !wordSet.has(l));
+        const result = [];
+        for (let i = 0; i < count && available.length > 0; i++) {
+          const idx = Math.floor(Math.random() * available.length);
+          result.push(available.splice(idx, 1)[0]);
+        }
+        return result;
+      }
+
+      function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function setupLightRays() {
+        lightRays.innerHTML = '';
+        const rayCount = 12;
+        for (let i = 0; i < rayCount; i++) {
+          const ray = document.createElement('div');
+          ray.className = 'ray';
+          const angle = (i / rayCount) * 360 - 90;
+          ray.style.transform = `rotate(${angle}deg)`;
+          ray.style.animationDelay = `${i * 0.05}s`;
+          ray.style.opacity = 0.3 + Math.random() * 0.5;
+          lightRays.appendChild(ray);
+        }
+      }
+
+      function setupTreasureOverflow() {
+        treasureOverflow.innerHTML = '';
+        const treasureEmojis = ['\u{1FA99}', '\u{1F48E}', '\u{1F451}', '\u{1FA99}', '\u{1F48E}', '\u{1FA99}', '\u{1F48E}', '\u{1F451}', '\u{1FA99}', '\u{1F48E}', '\u{1FA99}', '\u{1F48E}'];
+        treasureEmojis.forEach((em, i) => {
+          const item = document.createElement('div');
+          item.className = 'treasure-item';
+          item.textContent = em;
+          const tx = (Math.random() - 0.5) * 120;
+          const ty = -(20 + Math.random() * 60);
+          const ty2 = ty + 15 + Math.random() * 20;
+          item.style.setProperty('--tx', tx + 'px');
+          item.style.setProperty('--ty', ty + 'px');
+          item.style.setProperty('--ty2', ty2 + 'px');
+          item.style.left = (30 + Math.random() * 40) + '%';
+          item.style.top = (20 + Math.random() * 30) + '%';
+          item.style.animationDelay = `${0.2 + i * 0.08}s`;
+          treasureOverflow.appendChild(item);
+        });
+      }
+
+      // --- DRAG & DROP ---
+      function addDragListeners(coin) {
+        coin.addEventListener('mousedown', onDragStart);
+        coin.addEventListener('touchstart', onDragStart, { passive: false });
+      }
+
+      function onDragStart(e) {
+        e.preventDefault();
+        if (isDragging) return;
+        // Resume audio context on user gesture
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        isDragging = true;
+        dragCoinEl = e.currentTarget;
+        dragLetter = dragCoinEl.dataset.letter;
+        dragCoinEl.classList.add('dragging');
+
+        // Show ghost
+        dragGhost.textContent = dragLetter.toUpperCase();
+        dragGhost.style.display = 'flex';
+
+        const pos = getPointerPos(e);
+        moveDragGhost(pos.x, pos.y);
+
+        document.addEventListener('mousemove', onDragMove);
+        document.addEventListener('touchmove', onDragMove, { passive: false });
+        document.addEventListener('mouseup', onDragEnd);
+        document.addEventListener('touchend', onDragEnd);
+      }
+
+      function onDragMove(e) {
+        e.preventDefault();
+        if (!isDragging) return;
+        const pos = getPointerPos(e);
+        moveDragGhost(pos.x, pos.y);
+
+        // Highlight valid drop target
+        const slots = lockPanel.querySelectorAll('.lock-slot');
+        slots.forEach(slot => slot.classList.remove('hover-valid'));
+        const target = getDropTarget(pos.x, pos.y);
+        if (target) target.classList.add('hover-valid');
+      }
+
+      function onDragEnd(e) {
+        if (!isDragging) return;
+        isDragging = false;
+
+        document.removeEventListener('mousemove', onDragMove);
+        document.removeEventListener('touchmove', onDragMove);
+        document.removeEventListener('mouseup', onDragEnd);
+        document.removeEventListener('touchend', onDragEnd);
+
+        const pos = getPointerPos(e);
+        const target = getDropTarget(pos.x, pos.y);
+
+        // Remove hover highlights
+        lockPanel.querySelectorAll('.lock-slot').forEach(s => s.classList.remove('hover-valid'));
+
+        if (target) {
+          handleDrop(target);
+        } else {
+          cancelDrag();
+        }
+      }
+
+      function moveDragGhost(x, y) {
+        dragGhost.style.left = x + 'px';
+        dragGhost.style.top = y + 'px';
+      }
+
+      function getPointerPos(e) {
+        if (e.touches && e.touches.length > 0) {
+          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        if (e.changedTouches && e.changedTouches.length > 0) {
+          return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+      }
+
+      function getDropTarget(x, y) {
+        const slots = lockPanel.querySelectorAll('.lock-slot:not(.filled)');
+        for (const slot of slots) {
+          const rect = slot.getBoundingClientRect();
+          // Generous hit area
+          const pad = 15;
+          if (x >= rect.left - pad && x <= rect.right + pad &&
+              y >= rect.top - pad && y <= rect.bottom + pad) {
+            return slot;
+          }
+        }
+        return null;
+      }
+
+      function handleDrop(slot) {
+        const slotIndex = parseInt(slot.dataset.index, 10);
+        const expectedLetter = WORDS[currentWordIndex].word[nextExpectedIndex];
+
+        if (slotIndex === nextExpectedIndex && dragLetter === expectedLetter) {
+          // Correct!
+          playClick();
+          slot.classList.add('filled', 'just-filled');
+          setTimeout(() => slot.classList.remove('just-filled'), 600);
+
+          dragCoinEl.classList.remove('dragging');
+          dragCoinEl.classList.add('used');
+          dragGhost.style.display = 'none';
+
+          filledSlots++;
+          nextExpectedIndex++;
+
+          // Update HUD word display
+          updateHudWord();
+
+          // Check win
+          if (filledSlots === WORDS[currentWordIndex].word.length) {
+            setTimeout(onWordComplete, 300);
+          }
+        } else {
+          // Wrong!
+          playWrong();
+          lockPanel.classList.remove('shake');
+          void lockPanel.offsetWidth; // reflow to restart animation
+          lockPanel.classList.add('shake');
+
+          cancelDrag();
+        }
+      }
+
+      function cancelDrag() {
+        if (dragCoinEl) {
+          dragCoinEl.classList.remove('dragging');
+        }
+        dragGhost.style.display = 'none';
+        dragCoinEl = null;
+        dragLetter = '';
+      }
+
+      function updateHudWord() {
+        const word = WORDS[currentWordIndex].word;
+        let display = '';
+        for (let i = 0; i < word.length; i++) {
+          if (i < nextExpectedIndex) {
+            display += word[i].toUpperCase();
+          } else {
+            display += '_';
+          }
+          if (i < word.length - 1) display += ' ';
+        }
+        hudWord.textContent = display;
+      }
+
+      // --- WIN ---
+      function onWordComplete() {
+        playFanfare();
+
+        // Open the chest!
+        chest.classList.add('open');
+
+        // Confetti celebration
+        spawnCelebration();
+
+        // Show next button after a moment
+        setTimeout(() => {
+          if (currentWordIndex < WORDS.length - 1) {
+            nextBtn.classList.add('visible');
+          } else {
+            // All words done!
+            setTimeout(() => {
+              completeOverlay.classList.add('active');
+            }, 1500);
+          }
+        }, 1200);
+      }
+
+      function spawnCelebration() {
+        celebration.innerHTML = '';
+        celebration.classList.add('active');
+        const emojis = ['\u{1FA99}', '\u{1F48E}', '\u{2B50}', '\u{1F451}', '\u{2728}', '\u{1FA99}', '\u{1F48E}', '\u{2B50}'];
+        for (let i = 0; i < 30; i++) {
+          const piece = document.createElement('div');
+          piece.className = 'confetti-piece';
+          piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+          piece.style.left = (5 + Math.random() * 90) + '%';
+          piece.style.top = '-5%';
+          piece.style.setProperty('--delay', (Math.random() * 0.6) + 's');
+          piece.style.setProperty('--dur', (1.5 + Math.random() * 1.5) + 's');
+          const midY = 30 + Math.random() * 40;
+          piece.style.setProperty('--mid-y', midY + 'vh');
+          piece.style.setProperty('--end-y', (midY + 20 + Math.random() * 30) + 'vh');
+          piece.style.setProperty('--rot', (Math.random() * 360) + 'deg');
+          piece.style.setProperty('--rot2', (Math.random() * 720) + 'deg');
+          celebration.appendChild(piece);
+        }
+      }
+
+      // --- NEXT WORD ---
+      nextBtn.addEventListener('click', () => {
+        currentWordIndex++;
+        setupWord();
+      });
+
+      function restartGame() {
+        currentWordIndex = 0;
+        completeOverlay.classList.remove('active');
+        setupWord();
+      }
+
+      // --- INIT ---
+      setupWord();
+    </script>
+  </body>
+</html>
