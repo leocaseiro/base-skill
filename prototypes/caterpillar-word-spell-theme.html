@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Caterpillar Word Spell — WordSpell Theme Prototype</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+  }
+  body {
+    background: linear-gradient(180deg, #87CEEB 0%, #a8e6a3 30%, #6abf69 60%, #3d8b37 100%);
+  }
+
+  /* === Garden background elements === */
+  .garden-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  }
+  .cloud {
+    position: absolute; background: white; border-radius: 50%; opacity: 0.7;
+  }
+  .cloud-1 {
+    width: 120px; height: 40px; top: 30px; left: 10%;
+    box-shadow: 30px -15px 0 10px white, 60px 0 0 5px white;
+    animation: drift 40s linear infinite;
+  }
+  .cloud-2 {
+    width: 90px; height: 30px; top: 60px; left: 60%;
+    box-shadow: 25px -10px 0 8px white, 50px 0 0 4px white;
+    animation: drift 55s linear infinite;
+  }
+  @keyframes drift {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(100vw); }
+  }
+  .sun {
+    position: absolute; top: 15px; right: 40px;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: radial-gradient(circle, #fff176, #ffee58, #fdd835);
+    box-shadow: 0 0 30px rgba(253,216,53,0.6), 0 0 60px rgba(253,216,53,0.3);
+    animation: sunPulse 4s ease-in-out infinite;
+  }
+  @keyframes sunPulse {
+    0%, 100% { box-shadow: 0 0 30px rgba(253,216,53,0.6), 0 0 60px rgba(253,216,53,0.3); }
+    50% { box-shadow: 0 0 40px rgba(253,216,53,0.8), 0 0 80px rgba(253,216,53,0.4); }
+  }
+  .flower {
+    position: absolute; font-size: 28px; z-index: 1;
+    animation: sway 4s ease-in-out infinite;
+  }
+  @keyframes sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+  .grass-strip {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
+    background: linear-gradient(180deg, #4caf50 0%, #388e3c 40%, #2e7d32 100%);
+    z-index: 1;
+  }
+  .grass-blade {
+    position: absolute; bottom: 60px; font-size: 22px; opacity: 0.7;
+  }
+
+  /* === HUD === */
+  .hud {
+    position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+    z-index: 200; display: flex; gap: 14px; align-items: center;
+    background: rgba(27,94,32,0.8); backdrop-filter: blur(8px);
+    border-radius: 24px; padding: 8px 20px;
+    border: 2px solid rgba(255,255,255,0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .hud-emoji { font-size: 32px; line-height: 1; }
+  .hud-word {
+    color: #c8e6c9; font-size: 14px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+  }
+  .hud-word .filled { color: #fff; }
+  .hud-word .blank { color: rgba(255,255,255,0.3); }
+  .hud-progress { color: #a5d6a7; font-size: 12px; font-weight: 600; }
+
+  /* === Caterpillar area === */
+  .caterpillar-zone {
+    position: fixed; top: 50%; left: 0; right: 0;
+    transform: translateY(-60%);
+    height: 180px; z-index: 50;
+    display: flex; align-items: center;
+    padding-left: 30px;
+  }
+  .caterpillar {
+    display: flex; align-items: center; flex-direction: row;
+    transition: transform 0.3s ease;
+  }
+  .caterpillar.wiggle {
+    animation: wiggle 0.5s ease-in-out;
+  }
+  @keyframes wiggle {
+    0%, 100% { transform: translateY(0); }
+    20% { transform: translateY(-6px) rotate(2deg); }
+    40% { transform: translateY(4px) rotate(-2deg); }
+    60% { transform: translateY(-3px) rotate(1deg); }
+    80% { transform: translateY(2px) rotate(-1deg); }
+  }
+  .caterpillar.shake {
+    animation: headShake 0.4s ease-in-out;
+  }
+  @keyframes headShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  /* Caterpillar head */
+  .cat-head {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #81c784, #4caf50, #388e3c);
+    position: relative; z-index: 60;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 -3px 6px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+    transition: all 0.5s ease;
+  }
+  /* Eyes */
+  .cat-head::before, .cat-head::after {
+    content: '';
+    position: absolute; top: 28px;
+    width: 16px; height: 20px; border-radius: 50%;
+    background: white;
+    box-shadow: inset 0 0 0 6px #333, inset 3px -2px 0 5px #333;
+  }
+  .cat-head::before { left: 16px; }
+  .cat-head::after { right: 16px; }
+  /* Antennae */
+  .antenna {
+    position: absolute; top: -20px; width: 3px; height: 22px;
+    background: #388e3c; border-radius: 2px;
+  }
+  .antenna-left { left: 22px; transform: rotate(-20deg); }
+  .antenna-right { right: 22px; transform: rotate(20deg); }
+  .antenna::after {
+    content: '';
+    position: absolute; top: -6px; left: -3px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #ff7043;
+  }
+  /* Mouth */
+  .mouth {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    width: 20px; height: 10px;
+    border-bottom: 3px solid #2e7d32;
+    border-radius: 0 0 10px 10px;
+  }
+  /* Smile when happy */
+  .cat-head.happy .mouth {
+    border-bottom: 3px solid #2e7d32;
+    width: 24px; height: 12px;
+  }
+
+  /* Body segments */
+  .cat-body {
+    display: flex; align-items: center; flex-direction: row;
+    margin-left: -12px;
+  }
+  .segment {
+    width: 60px; height: 60px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 900; color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    margin-left: -10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 -3px 6px rgba(0,0,0,0.15);
+    animation: segmentPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+    opacity: 0; transform: scale(0);
+    position: relative;
+  }
+  @keyframes segmentPop {
+    0% { opacity: 0; transform: scale(0); }
+    60% { opacity: 1; transform: scale(1.15); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  /* Tiny feet on segments */
+  .segment::after {
+    content: '';
+    position: absolute; bottom: -6px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #5d4037;
+  }
+
+  /* === Leaf tiles area === */
+  .tile-bank {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 200px; z-index: 100;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding-top: 20px;
+  }
+  /* Branch/log */
+  .branch {
+    position: absolute; bottom: 50px; left: 5%; right: 5%;
+    height: 24px;
+    background: linear-gradient(180deg, #8d6e63, #6d4c41, #5d4037);
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    z-index: 0;
+  }
+  .branch::before {
+    content: '';
+    position: absolute; top: 3px; left: 10px; right: 10px; height: 4px;
+    background: rgba(255,255,255,0.1); border-radius: 2px;
+  }
+
+  .tiles-row {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    justify-content: center; position: relative; z-index: 10;
+    max-width: 500px; padding: 0 10px;
+  }
+
+  /* Leaf tile */
+  .leaf-tile {
+    width: 60px; height: 68px; position: relative;
+    cursor: grab; z-index: 110;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.3));
+  }
+  .leaf-tile:active { cursor: grabbing; }
+  .leaf-tile .leaf-shape {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #81c784, #66bb6a, #4caf50);
+    border-radius: 50% 10% 50% 10%;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #43a047;
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.15);
+  }
+  /* Leaf vein */
+  .leaf-shape::before {
+    content: '';
+    position: absolute; top: 50%; left: 15%; right: 15%;
+    height: 2px; background: rgba(46,125,50,0.3);
+    transform: translateY(-50%) rotate(-5deg);
+  }
+  .leaf-tile .letter {
+    font-size: 26px; font-weight: 900; color: #1b5e20;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.4);
+    position: relative; z-index: 2;
+    text-transform: uppercase;
+  }
+  .leaf-tile.dragging {
+    opacity: 0.85; z-index: 1000;
+    transform: scale(1.12) rotate(-3deg);
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+    transition: none;
+  }
+  .leaf-tile.wrong {
+    animation: leafBounce 0.5s ease-in-out;
+  }
+  @keyframes leafBounce {
+    0% { transform: translateY(0); }
+    30% { transform: translateY(-20px) rotate(5deg); }
+    60% { transform: translateY(5px) rotate(-3deg); }
+    100% { transform: translateY(0) rotate(0); }
+  }
+  .leaf-tile.used {
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  /* === Drop target highlight === */
+  .drop-zone {
+    position: absolute;
+    width: 70px; height: 70px;
+    border: 3px dashed rgba(255,255,255,0.4);
+    border-radius: 50%;
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 55;
+    animation: dropPulse 1s ease-in-out infinite;
+  }
+  .drop-zone.active {
+    display: flex;
+  }
+  @keyframes dropPulse {
+    0%, 100% { border-color: rgba(255,255,255,0.3); transform: scale(1); }
+    50% { border-color: rgba(255,255,255,0.6); transform: scale(1.05); }
+  }
+
+  /* === Cocoon & Butterfly === */
+  .cocoon {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    z-index: 300; display: none;
+  }
+  .cocoon-shape {
+    width: 80px; height: 100px;
+    background: linear-gradient(180deg, #8d6e63, #6d4c41);
+    border-radius: 40% 40% 50% 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 -4px 8px rgba(0,0,0,0.2);
+    animation: cocoonShake 0.3s ease-in-out infinite;
+    position: relative;
+  }
+  .cocoon-shape::before {
+    content: '';
+    position: absolute; top: 10%; left: 15%; right: 15%; bottom: 10%;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 40% 40% 50% 50%;
+  }
+  @keyframes cocoonShake {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+  }
+
+  .butterfly {
+    position: fixed; z-index: 400; display: none;
+    font-size: 80px; line-height: 1;
+    animation: butterflyFly 4s ease-in-out infinite;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+  }
+  @keyframes butterflyFly {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    15% { transform: translate(60px, -80px) rotate(10deg) scale(1.05); }
+    30% { transform: translate(120px, -40px) rotate(-5deg) scale(0.95); }
+    45% { transform: translate(60px, -120px) rotate(8deg) scale(1.1); }
+    60% { transform: translate(-40px, -80px) rotate(-10deg) scale(0.95); }
+    75% { transform: translate(-80px, -30px) rotate(5deg) scale(1.05); }
+    100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  }
+  .butterfly .wing-flap {
+    animation: wingFlap 0.3s ease-in-out infinite alternate;
+    display: inline-block;
+  }
+  @keyframes wingFlap {
+    0% { transform: scaleX(1); }
+    100% { transform: scaleX(0.7); }
+  }
+
+  /* Celebration particles */
+  .particle {
+    position: fixed; z-index: 350; pointer-events: none;
+    font-size: 24px;
+    animation: particleFly 2s ease-out forwards;
+  }
+  @keyframes particleFly {
+    0% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+    100% { opacity: 0; transform: translate(var(--px), var(--py)) scale(0.3) rotate(360deg); }
+  }
+
+  /* Next word button */
+  .next-btn {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    z-index: 500; display: none;
+    padding: 14px 36px; border: none; border-radius: 30px;
+    background: linear-gradient(135deg, #ff7043, #f4511e);
+    color: white; font-size: 18px; font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(244,81,30,0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .next-btn:hover {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 6px 16px rgba(244,81,30,0.6);
+  }
+  .next-btn:active {
+    transform: translateX(-50%) scale(0.97);
+  }
+
+  /* Word complete banner */
+  .complete-banner {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    z-index: 350; display: none;
+    font-size: 42px; font-weight: 900; color: white;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    animation: bannerPop 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+  }
+  @keyframes bannerPop {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+    60% { transform: translate(-50%, -50%) scale(1.15); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  /* All-done screen */
+  .all-done {
+    position: fixed; inset: 0; z-index: 600;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(27,94,32,0.9); backdrop-filter: blur(10px);
+  }
+  .all-done h1 {
+    font-size: 48px; color: white; margin-bottom: 8px;
+  }
+  .all-done p {
+    font-size: 20px; color: #c8e6c9; margin-bottom: 24px;
+  }
+  .all-done .replay-btn {
+    padding: 14px 40px; border: none; border-radius: 30px;
+    background: linear-gradient(135deg, #ff7043, #f4511e);
+    color: white; font-size: 18px; font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(244,81,30,0.4);
+  }
+</style>
+</head>
+<body>
+
+<!-- Garden background -->
+<div class="garden-bg">
+  <div class="sun"></div>
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="flower" style="bottom:70px;left:8%;animation-delay:-1s;">🌸</div>
+  <div class="flower" style="bottom:72px;left:22%;font-size:22px;animation-delay:-2.5s;">🌼</div>
+  <div class="flower" style="bottom:68px;right:12%;animation-delay:-0.5s;">🌷</div>
+  <div class="flower" style="bottom:74px;right:28%;font-size:24px;animation-delay:-3s;">🌻</div>
+  <div class="flower" style="bottom:66px;left:45%;font-size:20px;animation-delay:-1.8s;">🌺</div>
+  <div class="grass-strip"></div>
+  <div class="grass-blade" style="left:5%;">🌿</div>
+  <div class="grass-blade" style="left:15%;">🍃</div>
+  <div class="grass-blade" style="left:35%;">🌿</div>
+  <div class="grass-blade" style="left:55%;">🍃</div>
+  <div class="grass-blade" style="left:70%;">🌿</div>
+  <div class="grass-blade" style="left:85%;">🍃</div>
+  <div class="grass-blade" style="left:95%;">🌿</div>
+</div>
+
+<!-- HUD -->
+<div class="hud">
+  <span class="hud-emoji" id="hudEmoji"></span>
+  <span class="hud-word" id="hudWord"></span>
+  <span class="hud-progress" id="hudProgress"></span>
+</div>
+
+<!-- Caterpillar zone -->
+<div class="caterpillar-zone" id="caterpillarZone">
+  <div class="caterpillar" id="caterpillar">
+    <div class="cat-head" id="catHead">
+      <div class="antenna antenna-left"></div>
+      <div class="antenna antenna-right"></div>
+      <div class="mouth"></div>
+    </div>
+    <div class="cat-body" id="catBody"></div>
+  </div>
+  <div class="drop-zone" id="dropZone"></div>
+</div>
+
+<!-- Tile bank -->
+<div class="tile-bank" id="tileBank">
+  <div class="branch"></div>
+  <div class="tiles-row" id="tilesRow"></div>
+</div>
+
+<!-- Cocoon -->
+<div class="cocoon" id="cocoon">
+  <div class="cocoon-shape"></div>
+</div>
+
+<!-- Butterfly -->
+<div class="butterfly" id="butterfly">
+  <span class="wing-flap">🦋</span>
+</div>
+
+<!-- Complete banner -->
+<div class="complete-banner" id="completeBanner"></div>
+
+<!-- Next word button -->
+<button class="next-btn" id="nextBtn">Next Word 🌱</button>
+
+<!-- All done screen -->
+<div class="all-done" id="allDone">
+  <h1>🦋 Amazing! 🦋</h1>
+  <p>You grew all the caterpillars into butterflies!</p>
+  <button class="replay-btn" id="replayBtn">Play Again 🐛</button>
+</div>
+
+<script>
+  // === GAME DATA ===
+  const WORDS = [
+    { emoji: '🐱', word: 'cat' },
+    { emoji: '🐶', word: 'dog' },
+    { emoji: '🐸', word: 'frog' },
+    { emoji: '🌟', word: 'star' },
+    { emoji: '🐝', word: 'bee' },
+  ];
+
+  const EXTRA_LETTERS = 'abcdefghijklmnopqrstuvwxyz';
+  const SEGMENT_GREENS = [
+    'linear-gradient(135deg, #a5d6a7, #81c784)',
+    'linear-gradient(135deg, #81c784, #66bb6a)',
+    'linear-gradient(135deg, #66bb6a, #4caf50)',
+    'linear-gradient(135deg, #4caf50, #43a047)',
+    'linear-gradient(135deg, #43a047, #388e3c)',
+    'linear-gradient(135deg, #388e3c, #2e7d32)',
+  ];
+
+  let currentWordIndex = 0;
+  let currentLetterIndex = 0;
+  let currentWord = '';
+  let tiles = [];
+  let isDragging = false;
+  let dragTile = null;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  let isAnimating = false;
+
+  // === DOM REFS ===
+  const hudEmoji = document.getElementById('hudEmoji');
+  const hudWord = document.getElementById('hudWord');
+  const hudProgress = document.getElementById('hudProgress');
+  const caterpillar = document.getElementById('caterpillar');
+  const catHead = document.getElementById('catHead');
+  const catBody = document.getElementById('catBody');
+  const caterpillarZone = document.getElementById('caterpillarZone');
+  const dropZone = document.getElementById('dropZone');
+  const tileBank = document.getElementById('tileBank');
+  const tilesRow = document.getElementById('tilesRow');
+  const cocoonEl = document.getElementById('cocoon');
+  const butterflyEl = document.getElementById('butterfly');
+  const completeBanner = document.getElementById('completeBanner');
+  const nextBtn = document.getElementById('nextBtn');
+  const allDone = document.getElementById('allDone');
+  const replayBtn = document.getElementById('replayBtn');
+
+  // === INIT ===
+  const initRound = () => {
+    const data = WORDS[currentWordIndex];
+    currentWord = data.word;
+    currentLetterIndex = 0;
+    isAnimating = false;
+
+    // Reset UI
+    catBody.innerHTML = '';
+    cocoonEl.style.display = 'none';
+    butterflyEl.style.display = 'none';
+    completeBanner.style.display = 'none';
+    nextBtn.style.display = 'none';
+    caterpillar.style.display = 'flex';
+    caterpillar.style.opacity = '1';
+    caterpillarZone.style.display = 'flex';
+
+    // Update HUD
+    hudEmoji.textContent = data.emoji;
+    updateHudWord();
+    hudProgress.textContent = `${currentWordIndex + 1} / ${WORDS.length}`;
+
+    // Build tiles
+    buildTiles();
+
+    // Position drop zone
+    positionDropZone();
+  };
+
+  const updateHudWord = () => {
+    let html = '';
+    for (let i = 0; i < currentWord.length; i++) {
+      if (i < currentLetterIndex) {
+        html += `<span class="filled">${currentWord[i].toUpperCase()}</span>`;
+      } else {
+        html += `<span class="blank">_</span>`;
+      }
+      if (i < currentWord.length - 1) html += ' ';
+    }
+    hudWord.innerHTML = html;
+  };
+
+  const buildTiles = () => {
+    tilesRow.innerHTML = '';
+    tiles = [];
+
+    // Letters needed
+    const needed = currentWord.split('');
+
+    // Distractor letters (3-4 random, not duplicating needed ones too much)
+    const distractorCount = 3 + Math.floor(Math.random() * 2);
+    const distractors = [];
+    for (let i = 0; i < distractorCount; i++) {
+      let ch;
+      do {
+        ch = EXTRA_LETTERS[Math.floor(Math.random() * EXTRA_LETTERS.length)];
+      } while (needed.includes(ch) && distractors.filter(d => d === ch).length > 0);
+      distractors.push(ch);
+    }
+
+    // Combine and shuffle
+    const allLetters = [...needed, ...distractors];
+    shuffle(allLetters);
+
+    allLetters.forEach((letter, i) => {
+      const tile = document.createElement('div');
+      tile.className = 'leaf-tile';
+      tile.dataset.letter = letter;
+      tile.dataset.index = i;
+      tile.innerHTML = `
+        <div class="leaf-shape">
+          <span class="letter">${letter.toUpperCase()}</span>
+        </div>
+      `;
+      tilesRow.appendChild(tile);
+      tiles.push(tile);
+    });
+  };
+
+  const shuffle = (arr) => {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  };
+
+  const positionDropZone = () => {
+    // Position drop zone after last segment (or after head if none)
+    const headRect = catHead.getBoundingClientRect();
+    const segments = catBody.querySelectorAll('.segment');
+    let lastEl = catHead;
+    if (segments.length > 0) {
+      lastEl = segments[segments.length - 1];
+    }
+    const lastRect = lastEl.getBoundingClientRect();
+    const zoneRect = caterpillarZone.getBoundingClientRect();
+
+    dropZone.style.left = (lastRect.right - zoneRect.left - 5) + 'px';
+    dropZone.style.top = (lastRect.top - zoneRect.top + (lastRect.height - 70) / 2) + 'px';
+    dropZone.classList.add('active');
+  };
+
+  // === DRAG HANDLING ===
+  const getPos = (e) => {
+    if (e.touches && e.touches.length > 0) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    return { x: e.clientX, y: e.clientY };
+  };
+
+  const onDragStart = (e) => {
+    if (isAnimating) return;
+    const tile = e.target.closest('.leaf-tile');
+    if (!tile || tile.classList.contains('used')) return;
+
+    e.preventDefault();
+    isDragging = true;
+    dragTile = tile;
+
+    const pos = getPos(e);
+    const rect = tile.getBoundingClientRect();
+    dragOffsetX = pos.x - rect.left;
+    dragOffsetY = pos.y - rect.top;
+
+    // Switch to fixed positioning
+    tile.style.position = 'fixed';
+    tile.style.left = rect.left + 'px';
+    tile.style.top = rect.top + 'px';
+    tile.style.width = rect.width + 'px';
+    tile.classList.add('dragging');
+  };
+
+  const onDragMove = (e) => {
+    if (!isDragging || !dragTile) return;
+    e.preventDefault();
+
+    const pos = getPos(e);
+    dragTile.style.left = (pos.x - dragOffsetX) + 'px';
+    dragTile.style.top = (pos.y - dragOffsetY) + 'px';
+  };
+
+  const onDragEnd = (e) => {
+    if (!isDragging || !dragTile) return;
+    e.preventDefault();
+    isDragging = false;
+
+    const tile = dragTile;
+    dragTile = null;
+
+    // Check if dropped near the drop zone
+    const tileRect = tile.getBoundingClientRect();
+    const tileCenterX = tileRect.left + tileRect.width / 2;
+    const tileCenterY = tileRect.top + tileRect.height / 2;
+
+    const zoneRect = dropZone.getBoundingClientRect();
+    const zoneCenterX = zoneRect.left + zoneRect.width / 2;
+    const zoneCenterY = zoneRect.top + zoneRect.height / 2;
+
+    const dist = Math.sqrt(
+      Math.pow(tileCenterX - zoneCenterX, 2) +
+      Math.pow(tileCenterY - zoneCenterY, 2)
+    );
+
+    if (dist < 80) {
+      // Dropped on target
+      const letter = tile.dataset.letter;
+      const expectedLetter = currentWord[currentLetterIndex];
+
+      if (letter === expectedLetter) {
+        handleCorrect(tile);
+      } else {
+        handleWrong(tile);
+      }
+    } else {
+      // Not on target, return to position
+      resetTilePosition(tile);
+    }
+  };
+
+  const resetTilePosition = (tile) => {
+    tile.classList.remove('dragging');
+    tile.style.position = '';
+    tile.style.left = '';
+    tile.style.top = '';
+    tile.style.width = '';
+  };
+
+  const handleCorrect = (tile) => {
+    isAnimating = true;
+
+    // Mark tile as used
+    tile.classList.remove('dragging');
+    tile.classList.add('used');
+    tile.style.position = '';
+    tile.style.left = '';
+    tile.style.top = '';
+    tile.style.width = '';
+
+    // Add body segment
+    const seg = document.createElement('div');
+    seg.className = 'segment';
+    seg.style.background = SEGMENT_GREENS[currentLetterIndex % SEGMENT_GREENS.length];
+    seg.textContent = currentWord[currentLetterIndex].toUpperCase();
+    catBody.appendChild(seg);
+
+    // Happy wiggle
+    caterpillar.classList.add('wiggle');
+    catHead.classList.add('happy');
+    setTimeout(() => {
+      caterpillar.classList.remove('wiggle');
+      catHead.classList.remove('happy');
+    }, 500);
+
+    currentLetterIndex++;
+    updateHudWord();
+
+    // Update drop zone position
+    setTimeout(() => {
+      dropZone.classList.remove('active');
+      if (currentLetterIndex < currentWord.length) {
+        positionDropZone();
+        isAnimating = false;
+      } else {
+        // Word complete!
+        isAnimating = true;
+        setTimeout(() => startTransformation(), 600);
+      }
+    }, 400);
+  };
+
+  const handleWrong = (tile) => {
+    isAnimating = true;
+
+    // Caterpillar shakes head
+    caterpillar.classList.add('shake');
+    setTimeout(() => caterpillar.classList.remove('shake'), 400);
+
+    // Leaf bounces back
+    tile.classList.add('wrong');
+    setTimeout(() => {
+      tile.classList.remove('wrong');
+      resetTilePosition(tile);
+      isAnimating = false;
+    }, 500);
+  };
+
+  // === TRANSFORMATION SEQUENCE ===
+  const startTransformation = () => {
+    // 1. Curl caterpillar (shrink segments towards center)
+    dropZone.classList.remove('active');
+    const segments = catBody.querySelectorAll('.segment');
+    caterpillar.style.transition = 'transform 0.8s ease-in-out, opacity 0.8s ease';
+
+    // Curl animation
+    segments.forEach((seg, i) => {
+      seg.style.transition = 'all 0.6s ease-in-out';
+      seg.style.marginLeft = `-${20 + i * 5}px`;
+      seg.style.transform = `scale(${0.7 - i * 0.05})`;
+    });
+
+    catHead.style.transition = 'all 0.6s ease-in-out';
+    catHead.style.transform = 'scale(0.9)';
+
+    setTimeout(() => {
+      // 2. Fade caterpillar, show cocoon
+      caterpillar.style.opacity = '0';
+      setTimeout(() => {
+        caterpillar.style.display = 'none';
+        caterpillarZone.style.display = 'none';
+        showCocoon();
+      }, 400);
+    }, 800);
+  };
+
+  const showCocoon = () => {
+    cocoonEl.style.display = 'block';
+    const shape = cocoonEl.querySelector('.cocoon-shape');
+
+    // Cocoon shakes for 2 seconds
+    setTimeout(() => {
+      // Intensify shaking
+      shape.style.animationDuration = '0.15s';
+
+      setTimeout(() => {
+        // Cocoon cracks open
+        shape.style.animation = 'none';
+        shape.style.transition = 'all 0.4s ease';
+        shape.style.transform = 'scale(1.3)';
+        shape.style.opacity = '0.5';
+
+        setTimeout(() => {
+          cocoonEl.style.display = 'none';
+          spawnButterfly();
+        }, 400);
+      }, 1000);
+    }, 1500);
+  };
+
+  const spawnButterfly = () => {
+    // Show butterfly
+    butterflyEl.style.display = 'block';
+    butterflyEl.style.top = '40%';
+    butterflyEl.style.left = '45%';
+
+    // Show completion banner
+    completeBanner.style.display = 'block';
+    completeBanner.textContent = `${WORDS[currentWordIndex].emoji} ${currentWord.toUpperCase()}!`;
+
+    // Spawn celebration particles
+    spawnParticles();
+
+    // Show next button after delay
+    setTimeout(() => {
+      if (currentWordIndex < WORDS.length - 1) {
+        nextBtn.style.display = 'block';
+      } else {
+        // All words done
+        setTimeout(() => {
+          butterflyEl.style.display = 'none';
+          completeBanner.style.display = 'none';
+          allDone.style.display = 'flex';
+        }, 2000);
+      }
+    }, 1500);
+  };
+
+  const spawnParticles = () => {
+    const emojis = ['✨', '🌟', '⭐', '🌸', '🌺', '💚', '🍃', '🦋'];
+    for (let i = 0; i < 16; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.textContent = emojis[i % emojis.length];
+      p.style.left = '50%';
+      p.style.top = '50%';
+      p.style.setProperty('--px', `${(Math.random() - 0.5) * 400}px`);
+      p.style.setProperty('--py', `${(Math.random() - 0.5) * 400}px`);
+      p.style.animationDelay = `${i * 0.08}s`;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 2500);
+    }
+  };
+
+  // === NEXT WORD ===
+  nextBtn.addEventListener('click', () => {
+    currentWordIndex++;
+    // Clean up butterfly and banner
+    butterflyEl.style.display = 'none';
+    completeBanner.style.display = 'none';
+    nextBtn.style.display = 'none';
+
+    // Reset caterpillar head styles
+    catHead.style.transition = '';
+    catHead.style.transform = '';
+    caterpillar.style.transition = '';
+    caterpillar.style.opacity = '';
+    caterpillar.style.transform = '';
+
+    // Reset cocoon shake speed
+    const cocoonShape = cocoonEl.querySelector('.cocoon-shape');
+    cocoonShape.style.animation = '';
+    cocoonShape.style.animationDuration = '';
+    cocoonShape.style.transition = '';
+    cocoonShape.style.transform = '';
+    cocoonShape.style.opacity = '';
+
+    initRound();
+  });
+
+  // === REPLAY ===
+  replayBtn.addEventListener('click', () => {
+    currentWordIndex = 0;
+    allDone.style.display = 'none';
+
+    // Reset caterpillar head styles
+    catHead.style.transition = '';
+    catHead.style.transform = '';
+    caterpillar.style.transition = '';
+    caterpillar.style.opacity = '';
+    caterpillar.style.transform = '';
+
+    const cocoonShape = cocoonEl.querySelector('.cocoon-shape');
+    cocoonShape.style.animation = '';
+    cocoonShape.style.animationDuration = '';
+    cocoonShape.style.transition = '';
+    cocoonShape.style.transform = '';
+    cocoonShape.style.opacity = '';
+
+    initRound();
+  });
+
+  // === EVENT LISTENERS ===
+  document.addEventListener('mousedown', onDragStart, { passive: false });
+  document.addEventListener('mousemove', onDragMove, { passive: false });
+  document.addEventListener('mouseup', onDragEnd, { passive: false });
+  document.addEventListener('touchstart', onDragStart, { passive: false });
+  document.addEventListener('touchmove', onDragMove, { passive: false });
+  document.addEventListener('touchend', onDragEnd, { passive: false });
+
+  // Prevent context menu on long press
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // === START ===
+  initRound();
+</script>
+</body>
+</html>
