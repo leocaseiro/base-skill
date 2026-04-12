@@ -6,8 +6,12 @@ interface SpriteEntry {
 
 export type PhonemeSprite = Record<string, SpriteEntry>;
 
-const SPRITE_URL = '/audio/phonemes.mp3';
-const MANIFEST_URL = '/audio/phonemes.json';
+// Resolve against Vite's BASE_URL so the sprite loads correctly when the app
+// or Storybook is served from a subpath (e.g. GitHub Pages PR previews at
+// /base-skill/pr/<n>/app/ or /docs/). Absolute paths like "/audio/..." would
+// otherwise resolve to the domain root and 404.
+const SPRITE_URL = `${import.meta.env.BASE_URL}audio/phonemes.mp3`;
+const MANIFEST_URL = `${import.meta.env.BASE_URL}audio/phonemes.json`;
 
 let audioCtx: AudioContext | null = null;
 let bufferPromise: Promise<AudioBuffer> | null = null;
