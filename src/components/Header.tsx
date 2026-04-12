@@ -40,6 +40,7 @@ import { Slider } from '@/components/ui/slider';
 import { useRxDB } from '@/db/hooks/useRxDB';
 import { useRxQuery } from '@/db/hooks/useRxQuery';
 import { useSettings } from '@/db/hooks/useSettings';
+import { safeGetVoices } from '@/lib/speech/safe-get-voices';
 import { APP_VERSION, IS_BETA } from '@/lib/version';
 
 const LOCALES = [
@@ -72,7 +73,7 @@ const HeaderMenuPanel = ({
       globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
     ).speechSynthesis;
     if (!synth) return;
-    const load = () => setVoices(synth.getVoices());
+    const load = () => setVoices(safeGetVoices(synth));
     load();
     synth.addEventListener('voiceschanged', load);
     return () => synth.removeEventListener('voiceschanged', load);
