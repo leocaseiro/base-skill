@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { useSettings } from '@/db/hooks/useSettings';
+import { safeGetVoices } from '@/lib/speech/safe-get-voices';
 
 const LOCALES = [
   { code: 'en', label: '🇬🇧 English' },
@@ -44,7 +45,7 @@ const SettingsScreen = () => {
       globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
     ).speechSynthesis;
     if (!synth) return;
-    const load = () => setVoices(synth.getVoices());
+    const load = () => setVoices(safeGetVoices(synth));
     load();
     synth.addEventListener('voiceschanged', load);
     return () => synth.removeEventListener('voiceschanged', load);
