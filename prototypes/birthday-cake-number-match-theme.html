@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Birthday Cake — NumberMatch Theme Prototype</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    background: linear-gradient(180deg, #fce4ec 0%, #f8bbd0 30%, #f48fb1 60%, #f06292 100%);
+  }
+
+  /* ── Confetti Background ── */
+  .confetti-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 8px; height: 8px;
+    opacity: 0.5;
+    animation: confettiFall linear infinite;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); }
+    100% { transform: translateY(105vh) rotate(720deg); }
+  }
+
+  /* ── Party Bunting ── */
+  .bunting {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+    height: 50px; display: flex; justify-content: center;
+    pointer-events: none;
+  }
+  .bunting-rope {
+    position: absolute; top: 18px; left: 5%; right: 5%;
+    height: 3px; background: #795548;
+    border-radius: 2px;
+  }
+  .bunting-flag {
+    position: relative; top: 16px;
+    width: 0; height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-top: 24px solid;
+    margin: 0 6px;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15));
+  }
+
+  /* ── HUD ── */
+  .hud {
+    position: fixed; top: 56px; left: 50%; transform: translateX(-50%);
+    z-index: 100; display: flex; gap: 16px; align-items: center;
+    background: rgba(136,14,79,0.75); backdrop-filter: blur(8px);
+    border-radius: 24px; padding: 8px 20px;
+    border: 2px solid rgba(255,255,255,0.25);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .hud-label { color: #f8bbd0; font-size: 13px; font-weight: 600; }
+  .hud-progress { color: #fff; font-size: 13px; font-weight: 700; }
+  .hud-score { color: #ffeb3b; font-size: 13px; font-weight: 700; }
+
+  /* ── Mode Toggle ── */
+  .mode-toggle {
+    position: fixed; top: 56px; right: 16px; z-index: 100;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .mode-btn {
+    background: rgba(255,255,255,0.85); border: 2px solid #e91e63;
+    color: #880e4f; font-size: 11px; font-weight: 700;
+    padding: 6px 10px; border-radius: 12px; cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .mode-btn.active {
+    background: #e91e63; color: #fff; border-color: #c2185b;
+    box-shadow: 0 2px 8px rgba(233,30,99,0.4);
+  }
+  .mode-btn:hover { transform: scale(1.05); }
+
+  /* ── Scene ── */
+  .scene {
+    width: 100vw; height: 100vh; position: relative; z-index: 10;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start; padding-top: 100px;
+  }
+
+  /* ── Question Area ── */
+  .question-area {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: 12px;
+  }
+  .question-banner {
+    background: linear-gradient(135deg, #e91e63, #f06292);
+    color: #fff; font-size: 48px; font-weight: 900;
+    padding: 16px 40px; border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(233,30,99,0.4),
+                inset 0 2px 0 rgba(255,255,255,0.3);
+    border: 3px solid rgba(255,255,255,0.3);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    position: relative;
+    min-width: 120px; text-align: center;
+    animation: bannerPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes bannerPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .question-banner::before,
+  .question-banner::after {
+    content: ''; position: absolute; top: -8px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #ffeb3b; border: 2px solid #fbc02d;
+  }
+  .question-banner::before { left: -8px; }
+  .question-banner::after { right: -8px; }
+
+  /* ── Big Cake Display (for mode 3) ── */
+  .big-cake-display {
+    display: none; flex-direction: column; align-items: center;
+  }
+  .big-cake-display.visible { display: flex; }
+
+  /* ── Drop Target (Cake Stand) ── */
+  .drop-target {
+    margin-top: 10px;
+    width: 180px; height: 160px;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s;
+  }
+  .cake-stand {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 160px; height: 22px;
+    background: linear-gradient(180deg, #e0e0e0, #bdbdbd);
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  .cake-stand::after {
+    content: ''; position: absolute; top: 14px;
+    left: 50%; transform: translateX(-50%);
+    width: 60px; height: 30px;
+    background: linear-gradient(180deg, #bdbdbd, #9e9e9e);
+    border-radius: 0 0 8px 8px;
+  }
+  .drop-target .drop-hint {
+    font-size: 14px; color: rgba(255,255,255,0.6);
+    font-weight: 600; text-align: center;
+    position: relative; bottom: 20px;
+    pointer-events: none;
+  }
+  .drop-target.hover {
+    transform: scale(1.08);
+  }
+  .drop-target.hover .cake-stand {
+    box-shadow: 0 0 20px rgba(255,235,59,0.6);
+  }
+  .drop-target.wrong {
+    animation: shakeStand 0.4s ease-in-out;
+  }
+  @keyframes shakeStand {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-12px); }
+    40% { transform: translateX(12px); }
+    60% { transform: translateX(-8px); }
+    80% { transform: translateX(8px); }
+  }
+
+  /* ── Tile Bank ── */
+  .tile-bank {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 16px; flex-wrap: wrap;
+    justify-content: center; align-items: flex-end;
+    z-index: 50; max-width: 95vw;
+    padding: 12px 20px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(6px);
+    border-radius: 20px;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+
+  /* ── Cake Tile ── */
+  .cake-tile {
+    width: 100px; height: 130px;
+    cursor: grab; position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+    z-index: 50;
+    touch-action: none;
+  }
+  .cake-tile:hover { transform: translateY(-4px); }
+  .cake-tile.dragging {
+    cursor: grabbing; z-index: 200;
+    transform: scale(1.1);
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+    transition: none;
+  }
+  .cake-tile.bounce-back {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* ── Cake CSS Art ── */
+  .cake-body {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 80px; display: flex; flex-direction: column; align-items: center;
+  }
+  .cake-layer {
+    width: 100%; border-radius: 8px;
+    position: relative;
+  }
+  .cake-layer-1 {
+    height: 22px; border-radius: 0 0 10px 10px;
+    z-index: 1;
+  }
+  .cake-layer-2 {
+    height: 20px; width: 90%; margin: 0 auto;
+    z-index: 2;
+  }
+  .cake-layer-3 {
+    height: 16px; width: 80%; margin: 0 auto;
+    border-radius: 6px 6px 0 0;
+    z-index: 3; position: relative;
+  }
+  /* Frosting top edge */
+  .frosting {
+    position: absolute; top: -5px; left: -4px; right: -4px;
+    height: 10px; z-index: 4;
+  }
+  .frosting-drip {
+    position: absolute; top: 3px;
+    width: 8px; height: 12px;
+    border-radius: 0 0 50% 50%;
+  }
+
+  /* ── Candles ── */
+  .candle-row {
+    display: flex; justify-content: center; gap: 4px;
+    margin-bottom: 2px;
+  }
+  .candle-container {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .candle-flame {
+    width: 6px; height: 10px;
+    background: radial-gradient(ellipse at bottom, #ffeb3b 20%, #ff9800 50%, #ff5722 80%, transparent 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: flicker 0.3s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 4px rgba(255,152,0,0.8));
+  }
+  @keyframes flicker {
+    0% { transform: scaleY(1) scaleX(1) rotate(-2deg); opacity: 0.9; }
+    50% { transform: scaleY(1.15) scaleX(0.9) rotate(2deg); opacity: 1; }
+    100% { transform: scaleY(0.95) scaleX(1.05) rotate(-1deg); opacity: 0.85; }
+  }
+  .candle-stick {
+    width: 4px; height: 16px;
+    border-radius: 1px;
+  }
+
+  /* ── Candle flare on correct ── */
+  .candle-flame.flare {
+    animation: flare 0.6s ease-in-out;
+    filter: drop-shadow(0 0 12px rgba(255,152,0,1));
+  }
+  @keyframes flare {
+    0% { transform: scaleY(1) scaleX(1); }
+    50% { transform: scaleY(2.5) scaleX(1.5); filter: brightness(1.8); }
+    100% { transform: scaleY(1) scaleX(1); }
+  }
+
+  /* ── Number Tile (Balloon style for mode 3) ── */
+  .number-tile {
+    width: 80px; height: 100px;
+    cursor: grab; position: relative;
+    transition: transform 0.2s;
+    z-index: 50;
+    touch-action: none;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .number-tile:hover { transform: translateY(-4px); }
+  .number-tile.dragging {
+    cursor: grabbing; z-index: 200;
+    transform: scale(1.1);
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+    transition: none;
+  }
+  .number-tile.bounce-back {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .balloon {
+    width: 64px; height: 76px;
+    border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    box-shadow: inset -8px -8px 20px rgba(0,0,0,0.15),
+                inset 6px 6px 12px rgba(255,255,255,0.3);
+  }
+  .balloon::after {
+    content: ''; position: absolute; bottom: -8px;
+    left: 50%; transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 12px solid;
+  }
+  .balloon-number {
+    font-size: 28px; font-weight: 900; color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .balloon-string {
+    width: 2px; height: 20px;
+    background: #9e9e9e;
+    margin-top: -2px;
+  }
+
+  /* ── Celebration Overlay ── */
+  .celebration {
+    position: fixed; inset: 0; z-index: 500;
+    display: none; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .celebration.active { display: flex; }
+  .celebration-text {
+    font-size: 48px; font-weight: 900;
+    color: #fff; text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: celebPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes celebPop {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  /* ── Party Popper Particles ── */
+  .popper-particle {
+    position: fixed; z-index: 501; pointer-events: none;
+    border-radius: 2px;
+    animation: popperBurst 0.8s ease-out forwards;
+  }
+  @keyframes popperBurst {
+    0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(720deg) scale(0.3); }
+  }
+
+  /* ── End Screen ── */
+  .end-screen {
+    position: fixed; inset: 0; z-index: 600;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: radial-gradient(circle, rgba(233,30,99,0.95), rgba(136,14,79,0.98));
+    gap: 20px;
+  }
+  .end-screen.active { display: flex; }
+  .end-title {
+    font-size: 52px; font-weight: 900; color: #fff;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .end-score {
+    font-size: 28px; color: #ffeb3b; font-weight: 700;
+  }
+  .end-btn {
+    margin-top: 16px; padding: 14px 32px;
+    background: #ffeb3b; color: #880e4f;
+    font-size: 18px; font-weight: 800;
+    border: none; border-radius: 16px;
+    cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+  }
+  .end-btn:hover { transform: scale(1.05); }
+
+  /* ── Big Cake (question in mode 3) ── */
+  .big-cake {
+    width: 160px; height: 200px;
+    position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-end;
+  }
+  .big-cake .cake-body { width: 140px; }
+  .big-cake .cake-layer-1 { height: 36px; }
+  .big-cake .cake-layer-2 { height: 32px; }
+  .big-cake .cake-layer-3 { height: 26px; }
+  .big-cake .candle-stick { height: 24px; width: 5px; }
+  .big-cake .candle-flame { width: 8px; height: 14px; }
+  .big-cake .candle-row { gap: 6px; margin-bottom: 3px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .question-banner { font-size: 36px; padding: 12px 28px; }
+    .cake-tile { width: 80px; height: 110px; }
+    .cake-body { width: 64px !important; }
+    .tile-bank { gap: 10px; padding: 10px 12px; }
+    .mode-toggle { top: 106px; right: 8px; }
+    .hud { top: 56px; }
+    .scene { padding-top: 90px; }
+    .number-tile { width: 64px; height: 84px; }
+    .balloon { width: 52px; height: 62px; }
+    .balloon-number { font-size: 22px; }
+    .celebration-text { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Confetti background -->
+<div class="confetti-bg" id="confettiBg"></div>
+
+<!-- Party bunting -->
+<div class="bunting" id="bunting"></div>
+
+<!-- HUD -->
+<div class="hud">
+  <span class="hud-label">Round</span>
+  <span class="hud-progress" id="hudProgress">1 / 8</span>
+  <span class="hud-label">Score</span>
+  <span class="hud-score" id="hudScore">0</span>
+</div>
+
+<!-- Mode toggles -->
+<div class="mode-toggle">
+  <button class="mode-btn active" data-mode="numToCake" onclick="setMode('numToCake')">Number &rarr; Cake</button>
+  <button class="mode-btn" data-mode="wordToCake" onclick="setMode('wordToCake')">Word &rarr; Cake</button>
+  <button class="mode-btn" data-mode="cakeToNum" onclick="setMode('cakeToNum')">Cake &rarr; Number</button>
+</div>
+
+<!-- Scene -->
+<div class="scene" id="scene">
+  <!-- Question area -->
+  <div class="question-area" id="questionArea">
+    <div class="question-banner" id="questionBanner">7</div>
+  </div>
+
+  <!-- Big cake display for mode 3 -->
+  <div class="big-cake-display" id="bigCakeDisplay"></div>
+
+  <!-- Drop target (cake stand) -->
+  <div class="drop-target" id="dropTarget">
+    <span class="drop-hint">Drop here</span>
+    <div class="cake-stand"></div>
+  </div>
+</div>
+
+<!-- Tile bank -->
+<div class="tile-bank" id="tileBank"></div>
+
+<!-- Celebration overlay -->
+<div class="celebration" id="celebration">
+  <div class="celebration-text" id="celebrationText">Happy Birthday!</div>
+</div>
+
+<!-- End screen -->
+<div class="end-screen" id="endScreen">
+  <div class="end-title">Party Over!</div>
+  <div class="end-score" id="endScore">Score: 0 / 8</div>
+  <button class="end-btn" onclick="startGame()">Play Again</button>
+</div>
+
+<script>
+// ── Constants ──
+const TOTAL_ROUNDS = 8;
+const NUM_OPTIONS = 5;
+const CELEBRATE_DELAY = 1500;
+
+const NUMBER_WORDS = [
+  '', 'one', 'two', 'three', 'four', 'five', 'six',
+  'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'
+];
+
+const CAKE_COLORS = [
+  { layers: ['#f48fb1', '#f06292', '#ec407a'], frosting: '#fff', candle: '#e91e63' },
+  { layers: ['#90caf9', '#64b5f6', '#42a5f5'], frosting: '#e3f2fd', candle: '#1976d2' },
+  { layers: ['#fff176', '#ffee58', '#ffeb3b'], frosting: '#fffde7', candle: '#f9a825' },
+  { layers: ['#80cbc4', '#4db6ac', '#26a69a'], frosting: '#e0f2f1', candle: '#00897b' },
+  { layers: ['#ce93d8', '#ba68c8', '#ab47bc'], frosting: '#f3e5f5', candle: '#8e24aa' },
+  { layers: ['#ffab91', '#ff8a65', '#ff7043'], frosting: '#fbe9e7', candle: '#e64a19' },
+  { layers: ['#a5d6a7', '#81c784', '#66bb6a'], frosting: '#e8f5e9', candle: '#388e3c' },
+  { layers: ['#ef9a9a', '#e57373', '#ef5350'], frosting: '#ffebee', candle: '#c62828' }
+];
+
+const BALLOON_COLORS = [
+  '#e91e63', '#2196f3', '#ff9800', '#4caf50', '#9c27b0',
+  '#00bcd4', '#ff5722', '#8bc34a', '#673ab7', '#ffeb3b',
+  '#f44336', '#03a9f4'
+];
+
+const BUNTING_COLORS = ['#e91e63', '#ffeb3b', '#4caf50', '#2196f3', '#ff9800', '#9c27b0'];
+const CONFETTI_COLORS = ['#e91e63', '#ffeb3b', '#4caf50', '#2196f3', '#ff9800', '#9c27b0', '#ff5722', '#00bcd4'];
+
+// ── Candle Layouts (domino-style) ──
+function getCandleLayout(n) {
+  switch (n) {
+    case 1:  return [[1]];
+    case 2:  return [[2]];
+    case 3:  return [[3]];
+    case 4:  return [[2], [2]];
+    case 5:  return [[2], [1], [2]];
+    case 6:  return [[3], [3]];
+    case 7:  return [[4], [3]];
+    case 8:  return [[4], [4]];
+    case 9:  return [[5], [4]];
+    case 10: return [[5], [5]];
+    case 11: return [[6], [5]];
+    case 12: return [[6], [6]];
+    default: return [[n]];
+  }
+}
+
+// ── State ──
+let currentMode = 'numToCake';
+let rounds = [];
+let currentRound = 0;
+let score = 0;
+let dragging = null;
+let dragOffset = { x: 0, y: 0 };
+let dragStartPos = { x: 0, y: 0 };
+let isAnimating = false;
+
+// ── Init Background ──
+function initConfettiBg() {
+  const bg = document.getElementById('confettiBg');
+  bg.innerHTML = '';
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    const size = 4 + Math.random() * 8;
+    const shapes = ['50%', '2px', '0'];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+    piece.style.cssText = `
+      left: ${Math.random() * 100}%;
+      width: ${size}px;
+      height: ${size * (0.5 + Math.random())}px;
+      background: ${color};
+      border-radius: ${shape};
+      animation-duration: ${6 + Math.random() * 8}s;
+      animation-delay: ${-Math.random() * 10}s;
+      opacity: ${0.3 + Math.random() * 0.4};
+    `;
+    bg.appendChild(piece);
+  }
+}
+
+function initBunting() {
+  const bunting = document.getElementById('bunting');
+  bunting.innerHTML = '<div class="bunting-rope"></div>';
+  const flagCount = Math.floor(window.innerWidth / 36);
+  const container = document.createElement('div');
+  container.style.cssText = 'display:flex;justify-content:center;position:relative;';
+  for (let i = 0; i < flagCount; i++) {
+    const flag = document.createElement('div');
+    flag.className = 'bunting-flag';
+    flag.style.borderTopColor = BUNTING_COLORS[i % BUNTING_COLORS.length];
+    container.appendChild(flag);
+  }
+  bunting.appendChild(container);
+}
+
+// ── Generate Rounds ──
+function generateRounds() {
+  rounds = [];
+  const allNums = [];
+  for (let i = 1; i <= 12; i++) allNums.push(i);
+  // Shuffle and pick TOTAL_ROUNDS
+  const shuffled = allNums.sort(() => Math.random() - 0.5).slice(0, TOTAL_ROUNDS);
+  // If fewer than TOTAL_ROUNDS unique, allow repeats
+  while (shuffled.length < TOTAL_ROUNDS) {
+    shuffled.push(Math.floor(Math.random() * 12) + 1);
+  }
+
+  for (const target of shuffled) {
+    const distractors = generateDistractors(target, NUM_OPTIONS - 1);
+    const options = [target, ...distractors].sort(() => Math.random() - 0.5);
+    rounds.push({ target, options });
+  }
+}
+
+function generateDistractors(target, count) {
+  const distractors = new Set();
+  // Prefer close numbers
+  const close = [];
+  for (let d = -3; d <= 3; d++) {
+    const v = target + d;
+    if (v >= 1 && v <= 12 && v !== target) close.push(v);
+  }
+  // Shuffle close
+  close.sort(() => Math.random() - 0.5);
+  for (const c of close) {
+    if (distractors.size >= count) break;
+    distractors.add(c);
+  }
+  // Fill remaining with random if needed
+  while (distractors.size < count) {
+    const v = Math.floor(Math.random() * 12) + 1;
+    if (v !== target && !distractors.has(v)) distractors.add(v);
+  }
+  return [...distractors];
+}
+
+// ── Render ──
+function renderRound() {
+  if (currentRound >= TOTAL_ROUNDS) {
+    showEndScreen();
+    return;
+  }
+
+  isAnimating = false;
+  const round = rounds[currentRound];
+  const questionArea = document.getElementById('questionArea');
+  const bigCakeDisplay = document.getElementById('bigCakeDisplay');
+  const dropTarget = document.getElementById('dropTarget');
+  const tileBank = document.getElementById('tileBank');
+
+  // Update HUD
+  document.getElementById('hudProgress').textContent = `${currentRound + 1} / ${TOTAL_ROUNDS}`;
+  document.getElementById('hudScore').textContent = score;
+
+  // Reset drop target
+  dropTarget.classList.remove('hover', 'wrong');
+  dropTarget.querySelector('.drop-hint').textContent = 'Drop here';
+
+  // Shuffle cake colors for this round
+  const colorPool = [...CAKE_COLORS].sort(() => Math.random() - 0.5);
+
+  if (currentMode === 'cakeToNum') {
+    // Mode 3: show big cake, tile bank has balloons
+    questionArea.style.display = 'none';
+    bigCakeDisplay.className = 'big-cake-display visible';
+    bigCakeDisplay.innerHTML = '';
+    const bigCake = buildBigCake(round.target, colorPool[0]);
+    bigCakeDisplay.appendChild(bigCake);
+
+    tileBank.innerHTML = '';
+    round.options.forEach((num, i) => {
+      const tile = buildBalloonTile(num, BALLOON_COLORS[num - 1] || BALLOON_COLORS[i]);
+      tileBank.appendChild(tile);
+    });
+  } else {
+    // Modes 1 & 2: show question, tile bank has cakes
+    questionArea.style.display = 'flex';
+    bigCakeDisplay.className = 'big-cake-display';
+    bigCakeDisplay.innerHTML = '';
+
+    const banner = document.getElementById('questionBanner');
+    if (currentMode === 'numToCake') {
+      banner.textContent = round.target;
+    } else {
+      banner.textContent = NUMBER_WORDS[round.target];
+    }
+    // Re-trigger animation
+    banner.style.animation = 'none';
+    banner.offsetHeight; // reflow
+    banner.style.animation = '';
+
+    tileBank.innerHTML = '';
+    round.options.forEach((num, i) => {
+      const tile = buildCakeTile(num, colorPool[i % colorPool.length]);
+      tileBank.appendChild(tile);
+    });
+  }
+}
+
+// ── Build Cake Tile ──
+function buildCakeTile(candleCount, colors) {
+  const tile = document.createElement('div');
+  tile.className = 'cake-tile';
+  tile.dataset.value = candleCount;
+
+  const layout = getCandleLayout(candleCount);
+
+  // Candle area
+  const candleArea = document.createElement('div');
+  candleArea.style.cssText = 'position:absolute;bottom:56px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;z-index:5;';
+
+  layout.forEach(row => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'candle-row';
+    for (let c = 0; c < row[0]; c++) {
+      const container = document.createElement('div');
+      container.className = 'candle-container';
+
+      const flame = document.createElement('div');
+      flame.className = 'candle-flame';
+      flame.style.animationDelay = `${Math.random() * 0.3}s`;
+
+      const stick = document.createElement('div');
+      stick.className = 'candle-stick';
+      const candleColors = ['#e91e63', '#2196f3', '#ff9800', '#4caf50', '#9c27b0', '#ff5722'];
+      stick.style.background = candleColors[Math.floor(Math.random() * candleColors.length)];
+
+      container.appendChild(flame);
+      container.appendChild(stick);
+      rowEl.appendChild(container);
+    }
+    candleArea.appendChild(rowEl);
+  });
+
+  // Cake body
+  const body = document.createElement('div');
+  body.className = 'cake-body';
+
+  // Layer 3 (top)
+  const l3 = document.createElement('div');
+  l3.className = 'cake-layer cake-layer-3';
+  l3.style.background = colors.layers[2];
+
+  // Frosting
+  const frosting = document.createElement('div');
+  frosting.className = 'frosting';
+  frosting.style.background = colors.frosting;
+  frosting.style.borderRadius = '0 0 4px 4px';
+  // Add drips
+  for (let d = 0; d < 3; d++) {
+    const drip = document.createElement('div');
+    drip.className = 'frosting-drip';
+    drip.style.background = colors.frosting;
+    drip.style.left = `${10 + d * 30}%`;
+    drip.style.height = `${8 + Math.random() * 8}px`;
+    frosting.appendChild(drip);
+  }
+  l3.appendChild(frosting);
+
+  // Layer 2 (middle)
+  const l2 = document.createElement('div');
+  l2.className = 'cake-layer cake-layer-2';
+  l2.style.background = colors.layers[1];
+
+  // Layer 1 (bottom)
+  const l1 = document.createElement('div');
+  l1.className = 'cake-layer cake-layer-1';
+  l1.style.background = colors.layers[0];
+
+  body.appendChild(l3);
+  body.appendChild(l2);
+  body.appendChild(l1);
+
+  tile.appendChild(candleArea);
+  tile.appendChild(body);
+
+  // Drag events
+  tile.addEventListener('mousedown', startDrag);
+  tile.addEventListener('touchstart', startDrag, { passive: false });
+
+  return tile;
+}
+
+// ── Build Big Cake (mode 3) ──
+function buildBigCake(candleCount, colors) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'big-cake';
+
+  const layout = getCandleLayout(candleCount);
+
+  const candleArea = document.createElement('div');
+  candleArea.style.cssText = 'display:flex;flex-direction:column;align-items:center;z-index:5;margin-bottom:4px;';
+
+  layout.forEach(row => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'candle-row';
+    rowEl.style.gap = '8px';
+    for (let c = 0; c < row[0]; c++) {
+      const container = document.createElement('div');
+      container.className = 'candle-container';
+
+      const flame = document.createElement('div');
+      flame.className = 'candle-flame';
+      flame.style.cssText = `width:10px;height:16px;animation-delay:${Math.random() * 0.3}s;`;
+
+      const stick = document.createElement('div');
+      stick.className = 'candle-stick';
+      stick.style.cssText = `height:26px;width:6px;`;
+      const candleColors = ['#e91e63', '#2196f3', '#ff9800', '#4caf50', '#9c27b0'];
+      stick.style.background = candleColors[Math.floor(Math.random() * candleColors.length)];
+
+      container.appendChild(flame);
+      container.appendChild(stick);
+      rowEl.appendChild(container);
+    }
+    candleArea.appendChild(rowEl);
+  });
+
+  const body = document.createElement('div');
+  body.className = 'cake-body';
+  body.style.width = '140px';
+
+  const l3 = document.createElement('div');
+  l3.className = 'cake-layer cake-layer-3';
+  l3.style.cssText = `background:${colors.layers[2]};height:26px;`;
+  const frosting = document.createElement('div');
+  frosting.className = 'frosting';
+  frosting.style.cssText = `background:${colors.frosting};border-radius:0 0 4px 4px;`;
+  for (let d = 0; d < 4; d++) {
+    const drip = document.createElement('div');
+    drip.className = 'frosting-drip';
+    drip.style.cssText = `background:${colors.frosting};left:${8 + d * 25}%;height:${10 + Math.random() * 10}px;`;
+    frosting.appendChild(drip);
+  }
+  l3.appendChild(frosting);
+
+  const l2 = document.createElement('div');
+  l2.className = 'cake-layer cake-layer-2';
+  l2.style.cssText = `background:${colors.layers[1]};height:32px;`;
+
+  const l1 = document.createElement('div');
+  l1.className = 'cake-layer cake-layer-1';
+  l1.style.cssText = `background:${colors.layers[0]};height:36px;`;
+
+  body.appendChild(l3);
+  body.appendChild(l2);
+  body.appendChild(l1);
+
+  wrapper.appendChild(candleArea);
+  wrapper.appendChild(body);
+
+  return wrapper;
+}
+
+// ── Build Balloon Tile (mode 3) ──
+function buildBalloonTile(number, color) {
+  const tile = document.createElement('div');
+  tile.className = 'number-tile';
+  tile.dataset.value = number;
+
+  const balloon = document.createElement('div');
+  balloon.className = 'balloon';
+  balloon.style.background = `radial-gradient(circle at 35% 30%, ${lighten(color)}, ${color})`;
+  balloon.style.setProperty('--balloon-color', color);
+  // Triangle tip color
+  balloon.style.cssText += `;position:relative;`;
+
+  const tri = document.createElement('div');
+  tri.style.cssText = `position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+    width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;
+    border-top:12px solid ${color};`;
+  balloon.appendChild(tri);
+
+  const numSpan = document.createElement('span');
+  numSpan.className = 'balloon-number';
+  numSpan.textContent = number;
+  balloon.appendChild(numSpan);
+
+  const string = document.createElement('div');
+  string.className = 'balloon-string';
+
+  tile.appendChild(balloon);
+  tile.appendChild(string);
+
+  tile.addEventListener('mousedown', startDrag);
+  tile.addEventListener('touchstart', startDrag, { passive: false });
+
+  return tile;
+}
+
+function lighten(hex) {
+  // Simple lighten: blend with white
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const lr = Math.min(255, r + 80);
+  const lg = Math.min(255, g + 80);
+  const lb = Math.min(255, b + 80);
+  return `rgb(${lr},${lg},${lb})`;
+}
+
+// ── Drag & Drop ──
+function startDrag(e) {
+  if (isAnimating) return;
+  e.preventDefault();
+
+  const tile = e.currentTarget;
+  const touch = e.touches ? e.touches[0] : e;
+
+  const rect = tile.getBoundingClientRect();
+  dragOffset.x = touch.clientX - rect.left;
+  dragOffset.y = touch.clientY - rect.top;
+  dragStartPos.x = rect.left;
+  dragStartPos.y = rect.top;
+
+  tile.classList.add('dragging');
+  tile.style.position = 'fixed';
+  tile.style.left = `${rect.left}px`;
+  tile.style.top = `${rect.top}px`;
+  tile.style.zIndex = '200';
+
+  dragging = tile;
+
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('mouseup', endDrag);
+  document.addEventListener('touchmove', onDrag, { passive: false });
+  document.addEventListener('touchend', endDrag);
+}
+
+function onDrag(e) {
+  if (!dragging) return;
+  e.preventDefault();
+
+  const touch = e.touches ? e.touches[0] : e;
+  const x = touch.clientX - dragOffset.x;
+  const y = touch.clientY - dragOffset.y;
+
+  dragging.style.left = `${x}px`;
+  dragging.style.top = `${y}px`;
+
+  // Check hover over drop target
+  const dropTarget = document.getElementById('dropTarget');
+  const dropRect = dropTarget.getBoundingClientRect();
+  const tileRect = dragging.getBoundingClientRect();
+  const tileCenterX = tileRect.left + tileRect.width / 2;
+  const tileCenterY = tileRect.top + tileRect.height / 2;
+
+  if (tileCenterX > dropRect.left && tileCenterX < dropRect.right &&
+      tileCenterY > dropRect.top && tileCenterY < dropRect.bottom) {
+    dropTarget.classList.add('hover');
+  } else {
+    dropTarget.classList.remove('hover');
+  }
+}
+
+function endDrag(e) {
+  if (!dragging) return;
+
+  document.removeEventListener('mousemove', onDrag);
+  document.removeEventListener('mouseup', endDrag);
+  document.removeEventListener('touchmove', onDrag);
+  document.removeEventListener('touchend', endDrag);
+
+  const dropTarget = document.getElementById('dropTarget');
+  const dropRect = dropTarget.getBoundingClientRect();
+  const tileRect = dragging.getBoundingClientRect();
+  const tileCenterX = tileRect.left + tileRect.width / 2;
+  const tileCenterY = tileRect.top + tileRect.height / 2;
+
+  const isOverDrop = tileCenterX > dropRect.left && tileCenterX < dropRect.right &&
+                     tileCenterY > dropRect.top && tileCenterY < dropRect.bottom;
+
+  const tileValue = parseInt(dragging.dataset.value);
+  const round = rounds[currentRound];
+
+  if (isOverDrop) {
+    if (tileValue === round.target) {
+      handleCorrect(dragging);
+    } else {
+      handleWrong(dragging);
+    }
+  } else {
+    bounceBack(dragging);
+  }
+
+  dropTarget.classList.remove('hover');
+  dragging.classList.remove('dragging');
+  dragging = null;
+}
+
+function handleCorrect(tile) {
+  isAnimating = true;
+  score++;
+  document.getElementById('hudScore').textContent = score;
+
+  // Snap tile to drop target center
+  const dropTarget = document.getElementById('dropTarget');
+  const dropRect = dropTarget.getBoundingClientRect();
+  tile.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+  tile.style.left = `${dropRect.left + dropRect.width / 2 - tile.offsetWidth / 2}px`;
+  tile.style.top = `${dropRect.top + dropRect.height / 2 - tile.offsetHeight / 2 - 20}px`;
+
+  // Flare candles
+  const flames = tile.querySelectorAll('.candle-flame');
+  flames.forEach(f => {
+    f.classList.add('flare');
+  });
+
+  // Party poppers
+  spawnPartyPoppers(dropRect.left + dropRect.width / 2, dropRect.top);
+
+  // Celebration text
+  const celeb = document.getElementById('celebration');
+  const celebText = document.getElementById('celebrationText');
+  celebText.textContent = 'Happy Birthday!';
+  celebText.style.animation = 'none';
+  celebText.offsetHeight;
+  celebText.style.animation = '';
+  celeb.classList.add('active');
+
+  // Advance
+  setTimeout(() => {
+    celeb.classList.remove('active');
+    tile.style.position = '';
+    tile.style.left = '';
+    tile.style.top = '';
+    tile.style.zIndex = '';
+    tile.style.transition = '';
+    currentRound++;
+    renderRound();
+  }, CELEBRATE_DELAY);
+}
+
+function handleWrong(tile) {
+  const dropTarget = document.getElementById('dropTarget');
+  dropTarget.classList.add('wrong');
+  setTimeout(() => dropTarget.classList.remove('wrong'), 500);
+  bounceBack(tile);
+}
+
+function bounceBack(tile) {
+  tile.classList.add('bounce-back');
+  tile.style.left = `${dragStartPos.x}px`;
+  tile.style.top = `${dragStartPos.y}px`;
+
+  setTimeout(() => {
+    tile.classList.remove('bounce-back');
+    tile.style.position = '';
+    tile.style.left = '';
+    tile.style.top = '';
+    tile.style.zIndex = '';
+  }, 400);
+}
+
+// ── Party Poppers ──
+function spawnPartyPoppers(cx, cy) {
+  const colors = CONFETTI_COLORS;
+  for (let i = 0; i < 40; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'popper-particle';
+    const angle = (Math.PI * 2 * i) / 40 + (Math.random() - 0.5) * 0.5;
+    const dist = 80 + Math.random() * 160;
+    const tx = Math.cos(angle) * dist;
+    const ty = Math.sin(angle) * dist - 40;
+    const size = 4 + Math.random() * 8;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const shapes = ['50%', '2px', '0'];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+
+    particle.style.cssText = `
+      left: ${cx}px;
+      top: ${cy}px;
+      width: ${size}px;
+      height: ${size * (0.5 + Math.random())}px;
+      background: ${color};
+      border-radius: ${shape};
+      --tx: ${tx}px;
+      --ty: ${ty}px;
+      animation-duration: ${0.6 + Math.random() * 0.4}s;
+    `;
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 1200);
+  }
+}
+
+// ── End Screen ──
+function showEndScreen() {
+  document.getElementById('endScore').textContent = `Score: ${score} / ${TOTAL_ROUNDS}`;
+  document.getElementById('endScreen').classList.add('active');
+}
+
+// ── Mode Switching ──
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+  startGame();
+}
+
+// ── Start Game ──
+function startGame() {
+  currentRound = 0;
+  score = 0;
+  document.getElementById('endScreen').classList.remove('active');
+  document.getElementById('celebration').classList.remove('active');
+  generateRounds();
+  renderRound();
+}
+
+// ── Boot ──
+initConfettiBg();
+initBunting();
+startGame();
+
+// Re-init bunting on resize
+window.addEventListener('resize', () => {
+  initBunting();
+});
+</script>
+</body>
+</html>
