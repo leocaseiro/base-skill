@@ -1,7 +1,8 @@
 [
   {
     "word": "annoy",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["an", "noy"]
   },
   {
     "word": "arm",
@@ -45,7 +46,8 @@
   },
   {
     "word": "boring",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["bor", "ing"]
   },
   {
     "word": "born",
@@ -121,7 +123,8 @@
   },
   {
     "word": "cooking",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["cook", "ing"]
   },
   {
     "word": "corn",
@@ -169,11 +172,13 @@
   },
   {
     "word": "employ",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["em", "ploy"]
   },
   {
     "word": "enjoy",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["en", "joy"]
   },
   {
     "word": "farm",
@@ -201,7 +206,8 @@
   },
   {
     "word": "footprint",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["foot", "print"]
   },
   {
     "word": "fork",
@@ -445,7 +451,8 @@
   },
   {
     "word": "suburb",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["sub", "urb"]
   },
   {
     "word": "surf",
@@ -473,7 +480,8 @@
   },
   {
     "word": "toilet",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["toi", "let"]
   },
   {
     "word": "took",
@@ -509,7 +517,8 @@
   },
   {
     "word": "turtle",
-    "syllableCount": 1
+    "syllableCount": 2,
+    "syllables": ["tur", "tle"]
   },
   {
     "word": "twirl",
@@ -529,7 +538,8 @@
   },
   {
     "word": "wooden",
-    "syllableCount": 2
+    "syllableCount": 2,
+    "syllables": ["wood", "en"]
   },
   {
     "word": "wow",
