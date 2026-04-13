@@ -1,0 +1,139 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="answer-game/Reference" />
+
+# AnswerGame — Reference
+
+> Source: `src/components/answer-game/`
+>
+> Audience: developers and AI agents modifying game state logic.
+> Update this file whenever the reducer, hooks, or context API change.
+> Run `/update-architecture-docs` for guided update prompts.
+
+---
+
+## State Shape
+
+Defined in `src/components/answer-game/types.ts`.
+
+| Field                 | Type               | Description                                                        |
+| --------------------- | ------------------ | ------------------------------------------------------------------ |
+| `config`              | `AnswerGameConfig` | Game configuration (immutable during play)                         |
+| `allTiles`            | `TileItem[]`       | All tiles for the current round — never mutated mid-round          |
+| `bankTileIds`         | `string[]`         | IDs of tiles currently visible in the choice bank                  |
+| `zones`               | `AnswerZone[]`     | Slot definitions — contains `placedTileId`, `isWrong`, `isLocked`  |
+| `activeSlotIndex`     | `number`           | Cursor position for auto-next-slot mode (ordered input)            |
+| `dragActiveTileId`    | `string \| null`   | ID of the tile currently being dragged                             |
+| `dragHoverZoneIndex`  | `number \| null`   | Zone index being hovered during a drag                             |
+| `dragHoverBankTileId` | `string \| null`   | Bank tile hole being hovered by a dragged slot tile                |
+| `phase`               | `AnswerGamePhase`  | `'playing' \| 'round-complete' \| 'level-complete' \| 'game-over'` |
+| `roundIndex`          | `number`           | Current round (0-based)                                            |
+| `retryCount`          | `number`           | Wrong placements in the current round                              |
+| `levelIndex`          | `number`           | Current level (only used when `config.levelMode` is set)           |
+| `isLevelMode`         | `boolean`          | Whether `config.levelMode` is configured                           |
+
+### AnswerZone
+
+```ts
+interface AnswerZone {
+  id: string;
+  index: number;
+  expectedValue: string; // correct tile value for this slot
+  placedTileId: string | null;
+  isWrong: boolean;
+  isLocked: boolean; // true when wrongTileBehavior is 'lock-manual' or 'lock-auto-eject'
+}
+```
+
+### TileItem
+
+```ts
+interface TileItem {
+  id: string;
+  label: string; // display text on the tile
+  value: string; // semantic value matched against AnswerZone.expectedValue
+}
+```
+
+---
+
+## Action Catalog
+
+Defined in `src/components/answer-game/types.ts` as `AnswerGameAction`.
+Handled in `src/components/answer-game/answer-game-reducer.ts`.
+
+| Action                | Payload                          | Dispatched by                                                                     | Effect                                                                                           |
+| --------------------- | -------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `INIT_ROUND`          | `{ tiles, zones }`               | `AnswerGameProvider` (mount effect)                                               | Resets round state, populates tiles and zones                                                    |
+| `PLACE_TILE`          | `{ tileId, zoneIndex }`          | `useTileEvaluation`                                                               | Places bank tile in slot; marks wrong if mismatch; sets `phase: 'round-complete'` if all correct |
+| `TYPE_TILE`           | `{ tileId, value, zoneIndex }`   | `useTileEvaluation`                                                               | Creates a virtual typed tile (id `typed-${nanoid()}`); same evaluation as `PLACE_TILE`           |
+| `REMOVE_TILE`         | `{ zoneIndex }`                  | `useSlotBehavior`, `useSlotTileDrag`, `useKeyboardInput`, `useTouchKeyboardInput` | Removes tile from slot; returns it to bank (virtual tiles are discarded)                         |
+| `SWAP_TILES`          | `{ fromZoneIndex, toZoneIndex }` | `useSlotBehavior`, `useFreeSwap`                                                  | Exchanges tiles between two slots; re-evaluates both positions                                   |
+| `EJECT_TILE`          | `{ zoneIndex }`                  | `useSlotBehavior` (auto timer)                                                    | Removes wrong tile after lock-auto-eject animation; returns tile to bank                         |
+| `ADVANCE_ROUND`       | `{ tiles, zones }`               | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Increments `roundIndex`; replaces tiles and zones with next round data                           |
+| `ADVANCE_LEVEL`       | `{ tiles, zones }`               | `SortNumbers`                                                                     | Increments `levelIndex`; resets `roundIndex` to 0; replaces tiles and zones                      |
+| `COMPLETE_GAME`       | —                                | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Sets `phase: 'game-over'`                                                                        |
+| `SET_DRAG_ACTIVE`     | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`, `useSlotBehavior`                          | Tracks the tile being dragged; `null` clears it on drop or cancel                                |
+| `SET_DRAG_HOVER`      | `{ zoneIndex: number \| null }`  | `useSlotBehavior`, `useDraggableTile`                                             | Tracks which zone is hovered during drag for visual feedback                                     |
+| `SET_DRAG_HOVER_BANK` | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`                                             | Tracks which bank tile hole is hovered by a dragged slot tile                                    |
+| `SWAP_SLOT_BANK`      | `{ zoneIndex, bankTileId }`      | `useSlotTileDrag`                                                                 | Exchanges a slot tile with a specific bank tile                                                  |
+| `SET_ACTIVE_SLOT`     | `{ zoneIndex }`                  | `useKeyboardInput`                                                                | Moves the keyboard cursor to a specific slot (ordered mode only)                                 |
+
+---
+
+## Hook Index
+
+All hooks live in `src/components/answer-game/`.
+
+| Hook                    | File                       | Purpose                                                                                       | Dispatches                                                                     |
+| ----------------------- | -------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `useAnswerGameContext`  | `useAnswerGameContext.ts`  | Read `AnswerGameState` from context                                                           | —                                                                              |
+| `useAnswerGameDispatch` | `useAnswerGameDispatch.ts` | Get `dispatch` from context                                                                   | —                                                                              |
+| `useTileEvaluation`     | `useTileEvaluation.ts`     | Core tile placement — evaluates correctness, emits sound/events                               | `PLACE_TILE`, `TYPE_TILE`                                                      |
+| `useAutoNextSlot`       | `useAutoNextSlot.ts`       | Places tile in the next available slot; wraps `useTileEvaluation`                             | via `useTileEvaluation`                                                        |
+| `useFreeSwap`           | `useFreeSwap.ts`           | Bank tile click in free-swap mode — places or swaps                                           | `SWAP_TILES`; via `useTileEvaluation`                                          |
+| `useDraggableTile`      | `useDraggableTile.ts`      | Enables bank tile drag (HTML5 DnD + touch pointer events)                                     | `SET_DRAG_ACTIVE`, `SET_DRAG_HOVER`, `SET_DRAG_HOVER_BANK`                     |
+| `useSlotTileDrag`       | `useSlotTileDrag.ts`       | Enables slot tile drag; calls `onDrop` callback for SWAP dispatch                             | `SET_DRAG_ACTIVE`, `SET_DRAG_HOVER_BANK`, `SWAP_SLOT_BANK`, `REMOVE_TILE`      |
+| `useSlotBehavior`       | `Slot/useSlotBehavior.ts`  | Complete slot interaction: drop targets, click-to-remove, auto-eject timer                    | `SET_DRAG_HOVER`, `SWAP_TILES`, `REMOVE_TILE`, `EJECT_TILE`, `SET_DRAG_ACTIVE` |
+| `useKeyboardInput`      | `useKeyboardInput.ts`      | Global `keydown` listener for desktop input                                                   | `SET_ACTIVE_SLOT`, `REMOVE_TILE`; via `useTileEvaluation`                      |
+| `useTouchKeyboardInput` | `useTouchKeyboardInput.ts` | Hidden `<input>` for mobile OS keyboard                                                       | `REMOVE_TILE`; via `useTileEvaluation`                                         |
+| `useBankDropTarget`     | `useBankDropTarget.ts`     | Makes the bank a drop target for slot tiles (no dispatch — returns `isDragOver`)              | —                                                                              |
+| `useTouchDrag`          | `useTouchDrag.ts`          | Low-level pointer event handler; calls `onDrop`, `onDropOnBank`, `onDropOnBankTile` callbacks | Callers dispatch                                                               |
+
+---
+
+## Context API
+
+Defined in `src/components/answer-game/AnswerGameProvider.tsx`.
+
+```ts
+// State context — read-only
+export const AnswerGameStateContext: React.Context<AnswerGameState | null>
+
+// Dispatch context — write-only
+export const AnswerGameDispatchContext: React.Context<Dispatch<AnswerGameAction> | null>
+
+// Consumer hooks (throw if used outside provider)
+export const useAnswerGameContext = (): AnswerGameState
+export const useAnswerGameDispatch = (): Dispatch<AnswerGameAction>
+```
+
+The provider also supplies `GameRoundContext` with `{ current: number, total: number }`
+for progress display.
+
+---
+
+## Config Options
+
+`AnswerGameConfig` is defined in `src/components/answer-game/types.ts`.
+
+| Option                   | Type                                             | Default             | Behavior                                                                                                                                                                 |
+| ------------------------ | ------------------------------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `inputMethod`            | `'drag' \| 'type' \| 'both'`                     | `'drag'`            | `'type'`/`'both'` activates `useKeyboardInput` + `useTouchKeyboardInput`                                                                                                 |
+| `wrongTileBehavior`      | `'reject' \| 'lock-manual' \| 'lock-auto-eject'` | `'lock-auto-eject'` | `'reject'`: tile bounces back. `'lock-manual'`: tile stays, marked wrong, user must click to remove. `'lock-auto-eject'`: tile stays, shakes, auto-removed after ~1350ms |
+| `tileBankMode`           | `'exact' \| 'distractors'`                       | —                   | `'exact'`: bank contains only correct tiles. `'distractors'`: adds `distractorCount` extra tiles                                                                         |
+| `slotInteraction`        | `'ordered' \| 'free-swap'`                       | Inferred            | `'ordered'`: cursor moves slot-by-slot. `'free-swap'`: click any bank tile → fills any slot                                                                              |
+| `levelMode`              | `{ generateNextLevel, maxLevels? }`              | `undefined`         | Enables level progression; `generateNextLevel(completedLevel)` returns next tiles/zones or `null` to end game                                                            |
+| `roundsInOrder`          | `boolean`                                        | `false`             | When `true`, rounds play in config order; otherwise shuffled once per session                                                                                            |
+| `ttsEnabled`             | `boolean`                                        | —                   | Enables TTS on tile pronounce and answer evaluation                                                                                                                      |
+| `touchKeyboardInputMode` | `'text' \| 'numeric' \| 'none'`                  | `'text'`            | Sets the OS keyboard type hint for mobile input                                                                                                                          |

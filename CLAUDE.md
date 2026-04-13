@@ -143,3 +143,11 @@ VR tests use Docker to ensure screenshots match CI exactly (Linux/Chromium).
 - Compare with recent code changes — is this expected?
 - If yes: run `yarn test:vr:update`, commit updated baselines, then push
 - If no: investigate and fix before pushing
+
+## Architecture Documentation
+
+When modifying game state logic — any file in `src/components/answer-game/`,
+`src/lib/game-engine/`, or any file matching `*reducer*`, `*dispatch*`,
+`*Behavior*`, `*Drag*` — update the co-located `.mdx` docs in the same PR.
+
+Run `/update-architecture-docs` to get guided prompts for what sections need updating.
