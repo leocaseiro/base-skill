@@ -83,36 +83,37 @@ export interface GameTheme {
   tokens: Record<string, string>;
 
   // ── Event Callbacks ──────────────────────────────────────────────
+  // All callbacks may return a Promise. When they do, the engine
+  // awaits the Promise before proceeding (e.g. advancing rounds,
+  // ejecting tiles). A safety timeout (default 5 s) resolves the
+  // await if the Promise never settles, so a buggy theme cannot
+  // freeze the game.
+  //
+  // Return void (or undefined) for fire-and-forget behaviour —
+  // the engine proceeds immediately.
+
   /** Fired when a tile is placed correctly */
-  onCorrectPlace?: (zoneIndex: number, tileValue: string) => void;
+  onCorrectPlace?: (
+    zoneIndex: number,
+    tileValue: string,
+  ) => Promise<void> | void;
   /** Fired when a tile is placed incorrectly */
-  onWrongPlace?: (zoneIndex: number, tileValue: string) => void;
+  onWrongPlace?: (
+    zoneIndex: number,
+    tileValue: string,
+  ) => Promise<void> | void;
   /** Fired when a wrong tile is auto-ejected */
-  onTileEjected?: (zoneIndex: number) => void;
-  /** Fired when a drag begins */
+  onTileEjected?: (zoneIndex: number) => Promise<void> | void;
+  /** Fired when a drag begins (fire-and-forget, not awaited) */
   onDragStart?: (tileId: string) => void;
-  /** Fired when a dragged tile hovers over a zone */
+  /** Fired when a dragged tile hovers over a zone (fire-and-forget) */
   onDragOverZone?: (zoneIndex: number) => void;
   /** Fired when a round is completed (all zones correct) */
-  onRoundComplete?: (roundIndex: number) => void;
+  onRoundComplete?: (roundIndex: number) => Promise<void> | void;
   /** Fired when a level is completed */
-  onLevelComplete?: (levelIndex: number) => void;
+  onLevelComplete?: (levelIndex: number) => Promise<void> | void;
   /** Fired when the game is over */
-  onGameOver?: (retryCount: number) => void;
-
-  // ── Timing ──────────────────────────────────────────────────────
-  timing?: {
-    /** ms before advancing to next round after round-complete. Default: 750 */
-    roundAdvanceDelay?: number;
-    /** ms before auto-ejecting a wrong tile. Default: 800 */
-    autoEjectDelay?: number;
-  };
-  /**
-   * If provided, engine awaits this instead of using timing.roundAdvanceDelay.
-   * Allows multi-phase animation sequences (e.g. crack → hatch → baby dino).
-   * Must resolve within 5 s or engine advances anyway (safety timeout).
-   */
-  onRoundCompleteSequence?: (roundIndex: number) => Promise<void>;
+  onGameOver?: (retryCount: number) => Promise<void> | void;
 
   // ── Render Slots (optional React components) ─────────────────────
   /** Background scene behind the game area */
@@ -255,6 +256,39 @@ appropriate moments.
 | `game:drag-start`     | `{ tileId }`            | `useDraggableTile`                  |
 | `game:drag-over-zone` | `{ zoneIndex }`         | `useSlotTileDrag`                   |
 | `game:tile-ejected`   | `{ zoneIndex, tileId }` | `answerGameReducer` (EJECT_TILE)    |
+
+#### Awaiting Theme Callbacks
+
+The engine uses a helper to safely await theme callbacks with a timeout:
+
+```ts
+// baseskill/lib/theme/await-theme-callback.ts
+const DEFAULT_TIMEOUT_MS = 5_000;
+
+export const awaitThemeCallback = async (
+  result: Promise<void> | void,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+): Promise<void> => {
+  if (!result) return; // void — fire-and-forget, proceed immediately
+  await Promise.race([
+    result,
+    new Promise<void>((resolve) => setTimeout(resolve, timeoutMs)),
+  ]);
+};
+```
+
+Usage in the game component:
+
+```ts
+// After round completes, before advancing
+await awaitThemeCallback(theme.onRoundComplete?.(roundIndex));
+dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+```
+
+If the theme returns `void`, `awaitThemeCallback` returns immediately (same
+behaviour as today). If it returns a Promise, the engine waits up to 5 s.
+Drag events (`onDragStart`, `onDragOverZone`) are fire-and-forget and never
+awaited — they must not block interaction.
 
 #### How Themes Subscribe
 
@@ -472,12 +506,13 @@ This runs once at app startup. Baseskill discovers the themes via the registry.
 
 ### New Files
 
-| File                             | Purpose                                                                 |
-| -------------------------------- | ----------------------------------------------------------------------- |
-| `src/lib/theme/game-theme.ts`    | `GameTheme` type definition                                             |
-| `src/lib/theme/registry.ts`      | Theme registry (`registerTheme`, `resolveTheme`, `getRegisteredThemes`) |
-| `src/lib/theme/useGameTheme.ts`  | Hook that resolves theme and wires event callbacks                      |
-| `src/lib/theme/classic-theme.ts` | Default `classic` theme with baseline tokens                            |
+| File                                    | Purpose                                                                 |
+| --------------------------------------- | ----------------------------------------------------------------------- |
+| `src/lib/theme/game-theme.ts`           | `GameTheme` type definition                                             |
+| `src/lib/theme/registry.ts`             | Theme registry (`registerTheme`, `resolveTheme`, `getRegisteredThemes`) |
+| `src/lib/theme/useGameTheme.ts`         | Hook that resolves theme and wires event callbacks                      |
+| `src/lib/theme/classic-theme.ts`        | Default `classic` theme with baseline tokens                            |
+| `src/lib/theme/await-theme-callback.ts` | `awaitThemeCallback` helper (Promise.race with safety timeout)          |
 
 ### Modified Files
 
