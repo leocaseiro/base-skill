@@ -3,6 +3,7 @@ import {
   createMemoryHistory,
   createRouter as createTanStackRouter,
 } from '@tanstack/react-router';
+import { RouteErrorFallback } from './components/RouteErrorFallback';
 import { routeTree } from './routeTree.gen';
 
 /**
@@ -35,6 +36,7 @@ export function getRouter() {
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
+    defaultErrorComponent: RouteErrorFallback,
   });
 
   return router;

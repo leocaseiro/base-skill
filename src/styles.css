@@ -517,41 +517,40 @@ a:hover {
 
 .dark {
   /*
-   * Hardcoded values — NOT var(--bs-*) references.
-   * --bs-* vars are set as inline styles on <html> by ThemeRuntimeProvider,
-   * so inline specificity beats .dark class rules. Shadcn vars here must use
-   * concrete values to override the :root derivations.
-   * Galaxy dark palette: surface=#16213e, background=#1a1a2e, text=#e8f4fd
+   * Derive from --bs-* tokens with dark-mode fallbacks.
+   * --bs-* vars are set as inline styles on <html> by ThemeRuntimeProvider
+   * and by the Storybook withTheme decorator. The fallback values match the
+   * Galaxy dark palette for when no inline --bs-* vars are present.
    */
-  --background: oklch(14.5% 0 0deg);
-  --foreground: oklch(98.5% 0 0deg);
-  --card: oklch(20.5% 0 0deg);
-  --card-foreground: oklch(98.5% 0 0deg);
-  --popover: oklch(20.5% 0 0deg);
-  --popover-foreground: oklch(98.5% 0 0deg);
-  --primary: oklch(92.2% 0 0deg);
-  --primary-foreground: oklch(20.5% 0 0deg);
-  --secondary: oklch(26.9% 0 0deg);
-  --secondary-foreground: oklch(98.5% 0 0deg);
-  --muted: oklch(26.9% 0 0deg);
+  --background: var(--bs-background, oklch(14.5% 0 0deg));
+  --foreground: var(--bs-text, oklch(98.5% 0 0deg));
+  --card: var(--bs-surface, oklch(20.5% 0 0deg));
+  --card-foreground: var(--bs-text, oklch(98.5% 0 0deg));
+  --popover: var(--bs-surface, oklch(20.5% 0 0deg));
+  --popover-foreground: var(--bs-text, oklch(98.5% 0 0deg));
+  --primary: var(--bs-primary, oklch(92.2% 0 0deg));
+  --primary-foreground: var(--bs-surface, oklch(20.5% 0 0deg));
+  --secondary: var(--bs-secondary, oklch(26.9% 0 0deg));
+  --secondary-foreground: var(--bs-surface, oklch(98.5% 0 0deg));
+  --muted: var(--bs-surface, oklch(26.9% 0 0deg));
   --muted-foreground: oklch(70.8% 0 0deg);
-  --accent: oklch(26.9% 0 0deg);
-  --accent-foreground: oklch(98.5% 0 0deg);
+  --accent: var(--bs-accent, oklch(26.9% 0 0deg));
+  --accent-foreground: var(--bs-text, oklch(98.5% 0 0deg));
   --destructive: oklch(70.4% 0.191 22.216deg);
   --border: oklch(100% 0 0deg / 10%);
   --input: oklch(100% 0 0deg / 15%);
-  --ring: oklch(55.6% 0 0deg);
+  --ring: var(--bs-primary, oklch(55.6% 0 0deg));
   --chart-1: oklch(87% 0 0deg);
   --chart-2: oklch(55.6% 0 0deg);
   --chart-3: oklch(43.9% 0 0deg);
   --chart-4: oklch(37.1% 0 0deg);
   --chart-5: oklch(26.9% 0 0deg);
-  --sidebar: oklch(20.5% 0 0deg);
-  --sidebar-foreground: oklch(98.5% 0 0deg);
+  --sidebar: var(--bs-surface, oklch(20.5% 0 0deg));
+  --sidebar-foreground: var(--bs-text, oklch(98.5% 0 0deg));
   --sidebar-primary: oklch(48.8% 0.243 264.376deg);
   --sidebar-primary-foreground: oklch(98.5% 0 0deg);
-  --sidebar-accent: oklch(26.9% 0 0deg);
-  --sidebar-accent-foreground: oklch(98.5% 0 0deg);
+  --sidebar-accent: var(--bs-surface, oklch(26.9% 0 0deg));
+  --sidebar-accent-foreground: var(--bs-text, oklch(98.5% 0 0deg));
   --sidebar-border: oklch(100% 0 0deg / 10%);
   --sidebar-ring: oklch(55.6% 0 0deg);
 
@@ -581,7 +580,15 @@ a:hover {
 }
 
 .bookmark-text {
-  color: var(--bookmark-play);
+  /* Darken the bookmark colour so it meets WCAG AA 4.5:1 against the lightly-tinted
+   * bookmark-bg (which is 12–20 % of the same colour on a light background). */
+  color: color-mix(in srgb, var(--bookmark-play) 60%, #000);
+}
+
+.dark .bookmark-text {
+  /* Lighten for dark backgrounds so the mix-against-transparent bookmark-bg
+   * still provides sufficient contrast. */
+  color: color-mix(in srgb, var(--bookmark-play) 60%, #fff);
 }
 
 @layer base {
