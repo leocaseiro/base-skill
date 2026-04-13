@@ -17,16 +17,16 @@ Note every changed file.
 
 Use this lookup table to identify which doc files may be stale:
 
-| Changed file pattern | Doc(s) to check |
-| --- | --- |
-| `answer-game-reducer.ts` | `src/components/answer-game/AnswerGame/AnswerGame.reference.mdx` — action catalog, state shape |
-| `types.ts` (answer-game) | `AnswerGame.reference.mdx` — state shape, action catalog, config options |
-| `use*Behavior*`, `use*Drag*`, `use*Tile*`, `useFreeSwap*`, `useAutoNextSlot*` | `AnswerGame.reference.mdx` (hook index) + `AnswerGame.flows.mdx` |
-| `AnswerGameProvider.tsx` | `AnswerGame.reference.mdx` — context API section |
-| `useAnswerGameDraftSync*` | `src/lib/game-engine/GameEngine.reference.mdx` (draft sync) + `GameEngine.flows.mdx` |
-| `src/lib/game-engine/index.tsx` | `GameEngine.reference.mdx` + `GameEngine.flows.mdx` |
-| `src/lib/game-engine/types.ts` | `GameEngine.reference.mdx` — state shape, move types |
-| `src/lib/game-engine/lifecycle*` | `GameEngine.flows.mdx` — session lifecycle diagram |
+| Changed file pattern                                                          | Doc(s) to check                                                                                |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `answer-game-reducer.ts`                                                      | `src/components/answer-game/AnswerGame/AnswerGame.reference.mdx` — action catalog, state shape |
+| `types.ts` (answer-game)                                                      | `AnswerGame.reference.mdx` — state shape, action catalog, config options                       |
+| `use*Behavior*`, `use*Drag*`, `use*Tile*`, `useFreeSwap*`, `useAutoNextSlot*` | `AnswerGame.reference.mdx` (hook index) + `AnswerGame.flows.mdx`                               |
+| `AnswerGameProvider.tsx`                                                      | `AnswerGame.reference.mdx` — context API section                                               |
+| `useAnswerGameDraftSync*`                                                     | `src/lib/game-engine/GameEngine.reference.mdx` (draft sync) + `GameEngine.flows.mdx`           |
+| `src/lib/game-engine/index.tsx`                                               | `GameEngine.reference.mdx` + `GameEngine.flows.mdx`                                            |
+| `src/lib/game-engine/types.ts`                                                | `GameEngine.reference.mdx` — state shape, move types                                           |
+| `src/lib/game-engine/lifecycle*`                                              | `GameEngine.flows.mdx` — session lifecycle diagram                                             |
 
 ## Step 3 — Read the relevant doc files
 
