@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/42 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">42/42 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">3/170 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">9 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/42 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">42/42 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">3/170 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7244,10 +7244,403 @@ export const InstructionsOverlay = ({
   aria-label="Docs">
   <div class="head">
     <div class="title">
+      <h2><span class="status-dot dot-ok"></span> answer-game/Flows</h2>
+      <div class="badges">
+        
+        <label for="doc-0-answer-game-flows-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/components/answer-game/AnswerGame/AnswerGame.flows.mdx">answer-game-flows--docs · ./src/components/answer-game/AnswerGame/AnswerGame.flows.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-0-answer-game-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
+
+&lt;Meta title=&quot;answer-game/Flows&quot; /&gt;
+
+# AnswerGame — Event Flows
+
+&gt; Source: `src/components/answer-game/`
+&gt;
+&gt; Each diagram shows the sequence of dispatches and effects triggered by a user action.
+&gt; Update this file when adding new dispatch chains or changing existing ones.
+&gt; Run `/update-architecture-docs` for guided update prompts.
+
+---
+
+## 1. Tile Placement
+
+Bank tile click/tap or keyboard character press.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Hook as useTileEvaluation
+  participant Reducer as answerGameReducer
+  participant Effect as useSlotBehavior (effect)
+
+  User-&gt;&gt;Hook: click bank tile / press key
+  Hook-&gt;&gt;Reducer: PLACE_TILE { tileId, zoneIndex }
+  Reducer--&gt;&gt;Reducer: move tile from bankTileIds → zones[zoneIndex].placedTileId
+  Reducer--&gt;&gt;Reducer: evaluate: all zones correct?
+  alt all zones correct
+    Reducer--&gt;&gt;Effect: phase = &#39;round-complete&#39;
+    Effect-&gt;&gt;Effect: triggerPop animation
+  else mismatch (wrongTileBehavior = &#39;reject&#39;)
+    Reducer--&gt;&gt;Reducer: tile not placed, bankTileIds unchanged
+  else mismatch (wrongTileBehavior = &#39;lock-manual&#39; or &#39;lock-auto-eject&#39;)
+    Reducer--&gt;&gt;Reducer: zones[zoneIndex].isWrong = true, isLocked = true
+    Effect-&gt;&gt;Effect: triggerShake animation
+  end
+```
+
+---
+
+## 2. Wrong Tile Auto-Eject
+
+Only when `config.wrongTileBehavior === &#39;lock-auto-eject&#39;`.
+
+```mermaid
+sequenceDiagram
+  participant Reducer as answerGameReducer
+  participant Effect as useSlotBehavior (effect)
+
+  Reducer--&gt;&gt;Effect: zones[zoneIndex].isWrong = true
+  Effect-&gt;&gt;Effect: triggerShake animation (immediate)
+  Effect-&gt;&gt;Effect: wait 350ms
+  Effect-&gt;&gt;Effect: triggerEjectReturn animation
+  Effect-&gt;&gt;Effect: wait 1000ms
+  Effect-&gt;&gt;Reducer: EJECT_TILE { zoneIndex }
+  Reducer--&gt;&gt;Reducer: zones[zoneIndex].placedTileId = null, isWrong = false, isLocked = false
+  Reducer--&gt;&gt;Reducer: tile id returned to bankTileIds
+```
+
+---
+
+## 3. Drag and Drop
+
+Dragging a bank tile or slot tile onto a slot.
+
+```mermaid
+flowchart TD
+  A([User starts drag]) --&gt; B[SET_DRAG_ACTIVE tileId]
+  B --&gt; C{Drag over slot?}
+  C -- enter --&gt; D[SET_DRAG_HOVER zoneIndex]
+  C -- leave --&gt; E[SET_DRAG_HOVER null]
+  D --&gt; F{Drop?}
+  F -- bank tile on empty slot --&gt; G[PLACE_TILE tileId zoneIndex]
+  F -- bank tile on occupied slot --&gt; H[SWAP_TILES or PLACE_TILE]
+  F -- slot tile on slot --&gt; I[SWAP_TILES fromZone toZone]
+  F -- slot tile on bank tile hole --&gt; J[SWAP_SLOT_BANK zoneIndex bankTileId]
+  F -- slot tile on bank container --&gt; K[REMOVE_TILE zoneIndex]
+  G &amp; H &amp; I &amp; J &amp; K --&gt; L[SET_DRAG_ACTIVE null]
+  L --&gt; M[SET_DRAG_HOVER null]
+```
+
+**Drag-over bank tile (slot tile being dragged):**
+
+```mermaid
+sequenceDiagram
+  participant Hook as useSlotTileDrag
+  participant Reducer as answerGameReducer
+
+  Hook-&gt;&gt;Reducer: SET_DRAG_HOVER_BANK { tileId: bankTileId }
+  Note over Hook,Reducer: bank tile shows &quot;hole&quot; preview
+  Hook-&gt;&gt;Reducer: drop → SWAP_SLOT_BANK { zoneIndex, bankTileId }
+  Hook-&gt;&gt;Reducer: SET_DRAG_HOVER_BANK { tileId: null }
+  Hook-&gt;&gt;Reducer: SET_DRAG_ACTIVE { tileId: null }
+```
+
+---
+
+## 4. Keyboard and Touch Input
+
+Desktop keyboard (`useKeyboardInput`) and mobile hidden input (`useTouchKeyboardInput`).
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant KI as useKeyboardInput (global keydown)
+  participant TE as useTileEvaluation
+  participant Reducer as answerGameReducer
+
+  User-&gt;&gt;KI: ArrowLeft / ArrowRight
+  KI-&gt;&gt;Reducer: SET_ACTIVE_SLOT { zoneIndex: next }
+
+  User-&gt;&gt;KI: Backspace / Delete
+  KI-&gt;&gt;KI: find last filled slot ≤ activeSlotIndex
+  KI-&gt;&gt;Reducer: REMOVE_TILE { zoneIndex: i }
+
+  User-&gt;&gt;KI: printable character
+  KI-&gt;&gt;KI: find matching tile in bank?
+  alt tile found in bank
+    KI-&gt;&gt;TE: placeTile(matchingTile.id, activeSlotIndex)
+    TE-&gt;&gt;Reducer: PLACE_TILE { tileId, zoneIndex }
+  else no match
+    KI-&gt;&gt;TE: typeTile(char, activeSlotIndex)
+    TE-&gt;&gt;Reducer: TYPE_TILE { tileId: &quot;typed-{id}&quot;, value: char, zoneIndex }
+  end
+```
+
+Touch keyboard follows the same path via `useTouchKeyboardInput`, using the hidden
+`&lt;input&gt;` element&#39;s `input` event instead of global `keydown`.
+
+---
+
+## 5. Level Progression (SortNumbers only)
+
+Only when `config.levelMode` is configured.
+
+```mermaid
+stateDiagram-v2
+  [*] --&gt; playing
+
+  playing --&gt; round_complete : all zones correct
+  round_complete --&gt; playing : ADVANCE_ROUND\n(more rounds in level)
+  round_complete --&gt; level_complete : ADVANCE_ROUND\n(last round in level)
+  level_complete --&gt; playing : ADVANCE_LEVEL\n(user clicks Next Level)
+  level_complete --&gt; game_over : COMPLETE_GAME\n(generateNextLevel returns null\nor maxLevels reached)
+  playing --&gt; game_over : COMPLETE_GAME\n(no levelMode + last round)
+```
+
+**Dispatch sequence for level transition:**
+
+```mermaid
+sequenceDiagram
+  participant Component as SortNumbers
+  participant Reducer as answerGameReducer
+
+  Component-&gt;&gt;Component: phase = &#39;level-complete&#39; detected
+  Component-&gt;&gt;Component: user taps &quot;Next Level&quot;
+  Component-&gt;&gt;Component: config.levelMode.generateNextLevel(levelIndex)
+  alt returns { tiles, zones }
+    Component-&gt;&gt;Reducer: ADVANCE_LEVEL { tiles, zones }
+    Reducer--&gt;&gt;Reducer: levelIndex++, roundIndex = 0
+  else returns null
+    Component-&gt;&gt;Reducer: COMPLETE_GAME
+    Reducer--&gt;&gt;Reducer: phase = &#39;game-over&#39;
+  end
+```
+
+---
+
+## 6. Round Progression
+
+&gt; **Status: planned — not yet fully implemented.**
+&gt; The phase transition to `&#39;round-complete&#39;` is implemented. The 750ms delay before
+&gt; `ADVANCE_ROUND` is implemented in `WordSpell`, `NumberMatch`, and `SortNumbers`.
+&gt; A shared round-progression hook is not yet extracted.
+
+```mermaid
+sequenceDiagram
+  participant Reducer as answerGameReducer
+  participant Component as WordSpell / NumberMatch / SortNumbers
+  participant Sound as sound system
+
+  Reducer--&gt;&gt;Component: phase = &#39;round-complete&#39;
+  Component-&gt;&gt;Component: wait for sound ready signal
+  Component-&gt;&gt;Component: wait 750ms (confetti animation)
+  alt more rounds remain
+    Component-&gt;&gt;Reducer: ADVANCE_ROUND { tiles, zones }
+    Reducer--&gt;&gt;Reducer: roundIndex++, zones cleared, bankTileIds reset
+  else last round
+    Component-&gt;&gt;Reducer: COMPLETE_GAME
+    Reducer--&gt;&gt;Reducer: phase = &#39;game-over&#39;
+  end
+```
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> answer-game/Reference</h2>
+      <div class="badges">
+        
+        <label for="doc-1-answer-game-reference-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/components/answer-game/AnswerGame/AnswerGame.reference.mdx">answer-game-reference--docs · ./src/components/answer-game/AnswerGame/AnswerGame.reference.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-1-answer-game-reference-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
+
+&lt;Meta title=&quot;answer-game/Reference&quot; /&gt;
+
+# AnswerGame — Reference
+
+&gt; Source: `src/components/answer-game/`
+&gt;
+&gt; Audience: developers and AI agents modifying game state logic.
+&gt; Update this file whenever the reducer, hooks, or context API change.
+&gt; Run `/update-architecture-docs` for guided update prompts.
+
+---
+
+## State Shape
+
+Defined in `src/components/answer-game/types.ts`.
+
+| Field                 | Type               | Description                                                        |
+| --------------------- | ------------------ | ------------------------------------------------------------------ |
+| `config`              | `AnswerGameConfig` | Game configuration (immutable during play)                         |
+| `allTiles`            | `TileItem[]`       | All tiles for the current round — never mutated mid-round          |
+| `bankTileIds`         | `string[]`         | IDs of tiles currently visible in the choice bank                  |
+| `zones`               | `AnswerZone[]`     | Slot definitions — contains `placedTileId`, `isWrong`, `isLocked`  |
+| `activeSlotIndex`     | `number`           | Cursor position for auto-next-slot mode (ordered input)            |
+| `dragActiveTileId`    | `string \| null`   | ID of the tile currently being dragged                             |
+| `dragHoverZoneIndex`  | `number \| null`   | Zone index being hovered during a drag                             |
+| `dragHoverBankTileId` | `string \| null`   | Bank tile hole being hovered by a dragged slot tile                |
+| `phase`               | `AnswerGamePhase`  | `&#39;playing&#39; \| &#39;round-complete&#39; \| &#39;level-complete&#39; \| &#39;game-over&#39;` |
+| `roundIndex`          | `number`           | Current round (0-based)                                            |
+| `retryCount`          | `number`           | Wrong placements in the current round                              |
+| `levelIndex`          | `number`           | Current level (only used when `config.levelMode` is set)           |
+| `isLevelMode`         | `boolean`          | Whether `config.levelMode` is configured                           |
+
+### AnswerZone
+
+```ts
+interface AnswerZone {
+  id: string;
+  index: number;
+  expectedValue: string; // correct tile value for this slot
+  placedTileId: string | null;
+  isWrong: boolean;
+  isLocked: boolean; // true when wrongTileBehavior is &#39;lock-manual&#39; or &#39;lock-auto-eject&#39;
+}
+```
+
+### TileItem
+
+```ts
+interface TileItem {
+  id: string;
+  label: string; // display text on the tile
+  value: string; // semantic value matched against AnswerZone.expectedValue
+}
+```
+
+---
+
+## Action Catalog
+
+Defined in `src/components/answer-game/types.ts` as `AnswerGameAction`.
+Handled in `src/components/answer-game/answer-game-reducer.ts`.
+
+| Action                | Payload                          | Dispatched by                                                                     | Effect                                                                                           |
+| --------------------- | -------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `INIT_ROUND`          | `{ tiles, zones }`               | `AnswerGameProvider` (mount effect)                                               | Resets round state, populates tiles and zones                                                    |
+| `PLACE_TILE`          | `{ tileId, zoneIndex }`          | `useTileEvaluation`                                                               | Places bank tile in slot; marks wrong if mismatch; sets `phase: &#39;round-complete&#39;` if all correct |
+| `TYPE_TILE`           | `{ tileId, value, zoneIndex }`   | `useTileEvaluation`                                                               | Creates a virtual typed tile (id `typed-${nanoid()}`); same evaluation as `PLACE_TILE`           |
+| `REMOVE_TILE`         | `{ zoneIndex }`                  | `useSlotBehavior`, `useSlotTileDrag`, `useKeyboardInput`, `useTouchKeyboardInput` | Removes tile from slot; returns it to bank (virtual tiles are discarded)                         |
+| `SWAP_TILES`          | `{ fromZoneIndex, toZoneIndex }` | `useSlotBehavior`, `useFreeSwap`                                                  | Exchanges tiles between two slots; re-evaluates both positions                                   |
+| `EJECT_TILE`          | `{ zoneIndex }`                  | `useSlotBehavior` (auto timer)                                                    | Removes wrong tile after lock-auto-eject animation; returns tile to bank                         |
+| `ADVANCE_ROUND`       | `{ tiles, zones }`               | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Increments `roundIndex`; replaces tiles and zones with next round data                           |
+| `ADVANCE_LEVEL`       | `{ tiles, zones }`               | `SortNumbers`                                                                     | Increments `levelIndex`; resets `roundIndex` to 0; replaces tiles and zones                      |
+| `COMPLETE_GAME`       | —                                | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Sets `phase: &#39;game-over&#39;`                                                                        |
+| `SET_DRAG_ACTIVE`     | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`, `useSlotBehavior`                          | Tracks the tile being dragged; `null` clears it on drop or cancel                                |
+| `SET_DRAG_HOVER`      | `{ zoneIndex: number \| null }`  | `useSlotBehavior`, `useDraggableTile`                                             | Tracks which zone is hovered during drag for visual feedback                                     |
+| `SET_DRAG_HOVER_BANK` | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`                                             | Tracks which bank tile hole is hovered by a dragged slot tile                                    |
+| `SWAP_SLOT_BANK`      | `{ zoneIndex, bankTileId }`      | `useSlotTileDrag`                                                                 | Exchanges a slot tile with a specific bank tile                                                  |
+| `SET_ACTIVE_SLOT`     | `{ zoneIndex }`                  | `useKeyboardInput`                                                                | Moves the keyboard cursor to a specific slot (ordered mode only)                                 |
+
+---
+
+## Hook Index
+
+All hooks live in `src/components/answer-game/`.
+
+| Hook                    | File                       | Purpose                                                                                       | Dispatches                                                                     |
+| ----------------------- | -------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `useAnswerGameContext`  | `useAnswerGameContext.ts`  | Read `AnswerGameState` from context                                                           | —                                                                              |
+| `useAnswerGameDispatch` | `useAnswerGameDispatch.ts` | Get `dispatch` from context                                                                   | —                                                                              |
+| `useTileEvaluation`     | `useTileEvaluation.ts`     | Core tile placement — evaluates correctness, emits sound/events                               | `PLACE_TILE`, `TYPE_TILE`                                                      |
+| `useAutoNextSlot`       | `useAutoNextSlot.ts`       | Places tile in the next available slot; wraps `useTileEvaluation`                             | via `useTileEvaluation`                                                        |
+| `useFreeSwap`           | `useFreeSwap.ts`           | Bank tile click in free-swap mode — places or swaps                                           | `SWAP_TILES`; via `useTileEvaluation`                                          |
+| `useDraggableTile`      | `useDraggableTile.ts`      | Enables bank tile drag (HTML5 DnD + touch pointer events)                                     | `SET_DRAG_ACTIVE`, `SET_DRAG_HOVER`, `SET_DRAG_HOVER_BANK`                     |
+| `useSlotTileDrag`       | `useSlotTileDrag.ts`       | Enables slot tile drag; calls `onDrop` callback for SWAP dispatch                             | `SET_DRAG_ACTIVE`, `SET_DRAG_HOVER_BANK`, `SWAP_SLOT_BANK`, `REMOVE_TILE`      |
+| `useSlotBehavior`       | `Slot/useSlotBehavior.ts`  | Complete slot interaction: drop targets, click-to-remove, auto-eject timer                    | `SET_DRAG_HOVER`, `SWAP_TILES`, `REMOVE_TILE`, `EJECT_TILE`, `SET_DRAG_ACTIVE` |
+| `useKeyboardInput`      | `useKeyboardInput.ts`      | Global `keydown` listener for desktop input                                                   | `SET_ACTIVE_SLOT`, `REMOVE_TILE`; via `useTileEvaluation`                      |
+| `useTouchKeyboardInput` | `useTouchKeyboardInput.ts` | Hidden `&lt;input&gt;` for mobile OS keyboard                                                       | `REMOVE_TILE`; via `useTileEvaluation`                                         |
+| `useBankDropTarget`     | `useBankDropTarget.ts`     | Makes the bank a drop target for slot tiles (no dispatch — returns `isDragOver`)              | —                                                                              |
+| `useTouchDrag`          | `useTouchDrag.ts`          | Low-level pointer event handler; calls `onDrop`, `onDropOnBank`, `onDropOnBankTile` callbacks | Callers dispatch                                                               |
+
+---
+
+## Context API
+
+Defined in `src/components/answer-game/AnswerGameProvider.tsx`.
+
+```ts
+// State context — read-only
+export const AnswerGameStateContext: React.Context&lt;AnswerGameState | null&gt;
+
+// Dispatch context — write-only
+export const AnswerGameDispatchContext: React.Context&lt;Dispatch&lt;AnswerGameAction&gt; | null&gt;
+
+// Consumer hooks (throw if used outside provider)
+export const useAnswerGameContext = (): AnswerGameState
+export const useAnswerGameDispatch = (): Dispatch&lt;AnswerGameAction&gt;
+```
+
+The provider also supplies `GameRoundContext` with `{ current: number, total: number }`
+for progress display.
+
+---
+
+## Config Options
+
+`AnswerGameConfig` is defined in `src/components/answer-game/types.ts`.
+
+| Option                   | Type                                             | Default             | Behavior                                                                                                                                                                 |
+| ------------------------ | ------------------------------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `inputMethod`            | `&#39;drag&#39; \| &#39;type&#39; \| &#39;both&#39;`                     | `&#39;drag&#39;`            | `&#39;type&#39;`/`&#39;both&#39;` activates `useKeyboardInput` + `useTouchKeyboardInput`                                                                                                 |
+| `wrongTileBehavior`      | `&#39;reject&#39; \| &#39;lock-manual&#39; \| &#39;lock-auto-eject&#39;` | `&#39;lock-auto-eject&#39;` | `&#39;reject&#39;`: tile bounces back. `&#39;lock-manual&#39;`: tile stays, marked wrong, user must click to remove. `&#39;lock-auto-eject&#39;`: tile stays, shakes, auto-removed after ~1350ms |
+| `tileBankMode`           | `&#39;exact&#39; \| &#39;distractors&#39;`                       | —                   | `&#39;exact&#39;`: bank contains only correct tiles. `&#39;distractors&#39;`: adds `distractorCount` extra tiles                                                                         |
+| `slotInteraction`        | `&#39;ordered&#39; \| &#39;free-swap&#39;`                       | Inferred            | `&#39;ordered&#39;`: cursor moves slot-by-slot. `&#39;free-swap&#39;`: click any bank tile → fills any slot                                                                              |
+| `levelMode`              | `{ generateNextLevel, maxLevels? }`              | `undefined`         | Enables level progression; `generateNextLevel(completedLevel)` returns next tiles/zones or `null` to end game                                                            |
+| `roundsInOrder`          | `boolean`                                        | `false`             | When `true`, rounds play in config order; otherwise shuffled once per session                                                                                            |
+| `ttsEnabled`             | `boolean`                                        | —                   | Enables TTS on tile pronounce and answer evaluation                                                                                                                      |
+| `touchKeyboardInputMode` | `&#39;text&#39; \| &#39;numeric&#39; \| &#39;none&#39;`                  | `&#39;text&#39;`            | Sets the OS keyboard type hint for mobile input                                                                                                                          |
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
       <h2><span class="status-dot dot-ok"></span> DB Hooks/useRxQuery</h2>
       <div class="badges">
         
-        <label for="doc-0-db-hooks-userxquery-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-2-db-hooks-userxquery-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/db/hooks/useRxQuery.mdx">db-hooks-userxquery--docs · ./src/db/hooks/useRxQuery.mdx</div>
@@ -7256,7 +7649,7 @@ export const InstructionsOverlay = ({
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-0-db-hooks-userxquery-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-2-db-hooks-userxquery-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7301,7 +7694,7 @@ The counter below is driven by a `Subject&lt;number&gt;`. Clicking &quot;Increme
       <h2><span class="status-dot dot-ok"></span> DB Hooks/useSettings</h2>
       <div class="badges">
         
-        <label for="doc-1-db-hooks-usesettings-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-3-db-hooks-usesettings-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/db/hooks/useSettings.mdx">db-hooks-usesettings--docs · ./src/db/hooks/useSettings.mdx</div>
@@ -7310,7 +7703,7 @@ The counter below is driven by a `Subject&lt;number&gt;`. Clicking &quot;Increme
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-1-db-hooks-usesettings-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-3-db-hooks-usesettings-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7363,7 +7756,7 @@ The demo below uses in-memory RxDB storage — no IndexedDB is touched.
       <h2><span class="status-dot dot-ok"></span> Utils/CatalogUtils</h2>
       <div class="badges">
         
-        <label for="doc-2-utils-catalogutils-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-4-utils-catalogutils-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/games/catalog-utils.mdx">utils-catalogutils--docs · ./src/games/catalog-utils.mdx</div>
@@ -7372,7 +7765,7 @@ The demo below uses in-memory RxDB storage — no IndexedDB is touched.
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-2-utils-catalogutils-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-4-utils-catalogutils-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7429,7 +7822,7 @@ type PaginateResult&lt;T&gt; = {
       <h2><span class="status-dot dot-ok"></span> Games/Level System</h2>
       <div class="badges">
         
-        <label for="doc-3-games-level-system-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-5-games-level-system-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/games/level-system.mdx">games-level-system--docs · ./src/games/level-system.mdx</div>
@@ -7438,7 +7831,7 @@ type PaginateResult&lt;T&gt; = {
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-3-games-level-system-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-5-games-level-system-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7546,10 +7939,872 @@ to their configs.
   aria-label="Docs">
   <div class="head">
     <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Games/word-spell/Flows</h2>
+      <div class="badges">
+        
+        <label for="doc-6-games-word-spell-flows-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/games/word-spell/WordSpell/WordSpell.flows.mdx">games-word-spell-flows--docs · ./src/games/word-spell/WordSpell/WordSpell.flows.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-6-games-word-spell-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
+
+&lt;Meta title=&quot;Games/word-spell/Flows&quot; /&gt;
+
+# WordSpell — End-to-End Flows
+
+&gt; Source: `src/games/word-spell/`
+&gt;
+&gt; These diagrams show the full lifecycle of a WordSpell session, including sound
+&gt; effects, TTS, and UI feedback at each step. Update this file when the
+&gt; WordSpell progression logic or sound timing changes.
+
+---
+
+## 1. Correct Tile Placement
+
+User places the right letter in a slot. Sound fires **before** the reducer
+dispatch so feedback is instant.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant TE as useTileEvaluation
+  participant Audio as AudioFeedback
+  participant Reducer as answerGameReducer
+  participant Bus as GameEventBus
+  participant Slot as useSlotBehavior (effect)
+
+  User-&gt;&gt;TE: click bank tile / press key
+  TE-&gt;&gt;TE: tile.value === zone.expectedValue? ✓
+  TE-&gt;&gt;Audio: playSound(&#39;correct&#39;, 0.8)
+  Audio--&gt;&gt;Audio: interrupts current audio, plays immediately
+  TE-&gt;&gt;Reducer: PLACE_TILE { tileId, zoneIndex }
+  Reducer--&gt;&gt;Reducer: zones[i].placedTileId = tileId
+  Reducer--&gt;&gt;Reducer: zones[i].isWrong = false
+  TE-&gt;&gt;Bus: emit game:evaluate { correct: true }
+
+  alt all zones now correct
+    Reducer--&gt;&gt;Slot: phase → &#39;round-complete&#39;
+    Slot-&gt;&gt;Slot: triggerPop animation on each slot
+  else some zones still empty
+    Reducer--&gt;&gt;Reducer: phase stays &#39;playing&#39;
+    Note over TE: useAutoNextSlot advances cursor to next empty slot
+  end
+```
+
+---
+
+## 2. Wrong Tile Placement (lock-auto-eject)
+
+WordSpell defaults to `wrongTileBehavior: &#39;lock-auto-eject&#39;`. The tile is
+placed, marked wrong, shaken, and automatically ejected.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant TE as useTileEvaluation
+  participant Audio as AudioFeedback
+  participant Reducer as answerGameReducer
+  participant Bus as GameEventBus
+  participant Slot as useSlotBehavior (effect)
+
+  User-&gt;&gt;TE: click bank tile / press key
+  TE-&gt;&gt;TE: tile.value === zone.expectedValue? ✗
+  TE-&gt;&gt;Audio: playSound(&#39;wrong&#39;, 0.8)
+  Audio--&gt;&gt;Audio: interrupts current audio, plays immediately
+  TE-&gt;&gt;Reducer: PLACE_TILE { tileId, zoneIndex }
+  Reducer--&gt;&gt;Reducer: zones[i].placedTileId = tileId
+  Reducer--&gt;&gt;Reducer: zones[i].isWrong = true, isLocked = true
+  Reducer--&gt;&gt;Reducer: retryCount++
+  TE-&gt;&gt;Bus: emit game:evaluate { correct: false }
+
+  Reducer--&gt;&gt;Slot: isWrong = true detected
+  Slot-&gt;&gt;Slot: triggerShake animation (immediate)
+  Slot-&gt;&gt;Slot: wait 350 ms
+  Slot-&gt;&gt;Slot: triggerEjectReturn animation
+  Slot-&gt;&gt;Slot: wait 1000 ms
+  Slot-&gt;&gt;Reducer: EJECT_TILE { zoneIndex }
+  Reducer--&gt;&gt;Reducer: zones[i].placedTileId = null
+  Reducer--&gt;&gt;Reducer: zones[i].isWrong = false, isLocked = false
+  Reducer--&gt;&gt;Reducer: tile id returned to bankTileIds
+```
+
+### Other wrong-tile modes
+
+| Mode          | Behavior after wrong placement                         |
+| ------------- | ------------------------------------------------------ |
+| `reject`      | Tile bounces back immediately; never enters the slot   |
+| `lock-manual` | Tile stays in slot marked wrong; user clicks to remove |
+
+---
+
+## 3. Round Complete → Next Round
+
+When all zones are filled correctly, the round-complete phase triggers a
+cascade: phase sound → confetti → delay → advance to next round → TTS
+announces the new word.
+
+```mermaid
+sequenceDiagram
+  participant Reducer as answerGameReducer
+  participant GS as useGameSounds
+  participant Audio as AudioFeedback
+  participant UI as ScoreAnimation (confetti)
+  participant WS as WordSpellSession (effect)
+  participant TTS as useRoundTTS
+
+  Note over Reducer: last PLACE_TILE made all zones correct
+  Reducer--&gt;&gt;GS: phase = &#39;round-complete&#39;
+
+  GS-&gt;&gt;Audio: playSound(&#39;round-complete&#39;)
+  Audio--&gt;&gt;Audio: interrupts queue, plays immediately
+  GS-&gt;&gt;GS: await microtask
+  GS--&gt;&gt;UI: confettiReady = true
+  UI-&gt;&gt;UI: render confetti burst
+
+  WS-&gt;&gt;WS: phase === &#39;round-complete&#39; &amp;&amp; confettiReady
+  WS-&gt;&gt;WS: start 750 ms timer
+
+  Note over WS: timer fires
+
+  alt more rounds remain
+    WS-&gt;&gt;WS: build next round tiles/zones
+    WS-&gt;&gt;Reducer: ADVANCE_ROUND { tiles, zones }
+    Reducer--&gt;&gt;Reducer: roundIndex++, zones/bankTileIds reset
+    Reducer--&gt;&gt;GS: phase = &#39;playing&#39;
+    GS--&gt;&gt;UI: confettiReady = false
+
+    TTS-&gt;&gt;Audio: whenSoundEnds()
+    Audio--&gt;&gt;TTS: queue drained
+    TTS-&gt;&gt;TTS: speak(nextWord) via Web Speech API
+  else last round
+    WS-&gt;&gt;Reducer: COMPLETE_GAME
+    Note over Reducer: see §4 Game Complete
+  end
+```
+
+### Timing breakdown
+
+| Offset   | Event                                                 |
+| -------- | ----------------------------------------------------- |
+| 0 ms     | Reducer sets `phase = &#39;round-complete&#39;`               |
+| ~0 ms    | `playSound(&#39;round-complete&#39;)` fires                   |
+| ~1 ms    | `confettiReady` flag set (microtask)                  |
+| ~1 ms    | Confetti animation starts rendering                   |
+| 750 ms   | Timer fires → `ADVANCE_ROUND` or `COMPLETE_GAME`      |
+| ~750+ ms | `whenSoundEnds()` resolves → TTS speaks the next word |
+
+---
+
+## 4. Game Complete
+
+Dispatched when the last round finishes or when no more rounds exist.
+
+```mermaid
+sequenceDiagram
+  participant WS as WordSpellSession
+  participant Reducer as answerGameReducer
+  participant GS as useGameSounds
+  participant Audio as AudioFeedback
+  participant Overlay as GameOverOverlay
+
+  WS-&gt;&gt;Reducer: COMPLETE_GAME
+  Reducer--&gt;&gt;Reducer: phase = &#39;game-over&#39;
+  Reducer--&gt;&gt;GS: phase change detected
+
+  GS-&gt;&gt;Audio: playSound(&#39;game-complete&#39;)
+  GS-&gt;&gt;GS: await microtask
+  GS--&gt;&gt;Overlay: gameOverReady = true
+  Overlay-&gt;&gt;Overlay: render game-over screen
+  Overlay-&gt;&gt;Overlay: show retryCount, Play Again, Home buttons
+
+  alt user taps Play Again
+    Overlay-&gt;&gt;WS: onRestartSession()
+    WS-&gt;&gt;WS: setSessionEpoch(e + 1)
+    Note over WS: AnswerGame remounts with key={epoch}, fresh round order
+  else user taps Home
+    Overlay-&gt;&gt;WS: navigate(&#39;/$locale&#39;)
+  end
+```
+
+---
+
+## 5. Full Session Lifecycle (state diagram)
+
+```mermaid
+stateDiagram-v2
+  [*] --&gt; loading : WordSpell mounts
+  loading --&gt; playing : useLibraryRounds resolves,\nINIT_ROUND dispatched
+
+  playing --&gt; round_complete : all zones correct
+  playing --&gt; playing : wrong tile placed\n(auto-eject returns tile)
+
+  round_complete --&gt; playing : ADVANCE_ROUND\n(more rounds, 750 ms delay)
+  round_complete --&gt; game_over : COMPLETE_GAME\n(last round)
+
+  game_over --&gt; loading : Play Again\n(sessionEpoch++)
+  game_over --&gt; [*] : Home
+```
+
+---
+
+## 6. Sound and TTS Pipeline
+
+All game sounds flow through `AudioFeedback.ts`. TTS waits for the audio
+queue to drain before speaking.
+
+```mermaid
+flowchart LR
+  subgraph &quot;Tile feedback (instant)&quot;
+    A[&quot;useTileEvaluation&quot;] --&gt;|&quot;playSound(&#39;correct&#39;/&#39;wrong&#39;)&quot;| B[&quot;AudioFeedback\n(interrupts queue)&quot;]
+  end
+
+  subgraph &quot;Phase sounds (on transition)&quot;
+    C[&quot;useGameSounds&quot;] --&gt;|&quot;playSound(&#39;round-complete&#39;)\nplaySound(&#39;level-complete&#39;)\nplaySound(&#39;game-complete&#39;)&quot;| B
+  end
+
+  subgraph &quot;TTS (after sounds)&quot;
+    D[&quot;useRoundTTS&quot;] --&gt;|&quot;whenSoundEnds()&quot;| B
+    B --&gt;|&quot;queue drained&quot;| E[&quot;useGameTTS.speakPrompt()\nWeb Speech API&quot;]
+  end
+```
+
+### AudioFeedback API
+
+| Function          | Behavior                                            | Use case                  |
+| ----------------- | --------------------------------------------------- | ------------------------- |
+| `playSound()`     | Interrupts current audio + resets queue             | Tile correct/wrong sounds |
+| `queueSound()`    | Appends to queue; resolves when sound **starts**    | Phase transition sounds   |
+| `whenSoundEnds()` | Resolves when entire queue (current + pending) ends | TTS delay                 |
+
+&gt; **Note:** `useGameSounds` currently uses `playSound()` (interrupt), not
+&gt; `queueSound()`. This means a rapid correct tile + round-complete can cut off
+&gt; the tile sound. This is intentional — the phase sound takes priority.
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> game-engine/Flows</h2>
+      <div class="badges">
+        
+        <label for="doc-7-game-engine-flows-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/lib/game-engine/GameEngine.flows.mdx">game-engine-flows--docs · ./src/lib/game-engine/GameEngine.flows.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-7-game-engine-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
+
+&lt;Meta title=&quot;game-engine/Flows&quot; /&gt;
+
+# GameEngine — Flows
+
+&gt; Source: `src/lib/game-engine/`
+&gt;
+&gt; Update this file when session lifecycle transitions or persistence behaviour change.
+
+---
+
+## 1. Session Lifecycle
+
+```mermaid
+stateDiagram-v2
+  [*] --&gt; idle
+
+  idle --&gt; loading : GameEngineProvider mounts
+  loading --&gt; instructions : assets ready
+  instructions --&gt; playing : SKIP_INSTRUCTIONS move
+  playing --&gt; evaluating : SUBMIT_ANSWER move
+  evaluating --&gt; scoring : evaluation complete
+  scoring --&gt; next_round : correct + more rounds
+  scoring --&gt; retry : incorrect + retries remaining
+  scoring --&gt; game_over : last round OR max retries exceeded
+  next_round --&gt; playing : nextRound()
+  retry --&gt; playing : retry()
+  game_over --&gt; idle : endGame() / Play Again
+```
+
+---
+
+## 2. Move Dispatch and Recording
+
+Every user action goes through a single `dispatch(move)` call.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Component as Game Component
+  participant Engine as GameEngineProvider
+  participant Lifecycle as lifecycle reducer
+  participant Recorder as SessionRecorderBridge
+  participant DB as RxDB
+
+  User-&gt;&gt;Component: interaction (submit answer, request hint, etc.)
+  Component-&gt;&gt;Engine: dispatch({ type, args, timestamp })
+  Engine-&gt;&gt;Lifecycle: apply move → new GameEngineState
+  Engine-&gt;&gt;Recorder: append move to MoveLog
+  Recorder-&gt;&gt;DB: upsert session_history_index { moves: [...] }
+  Engine--&gt;&gt;Component: re-render with new state
+```
+
+---
+
+## 3. Session Resume (Move Log Replay)
+
+When a player returns to an in-progress game, the route loader finds the saved `MoveLog`
+and passes it as `initialLog` to `GameEngineProvider`.
+
+```mermaid
+sequenceDiagram
+  participant Route as game/$gameId loader
+  participant DB as RxDB
+  participant Engine as GameEngineProvider
+  participant Lifecycle as lifecycle reducer
+
+  Route-&gt;&gt;DB: query session_history_index for sessionId
+  DB--&gt;&gt;Route: MoveLog { initialState, moves: [...] }
+  Route-&gt;&gt;Engine: &lt;GameEngineProvider initialLog={moveLog} /&gt;
+  Engine-&gt;&gt;Lifecycle: start from initialState
+  Engine-&gt;&gt;Lifecycle: replay each move in moves[]
+  Lifecycle--&gt;&gt;Engine: final restored GameEngineState
+  Engine--&gt;&gt;Route: renders at correct round/phase
+```
+
+---
+
+## 4. Draft State Sync (AnswerGame mid-round persistence)
+
+`useAnswerGameDraftSync` keeps the `AnswerGameState` persisted so a mid-round refresh
+restores exactly where the player left off.
+
+```mermaid
+sequenceDiagram
+  participant Provider as AnswerGameProvider
+  participant Hook as useAnswerGameDraftSync
+  participant DB as RxDB
+
+  Provider-&gt;&gt;Hook: state changes (every dispatch)
+  Hook-&gt;&gt;DB: upsert session_history_index.draftState (debounced)
+
+  Note over Hook,DB: On page refresh / remount
+  Provider-&gt;&gt;Hook: mount with initialState prop from route loader
+  Hook-&gt;&gt;Provider: dispatch INIT_ROUND with restored tiles/zones
+  Provider--&gt;&gt;Provider: game resumes at exact mid-round state
+```
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> game-engine/Reference</h2>
+      <div class="badges">
+        
+        <label for="doc-8-game-engine-reference-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/lib/game-engine/GameEngine.reference.mdx">game-engine-reference--docs · ./src/lib/game-engine/GameEngine.reference.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-8-game-engine-reference-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
+
+&lt;Meta title=&quot;game-engine/Reference&quot; /&gt;
+
+# GameEngine — Reference
+
+&gt; Source: `src/lib/game-engine/`
+&gt;
+&gt; The game engine is the outer shell that wraps every game session. It manages the
+&gt; session lifecycle, records moves for replay, and persists draft state across page
+&gt; refreshes. Update this file when the engine API, move log structure, or session
+&gt; recording changes.
+
+---
+
+## Provider API
+
+`GameEngineProvider` is defined in `src/lib/game-engine/index.tsx`.
+
+```tsx
+&lt;GameEngineProvider
+  config={ResolvedGameConfig}
+  initialLog={MoveLog | null} // pass to resume a saved session
+  sessionId={string}
+  meta={SessionMeta}
+&gt;
+  {children}
+&lt;/GameEngineProvider&gt;
+```
+
+### Contexts
+
+```ts
+// Read game state
+const GameStateContext: React.Context&lt;GameEngineState | null&gt;
+export const useGameState = (): GameEngineState
+
+// Dispatch a move
+const GameDispatchContext: React.Context&lt;((move: Move) =&gt; void) | null&gt;
+export const useGameDispatch = (): (move: Move) =&gt; void
+```
+
+### GameEngineState
+
+Defined in `src/lib/game-engine/types.ts`.
+
+| Field          | Type              | Description                                                                                                                 |
+| -------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `phase`        | `GamePhase`       | `&#39;idle&#39; \| &#39;loading&#39; \| &#39;instructions&#39; \| &#39;playing&#39; \| &#39;evaluating&#39; \| &#39;scoring&#39; \| &#39;next-round&#39; \| &#39;retry&#39; \| &#39;game-over&#39;` |
+| `roundIndex`   | `number`          | Current round (0-based)                                                                                                     |
+| `score`        | `number`          | Cumulative score                                                                                                            |
+| `streak`       | `number`          | Consecutive correct answers                                                                                                 |
+| `retryCount`   | `number`          | Retries in current round                                                                                                    |
+| `content`      | `ResolvedContent` | All round definitions for this session                                                                                      |
+| `currentRound` | `RoundState`      | Active round: `{ roundId, answer, hintsUsed }`                                                                              |
+
+### Move
+
+All state changes go through a `Move`:
+
+```ts
+interface Move {
+  type: MoveType | string; // &#39;SUBMIT_ANSWER&#39; | &#39;REQUEST_HINT&#39; | &#39;SKIP_INSTRUCTIONS&#39; | &#39;UNDO&#39; | custom
+  args: Record&lt;string, string | number | boolean&gt;;
+  timestamp: number;
+}
+```
+
+---
+
+## Round Context
+
+`GameRoundContext` is a lightweight context providing round progress to any component
+in the tree without importing the full engine state.
+
+```ts
+// src/lib/game-engine/GameRoundContext.ts
+interface GameRoundContextValue {
+  current: number; // 1-based current round
+  total: number; // total rounds in session
+}
+```
+
+Consumed by: `ProgressBar`, `GameHeader`, and any component that shows &quot;Round N of M&quot;.
+
+---
+
+## Session Recording
+
+`SessionRecorderBridge` (inside `GameEngineProvider`) subscribes to move dispatches
+and writes them to RxDB via `useSessionRecorder`.
+
+### MoveLog structure
+
+```ts
+interface MoveLog {
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  seed: string;
+  initialContent: ResolvedContent;
+  initialState: GameEngineState;
+  moves: Move[]; // append-only list of every dispatched move
+}
+```
+
+Stored in RxDB collection `session_history_index`. Replay by passing `initialLog` to
+`GameEngineProvider`.
+
+---
+
+## Draft Sync
+
+`useAnswerGameDraftSync` (in `src/components/answer-game/`) serialises the current
+`AnswerGameState` to RxDB&#39;s `session_history_index.draftState` field on every state
+change, and reads it back on mount when `initialState` is provided.
+
+### AnswerGameDraftState (persisted subset)
+
+```ts
+interface AnswerGameDraftState {
+  allTiles: TileItem[];
+  bankTileIds: string[];
+  zones: AnswerZone[];
+  activeSlotIndex: number;
+  phase: &#39;playing&#39; | &#39;round-complete&#39; | &#39;level-complete&#39;; // &#39;game-over&#39; never persisted
+  roundIndex: number;
+  retryCount: number;
+  levelIndex: number;
+}
+```
+
+Fields excluded from draft: `config` (reconstructed from game config), `dragActiveTileId`
+(transient), `dragHoverZoneIndex`, `dragHoverBankTileId` (transient).
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> game-engine/Debugging</h2>
+      <div class="badges">
+        
+        <label for="doc-9-game-engine-debugging-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/lib/game-engine/debugging.mdx">game-engine-debugging--docs · ./src/lib/game-engine/debugging.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-9-game-engine-debugging-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
+
+&lt;Meta title=&quot;game-engine/Debugging&quot; /&gt;
+
+# Debugging the Game Engine
+
+&gt; Techniques for inspecting state transitions, dispatched actions, sound
+&gt; playback, and persisted session data during development.
+
+---
+
+## 1. React DevTools — Reducer and Context Inspection
+
+Both the outer `GameEngineProvider` and the inner `AnswerGameProvider` use
+plain `useReducer`. React DevTools is the primary way to inspect their state.
+
+### Viewing AnswerGame state
+
+1. Open **React DevTools** → Components tab
+2. Search for `AnswerGameStateContext.Provider`
+3. Expand the **value** prop to see the full `AnswerGameState`:
+   `phase`, `zones`, `bankTileIds`, `activeSlotIndex`, `retryCount`, etc.
+
+### Viewing dispatched actions
+
+React DevTools does not log individual `useReducer` dispatches by default.
+To trace every action through the AnswerGame reducer, add a temporary
+logging wrapper in `AnswerGameProvider.tsx`:
+
+```ts
+// Temporary — remove before committing
+const [state, rawDispatch] = useReducer(
+  answerGameReducer,
+  initialState,
+);
+const dispatch = (action: AnswerGameAction) =&gt; {
+  console.group(`[AnswerGame] ${action.type}`);
+  console.log(&#39;payload&#39;, action);
+  console.log(&#39;state before&#39;, state);
+  rawDispatch(action);
+  console.groupEnd();
+};
+```
+
+The same pattern works for the GameEngine lifecycle reducer in
+`lifecycle.ts`:
+
+```ts
+const [state, rawDispatch] = useReducer(reducer, initial);
+const dispatch = (move: Move) =&gt; {
+  console.group(`[GameEngine] ${move.type}`);
+  console.log(&#39;args&#39;, move.args);
+  rawDispatch(move);
+  console.groupEnd();
+};
+```
+
+&gt; **Tip:** State _after_ dispatch is visible in the next render. To see
+&gt; before/after in one log, compute `reducer(state, action)` inline — but
+&gt; only in dev, since the reducer must remain pure.
+
+### Viewing GameEngine state
+
+Search for `GameStateContext.Provider` in React DevTools. Its value shows
+`phase`, `roundIndex`, `score`, `streak`, and `currentRound`.
+
+---
+
+## 2. TanStack DevTools
+
+TanStack DevTools are mounted in `src/routes/__root.tsx` and appear as a
+floating panel at the bottom-right of the page in development.
+
+### Router DevTools
+
+The **TanStack Router** tab shows:
+
+- All registered routes and their current match state
+- Route params (e.g. `$locale`, `$gameId`)
+- Loader data (including `initialLog` and `draftState` from session finders)
+- Navigation history
+
+This is useful for verifying that the correct session data was loaded from
+RxDB before the game mounts.
+
+### Adding custom panels
+
+The DevTools accept plugins. To add a game state inspector panel:
+
+```tsx
+&lt;TanStackDevtools
+  config={{ position: &#39;bottom-right&#39; }}
+  plugins={[
+    {
+      name: &#39;Tanstack Router&#39;,
+      render: &lt;TanStackRouterDevtoolsPanel /&gt;,
+    },
+    {
+      name: &#39;Game State&#39;,
+      render: &lt;YourCustomPanel /&gt;,
+    },
+  ]}
+/&gt;
+```
+
+---
+
+## 3. GameEventBus — Tapping All Events
+
+The `GameEventBus` singleton supports a wildcard subscription that captures
+every event. Use this in the browser console to trace game events in real
+time:
+
+```js
+// In the browser console (dev only)
+// Import is available because Vite exposes modules in dev
+const { getGameEventBus } = await import(&#39;/src/lib/game-event-bus.ts&#39;);
+const unsub = getGameEventBus().subscribe(&#39;game:*&#39;, (event) =&gt; {
+  console.log(`[EventBus] ${event.type}`, event);
+});
+// Call unsub() to stop logging
+```
+
+### Events emitted during gameplay
+
+| Event           | Emitted by          | Contains                                                |
+| --------------- | ------------------- | ------------------------------------------------------- |
+| `game:evaluate` | `useTileEvaluation` | `gameId`, `roundIndex`, `answer`, `correct`, `nearMiss` |
+
+&gt; The event bus is currently internal (M2). More event types may be added as
+&gt; the public API evolves.
+
+---
+
+## 4. RxDB — Inspecting Persisted Session Data
+
+Game sessions are stored in two RxDB collections:
+
+| Collection              | Purpose                                               |
+| ----------------------- | ----------------------------------------------------- |
+| `session_history_index` | One doc per session: metadata, move count, draftState |
+| `session_history`       | Chunked move arrays for replay                        |
+
+### Browser console queries
+
+RxDB is accessible through the `DbContext`. In development, you can grab it
+from React DevTools or expose it on `window` temporarily:
+
+```ts
+// Temporary — add to DbProvider.tsx, remove before committing
+useEffect(() =&gt; {
+  if (db) (window as any).__db = db;
+}, [db]);
+```
+
+Then in the browser console:
+
+```js
+// List all session index documents
+const docs = await __db.session_history_index.find().exec();
+docs.forEach((d) =&gt; console.log(d.toJSON()));
+
+// Find a specific session
+const session = await __db.session_history_index
+  .findOne(&#39;session-id&#39;)
+  .exec();
+console.log(session?.toJSON());
+
+// Inspect draft state (mid-round snapshot)
+console.log(session?.draftState);
+
+// List move chunks for a session
+const chunks = await __db.session_history
+  .find({ selector: { sessionId: &#39;session-id&#39; } })
+  .exec();
+chunks.forEach((c) =&gt; console.log(`chunk ${c.chunkIndex}:`, c.moves));
+```
+
+### IndexedDB direct access
+
+RxDB uses IndexedDB as its storage backend. Open **DevTools → Application →
+IndexedDB** to browse raw documents. Look for the database named
+`baseskill` (or the name configured in `create-database.ts`).
+
+---
+
+## 5. Sound System Debugging
+
+### Verifying sound playback
+
+`AudioFeedback.ts` creates `HTMLAudioElement` instances. To trace playback:
+
+```js
+// Monkey-patch in browser console
+const origPlay = HTMLAudioElement.prototype.play;
+HTMLAudioElement.prototype.play = function () {
+  console.log(&#39;[Audio] play&#39;, this.src, &#39;volume:&#39;, this.volume);
+  return origPlay.call(this);
+};
+```
+
+### Common issues
+
+| Symptom                           | Likely cause                                    | Fix                                               |
+| --------------------------------- | ----------------------------------------------- | ------------------------------------------------- |
+| No sound on first interaction     | Browser autoplay policy blocks audio            | Sounds must start from a user gesture (click/tap) |
+| Tile sound cut off by phase sound | `playSound()` interrupts; this is by design     | Use `queueSound()` if sounds should chain         |
+| TTS speaks over sound effects     | `whenSoundEnds()` not awaited                   | Check `useRoundTTS` awaits the sound queue        |
+| Sound plays but wrong file        | `SOUND_PATHS` map or `import.meta.env.BASE_URL` | Verify paths in `AudioFeedback.ts`                |
+
+### TTS debug logs
+
+The speech system logs to `console.debug` with a `[TTS]` prefix:
+
+- `[TTS] speakTile(&quot;a&quot;) — busy, skipped` — a speak call was dropped because
+  another utterance was active
+- `[TTS] speak(...)` — utterance started (logged in `SpeechOutput.ts`)
+- `[TTS] cancelSpeech() — idle, skipped` — cancel was a no-op
+
+Filter the browser console to `[TTS]` to see only speech events.
+
+---
+
+## 6. Reducer Unit Testing
+
+Both reducers are pure functions and can be tested without React:
+
+```ts
+import {
+  answerGameReducer,
+  makeInitialState,
+} from &#39;./answer-game-reducer&#39;;
+
+const state = makeInitialState(config);
+const next = answerGameReducer(state, {
+  type: &#39;PLACE_TILE&#39;,
+  tileId: &#39;tile-1&#39;,
+  zoneIndex: 0,
+});
+expect(next.zones[0].placedTileId).toBe(&#39;tile-1&#39;);
+```
+
+For the GameEngine reducer:
+
+```ts
+import { createReducer } from &#39;./lifecycle&#39;;
+
+const reducer = createReducer(config, gameMovers);
+const next = reducer(state, {
+  type: &#39;SUBMIT_ANSWER&#39;,
+  args: {},
+  timestamp: Date.now(),
+});
+expect(next.phase).toBe(&#39;scoring&#39;);
+```
+
+Existing test suites:
+
+- `src/components/answer-game/answer-game-reducer.test.ts`
+- `src/lib/game-engine/lifecycle.test.ts` (if present)
+- `src/lib/game-engine/session-finder.test.ts`
+
+---
+
+## Quick Reference
+
+| What to inspect              | Tool / technique                                          |
+| ---------------------------- | --------------------------------------------------------- |
+| Current AnswerGame state     | React DevTools → `AnswerGameStateContext.Provider`        |
+| Current GameEngine state     | React DevTools → `GameStateContext.Provider`              |
+| Dispatched actions (trace)   | Temporary logging wrapper around `useReducer`             |
+| Route params and loader data | TanStack Router DevTools panel (bottom-right)             |
+| Game events (evaluate, etc.) | `getGameEventBus().subscribe(&#39;game:*&#39;, console.log)`      |
+| Persisted sessions and moves | RxDB queries via `window.__db` or IndexedDB direct access |
+| Sound playback               | `HTMLAudioElement.prototype.play` monkey-patch            |
+| TTS utterances               | Filter browser console to `[TTS]`                         |
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
       <h2><span class="status-dot dot-ok"></span> Services/GameEventBus</h2>
       <div class="badges">
         
-        <label for="doc-4-services-gameeventbus-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-10-services-gameeventbus-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/game-event-bus.mdx">services-gameeventbus--docs · ./src/lib/game-event-bus.mdx</div>
@@ -7558,7 +8813,7 @@ to their configs.
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-4-services-gameeventbus-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-10-services-gameeventbus-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7605,7 +8860,7 @@ A typed pub/sub event bus for coordinating game engine events.
       <h2><span class="status-dot dot-ok"></span> Utils/i18n</h2>
       <div class="badges">
         
-        <label for="doc-5-utils-i18n-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-11-utils-i18n-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/i18n/i18n.mdx">utils-i18n--docs · ./src/lib/i18n/i18n.mdx</div>
@@ -7614,7 +8869,7 @@ A typed pub/sub event bus for coordinating game engine events.
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-5-utils-i18n-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-11-utils-i18n-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7673,7 +8928,7 @@ they do not read the locale from i18next config at runtime — the router render
       <h2><span class="status-dot dot-ok"></span> Services/SpeechInput</h2>
       <div class="badges">
         
-        <label for="doc-6-services-speechinput-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-12-services-speechinput-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/speech/SpeechInput.mdx">services-speechinput--docs · ./src/lib/speech/SpeechInput.mdx</div>
@@ -7682,7 +8937,7 @@ they do not read the locale from i18next config at runtime — the router render
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-6-services-speechinput-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-12-services-speechinput-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7724,7 +8979,7 @@ Wraps the browser&#39;s `SpeechRecognition` / `webkitSpeechRecognition` API. Ret
       <h2><span class="status-dot dot-ok"></span> Services/SpeechOutput</h2>
       <div class="badges">
         
-        <label for="doc-7-services-speechoutput-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-13-services-speechoutput-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/speech/SpeechOutput.mdx">services-speechoutput--docs · ./src/lib/speech/SpeechOutput.mdx</div>
@@ -7733,7 +8988,7 @@ Wraps the browser&#39;s `SpeechRecognition` / `webkitSpeechRecognition` API. Ret
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-7-services-speechoutput-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-13-services-speechoutput-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7776,7 +9031,7 @@ Wraps the browser&#39;s `SpeechSynthesis` API. Gracefully degrades when the API 
       <h2><span class="status-dot dot-ok"></span> Theme/CSS Variables</h2>
       <div class="badges">
         
-        <label for="doc-8-theme-css-variables-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-14-theme-css-variables-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/theme/css-vars.mdx">theme-css-variables--docs · ./src/lib/theme/css-vars.mdx</div>
@@ -7785,7 +9040,7 @@ Wraps the browser&#39;s `SpeechSynthesis` API. Gracefully degrades when the API 
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-8-theme-css-variables-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-14-theme-css-variables-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
