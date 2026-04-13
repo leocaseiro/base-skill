@@ -1,0 +1,98 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="game-engine/Flows" />
+
+# GameEngine — Flows
+
+> Source: `src/lib/game-engine/`
+>
+> Update this file when session lifecycle transitions or persistence behaviour change.
+
+---
+
+## 1. Session Lifecycle
+
+```mermaid
+stateDiagram-v2
+  [*] --> idle
+
+  idle --> loading : GameEngineProvider mounts
+  loading --> instructions : assets ready
+  instructions --> playing : SKIP_INSTRUCTIONS move
+  playing --> evaluating : SUBMIT_ANSWER move
+  evaluating --> scoring : evaluation complete
+  scoring --> next_round : correct + more rounds
+  scoring --> retry : incorrect + retries remaining
+  scoring --> game_over : last round OR max retries exceeded
+  next_round --> playing : nextRound()
+  retry --> playing : retry()
+  game_over --> idle : endGame() / Play Again
+```
+
+---
+
+## 2. Move Dispatch and Recording
+
+Every user action goes through a single `dispatch(move)` call.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Component as Game Component
+  participant Engine as GameEngineProvider
+  participant Lifecycle as lifecycle reducer
+  participant Recorder as SessionRecorderBridge
+  participant DB as RxDB
+
+  User->>Component: interaction (submit answer, request hint, etc.)
+  Component->>Engine: dispatch({ type, args, timestamp })
+  Engine->>Lifecycle: apply move → new GameEngineState
+  Engine->>Recorder: append move to MoveLog
+  Recorder->>DB: upsert session_history_index { moves: [...] }
+  Engine-->>Component: re-render with new state
+```
+
+---
+
+## 3. Session Resume (Move Log Replay)
+
+When a player returns to an in-progress game, the route loader finds the saved `MoveLog`
+and passes it as `initialLog` to `GameEngineProvider`.
+
+```mermaid
+sequenceDiagram
+  participant Route as game/$gameId loader
+  participant DB as RxDB
+  participant Engine as GameEngineProvider
+  participant Lifecycle as lifecycle reducer
+
+  Route->>DB: query session_history_index for sessionId
+  DB-->>Route: MoveLog { initialState, moves: [...] }
+  Route->>Engine: <GameEngineProvider initialLog={moveLog} />
+  Engine->>Lifecycle: start from initialState
+  Engine->>Lifecycle: replay each move in moves[]
+  Lifecycle-->>Engine: final restored GameEngineState
+  Engine-->>Route: renders at correct round/phase
+```
+
+---
+
+## 4. Draft State Sync (AnswerGame mid-round persistence)
+
+`useAnswerGameDraftSync` keeps the `AnswerGameState` persisted so a mid-round refresh
+restores exactly where the player left off.
+
+```mermaid
+sequenceDiagram
+  participant Provider as AnswerGameProvider
+  participant Hook as useAnswerGameDraftSync
+  participant DB as RxDB
+
+  Provider->>Hook: state changes (every dispatch)
+  Hook->>DB: upsert session_history_index.draftState (debounced)
+
+  Note over Hook,DB: On page refresh / remount
+  Provider->>Hook: mount with initialState prop from route loader
+  Hook->>Provider: dispatch INIT_ROUND with restored tiles/zones
+  Provider-->>Provider: game resumes at exact mid-round state
+```

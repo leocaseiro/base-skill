@@ -1,0 +1,134 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="game-engine/Reference" />
+
+# GameEngine — Reference
+
+> Source: `src/lib/game-engine/`
+>
+> The game engine is the outer shell that wraps every game session. It manages the
+> session lifecycle, records moves for replay, and persists draft state across page
+> refreshes. Update this file when the engine API, move log structure, or session
+> recording changes.
+
+---
+
+## Provider API
+
+`GameEngineProvider` is defined in `src/lib/game-engine/index.tsx`.
+
+```tsx
+<GameEngineProvider
+  config={ResolvedGameConfig}
+  initialLog={MoveLog | null} // pass to resume a saved session
+  sessionId={string}
+  meta={SessionMeta}
+>
+  {children}
+</GameEngineProvider>
+```
+
+### Contexts
+
+```ts
+// Read game state
+const GameStateContext: React.Context<GameEngineState | null>
+export const useGameState = (): GameEngineState
+
+// Dispatch a move
+const GameDispatchContext: React.Context<((move: Move) => void) | null>
+export const useGameDispatch = (): (move: Move) => void
+```
+
+### GameEngineState
+
+Defined in `src/lib/game-engine/types.ts`.
+
+| Field          | Type              | Description                                                                                                                 |
+| -------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `phase`        | `GamePhase`       | `'idle' \| 'loading' \| 'instructions' \| 'playing' \| 'evaluating' \| 'scoring' \| 'next-round' \| 'retry' \| 'game-over'` |
+| `roundIndex`   | `number`          | Current round (0-based)                                                                                                     |
+| `score`        | `number`          | Cumulative score                                                                                                            |
+| `streak`       | `number`          | Consecutive correct answers                                                                                                 |
+| `retryCount`   | `number`          | Retries in current round                                                                                                    |
+| `content`      | `ResolvedContent` | All round definitions for this session                                                                                      |
+| `currentRound` | `RoundState`      | Active round: `{ roundId, answer, hintsUsed }`                                                                              |
+
+### Move
+
+All state changes go through a `Move`:
+
+```ts
+interface Move {
+  type: MoveType | string; // 'SUBMIT_ANSWER' | 'REQUEST_HINT' | 'SKIP_INSTRUCTIONS' | 'UNDO' | custom
+  args: Record<string, string | number | boolean>;
+  timestamp: number;
+}
+```
+
+---
+
+## Round Context
+
+`GameRoundContext` is a lightweight context providing round progress to any component
+in the tree without importing the full engine state.
+
+```ts
+// src/lib/game-engine/GameRoundContext.ts
+interface GameRoundContextValue {
+  current: number; // 1-based current round
+  total: number; // total rounds in session
+}
+```
+
+Consumed by: `ProgressBar`, `GameHeader`, and any component that shows "Round N of M".
+
+---
+
+## Session Recording
+
+`SessionRecorderBridge` (inside `GameEngineProvider`) subscribes to move dispatches
+and writes them to RxDB via `useSessionRecorder`.
+
+### MoveLog structure
+
+```ts
+interface MoveLog {
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  seed: string;
+  initialContent: ResolvedContent;
+  initialState: GameEngineState;
+  moves: Move[]; // append-only list of every dispatched move
+}
+```
+
+Stored in RxDB collection `session_history_index`. Replay by passing `initialLog` to
+`GameEngineProvider`.
+
+---
+
+## Draft Sync
+
+`useAnswerGameDraftSync` (in `src/components/answer-game/`) serialises the current
+`AnswerGameState` to RxDB's `session_history_index.draftState` field on every state
+change, and reads it back on mount when `initialState` is provided.
+
+### AnswerGameDraftState (persisted subset)
+
+```ts
+interface AnswerGameDraftState {
+  allTiles: TileItem[];
+  bankTileIds: string[];
+  zones: AnswerZone[];
+  activeSlotIndex: number;
+  phase: 'playing' | 'round-complete' | 'level-complete'; // 'game-over' never persisted
+  roundIndex: number;
+  retryCount: number;
+  levelIndex: number;
+}
+```
+
+Fields excluded from draft: `config` (reconstructed from game config), `dragActiveTileId`
+(transient), `dragHoverZoneIndex`, `dragHoverBankTileId` (transient).

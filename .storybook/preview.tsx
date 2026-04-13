@@ -1,8 +1,25 @@
 import '../src/styles.css';
 import '../src/lib/i18n/i18n';
 import { ThemeProvider } from 'next-themes';
+import { Mermaid } from '../src/components/ui/Mermaid';
 import { withTheme } from './decorators/withTheme';
 import type { Decorator, Preview } from '@storybook/react';
+import type { ReactNode } from 'react';
+
+interface CodeProps {
+  children?: string;
+  className?: string;
+}
+
+const MermaidCodeBlock = ({
+  children,
+  className,
+}: CodeProps): ReactNode => {
+  if (className === 'language-mermaid' && children) {
+    return <Mermaid chart={children} />;
+  }
+  return <code className={className}>{children}</code>;
+};
 
 const withAppThemeProvider: Decorator = (Story) => (
   <ThemeProvider
@@ -65,6 +82,11 @@ const preview: Preview = {
     a11y: {
       // Fail the test-runner on any axe violation (colour-contrast included)
       test: 'error',
+    },
+    docs: {
+      components: {
+        code: MermaidCodeBlock,
+      },
     },
   },
 };
