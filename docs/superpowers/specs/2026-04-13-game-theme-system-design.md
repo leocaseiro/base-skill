@@ -100,6 +100,20 @@ export interface GameTheme {
   /** Fired when the game is over */
   onGameOver?: (retryCount: number) => void;
 
+  // ── Timing ──────────────────────────────────────────────────────
+  timing?: {
+    /** ms before advancing to next round after round-complete. Default: 750 */
+    roundAdvanceDelay?: number;
+    /** ms before auto-ejecting a wrong tile. Default: 800 */
+    autoEjectDelay?: number;
+  };
+  /**
+   * If provided, engine awaits this instead of using timing.roundAdvanceDelay.
+   * Allows multi-phase animation sequences (e.g. crack → hatch → baby dino).
+   * Must resolve within 5 s or engine advances anyway (safety timeout).
+   */
+  onRoundCompleteSequence?: (roundIndex: number) => Promise<void>;
+
   // ── Render Slots (optional React components) ─────────────────────
   /** Background scene behind the game area */
   SceneBackground?: React.ComponentType;
