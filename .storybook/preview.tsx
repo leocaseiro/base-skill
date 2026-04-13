@@ -62,6 +62,10 @@ const preview: Preview = {
       defaultViewport: 'tabletLandscape',
     },
     actions: { argTypesRegex: '^on[A-Z].*' },
+    a11y: {
+      // Fail the test-runner on any axe violation (colour-contrast included)
+      test: 'error',
+    },
   },
 };
 

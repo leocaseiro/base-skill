@@ -4,22 +4,13 @@ import {
   useNavigate,
   useParams,
 } from '@tanstack/react-router';
-import {
-  MenuIcon,
-  SearchIcon,
-  SlidersHorizontalIcon,
-} from 'lucide-react';
+import { MenuIcon, SearchIcon } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EMPTY } from 'rxjs';
 import type { ThemeDoc } from '@/db/schemas/themes';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -40,6 +31,7 @@ import { Slider } from '@/components/ui/slider';
 import { useRxDB } from '@/db/hooks/useRxDB';
 import { useRxQuery } from '@/db/hooks/useRxQuery';
 import { useSettings } from '@/db/hooks/useSettings';
+import { safeGetVoices } from '@/lib/speech/safe-get-voices';
 import { APP_VERSION, IS_BETA } from '@/lib/version';
 
 const LOCALES = [
@@ -72,7 +64,7 @@ const HeaderMenuPanel = ({
       globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
     ).speechSynthesis;
     if (!synth) return;
-    const load = () => setVoices(synth.getVoices());
+    const load = () => setVoices(safeGetVoices(synth));
     load();
     synth.addEventListener('voiceschanged', load);
     return () => synth.removeEventListener('voiceschanged', load);
@@ -94,6 +86,18 @@ const HeaderMenuPanel = ({
         <SheetTitle>{appName}</SheetTitle>
       </SheetHeader>
       <div className="flex flex-col gap-6 p-4">
+        <div className="flex items-center justify-between">
+          <a
+            href="/base-skill/docs/"
+            className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Docs
+          </a>
+          <ThemeToggle />
+        </div>
+
         <div className="flex flex-col gap-2">
           <Label htmlFor="drawer-volume">
             {t('volume', { percent: Math.round(volume * 100) })}
@@ -195,28 +199,6 @@ const HeaderMenuPanel = ({
   );
 };
 
-const FiltersDropdown = ({
-  filtersLabel,
-  subjectsAll,
-}: {
-  filtersLabel: string;
-  subjectsAll: string;
-}) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="outline" size="sm" aria-label={filtersLabel}>
-        <SlidersHorizontalIcon size={16} />
-        <span className="hidden sm:inline">{filtersLabel}</span>
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="w-56">
-      <div className="text-muted-foreground px-2 py-1.5 text-sm">
-        {subjectsAll}
-      </div>
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
-
 const MenuSheetTrigger = () => (
   <SheetTrigger asChild>
     <Button variant="ghost" size="icon" aria-label="Menu">
@@ -276,7 +258,7 @@ export const Header = () => {
 
         <a
           href="/base-skill/docs/"
-          className="flex-shrink-0 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
+          className="hidden flex-shrink-0 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline sm:flex"
           target="_blank"
           rel="noreferrer"
         >
@@ -296,14 +278,11 @@ export const Header = () => {
               aria-label={t('search.placeholder')}
             />
           </div>
-
-          <FiltersDropdown
-            filtersLabel={t('search.filters')}
-            subjectsAll={t('subjects.all')}
-          />
         </div>
 
-        <ThemeToggle />
+        <span className="hidden sm:flex">
+          <ThemeToggle />
+        </span>
 
         <Sheet>
           <MenuSheetTrigger />
