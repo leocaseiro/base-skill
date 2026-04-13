@@ -89,7 +89,7 @@ const GameShellChrome = ({
       {/* Top bar */}
       <header className="flex items-center justify-between border-b px-4 py-2">
         <button
-          className="text-sm text-muted-foreground"
+          className="text-sm text-foreground"
           onClick={() => setExitOpen(true)}
           aria-label="Back"
           type="button"
