@@ -7,6 +7,7 @@ import { useRxDB } from '@/db/hooks/useRxDB';
 import { useRxQuery } from '@/db/hooks/useRxQuery';
 import {
   applyThemeCssVars,
+  clearThemeCssVars,
   themeDocToCssVars,
 } from '@/lib/theme/css-vars';
 import { defaultThemeCssVars } from '@/lib/theme/default-tokens';
@@ -14,14 +15,24 @@ import { defaultThemeCssVars } from '@/lib/theme/default-tokens';
 const DEFAULT_THEME_ID = 'theme_ocean_preset';
 const ANONYMOUS_SETTINGS_ID = 'settings:anonymous';
 
-function applyDocOrDefault(doc: ThemeDoc | null | undefined): void {
+const applyDocOrDefault = (doc: ThemeDoc | null | undefined): void => {
   const root = document.documentElement;
+  const isDark = root.classList.contains('dark');
+
+  if (isDark) {
+    // In dark mode, clear --bs-* inline styles so the .dark CSS block's
+    // Galaxy dark fallback values take effect. Light-mode theme tokens
+    // set as inline styles would override var(--bs-*, fallback).
+    clearThemeCssVars(root, defaultThemeCssVars);
+    return;
+  }
+
   if (doc) {
     applyThemeCssVars(root, themeDocToCssVars(doc));
   } else {
     applyThemeCssVars(root, defaultThemeCssVars);
   }
-}
+};
 
 export const ThemeRuntimeProvider = ({
   children,
