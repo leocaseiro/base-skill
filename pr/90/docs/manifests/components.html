@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/41 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">41/41 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">3/165 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">13 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/42 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">42/42 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">3/170 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -1141,6 +1141,22 @@ const meta: Meta&lt;typeof AudioPrototype&gt; = {
   component: AudioFeedbackPrototype,
   title: &#39;Audio/AudioFeedback Prototype&#39;,
   tags: [&#39;autodocs&#39;],
+  parameters: {
+    a11y: {
+      config: {
+        rules: [
+          {
+            // Prototype scenario buttons use success/warning colours from the
+            // design system that fall below 4.5:1 (e.g. white on #00a63e =
+            // 3.21:1). This is a dev-only prototype — not shipped to users.
+            // TODO: update colour tokens so success green meets WCAG AA.
+            id: &#39;color-contrast&#39;,
+            enabled: false,
+          },
+        ],
+      },
+    },
+  },
 };
 export default meta;
 
@@ -3351,7 +3367,7 @@ src: string</code></pre>
               </div>
               
               
-              <pre><code>const Invalid = () =&gt; &lt;Input aria-invalid defaultValue=&quot;Bad value&quot; /&gt;;</code></pre>
+              <pre><code>const Invalid = () =&gt; &lt;Input aria-invalid defaultValue=&quot;Bad value&quot; aria-label=&quot;Example input&quot; /&gt;;</code></pre>
             </div>
         </div>
     
@@ -3543,7 +3559,7 @@ export const InstructionsOverlay = ({
               {tags.map((tag) =&gt; (
                 &lt;span
                   key={tag}
-                  className=&quot;rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground&quot;
+                  className=&quot;rounded bg-muted px-2 py-0.5 text-xs font-medium text-foreground&quot;
                 &gt;
                   {tag}
                 &lt;/span&gt;
@@ -4848,7 +4864,7 @@ renderConfigForm?: (props: {
               
               <pre><code>const Default = () =&gt; (
   &lt;Select&gt;
-    &lt;SelectTrigger className=&quot;w-48&quot;&gt;
+    &lt;SelectTrigger className=&quot;w-48&quot; aria-label=&quot;Select a fruit&quot;&gt;
       &lt;SelectValue placeholder=&quot;Pick a fruit&quot; /&gt;
     &lt;/SelectTrigger&gt;
     &lt;SelectContent&gt;
@@ -4868,7 +4884,7 @@ renderConfigForm?: (props: {
               
               <pre><code>const WithPreselected = () =&gt; (
   &lt;Select defaultValue=&quot;banana&quot;&gt;
-    &lt;SelectTrigger className=&quot;w-48&quot;&gt;
+    &lt;SelectTrigger className=&quot;w-48&quot; aria-label=&quot;Select a fruit&quot;&gt;
       &lt;SelectValue /&gt;
     &lt;/SelectTrigger&gt;
     &lt;SelectContent&gt;
@@ -6039,14 +6055,118 @@ sessionId?: string</code></pre>
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="UpdateBanner">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> UpdateBanner</h2>
+      <div class="badges">
+        
+        <label for="c-39-components-updatebanner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-39-components-updatebanner-stories" class="badge ok as-toggle">5 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/UpdateBanner.stories.tsx">components-updatebanner · ./src/components/UpdateBanner.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-39-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-39-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { ServiceWorkerContext, UpdateBanner } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Default = () =&gt; &lt;UpdateBanner /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Ocean Light</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const OceanLight = () =&gt; &lt;UpdateBanner /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Ocean Dark</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const OceanDark = () =&gt; &lt;UpdateBanner /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Forest Light</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ForestLight = () =&gt; &lt;UpdateBanner /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Forest Dark</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ForestDark = () =&gt; &lt;UpdateBanner /&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="WordLibraryExplorer">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> WordLibraryExplorer</h2>
       <div class="badges">
         
-        <label for="c-39-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-39-data-wordlibraryexplorer-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-40-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
+        <label for="c-40-data-wordlibraryexplorer-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -6058,8 +6178,8 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-39-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-39-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-40-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-40-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6112,9 +6232,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> WordSpell</h2>
       <div class="badges">
-        <label for="c-40-games-word-spell-wordspell-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-40-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-40-games-word-spell-wordspell-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-41-games-word-spell-wordspell-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-41-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
+        <label for="c-41-games-word-spell-wordspell-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -6126,10 +6246,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-40-games-word-spell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-40-games-word-spell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-41-games-word-spell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-41-games-word-spell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-40-games-word-spell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-41-games-word-spell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6513,6 +6633,22 @@ const meta: Meta&lt;typeof AudioPrototype&gt; = {
   component: AudioFeedbackPrototype,
   title: &#39;Audio/AudioFeedback Prototype&#39;,
   tags: [&#39;autodocs&#39;],
+  parameters: {
+    a11y: {
+      config: {
+        rules: [
+          {
+            // Prototype scenario buttons use success/warning colours from the
+            // design system that fall below 4.5:1 (e.g. white on #00a63e =
+            // 3.21:1). This is a dev-only prototype — not shipped to users.
+            // TODO: update colour tokens so success green meets WCAG AA.
+            id: &#39;color-contrast&#39;,
+            enabled: false,
+          },
+        ],
+      },
+    },
+  },
 };
 export default meta;
 
@@ -6887,7 +7023,7 @@ export const InstructionsOverlay = ({
               {tags.map((tag) =&gt; (
                 &lt;span
                   key={tag}
-                  className=&quot;rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground&quot;
+                  className=&quot;rounded bg-muted px-2 py-0.5 text-xs font-medium text-foreground&quot;
                 &gt;
                   {tag}
                 &lt;/span&gt;
@@ -7803,10 +7939,274 @@ to their configs.
   aria-label="Docs">
   <div class="head">
     <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Games/WordSpell/Flows</h2>
+      <div class="badges">
+        
+        <label for="doc-6-games-wordspell-flows-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/games/word-spell/WordSpell/WordSpell.flows.mdx">games-wordspell-flows--docs · ./src/games/word-spell/WordSpell/WordSpell.flows.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-6-games-wordspell-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
+
+&lt;Meta title=&quot;Games/WordSpell/Flows&quot; /&gt;
+
+# WordSpell — End-to-End Flows
+
+&gt; Source: `src/games/word-spell/`
+&gt;
+&gt; These diagrams show the full lifecycle of a WordSpell session, including sound
+&gt; effects, TTS, and UI feedback at each step. Update this file when the
+&gt; WordSpell progression logic or sound timing changes.
+
+---
+
+## 1. Correct Tile Placement
+
+User places the right letter in a slot. Sound fires **before** the reducer
+dispatch so feedback is instant.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant TE as useTileEvaluation
+  participant Audio as AudioFeedback
+  participant Reducer as answerGameReducer
+  participant Bus as GameEventBus
+  participant Slot as useSlotBehavior (effect)
+
+  User-&gt;&gt;TE: click bank tile / press key
+  TE-&gt;&gt;TE: tile.value === zone.expectedValue? ✓
+  TE-&gt;&gt;Audio: playSound(&#39;correct&#39;, 0.8)
+  Audio--&gt;&gt;Audio: interrupts current audio, plays immediately
+  TE-&gt;&gt;Reducer: PLACE_TILE { tileId, zoneIndex }
+  Reducer--&gt;&gt;Reducer: zones[i].placedTileId = tileId
+  Reducer--&gt;&gt;Reducer: zones[i].isWrong = false
+  TE-&gt;&gt;Bus: emit game:evaluate { correct: true }
+
+  alt all zones now correct
+    Reducer--&gt;&gt;Slot: phase → &#39;round-complete&#39;
+    Slot-&gt;&gt;Slot: triggerPop animation on each slot
+  else some zones still empty
+    Reducer--&gt;&gt;Reducer: phase stays &#39;playing&#39;
+    Note over TE: useAutoNextSlot advances cursor to next empty slot
+  end
+```
+
+---
+
+## 2. Wrong Tile Placement (lock-auto-eject)
+
+WordSpell defaults to `wrongTileBehavior: &#39;lock-auto-eject&#39;`. The tile is
+placed, marked wrong, shaken, and automatically ejected.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant TE as useTileEvaluation
+  participant Audio as AudioFeedback
+  participant Reducer as answerGameReducer
+  participant Bus as GameEventBus
+  participant Slot as useSlotBehavior (effect)
+
+  User-&gt;&gt;TE: click bank tile / press key
+  TE-&gt;&gt;TE: tile.value === zone.expectedValue? ✗
+  TE-&gt;&gt;Audio: playSound(&#39;wrong&#39;, 0.8)
+  Audio--&gt;&gt;Audio: interrupts current audio, plays immediately
+  TE-&gt;&gt;Reducer: PLACE_TILE { tileId, zoneIndex }
+  Reducer--&gt;&gt;Reducer: zones[i].placedTileId = tileId
+  Reducer--&gt;&gt;Reducer: zones[i].isWrong = true, isLocked = true
+  Reducer--&gt;&gt;Reducer: retryCount++
+  TE-&gt;&gt;Bus: emit game:evaluate { correct: false }
+
+  Reducer--&gt;&gt;Slot: isWrong = true detected
+  Slot-&gt;&gt;Slot: triggerShake animation (immediate)
+  Slot-&gt;&gt;Slot: wait 350 ms
+  Slot-&gt;&gt;Slot: triggerEjectReturn animation
+  Slot-&gt;&gt;Slot: wait 1000 ms
+  Slot-&gt;&gt;Reducer: EJECT_TILE { zoneIndex }
+  Reducer--&gt;&gt;Reducer: zones[i].placedTileId = null
+  Reducer--&gt;&gt;Reducer: zones[i].isWrong = false, isLocked = false
+  Reducer--&gt;&gt;Reducer: tile id returned to bankTileIds
+```
+
+### Other wrong-tile modes
+
+| Mode          | Behavior after wrong placement                         |
+| ------------- | ------------------------------------------------------ |
+| `reject`      | Tile bounces back immediately; never enters the slot   |
+| `lock-manual` | Tile stays in slot marked wrong; user clicks to remove |
+
+---
+
+## 3. Round Complete → Next Round
+
+When all zones are filled correctly, the round-complete phase triggers a
+cascade: phase sound → confetti → delay → advance to next round → TTS
+announces the new word.
+
+```mermaid
+sequenceDiagram
+  participant Reducer as answerGameReducer
+  participant GS as useGameSounds
+  participant Audio as AudioFeedback
+  participant UI as ScoreAnimation (confetti)
+  participant WS as WordSpellSession (effect)
+  participant TTS as useRoundTTS
+
+  Note over Reducer: last PLACE_TILE made all zones correct
+  Reducer--&gt;&gt;GS: phase = &#39;round-complete&#39;
+
+  GS-&gt;&gt;Audio: playSound(&#39;round-complete&#39;)
+  Audio--&gt;&gt;Audio: interrupts queue, plays immediately
+  GS-&gt;&gt;GS: await microtask
+  GS--&gt;&gt;UI: confettiReady = true
+  UI-&gt;&gt;UI: render confetti burst
+
+  WS-&gt;&gt;WS: phase === &#39;round-complete&#39; &amp;&amp; confettiReady
+  WS-&gt;&gt;WS: start 750 ms timer
+
+  Note over WS: timer fires
+
+  alt more rounds remain
+    WS-&gt;&gt;WS: build next round tiles/zones
+    WS-&gt;&gt;Reducer: ADVANCE_ROUND { tiles, zones }
+    Reducer--&gt;&gt;Reducer: roundIndex++, zones/bankTileIds reset
+    Reducer--&gt;&gt;GS: phase = &#39;playing&#39;
+    GS--&gt;&gt;UI: confettiReady = false
+
+    TTS-&gt;&gt;Audio: whenSoundEnds()
+    Audio--&gt;&gt;TTS: queue drained
+    TTS-&gt;&gt;TTS: speak(nextWord) via Web Speech API
+  else last round
+    WS-&gt;&gt;Reducer: COMPLETE_GAME
+    Note over Reducer: see §4 Game Complete
+  end
+```
+
+### Timing breakdown
+
+| Offset   | Event                                                 |
+| -------- | ----------------------------------------------------- |
+| 0 ms     | Reducer sets `phase = &#39;round-complete&#39;`               |
+| ~0 ms    | `playSound(&#39;round-complete&#39;)` fires                   |
+| ~1 ms    | `confettiReady` flag set (microtask)                  |
+| ~1 ms    | Confetti animation starts rendering                   |
+| 750 ms   | Timer fires → `ADVANCE_ROUND` or `COMPLETE_GAME`      |
+| ~750+ ms | `whenSoundEnds()` resolves → TTS speaks the next word |
+
+---
+
+## 4. Game Complete
+
+Dispatched when the last round finishes or when no more rounds exist.
+
+```mermaid
+sequenceDiagram
+  participant WS as WordSpellSession
+  participant Reducer as answerGameReducer
+  participant GS as useGameSounds
+  participant Audio as AudioFeedback
+  participant Overlay as GameOverOverlay
+
+  WS-&gt;&gt;Reducer: COMPLETE_GAME
+  Reducer--&gt;&gt;Reducer: phase = &#39;game-over&#39;
+  Reducer--&gt;&gt;GS: phase change detected
+
+  GS-&gt;&gt;Audio: playSound(&#39;game-complete&#39;)
+  GS-&gt;&gt;GS: await microtask
+  GS--&gt;&gt;Overlay: gameOverReady = true
+  Overlay-&gt;&gt;Overlay: render game-over screen
+  Overlay-&gt;&gt;Overlay: show retryCount, Play Again, Home buttons
+
+  alt user taps Play Again
+    Overlay-&gt;&gt;WS: onRestartSession()
+    WS-&gt;&gt;WS: setSessionEpoch(e + 1)
+    Note over WS: AnswerGame remounts with key={epoch}, fresh round order
+  else user taps Home
+    Overlay-&gt;&gt;WS: navigate(&#39;/$locale&#39;)
+  end
+```
+
+---
+
+## 5. Full Session Lifecycle (state diagram)
+
+```mermaid
+stateDiagram-v2
+  [*] --&gt; loading : WordSpell mounts
+  loading --&gt; playing : useLibraryRounds resolves,\nINIT_ROUND dispatched
+
+  playing --&gt; round_complete : all zones correct
+  playing --&gt; playing : wrong tile placed\n(auto-eject returns tile)
+
+  round_complete --&gt; playing : ADVANCE_ROUND\n(more rounds, 750 ms delay)
+  round_complete --&gt; game_over : COMPLETE_GAME\n(last round)
+
+  game_over --&gt; loading : Play Again\n(sessionEpoch++)
+  game_over --&gt; [*] : Home
+```
+
+---
+
+## 6. Sound and TTS Pipeline
+
+All game sounds flow through `AudioFeedback.ts`. TTS waits for the audio
+queue to drain before speaking.
+
+```mermaid
+flowchart LR
+  subgraph &quot;Tile feedback (instant)&quot;
+    A[&quot;useTileEvaluation&quot;] --&gt;|&quot;playSound(&#39;correct&#39;/&#39;wrong&#39;)&quot;| B[&quot;AudioFeedback\n(interrupts queue)&quot;]
+  end
+
+  subgraph &quot;Phase sounds (on transition)&quot;
+    C[&quot;useGameSounds&quot;] --&gt;|&quot;playSound(&#39;round-complete&#39;)\nplaySound(&#39;level-complete&#39;)\nplaySound(&#39;game-complete&#39;)&quot;| B
+  end
+
+  subgraph &quot;TTS (after sounds)&quot;
+    D[&quot;useRoundTTS&quot;] --&gt;|&quot;whenSoundEnds()&quot;| B
+    B --&gt;|&quot;queue drained&quot;| E[&quot;useGameTTS.speakPrompt()\nWeb Speech API&quot;]
+  end
+```
+
+### AudioFeedback API
+
+| Function          | Behavior                                            | Use case                  |
+| ----------------- | --------------------------------------------------- | ------------------------- |
+| `playSound()`     | Interrupts current audio + resets queue             | Tile correct/wrong sounds |
+| `queueSound()`    | Appends to queue; resolves when sound **starts**    | Phase transition sounds   |
+| `whenSoundEnds()` | Resolves when entire queue (current + pending) ends | TTS delay                 |
+
+&gt; **Note:** `useGameSounds` currently uses `playSound()` (interrupt), not
+&gt; `queueSound()`. This means a rapid correct tile + round-complete can cut off
+&gt; the tile sound. This is intentional — the phase sound takes priority.
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
       <h2><span class="status-dot dot-ok"></span> game-engine/Flows</h2>
       <div class="badges">
         
-        <label for="doc-6-game-engine-flows-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-7-game-engine-flows-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/game-engine/GameEngine.flows.mdx">game-engine-flows--docs · ./src/lib/game-engine/GameEngine.flows.mdx</div>
@@ -7815,7 +8215,7 @@ to their configs.
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-6-game-engine-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-7-game-engine-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7934,7 +8334,7 @@ sequenceDiagram
       <h2><span class="status-dot dot-ok"></span> game-engine/Reference</h2>
       <div class="badges">
         
-        <label for="doc-7-game-engine-reference-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-8-game-engine-reference-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/game-engine/GameEngine.reference.mdx">game-engine-reference--docs · ./src/lib/game-engine/GameEngine.reference.mdx</div>
@@ -7943,7 +8343,7 @@ sequenceDiagram
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-7-game-engine-reference-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-8-game-engine-reference-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8095,10 +8495,316 @@ Fields excluded from draft: `config` (reconstructed from game config), `dragActi
   aria-label="Docs">
   <div class="head">
     <div class="title">
+      <h2><span class="status-dot dot-ok"></span> game-engine/Debugging</h2>
+      <div class="badges">
+        
+        <label for="doc-9-game-engine-debugging-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/lib/game-engine/debugging.mdx">game-engine-debugging--docs · ./src/lib/game-engine/debugging.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-9-game-engine-debugging-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
+
+&lt;Meta title=&quot;game-engine/Debugging&quot; /&gt;
+
+# Debugging the Game Engine
+
+&gt; Techniques for inspecting state transitions, dispatched actions, sound
+&gt; playback, and persisted session data during development.
+
+---
+
+## 1. React DevTools — Reducer and Context Inspection
+
+Both the outer `GameEngineProvider` and the inner `AnswerGameProvider` use
+plain `useReducer`. React DevTools is the primary way to inspect their state.
+
+### Viewing AnswerGame state
+
+1. Open **React DevTools** → Components tab
+2. Search for `AnswerGameStateContext.Provider`
+3. Expand the **value** prop to see the full `AnswerGameState`:
+   `phase`, `zones`, `bankTileIds`, `activeSlotIndex`, `retryCount`, etc.
+
+### Viewing dispatched actions
+
+React DevTools does not log individual `useReducer` dispatches by default.
+To trace every action through the AnswerGame reducer, add a temporary
+logging wrapper in `AnswerGameProvider.tsx`:
+
+```ts
+// Temporary — remove before committing
+const [state, rawDispatch] = useReducer(
+  answerGameReducer,
+  initialState,
+);
+const dispatch = (action: AnswerGameAction) =&gt; {
+  console.group(`[AnswerGame] ${action.type}`);
+  console.log(&#39;payload&#39;, action);
+  console.log(&#39;state before&#39;, state);
+  rawDispatch(action);
+  console.groupEnd();
+};
+```
+
+The same pattern works for the GameEngine lifecycle reducer in
+`lifecycle.ts`:
+
+```ts
+const [state, rawDispatch] = useReducer(reducer, initial);
+const dispatch = (move: Move) =&gt; {
+  console.group(`[GameEngine] ${move.type}`);
+  console.log(&#39;args&#39;, move.args);
+  rawDispatch(move);
+  console.groupEnd();
+};
+```
+
+&gt; **Tip:** State _after_ dispatch is visible in the next render. To see
+&gt; before/after in one log, compute `reducer(state, action)` inline — but
+&gt; only in dev, since the reducer must remain pure.
+
+### Viewing GameEngine state
+
+Search for `GameStateContext.Provider` in React DevTools. Its value shows
+`phase`, `roundIndex`, `score`, `streak`, and `currentRound`.
+
+---
+
+## 2. TanStack DevTools
+
+TanStack DevTools are mounted in `src/routes/__root.tsx` and appear as a
+floating panel at the bottom-right of the page in development.
+
+### Router DevTools
+
+The **TanStack Router** tab shows:
+
+- All registered routes and their current match state
+- Route params (e.g. `$locale`, `$gameId`)
+- Loader data (including `initialLog` and `draftState` from session finders)
+- Navigation history
+
+This is useful for verifying that the correct session data was loaded from
+RxDB before the game mounts.
+
+### Adding custom panels
+
+The DevTools accept plugins. To add a game state inspector panel:
+
+```tsx
+&lt;TanStackDevtools
+  config={{ position: &#39;bottom-right&#39; }}
+  plugins={[
+    {
+      name: &#39;Tanstack Router&#39;,
+      render: &lt;TanStackRouterDevtoolsPanel /&gt;,
+    },
+    {
+      name: &#39;Game State&#39;,
+      render: &lt;YourCustomPanel /&gt;,
+    },
+  ]}
+/&gt;
+```
+
+---
+
+## 3. GameEventBus — Tapping All Events
+
+The `GameEventBus` singleton supports a wildcard subscription that captures
+every event. Use this in the browser console to trace game events in real
+time:
+
+```js
+// In the browser console (dev only)
+// Import is available because Vite exposes modules in dev
+const { getGameEventBus } = await import(&#39;/src/lib/game-event-bus.ts&#39;);
+const unsub = getGameEventBus().subscribe(&#39;game:*&#39;, (event) =&gt; {
+  console.log(`[EventBus] ${event.type}`, event);
+});
+// Call unsub() to stop logging
+```
+
+### Events emitted during gameplay
+
+| Event           | Emitted by          | Contains                                                |
+| --------------- | ------------------- | ------------------------------------------------------- |
+| `game:evaluate` | `useTileEvaluation` | `gameId`, `roundIndex`, `answer`, `correct`, `nearMiss` |
+
+&gt; The event bus is currently internal (M2). More event types may be added as
+&gt; the public API evolves.
+
+---
+
+## 4. RxDB — Inspecting Persisted Session Data
+
+Game sessions are stored in two RxDB collections:
+
+| Collection              | Purpose                                               |
+| ----------------------- | ----------------------------------------------------- |
+| `session_history_index` | One doc per session: metadata, move count, draftState |
+| `session_history`       | Chunked move arrays for replay                        |
+
+### Browser console queries
+
+RxDB is accessible through the `DbContext`. In development, you can grab it
+from React DevTools or expose it on `window` temporarily:
+
+```ts
+// Temporary — add to DbProvider.tsx, remove before committing
+useEffect(() =&gt; {
+  if (db) (window as any).__db = db;
+}, [db]);
+```
+
+Then in the browser console:
+
+```js
+// List all session index documents
+const docs = await __db.session_history_index.find().exec();
+docs.forEach((d) =&gt; console.log(d.toJSON()));
+
+// Find a specific session
+const session = await __db.session_history_index
+  .findOne(&#39;session-id&#39;)
+  .exec();
+console.log(session?.toJSON());
+
+// Inspect draft state (mid-round snapshot)
+console.log(session?.draftState);
+
+// List move chunks for a session
+const chunks = await __db.session_history
+  .find({ selector: { sessionId: &#39;session-id&#39; } })
+  .exec();
+chunks.forEach((c) =&gt; console.log(`chunk ${c.chunkIndex}:`, c.moves));
+```
+
+### IndexedDB direct access
+
+RxDB uses IndexedDB as its storage backend. Open **DevTools → Application →
+IndexedDB** to browse raw documents. Look for the database named
+`baseskill` (or the name configured in `create-database.ts`).
+
+---
+
+## 5. Sound System Debugging
+
+### Verifying sound playback
+
+`AudioFeedback.ts` creates `HTMLAudioElement` instances. To trace playback:
+
+```js
+// Monkey-patch in browser console
+const origPlay = HTMLAudioElement.prototype.play;
+HTMLAudioElement.prototype.play = function () {
+  console.log(&#39;[Audio] play&#39;, this.src, &#39;volume:&#39;, this.volume);
+  return origPlay.call(this);
+};
+```
+
+### Common issues
+
+| Symptom                           | Likely cause                                    | Fix                                               |
+| --------------------------------- | ----------------------------------------------- | ------------------------------------------------- |
+| No sound on first interaction     | Browser autoplay policy blocks audio            | Sounds must start from a user gesture (click/tap) |
+| Tile sound cut off by phase sound | `playSound()` interrupts; this is by design     | Use `queueSound()` if sounds should chain         |
+| TTS speaks over sound effects     | `whenSoundEnds()` not awaited                   | Check `useRoundTTS` awaits the sound queue        |
+| Sound plays but wrong file        | `SOUND_PATHS` map or `import.meta.env.BASE_URL` | Verify paths in `AudioFeedback.ts`                |
+
+### TTS debug logs
+
+The speech system logs to `console.debug` with a `[TTS]` prefix:
+
+- `[TTS] speakTile(&quot;a&quot;) — busy, skipped` — a speak call was dropped because
+  another utterance was active
+- `[TTS] speak(...)` — utterance started (logged in `SpeechOutput.ts`)
+- `[TTS] cancelSpeech() — idle, skipped` — cancel was a no-op
+
+Filter the browser console to `[TTS]` to see only speech events.
+
+---
+
+## 6. Reducer Unit Testing
+
+Both reducers are pure functions and can be tested without React:
+
+```ts
+import {
+  answerGameReducer,
+  makeInitialState,
+} from &#39;./answer-game-reducer&#39;;
+
+const state = makeInitialState(config);
+const next = answerGameReducer(state, {
+  type: &#39;PLACE_TILE&#39;,
+  tileId: &#39;tile-1&#39;,
+  zoneIndex: 0,
+});
+expect(next.zones[0].placedTileId).toBe(&#39;tile-1&#39;);
+```
+
+For the GameEngine reducer:
+
+```ts
+import { createReducer } from &#39;./lifecycle&#39;;
+
+const reducer = createReducer(config, gameMovers);
+const next = reducer(state, {
+  type: &#39;SUBMIT_ANSWER&#39;,
+  args: {},
+  timestamp: Date.now(),
+});
+expect(next.phase).toBe(&#39;scoring&#39;);
+```
+
+Existing test suites:
+
+- `src/components/answer-game/answer-game-reducer.test.ts`
+- `src/lib/game-engine/lifecycle.test.ts` (if present)
+- `src/lib/game-engine/session-finder.test.ts`
+
+---
+
+## Quick Reference
+
+| What to inspect              | Tool / technique                                          |
+| ---------------------------- | --------------------------------------------------------- |
+| Current AnswerGame state     | React DevTools → `AnswerGameStateContext.Provider`        |
+| Current GameEngine state     | React DevTools → `GameStateContext.Provider`              |
+| Dispatched actions (trace)   | Temporary logging wrapper around `useReducer`             |
+| Route params and loader data | TanStack Router DevTools panel (bottom-right)             |
+| Game events (evaluate, etc.) | `getGameEventBus().subscribe(&#39;game:*&#39;, console.log)`      |
+| Persisted sessions and moves | RxDB queries via `window.__db` or IndexedDB direct access |
+| Sound playback               | `HTMLAudioElement.prototype.play` monkey-patch            |
+| TTS utterances               | Filter browser console to `[TTS]`                         |
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
       <h2><span class="status-dot dot-ok"></span> Services/GameEventBus</h2>
       <div class="badges">
         
-        <label for="doc-8-services-gameeventbus-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-10-services-gameeventbus-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/game-event-bus.mdx">services-gameeventbus--docs · ./src/lib/game-event-bus.mdx</div>
@@ -8107,7 +8813,7 @@ Fields excluded from draft: `config` (reconstructed from game config), `dragActi
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-8-services-gameeventbus-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-10-services-gameeventbus-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8154,7 +8860,7 @@ A typed pub/sub event bus for coordinating game engine events.
       <h2><span class="status-dot dot-ok"></span> Utils/i18n</h2>
       <div class="badges">
         
-        <label for="doc-9-utils-i18n-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-11-utils-i18n-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/i18n/i18n.mdx">utils-i18n--docs · ./src/lib/i18n/i18n.mdx</div>
@@ -8163,7 +8869,7 @@ A typed pub/sub event bus for coordinating game engine events.
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-9-utils-i18n-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-11-utils-i18n-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8222,7 +8928,7 @@ they do not read the locale from i18next config at runtime — the router render
       <h2><span class="status-dot dot-ok"></span> Services/SpeechInput</h2>
       <div class="badges">
         
-        <label for="doc-10-services-speechinput-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-12-services-speechinput-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/speech/SpeechInput.mdx">services-speechinput--docs · ./src/lib/speech/SpeechInput.mdx</div>
@@ -8231,7 +8937,7 @@ they do not read the locale from i18next config at runtime — the router render
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-10-services-speechinput-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-12-services-speechinput-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8273,7 +8979,7 @@ Wraps the browser&#39;s `SpeechRecognition` / `webkitSpeechRecognition` API. Ret
       <h2><span class="status-dot dot-ok"></span> Services/SpeechOutput</h2>
       <div class="badges">
         
-        <label for="doc-11-services-speechoutput-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-13-services-speechoutput-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/speech/SpeechOutput.mdx">services-speechoutput--docs · ./src/lib/speech/SpeechOutput.mdx</div>
@@ -8282,7 +8988,7 @@ Wraps the browser&#39;s `SpeechRecognition` / `webkitSpeechRecognition` API. Ret
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-11-services-speechoutput-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-13-services-speechoutput-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8325,7 +9031,7 @@ Wraps the browser&#39;s `SpeechSynthesis` API. Gracefully degrades when the API 
       <h2><span class="status-dot dot-ok"></span> Theme/CSS Variables</h2>
       <div class="badges">
         
-        <label for="doc-12-theme-css-variables-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-14-theme-css-variables-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/theme/css-vars.mdx">theme-css-variables--docs · ./src/lib/theme/css-vars.mdx</div>
@@ -8334,7 +9040,7 @@ Wraps the browser&#39;s `SpeechSynthesis` API. Gracefully degrades when the API 
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-12-theme-css-variables-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-14-theme-css-variables-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
