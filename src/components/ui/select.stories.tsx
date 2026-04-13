@@ -18,7 +18,7 @@ type Story = StoryObj<typeof Select>;
 export const Default: Story = {
   render: () => (
     <Select>
-      <SelectTrigger className="w-48">
+      <SelectTrigger className="w-48" aria-label="Select a fruit">
         <SelectValue placeholder="Pick a fruit" />
       </SelectTrigger>
       <SelectContent>
@@ -33,7 +33,7 @@ export const Default: Story = {
 export const WithPreselected: Story = {
   render: () => (
     <Select defaultValue="banana">
-      <SelectTrigger className="w-48">
+      <SelectTrigger className="w-48" aria-label="Select a fruit">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
