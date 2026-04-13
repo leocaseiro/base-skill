@@ -58,7 +58,22 @@ export const ThemeRuntimeProvider = ({
   );
 
   useEffect(() => {
-    applyDocOrDefault(themeDoc ? themeDoc.toJSON() : null);
+    const doc = themeDoc ? themeDoc.toJSON() : null;
+    applyDocOrDefault(doc);
+
+    // Re-apply when the dark class is toggled externally (e.g. E2E test
+    // calling setDarkMode, or any code that directly sets html.classList).
+    const root = document.documentElement;
+    const observer = new MutationObserver(() => {
+      applyDocOrDefault(doc);
+    });
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    return () => {
+      observer.disconnect();
+    };
   }, [themeDoc]);
 
   return <>{children}</>;
