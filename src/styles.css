@@ -580,7 +580,15 @@ a:hover {
 }
 
 .bookmark-text {
-  color: var(--bookmark-play);
+  /* Darken the bookmark colour so it meets WCAG AA 4.5:1 against the lightly-tinted
+   * bookmark-bg (which is 12–20 % of the same colour on a light background). */
+  color: color-mix(in srgb, var(--bookmark-play) 60%, #000);
+}
+
+.dark .bookmark-text {
+  /* Lighten for dark backgrounds so the mix-against-transparent bookmark-bg
+   * still provides sufficient contrast. */
+  color: color-mix(in srgb, var(--bookmark-play) 60%, #fff);
 }
 
 @layer base {

@@ -94,6 +94,21 @@ const SortNumbersDragHoverSetup = ({
 
 /** Tile `1` is in the first slot; dashed hover on bank tile `3`. */
 export const DragHoverBankTile: Story = {
+  parameters: {
+    a11y: {
+      config: {
+        rules: [
+          {
+            // The drag-simulation setup briefly creates aria-hidden elements
+            // that still contain the focusable tile, triggering this rule.
+            // This is a transient state specific to this story's drag fixture.
+            id: 'aria-hidden-focus',
+            enabled: false,
+          },
+        ],
+      },
+    },
+  },
   decorators: [
     withDb,
     (Story) => (
