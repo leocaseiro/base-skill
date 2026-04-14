@@ -100,14 +100,11 @@ export const Slot = ({
       <InnerTag
         ref={slotRef as Ref<HTMLDivElement>}
         className={[stateClasses, className].filter(Boolean).join(' ')}
-        style={{
-          background: 'var(--skin-slot-bg)',
-          borderColor: 'var(--skin-slot-border)',
-          borderRadius: 'var(--skin-slot-radius)',
-          ...(isPreview
+        style={
+          isPreview
             ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
-            : undefined),
-        }}
+            : undefined
+        }
       >
         {skin?.slotDecoration?.(
           {
