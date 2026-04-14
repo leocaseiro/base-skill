@@ -93,52 +93,56 @@ Every bug fix and every new feature **must** follow the red-green-refactor cycle
 Use the `superpowers:test-driven-development` skill at the start of every feature
 branch. Write tests first; implement only enough code to make them pass.
 
-## Pre-push Quality Gate
+## Hook and CI Gating
 
-A `.husky/pre-push` hook runs automatically on every `git push`. It enforces the
-following checks in order:
+Hooks and CI run **only the checks that the changed files can possibly affect**,
+driven by `scripts/detect-buckets.mjs`. Full documentation:
+`docs/superpowers/specs/2026-04-14-smart-pipelines-design.md`.
 
-1. Lint (ESLint + Knip) — `yarn lint`
-2. TypeScript — `yarn typecheck`
-3. Unit tests — `yarn test`
-4. Storybook tests — `yarn test:storybook`
-5. Visual regression tests — `yarn test:vr`
-6. End-to-end tests — `yarn test:e2e`
+### Pre-commit (`.husky/pre-commit`)
 
-**Agents must not commit or push unless all relevant checks pass**, or a check is
-explicitly skipped with documented justification (see skip flags below).
+1. `lint-staged` (per-file formatters/linters).
+2. `yarn typecheck` — only if any staged file triggers the `typecheck` atomic
+   check.
 
-### Skip Flags
+### Pre-push (`.husky/pre-push`)
 
-Individual checks (or all checks) can be bypassed via environment variables:
+Runs the pre-push phase of every atomic check whose globs match files changed
+between `origin/master` and `HEAD`. Output begins with a `Triggered checks:`
+summary.
 
-- `SKIP_PREPUSH=1` — bypass every check entirely
-- `SKIP_LINT=1` — skip ESLint + Knip
+| Phase       | Atomic checks that may run                                                    |
+| ----------- | ----------------------------------------------------------------------------- |
+| pre-commit  | prettier, eslint, stylelint, markdownlint (via lint-staged), typecheck        |
+| pre-push    | + actionlint, shellcheck, knip, unit (`vitest related`)                       |
+| PR CI       | + storybook, VR, e2e, build                                                   |
+| master push | full suite (every check, ignoring the glob filter) — safety net before deploy |
+
+### Skip Flags (unchanged API)
+
+- `SKIP_PREPUSH=1` — bypass pre-commit **and** pre-push entirely
+- `SKIP_LINT=1` — skip prettier/eslint/stylelint/markdownlint/actionlint/shellcheck/knip
 - `SKIP_TYPECHECK=1` — skip TypeScript typecheck
 - `SKIP_UNIT=1` — skip Vitest unit tests
-- `SKIP_STORYBOOK=1` — skip Storybook interaction tests
-- `SKIP_VR=1` — skip visual regression tests
-- `SKIP_E2E=1` — skip Playwright end-to-end tests
+- `SKIP_STORYBOOK=1` — skip Storybook (not run by default on pre-push)
+- `SKIP_VR=1` — skip visual regression (not run by default on pre-push)
+- `SKIP_E2E=1` — skip Playwright e2e (not run by default on pre-push)
 
 Example: `SKIP_E2E=1 SKIP_VR=1 git push`
 
-When skipping a check, **always document the reason** in the commit message or PR
-description (e.g. "SKIP_E2E=1 — E2E requires a running server, verified manually").
+When skipping a check, **always document the reason** in the commit message or
+PR description (e.g. "SKIP_E2E=1 — E2E requires a running server, verified
+manually").
 
-### Storybook Tests
+### Branch Protection
 
-Storybook tests require the dev server to be running on port 6006 before pushing:
-
-```bash
-# Option A — start manually, then push in a second terminal
-yarn storybook
-
-# Option B — let the hook start/stop the server automatically
-START_STORYBOOK=1 git push
-
-# Option C — skip storybook tests entirely
-SKIP_STORYBOOK=1 git push
-```
+Required status checks on `master`: `Lint`, `Type Check`, `Unit Tests`,
+`Storybook Tests`, `Build`, `E2E — chromium`. The consolidated `Lint` job
+runs prettier, eslint, stylelint, markdownlint, actionlint, shellcheck,
+and knip as internal steps — each step is individually gated by its
+detect-changes bucket, so unaffected linters are skipped while still
+sharing one install. Conditionally-skipped jobs exit 0 early → GitHub
+shows them green.
 
 ### Visual Regression Tests
 
@@ -148,19 +152,12 @@ VR tests use Docker to ensure screenshots match CI exactly (Linux/Chromium).
 
 1. `yarn test:vr` — detects diffs, prints image paths on failure
 2. Review diff images (Claude can read PNGs with the Read tool)
-3. If change is intentional: `yarn test:vr:update` — updates baselines, then push
+3. If change is intentional: `yarn test:vr:update` — updates baselines, then
+   push
 4. If change is unintentional: fix the bug, then push
 
-**First-time setup:** baselines are auto-generated on first push if missing.
-
-**Requires Docker running.** If Docker is not available, the VR check is skipped with a warning.
-
-**Agent checklist when VR fails:**
-
-- Read the diff PNG paths printed by the hook
-- Compare with recent code changes — is this expected?
-- If yes: run `yarn test:vr:update`, commit updated baselines, then push
-- If no: investigate and fix before pushing
+**Requires Docker running.** If Docker is not available, the VR check is skipped
+with a warning.
 
 ## Architecture Documentation
 
