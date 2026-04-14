@@ -1,4 +1,6 @@
 export { classicSkin } from './classic-skin';
+export { SkinHarness } from './SkinHarness';
+export type { SkinHarnessProps } from './SkinHarness';
 export type {
   GameSkin,
   GameSkinCelebrationOverlayProps,
