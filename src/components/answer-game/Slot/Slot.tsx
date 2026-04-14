@@ -9,6 +9,7 @@ interface SlotProps {
   index: number;
   as?: 'li' | 'span' | 'div';
   className?: string;
+  style?: React.CSSProperties;
   children: (props: SlotRenderProps) => ReactNode;
   /**
    * Optional custom preview renderer. Invoked during drag-hover or swap
@@ -29,6 +30,7 @@ export const Slot = ({
   index,
   as: Tag = 'li',
   className,
+  style,
   children,
   renderPreview,
   skin,
@@ -111,6 +113,7 @@ export const Slot = ({
     ...correctStyle,
     ...wrongStyle,
     ...previewStyle,
+    ...style,
   };
 
   return (
