@@ -37,6 +37,9 @@ jobs:
       - name: Markdownlint
         run: npx markdownlint-cli2 "**/*.md" "#node_modules" "#.specstory" "#.cursor" "#dist" "#worktrees"
 
+      - name: Shell script tests (determine-bump, workflow guards)
+        run: yarn test:scripts
+
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
