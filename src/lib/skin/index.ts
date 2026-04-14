@@ -8,6 +8,7 @@ export type {
   GameSkinZoneSnapshot,
 } from './game-skin';
 export {
+  __resetSkinRegistryForTests,
   getRegisteredSkins,
   registerSkin,
   resolveSkin,
