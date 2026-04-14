@@ -1,4 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { detectChecks, TRIGGERS, ALL_CHECKS } from './detect-buckets.mjs';
 
 describe('TRIGGERS', () => {
@@ -82,5 +85,47 @@ describe('detectChecks — negative cases', () => {
     const result = detectChecks(['src/components/Foo.stories.mdx']);
     expect(result).not.toContain('markdownlint');
     expect(result).toContain('prettier');
+  });
+});
+
+const SCRIPT = path.resolve(process.cwd(), 'scripts/detect-buckets.mjs');
+
+const runCli = (args) =>
+  execFileSync('node', [SCRIPT, ...args], { encoding: 'utf8' }).trim();
+
+describe('CLI — --files mode', () => {
+  it('prints space-separated checks for an explicit file list', () => {
+    const out = runCli(['--files', 'README.md']);
+    expect(out.split(/\s+/).sort()).toEqual(['markdownlint', 'prettier']);
+  });
+
+  it('--force-all emits every check', () => {
+    const out = runCli(['--force-all']);
+    const checks = out.split(/\s+/).sort();
+    expect(checks).toContain('e2e');
+    expect(checks).toContain('build');
+    expect(checks).toContain('prettier');
+    expect(checks.length).toBe(13);
+  });
+
+  it('empty --files input prints empty line', () => {
+    const out = runCli(['--files']);
+    expect(out).toBe('');
+  });
+
+  it('--github-output writes key=value to the file in $GITHUB_OUTPUT', () => {
+    const outPath = path.join(
+      process.env.RUNNER_TEMP || '/tmp',
+      `detect-buckets-test-${process.pid}.txt`,
+    );
+    execFileSync(
+      'node',
+      [SCRIPT, '--force-all', '--github-output'],
+      { env: { ...process.env, GITHUB_OUTPUT: outPath }, encoding: 'utf8' },
+    );
+    const contents = readFileSync(outPath, 'utf8');
+    expect(contents).toMatch(/^prettier=true$/m);
+    expect(contents).toMatch(/^e2e=true$/m);
+    expect(contents).toMatch(/^build=true$/m);
   });
 });
