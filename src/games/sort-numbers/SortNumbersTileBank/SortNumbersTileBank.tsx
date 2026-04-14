@@ -70,6 +70,14 @@ export const SortNumbersTileBank = ({
   } = useAnswerGameContext();
   const { bankRef, isDragOver } = useBankDropTarget();
 
+  // Bank tile placeholders (the "hole" left when a tile is dragged out and
+  // the hover-target indicator) honor the skin's tile-radius so a custom
+  // round skin doesn't show square placeholders mid-drag.
+  const isCustomSkin = skin && skin.id !== 'classic';
+  const holeRadiusStyle: React.CSSProperties | undefined = isCustomSkin
+    ? { borderRadius: 'var(--skin-tile-radius)' }
+    : undefined;
+
   return (
     <div
       ref={bankRef}
@@ -93,11 +101,13 @@ export const SortNumbersTileBank = ({
               <div
                 key={tile.id}
                 className="relative size-14 rounded-xl transition-all"
+                style={holeRadiusStyle}
               >
                 <div
                   data-tile-bank-hole={tile.id}
                   className="size-14 rounded-xl bg-muted/60 shadow-inner"
                   aria-hidden="true"
+                  style={holeRadiusStyle}
                 />
                 <div
                   className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
@@ -109,6 +119,7 @@ export const SortNumbersTileBank = ({
                   <div
                     className="pointer-events-none absolute inset-0 rounded-xl border-2 border-dashed border-primary"
                     aria-hidden="true"
+                    style={holeRadiusStyle}
                   />
                 )}
               </div>
@@ -121,6 +132,7 @@ export const SortNumbersTileBank = ({
               data-tile-bank-hole={tile.id}
               className={`relative size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
               aria-hidden="true"
+              style={holeRadiusStyle}
             >
               {isHoverTarget && (
                 <span

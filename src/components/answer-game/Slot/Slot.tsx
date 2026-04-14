@@ -82,24 +82,32 @@ export const Slot = ({
     .filter(Boolean)
     .join(' ');
 
+  // Custom skins drive their own colors AND shape. The radius doesn't conflict
+  // with state classes (Tailwind state classes don't change border-radius), so
+  // it's safe to apply for every state. Background and border colors only apply
+  // when no state override is active (wrong/preview keep their state colors).
   const isCustomSkin = skin && skin.id !== 'classic';
   const hasColorStateOverride = isWrong || isPreview;
-  const slotTokenStyle: React.CSSProperties =
+  const skinShape: React.CSSProperties = isCustomSkin
+    ? { borderRadius: 'var(--skin-slot-radius)' }
+    : {};
+  const skinColors: React.CSSProperties =
     isCustomSkin && !hasColorStateOverride
       ? {
           background: 'var(--skin-slot-bg)',
           borderColor: 'var(--skin-slot-border)',
-          borderRadius: 'var(--skin-slot-radius)',
         }
       : {};
 
   const finalStyle: React.CSSProperties | undefined = isPreview
     ? {
-        ...slotTokenStyle,
+        ...skinShape,
+        ...skinColors,
         animation: 'pulse-ring 1.5s ease-in-out infinite',
       }
-    : Object.keys(slotTokenStyle).length > 0
-      ? slotTokenStyle
+    : Object.keys(skinShape).length > 0 ||
+        Object.keys(skinColors).length > 0
+      ? { ...skinShape, ...skinColors }
       : undefined;
 
   return (
