@@ -78,26 +78,40 @@ export const useSlotTileDrag = ({
             input: location.current.input,
           }),
           render({ container }) {
+            // Build a FRESH div (not cloneNode). Copy the button's inner
+            // markup so child styling (font-bold, tabular-nums, etc.) is
+            // preserved via document-level stylesheets, and apply resolved
+            // outer styles explicitly so the ghost is self-contained and
+            // doesn't depend on ancestor CSS vars or `rounded-[inherit]`.
             const rect = element.getBoundingClientRect();
-            // Clone the source button so the ghost matches the tile exactly
-            // (background gradient, border-radius, font, etc.) — works for
-            // both classic skeuomorphic tiles and custom-skinned tiles.
-            const ghost = element.cloneNode(true) as HTMLElement;
-            ghost.removeAttribute('id');
-            // Snapshot computed styles that we want to preserve regardless of
-            // where the ghost is appended (computed values resolve at
-            // append-time inside the drag-preview container).
             const computed = getComputedStyle(element);
+            const ghost = document.createElement('div');
+            ghost.innerHTML = element.innerHTML;
+            // border-radius shorthand can serialize to '' when set via
+            // `inherit`; read longhands explicitly.
+            const radius = [
+              computed.borderTopLeftRadius,
+              computed.borderTopRightRadius,
+              computed.borderBottomRightRadius,
+              computed.borderBottomLeftRadius,
+            ].join(' ');
             Object.assign(ghost.style, {
               width: `${rect.width}px`,
               height: `${rect.height}px`,
-              margin: '0',
-              pointerEvents: 'none',
-              boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-              transform: 'scale(1.08)',
-              borderRadius: computed.borderRadius,
-              background: computed.background,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: computed.backgroundColor,
+              backgroundImage: computed.backgroundImage,
               color: computed.color,
+              borderRadius: radius,
+              fontSize: computed.fontSize,
+              fontFamily: computed.fontFamily,
+              fontWeight: computed.fontWeight,
+              border: '1px solid rgba(0,0,0,0.15)',
+              boxSizing: 'border-box',
+              transform: 'scale(1.08)',
+              pointerEvents: 'none',
             });
             container.append(ghost);
             return () => ghost.remove();
