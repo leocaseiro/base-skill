@@ -71,5 +71,10 @@ export const classicSkin: GameSkin = {
     // ── Sentence-with-gaps tokens ─────────────────────────────────
     '--skin-sentence-gap-border': 'currentColor',
     '--skin-sentence-gap-style': 'dashed',
+
+    // ── Domino pip tokens ─────────────────────────────────────────
+    '--skin-pip-color': 'currentColor',
+    '--skin-pip-divider-color': 'currentColor',
+    '--skin-pip-divider-opacity': '0.3',
   },
 };

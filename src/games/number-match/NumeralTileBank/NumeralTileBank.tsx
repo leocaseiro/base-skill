@@ -47,10 +47,12 @@ const DiceFace = ({ value }: { value: number }) => {
           key={i}
           data-cell=""
           data-pip={pips.includes(i) ? '' : undefined}
-          className={[
-            'size-2.5 rounded-full',
-            pips.includes(i) ? 'bg-current' : 'bg-transparent',
-          ].join(' ')}
+          className="size-2.5 rounded-full"
+          style={{
+            background: pips.includes(i)
+              ? 'var(--skin-pip-color)'
+              : 'transparent',
+          }}
         />
       ))}
     </div>
@@ -64,7 +66,11 @@ export const DominoTile = ({ value }: { value: number }) => {
       <DiceFace value={top} />
       <span
         data-divider=""
-        className="h-px w-11 shrink-0 bg-current opacity-30"
+        className="h-px w-11 shrink-0"
+        style={{
+          background: 'var(--skin-pip-divider-color)',
+          opacity: 'var(--skin-pip-divider-opacity)',
+        }}
       />
       <DiceFace value={bottom} />
     </div>
