@@ -1,6 +1,6 @@
 import type { TileItem } from '@/components/answer-game/types';
 import type { GameSkin } from '@/lib/skin';
-import { skeuoStyle } from '@/components/answer-game/styles';
+import { tileStyle } from '@/components/answer-game/styles';
 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
@@ -23,9 +23,9 @@ const NumberTile = ({
   } = useDraggableTile(tile);
 
   const isCustomSkin = skin && skin.id !== 'classic';
-  const tileStyle: React.CSSProperties = isCustomSkin
+  const resolvedTileStyle: React.CSSProperties = isCustomSkin
     ? {
-        ...skeuoStyle,
+        ...tileStyle(),
         background: 'var(--skin-tile-bg)',
         color: 'var(--skin-tile-text)',
         borderRadius: 'var(--skin-tile-radius)',
@@ -34,7 +34,7 @@ const NumberTile = ({
         fontWeight:
           'var(--skin-tile-font-weight)' as React.CSSProperties['fontWeight'],
       }
-    : skeuoStyle;
+    : tileStyle();
 
   return (
     <button
@@ -42,7 +42,7 @@ const NumberTile = ({
       type="button"
       aria-label={`Number ${tile.label}`}
       className={`flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums transition-transform active:scale-95 active:cursor-grabbing`}
-      style={tileStyle}
+      style={resolvedTileStyle}
       onClick={handleClick}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -105,9 +105,13 @@ export const SortNumbersTileBank = ({
               >
                 <div
                   data-tile-bank-hole={tile.id}
-                  className="size-14 rounded-xl bg-muted/60 shadow-inner"
+                  className="size-14 rounded-xl"
                   aria-hidden="true"
-                  style={holeRadiusStyle}
+                  style={{
+                    background: 'var(--skin-bank-hole-bg)',
+                    boxShadow: 'var(--skin-bank-hole-shadow)',
+                    ...holeRadiusStyle,
+                  }}
                 />
                 <div
                   className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
@@ -117,9 +121,14 @@ export const SortNumbersTileBank = ({
                 </div>
                 {isHoverTarget && (
                   <div
-                    className="pointer-events-none absolute inset-0 rounded-xl border-2 border-dashed border-primary"
+                    className="pointer-events-none absolute inset-0 rounded-xl border-2"
                     aria-hidden="true"
-                    style={holeRadiusStyle}
+                    style={{
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                      ...holeRadiusStyle,
+                    }}
                   />
                 )}
               </div>
@@ -130,9 +139,20 @@ export const SortNumbersTileBank = ({
             <div
               key={tile.id}
               data-tile-bank-hole={tile.id}
-              className={`relative size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' border-2' : ''}`}
               aria-hidden="true"
-              style={holeRadiusStyle}
+              style={{
+                background: 'var(--skin-bank-hole-bg)',
+                boxShadow: 'var(--skin-bank-hole-shadow)',
+                ...(isHoverTarget
+                  ? {
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                    }
+                  : {}),
+                ...holeRadiusStyle,
+              }}
             >
               {isHoverTarget && (
                 <span

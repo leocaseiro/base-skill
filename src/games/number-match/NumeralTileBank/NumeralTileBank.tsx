@@ -1,5 +1,5 @@
 import type { TileItem } from '@/components/answer-game/types';
-import { skeuoStyle } from '@/components/answer-game/styles';
+import { tileStyle as tileSurfaceStyle } from '@/components/answer-game/styles';
 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
@@ -47,10 +47,12 @@ const DiceFace = ({ value }: { value: number }) => {
           key={i}
           data-cell=""
           data-pip={pips.includes(i) ? '' : undefined}
-          className={[
-            'size-2.5 rounded-full',
-            pips.includes(i) ? 'bg-current' : 'bg-transparent',
-          ].join(' ')}
+          className="size-2.5 rounded-full"
+          style={{
+            background: pips.includes(i)
+              ? 'var(--skin-pip-color)'
+              : 'transparent',
+          }}
         />
       ))}
     </div>
@@ -64,7 +66,11 @@ export const DominoTile = ({ value }: { value: number }) => {
       <DiceFace value={top} />
       <span
         data-divider=""
-        className="h-px w-11 shrink-0 bg-current opacity-30"
+        className="h-px w-11 shrink-0"
+        style={{
+          background: 'var(--skin-pip-divider-color)',
+          opacity: 'var(--skin-pip-divider-opacity)',
+        }}
       />
       <DiceFace value={bottom} />
     </div>
@@ -113,7 +119,7 @@ const NumeralTile = ({
         'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl p-2 transition-transform active:scale-95 active:cursor-grabbing',
         sizeClass,
       ].join(' ')}
-      style={skeuoStyle}
+      style={tileSurfaceStyle()}
       onClick={handleClick}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -201,12 +207,13 @@ export const NumeralTileBank = ({
               >
                 <div
                   data-tile-bank-hole={tile.id}
-                  className={[
-                    'rounded-2xl bg-muted/60 shadow-inner',
-                    holeSizeClass,
-                  ]
+                  className={['rounded-2xl', holeSizeClass]
                     .filter(Boolean)
                     .join(' ')}
+                  style={{
+                    background: 'var(--skin-bank-hole-bg)',
+                    boxShadow: 'var(--skin-bank-hole-shadow)',
+                  }}
                   aria-hidden="true"
                 />
                 <div
@@ -221,7 +228,12 @@ export const NumeralTileBank = ({
                 </div>
                 {isHoverTarget && (
                   <div
-                    className="pointer-events-none absolute inset-0 rounded-2xl border-2 border-dashed border-primary"
+                    className="pointer-events-none absolute inset-0 rounded-2xl border-2"
+                    style={{
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                    }}
                     aria-hidden="true"
                   />
                 )}
@@ -234,14 +246,23 @@ export const NumeralTileBank = ({
               key={tile.id}
               data-tile-bank-hole={tile.id}
               className={[
-                'relative rounded-2xl bg-muted/60 shadow-inner transition-all',
+                'relative rounded-2xl transition-all',
                 holeSizeClass,
-                isHoverTarget
-                  ? 'border-2 border-dashed border-primary'
-                  : '',
+                isHoverTarget ? 'border-2' : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
+              style={{
+                background: 'var(--skin-bank-hole-bg)',
+                boxShadow: 'var(--skin-bank-hole-shadow)',
+                ...(isHoverTarget
+                  ? {
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                    }
+                  : {}),
+              }}
               aria-hidden="true"
             >
               {isHoverTarget &&

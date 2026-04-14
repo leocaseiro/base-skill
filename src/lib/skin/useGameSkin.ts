@@ -55,7 +55,7 @@ export function useGameSkin(gameId: string, skinId?: string): GameSkin {
       bus.subscribe('game:end', (event) => {
         if (event.type !== 'game:end') return;
         if (event.gameId !== gameId) return;
-        skin.onGameOver?.(0); // retryCount not yet wired through event
+        skin.onGameOver?.(event.retryCount);
       }),
     ];
 
