@@ -32,7 +32,12 @@ export const TRIGGERS = {
     '.storybook/**',
     'package.json',
   ],
-  vr: ['**/*.stories.*', 'src/**/*.{ts,tsx,css}', 'public/**', 'e2e/**'],
+  vr: [
+    '**/*.stories.*',
+    'src/**/*.{ts,tsx,css}',
+    'public/**',
+    'e2e/**',
+  ],
   e2e: ['e2e/**', 'src/**', 'public/**', 'playwright.config.*'],
   build: [
     'src/**',
@@ -135,9 +140,13 @@ const parseArgs = (argv) => {
 
 const gitFiles = ({ staged, base }) => {
   if (staged) {
-    const out = execFileSync('git', ['diff', '--name-only', '--cached'], {
-      encoding: 'utf8',
-    });
+    const out = execFileSync(
+      'git',
+      ['diff', '--name-only', '--cached'],
+      {
+        encoding: 'utf8',
+      },
+    );
     return out.split('\n').filter(Boolean);
   }
   if (base) {
@@ -192,13 +201,16 @@ const main = () => {
     if (fromGit === null) {
       const checks = new Set(ALL_CHECKS);
       if (args.githubOutput) writeGithubOutput(checks);
-      else process.stdout.write(`${[...checks].toSorted().join(' ')}\n`);
+      else
+        process.stdout.write(`${[...checks].toSorted().join(' ')}\n`);
       return;
     }
     files = fromGit;
   }
   if (args.verbose) {
-    process.stderr.write(`detect-buckets: ${files.length} changed files\n`);
+    process.stderr.write(
+      `detect-buckets: ${files.length} changed files\n`,
+    );
     for (const f of files) process.stderr.write(`  ${f}\n`);
   }
   const checks = detectChecks(files);

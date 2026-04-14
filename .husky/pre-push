@@ -75,11 +75,11 @@ if has_check "unit"; then
   if [ "${SKIP_UNIT:-0}" = "1" ]; then
     skip "Unit tests"
   else
-    CHANGED=$(git diff --name-only "$(git merge-base HEAD origin/master)..HEAD" \
+    mapfile -t CHANGED < <(git diff --name-only "$(git merge-base HEAD origin/master)..HEAD" \
       | grep -E '\.(ts|tsx|js|mjs|cjs)$' || true)
-    if [ -n "$CHANGED" ]; then
+    if [ "${#CHANGED[@]}" -gt 0 ]; then
       info "Running: vitest related"
-      if npx vitest related $CHANGED --run; then
+      if npx vitest related "${CHANGED[@]}" --run; then
         pass "Unit tests (vitest related)"
       else
         fail "Unit tests"

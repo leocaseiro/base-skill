@@ -137,6 +137,10 @@ jobs:
       - if: needs.detect-changes.outputs.actionlint == 'true'
         uses: actions/checkout@v6
       - if: needs.detect-changes.outputs.actionlint == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+      - if: needs.detect-changes.outputs.actionlint == 'true'
         uses: raven-actions/actionlint@v2
 
   shellcheck:
