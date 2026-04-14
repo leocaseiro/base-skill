@@ -11,6 +11,8 @@ import {
 } from './slot-animations';
 import type { RefObject } from 'react';
 import { playSound } from '@/lib/audio/AudioFeedback';
+import { getGameEventBus } from '@/lib/game-event-bus';
+import { resolveSkin, resolveTiming } from '@/lib/skin';
 
 export interface SlotRenderProps {
   label: string | null;
@@ -44,6 +46,7 @@ export interface UseSlotBehaviorReturn {
 export const useSlotBehavior = (
   index: number,
 ): UseSlotBehaviorReturn => {
+  const state = useAnswerGameContext();
   const {
     zones,
     allTiles,
@@ -52,7 +55,8 @@ export const useSlotBehavior = (
     config,
     dragActiveTileId,
     dragHoverZoneIndex,
-  } = useAnswerGameContext();
+  } = state;
+  const stateRef = useRef(state);
   const dispatch = useAnswerGameDispatch();
   const { placeTile } = useTileEvaluation();
 
@@ -63,6 +67,13 @@ export const useSlotBehavior = (
   const isWrong = zone?.isWrong ?? false;
   const isLocked = zone?.isLocked ?? false;
   const isEmpty = tileId === null;
+
+  const skin = resolveSkin(config.gameId, config.skin);
+  const autoEjectDelay = resolveTiming(
+    'autoEjectDelay',
+    skin,
+    config.timing,
+  );
 
   // Resolve interaction mode: explicit config or inferred from inputMethod
   const slotInteraction =
@@ -110,6 +121,13 @@ export const useSlotBehavior = (
   // Holds the startFade handle returned by triggerEjectReturn so we can call
   // it when EJECT_TILE fires and the tile is back in the bank.
   const startFadeRef = useRef<(() => void) | null>(null);
+
+  // Mirror state in a ref so drop-target callbacks can read current
+  // gameId/roundIndex without adding `state` to the effect's deps
+  // (which would re-subscribe the drop target on every state change).
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   // Drop target handler — choose evaluation or swap based on interaction mode
   const handleDrop = useCallback(
@@ -172,6 +190,15 @@ export const useSlotBehavior = (
       getData: () => ({ zoneIndex: index }),
       onDragEnter: () => {
         dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: index });
+        getGameEventBus().emit({
+          type: 'game:drag-over-zone',
+          gameId: stateRef.current.config.gameId,
+          sessionId: '',
+          profileId: '',
+          timestamp: Date.now(),
+          roundIndex: stateRef.current.roundIndex,
+          zoneIndex: index,
+        });
       },
       onDragLeave: () => {
         dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
@@ -195,6 +222,17 @@ export const useSlotBehavior = (
   const handleHoverZone = useCallback(
     (zoneIndex: number | null) => {
       dispatch({ type: 'SET_DRAG_HOVER', zoneIndex });
+      if (zoneIndex !== null) {
+        getGameEventBus().emit({
+          type: 'game:drag-over-zone',
+          gameId: stateRef.current.config.gameId,
+          sessionId: '',
+          profileId: '',
+          timestamp: Date.now(),
+          roundIndex: stateRef.current.roundIndex,
+          zoneIndex,
+        });
+      }
     },
     [dispatch],
   );
@@ -297,10 +335,28 @@ export const useSlotBehavior = (
     if (!isWrong || config.wrongTileBehavior !== 'lock-auto-eject')
       return;
     const timerId = setTimeout(() => {
+      const ejectedTileId =
+        stateRef.current.zones[index]?.placedTileId ?? null;
       dispatch({ type: 'EJECT_TILE', zoneIndex: index });
-    }, 1000);
+      getGameEventBus().emit({
+        type: 'game:tile-ejected',
+        gameId: stateRef.current.config.gameId,
+        sessionId: '',
+        profileId: '',
+        timestamp: Date.now(),
+        roundIndex: stateRef.current.roundIndex,
+        zoneIndex: index,
+        tileId: ejectedTileId,
+      });
+    }, autoEjectDelay);
     return () => clearTimeout(timerId);
-  }, [isWrong, config.wrongTileBehavior, dispatch, index]);
+  }, [
+    isWrong,
+    config.wrongTileBehavior,
+    dispatch,
+    index,
+    autoEjectDelay,
+  ]);
 
   return {
     renderProps: {
