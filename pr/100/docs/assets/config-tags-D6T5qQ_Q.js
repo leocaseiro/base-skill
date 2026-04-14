@@ -1,0 +1,1 @@
+const e=[["inputMethod",String],["mode",String],["tileUnit",String],["direction",String],["totalRounds",t=>`${String(t)} rounds`],["ttsEnabled",t=>t===!0?"TTS on":null]],s=t=>{if(!t)return[];const n=[];for(const[r,i]of e){if(r in t){const o=i(t[r]);o!==null&&n.push(o)}if(n.length===4)break}return n};export{s as c};
