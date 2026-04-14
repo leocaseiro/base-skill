@@ -48,14 +48,39 @@ vi.mock('./useAnswerGameContext', () => ({
   }),
 }));
 
+const mockDispatch = vi.fn();
+
 vi.mock('./useAnswerGameDispatch', () => ({
-  useAnswerGameDispatch: () => vi.fn(),
+  useAnswerGameDispatch: () => mockDispatch,
 }));
 
 const mockPlaceTile = vi.fn();
 
 vi.mock('./useTileEvaluation', () => ({
   useTileEvaluation: () => ({ placeTile: mockPlaceTile }),
+}));
+
+// Capture the options passed to useTouchDrag so tests can invoke the touch
+// callbacks directly without simulating real pointer events.
+type CapturedTouchDragOptions = {
+  onDropOnBank?: () => void;
+  onDropOnBankTile?: (bankTileId: string) => void;
+};
+
+let capturedTouchDragOptions: CapturedTouchDragOptions | null = null;
+
+vi.mock('./useTouchDrag', () => ({
+  useTouchDrag: vi
+    .fn()
+    .mockImplementation((opts: CapturedTouchDragOptions) => {
+      capturedTouchDragOptions = opts;
+      return {
+        onPointerDown: vi.fn(),
+        onPointerMove: vi.fn(),
+        onPointerUp: vi.fn(),
+        onPointerCancel: vi.fn(),
+      };
+    }),
 }));
 
 const providerConfig: AnswerGameConfig = {
@@ -124,5 +149,46 @@ describe('useDraggableTile', () => {
       onDragEnter: () => void;
     };
     expect(typeof dropArgs.onDragEnter).toBe('function');
+  });
+
+  describe('touch drag — onDropOnBank', () => {
+    it('clears drag state when bank tile is released back onto the bank', () => {
+      // Regression: dragging a bank tile a few pixels then releasing within the
+      // bank left dragActiveTileId set, making the tile permanently faded and
+      // uninteractable. onDropOnBank must reset the active drag state.
+      capturedTouchDragOptions = null;
+      mockDispatch.mockClear();
+
+      renderHook(() => useDraggableTile(tile));
+
+      expect(capturedTouchDragOptions?.onDropOnBank).toBeDefined();
+      act(() => capturedTouchDragOptions?.onDropOnBank?.());
+
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'SET_DRAG_ACTIVE',
+        tileId: null,
+      });
+    });
+  });
+
+  describe('touch drag — onDropOnBankTile', () => {
+    it('clears drag state when bank tile is dropped onto another bank tile hole', () => {
+      // Same regression path — dropping on a bank tile hole also left
+      // dragActiveTileId set when onDropOnBankTile was not provided.
+      capturedTouchDragOptions = null;
+      mockDispatch.mockClear();
+
+      renderHook(() => useDraggableTile(tile));
+
+      expect(capturedTouchDragOptions?.onDropOnBankTile).toBeDefined();
+      act(() =>
+        capturedTouchDragOptions?.onDropOnBankTile?.('other-tile'),
+      );
+
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'SET_DRAG_ACTIVE',
+        tileId: null,
+      });
+    });
   });
 });
