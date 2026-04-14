@@ -39,6 +39,7 @@ export function useTileEvaluation(): TileEvaluation {
         answer: tileId,
         correct,
         nearMiss: false,
+        zoneIndex,
       });
     },
     [state, dispatch],
@@ -69,6 +70,7 @@ export function useTileEvaluation(): TileEvaluation {
         answer: value,
         correct,
         nearMiss: false,
+        zoneIndex,
       });
     },
     [state, dispatch],
