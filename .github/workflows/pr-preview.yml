@@ -15,8 +15,27 @@ permissions:
   pull-requests: write
 
 jobs:
+  detect-changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.filter.outputs.build }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - id: filter
+        run: node scripts/detect-buckets.mjs --base=${{ github.event.pull_request.base.sha }} --github-output
+
   deploy-preview:
     name: Build and deploy preview
+    needs: detect-changes
+    if: needs.detect-changes.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
