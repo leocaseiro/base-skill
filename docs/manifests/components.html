@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/42 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">42/42 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">3/170 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/172 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -4369,6 +4369,163 @@ sessionId?: string</code></pre>
 </article>
 <article
   class="card 
+  has-error 
+  has-info 
+  has-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="NumberMatchWithHarness">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> NumberMatchWithHarness</h2>
+      <div class="badges">
+        <label for="c-27-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-27-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-27-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/games/number-match/NumberMatch/NumberMatch.skin.stories.tsx">games-numbermatch-skin-harness · ./src/games/number-match/NumberMatch/NumberMatch.skin.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-27-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-27-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-27-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;NumberMatchWithHarness&quot; component.
+  58 | );
+  59 |
+&gt; 60 | const meta: Meta&lt;typeof NumberMatchWithHarness&gt; = {
+     | ^
+  61 |   title: &#39;Games/NumberMatch/Skin Harness&#39;,
+  62 |   component: NumberMatchWithHarness,
+  63 |   tags: [&#39;autodocs&#39;],
+
+./src/games/number-match/NumberMatch/NumberMatch.skin.stories.tsx:
+import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
+import { withRouter } from &#39;../../../../.storybook/decorators/withRouter&#39;;
+import { NumberMatch } from &#39;./NumberMatch&#39;;
+import type { NumberMatchConfig } from &#39;../types&#39;;
+import type { GameSkin } from &#39;@/lib/skin&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import { SkinHarness, registerSkin } from &#39;@/lib/skin&#39;;
+
+const demoSkin: GameSkin = {
+  id: &#39;demo&#39;,
+  name: &#39;Demo Teal&#39;,
+  tokens: {
+    &#39;--skin-tile-bg&#39;: &#39;#14b8a6&#39;,
+    &#39;--skin-tile-text&#39;: &#39;#fff&#39;,
+    &#39;--skin-tile-radius&#39;: &#39;1rem&#39;,
+    &#39;--skin-slot-bg&#39;: &#39;#f0fdfa&#39;,
+    &#39;--skin-slot-border&#39;: &#39;#2dd4bf&#39;,
+    &#39;--skin-slot-radius&#39;: &#39;1rem&#39;,
+    &#39;--skin-pip-color&#39;: &#39;#0f766e&#39;,
+    &#39;--skin-pip-divider-color&#39;: &#39;#0f766e&#39;,
+    &#39;--skin-question-audio-bg&#39;: &#39;#14b8a6&#39;,
+  },
+  onCorrectPlace: (zoneIndex, value) =&gt; {
+    console.log(`[number-match demo] correct @ ${zoneIndex}: ${value}`);
+  },
+  onWrongPlace: (zoneIndex, value) =&gt; {
+    console.log(`[number-match demo] wrong @ ${zoneIndex}: ${value}`);
+  },
+};
+
+registerSkin(&#39;number-match&#39;, demoSkin);
+
+const baseConfig: NumberMatchConfig = {
+  gameId: &#39;number-match&#39;,
+  component: &#39;NumberMatch&#39;,
+  inputMethod: &#39;drag&#39;,
+  wrongTileBehavior: &#39;lock-manual&#39;,
+  tileBankMode: &#39;exact&#39;,
+  totalRounds: 3,
+  roundsInOrder: true,
+  ttsEnabled: false,
+  mode: &#39;numeral-to-group&#39;,
+  tileStyle: &#39;dots&#39;,
+  range: { min: 1, max: 6 },
+  rounds: [{ value: 3 }, { value: 5 }, { value: 2 }],
+};
+
+const NumberMatchWithHarness = ({
+  config,
+}: {
+  config: NumberMatchConfig;
+}) =&gt; (
+  &lt;SkinHarness gameId=&quot;number-match&quot;&gt;
+    {({ skin }) =&gt; (
+      &lt;NumberMatch config={{ ...config, skin: skin.id }} /&gt;
+    )}
+  &lt;/SkinHarness&gt;
+);
+
+const meta: Meta&lt;typeof NumberMatchWithHarness&gt; = {
+  title: &#39;Games/NumberMatch/Skin Harness&#39;,
+  component: NumberMatchWithHarness,
+  tags: [&#39;autodocs&#39;],
+  decorators: [withDb, withRouter],
+  args: { config: baseConfig },
+};
+export default meta;
+
+type Story = StoryObj&lt;typeof NumberMatchWithHarness&gt;;
+
+export const Default: Story = {};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+            <div class="note err">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge err">story error</span>
+              </div>
+              
+              
+              
+              <pre><code>Could not generate snippet without component name.</code></pre>
+            </div>
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { NumberMatch, SkinHarness } from "base-skill";</code></pre>
+              </div>
+          
+          
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
   no-error 
   has-info 
   no-story-error
@@ -4379,9 +4536,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NumeralTileBank</h2>
       <div class="badges">
-        <label for="c-27-games-number-match-numeraltilebank-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-27-games-number-match-numeraltilebank-info" class="badge info as-toggle">1 info</label>
-        <label for="c-27-games-number-match-numeraltilebank-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-28-games-number-match-numeraltilebank-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-28-games-number-match-numeraltilebank-info" class="badge info as-toggle">1 info</label>
+        <label for="c-28-games-number-match-numeraltilebank-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -4393,10 +4550,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-27-games-number-match-numeraltilebank-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-27-games-number-match-numeraltilebank-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-28-games-number-match-numeraltilebank-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-28-games-number-match-numeraltilebank-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-27-games-number-match-numeraltilebank-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-28-games-number-match-numeraltilebank-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4497,8 +4654,8 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
       <h2><span class="status-dot dot-ok"></span> OfflineIndicator</h2>
       <div class="badges">
         
-        <label for="c-28-components-offlineindicator-info" class="badge info as-toggle">1 info</label>
-        <label for="c-28-components-offlineindicator-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-29-components-offlineindicator-info" class="badge info as-toggle">1 info</label>
+        <label for="c-29-components-offlineindicator-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -4510,8 +4667,8 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-28-components-offlineindicator-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-28-components-offlineindicator-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-29-components-offlineindicator-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-29-components-offlineindicator-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -4573,9 +4730,9 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SavedConfigChip</h2>
       <div class="badges">
-        <label for="c-29-components-savedconfigchip-props" class="badge ok as-toggle">6 prop types</label>
-        <label for="c-29-components-savedconfigchip-info" class="badge info as-toggle">1 info</label>
-        <label for="c-29-components-savedconfigchip-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-30-components-savedconfigchip-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-30-components-savedconfigchip-info" class="badge info as-toggle">1 info</label>
+        <label for="c-30-components-savedconfigchip-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -4587,10 +4744,10 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-29-components-savedconfigchip-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-29-components-savedconfigchip-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-30-components-savedconfigchip-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-30-components-savedconfigchip-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-29-components-savedconfigchip-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-30-components-savedconfigchip-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4724,9 +4881,9 @@ renderConfigForm?: (props: {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ScoreAnimation</h2>
       <div class="badges">
-        <label for="c-30-components-answer-game-scoreanimation-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-30-components-answer-game-scoreanimation-info" class="badge info as-toggle">1 info</label>
-        <label for="c-30-components-answer-game-scoreanimation-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-31-components-answer-game-scoreanimation-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-31-components-answer-game-scoreanimation-info" class="badge info as-toggle">1 info</label>
+        <label for="c-31-components-answer-game-scoreanimation-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -4738,10 +4895,10 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-30-components-answer-game-scoreanimation-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-30-components-answer-game-scoreanimation-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-31-components-answer-game-scoreanimation-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-31-components-answer-game-scoreanimation-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-30-components-answer-game-scoreanimation-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-31-components-answer-game-scoreanimation-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4813,8 +4970,8 @@ renderConfigForm?: (props: {
       <h2><span class="status-dot dot-ok"></span> Select</h2>
       <div class="badges">
         
-        <label for="c-31-components-ui-select-info" class="badge info as-toggle">1 info</label>
-        <label for="c-31-components-ui-select-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-32-components-ui-select-info" class="badge info as-toggle">1 info</label>
+        <label for="c-32-components-ui-select-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -4826,8 +4983,8 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-31-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-31-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-32-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-32-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -4912,8 +5069,8 @@ renderConfigForm?: (props: {
       <h2><span class="status-dot dot-ok"></span> Sheet</h2>
       <div class="badges">
         
-        <label for="c-32-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
-        <label for="c-32-components-ui-sheet-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-33-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
+        <label for="c-33-components-ui-sheet-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -4925,8 +5082,8 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-32-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-32-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-33-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-33-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -5020,9 +5177,9 @@ renderConfigForm?: (props: {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Slider</h2>
       <div class="badges">
-        <label for="c-33-components-ui-slider-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-33-components-ui-slider-info" class="badge info as-toggle">1 info</label>
-        <label for="c-33-components-ui-slider-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-34-components-ui-slider-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-34-components-ui-slider-info" class="badge info as-toggle">1 info</label>
+        <label for="c-34-components-ui-slider-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -5034,10 +5191,10 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-33-components-ui-slider-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-33-components-ui-slider-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-34-components-ui-slider-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-34-components-ui-slider-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-33-components-ui-slider-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-34-components-ui-slider-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5131,9 +5288,9 @@ min?: any = 0</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SlotRow</h2>
       <div class="badges">
-        <label for="c-34-answer-game-slot-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-34-answer-game-slot-info" class="badge info as-toggle">1 info</label>
-        <label for="c-34-answer-game-slot-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-35-answer-game-slot-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-35-answer-game-slot-info" class="badge info as-toggle">1 info</label>
+        <label for="c-35-answer-game-slot-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -5145,10 +5302,10 @@ min?: any = 0</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-34-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-34-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-35-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-35-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-34-answer-game-slot-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-35-answer-game-slot-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5438,9 +5595,9 @@ className?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbers</h2>
       <div class="badges">
-        <label for="c-35-games-sort-numbers-sortnumbers-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-35-games-sort-numbers-sortnumbers-info" class="badge info as-toggle">1 info</label>
-        <label for="c-35-games-sort-numbers-sortnumbers-stories" class="badge ok as-toggle">17 stories</label>
+        <label for="c-36-games-sort-numbers-sortnumbers-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-36-games-sort-numbers-sortnumbers-info" class="badge info as-toggle">1 info</label>
+        <label for="c-36-games-sort-numbers-sortnumbers-stories" class="badge ok as-toggle">17 stories</label>
         
       </div>
     </div>
@@ -5452,10 +5609,10 @@ className?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-35-games-sort-numbers-sortnumbers-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-35-games-sort-numbers-sortnumbers-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-36-games-sort-numbers-sortnumbers-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-36-games-sort-numbers-sortnumbers-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-35-games-sort-numbers-sortnumbers-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-36-games-sort-numbers-sortnumbers-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5701,9 +5858,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbersTileBank</h2>
       <div class="badges">
-        <label for="c-36-games-sort-numbers-sortnumberstilebank-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-36-games-sort-numbers-sortnumberstilebank-info" class="badge info as-toggle">1 info</label>
-        <label for="c-36-games-sort-numbers-sortnumberstilebank-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-37-games-sort-numbers-sortnumberstilebank-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-37-games-sort-numbers-sortnumberstilebank-info" class="badge info as-toggle">1 info</label>
+        <label for="c-37-games-sort-numbers-sortnumberstilebank-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -5715,10 +5872,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-36-games-sort-numbers-sortnumberstilebank-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-36-games-sort-numbers-sortnumberstilebank-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-37-games-sort-numbers-sortnumberstilebank-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-37-games-sort-numbers-sortnumberstilebank-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-36-games-sort-numbers-sortnumberstilebank-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-37-games-sort-numbers-sortnumberstilebank-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5798,9 +5955,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> TextQuestion</h2>
       <div class="badges">
-        <label for="c-37-components-questions-textquestion-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-37-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-37-components-questions-textquestion-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-38-components-questions-textquestion-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-38-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-38-components-questions-textquestion-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -5812,10 +5969,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-37-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-37-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-38-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-38-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-37-components-questions-textquestion-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-38-components-questions-textquestion-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5896,8 +6053,8 @@ sessionId?: string</code></pre>
       <h2><span class="status-dot dot-ok"></span> ThemeToggle</h2>
       <div class="badges">
         
-        <label for="c-38-components-themetoggle-info" class="badge info as-toggle">1 info</label>
-        <label for="c-38-components-themetoggle-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-39-components-themetoggle-info" class="badge info as-toggle">1 info</label>
+        <label for="c-39-components-themetoggle-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -5909,8 +6066,8 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-38-components-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-38-components-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-39-components-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-39-components-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -5964,8 +6121,8 @@ sessionId?: string</code></pre>
       <h2><span class="status-dot dot-ok"></span> UpdateBanner</h2>
       <div class="badges">
         
-        <label for="c-39-components-updatebanner-info" class="badge info as-toggle">1 info</label>
-        <label for="c-39-components-updatebanner-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-40-components-updatebanner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-40-components-updatebanner-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -5977,8 +6134,8 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-39-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-39-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-40-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-40-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6068,8 +6225,8 @@ sessionId?: string</code></pre>
       <h2><span class="status-dot dot-ok"></span> WordLibraryExplorer</h2>
       <div class="badges">
         
-        <label for="c-40-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-40-data-wordlibraryexplorer-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-41-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
+        <label for="c-41-data-wordlibraryexplorer-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -6081,8 +6238,8 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-40-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-40-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-41-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-41-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6135,9 +6292,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> WordSpell</h2>
       <div class="badges">
-        <label for="c-41-games-word-spell-wordspell-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-41-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-41-games-word-spell-wordspell-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-42-games-word-spell-wordspell-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-42-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
+        <label for="c-42-games-word-spell-wordspell-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -6149,10 +6306,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-41-games-word-spell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-41-games-word-spell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-42-games-word-spell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-42-games-word-spell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-41-games-word-spell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-42-games-word-spell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6305,6 +6462,162 @@ sessionId?: string</code></pre>
     
   </div>
 </article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  has-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="WordSpellWithHarness">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
+      <div class="badges">
+        <label for="c-43-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-43-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-43-games-wordspell-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx">games-wordspell-skin-harness · ./src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-43-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-43-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-43-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;WordSpellWithHarness&quot; component.
+  57 | );
+  58 |
+&gt; 59 | const meta: Meta&lt;typeof WordSpellWithHarness&gt; = {
+     | ^
+  60 |   title: &#39;Games/WordSpell/Skin Harness&#39;,
+  61 |   component: WordSpellWithHarness,
+  62 |   tags: [&#39;autodocs&#39;],
+
+./src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx:
+import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
+import { withRouter } from &#39;../../../../.storybook/decorators/withRouter&#39;;
+import { WordSpell } from &#39;./WordSpell&#39;;
+import type { WordSpellConfig } from &#39;../types&#39;;
+import type { GameSkin } from &#39;@/lib/skin&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import { SkinHarness, registerSkin } from &#39;@/lib/skin&#39;;
+
+const demoSkin: GameSkin = {
+  id: &#39;demo&#39;,
+  name: &#39;Demo Pink&#39;,
+  tokens: {
+    &#39;--skin-tile-bg&#39;: &#39;#ec4899&#39;,
+    &#39;--skin-tile-text&#39;: &#39;#fff&#39;,
+    &#39;--skin-tile-radius&#39;: &#39;50%&#39;,
+    &#39;--skin-slot-bg&#39;: &#39;#fdf2f8&#39;,
+    &#39;--skin-slot-border&#39;: &#39;#f472b6&#39;,
+    &#39;--skin-slot-radius&#39;: &#39;50%&#39;,
+    &#39;--skin-sentence-gap-border&#39;: &#39;#ec4899&#39;,
+    &#39;--skin-question-audio-bg&#39;: &#39;#ec4899&#39;,
+  },
+  onCorrectPlace: (zoneIndex, value) =&gt; {
+    console.log(`[word-spell demo] correct @ ${zoneIndex}: ${value}`);
+  },
+  onWrongPlace: (zoneIndex, value) =&gt; {
+    console.log(`[word-spell demo] wrong @ ${zoneIndex}: ${value}`);
+  },
+};
+
+registerSkin(&#39;word-spell&#39;, demoSkin);
+
+const baseConfig: WordSpellConfig = {
+  gameId: &#39;word-spell&#39;,
+  component: &#39;WordSpell&#39;,
+  inputMethod: &#39;drag&#39;,
+  wrongTileBehavior: &#39;lock-manual&#39;,
+  tileBankMode: &#39;exact&#39;,
+  totalRounds: 2,
+  roundsInOrder: true,
+  ttsEnabled: false,
+  tileUnit: &#39;letter&#39;,
+  mode: &#39;picture&#39;,
+  rounds: [
+    { word: &#39;cat&#39;, image: &#39;https://placehold.co/160?text=🐱&#39; },
+    { word: &#39;dog&#39;, image: &#39;https://placehold.co/160?text=🐶&#39; },
+  ],
+};
+
+const WordSpellWithHarness = ({
+  config,
+}: {
+  config: WordSpellConfig;
+}) =&gt; (
+  &lt;SkinHarness gameId=&quot;word-spell&quot;&gt;
+    {({ skin }) =&gt; &lt;WordSpell config={{ ...config, skin: skin.id }} /&gt;}
+  &lt;/SkinHarness&gt;
+);
+
+const meta: Meta&lt;typeof WordSpellWithHarness&gt; = {
+  title: &#39;Games/WordSpell/Skin Harness&#39;,
+  component: WordSpellWithHarness,
+  tags: [&#39;autodocs&#39;],
+  decorators: [withDb, withRouter],
+  args: { config: baseConfig },
+};
+export default meta;
+
+type Story = StoryObj&lt;typeof WordSpellWithHarness&gt;;
+
+export const Default: Story = {};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+            <div class="note err">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge err">story error</span>
+              </div>
+              
+              
+              
+              <pre><code>Could not generate snippet without component name.</code></pre>
+            </div>
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { SkinHarness, WordSpell } from "base-skill";</code></pre>
+              </div>
+          
+          
+        </div>
+    
+  </div>
+</article>
     </div>
     <div class="error-groups" role="region" aria-label="Prop type error groups">
         <section class="group">
@@ -6312,7 +6625,7 @@ sessionId?: string</code></pre>
           <label for="no-component-import-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component import found</span>
-            <span class="group-count">1</span>
+            <span class="group-count">3</span>
           </label>
           <div class="group-cards">
 <article
@@ -6726,6 +7039,319 @@ export const Scenario3CorrectAndRoundComplete: Story = {
   /&gt;
 );</code></pre>
             </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  has-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="NumberMatchWithHarness">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> NumberMatchWithHarness</h2>
+      <div class="badges">
+        <label for="c-error-1-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-1-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-1-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/games/number-match/NumberMatch/NumberMatch.skin.stories.tsx">games-numbermatch-skin-harness · ./src/games/number-match/NumberMatch/NumberMatch.skin.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-1-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-1-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-1-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;NumberMatchWithHarness&quot; component.
+  58 | );
+  59 |
+&gt; 60 | const meta: Meta&lt;typeof NumberMatchWithHarness&gt; = {
+     | ^
+  61 |   title: &#39;Games/NumberMatch/Skin Harness&#39;,
+  62 |   component: NumberMatchWithHarness,
+  63 |   tags: [&#39;autodocs&#39;],
+
+./src/games/number-match/NumberMatch/NumberMatch.skin.stories.tsx:
+import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
+import { withRouter } from &#39;../../../../.storybook/decorators/withRouter&#39;;
+import { NumberMatch } from &#39;./NumberMatch&#39;;
+import type { NumberMatchConfig } from &#39;../types&#39;;
+import type { GameSkin } from &#39;@/lib/skin&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import { SkinHarness, registerSkin } from &#39;@/lib/skin&#39;;
+
+const demoSkin: GameSkin = {
+  id: &#39;demo&#39;,
+  name: &#39;Demo Teal&#39;,
+  tokens: {
+    &#39;--skin-tile-bg&#39;: &#39;#14b8a6&#39;,
+    &#39;--skin-tile-text&#39;: &#39;#fff&#39;,
+    &#39;--skin-tile-radius&#39;: &#39;1rem&#39;,
+    &#39;--skin-slot-bg&#39;: &#39;#f0fdfa&#39;,
+    &#39;--skin-slot-border&#39;: &#39;#2dd4bf&#39;,
+    &#39;--skin-slot-radius&#39;: &#39;1rem&#39;,
+    &#39;--skin-pip-color&#39;: &#39;#0f766e&#39;,
+    &#39;--skin-pip-divider-color&#39;: &#39;#0f766e&#39;,
+    &#39;--skin-question-audio-bg&#39;: &#39;#14b8a6&#39;,
+  },
+  onCorrectPlace: (zoneIndex, value) =&gt; {
+    console.log(`[number-match demo] correct @ ${zoneIndex}: ${value}`);
+  },
+  onWrongPlace: (zoneIndex, value) =&gt; {
+    console.log(`[number-match demo] wrong @ ${zoneIndex}: ${value}`);
+  },
+};
+
+registerSkin(&#39;number-match&#39;, demoSkin);
+
+const baseConfig: NumberMatchConfig = {
+  gameId: &#39;number-match&#39;,
+  component: &#39;NumberMatch&#39;,
+  inputMethod: &#39;drag&#39;,
+  wrongTileBehavior: &#39;lock-manual&#39;,
+  tileBankMode: &#39;exact&#39;,
+  totalRounds: 3,
+  roundsInOrder: true,
+  ttsEnabled: false,
+  mode: &#39;numeral-to-group&#39;,
+  tileStyle: &#39;dots&#39;,
+  range: { min: 1, max: 6 },
+  rounds: [{ value: 3 }, { value: 5 }, { value: 2 }],
+};
+
+const NumberMatchWithHarness = ({
+  config,
+}: {
+  config: NumberMatchConfig;
+}) =&gt; (
+  &lt;SkinHarness gameId=&quot;number-match&quot;&gt;
+    {({ skin }) =&gt; (
+      &lt;NumberMatch config={{ ...config, skin: skin.id }} /&gt;
+    )}
+  &lt;/SkinHarness&gt;
+);
+
+const meta: Meta&lt;typeof NumberMatchWithHarness&gt; = {
+  title: &#39;Games/NumberMatch/Skin Harness&#39;,
+  component: NumberMatchWithHarness,
+  tags: [&#39;autodocs&#39;],
+  decorators: [withDb, withRouter],
+  args: { config: baseConfig },
+};
+export default meta;
+
+type Story = StoryObj&lt;typeof NumberMatchWithHarness&gt;;
+
+export const Default: Story = {};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+            <div class="note err">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge err">story error</span>
+              </div>
+              
+              
+              
+              <pre><code>Could not generate snippet without component name.</code></pre>
+            </div>
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { NumberMatch, SkinHarness } from "base-skill";</code></pre>
+              </div>
+          
+          
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  has-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="WordSpellWithHarness">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
+      <div class="badges">
+        <label for="c-error-2-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-2-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-2-games-wordspell-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx">games-wordspell-skin-harness · ./src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-2-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-2-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-2-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;WordSpellWithHarness&quot; component.
+  57 | );
+  58 |
+&gt; 59 | const meta: Meta&lt;typeof WordSpellWithHarness&gt; = {
+     | ^
+  60 |   title: &#39;Games/WordSpell/Skin Harness&#39;,
+  61 |   component: WordSpellWithHarness,
+  62 |   tags: [&#39;autodocs&#39;],
+
+./src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx:
+import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
+import { withRouter } from &#39;../../../../.storybook/decorators/withRouter&#39;;
+import { WordSpell } from &#39;./WordSpell&#39;;
+import type { WordSpellConfig } from &#39;../types&#39;;
+import type { GameSkin } from &#39;@/lib/skin&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import { SkinHarness, registerSkin } from &#39;@/lib/skin&#39;;
+
+const demoSkin: GameSkin = {
+  id: &#39;demo&#39;,
+  name: &#39;Demo Pink&#39;,
+  tokens: {
+    &#39;--skin-tile-bg&#39;: &#39;#ec4899&#39;,
+    &#39;--skin-tile-text&#39;: &#39;#fff&#39;,
+    &#39;--skin-tile-radius&#39;: &#39;50%&#39;,
+    &#39;--skin-slot-bg&#39;: &#39;#fdf2f8&#39;,
+    &#39;--skin-slot-border&#39;: &#39;#f472b6&#39;,
+    &#39;--skin-slot-radius&#39;: &#39;50%&#39;,
+    &#39;--skin-sentence-gap-border&#39;: &#39;#ec4899&#39;,
+    &#39;--skin-question-audio-bg&#39;: &#39;#ec4899&#39;,
+  },
+  onCorrectPlace: (zoneIndex, value) =&gt; {
+    console.log(`[word-spell demo] correct @ ${zoneIndex}: ${value}`);
+  },
+  onWrongPlace: (zoneIndex, value) =&gt; {
+    console.log(`[word-spell demo] wrong @ ${zoneIndex}: ${value}`);
+  },
+};
+
+registerSkin(&#39;word-spell&#39;, demoSkin);
+
+const baseConfig: WordSpellConfig = {
+  gameId: &#39;word-spell&#39;,
+  component: &#39;WordSpell&#39;,
+  inputMethod: &#39;drag&#39;,
+  wrongTileBehavior: &#39;lock-manual&#39;,
+  tileBankMode: &#39;exact&#39;,
+  totalRounds: 2,
+  roundsInOrder: true,
+  ttsEnabled: false,
+  tileUnit: &#39;letter&#39;,
+  mode: &#39;picture&#39;,
+  rounds: [
+    { word: &#39;cat&#39;, image: &#39;https://placehold.co/160?text=🐱&#39; },
+    { word: &#39;dog&#39;, image: &#39;https://placehold.co/160?text=🐶&#39; },
+  ],
+};
+
+const WordSpellWithHarness = ({
+  config,
+}: {
+  config: WordSpellConfig;
+}) =&gt; (
+  &lt;SkinHarness gameId=&quot;word-spell&quot;&gt;
+    {({ skin }) =&gt; &lt;WordSpell config={{ ...config, skin: skin.id }} /&gt;}
+  &lt;/SkinHarness&gt;
+);
+
+const meta: Meta&lt;typeof WordSpellWithHarness&gt; = {
+  title: &#39;Games/WordSpell/Skin Harness&#39;,
+  component: WordSpellWithHarness,
+  tags: [&#39;autodocs&#39;],
+  decorators: [withDb, withRouter],
+  args: { config: baseConfig },
+};
+export default meta;
+
+type Story = StoryObj&lt;typeof WordSpellWithHarness&gt;;
+
+export const Default: Story = {};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+            <div class="note err">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge err">story error</span>
+              </div>
+              
+              
+              
+              <pre><code>Could not generate snippet without component name.</code></pre>
+            </div>
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { SkinHarness, WordSpell } from "base-skill";</code></pre>
+              </div>
+          
+          
         </div>
     
   </div>
