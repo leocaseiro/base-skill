@@ -55,28 +55,35 @@ Caterpillar skin, all rendered under the Ocean app theme.
 ### Repository Structure
 
 ```text
-baseskill (GPLv3, npm package)
+baseskill (GPLv3, public — npm or private registry)
     ↑ peerDependency
-my-skins (GPL-3.0, separate repo)
+baseskill-premium-cloud (proprietary, private registry or git URL)
 ├── src/sort-numbers/dino-eggs/
 ├── src/sort-numbers/rocket-launch/
 ├── src/word-spell/caterpillar/
 └── package.json  →  peerDependencies: { "baseskill": "^1.0.0" }
+    ↑ dependency
+baseskill-ios (proprietary, App Store / Play Store)
+├── package.json  →  imports baseskill + baseskill-premium-cloud
+├── Capacitor / RN native wrapper
+└── deploys to iOS + Android stores
 
-my-app (private, deployment shell)
-├── package.json  →  imports baseskill + my-skins
-├── vite.config.ts
-└── deploys to web / app stores
+(Web/PWA build lives inside the baseskill repo for now — served from
+ your own server, no GPL distribution obligation.)
 ```
 
 ### Why This Works
 
-- **Skin repo imports baseskill types and hooks** → derivative work under GPLv3
-  → third-party skin authors must share source
-- **Copyright holder (you) can dual-license baseskill** → your own skin repo is
-  not bound by GPL for your own deployments
-- **SaaS deployment** (web/PWA) has no GPL distribution obligation regardless
-- **App Store distribution** uses the proprietary license grant
+- **`baseskill-premium-cloud` imports baseskill types and hooks** →
+  derivative work under GPLv3 → **third-party** skin authors must share
+  source if they distribute
+- **You own baseskill's copyright** and can dual-license it → your own
+  `baseskill-premium-cloud` and `baseskill-ios` are not bound by GPL when
+  built and shipped by you
+- **Web/PWA deployment** (served from baseskill itself) has no GPL
+  distribution obligation regardless (SaaS)
+- **App Store distribution** of `baseskill-ios` uses the proprietary
+  license grant you give yourself
 
 ### Game vs Skin Distinction
 
@@ -521,7 +528,7 @@ const skins = getRegisteredSkins('sort-numbers');
 ### Skin Package Structure
 
 ```text
-@my-org/baseskill-skins/
+@my-org/baseskill-premium-cloud/
 ├── src/
 │   ├── sort-numbers/
 │   │   ├── dino-eggs/
@@ -545,20 +552,20 @@ const skins = getRegisteredSkins('sort-numbers');
 │   peerDependencies:
 │     baseskill: "^1.0.0"
 │     react: "^19.0.0"
-└── LICENSE  (GPL-3.0)
+└── LICENSE  (proprietary, dual-licensed for your own use)
 ```
 
 ### Registration in the Deployment App
 
 ```ts
-// my-app/src/register-skins.ts
+// baseskill-ios/src/register-skins.ts
 import { registerSkin } from 'baseskill/skin';
 
-import { dinoEggsSkin } from '@my-org/baseskill-skins/sort-numbers/dino-eggs';
-import { rocketLaunchSkin } from '@my-org/baseskill-skins/sort-numbers/rocket-launch';
-import { rainbowArcSkin } from '@my-org/baseskill-skins/sort-numbers/rainbow-arc';
-import { caterpillarSkin } from '@my-org/baseskill-skins/word-spell/caterpillar';
-import { treasureChestSkin } from '@my-org/baseskill-skins/word-spell/treasure-chest';
+import { dinoEggsSkin } from '@my-org/baseskill-premium-cloud/sort-numbers/dino-eggs';
+import { rocketLaunchSkin } from '@my-org/baseskill-premium-cloud/sort-numbers/rocket-launch';
+import { rainbowArcSkin } from '@my-org/baseskill-premium-cloud/sort-numbers/rainbow-arc';
+import { caterpillarSkin } from '@my-org/baseskill-premium-cloud/word-spell/caterpillar';
+import { treasureChestSkin } from '@my-org/baseskill-premium-cloud/word-spell/treasure-chest';
 
 registerSkin('sort-numbers', dinoEggsSkin);
 registerSkin('sort-numbers', rocketLaunchSkin);
@@ -688,6 +695,161 @@ The harness wraps the real game component with an outer panel that:
 
 This removes the need to play through a full session to verify a wrong-tile
 shake or a level-complete overlay.
+
+## Deployment Tiers & Premium Skins
+
+Skin availability can be gated for freemium / premium tiers. The recommended
+approach keeps all skin code bundled in the app and uses an **entitlements
+check** at runtime to decide which registered skins appear in the picker.
+
+### Recommended: Entitlement-Gated Registry
+
+```ts
+// baseskill-ios/src/register-skins.ts
+import { registerSkin } from 'baseskill/skin';
+import { currentUserEntitlements } from './auth';
+
+const entitlements = await currentUserEntitlements(); // { tier: 'premium' }
+
+registerSkin('sort-numbers', classicSkin); // always available
+if (entitlements.tier === 'premium') {
+  registerSkin('sort-numbers', dinoEggsSkin);
+  registerSkin('sort-numbers', rocketLaunchSkin);
+}
+```
+
+All skin code is bundled in the binary. The server decides what's visible.
+Works identically on web, PWA, iOS, and Android. No App Store review issues
+because no code is downloaded at runtime.
+
+### Constraints to Be Aware Of
+
+- **iOS App Store Review Guideline 2.5.2** prohibits downloading executable
+  code that alters the primary purpose of the app. Bundling all skins and
+  gating via entitlements avoids this entirely.
+- A future extension — runtime-loaded skins delivered from a CDN — is only
+  safe on iOS if the skin is **CSS tokens + JSON config only** (no
+  JavaScript / React components). React component slots
+  (`SceneBackground`, `CelebrationOverlay`, etc.) must remain bundled.
+- Web and PWA deployments have no such restriction, but the entitlement
+  approach is still simpler to maintain.
+
+### Out of Scope for This Spec
+
+- Dynamic CDN-loaded skins
+- Per-skin purchase flows and IAP integration
+- Entitlement API / auth design
+
+These would be covered by a separate spec once the core skin system is
+shipped and working.
+
+## Maintainability (3-Repo Setup)
+
+The target structure is three repositories, each with a single clear purpose:
+
+| #   | Repo                        | License                     | Purpose                                                                           |
+| --- | --------------------------- | --------------------------- | --------------------------------------------------------------------------------- |
+| 1   | **baseskill**               | GPLv3 (public)              | Core engine, `GameSkin` contract, `classic` skin, `SkinHarness`                   |
+| 2   | **baseskill-ios**           | Proprietary                 | iOS/Android native shell, bundles baseskill + premium skins for stores            |
+| 3   | **baseskill-premium-cloud** | Proprietary (dual-licensed) | Premium skins — shipped bundled to native apps and served from CDN to the web PWA |
+
+### Dependency Graph
+
+```text
+                 ┌──────────────────────────────┐
+                 │  baseskill (GPLv3, npm/git)  │
+                 │  • core engine               │
+                 │  • GameSkin contract         │
+                 │  • classic skin              │
+                 │  • SkinHarness               │
+                 └──────────────┬───────────────┘
+                                │ peerDep (type imports + hooks)
+                                ▼
+                 ┌──────────────────────────────┐
+                 │  baseskill-premium-cloud     │
+                 │  • dino-eggs, rocket-launch  │
+                 │  • tokens + CSS + components │
+                 │  • no game logic             │
+                 └──────────────┬───────────────┘
+                                │ dependency
+                                ▼
+                 ┌──────────────────────────────┐
+                 │  baseskill-ios               │
+                 │  • Capacitor / RN wrapper    │
+                 │  • registers bundled skins   │
+                 │  • entitlements, auth, IAP   │
+                 └──────────────────────────────┘
+
+         (web/PWA build lives in baseskill itself for now —
+          served from your own server, no distribution obligation)
+```
+
+### Where Logic Lives
+
+| Concern                                 | baseskill | premium-cloud | ios |
+| --------------------------------------- | :-------: | :-----------: | :-: |
+| Game state, reducer, event bus          |     ✓     |               |     |
+| Input handling (drag, keyboard, touch)  |     ✓     |               |     |
+| `GameSkin` contract + `classic` skin    |     ✓     |               |     |
+| `SkinHarness` component                 |     ✓     |               |     |
+| Web/PWA build + deployment              |     ✓     |               |     |
+| Custom CSS tokens, animations, sounds   |           |       ✓       |     |
+| `SceneBackground`, `CelebrationOverlay` |           |       ✓       |     |
+| Skin event callbacks                    |           |       ✓       |     |
+| Native wrapper (Capacitor / RN)         |           |               |  ✓  |
+| Entitlements, auth, IAP, push           |           |               |  ✓  |
+| Skin registration for native builds     |           |               |  ✓  |
+
+Key rule: **premium-cloud is thin** — just CSS + React components + callbacks.
+No game logic, no state, no dispatch.
+
+### Why Three, Not Two or Four?
+
+- Folding **premium-cloud into ios** (two repos) would mean skins can't be
+  served to the web PWA. You'd need to duplicate them.
+- Folding **premium-cloud into baseskill** would force your commercial skins
+  under GPL — defeats the dual-licensing strategy.
+- Splitting **ios into separate ios + android + web** is premature. One
+  native-wrapper repo (Capacitor supports both platforms from a single
+  codebase) is enough until there's platform-specific divergence.
+
+### Dev Workflow to Avoid Pain
+
+- **Use yarn/pnpm workspaces locally.** Clone all three repos as siblings;
+  workspaces links them. No `npm link` dance, no publish-to-test.
+- **Storybook harness is the primary skin dev surface.** 90% of skin work
+  happens in baseskill's Storybook, importing the in-development skin as
+  a story arg. No native build needed.
+- **Semver discipline on baseskill.** Breaking changes = major bump.
+  premium-cloud pins `peerDependencies: { baseskill: "^2.x" }`.
+- **CI in premium-cloud typechecks against latest baseskill.** Catches
+  breaking changes before users do.
+- **ios repo is thin** — shouldn't need frequent changes once set up.
+
+### Versioning Discipline
+
+```text
+baseskill 1.0.0 → 1.1.0   (new optional callback — additive, non-breaking)
+baseskill 1.1.0 → 2.0.0   (rename callback — breaking)
+
+premium-cloud bumps peerDep, tests, publishes premium-cloud 2.0.0
+ios bumps both, tests, rebuilds, ships to App Store
+```
+
+Most baseskill changes are additive (new optional callbacks, new render
+slots). Breaking changes should be rare once the contract stabilises.
+
+### What NOT to Do
+
+- **Don't put game logic in premium-cloud.** If you reach for a reducer or
+  dispatch, the feature belongs in baseskill.
+- **Don't put premium skin code in baseskill.** Core ships with only the
+  `classic` skin and the contract.
+- **Don't fork baseskill** to add private features. Extend the contract in
+  baseskill (staying GPL), then build on top in premium-cloud.
+- **Don't publish premium-cloud to public npm.** Either keep it on a
+  private registry (GitHub Packages private / Verdaccio / JFrog) or
+  install via a git URL.
 
 ## Accessibility
 
