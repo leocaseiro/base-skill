@@ -16,8 +16,12 @@ vi.mock('@/lib/speech/SpeechOutput', () => ({
   cancelSpeech: vi.fn(),
   isSpeechActive: vi.fn().mockReturnValue(false),
 }));
+const noopUnsubscribe = () => {};
 vi.mock('@/lib/game-event-bus', () => ({
-  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+  getGameEventBus: () => ({
+    emit: vi.fn(),
+    subscribe: vi.fn(() => noopUnsubscribe),
+  }),
 }));
 vi.mock('@/db/hooks/useSettings', () => ({
   useSettings: () => ({
