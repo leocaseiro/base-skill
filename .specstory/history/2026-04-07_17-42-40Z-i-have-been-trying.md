@@ -3536,16 +3536,11 @@ _**Agent (claude-opus-4-6 2026-04-07 17:59:31Z)**_
 
 **Input:**
 
-- args:
-
-```
-Two features for the answer-game drag system:
+- args: `Two features for the answer-game drag system:
 
 1. **Drag preview in slots**: When a user drags a tile (from bank to slot, or slot to slot), the target slot should show a visual preview of what the final result will look like while dragging. For swaps, both slots should preview the outcome. This gives immediate visual feedback before the drop.
 
-2. **Sound effect bug on single-tile slot move**: When dragging a single tile from one slot to an empty slot (not a swap, not from bank), the sound effect only plays "tile-place" instead of evaluating correct/wrong. It should play the correct/wrong sound based on whether the tile matches the target slot's expected value.
-```
-
+2. **Sound effect bug on single-tile slot move**: When dragging a single tile from one slot to an empty slot (not a swap, not from bank), the sound effect only plays "tile-place" instead of evaluating correct/wrong. It should play the correct/wrong sound based on whether the tile matches the target slot's expected value.`
 - skill: `superpowers:brainstorming`
 
 </details></tool-use>
