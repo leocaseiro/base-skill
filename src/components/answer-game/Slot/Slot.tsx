@@ -164,7 +164,12 @@ export const Slot = ({
         ) : (
           <>
             <div
-              className="absolute inset-0 bg-muted/60 shadow-inner"
+              className="absolute inset-0"
+              style={{
+                background: 'var(--skin-bank-hole-bg)',
+                boxShadow: 'var(--skin-bank-hole-shadow)',
+                borderRadius: 'inherit',
+              }}
               aria-hidden="true"
             />
             <button
