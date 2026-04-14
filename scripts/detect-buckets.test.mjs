@@ -30,7 +30,7 @@ describe('detectChecks — positive cases', () => {
     ['docs/foo.mdx', ['prettier']], // mdx excluded from markdownlint
     ['src/components/Button.tsx', ['prettier', 'eslint', 'knip', 'typecheck', 'unit', 'storybook', 'vr', 'e2e', 'build']],
     ['src/lib/game-engine/reducer.ts', ['prettier', 'eslint', 'knip', 'typecheck', 'unit', 'storybook', 'vr', 'e2e', 'build']],
-    ['src/components/Button.css', ['stylelint', 'storybook', 'vr', 'e2e', 'build']],
+    ['src/components/Button.css', ['prettier', 'stylelint', 'storybook', 'vr', 'e2e', 'build']],
     ['src/components/Button.stories.tsx', ['prettier', 'eslint', 'knip', 'typecheck', 'unit', 'storybook', 'vr', 'e2e', 'build']],
     ['src/components/Button.test.tsx', ['prettier', 'eslint', 'knip', 'typecheck', 'unit', 'storybook', 'vr', 'e2e', 'build']],
     ['e2e/landing.spec.ts', ['prettier', 'eslint', 'knip', 'typecheck', 'unit', 'vr', 'e2e']],

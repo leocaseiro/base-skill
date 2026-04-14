@@ -2,7 +2,7 @@
 import picomatch from 'picomatch';
 
 export const TRIGGERS = {
-  prettier: ['**/*.{md,mdx,json,ts,tsx,js,mjs,cjs,yml,yaml}'],
+  prettier: ['**/*.{md,mdx,json,ts,tsx,js,mjs,cjs,css,yml,yaml}'],
   eslint: ['**/*.{ts,tsx,js,mjs,cjs}'],
   stylelint: ['src/**/*.css'],
   markdownlint: ['**/*.md'],
