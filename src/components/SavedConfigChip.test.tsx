@@ -163,6 +163,22 @@ describe('SavedConfigChip', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('applies touch-manipulation to all buttons for iOS tap reliability', () => {
+    render(
+      <SavedConfigChip
+        doc={mockDoc}
+        configFields={fields}
+        onPlay={vi.fn()}
+        onDelete={vi.fn()}
+        onSave={vi.fn()}
+      />,
+    );
+    const buttons = screen.getAllByRole('button');
+    for (const button of buttons) {
+      expect(button).toHaveClass('touch-manipulation');
+    }
+  });
+
   it('collapses without saving when Cancel is clicked', async () => {
     const onSave = vi.fn();
     render(
