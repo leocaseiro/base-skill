@@ -161,8 +161,11 @@ describe('useDraggableTile', () => {
 
       renderHook(() => useDraggableTile(tile));
 
-      expect(capturedTouchDragOptions?.onDropOnBank).toBeDefined();
-      act(() => capturedTouchDragOptions?.onDropOnBank?.());
+      expect(capturedTouchDragOptions).not.toBeNull();
+      const opts =
+        capturedTouchDragOptions as unknown as CapturedTouchDragOptions;
+      expect(opts.onDropOnBank).toBeDefined();
+      act(() => opts.onDropOnBank?.());
 
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SET_DRAG_ACTIVE',
@@ -180,10 +183,11 @@ describe('useDraggableTile', () => {
 
       renderHook(() => useDraggableTile(tile));
 
-      expect(capturedTouchDragOptions?.onDropOnBankTile).toBeDefined();
-      act(() =>
-        capturedTouchDragOptions?.onDropOnBankTile?.('other-tile'),
-      );
+      expect(capturedTouchDragOptions).not.toBeNull();
+      const opts =
+        capturedTouchDragOptions as unknown as CapturedTouchDragOptions;
+      expect(opts.onDropOnBankTile).toBeDefined();
+      act(() => opts.onDropOnBankTile?.('other-tile'));
 
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SET_DRAG_ACTIVE',
