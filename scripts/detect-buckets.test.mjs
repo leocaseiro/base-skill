@@ -1,12 +1,12 @@
-import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { describe, it, expect } from 'vitest';
 import { detectChecks, TRIGGERS, ALL_CHECKS } from './detect-buckets.mjs';
 
 describe('TRIGGERS', () => {
   it('exposes every atomic check', () => {
-    expect([...ALL_CHECKS].sort()).toEqual(
+    expect([...ALL_CHECKS].toSorted()).toEqual(
       [
         'actionlint',
         'build',
@@ -21,7 +21,7 @@ describe('TRIGGERS', () => {
         'typecheck',
         'unit',
         'vr',
-      ].sort(),
+      ].toSorted(),
     );
   });
 });
@@ -52,7 +52,7 @@ describe('detectChecks — positive cases', () => {
 
   it.each(cases)('%s triggers %j', (file, expected) => {
     const result = detectChecks([file]);
-    expect([...result].sort()).toEqual([...expected].sort());
+    expect([...result].toSorted()).toEqual([...expected].toSorted());
   });
 });
 
@@ -96,12 +96,12 @@ const runCli = (args) =>
 describe('CLI — --files mode', () => {
   it('prints space-separated checks for an explicit file list', () => {
     const out = runCli(['--files', 'README.md']);
-    expect(out.split(/\s+/).sort()).toEqual(['markdownlint', 'prettier']);
+    expect(out.split(/\s+/).toSorted()).toEqual(['markdownlint', 'prettier']);
   });
 
   it('--force-all emits every check', () => {
     const out = runCli(['--force-all']);
-    const checks = out.split(/\s+/).sort();
+    const checks = out.split(/\s+/).toSorted();
     expect(checks).toContain('e2e');
     expect(checks).toContain('build');
     expect(checks).toContain('prettier');
