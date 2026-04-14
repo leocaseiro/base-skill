@@ -1,15 +1,10 @@
-import { useEffect } from 'react';
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { withRouter } from '../../../../.storybook/decorators/withRouter';
 import { SortNumbers } from './SortNumbers';
 import type { SortNumbersConfig } from '../types';
 import type { GameSkin } from '@/lib/skin';
 import type { Meta, StoryObj } from '@storybook/react';
-import {
-  SkinHarness,
-  __resetSkinRegistryForTests,
-  registerSkin,
-} from '@/lib/skin';
+import { SkinHarness, registerSkin } from '@/lib/skin';
 
 /**
  * Demo skin to prove the harness wires callbacks and tokens end-to-end.
@@ -33,6 +28,9 @@ const demoSkin: GameSkin = {
     console.log(`[demo skin] wrong @ zone ${zoneIndex}: ${value}`);
   },
 };
+
+// Register at module load so `SkinHarness` sees the skin on first render.
+registerSkin('sort-numbers', demoSkin);
 
 const baseConfig: SortNumbersConfig = {
   gameId: 'sort-numbers',
@@ -59,20 +57,13 @@ const SortNumbersWithHarness = ({
   config,
 }: {
   config: SortNumbersConfig;
-}) => {
-  useEffect(() => {
-    __resetSkinRegistryForTests();
-    registerSkin('sort-numbers', demoSkin);
-  }, []);
-
-  return (
-    <SkinHarness gameId="sort-numbers">
-      {({ skin }) => (
-        <SortNumbers config={{ ...config, skin: skin.id }} />
-      )}
-    </SkinHarness>
-  );
-};
+}) => (
+  <SkinHarness gameId="sort-numbers">
+    {({ skin }) => (
+      <SortNumbers config={{ ...config, skin: skin.id }} />
+    )}
+  </SkinHarness>
+);
 
 const meta: Meta<typeof SortNumbersWithHarness> = {
   title: 'Games/SortNumbers/Skin Harness',
