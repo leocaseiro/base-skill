@@ -28,6 +28,12 @@ jobs:
         with:
           ref: master
           fetch-depth: 0
+          # Use a PAT so the release branch/tag push is attributed to a real
+          # user. Pushes made with the default GITHUB_TOKEN do NOT trigger
+          # downstream workflows (prevents recursion), which means CI checks
+          # never run on the auto-generated release PR. Falls back to
+          # GITHUB_TOKEN locally / in forks where RELEASE_PAT isn't set.
+          token: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v6
         with:
@@ -119,7 +125,9 @@ jobs:
         if: steps.bump.outputs.bumped == 'true' && github.actor != 'github-actions[bot]'
         env:
           NEW_VERSION: ${{ steps.bump.outputs.new_version }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PAT required so the created PR triggers CI checks. With the default
+          # GITHUB_TOKEN, PRs open but no workflows run on them.
+          GH_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
           # Bypass the local pre-push quality gate — every check in the hook
           # (lint, typecheck, unit, storybook, VR, e2e) already ran in ci.yml
           # on the merging PR. The runner also uses dash as /bin/sh, which
