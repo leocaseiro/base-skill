@@ -3,6 +3,7 @@ import {
   dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { useEffect, useRef } from 'react';
+import { useAnswerGameContext } from './useAnswerGameContext';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
 import { useAutoNextSlot } from './useAutoNextSlot';
 import { useGameTTS } from './useGameTTS';
@@ -11,6 +12,7 @@ import { useTouchDrag } from './useTouchDrag';
 import type { TileItem } from './types';
 import type { TouchDragHandlers } from './useTouchDrag';
 import type { RefObject } from 'react';
+import { getGameEventBus } from '@/lib/game-event-bus';
 
 export interface DraggableTile extends TouchDragHandlers {
   ref: RefObject<HTMLButtonElement | null>;
@@ -20,6 +22,8 @@ export interface DraggableTile extends TouchDragHandlers {
 export const useDraggableTile = (tile: TileItem): DraggableTile => {
   const ref = useRef<HTMLButtonElement>(null);
   const dispatch = useAnswerGameDispatch();
+  const state = useAnswerGameContext();
+  const stateRef = useRef(state);
   const { placeInNextSlot } = useAutoNextSlot();
   const { speakTile } = useGameTTS();
   const speakTileRef = useRef(speakTile);
@@ -28,6 +32,10 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
   useEffect(() => {
     speakTileRef.current = speakTile;
   }, [speakTile]);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   // HTML5 DnD — desktop
   // SET_DRAG_ACTIVE on start so slots can show a preview while the bank tile
@@ -45,6 +53,15 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
       onDragStart: () => {
         speakTileRef.current(tile.label);
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+        getGameEventBus().emit({
+          type: 'game:drag-start',
+          gameId: stateRef.current.config.gameId,
+          sessionId: '',
+          profileId: '',
+          timestamp: Date.now(),
+          roundIndex: stateRef.current.roundIndex,
+          tileId: tile.id,
+        });
       },
       onDrop: () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
     });
@@ -70,6 +87,15 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
       onDragStart: () => {
         speakTileRef.current(tile.label);
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+        getGameEventBus().emit({
+          type: 'game:drag-start',
+          gameId: stateRef.current.config.gameId,
+          sessionId: '',
+          profileId: '',
+          timestamp: Date.now(),
+          roundIndex: stateRef.current.roundIndex,
+          tileId: tile.id,
+        });
       },
       onDragCancel: () =>
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
