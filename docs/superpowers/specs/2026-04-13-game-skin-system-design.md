@@ -102,37 +102,50 @@ export interface GameSkin {
   tokens: Record<string, string>;
 
   // ── Event Callbacks ──────────────────────────────────────────────
-  // All callbacks may return a Promise. When they do, the engine
-  // awaits the Promise before proceeding (e.g. advancing rounds,
-  // ejecting tiles). A safety timeout (default 5 s) resolves the
-  // await if the Promise never settles, so a buggy skin cannot
-  // freeze the game.
+  // All callbacks are synchronous fire-and-forget. They trigger CSS
+  // class changes, Web Animations API calls, sound playback, or
+  // React state updates — none of which require the engine to wait.
   //
-  // Return void (or undefined) for fire-and-forget behaviour —
-  // the engine proceeds immediately.
+  // When the engine needs to pause before proceeding (e.g. to let a
+  // celebration play before advancing to the next round), it uses
+  // the values in `timing` below, not a return value from the
+  // callback. Durations for these transitions are known upfront
+  // (CSS keyframe duration, audio length) and declared, not awaited.
 
   /** Fired when a tile is placed correctly */
-  onCorrectPlace?: (
-    zoneIndex: number,
-    tileValue: string,
-  ) => Promise<void> | void;
+  onCorrectPlace?: (zoneIndex: number, tileValue: string) => void;
   /** Fired when a tile is placed incorrectly */
-  onWrongPlace?: (
-    zoneIndex: number,
-    tileValue: string,
-  ) => Promise<void> | void;
+  onWrongPlace?: (zoneIndex: number, tileValue: string) => void;
   /** Fired when a wrong tile is auto-ejected */
-  onTileEjected?: (zoneIndex: number) => Promise<void> | void;
-  /** Fired when a drag begins (fire-and-forget, not awaited) */
+  onTileEjected?: (zoneIndex: number) => void;
+  /** Fired when a drag begins */
   onDragStart?: (tileId: string) => void;
-  /** Fired when a dragged tile hovers over a zone (fire-and-forget) */
+  /** Fired when a dragged tile hovers over a zone */
   onDragOverZone?: (zoneIndex: number) => void;
   /** Fired when a round is completed (all zones correct) */
-  onRoundComplete?: (roundIndex: number) => Promise<void> | void;
+  onRoundComplete?: (roundIndex: number) => void;
   /** Fired when a level is completed */
-  onLevelComplete?: (levelIndex: number) => Promise<void> | void;
+  onLevelComplete?: (levelIndex: number) => void;
   /** Fired when the game is over */
-  onGameOver?: (retryCount: number) => Promise<void> | void;
+  onGameOver?: (retryCount: number) => void;
+
+  // ── Timing (engine delays) ───────────────────────────────────────
+  /**
+   * Durations (ms) for engine transitions where the skin's animation
+   * needs to be visible before the engine proceeds. Each field is
+   * optional; missing values fall back to baseskill defaults.
+   *
+   * Precedence: game config `timing` overrides ← skin `timing` ←
+   * baseskill defaults.
+   */
+  timing?: {
+    /** Between round-complete and ADVANCE_ROUND. Default: 750 */
+    roundAdvanceDelay?: number;
+    /** Between wrong-tile lock and EJECT_TILE. Default: 1000 */
+    autoEjectDelay?: number;
+    /** Between level-complete and LevelCompleteOverlay. Default: 750 */
+    levelCompleteDelay?: number;
+  };
 
   // ── Render Slots (optional React components) ─────────────────────
   /** Background scene behind the game area */
@@ -280,38 +293,41 @@ appropriate moments.
 | `game:drag-over-zone` | `{ zoneIndex }`         | `useSlotTileDrag`                   |
 | `game:tile-ejected`   | `{ zoneIndex, tileId }` | `answerGameReducer` (EJECT_TILE)    |
 
-#### Awaiting Skin Callbacks
+#### Resolving Engine Delays
 
-The engine uses a helper to safely await skin callbacks with a timeout:
+The engine uses a helper to resolve timing with the correct precedence
+(game config → skin → baseskill default):
 
 ```ts
-// baseskill/lib/skin/await-skin-callback.ts
-const DEFAULT_TIMEOUT_MS = 5_000;
+// baseskill/lib/skin/resolve-timing.ts
+const DEFAULT_TIMING = {
+  roundAdvanceDelay: 750,
+  autoEjectDelay: 1000,
+  levelCompleteDelay: 750,
+} as const;
 
-export const awaitSkinCallback = async (
-  result: Promise<void> | void,
-  timeoutMs = DEFAULT_TIMEOUT_MS,
-): Promise<void> => {
-  if (!result) return; // void — fire-and-forget, proceed immediately
-  await Promise.race([
-    result,
-    new Promise<void>((resolve) => setTimeout(resolve, timeoutMs)),
-  ]);
-};
+export const resolveTiming = (
+  key: keyof typeof DEFAULT_TIMING,
+  skin: GameSkin,
+  configTiming?: Partial<typeof DEFAULT_TIMING>,
+): number =>
+  configTiming?.[key] ?? skin.timing?.[key] ?? DEFAULT_TIMING[key];
 ```
 
-Usage in the game component:
+Usage in the game component (replaces the hardcoded `750` / `1000`):
 
 ```ts
 // After round completes, before advancing
-await awaitSkinCallback(skin.onRoundComplete?.(roundIndex));
-dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+const delay = resolveTiming('roundAdvanceDelay', skin, config.timing);
+timer = setTimeout(() => {
+  skin.onRoundComplete?.(roundIndex); // fire-and-forget
+  dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+}, delay);
 ```
 
-If the skin returns `void`, `awaitSkinCallback` returns immediately (same
-behaviour as today). If it returns a Promise, the engine waits up to 5 s.
-Drag events (`onDragStart`, `onDragOverZone`) are fire-and-forget and never
-awaited — they must not block interaction.
+Callbacks fire synchronously and return immediately. The engine's pause is
+driven by declared durations, not by awaited work. This removes all async
+complexity, safety timeouts, and test `await` overhead.
 
 #### How Skins Subscribe
 
@@ -454,6 +470,16 @@ export interface AnswerGameConfig {
   // ... existing fields
   /** Skin ID for visual variant. Falls back to 'classic' if not registered. */
   skin?: string;
+  /**
+   * Per-config timing overrides. Take precedence over the skin's own
+   * `timing` values and the baseskill defaults. Useful for teachers who
+   * want a slower pace for younger learners.
+   */
+  timing?: {
+    roundAdvanceDelay?: number;
+    autoEjectDelay?: number;
+    levelCompleteDelay?: number;
+  };
 }
 ```
 
@@ -547,13 +573,13 @@ This runs once at app startup. Baseskill discovers the skins via the registry.
 
 ### New Files
 
-| File                                  | Purpose                                                             |
-| ------------------------------------- | ------------------------------------------------------------------- |
-| `src/lib/skin/game-skin.ts`           | `GameSkin` type definition                                          |
-| `src/lib/skin/registry.ts`            | Skin registry (`registerSkin`, `resolveSkin`, `getRegisteredSkins`) |
-| `src/lib/skin/useGameSkin.ts`         | Hook that resolves skin and wires event callbacks                   |
-| `src/lib/skin/classic-skin.ts`        | Default `classic` skin with baseline tokens                         |
-| `src/lib/skin/await-skin-callback.ts` | `awaitSkinCallback` helper (Promise.race with safety timeout)       |
+| File                             | Purpose                                                             |
+| -------------------------------- | ------------------------------------------------------------------- |
+| `src/lib/skin/game-skin.ts`      | `GameSkin` type definition                                          |
+| `src/lib/skin/registry.ts`       | Skin registry (`registerSkin`, `resolveSkin`, `getRegisteredSkins`) |
+| `src/lib/skin/useGameSkin.ts`    | Hook that resolves skin and wires event callbacks                   |
+| `src/lib/skin/classic-skin.ts`   | Default `classic` skin with baseline tokens                         |
+| `src/lib/skin/resolve-timing.ts` | `resolveTiming` helper (config → skin → default precedence)         |
 
 ### Modified Files
 
@@ -591,6 +617,78 @@ This is backwards compatible — `--skin-tile-bg` defaults to `var(--bs-primary)
 so the classic look is unchanged. The app-wide theme (Ocean, Galaxy, etc.)
 continues to cascade through.
 
+## Skin Development Harness (Storybook)
+
+To allow skin authors to develop and iterate without running a full live game
+session, baseskill ships one **Skin Harness** story per game. The harness
+renders the game container with a chosen skin applied and provides a control
+panel (toolbar) that fires each callback and transitions the engine between
+phases — so the author can see what happens when `onCorrectPlace` is called,
+what the `CelebrationOverlay` looks like, how a `slotDecoration` behaves on
+a wrong-locked slot, etc.
+
+### Harness Layout
+
+```text
+┌────────────────────────────────────────────────────────────────┐
+│  [Skin dropdown: classic ▾]  [Theme: Ocean ▾]  [Reset]         │
+│  ─── Callbacks ────────────────────────────────────────────    │
+│  [onCorrectPlace] [onWrongPlace] [onTileEjected]               │
+│  [onDragStart] [onDragOverZone]                                │
+│  ─── Phase transitions ────────────────────────────────────    │
+│  [Advance round] [Complete level] [Game over]                  │
+│  ─── Timing overrides ─────────────────────────────────────    │
+│  roundAdvanceDelay: [___] autoEjectDelay: [___]                │
+├────────────────────────────────────────────────────────────────┤
+│                                                                │
+│                    <Game rendered here>                        │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Files to Add
+
+| File                                                  | Purpose                                                 |
+| ----------------------------------------------------- | ------------------------------------------------------- |
+| `src/lib/skin/SkinHarness.tsx`                        | Reusable harness component (toolbar + render area)      |
+| `src/lib/skin/SkinHarness.stories.tsx`                | Generic harness story (mock game for API demonstration) |
+| `src/games/sort-numbers/SortNumbers.skin.stories.tsx` | SortNumbers-specific harness preloaded with mock rounds |
+| `src/games/word-spell/WordSpell.skin.stories.tsx`     | WordSpell-specific harness                              |
+| `src/games/number-match/NumberMatch.skin.stories.tsx` | NumberMatch-specific harness                            |
+
+### How It Works
+
+The harness wraps the real game component with an outer panel that:
+
+1. **Skin dropdown** — lists all registered skins (plus a mock injection point
+   so skin authors can import their in-development skin as a Storybook arg).
+2. **Theme dropdown** — switches the app-wide theme (Ocean / Forest / Galaxy)
+   to verify the skin composes correctly with each.
+3. **Callback buttons** — directly invoke the resolved skin's callbacks with
+   representative arguments (e.g. `onCorrectPlace(0, 'A')`). No game state
+   changes — this is purely for seeing what animation/visual effect the
+   callback triggers.
+4. **Phase transition buttons** — dispatch the real reducer actions
+   (`PLACE_TILE` that completes the round, `ADVANCE_ROUND`, `COMPLETE_GAME`,
+   etc.) so the author can see the render slots (`RoundCompleteEffect`,
+   `CelebrationOverlay`, `LevelCompleteOverlay`) in their natural context.
+5. **Timing override fields** — live-edit the resolved timing values to
+   preview how the skin feels at different paces.
+
+### Skin Author Workflow
+
+1. Add the skin repo as a local dependency of baseskill (or develop in the
+   baseskill tree during development)
+2. Import the in-development skin into `SortNumbers.skin.stories.tsx` as
+   a story arg
+3. Open the story in Storybook
+4. Click callback buttons to trigger animations; verify visuals
+5. Click phase transitions to see overlays and full round-complete flow
+6. Iterate CSS/animation code with HMR
+
+This removes the need to play through a full session to verify a wrong-tile
+shake or a level-complete overlay.
+
 ## Accessibility
 
 - All skin token overrides must maintain WCAG AA contrast ratios
@@ -618,8 +716,9 @@ continues to cascade through.
 
 The callback surface and render slots listed above are the initial set. The
 following additions are planned as baseskill grows — they should be wired in
-the same pattern (optional `Promise<void> | void` callbacks, optional
-`React.ComponentType` render slots) and documented here when added:
+the same pattern (optional fire-and-forget callbacks returning `void`,
+optional `React.ComponentType` render slots, and optional `timing` fields for
+any new engine delays they introduce) and documented here when added:
 
 - **`onDropOnBank`** — fired when a dragged slot tile is dropped back onto the
   bank area (empty space). Already emitted by in-flight branches; to be picked
@@ -634,9 +733,8 @@ the same pattern (optional `Promise<void> | void` callbacks, optional
   Useful for thematic scoring UIs (e.g. hatched-dino counter, stars earned).
 - **`EncouragementAnnouncer`** (render slot + callbacks) — replaces the
   existing `EncouragementAnnouncer` with a skin-aware variant, plus
-  `onEncouragement?: (kind: 'positive' | 'retry') => Promise<void> | void`
-  callbacks for skin-specific reactions (e.g. a firefly swarm, a baby dino
-  cheering).
+  `onEncouragement?: (kind: 'positive' | 'retry') => void` callbacks for
+  skin-specific reactions (e.g. a firefly swarm, a baby dino cheering).
 
 When these land, update the `GameSkin` type and the "Changes Required in
 Baseskill" table in this spec. The principle is the same: add to the surface,
