@@ -12,7 +12,25 @@ import type { Decorator } from '@storybook/react';
 export const withDarkMode: Decorator = (Story) => (
   <div
     className="dark"
-    style={{ background: 'var(--background)', padding: '1rem' }}
+    style={
+      {
+        // Provide ocean-dark token values inline so that CSS custom properties
+        // like --background resolve correctly within this div. Without these,
+        // --bs-* vars inherit from html (light-mode values set by withTheme)
+        // and axe-core computes contrast against a light background.
+        '--bs-background': '#03045E',
+        '--bs-surface': '#0077B6',
+        '--bs-text': '#CAF0F8',
+        '--bs-primary': '#48CAE4',
+        '--bs-secondary': '#90E0EF',
+        '--bs-accent': '#FFB703',
+        '--bs-success': '#2DC653',
+        '--bs-warning': '#F4A261',
+        '--bs-error': '#E63946',
+        background: 'var(--background)',
+        padding: '1rem',
+      } as React.CSSProperties
+    }
   >
     <Story />
   </div>

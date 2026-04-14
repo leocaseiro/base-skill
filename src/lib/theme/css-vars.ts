@@ -27,3 +27,12 @@ export function applyThemeCssVars(
     element.style.setProperty(k, v);
   }
 }
+
+export function clearThemeCssVars(
+  element: HTMLElement,
+  variables: Record<string, string>,
+): void {
+  for (const key of Object.keys(variables)) {
+    element.style.removeProperty(key);
+  }
+}

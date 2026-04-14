@@ -7,6 +7,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
 import appCss from '../styles.css?url';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ServiceWorkerProvider } from '@/lib/service-worker/ServiceWorkerProvider';
 
 /** First paint only: class + color-scheme from system preference (no localStorage). */
@@ -20,7 +21,9 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => (
       <HeadContent />
     </head>
     <body className="font-sans antialiased">
-      <ServiceWorkerProvider>{children}</ServiceWorkerProvider>
+      <ErrorBoundary>
+        <ServiceWorkerProvider>{children}</ServiceWorkerProvider>
+      </ErrorBoundary>
       <TanStackDevtools
         config={{ position: 'bottom-right' }}
         plugins={[

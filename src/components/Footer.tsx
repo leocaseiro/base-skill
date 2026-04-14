@@ -45,6 +45,15 @@ export const Footer = () => {
           {t('nav.settings')}
         </Link>
 
+        <a
+          href="/base-skill/docs/"
+          className="text-muted-foreground hover:text-foreground text-sm"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Docs
+        </a>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

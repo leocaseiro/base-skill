@@ -68,10 +68,30 @@ const WithThemeInner = ({
     const vars = THEME_VARS[theme] ?? defaultThemeCssVars;
     applyThemeCssVars(document.documentElement, vars);
 
+    const isDark = DARK_THEMES.has(theme);
     document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(
-      DARK_THEMES.has(theme) ? 'dark' : 'light',
-    );
+    document.documentElement.classList.add(isDark ? 'dark' : 'light');
+
+    // Force Storybook Docs page backgrounds to follow the theme
+    const STYLE_ID = '__sb-dark-override';
+    let styleEl = document.querySelector<HTMLElement>(`#${STYLE_ID}`);
+    if (isDark) {
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = STYLE_ID;
+        document.head.append(styleEl);
+      }
+      styleEl.textContent = [
+        'body, #storybook-root, .sb-main-padded,',
+        '#storybook-docs, .sbdocs, .sbdocs-wrapper,',
+        '.sbdocs-content, .docs-story {',
+        '  background-color: var(--background) !important;',
+        '  color: var(--foreground) !important;',
+        '}',
+      ].join('\n');
+    } else {
+      styleEl?.remove();
+    }
   }, [theme]);
 
   return Story();

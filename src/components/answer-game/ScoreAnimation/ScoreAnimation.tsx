@@ -24,7 +24,7 @@ export const ScoreAnimation = ({ visible }: ScoreAnimationProps) => {
 
   return (
     <div
-      aria-live="polite"
+      role="status"
       aria-label="Round complete!"
       className="pointer-events-none fixed inset-0"
     />

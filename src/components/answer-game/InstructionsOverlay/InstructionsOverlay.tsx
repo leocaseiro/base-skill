@@ -142,7 +142,7 @@ export const InstructionsOverlay = ({
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                  className="rounded bg-muted px-2 py-0.5 text-xs font-medium text-foreground"
                 >
                   {tag}
                 </span>
