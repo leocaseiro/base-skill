@@ -152,3 +152,6 @@ jobs:
           The site has already been deployed to gh-pages with version \`${NEW_VERSION}\` (see \`dist/client/version.json\`). Merging this PR lands the matching \`package.json\` bump on master and makes the \`v${NEW_VERSION}\` tag reachable from master.
 
           The bump type was derived from the merged PR's conventional-commit messages by \`scripts/determine-bump.sh\`."
+          # Enable auto-merge so the release PR lands the moment required
+          # checks go green — no human review needed for version bumps.
+          gh pr merge "$BRANCH" --auto --squash --delete-branch
