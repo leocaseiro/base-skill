@@ -12,6 +12,7 @@ import {
 import type { RefObject } from 'react';
 import { playSound } from '@/lib/audio/AudioFeedback';
 import { getGameEventBus } from '@/lib/game-event-bus';
+import { resolveSkin, resolveTiming } from '@/lib/skin';
 
 export interface SlotRenderProps {
   label: string | null;
@@ -66,6 +67,13 @@ export const useSlotBehavior = (
   const isWrong = zone?.isWrong ?? false;
   const isLocked = zone?.isLocked ?? false;
   const isEmpty = tileId === null;
+
+  const skin = resolveSkin(config.gameId, config.skin);
+  const autoEjectDelay = resolveTiming(
+    'autoEjectDelay',
+    skin,
+    config.timing,
+  );
 
   // Resolve interaction mode: explicit config or inferred from inputMethod
   const slotInteraction =
@@ -340,9 +348,15 @@ export const useSlotBehavior = (
         zoneIndex: index,
         tileId: ejectedTileId,
       });
-    }, 1000);
+    }, autoEjectDelay);
     return () => clearTimeout(timerId);
-  }, [isWrong, config.wrongTileBehavior, dispatch, index]);
+  }, [
+    isWrong,
+    config.wrongTileBehavior,
+    dispatch,
+    index,
+    autoEjectDelay,
+  ]);
 
   return {
     renderProps: {
