@@ -1,6 +1,8 @@
 import { skeuoStyle } from '../styles';
+import { useAnswerGameContext } from '../useAnswerGameContext';
 import { useSlotBehavior } from './useSlotBehavior';
 import type { SlotRenderProps } from './useSlotBehavior';
+import type { GameSkin } from '@/lib/skin';
 import type { ReactNode, Ref } from 'react';
 
 interface SlotProps {
@@ -16,6 +18,11 @@ interface SlotProps {
    * `<span>{previewLabel}</span>` is used.
    */
   renderPreview?: (previewLabel: string) => ReactNode;
+  /**
+   * Optional skin whose `slotDecoration` renderer runs inside the slot.
+   * When undefined, no decoration is rendered.
+   */
+  skin?: GameSkin;
 }
 
 export const Slot = ({
@@ -24,7 +31,10 @@ export const Slot = ({
   className,
   children,
   renderPreview,
+  skin,
 }: SlotProps) => {
+  const { zones } = useAnswerGameContext();
+  const zone = zones[index];
   const {
     renderProps,
     outerRef,
@@ -90,12 +100,23 @@ export const Slot = ({
       <InnerTag
         ref={slotRef as Ref<HTMLDivElement>}
         className={[stateClasses, className].filter(Boolean).join(' ')}
-        style={
-          isPreview
+        style={{
+          background: 'var(--skin-slot-bg)',
+          borderColor: 'var(--skin-slot-border)',
+          borderRadius: 'var(--skin-slot-radius)',
+          ...(isPreview
             ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
-            : undefined
-        }
+            : undefined),
+        }}
       >
+        {skin?.slotDecoration?.(
+          {
+            isLocked: zone?.isLocked ?? false,
+            isWrong: zone?.isWrong ?? false,
+            placedTileId: zone?.placedTileId ?? null,
+          },
+          index,
+        )}
         {isEmpty ? (
           <>
             {isPreview && previewLabel !== null ? (
