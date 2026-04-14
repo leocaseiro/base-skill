@@ -22,13 +22,13 @@ let currentResolve: (() => void) | null = null;
 let queueTail: Promise<void> = Promise.resolve();
 
 function playSoundInternal(
-  key: SoundKey,
+  path: string,
   volume: number,
 ): Promise<void> {
   currentAudio?.pause();
   currentAudio = null;
 
-  const audio = new Audio(SOUND_PATHS[key]);
+  const audio = new Audio(path);
   audio.volume = volume;
   currentAudio = audio;
 
@@ -45,7 +45,7 @@ function playSoundInternal(
     audio.addEventListener('error', cleanup, { once: true });
 
     void audio.play().catch(() => {
-      console.error(`Failed to play sound ${key}`);
+      console.error(`Failed to play sound ${path}`);
       cleanup();
     });
   });
@@ -58,7 +58,7 @@ function playSoundInternal(
 export function playSound(key: SoundKey, volume = 0.8): void {
   currentResolve?.();
   currentResolve = null;
-  queueTail = playSoundInternal(key, volume);
+  queueTail = playSoundInternal(SOUND_PATHS[key], volume);
 }
 
 /**
@@ -68,7 +68,9 @@ export function playSound(key: SoundKey, volume = 0.8): void {
  */
 export function queueSound(key: SoundKey, volume = 0.8): Promise<void> {
   const startsAt = queueTail;
-  queueTail = startsAt.then(() => playSoundInternal(key, volume));
+  queueTail = startsAt.then(() =>
+    playSoundInternal(SOUND_PATHS[key], volume),
+  );
   return startsAt;
 }
 
@@ -79,3 +81,30 @@ export function queueSound(key: SoundKey, volume = 0.8): Promise<void> {
 export function whenSoundEnds(): Promise<void> {
   return queueTail;
 }
+
+/** Plays an arbitrary audio URL through the same queue/cancel machinery. */
+export function playSoundUrl(url: string, volume = 0.8): void {
+  currentResolve?.();
+  currentResolve = null;
+  queueTail = playSoundInternal(url, volume);
+}
+
+/** Queues an arbitrary audio URL behind any in-flight audio. */
+export function queueSoundUrl(
+  url: string,
+  volume = 0.8,
+): Promise<void> {
+  const startsAt = queueTail;
+  queueTail = startsAt.then(() => playSoundInternal(url, volume));
+  return startsAt;
+}
+
+/** Exposed so skins can check / extend the built-in sound key set. */
+export const SOUND_KEYS = [
+  'correct',
+  'wrong',
+  'round-complete',
+  'level-complete',
+  'game-complete',
+  'tile-place',
+] as const satisfies readonly SoundKey[];
