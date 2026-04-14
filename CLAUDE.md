@@ -136,10 +136,13 @@ manually").
 
 ### Branch Protection
 
-Required status checks on `master`: `Prettier`, `ESLint`, `Stylelint`,
-`Markdownlint`, `Actionlint`, `Shellcheck`, `Knip`, `Type Check`, `Unit Tests`,
-`Storybook Tests`, `Visual Regression (Docker / Chromium)`, `E2E — chromium`,
-`Build`. Conditionally-skipped jobs exit 0 early → GitHub shows them green.
+Required status checks on `master`: `Lint`, `Type Check`, `Unit Tests`,
+`Storybook Tests`, `Build`, `E2E — chromium`. The consolidated `Lint` job
+runs prettier, eslint, stylelint, markdownlint, actionlint, shellcheck,
+and knip as internal steps — each step is individually gated by its
+detect-changes bucket, so unaffected linters are skipped while still
+sharing one install. Conditionally-skipped jobs exit 0 early → GitHub
+shows them green.
 
 ### Visual Regression Tests
 
