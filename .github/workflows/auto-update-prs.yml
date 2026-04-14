@@ -1,0 +1,80 @@
+# .github/workflows/auto-update-prs.yml
+#
+# When master moves, rebase-update every open PR automatically so the
+# "Require branches to be up to date before merging" ruleset stops forcing
+# maintainers to click "Update branch" by hand.
+#
+# Why RELEASE_PAT instead of the default GITHUB_TOKEN:
+# Workflow events triggered with GITHUB_TOKEN do NOT re-fire downstream
+# workflows (GitHub's loop-prevention). That would leave CI stale on the
+# sync commit. Using a PAT (same trick as deploy.yml) makes the resulting
+# sync commit look like a regular user push, so CI / VR / preview re-run.
+
+name: Auto-update PRs
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: auto-update-prs
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    name: Update open PRs against master
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Update every open PR
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
+          # Flip to "true" to leave drafts alone.
+          SKIP_DRAFTS: 'false'
+        run: |
+          set -euo pipefail
+
+          PRS=$(gh pr list \
+            --base master \
+            --state open \
+            --json number,isCrossRepository,isDraft,headRefName \
+            --jq '.[] | @json')
+
+          if [ -z "$PRS" ]; then
+            echo "No open PRs against master."
+            exit 0
+          fi
+
+          while IFS= read -r pr; do
+            num=$(echo "$pr" | jq -r '.number')
+            fork=$(echo "$pr" | jq -r '.isCrossRepository')
+            draft=$(echo "$pr" | jq -r '.isDraft')
+            branch=$(echo "$pr" | jq -r '.headRefName')
+
+            if [ "$fork" = "true" ]; then
+              echo "• #$num ($branch) — skipped (fork; update-branch API rejects cross-repo)"
+              continue
+            fi
+
+            if [ "$SKIP_DRAFTS" = "true" ] && [ "$draft" = "true" ]; then
+              echo "• #$num ($branch) — skipped (draft; SKIP_DRAFTS=true)"
+              continue
+            fi
+
+            echo "• #$num ($branch) — rebasing onto master…"
+            # --rebase replays PR commits on top of master (linear history,
+            # no merge commit). Capture stderr so "already up to date" and
+            # conflicts don't abort the loop — gh prints both the API error
+            # and a summary line.
+            if ! out=$(gh pr update-branch "$num" --rebase 2>&1); then
+              echo "  ↳ non-fatal: $out"
+            else
+              echo "  ↳ $out"
+            fi
+          done <<< "$PRS"

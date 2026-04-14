@@ -29,7 +29,8 @@ run_test() {
   local fixture_content="$2"
   local expected_exit="$3"
 
-  local fixture_dir="$TMPDIR_TESTS/$(date +%s%N)_$RANDOM"
+  local fixture_dir
+  fixture_dir="$TMPDIR_TESTS/$(date +%s%N)_$RANDOM"
   mkdir -p "$fixture_dir/.github/workflows"
   printf '%s' "$fixture_content" >"$fixture_dir/.github/workflows/test.yml"
 
