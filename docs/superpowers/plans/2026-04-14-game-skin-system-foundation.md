@@ -16,6 +16,11 @@
 - Plan 2 (future) will replicate the integration pattern to WordSpell + NumberMatch.
 - Plan 3 (future) will bootstrap the `baseskill-premium-cloud` repo and first real skin.
 
+**Known limitations after Plan 1 (to be addressed in Plan 2):**
+
+- **`--skin-*` CSS tokens are applied on the game container but not yet consumed by core components.** An initial attempt to inline tokens on `Slot` and `TileBank` broke Tailwind state classes (inline styles outrank class-level styling), so token consumption was reverted to preserve the classic look. Third-party skins can still consume the tokens via their own `.skin-<id>` CSS classes served from the skin package. Plan 2 will refactor `Slot` and `TileBank` to a CSS-variable-first styling approach so core components read `var(--skin-*)` without breaking state styling.
+- **`onGameOver` receives `retryCount: 0`.** `GameEndEvent` does not carry the retry count. Either extend the event payload or emit a skin-specific event in Plan 2 when all three games are integrated.
+
 ---
 
 ## File Structure
