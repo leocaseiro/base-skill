@@ -23,6 +23,9 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
   const ref = useRef<HTMLButtonElement>(null);
   const dispatch = useAnswerGameDispatch();
   const state = useAnswerGameContext();
+  // Mirror state in a ref so onDragStart can read current gameId/roundIndex
+  // without adding `state` to the draggable() effect's deps (which would
+  // re-subscribe pragmatic-drag-and-drop on every game-state change).
   const stateRef = useRef(state);
   const { placeInNextSlot } = useAutoNextSlot();
   const { speakTile } = useGameTTS();
@@ -107,8 +110,20 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
       onDropOnBankTile: () =>
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
-      onHoverZone: (zoneIndex) =>
-        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex }),
+      onHoverZone: (zoneIndex) => {
+        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex });
+        if (zoneIndex !== null) {
+          getGameEventBus().emit({
+            type: 'game:drag-over-zone',
+            gameId: stateRef.current.config.gameId,
+            sessionId: '',
+            profileId: '',
+            timestamp: Date.now(),
+            roundIndex: stateRef.current.roundIndex,
+            zoneIndex,
+          });
+        }
+      },
     });
 
   const handleClick = () => {
