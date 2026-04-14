@@ -82,6 +82,26 @@ export const Slot = ({
     .filter(Boolean)
     .join(' ');
 
+  const isCustomSkin = skin && skin.id !== 'classic';
+  const hasColorStateOverride = isWrong || isPreview;
+  const slotTokenStyle: React.CSSProperties =
+    isCustomSkin && !hasColorStateOverride
+      ? {
+          background: 'var(--skin-slot-bg)',
+          borderColor: 'var(--skin-slot-border)',
+          borderRadius: 'var(--skin-slot-radius)',
+        }
+      : {};
+
+  const finalStyle: React.CSSProperties | undefined = isPreview
+    ? {
+        ...slotTokenStyle,
+        animation: 'pulse-ring 1.5s ease-in-out infinite',
+      }
+    : Object.keys(slotTokenStyle).length > 0
+      ? slotTokenStyle
+      : undefined;
+
   return (
     // Outer wrapper: the drop target. p-1.5 expands the hit area ~6 px beyond
     // the visual slot on all sides (pragmatic-board card pattern). data-zone-index
@@ -100,11 +120,7 @@ export const Slot = ({
       <InnerTag
         ref={slotRef as Ref<HTMLDivElement>}
         className={[stateClasses, className].filter(Boolean).join(' ')}
-        style={
-          isPreview
-            ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
-            : undefined
-        }
+        style={finalStyle}
       >
         {skin?.slotDecoration?.(
           {
