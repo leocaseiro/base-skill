@@ -77,6 +77,10 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
         placeTile(droppedTileId, zoneIndex);
       },
+      onDropOnBank: () =>
+        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
+      onDropOnBankTile: () =>
+        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
       onHoverZone: (zoneIndex) =>
         dispatch({ type: 'SET_DRAG_HOVER', zoneIndex }),
     });

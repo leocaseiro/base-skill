@@ -1,3 +1,5 @@
+import { safeGetVoices } from './safe-get-voices';
+
 export interface SpeakOptions {
   rate?: number;
   volume?: number;
@@ -44,7 +46,7 @@ export function speak(
   const opts: SpeakOptions =
     typeof options === 'string' ? { voiceName: options } : options;
 
-  const voices = synth.getVoices();
+  const voices = safeGetVoices(synth);
 
   if (voices.length > 0) {
     console.debug(
@@ -64,7 +66,7 @@ export function speak(
   const handler = () => {
     pendingVoicesChangedHandler = null;
     synth.removeEventListener('voiceschanged', handler);
-    const loadedVoices = synth.getVoices();
+    const loadedVoices = safeGetVoices(synth);
     console.debug(
       `[TTS] speak("${text}") — deferred, voices now loaded → queued`,
     );

@@ -1,0 +1,276 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="game-engine/Debugging" />
+
+# Debugging the Game Engine
+
+> Techniques for inspecting state transitions, dispatched actions, sound
+> playback, and persisted session data during development.
+
+---
+
+## 1. React DevTools — Reducer and Context Inspection
+
+Both the outer `GameEngineProvider` and the inner `AnswerGameProvider` use
+plain `useReducer`. React DevTools is the primary way to inspect their state.
+
+### Viewing AnswerGame state
+
+1. Open **React DevTools** → Components tab
+2. Search for `AnswerGameStateContext.Provider`
+3. Expand the **value** prop to see the full `AnswerGameState`:
+   `phase`, `zones`, `bankTileIds`, `activeSlotIndex`, `retryCount`, etc.
+
+### Viewing dispatched actions
+
+React DevTools does not log individual `useReducer` dispatches by default.
+To trace every action through the AnswerGame reducer, add a temporary
+logging wrapper in `AnswerGameProvider.tsx`:
+
+```ts
+// Temporary — remove before committing
+const [state, rawDispatch] = useReducer(
+  answerGameReducer,
+  initialState,
+);
+const dispatch = (action: AnswerGameAction) => {
+  console.group(`[AnswerGame] ${action.type}`);
+  console.log('payload', action);
+  console.log('state before', state);
+  rawDispatch(action);
+  console.groupEnd();
+};
+```
+
+The same pattern works for the GameEngine lifecycle reducer in
+`lifecycle.ts`:
+
+```ts
+const [state, rawDispatch] = useReducer(reducer, initial);
+const dispatch = (move: Move) => {
+  console.group(`[GameEngine] ${move.type}`);
+  console.log('args', move.args);
+  rawDispatch(move);
+  console.groupEnd();
+};
+```
+
+> **Tip:** State _after_ dispatch is visible in the next render. To see
+> before/after in one log, compute `reducer(state, action)` inline — but
+> only in dev, since the reducer must remain pure.
+
+### Viewing GameEngine state
+
+Search for `GameStateContext.Provider` in React DevTools. Its value shows
+`phase`, `roundIndex`, `score`, `streak`, and `currentRound`.
+
+---
+
+## 2. TanStack DevTools
+
+TanStack DevTools are mounted in `src/routes/__root.tsx` and appear as a
+floating panel at the bottom-right of the page in development.
+
+### Router DevTools
+
+The **TanStack Router** tab shows:
+
+- All registered routes and their current match state
+- Route params (e.g. `$locale`, `$gameId`)
+- Loader data (including `initialLog` and `draftState` from session finders)
+- Navigation history
+
+This is useful for verifying that the correct session data was loaded from
+RxDB before the game mounts.
+
+### Adding custom panels
+
+The DevTools accept plugins. To add a game state inspector panel:
+
+```tsx
+<TanStackDevtools
+  config={{ position: 'bottom-right' }}
+  plugins={[
+    {
+      name: 'Tanstack Router',
+      render: <TanStackRouterDevtoolsPanel />,
+    },
+    {
+      name: 'Game State',
+      render: <YourCustomPanel />,
+    },
+  ]}
+/>
+```
+
+---
+
+## 3. GameEventBus — Tapping All Events
+
+The `GameEventBus` singleton supports a wildcard subscription that captures
+every event. Use this in the browser console to trace game events in real
+time:
+
+```js
+// In the browser console (dev only)
+// Import is available because Vite exposes modules in dev
+const { getGameEventBus } = await import('/src/lib/game-event-bus.ts');
+const unsub = getGameEventBus().subscribe('game:*', (event) => {
+  console.log(`[EventBus] ${event.type}`, event);
+});
+// Call unsub() to stop logging
+```
+
+### Events emitted during gameplay
+
+| Event           | Emitted by          | Contains                                                |
+| --------------- | ------------------- | ------------------------------------------------------- |
+| `game:evaluate` | `useTileEvaluation` | `gameId`, `roundIndex`, `answer`, `correct`, `nearMiss` |
+
+> The event bus is currently internal (M2). More event types may be added as
+> the public API evolves.
+
+---
+
+## 4. RxDB — Inspecting Persisted Session Data
+
+Game sessions are stored in two RxDB collections:
+
+| Collection              | Purpose                                               |
+| ----------------------- | ----------------------------------------------------- |
+| `session_history_index` | One doc per session: metadata, move count, draftState |
+| `session_history`       | Chunked move arrays for replay                        |
+
+### Browser console queries
+
+RxDB is accessible through the `DbContext`. In development, you can grab it
+from React DevTools or expose it on `window` temporarily:
+
+```ts
+// Temporary — add to DbProvider.tsx, remove before committing
+useEffect(() => {
+  if (db) (window as any).__db = db;
+}, [db]);
+```
+
+Then in the browser console:
+
+```js
+// List all session index documents
+const docs = await __db.session_history_index.find().exec();
+docs.forEach((d) => console.log(d.toJSON()));
+
+// Find a specific session
+const session = await __db.session_history_index
+  .findOne('session-id')
+  .exec();
+console.log(session?.toJSON());
+
+// Inspect draft state (mid-round snapshot)
+console.log(session?.draftState);
+
+// List move chunks for a session
+const chunks = await __db.session_history
+  .find({ selector: { sessionId: 'session-id' } })
+  .exec();
+chunks.forEach((c) => console.log(`chunk ${c.chunkIndex}:`, c.moves));
+```
+
+### IndexedDB direct access
+
+RxDB uses IndexedDB as its storage backend. Open **DevTools → Application →
+IndexedDB** to browse raw documents. Look for the database named
+`baseskill` (or the name configured in `create-database.ts`).
+
+---
+
+## 5. Sound System Debugging
+
+### Verifying sound playback
+
+`AudioFeedback.ts` creates `HTMLAudioElement` instances. To trace playback:
+
+```js
+// Monkey-patch in browser console
+const origPlay = HTMLAudioElement.prototype.play;
+HTMLAudioElement.prototype.play = function () {
+  console.log('[Audio] play', this.src, 'volume:', this.volume);
+  return origPlay.call(this);
+};
+```
+
+### Common issues
+
+| Symptom                           | Likely cause                                    | Fix                                               |
+| --------------------------------- | ----------------------------------------------- | ------------------------------------------------- |
+| No sound on first interaction     | Browser autoplay policy blocks audio            | Sounds must start from a user gesture (click/tap) |
+| Tile sound cut off by phase sound | `playSound()` interrupts; this is by design     | Use `queueSound()` if sounds should chain         |
+| TTS speaks over sound effects     | `whenSoundEnds()` not awaited                   | Check `useRoundTTS` awaits the sound queue        |
+| Sound plays but wrong file        | `SOUND_PATHS` map or `import.meta.env.BASE_URL` | Verify paths in `AudioFeedback.ts`                |
+
+### TTS debug logs
+
+The speech system logs to `console.debug` with a `[TTS]` prefix:
+
+- `[TTS] speakTile("a") — busy, skipped` — a speak call was dropped because
+  another utterance was active
+- `[TTS] speak(...)` — utterance started (logged in `SpeechOutput.ts`)
+- `[TTS] cancelSpeech() — idle, skipped` — cancel was a no-op
+
+Filter the browser console to `[TTS]` to see only speech events.
+
+---
+
+## 6. Reducer Unit Testing
+
+Both reducers are pure functions and can be tested without React:
+
+```ts
+import {
+  answerGameReducer,
+  makeInitialState,
+} from './answer-game-reducer';
+
+const state = makeInitialState(config);
+const next = answerGameReducer(state, {
+  type: 'PLACE_TILE',
+  tileId: 'tile-1',
+  zoneIndex: 0,
+});
+expect(next.zones[0].placedTileId).toBe('tile-1');
+```
+
+For the GameEngine reducer:
+
+```ts
+import { createReducer } from './lifecycle';
+
+const reducer = createReducer(config, gameMovers);
+const next = reducer(state, {
+  type: 'SUBMIT_ANSWER',
+  args: {},
+  timestamp: Date.now(),
+});
+expect(next.phase).toBe('scoring');
+```
+
+Existing test suites:
+
+- `src/components/answer-game/answer-game-reducer.test.ts`
+- `src/lib/game-engine/lifecycle.test.ts` (if present)
+- `src/lib/game-engine/session-finder.test.ts`
+
+---
+
+## Quick Reference
+
+| What to inspect              | Tool / technique                                          |
+| ---------------------------- | --------------------------------------------------------- |
+| Current AnswerGame state     | React DevTools → `AnswerGameStateContext.Provider`        |
+| Current GameEngine state     | React DevTools → `GameStateContext.Provider`              |
+| Dispatched actions (trace)   | Temporary logging wrapper around `useReducer`             |
+| Route params and loader data | TanStack Router DevTools panel (bottom-right)             |
+| Game events (evaluate, etc.) | `getGameEventBus().subscribe('game:*', console.log)`      |
+| Persisted sessions and moves | RxDB queries via `window.__db` or IndexedDB direct access |
+| Sound playback               | `HTMLAudioElement.prototype.play` monkey-patch            |
+| TTS utterances               | Filter browser console to `[TTS]`                         |
