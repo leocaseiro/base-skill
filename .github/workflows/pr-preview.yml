@@ -58,9 +58,11 @@ jobs:
           PR_NUMBER="${{ github.event.pull_request.number }}"
           VERSION="${BASE_VERSION}-pr.${PR_NUMBER}"
           APP_BASE="/base-skill/pr/${PR_NUMBER}/app/"
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "app_base=${APP_BASE}" >> "$GITHUB_OUTPUT"
-          echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+          {
+            echo "version=${VERSION}"
+            echo "app_base=${APP_BASE}"
+            echo "pr_number=${PR_NUMBER}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Build app
         env:
