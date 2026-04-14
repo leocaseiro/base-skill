@@ -2,8 +2,6 @@
 name: E2E Tests
 
 on:
-  push:
-    branches: [master]
   pull_request:
   schedule:
     - cron: '0 0 * * 0' # weekly — Sunday at 00:00 UTC
@@ -14,45 +12,65 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  detect-changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      e2e: ${{ steps.filter.outputs.e2e }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - id: filter
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            node scripts/detect-buckets.mjs \
+              --base=${{ github.event.pull_request.base.sha }} \
+              --github-output
+          else
+            node scripts/detect-buckets.mjs --force-all --github-output
+          fi
+
   e2e:
     name: E2E — ${{ matrix.browser }}
+    needs: detect-changes
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         browser: [chromium]
-
     steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.e2e != 'true'
+        run: echo "Skipped — no e2e-relevant changes" && exit 0
+      - if: needs.detect-changes.outputs.e2e == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.e2e == 'true'
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: yarn
-
-      - name: Install dependencies
+      - if: needs.detect-changes.outputs.e2e == 'true'
         run: yarn install --frozen-lockfile
-
-      - name: Install Playwright browsers
+      - if: needs.detect-changes.outputs.e2e == 'true'
         run: npx playwright install --with-deps ${{ matrix.browser }}
-
-      - name: Build app
+      - if: needs.detect-changes.outputs.e2e == 'true'
         run: yarn build
-
-      - name: Copy shell to index.html
+      - if: needs.detect-changes.outputs.e2e == 'true'
         run: cp dist/client/_shell.html dist/client/index.html
-
-      - name: Run Playwright tests (${{ matrix.browser }})
+      - if: needs.detect-changes.outputs.e2e == 'true'
         run: npx playwright test --project=${{ matrix.browser }}
         env:
           CI: true
-
-      - name: Run accessibility audit
+      - if: needs.detect-changes.outputs.e2e == 'true'
         run: npx playwright test --project=${{ matrix.browser }} --grep @a11y
         continue-on-error: false
-
-      - name: Upload Playwright report
-        if: failure()
+      - if: needs.detect-changes.outputs.e2e == 'true' && failure()
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report-${{ matrix.browser }}

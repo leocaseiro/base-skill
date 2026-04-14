@@ -11,6 +11,7 @@ import type {
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
+import type { GameSkin } from '@/lib/skin';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
@@ -25,6 +26,8 @@ import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
 import { buildRoundOrder } from '@/games/build-round-order';
+import { getGameEventBus } from '@/lib/game-event-bus';
+import { useGameSkin } from '@/lib/skin';
 
 function segmentsForWord(
   word: string,
@@ -78,10 +81,12 @@ interface WordSpellProps {
 const WordSpellSession = ({
   wordSpellConfig,
   roundOrder,
+  skin,
   onRestartSession,
 }: {
   wordSpellConfig: WordSpellConfig;
   roundOrder: readonly number[];
+  skin: GameSkin;
   onRestartSession: () => void;
 }) => {
   const { phase, roundIndex, retryCount, zones } =
@@ -114,6 +119,29 @@ const WordSpellSession = ({
   const handlePlayAgain = () => {
     onRestartSession();
   };
+
+  useEffect(() => {
+    if (phase !== 'game-over') return;
+    getGameEventBus().emit({
+      type: 'game:end',
+      gameId: wordSpellConfig.gameId,
+      sessionId: '',
+      profileId: '',
+      timestamp: Date.now(),
+      roundIndex,
+      finalScore: 0,
+      totalRounds: roundOrder.length,
+      correctCount: 0,
+      durationMs: 0,
+      retryCount,
+    });
+  }, [
+    phase,
+    wordSpellConfig.gameId,
+    roundIndex,
+    roundOrder.length,
+    retryCount,
+  ]);
 
   useEffect(() => {
     if (phase !== 'round-complete' || !confettiReady) return;
@@ -212,6 +240,7 @@ const WordSpellSession = ({
                 <Slot
                   key={zone.id}
                   index={i}
+                  skin={skin}
                   className="size-14 rounded-lg"
                 >
                   {({ label }) => (
@@ -226,13 +255,25 @@ const WordSpellSession = ({
           <LetterTileBank />
         </AnswerGame.Choices>
       </div>
-      <ScoreAnimation visible={confettiReady} />
+      {skin.RoundCompleteEffect ? (
+        <skin.RoundCompleteEffect visible={confettiReady} />
+      ) : (
+        <ScoreAnimation visible={confettiReady} />
+      )}
       {gameOverReady ? (
-        <GameOverOverlay
-          retryCount={retryCount}
-          onPlayAgain={handlePlayAgain}
-          onHome={handleHome}
-        />
+        skin.CelebrationOverlay ? (
+          <skin.CelebrationOverlay
+            retryCount={retryCount}
+            onPlayAgain={handlePlayAgain}
+            onHome={handleHome}
+          />
+        ) : (
+          <GameOverOverlay
+            retryCount={retryCount}
+            onPlayAgain={handlePlayAgain}
+            onHome={handleHome}
+          />
+        )
       ) : null}
     </>
   );
@@ -244,6 +285,7 @@ export const WordSpell = ({
   sessionId,
   seed,
 }: WordSpellProps) => {
+  const skin = useGameSkin('word-spell', config.skin);
   const { rounds: resolvedRounds, isLoading } =
     useLibraryRounds(config);
 
@@ -326,19 +368,26 @@ export const WordSpell = ({
   if (!round0) return null;
 
   return (
-    <AnswerGame
-      key={sessionEpoch}
-      config={answerGameConfig}
-      initialState={sessionEpoch === 0 ? initialState : undefined}
-      sessionId={sessionId}
+    <div
+      className={`game-container skin-${skin.id}`}
+      style={skin.tokens as React.CSSProperties}
     >
-      <WordSpellSession
-        wordSpellConfig={resolvedConfig}
-        roundOrder={roundOrder}
-        onRestartSession={() => {
-          setSessionEpoch((e) => e + 1);
-        }}
-      />
-    </AnswerGame>
+      {skin.SceneBackground ? <skin.SceneBackground /> : null}
+      <AnswerGame
+        key={sessionEpoch}
+        config={answerGameConfig}
+        initialState={sessionEpoch === 0 ? initialState : undefined}
+        sessionId={sessionId}
+      >
+        <WordSpellSession
+          wordSpellConfig={resolvedConfig}
+          roundOrder={roundOrder}
+          skin={skin}
+          onRestartSession={() => {
+            setSessionEpoch((e) => e + 1);
+          }}
+        />
+      </AnswerGame>
+    </div>
   );
 };

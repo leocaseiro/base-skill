@@ -19,23 +19,51 @@ permissions:
   contents: write
 
 jobs:
-  visual-regression:
-    name: Visual Regression (Docker / Chromium)
+  detect-changes:
+    name: Detect changes
     runs-on: ubuntu-latest
+    outputs:
+      vr: ${{ steps.filter.outputs.vr }}
     steps:
       - uses: actions/checkout@v6
         with:
-          # On workflow_dispatch we need the branch (not a PR merge ref) so the
-          # "Commit updated snapshots" step can push back. On pull_request we
-          # let checkout use its default merge-ref behaviour.
-          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || '' }}
-
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: yarn
+      - run: yarn install --frozen-lockfile
+      - id: filter
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            node scripts/detect-buckets.mjs \
+              --base=${{ github.event.pull_request.base.sha }} \
+              --github-output
+          else
+            node scripts/detect-buckets.mjs --force-all --github-output
+          fi
 
-      - name: Install dependencies
+  visual-regression:
+    name: Visual Regression (Docker / Chromium)
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip if not triggered
+        if: github.event_name == 'pull_request' && needs.detect-changes.outputs.vr != 'true'
+        run: echo "Skipped — no vr-relevant changes" && exit 0
+
+      - if: github.event_name != 'pull_request' || needs.detect-changes.outputs.vr == 'true'
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || '' }}
+
+      - if: github.event_name != 'pull_request' || needs.detect-changes.outputs.vr == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+
+      - if: github.event_name != 'pull_request' || needs.detect-changes.outputs.vr == 'true'
         run: yarn install --frozen-lockfile
 
       - name: Update baseline snapshots
@@ -52,13 +80,13 @@ jobs:
           git push
 
       - name: Run visual regression tests
-        if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.update_snapshots != true)
+        if: (github.event_name == 'pull_request' && needs.detect-changes.outputs.vr == 'true') || (github.event_name == 'workflow_dispatch' && inputs.update_snapshots != true)
         run: node scripts/vr-docker.mjs test
         continue-on-error: true
         id: visual
 
       - name: Upload diff images
-        if: (github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.update_snapshots != true)) && steps.visual.outcome == 'failure'
+        if: steps.visual.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
           name: visual-regression-diffs-chromium
@@ -69,11 +97,6 @@ jobs:
         if: inputs.update_snapshots != true && steps.visual.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report-vr-${{ matrix.browser }}
+          name: playwright-report-vr
           path: playwright-report/
           retention-days: 14
-
-      # TODO: re-enable once Docker VR tests are fixed (WordSpell/NumberMatch timeout in CI)
-      # - name: Fail if visual regressions found
-      #   if: (github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.update_snapshots != true)) && steps.visual.outcome == 'failure'
-      #   run: exit 1

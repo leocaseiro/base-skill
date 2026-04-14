@@ -4,7 +4,37 @@ import { withRouter } from '../../../../.storybook/decorators/withRouter';
 import { createSortNumbersLevelGenerator } from '../sort-numbers-level-generator';
 import { SortNumbers } from './SortNumbers';
 import type { SortNumbersConfig } from '../types';
+import type { GameSkin } from '@/lib/skin';
 import type { Meta, StoryObj } from '@storybook/react';
+import { registerSkin } from '@/lib/skin';
+
+// Demo skin registered here so the Skin dropdown control works across every
+// SortNumbers story. Matches the tokens previously used in the standalone
+// skin-harness story.
+const demoSkin: GameSkin = {
+  id: 'demo',
+  name: 'Demo Pink',
+  tokens: {
+    '--skin-tile-bg': '#ec4899',
+    '--skin-tile-text': '#fff',
+    '--skin-tile-radius': '50%',
+    '--skin-slot-bg': '#fdf2f8',
+    '--skin-slot-border': '#f472b6',
+    '--skin-slot-radius': '50%',
+  },
+  onCorrectPlace: (zoneIndex, value) => {
+    console.log(`[demo skin] correct @ zone ${zoneIndex}: ${value}`);
+  },
+  onWrongPlace: (zoneIndex, value) => {
+    console.log(`[demo skin] wrong @ zone ${zoneIndex}: ${value}`);
+  },
+};
+registerSkin('sort-numbers', demoSkin);
+
+type StoryArgs = {
+  config: SortNumbersConfig;
+  skinId: 'classic' | 'demo';
+};
 
 const baseConfig: SortNumbersConfig = {
   gameId: 'sort-numbers',
@@ -27,15 +57,27 @@ const baseConfig: SortNumbersConfig = {
   ],
 };
 
-const meta: Meta<typeof SortNumbers> = {
+const meta: Meta<StoryArgs> = {
   component: SortNumbers,
   tags: ['autodocs'],
   decorators: [withDb, withRouter],
-  args: { config: baseConfig },
+  args: { config: baseConfig, skinId: 'classic' },
+  argTypes: {
+    skinId: {
+      name: 'Skin',
+      control: 'select',
+      options: ['classic', 'demo'],
+      description:
+        'Switch between the classic look and the Demo Pink skin.',
+    },
+  },
+  render: ({ config, skinId }) => (
+    <SortNumbers config={{ ...config, skin: skinId }} />
+  ),
 };
 export default meta;
 
-type Story = StoryObj<typeof SortNumbers>;
+type Story = StoryObj<StoryArgs>;
 
 export const Consecutive: Story = {};
 
