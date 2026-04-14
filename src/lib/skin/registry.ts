@@ -24,10 +24,7 @@ export function getRegisteredSkins(gameId: string): GameSkin[] {
 }
 
 /** Resolve a skin by id, falling back to `classic` when unknown. */
-export function resolveSkin(
-  gameId: string,
-  skinId: string | undefined,
-): GameSkin {
+export function resolveSkin(gameId: string, skinId?: string): GameSkin {
   if (!skinId || skinId === 'classic') return classicSkin;
   const gameSkins = registry.get(gameId);
   return gameSkins?.get(skinId) ?? classicSkin;
