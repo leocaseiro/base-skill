@@ -1,6 +1,8 @@
 import { skeuoStyle } from '../styles';
+import { useAnswerGameContext } from '../useAnswerGameContext';
 import { useSlotBehavior } from './useSlotBehavior';
 import type { SlotRenderProps } from './useSlotBehavior';
+import type { GameSkin } from '@/lib/skin';
 import type { ReactNode, Ref } from 'react';
 
 interface SlotProps {
@@ -16,6 +18,11 @@ interface SlotProps {
    * `<span>{previewLabel}</span>` is used.
    */
   renderPreview?: (previewLabel: string) => ReactNode;
+  /**
+   * Optional skin whose `slotDecoration` renderer runs inside the slot.
+   * When undefined, no decoration is rendered.
+   */
+  skin?: GameSkin;
 }
 
 export const Slot = ({
@@ -24,7 +31,10 @@ export const Slot = ({
   className,
   children,
   renderPreview,
+  skin,
 }: SlotProps) => {
+  const { zones } = useAnswerGameContext();
+  const zone = zones[index];
   const {
     renderProps,
     outerRef,
@@ -72,6 +82,34 @@ export const Slot = ({
     .filter(Boolean)
     .join(' ');
 
+  // Custom skins drive their own colors AND shape. The radius doesn't conflict
+  // with state classes (Tailwind state classes don't change border-radius), so
+  // it's safe to apply for every state. Background and border colors only apply
+  // when no state override is active (wrong/preview keep their state colors).
+  const isCustomSkin = skin && skin.id !== 'classic';
+  const hasColorStateOverride = isWrong || isPreview;
+  const skinShape: React.CSSProperties = isCustomSkin
+    ? { borderRadius: 'var(--skin-slot-radius)' }
+    : {};
+  const skinColors: React.CSSProperties =
+    isCustomSkin && !hasColorStateOverride
+      ? {
+          background: 'var(--skin-slot-bg)',
+          borderColor: 'var(--skin-slot-border)',
+        }
+      : {};
+
+  const finalStyle: React.CSSProperties | undefined = isPreview
+    ? {
+        ...skinShape,
+        ...skinColors,
+        animation: 'pulse-ring 1.5s ease-in-out infinite',
+      }
+    : Object.keys(skinShape).length > 0 ||
+        Object.keys(skinColors).length > 0
+      ? { ...skinShape, ...skinColors }
+      : undefined;
+
   return (
     // Outer wrapper: the drop target. p-1.5 expands the hit area ~6 px beyond
     // the visual slot on all sides (pragmatic-board card pattern). data-zone-index
@@ -90,12 +128,16 @@ export const Slot = ({
       <InnerTag
         ref={slotRef as Ref<HTMLDivElement>}
         className={[stateClasses, className].filter(Boolean).join(' ')}
-        style={
-          isPreview
-            ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
-            : undefined
-        }
+        style={finalStyle}
       >
+        {skin?.slotDecoration?.(
+          {
+            isLocked: zone?.isLocked ?? false,
+            isWrong: zone?.isWrong ?? false,
+            placedTileId: zone?.placedTileId ?? null,
+          },
+          index,
+        )}
         {isEmpty ? (
           <>
             {isPreview && previewLabel !== null ? (

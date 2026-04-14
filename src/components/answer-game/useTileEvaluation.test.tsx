@@ -14,6 +14,7 @@ import { useTileEvaluation } from './useTileEvaluation';
 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
 import type { ReactNode } from 'react';
 import { playSound } from '@/lib/audio/AudioFeedback';
+import { __resetSkinRegistryForTests, registerSkin } from '@/lib/skin';
 
 vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
@@ -155,5 +156,28 @@ describe('useTileEvaluation', () => {
 
     act(() => vi.advanceTimersByTime(2000));
     expect(result.current.state.zones[0]?.placedTileId).toBe('t2');
+  });
+
+  it('skips default sound when skin.suppressDefaultSounds is true', () => {
+    __resetSkinRegistryForTests();
+    registerSkin('test', {
+      id: 'silent',
+      name: 'Silent',
+      tokens: {},
+      suppressDefaultSounds: true,
+    });
+
+    const config: AnswerGameConfig = { ...baseConfig, skin: 'silent' };
+    const { result } = renderHook(() => useTileEvaluationHarness(), {
+      wrapper: createWrapper(config),
+    });
+
+    vi.mocked(playSound).mockClear();
+
+    act(() => {
+      result.current.placeTile('t1', 0);
+    });
+
+    expect(playSound).not.toHaveBeenCalled();
   });
 });

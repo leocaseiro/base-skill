@@ -78,23 +78,40 @@ export const useSlotTileDrag = ({
             input: location.current.input,
           }),
           render({ container }) {
+            // Build a FRESH div (not cloneNode). Copy the button's inner
+            // markup so child styling (font-bold, tabular-nums, etc.) is
+            // preserved via document-level stylesheets, and apply resolved
+            // outer styles explicitly so the ghost is self-contained and
+            // doesn't depend on ancestor CSS vars or `rounded-[inherit]`.
             const rect = element.getBoundingClientRect();
+            const computed = getComputedStyle(element);
             const ghost = document.createElement('div');
-            // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
-            // inner elements are preserved — avoids the shrunken-font issue
-            // that occurs when reading fontSize from the button itself.
             ghost.innerHTML = element.innerHTML;
+            // border-radius shorthand can serialize to '' when set via
+            // `inherit`; read longhands explicitly.
+            const radius = [
+              computed.borderTopLeftRadius,
+              computed.borderTopRightRadius,
+              computed.borderBottomRightRadius,
+              computed.borderBottomLeftRadius,
+            ].join(' ');
             Object.assign(ghost.style, {
               width: `${rect.width}px`,
               height: `${rect.height}px`,
-              borderRadius: '12px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: 'var(--card, #fff)',
-              color: 'var(--card-foreground, #000)',
-              boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+              backgroundColor: computed.backgroundColor,
+              backgroundImage: computed.backgroundImage,
+              color: computed.color,
+              borderRadius: radius,
+              fontSize: computed.fontSize,
+              fontFamily: computed.fontFamily,
+              fontWeight: computed.fontWeight,
+              border: '1px solid rgba(0,0,0,0.15)',
+              boxSizing: 'border-box',
               transform: 'scale(1.08)',
+              pointerEvents: 'none',
             });
             container.append(ghost);
             return () => ghost.remove();
