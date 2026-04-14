@@ -13,7 +13,7 @@ concurrency:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   build:
@@ -111,10 +111,15 @@ jobs:
             pr/**
           commit-message: 'deploy: production ${{ steps.version.outputs.version }}'
 
-      - name: Commit and tag version bump
+      - name: Open release PR for version bump
+        # Master is protected by a ruleset requiring PRs, so the bot cannot
+        # push the chore(release) commit directly. Instead we land the
+        # package.json bump via a PR and push the tag separately (tags are
+        # not covered by the branch ruleset).
         if: steps.bump.outputs.bumped == 'true' && github.actor != 'github-actions[bot]'
         env:
           NEW_VERSION: ${{ steps.bump.outputs.new_version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Bypass the local pre-push quality gate — every check in the hook
           # (lint, typecheck, unit, storybook, VR, e2e) already ran in ci.yml
           # on the merging PR. The runner also uses dash as /bin/sh, which
@@ -124,8 +129,18 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="release/v${NEW_VERSION}"
+          git checkout -b "$BRANCH"
           git add package.json
           git commit -m "chore(release): v${NEW_VERSION}"
           git tag "v${NEW_VERSION}"
-          git pull --rebase origin master
-          git push origin master --follow-tags
+          git push origin "$BRANCH" --follow-tags
+          gh pr create \
+            --base master \
+            --head "$BRANCH" \
+            --title "chore(release): v${NEW_VERSION}" \
+            --body "Automated version bump from the deploy workflow.
+
+          The site has already been deployed to gh-pages with version \`${NEW_VERSION}\` (see \`dist/client/version.json\`). Merging this PR lands the matching \`package.json\` bump on master and makes the \`v${NEW_VERSION}\` tag reachable from master.
+
+          The bump type was derived from the merged PR's conventional-commit messages by \`scripts/determine-bump.sh\`."
