@@ -135,6 +135,13 @@ export default [
       '@typescript-eslint/explicit-module-boundary-types': 'warn',
     },
   },
+  {
+    // Plain JS/mjs scripts don't benefit from TS annotation rules.
+    files: ['scripts/**/*.{js,mjs,cjs}'],
+    rules: {
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+    },
+  },
   eslintConfigPrettier,
   {
     // Framework config files require `export default` by convention (Vite, Vitest,

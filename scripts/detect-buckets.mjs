@@ -1,4 +1,5 @@
 // scripts/detect-buckets.mjs
+/* eslint-disable unicorn/no-process-exit -- CLI app, process.exit is the idiomatic way to signal exit codes here. */
 import { execFileSync } from 'node:child_process';
 import { appendFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -52,6 +53,10 @@ const COMPILED = Object.fromEntries(
   ]),
 );
 
+/**
+ * @param {string[]} files
+ * @returns {Set<string>}
+ */
 export const detectChecks = (files) => {
   const result = new Set();
   for (const file of files) {
@@ -78,28 +83,51 @@ const parseArgs = (argv) => {
   };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (arg === '--staged') args.staged = true;
-    else if (arg === '--force-all') args.forceAll = true;
-    else if (arg === '--github-output') args.githubOutput = true;
-    else if (arg === '--verbose') args.verbose = true;
-    else if (arg.startsWith('--base=')) args.base = arg.slice('--base='.length);
-    else if (arg === '--files') {
+    if (arg === '--files') {
       args.files = argv.slice(i + 1);
       break;
-    } else if (arg === '--help' || arg === '-h') {
-      process.stdout.write(
-        [
-          'Usage: detect-buckets.mjs [options]',
-          '  --staged                use git staged files',
-          '  --base=REF              diff against REF (merge-base)',
-          '  --force-all             ignore diff, return every check',
-          '  --github-output         write key=value to $GITHUB_OUTPUT',
-          '  --verbose               print matching details to stderr',
-          '  --files F1 F2 ...       explicit file list',
-          '',
-        ].join('\n'),
-      );
-      process.exit(0);
+    }
+    if (arg.startsWith('--base=')) {
+      args.base = arg.slice('--base='.length);
+      continue;
+    }
+    switch (arg) {
+      case '--staged': {
+        args.staged = true;
+        break;
+      }
+      case '--force-all': {
+        args.forceAll = true;
+        break;
+      }
+      case '--github-output': {
+        args.githubOutput = true;
+        break;
+      }
+      case '--verbose': {
+        args.verbose = true;
+        break;
+      }
+      case '--help':
+      case '-h': {
+        process.stdout.write(
+          [
+            'Usage: detect-buckets.mjs [options]',
+            '  --staged                use git staged files',
+            '  --base=REF              diff against REF (merge-base)',
+            '  --force-all             ignore diff, return every check',
+            '  --github-output         write key=value to $GITHUB_OUTPUT',
+            '  --verbose               print matching details to stderr',
+            '  --files F1 F2 ...       explicit file list',
+            '',
+          ].join('\n'),
+        );
+        process.exit(0);
+        break;
+      }
+      default: {
+        break;
+      }
     }
   }
   return args;
@@ -154,7 +182,7 @@ const main = () => {
   if (args.forceAll) {
     const checks = new Set(ALL_CHECKS);
     if (args.githubOutput) writeGithubOutput(checks);
-    else process.stdout.write(`${[...checks].sort().join(' ')}\n`);
+    else process.stdout.write(`${[...checks].toSorted().join(' ')}\n`);
     return;
   }
   if (args.files) {
@@ -164,7 +192,7 @@ const main = () => {
     if (fromGit === null) {
       const checks = new Set(ALL_CHECKS);
       if (args.githubOutput) writeGithubOutput(checks);
-      else process.stdout.write(`${[...checks].sort().join(' ')}\n`);
+      else process.stdout.write(`${[...checks].toSorted().join(' ')}\n`);
       return;
     }
     files = fromGit;
@@ -175,7 +203,7 @@ const main = () => {
   }
   const checks = detectChecks(files);
   if (args.githubOutput) writeGithubOutput(checks);
-  else process.stdout.write(`${[...checks].sort().join(' ')}\n`);
+  else process.stdout.write(`${[...checks].toSorted().join(' ')}\n`);
 };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
