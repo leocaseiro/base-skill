@@ -300,6 +300,27 @@ appropriate moments.
 | `game:drag-over-zone` | `{ zoneIndex }`         | `useSlotTileDrag`                   |
 | `game:tile-ejected`   | `{ zoneIndex, tileId }` | `answerGameReducer` (EJECT_TILE)    |
 
+#### Change to Existing Event
+
+`GameEvaluateEvent` currently carries `{ answer, correct, nearMiss }` but not
+the target slot. Extend it with `zoneIndex: number` so skins can animate the
+specific slot that was placed into. This is a **backwards-compatible addition**
+to the payload — existing subscribers continue to work.
+
+```ts
+// src/types/game-events.ts (updated)
+export interface GameEvaluateEvent extends BaseGameEvent {
+  type: 'game:evaluate';
+  answer: string | string[] | number;
+  correct: boolean;
+  nearMiss: boolean;
+  zoneIndex: number; // NEW — which slot was targeted
+}
+```
+
+Emitters in `useTileEvaluation.ts` (both `placeTile` and `typeTile`) must pass
+the `zoneIndex` they already receive as a parameter.
+
 #### Resolving Engine Delays
 
 The engine uses a helper to resolve timing with the correct precedence
@@ -902,18 +923,123 @@ When these land, update the `GameSkin` type and the "Changes Required in
 Baseskill" table in this spec. The principle is the same: add to the surface,
 default to `void`/`undefined` so existing skins remain valid.
 
-## Open Questions
+## Resolved Decisions
 
-1. **Should `game:evaluate` include `zoneIndex`?** Currently it includes
-   `answer` (the tile value) but not which zone was targeted. Skins need
-   `zoneIndex` to animate the correct slot. Recommendation: add it.
-2. **Animation token format** — should `--skin-correct-animation` be a full CSS
-   `animation` shorthand, or split into `--skin-correct-animation-name` and
-   `--skin-correct-animation-duration`? Shorthand is simpler; split is more
-   composable.
-3. **Sound overrides** — should skins provide sound file URLs via tokens (e.g.
-   `--skin-correct-sound: url(...)`) or via callback (`onCorrectPlace` calls
-   `playSound`)? Callbacks are more flexible. Recommendation: callbacks.
-4. **Skin metadata** — should skins declare which games they support, or is
-   registration-time binding (`registerSkin('sort-numbers', skin)`) sufficient?
-   Registration-time binding is simpler and avoids metadata drift.
+- **`game:evaluate` includes `zoneIndex`** — confirmed 2026-04-14. The
+  payload gains `zoneIndex: number` so skins can animate the specific slot
+  that was placed into. Backwards-compatible addition.
+- **Animation token format: shorthand** — confirmed 2026-04-14. Skins
+  declare a single `--skin-correct-animation` / `--skin-wrong-animation`
+  value using the full CSS `animation` shorthand
+  (e.g. `egg-crack 600ms ease-out`). Keeps the skin surface small; can be
+  split into composed tokens later if real cases require it.
+- **Sound overrides via callback, with baseskill helpers exported** —
+  confirmed 2026-04-14. Skins own audio by implementing `onCorrectPlace`
+  (etc.) and calling the baseskill-exported `playSound` / `queueSound` /
+  `speak` helpers. See "Audio & Voice Extension Points" below.
+- **Skin is bound to one game at registration time** — confirmed
+  2026-04-14. Skins do not declare multi-game support in metadata. To
+  share a visual identity across games, export two skin objects that
+  import common CSS/assets and call `registerSkin` twice.
+
+## Audio & Voice Extension Points
+
+Callbacks give skins full control over audio. To make this ergonomic,
+baseskill exposes its audio/speech helpers as a public API so skins can
+reuse, extend, or replace the defaults.
+
+### New Exports from Baseskill
+
+| Export                        | Path               | Purpose                                                                  |
+| ----------------------------- | ------------------ | ------------------------------------------------------------------------ |
+| `playSound(key, volume?)`     | `baseskill/audio`  | Existing — plays a preset sound (`correct`, `wrong`, etc.)               |
+| `playSoundUrl(url, volume?)`  | `baseskill/audio`  | NEW — plays a custom audio URL through the same queue / cancel machinery |
+| `queueSound(key, volume?)`    | `baseskill/audio`  | Existing — queues a preset sound                                         |
+| `queueSoundUrl(url, volume?)` | `baseskill/audio`  | NEW — queues a custom audio URL                                          |
+| `whenSoundEnds()`             | `baseskill/audio`  | Existing — promise that resolves when the audio queue drains             |
+| `speak(text, options?)`       | `baseskill/speech` | Existing — TTS with voice/rate/pitch options                             |
+| `SOUND_KEYS`                  | `baseskill/audio`  | NEW — the preset key list, so skins can extend/fall back cleanly         |
+
+### Default Behaviour (Classic Skin)
+
+`useTileEvaluation` calls `playSound(correct ? 'correct' : 'wrong')` today.
+When a skin provides `onCorrectPlace` / `onWrongPlace`, the default sound
+is still played unless the skin opts out (see below).
+
+### Opting Out of Default Sounds
+
+A `suppressDefaultSounds?: boolean` flag on `GameSkin` tells the engine to
+skip the built-in correct/wrong beep so the skin owns the audio entirely:
+
+```ts
+export interface GameSkin {
+  // ... existing fields
+
+  /** When true, engine suppresses default correct/wrong sound effects.
+   *  The skin takes full ownership via its callbacks. */
+  suppressDefaultSounds?: boolean;
+}
+```
+
+### Skin Authoring Examples
+
+**Extend the default** (play default beep + a custom layer):
+
+```ts
+import { playSound, playSoundUrl } from 'baseskill/audio';
+import crackSound from './assets/egg-crack.mp3';
+
+export const dinoEggsSkin: GameSkin = {
+  // ... tokens
+  onCorrectPlace: () => {
+    // default beep still plays (no suppressDefaultSounds)
+    playSoundUrl(crackSound, 0.6);
+  },
+};
+```
+
+**Replace the default entirely**:
+
+```ts
+import { playSoundUrl } from 'baseskill/audio';
+import hatchSound from './assets/hatch.mp3';
+import wobbleSound from './assets/wobble.mp3';
+
+export const dinoEggsSkin: GameSkin = {
+  // ... tokens
+  suppressDefaultSounds: true, // silence built-in beeps
+  onCorrectPlace: () => playSoundUrl(hatchSound),
+  onWrongPlace: () => playSoundUrl(wobbleSound),
+};
+```
+
+**Override voice for TTS flavour**:
+
+```ts
+import { speak } from 'baseskill/speech';
+
+export const pirateTreasureSkin: GameSkin = {
+  // ... tokens
+  onRoundComplete: () => {
+    speak('Arrr, ye found the treasure!', {
+      voice: 'Daniel (en-GB)',
+      rate: 0.9,
+      pitch: 0.7,
+    });
+  },
+  onCorrectPlace: () => {
+    speak('Aye!', { voice: 'Daniel (en-GB)', rate: 1.1 });
+  },
+};
+```
+
+### Additions to "New Files" / "Modified Files" Tables
+
+- Add a new file `src/lib/audio/playSoundUrl.ts` (and `queueSoundUrl`)
+  exposing URL-based variants of the existing queue functions.
+- Export `SOUND_KEYS`, `playSound`, `playSoundUrl`, `queueSound`,
+  `queueSoundUrl`, `whenSoundEnds` from a stable `baseskill/audio` path.
+- Export `speak` from a stable `baseskill/speech` path.
+- Add `suppressDefaultSounds?: boolean` to `GameSkin`.
+- Update `useTileEvaluation.ts` to skip the default `playSound` call when
+  the resolved skin has `suppressDefaultSounds: true`.
