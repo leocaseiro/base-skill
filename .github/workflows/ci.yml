@@ -46,146 +46,51 @@ jobs:
               --github-output
           fi
 
-  prettier:
-    name: Prettier
+  lint:
+    name: Lint
     needs: detect-changes
     runs-on: ubuntu-latest
+    env:
+      ANY_LINT: ${{ needs.detect-changes.outputs.prettier == 'true' || needs.detect-changes.outputs.eslint == 'true' || needs.detect-changes.outputs.stylelint == 'true' || needs.detect-changes.outputs.markdownlint == 'true' || needs.detect-changes.outputs.actionlint == 'true' || needs.detect-changes.outputs.shellcheck == 'true' || needs.detect-changes.outputs.knip == 'true' }}
     steps:
       - name: Skip if not triggered
-        if: needs.detect-changes.outputs.prettier != 'true'
-        run: echo "Skipped — no prettier-relevant changes" && exit 0
-      - if: needs.detect-changes.outputs.prettier == 'true'
+        if: env.ANY_LINT != 'true'
+        run: echo "Skipped — no lint-relevant changes" && exit 0
+      - if: env.ANY_LINT == 'true'
         uses: actions/checkout@v6
-      - if: needs.detect-changes.outputs.prettier == 'true'
+      - if: env.ANY_LINT == 'true'
         uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: yarn
-      - if: needs.detect-changes.outputs.prettier == 'true'
+      - if: env.ANY_LINT == 'true'
         run: yarn install --frozen-lockfile
+
       - if: needs.detect-changes.outputs.prettier == 'true'
+        name: Prettier
         run: npx prettier --check .
-
-  eslint:
-    name: ESLint
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip if not triggered
-        if: needs.detect-changes.outputs.eslint != 'true'
-        run: echo "Skipped — no eslint-relevant changes" && exit 0
       - if: needs.detect-changes.outputs.eslint == 'true'
-        uses: actions/checkout@v6
-      - if: needs.detect-changes.outputs.eslint == 'true'
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
-      - if: needs.detect-changes.outputs.eslint == 'true'
-        run: yarn install --frozen-lockfile
-      - if: needs.detect-changes.outputs.eslint == 'true'
+        name: ESLint
         run: npx eslint . --max-warnings 0
-
-  stylelint:
-    name: Stylelint
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip if not triggered
-        if: needs.detect-changes.outputs.stylelint != 'true'
-        run: echo "Skipped — no stylelint-relevant changes" && exit 0
       - if: needs.detect-changes.outputs.stylelint == 'true'
-        uses: actions/checkout@v6
-      - if: needs.detect-changes.outputs.stylelint == 'true'
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
-      - if: needs.detect-changes.outputs.stylelint == 'true'
-        run: yarn install --frozen-lockfile
-      - if: needs.detect-changes.outputs.stylelint == 'true'
+        name: Stylelint
         run: npx stylelint "src/**/*.css"
-
-  markdownlint:
-    name: Markdownlint
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip if not triggered
-        if: needs.detect-changes.outputs.markdownlint != 'true'
-        run: echo "Skipped — no markdown-relevant changes" && exit 0
       - if: needs.detect-changes.outputs.markdownlint == 'true'
-        uses: actions/checkout@v6
-      - if: needs.detect-changes.outputs.markdownlint == 'true'
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
-      - if: needs.detect-changes.outputs.markdownlint == 'true'
-        run: yarn install --frozen-lockfile
-      - if: needs.detect-changes.outputs.markdownlint == 'true'
+        name: Markdownlint
         run: npx markdownlint-cli2 "**/*.md" "#node_modules" "#.specstory" "#.cursor" "#dist" "#worktrees"
-
-  actionlint:
-    name: Actionlint
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip if not triggered
-        if: needs.detect-changes.outputs.actionlint != 'true'
-        run: echo "Skipped — no workflow changes" && exit 0
       - if: needs.detect-changes.outputs.actionlint == 'true'
-        uses: actions/checkout@v6
-      - if: needs.detect-changes.outputs.actionlint == 'true'
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: '.nvmrc'
-      - if: needs.detect-changes.outputs.actionlint == 'true'
+        name: Actionlint
         uses: raven-actions/actionlint@v2
-
-  shellcheck:
-    name: Shellcheck
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip if not triggered
-        if: needs.detect-changes.outputs.shellcheck != 'true'
-        run: echo "Skipped — no shell script changes" && exit 0
       - if: needs.detect-changes.outputs.shellcheck == 'true'
-        uses: actions/checkout@v6
-      - if: needs.detect-changes.outputs.shellcheck == 'true'
+        name: Shellcheck
         uses: ludeeus/action-shellcheck@master
         with:
           additional_files: '.husky/pre-commit .husky/pre-push .husky/post-merge'
       - if: needs.detect-changes.outputs.shellcheck == 'true'
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
-      - if: needs.detect-changes.outputs.shellcheck == 'true'
-        run: yarn install --frozen-lockfile
-      - if: needs.detect-changes.outputs.shellcheck == 'true'
         name: Shell script tests (determine-bump, workflow guards)
         run: yarn test:scripts
-
-  knip:
-    name: Knip
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip if not triggered
-        if: needs.detect-changes.outputs.knip != 'true'
-        run: echo "Skipped — no knip-relevant changes" && exit 0
       - if: needs.detect-changes.outputs.knip == 'true'
-        uses: actions/checkout@v6
-      - if: needs.detect-changes.outputs.knip == 'true'
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
-      - if: needs.detect-changes.outputs.knip == 'true'
-        run: yarn install --frozen-lockfile
-      - if: needs.detect-changes.outputs.knip == 'true'
+        name: Knip
         run: npx knip
 
   typecheck:
