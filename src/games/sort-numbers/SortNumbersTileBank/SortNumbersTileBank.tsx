@@ -22,13 +22,27 @@ const NumberTile = ({
     onPointerCancel,
   } = useDraggableTile(tile);
 
+  const isCustomSkin = skin && skin.id !== 'classic';
+  const tileStyle: React.CSSProperties = isCustomSkin
+    ? {
+        ...skeuoStyle,
+        background: 'var(--skin-tile-bg)',
+        color: 'var(--skin-tile-text)',
+        borderRadius: 'var(--skin-tile-radius)',
+        border: 'var(--skin-tile-border)',
+        boxShadow: 'var(--skin-tile-shadow)',
+        fontWeight:
+          'var(--skin-tile-font-weight)' as React.CSSProperties['fontWeight'],
+      }
+    : skeuoStyle;
+
   return (
     <button
       ref={ref}
       type="button"
       aria-label={`Number ${tile.label}`}
       className={`flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums transition-transform active:scale-95 active:cursor-grabbing`}
-      style={skeuoStyle}
+      style={tileStyle}
       onClick={handleClick}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
