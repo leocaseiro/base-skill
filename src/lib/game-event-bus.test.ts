@@ -13,6 +13,7 @@ function evaluateEvent(): GameEvaluateEvent {
     answer: 7,
     correct: true,
     nearMiss: false,
+    zoneIndex: 0,
   };
 }
 
