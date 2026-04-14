@@ -65,50 +65,53 @@ export const Slot = ({
 
   const stateClasses = [
     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-    isPreview
-      ? 'border-dashed border-primary'
-      : isEmpty
-        ? 'border-border'
-        : isWrong
-          ? 'border-destructive bg-destructive/10 text-destructive'
-          : 'border-primary bg-primary/10 text-primary',
-    // Focus ring on active slot (driven by showCursor, works in all modes)
     showCursor && isWrong
       ? 'ring-2 ring-destructive ring-offset-2'
       : showCursor
-        ? 'border-primary ring-2 ring-primary ring-offset-2'
+        ? 'ring-2 ring-primary ring-offset-2'
         : '',
   ]
     .filter(Boolean)
     .join(' ');
 
-  // Custom skins drive their own colors AND shape. The radius doesn't conflict
-  // with state classes (Tailwind state classes don't change border-radius), so
-  // it's safe to apply for every state. Background and border colors only apply
-  // when no state override is active (wrong/preview keep their state colors).
-  const isCustomSkin = skin && skin.id !== 'classic';
-  const hasColorStateOverride = isWrong || isPreview;
-  const skinShape: React.CSSProperties = isCustomSkin
-    ? { borderRadius: 'var(--skin-slot-radius)' }
+  const baseStyle: React.CSSProperties = {
+    background: 'var(--skin-slot-bg)',
+    borderColor: 'var(--skin-slot-border)',
+    borderRadius: 'var(--skin-slot-radius)',
+  };
+
+  const wrongStyle: React.CSSProperties = isWrong
+    ? {
+        background: 'var(--skin-wrong-bg)',
+        borderColor: 'var(--skin-wrong-border)',
+        color: 'var(--skin-wrong-color)',
+      }
     : {};
-  const skinColors: React.CSSProperties =
-    isCustomSkin && !hasColorStateOverride
+
+  const previewStyle: React.CSSProperties = isPreview
+    ? {
+        borderColor: 'var(--skin-hover-border-color)',
+        borderStyle:
+          'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+        animation: 'pulse-ring 1.5s ease-in-out infinite',
+      }
+    : {};
+
+  const correctStyle: React.CSSProperties =
+    !isEmpty && !isWrong && !isPreview
       ? {
-          background: 'var(--skin-slot-bg)',
-          borderColor: 'var(--skin-slot-border)',
+          background: 'var(--skin-correct-bg)',
+          borderColor: 'var(--skin-correct-border)',
+          color: 'var(--skin-correct-border)',
         }
       : {};
 
-  const finalStyle: React.CSSProperties | undefined = isPreview
-    ? {
-        ...skinShape,
-        ...skinColors,
-        animation: 'pulse-ring 1.5s ease-in-out infinite',
-      }
-    : Object.keys(skinShape).length > 0 ||
-        Object.keys(skinColors).length > 0
-      ? { ...skinShape, ...skinColors }
-      : undefined;
+  const finalStyle: React.CSSProperties = {
+    ...baseStyle,
+    ...correctStyle,
+    ...wrongStyle,
+    ...previewStyle,
+  };
 
   return (
     // Outer wrapper: the drop target. p-1.5 expands the hit area ~6 px beyond
