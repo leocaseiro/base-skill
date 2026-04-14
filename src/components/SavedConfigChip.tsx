@@ -75,7 +75,7 @@ export const SavedConfigChip = ({
           type="button"
           aria-label={`Expand ${doc.name}`}
           onClick={() => setExpanded((v) => !v)}
-          className="flex min-h-12 flex-1 items-center gap-2 px-3 text-left"
+          className="flex min-h-12 flex-1 touch-manipulation items-center gap-2 px-3 text-left"
         >
           <span
             className={`text-sm font-semibold ${expanded ? 'text-white' : 'bookmark-text'}`}
@@ -92,7 +92,7 @@ export const SavedConfigChip = ({
           type="button"
           aria-label={`Play ${doc.name}`}
           onClick={() => onPlay(doc.id)}
-          className="flex min-h-12 w-12 items-center justify-center text-sm text-white"
+          className="flex min-h-12 w-12 touch-manipulation items-center justify-center text-sm text-white"
           style={{ background: 'var(--bookmark-play)' }}
         >
           ▶
@@ -101,7 +101,7 @@ export const SavedConfigChip = ({
           type="button"
           aria-label={`Delete ${doc.name}`}
           onClick={() => onDelete(doc.id)}
-          className="flex min-h-12 w-12 items-center justify-center border-l border-destructive/20 text-sm text-destructive"
+          className="flex min-h-12 w-12 touch-manipulation items-center justify-center border-l border-destructive/20 text-sm text-destructive"
           style={{
             background:
               'color-mix(in srgb, var(--bs-error) 15%, transparent)',
@@ -154,7 +154,7 @@ export const SavedConfigChip = ({
               type="button"
               aria-label="Save"
               onClick={() => void handleSave()}
-              className="h-12 flex-1 rounded-xl bg-primary text-sm font-bold text-primary-foreground"
+              className="h-12 flex-1 touch-manipulation rounded-xl bg-primary text-sm font-bold text-primary-foreground"
             >
               Save
             </button>
@@ -162,7 +162,7 @@ export const SavedConfigChip = ({
               type="button"
               aria-label="Cancel"
               onClick={handleCancel}
-              className="h-12 flex-1 rounded-xl border border-input bg-background text-sm text-muted-foreground"
+              className="h-12 flex-1 touch-manipulation rounded-xl border border-input bg-background text-sm text-muted-foreground"
             >
               Cancel
             </button>
