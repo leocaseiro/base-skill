@@ -1,5 +1,5 @@
 import type { TileItem } from '@/components/answer-game/types';
-import { skeuoStyle } from '@/components/answer-game/styles';
+import { tileStyle as tileSurfaceStyle } from '@/components/answer-game/styles';
 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
@@ -113,7 +113,7 @@ const NumeralTile = ({
         'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl p-2 transition-transform active:scale-95 active:cursor-grabbing',
         sizeClass,
       ].join(' ')}
-      style={skeuoStyle}
+      style={tileSurfaceStyle()}
       onClick={handleClick}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}

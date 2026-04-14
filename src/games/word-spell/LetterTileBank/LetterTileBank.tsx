@@ -1,5 +1,5 @@
 import type { TileItem } from '@/components/answer-game/types';
-import { skeuoStyle } from '@/components/answer-game/styles';
+import { tileStyle } from '@/components/answer-game/styles';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
@@ -20,7 +20,7 @@ const LetterTile = ({ tile }: { tile: TileItem }) => {
       type="button"
       aria-label={`Letter ${tile.label}`}
       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
-      style={skeuoStyle}
+      style={tileStyle()}
       onClick={handleClick}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}

@@ -1,6 +1,6 @@
 import type { TileItem } from '@/components/answer-game/types';
 import type { GameSkin } from '@/lib/skin';
-import { skeuoStyle } from '@/components/answer-game/styles';
+import { tileStyle } from '@/components/answer-game/styles';
 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
@@ -23,9 +23,9 @@ const NumberTile = ({
   } = useDraggableTile(tile);
 
   const isCustomSkin = skin && skin.id !== 'classic';
-  const tileStyle: React.CSSProperties = isCustomSkin
+  const resolvedTileStyle: React.CSSProperties = isCustomSkin
     ? {
-        ...skeuoStyle,
+        ...tileStyle(),
         background: 'var(--skin-tile-bg)',
         color: 'var(--skin-tile-text)',
         borderRadius: 'var(--skin-tile-radius)',
@@ -34,7 +34,7 @@ const NumberTile = ({
         fontWeight:
           'var(--skin-tile-font-weight)' as React.CSSProperties['fontWeight'],
       }
-    : skeuoStyle;
+    : tileStyle();
 
   return (
     <button
@@ -42,7 +42,7 @@ const NumberTile = ({
       type="button"
       aria-label={`Number ${tile.label}`}
       className={`flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums transition-transform active:scale-95 active:cursor-grabbing`}
-      style={tileStyle}
+      style={resolvedTileStyle}
       onClick={handleClick}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
