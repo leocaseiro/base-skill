@@ -158,6 +158,13 @@ jobs:
         with:
           additional_files: '.husky/pre-commit .husky/pre-push .husky/post-merge'
       - if: needs.detect-changes.outputs.shellcheck == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+      - if: needs.detect-changes.outputs.shellcheck == 'true'
+        run: yarn install --frozen-lockfile
+      - if: needs.detect-changes.outputs.shellcheck == 'true'
         name: Shell script tests (determine-bump, workflow guards)
         run: yarn test:scripts
 
