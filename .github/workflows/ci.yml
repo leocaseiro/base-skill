@@ -11,71 +11,212 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
+  detect-changes:
+    name: Detect changes
     runs-on: ubuntu-latest
+    outputs:
+      prettier: ${{ steps.filter.outputs.prettier }}
+      eslint: ${{ steps.filter.outputs.eslint }}
+      stylelint: ${{ steps.filter.outputs.stylelint }}
+      markdownlint: ${{ steps.filter.outputs.markdownlint }}
+      actionlint: ${{ steps.filter.outputs.actionlint }}
+      shellcheck: ${{ steps.filter.outputs.shellcheck }}
+      knip: ${{ steps.filter.outputs.knip }}
+      typecheck: ${{ steps.filter.outputs.typecheck }}
+      unit: ${{ steps.filter.outputs.unit }}
+      storybook: ${{ steps.filter.outputs.storybook }}
+      build: ${{ steps.filter.outputs.build }}
     steps:
       - uses: actions/checkout@v6
-
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: yarn
-
-      - name: Install dependencies
+      - name: Install
         run: yarn install --frozen-lockfile
+      - id: filter
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            node scripts/detect-buckets.mjs --force-all --github-output
+          else
+            node scripts/detect-buckets.mjs \
+              --base=${{ github.event.pull_request.base.sha }} \
+              --github-output
+          fi
 
-      - name: ESLint
-        run: npx eslint . --max-warnings 0
-
-      - name: Prettier
+  prettier:
+    name: Prettier
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.prettier != 'true'
+        run: echo "Skipped — no prettier-relevant changes" && exit 0
+      - if: needs.detect-changes.outputs.prettier == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.prettier == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+      - if: needs.detect-changes.outputs.prettier == 'true'
+        run: yarn install --frozen-lockfile
+      - if: needs.detect-changes.outputs.prettier == 'true'
         run: npx prettier --check .
 
-      - name: Stylelint
+  eslint:
+    name: ESLint
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.eslint != 'true'
+        run: echo "Skipped — no eslint-relevant changes" && exit 0
+      - if: needs.detect-changes.outputs.eslint == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.eslint == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+      - if: needs.detect-changes.outputs.eslint == 'true'
+        run: yarn install --frozen-lockfile
+      - if: needs.detect-changes.outputs.eslint == 'true'
+        run: npx eslint . --max-warnings 0
+
+  stylelint:
+    name: Stylelint
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.stylelint != 'true'
+        run: echo "Skipped — no stylelint-relevant changes" && exit 0
+      - if: needs.detect-changes.outputs.stylelint == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.stylelint == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+      - if: needs.detect-changes.outputs.stylelint == 'true'
+        run: yarn install --frozen-lockfile
+      - if: needs.detect-changes.outputs.stylelint == 'true'
         run: npx stylelint "src/**/*.css"
 
-      - name: Markdownlint
+  markdownlint:
+    name: Markdownlint
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.markdownlint != 'true'
+        run: echo "Skipped — no markdown-relevant changes" && exit 0
+      - if: needs.detect-changes.outputs.markdownlint == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.markdownlint == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+      - if: needs.detect-changes.outputs.markdownlint == 'true'
+        run: yarn install --frozen-lockfile
+      - if: needs.detect-changes.outputs.markdownlint == 'true'
         run: npx markdownlint-cli2 "**/*.md" "#node_modules" "#.specstory" "#.cursor" "#dist" "#worktrees"
 
-      - name: Shell script tests (determine-bump, workflow guards)
+  actionlint:
+    name: Actionlint
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.actionlint != 'true'
+        run: echo "Skipped — no workflow changes" && exit 0
+      - if: needs.detect-changes.outputs.actionlint == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.actionlint == 'true'
+        uses: raven-actions/actionlint@v2
+
+  shellcheck:
+    name: Shellcheck
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.shellcheck != 'true'
+        run: echo "Skipped — no shell script changes" && exit 0
+      - if: needs.detect-changes.outputs.shellcheck == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.shellcheck == 'true'
+        uses: ludeeus/action-shellcheck@master
+        with:
+          additional_files: '.husky/pre-commit .husky/pre-push .husky/post-merge'
+      - if: needs.detect-changes.outputs.shellcheck == 'true'
+        name: Shell script tests (determine-bump, workflow guards)
         run: yarn test:scripts
+
+  knip:
+    name: Knip
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.knip != 'true'
+        run: echo "Skipped — no knip-relevant changes" && exit 0
+      - if: needs.detect-changes.outputs.knip == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.knip == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+      - if: needs.detect-changes.outputs.knip == 'true'
+        run: yarn install --frozen-lockfile
+      - if: needs.detect-changes.outputs.knip == 'true'
+        run: npx knip
 
   typecheck:
     name: Type Check
+    needs: detect-changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.typecheck != 'true'
+        run: echo "Skipped — no typecheck-relevant changes" && exit 0
+      - if: needs.detect-changes.outputs.typecheck == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.typecheck == 'true'
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: yarn
-
-      - name: Install dependencies
+      - if: needs.detect-changes.outputs.typecheck == 'true'
         run: yarn install --frozen-lockfile
-
-      - name: TypeScript
+      - if: needs.detect-changes.outputs.typecheck == 'true'
         run: npx tsc --noEmit
 
   unit-test:
     name: Unit Tests
+    needs: detect-changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.unit != 'true'
+        run: echo "Skipped — no unit-test-relevant changes" && exit 0
+      - if: needs.detect-changes.outputs.unit == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.unit == 'true'
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: yarn
-
-      - name: Install dependencies
+      - if: needs.detect-changes.outputs.unit == 'true'
         run: yarn install --frozen-lockfile
-
-      - name: Vitest with coverage
+      - if: needs.detect-changes.outputs.unit == 'true'
         run: npx vitest run --coverage
-
-      - name: Upload coverage report
-        if: always()
+      - if: needs.detect-changes.outputs.unit == 'true' && always()
         uses: actions/upload-artifact@v7
         with:
           name: coverage-report
@@ -84,22 +225,24 @@ jobs:
 
   build:
     name: Build
+    needs: detect-changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.build != 'true'
+        run: echo "Skipped — no build-relevant changes" && exit 0
+      - if: needs.detect-changes.outputs.build == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.build == 'true'
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: yarn
-
-      - name: Install dependencies
+      - if: needs.detect-changes.outputs.build == 'true'
         run: yarn install --frozen-lockfile
-
-      - name: Build
+      - if: needs.detect-changes.outputs.build == 'true'
         run: yarn build
-
-      - name: Upload build artifact
+      - if: needs.detect-changes.outputs.build == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: dist-ci
@@ -108,35 +251,32 @@ jobs:
 
   storybook-test:
     name: Storybook Tests
+    needs: detect-changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
+      - name: Skip if not triggered
+        if: needs.detect-changes.outputs.storybook != 'true'
+        run: echo "Skipped — no storybook-relevant changes" && exit 0
+      - if: needs.detect-changes.outputs.storybook == 'true'
+        uses: actions/checkout@v6
+      - if: needs.detect-changes.outputs.storybook == 'true'
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: yarn
-
-      - name: Install dependencies
+      - if: needs.detect-changes.outputs.storybook == 'true'
         run: yarn install --frozen-lockfile
-
-      - name: Install Playwright browsers
+      - if: needs.detect-changes.outputs.storybook == 'true'
         run: npx playwright install --with-deps chromium
-
-      - name: Build Storybook
+      - if: needs.detect-changes.outputs.storybook == 'true'
         run: yarn build-storybook --output-dir storybook-static
-
-      - name: Serve Storybook
+      - if: needs.detect-changes.outputs.storybook == 'true'
         run: npx http-server storybook-static --port 6006 &
-
-      - name: Wait for Storybook
+      - if: needs.detect-changes.outputs.storybook == 'true'
         run: npx wait-on http://localhost:6006 --timeout 60000
-
-      - name: Run Storybook tests
+      - if: needs.detect-changes.outputs.storybook == 'true'
         run: yarn test:storybook --url http://localhost:6006
-
-      - name: Upload Playwright traces on failure
-        if: failure()
+      - if: needs.detect-changes.outputs.storybook == 'true' && failure()
         uses: actions/upload-artifact@v7
         with:
           name: storybook-playwright-traces
