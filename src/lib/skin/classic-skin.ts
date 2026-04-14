@@ -64,8 +64,8 @@ export const classicSkin: GameSkin = {
     '--skin-question-text': 'inherit',
     '--skin-question-radius': '0.75rem',
     '--skin-question-audio-bg': 'var(--bs-primary)',
-    '--skin-question-audio-fg': 'var(--bs-primary-foreground)',
-    '--skin-question-dot-bg': 'var(--bs-muted)',
+    '--skin-question-audio-fg': 'var(--primary-foreground)',
+    '--skin-question-dot-bg': 'var(--bs-primary)',
     '--skin-question-dot-assigned-bg': 'var(--bs-primary)',
 
     // ── Sentence-with-gaps tokens ─────────────────────────────────
