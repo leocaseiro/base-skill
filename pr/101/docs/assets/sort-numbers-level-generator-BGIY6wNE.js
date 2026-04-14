@@ -1,0 +1,1 @@
+import{b as m}from"./build-sort-round-D7W6uZS5.js";const f=n=>{const{start:c,step:t,quantity:r,direction:s,distractor:o}=n;return a=>{const e=c+(a+1)*r*t,i=Array.from({length:r},(g,d)=>e+d*t),u=o?{config:o.config,range:{min:e,max:e+(r-1)*t}}:void 0;return m(i,s,u)}};export{f as c};
