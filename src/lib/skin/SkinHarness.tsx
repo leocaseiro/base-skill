@@ -123,6 +123,7 @@ export const SkinHarness = ({ gameId, children }: SkinHarnessProps) => {
               totalRounds: 1,
               correctCount: 1,
               durationMs: 100,
+              retryCount: 0,
             })
           }
         >
