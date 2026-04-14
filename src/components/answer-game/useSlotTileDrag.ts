@@ -79,28 +79,25 @@ export const useSlotTileDrag = ({
           }),
           render({ container }) {
             const rect = element.getBoundingClientRect();
-            const ghost = document.createElement('div');
-            // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
-            // inner elements are preserved — avoids the shrunken-font issue
-            // that occurs when reading fontSize from the button itself.
-            ghost.innerHTML = element.innerHTML;
-            // Honor the active skin's tile radius so a round skin's drag
-            // ghost stays round. Falls back to 12px for the classic skin.
+            // Clone the source button so the ghost matches the tile exactly
+            // (background gradient, border-radius, font, etc.) — works for
+            // both classic skeuomorphic tiles and custom-skinned tiles.
+            const ghost = element.cloneNode(true) as HTMLElement;
+            ghost.removeAttribute('id');
+            // Snapshot computed styles that we want to preserve regardless of
+            // where the ghost is appended (computed values resolve at
+            // append-time inside the drag-preview container).
             const computed = getComputedStyle(element);
-            const skinRadius = computed
-              .getPropertyValue('--skin-tile-radius')
-              .trim();
             Object.assign(ghost.style, {
               width: `${rect.width}px`,
               height: `${rect.height}px`,
-              borderRadius: skinRadius || '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'var(--card, #fff)',
-              color: 'var(--card-foreground, #000)',
+              margin: '0',
+              pointerEvents: 'none',
               boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
               transform: 'scale(1.08)',
+              borderRadius: computed.borderRadius,
+              background: computed.background,
+              color: computed.color,
             });
             container.append(ghost);
             return () => ghost.remove();
