@@ -1,11 +1,18 @@
 import type { TileItem } from '@/components/answer-game/types';
+import type { GameSkin } from '@/lib/skin';
 import { skeuoStyle } from '@/components/answer-game/styles';
 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
 
-const NumberTile = ({ tile }: { tile: TileItem }) => {
+const NumberTile = ({
+  tile,
+  skin,
+}: {
+  tile: TileItem;
+  skin?: GameSkin;
+}) => {
   const {
     ref,
     handleClick,
@@ -29,11 +36,18 @@ const NumberTile = ({ tile }: { tile: TileItem }) => {
       onPointerCancel={onPointerCancel}
     >
       {tile.label}
+      {skin?.tileDecoration?.(tile)}
     </button>
   );
 };
 
-export const SortNumbersTileBank = () => {
+interface SortNumbersTileBankProps {
+  skin?: GameSkin;
+}
+
+export const SortNumbersTileBank = ({
+  skin,
+}: SortNumbersTileBankProps) => {
   const {
     allTiles,
     bankTileIds,
@@ -75,7 +89,7 @@ export const SortNumbersTileBank = () => {
                   className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
                   aria-hidden={isDragging || undefined}
                 >
-                  <NumberTile tile={tile} />
+                  <NumberTile tile={tile} skin={skin} />
                 </div>
                 {isHoverTarget && (
                   <div
