@@ -1,12 +1,15 @@
-import { skeuoStyle } from '../styles';
+import { tileStyle } from '../styles';
+import { useAnswerGameContext } from '../useAnswerGameContext';
 import { useSlotBehavior } from './useSlotBehavior';
 import type { SlotRenderProps } from './useSlotBehavior';
+import type { GameSkin } from '@/lib/skin';
 import type { ReactNode, Ref } from 'react';
 
 interface SlotProps {
   index: number;
   as?: 'li' | 'span' | 'div';
   className?: string;
+  style?: React.CSSProperties;
   children: (props: SlotRenderProps) => ReactNode;
   /**
    * Optional custom preview renderer. Invoked during drag-hover or swap
@@ -16,15 +19,24 @@ interface SlotProps {
    * `<span>{previewLabel}</span>` is used.
    */
   renderPreview?: (previewLabel: string) => ReactNode;
+  /**
+   * Optional skin whose `slotDecoration` renderer runs inside the slot.
+   * When undefined, no decoration is rendered.
+   */
+  skin?: GameSkin;
 }
 
 export const Slot = ({
   index,
   as: Tag = 'li',
   className,
+  style,
   children,
   renderPreview,
+  skin,
 }: SlotProps) => {
+  const { zones } = useAnswerGameContext();
+  const zone = zones[index];
   const {
     renderProps,
     outerRef,
@@ -55,22 +67,54 @@ export const Slot = ({
 
   const stateClasses = [
     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-    isPreview
-      ? 'border-dashed border-primary'
-      : isEmpty
-        ? 'border-border'
-        : isWrong
-          ? 'border-destructive bg-destructive/10 text-destructive'
-          : 'border-primary bg-primary/10 text-primary',
-    // Focus ring on active slot (driven by showCursor, works in all modes)
     showCursor && isWrong
       ? 'ring-2 ring-destructive ring-offset-2'
       : showCursor
-        ? 'border-primary ring-2 ring-primary ring-offset-2'
+        ? 'ring-2 ring-primary ring-offset-2'
         : '',
   ]
     .filter(Boolean)
     .join(' ');
+
+  const baseStyle: React.CSSProperties = {
+    background: 'var(--skin-slot-bg)',
+    borderColor: 'var(--skin-slot-border)',
+    borderRadius: 'var(--skin-slot-radius)',
+  };
+
+  const wrongStyle: React.CSSProperties = isWrong
+    ? {
+        background: 'var(--skin-wrong-bg)',
+        borderColor: 'var(--skin-wrong-border)',
+        color: 'var(--skin-wrong-color)',
+      }
+    : {};
+
+  const previewStyle: React.CSSProperties = isPreview
+    ? {
+        borderColor: 'var(--skin-hover-border-color)',
+        borderStyle:
+          'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+        animation: 'pulse-ring 1.5s ease-in-out infinite',
+      }
+    : {};
+
+  const correctStyle: React.CSSProperties =
+    !isEmpty && !isWrong && !isPreview
+      ? {
+          background: 'var(--skin-correct-bg)',
+          borderColor: 'var(--skin-correct-border)',
+          color: 'var(--skin-correct-border)',
+        }
+      : {};
+
+  const finalStyle: React.CSSProperties = {
+    ...baseStyle,
+    ...correctStyle,
+    ...wrongStyle,
+    ...previewStyle,
+    ...style,
+  };
 
   return (
     // Outer wrapper: the drop target. p-1.5 expands the hit area ~6 px beyond
@@ -90,12 +134,16 @@ export const Slot = ({
       <InnerTag
         ref={slotRef as Ref<HTMLDivElement>}
         className={[stateClasses, className].filter(Boolean).join(' ')}
-        style={
-          isPreview
-            ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
-            : undefined
-        }
+        style={finalStyle}
       >
+        {skin?.slotDecoration?.(
+          {
+            isLocked: zone?.isLocked ?? false,
+            isWrong: zone?.isWrong ?? false,
+            placedTileId: zone?.placedTileId ?? null,
+          },
+          index,
+        )}
         {isEmpty ? (
           <>
             {isPreview && previewLabel !== null ? (
@@ -119,7 +167,12 @@ export const Slot = ({
         ) : (
           <>
             <div
-              className="absolute inset-0 bg-muted/60 shadow-inner"
+              className="absolute inset-0"
+              style={{
+                background: 'var(--skin-bank-hole-bg)',
+                boxShadow: 'var(--skin-bank-hole-shadow)',
+                borderRadius: 'inherit',
+              }}
               aria-hidden="true"
             />
             <button
@@ -129,7 +182,7 @@ export const Slot = ({
               aria-hidden={
                 isBeingDragged && !isPreview ? 'true' : undefined
               }
-              style={skeuoStyle}
+              style={tileStyle()}
               onClick={handleClick}
               onPointerDown={pointerHandlers.onPointerDown}
               onPointerMove={pointerHandlers.onPointerMove}

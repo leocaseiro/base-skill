@@ -2,8 +2,6 @@
 import { useEffect, useRef } from 'react';
 import type { Move, SessionMeta } from './types';
 import type { BaseSkillDatabase } from '@/db/types';
-import type { GameEndEvent } from '@/types/game-events';
-import { getGameEventBus } from '@/lib/game-event-bus';
 
 const CHUNK_MAX_MOVES = 200;
 const CHUNK_MAX_BYTES = 50 * 1024; // 50 KB
@@ -127,22 +125,6 @@ export function useSessionRecorder(
           duration: Math.round(durationMs / 1000),
         });
       });
-
-    // Emit game:end on event bus
-    const bus = getGameEventBus();
-    const endEvent: GameEndEvent = {
-      type: 'game:end',
-      gameId: meta.gameId,
-      sessionId,
-      profileId: meta.profileId,
-      timestamp: Date.now(),
-      roundIndex: 0,
-      finalScore: 0,
-      totalRounds: meta.initialContent.rounds.length,
-      correctCount: 0,
-      durationMs,
-    };
-    bus.emit(endEvent);
   }, [phase, db, sessionId, meta]);
 
   // Flush on visibilitychange (hidden)

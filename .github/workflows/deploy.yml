@@ -13,7 +13,7 @@ concurrency:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   build:
@@ -28,6 +28,12 @@ jobs:
         with:
           ref: master
           fetch-depth: 0
+          # Use a PAT so the release branch/tag push is attributed to a real
+          # user. Pushes made with the default GITHUB_TOKEN do NOT trigger
+          # downstream workflows (prevents recursion), which means CI checks
+          # never run on the auto-generated release PR. Falls back to
+          # GITHUB_TOKEN locally / in forks where RELEASE_PAT isn't set.
+          token: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v6
         with:
@@ -111,10 +117,17 @@ jobs:
             pr/**
           commit-message: 'deploy: production ${{ steps.version.outputs.version }}'
 
-      - name: Commit and tag version bump
+      - name: Open release PR for version bump
+        # Master is protected by a ruleset requiring PRs, so the bot cannot
+        # push the chore(release) commit directly. Instead we land the
+        # package.json bump via a PR and push the tag separately (tags are
+        # not covered by the branch ruleset).
         if: steps.bump.outputs.bumped == 'true' && github.actor != 'github-actions[bot]'
         env:
           NEW_VERSION: ${{ steps.bump.outputs.new_version }}
+          # PAT required so the created PR triggers CI checks. With the default
+          # GITHUB_TOKEN, PRs open but no workflows run on them.
+          GH_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
           # Bypass the local pre-push quality gate — every check in the hook
           # (lint, typecheck, unit, storybook, VR, e2e) already ran in ci.yml
           # on the merging PR. The runner also uses dash as /bin/sh, which
@@ -124,8 +137,21 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="release/v${NEW_VERSION}"
+          git checkout -b "$BRANCH"
           git add package.json
           git commit -m "chore(release): v${NEW_VERSION}"
           git tag "v${NEW_VERSION}"
-          git pull --rebase origin master
-          git push origin master --follow-tags
+          git push origin "$BRANCH" --follow-tags
+          gh pr create \
+            --base master \
+            --head "$BRANCH" \
+            --title "chore(release): v${NEW_VERSION}" \
+            --body "Automated version bump from the deploy workflow.
+
+          The site has already been deployed to gh-pages with version \`${NEW_VERSION}\` (see \`dist/client/version.json\`). Merging this PR lands the matching \`package.json\` bump on master and makes the \`v${NEW_VERSION}\` tag reachable from master.
+
+          The bump type was derived from the merged PR's conventional-commit messages by \`scripts/determine-bump.sh\`."
+          # Enable auto-merge so the release PR lands the moment required
+          # checks go green — no human review needed for version bumps.
+          gh pr merge "$BRANCH" --auto --squash --delete-branch

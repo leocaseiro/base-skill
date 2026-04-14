@@ -10,6 +10,7 @@ import type {
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
+import type { GameSkin } from '@/lib/skin';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
 import { LevelCompleteOverlay } from '@/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay';
@@ -22,6 +23,8 @@ import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDis
 import { useGameSounds } from '@/components/answer-game/useGameSounds';
 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
 import { buildRoundOrder } from '@/games/build-round-order';
+import { getGameEventBus } from '@/lib/game-event-bus';
+import { resolveTiming, useGameSkin } from '@/lib/skin';
 
 interface SortNumbersProps {
   config: SortNumbersConfig;
@@ -33,10 +36,12 @@ interface SortNumbersProps {
 const SortNumbersSession = ({
   sortNumbersConfig,
   roundOrder,
+  skin,
   onRestartSession,
 }: {
   sortNumbersConfig: SortNumbersConfig;
   roundOrder: readonly number[];
+  skin: GameSkin;
   onRestartSession: () => void;
 }) => {
   const { t } = useTranslation('games');
@@ -82,6 +87,15 @@ const SortNumbersSession = ({
         tiles: nextLevel.tiles,
         zones: nextLevel.zones,
       });
+      getGameEventBus().emit({
+        type: 'game:level-advance',
+        gameId: sortNumbersConfig.gameId,
+        sessionId: '',
+        profileId: '',
+        timestamp: Date.now(),
+        roundIndex: 0,
+        levelIndex: levelIndex + 1,
+      });
     } else {
       dispatch({ type: 'COMPLETE_GAME' });
     }
@@ -92,10 +106,37 @@ const SortNumbersSession = ({
   };
 
   useEffect(() => {
+    if (phase !== 'game-over') return;
+    getGameEventBus().emit({
+      type: 'game:end',
+      gameId: sortNumbersConfig.gameId,
+      sessionId: '',
+      profileId: '',
+      timestamp: Date.now(),
+      roundIndex,
+      finalScore: 0,
+      totalRounds: roundOrder.length,
+      correctCount: 0,
+      durationMs: 0,
+      retryCount,
+    });
+  }, [
+    phase,
+    sortNumbersConfig.gameId,
+    roundIndex,
+    roundOrder.length,
+    retryCount,
+  ]);
+
+  useEffect(() => {
     if (phase !== 'round-complete' || !confettiReady) return;
 
     const token = ++completionToken.current;
-    const delayMs = 750;
+    const delayMs = resolveTiming(
+      'roundAdvanceDelay',
+      skin,
+      sortNumbersConfig.timing,
+    );
     const timer = globalThis.setTimeout(() => {
       if (completionToken.current !== token) return;
 
@@ -134,6 +175,14 @@ const SortNumbersSession = ({
         tiles: nextTiles,
         zones: nextZones,
       });
+      getGameEventBus().emit({
+        type: 'game:round-advance',
+        gameId: sortNumbersConfig.gameId,
+        sessionId: '',
+        profileId: '',
+        timestamp: Date.now(),
+        roundIndex: roundIndex + 1,
+      });
     }, delayMs);
 
     return () => {
@@ -145,11 +194,14 @@ const SortNumbersSession = ({
     roundIndex,
     dispatch,
     roundOrder,
+    skin,
+    sortNumbersConfig.gameId,
     sortNumbersConfig.rounds,
     sortNumbersConfig.direction,
     sortNumbersConfig.tileBankMode,
     sortNumbersConfig.distractors,
     sortNumbersConfig.range,
+    sortNumbersConfig.timing,
   ]);
 
   if (!round) return null;
@@ -168,6 +220,7 @@ const SortNumbersSession = ({
               <Slot
                 key={zone.id}
                 index={i}
+                skin={skin}
                 className="size-14 rounded-lg"
               >
                 {({ label }) => (
@@ -182,23 +235,43 @@ const SortNumbersSession = ({
           </SlotRow>
         </AnswerGame.Answer>
         <AnswerGame.Choices>
-          <SortNumbersTileBank />
+          <SortNumbersTileBank skin={skin} />
         </AnswerGame.Choices>
       </div>
-      <ScoreAnimation visible={confettiReady} />
+      {skin.RoundCompleteEffect ? (
+        <skin.RoundCompleteEffect visible={confettiReady} />
+      ) : (
+        <ScoreAnimation visible={confettiReady} />
+      )}
       {levelCompleteReady ? (
-        <LevelCompleteOverlay
-          level={levelIndex + 1}
-          onNextLevel={handleNextLevel}
-          onDone={handleDone}
-        />
+        skin.LevelCompleteOverlay ? (
+          <skin.LevelCompleteOverlay
+            level={levelIndex + 1}
+            onNextLevel={handleNextLevel}
+            onDone={handleDone}
+          />
+        ) : (
+          <LevelCompleteOverlay
+            level={levelIndex + 1}
+            onNextLevel={handleNextLevel}
+            onDone={handleDone}
+          />
+        )
       ) : null}
       {gameOverReady ? (
-        <GameOverOverlay
-          retryCount={retryCount}
-          onPlayAgain={handlePlayAgain}
-          onHome={handleHome}
-        />
+        skin.CelebrationOverlay ? (
+          <skin.CelebrationOverlay
+            retryCount={retryCount}
+            onPlayAgain={handlePlayAgain}
+            onHome={handleHome}
+          />
+        ) : (
+          <GameOverOverlay
+            retryCount={retryCount}
+            onPlayAgain={handlePlayAgain}
+            onHome={handleHome}
+          />
+        )
       ) : null}
     </>
   );
@@ -210,6 +283,7 @@ export const SortNumbers = ({
   sessionId,
   seed,
 }: SortNumbersProps) => {
+  const skin = useGameSkin('sort-numbers', config.skin);
   const roundsInOrder = config.roundsInOrder === true;
   const [sessionEpoch, setSessionEpoch] = useState(0);
 
@@ -277,19 +351,26 @@ export const SortNumbers = ({
   if (!round0) return null;
 
   return (
-    <AnswerGame
-      key={sessionEpoch}
-      config={answerGameConfig}
-      initialState={sessionEpoch === 0 ? initialState : undefined}
-      sessionId={sessionId}
+    <div
+      className={`game-container skin-${skin.id}`}
+      style={skin.tokens as React.CSSProperties}
     >
-      <SortNumbersSession
-        sortNumbersConfig={config}
-        roundOrder={roundOrder}
-        onRestartSession={() => {
-          setSessionEpoch((e) => e + 1);
-        }}
-      />
-    </AnswerGame>
+      {skin.SceneBackground ? <skin.SceneBackground /> : null}
+      <AnswerGame
+        key={sessionEpoch}
+        config={answerGameConfig}
+        initialState={sessionEpoch === 0 ? initialState : undefined}
+        sessionId={sessionId}
+      >
+        <SortNumbersSession
+          sortNumbersConfig={config}
+          roundOrder={roundOrder}
+          skin={skin}
+          onRestartSession={() => {
+            setSessionEpoch((e) => e + 1);
+          }}
+        />
+      </AnswerGame>
+    </div>
   );
 };

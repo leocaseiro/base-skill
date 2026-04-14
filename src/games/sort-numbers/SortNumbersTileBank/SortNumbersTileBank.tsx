@@ -1,11 +1,18 @@
 import type { TileItem } from '@/components/answer-game/types';
-import { skeuoStyle } from '@/components/answer-game/styles';
+import type { GameSkin } from '@/lib/skin';
+import { tileStyle } from '@/components/answer-game/styles';
 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
 
-const NumberTile = ({ tile }: { tile: TileItem }) => {
+const NumberTile = ({
+  tile,
+  skin,
+}: {
+  tile: TileItem;
+  skin?: GameSkin;
+}) => {
   const {
     ref,
     handleClick,
@@ -15,13 +22,27 @@ const NumberTile = ({ tile }: { tile: TileItem }) => {
     onPointerCancel,
   } = useDraggableTile(tile);
 
+  const isCustomSkin = skin && skin.id !== 'classic';
+  const resolvedTileStyle: React.CSSProperties = isCustomSkin
+    ? {
+        ...tileStyle(),
+        background: 'var(--skin-tile-bg)',
+        color: 'var(--skin-tile-text)',
+        borderRadius: 'var(--skin-tile-radius)',
+        border: 'var(--skin-tile-border)',
+        boxShadow: 'var(--skin-tile-shadow)',
+        fontWeight:
+          'var(--skin-tile-font-weight)' as React.CSSProperties['fontWeight'],
+      }
+    : tileStyle();
+
   return (
     <button
       ref={ref}
       type="button"
       aria-label={`Number ${tile.label}`}
       className={`flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums transition-transform active:scale-95 active:cursor-grabbing`}
-      style={skeuoStyle}
+      style={resolvedTileStyle}
       onClick={handleClick}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -29,11 +50,18 @@ const NumberTile = ({ tile }: { tile: TileItem }) => {
       onPointerCancel={onPointerCancel}
     >
       {tile.label}
+      {skin?.tileDecoration?.(tile)}
     </button>
   );
 };
 
-export const SortNumbersTileBank = () => {
+interface SortNumbersTileBankProps {
+  skin?: GameSkin;
+}
+
+export const SortNumbersTileBank = ({
+  skin,
+}: SortNumbersTileBankProps) => {
   const {
     allTiles,
     bankTileIds,
@@ -41,6 +69,14 @@ export const SortNumbersTileBank = () => {
     dragHoverBankTileId,
   } = useAnswerGameContext();
   const { bankRef, isDragOver } = useBankDropTarget();
+
+  // Bank tile placeholders (the "hole" left when a tile is dragged out and
+  // the hover-target indicator) honor the skin's tile-radius so a custom
+  // round skin doesn't show square placeholders mid-drag.
+  const isCustomSkin = skin && skin.id !== 'classic';
+  const holeRadiusStyle: React.CSSProperties | undefined = isCustomSkin
+    ? { borderRadius: 'var(--skin-tile-radius)' }
+    : undefined;
 
   return (
     <div
@@ -65,22 +101,34 @@ export const SortNumbersTileBank = () => {
               <div
                 key={tile.id}
                 className="relative size-14 rounded-xl transition-all"
+                style={holeRadiusStyle}
               >
                 <div
                   data-tile-bank-hole={tile.id}
-                  className="size-14 rounded-xl bg-muted/60 shadow-inner"
+                  className="size-14 rounded-xl"
                   aria-hidden="true"
+                  style={{
+                    background: 'var(--skin-bank-hole-bg)',
+                    boxShadow: 'var(--skin-bank-hole-shadow)',
+                    ...holeRadiusStyle,
+                  }}
                 />
                 <div
                   className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
                   aria-hidden={isDragging || undefined}
                 >
-                  <NumberTile tile={tile} />
+                  <NumberTile tile={tile} skin={skin} />
                 </div>
                 {isHoverTarget && (
                   <div
-                    className="pointer-events-none absolute inset-0 rounded-xl border-2 border-dashed border-primary"
+                    className="pointer-events-none absolute inset-0 rounded-xl border-2"
                     aria-hidden="true"
+                    style={{
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                      ...holeRadiusStyle,
+                    }}
                   />
                 )}
               </div>
@@ -91,8 +139,20 @@ export const SortNumbersTileBank = () => {
             <div
               key={tile.id}
               data-tile-bank-hole={tile.id}
-              className={`relative size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' border-2' : ''}`}
               aria-hidden="true"
+              style={{
+                background: 'var(--skin-bank-hole-bg)',
+                boxShadow: 'var(--skin-bank-hole-shadow)',
+                ...(isHoverTarget
+                  ? {
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                    }
+                  : {}),
+                ...holeRadiusStyle,
+              }}
             >
               {isHoverTarget && (
                 <span

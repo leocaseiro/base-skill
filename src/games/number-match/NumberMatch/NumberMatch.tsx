@@ -17,6 +17,7 @@ import type {
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
+import type { GameSkin } from '@/lib/skin';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
@@ -31,6 +32,8 @@ import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
 import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
 import { buildRoundOrder } from '@/games/build-round-order';
+import { getGameEventBus } from '@/lib/game-event-bus';
+import { useGameSkin } from '@/lib/skin';
 
 type NumberWordsLocale = 'en' | 'pt-BR';
 
@@ -88,10 +91,12 @@ interface NumberMatchProps {
 const NumberMatchSession = ({
   numberMatchConfig,
   roundOrder,
+  skin,
   onRestartSession,
 }: {
   numberMatchConfig: NumberMatchConfig;
   roundOrder: readonly number[];
+  skin: GameSkin;
   onRestartSession: () => void;
 }) => {
   const { phase, roundIndex, retryCount, zones } =
@@ -119,6 +124,29 @@ const NumberMatchSession = ({
   const handlePlayAgain = () => {
     onRestartSession();
   };
+
+  useEffect(() => {
+    if (phase !== 'game-over') return;
+    getGameEventBus().emit({
+      type: 'game:end',
+      gameId: numberMatchConfig.gameId,
+      sessionId: '',
+      profileId: '',
+      timestamp: Date.now(),
+      roundIndex,
+      finalScore: 0,
+      totalRounds: roundOrder.length,
+      correctCount: 0,
+      durationMs: 0,
+      retryCount,
+    });
+  }, [
+    phase,
+    numberMatchConfig.gameId,
+    roundIndex,
+    roundOrder.length,
+    retryCount,
+  ]);
 
   useEffect(() => {
     if (phase !== 'round-complete' || !confettiReady) return;
@@ -224,6 +252,7 @@ const NumberMatchSession = ({
               <Slot
                 key={zone.id}
                 index={i}
+                skin={skin}
                 className={slotClass}
                 renderPreview={(previewLabel) => {
                   if (dotsDominoMode) {
@@ -298,13 +327,25 @@ const NumberMatchSession = ({
           />
         </AnswerGame.Choices>
       </div>
-      <ScoreAnimation visible={confettiReady} />
+      {skin.RoundCompleteEffect ? (
+        <skin.RoundCompleteEffect visible={confettiReady} />
+      ) : (
+        <ScoreAnimation visible={confettiReady} />
+      )}
       {gameOverReady ? (
-        <GameOverOverlay
-          retryCount={retryCount}
-          onPlayAgain={handlePlayAgain}
-          onHome={handleHome}
-        />
+        skin.CelebrationOverlay ? (
+          <skin.CelebrationOverlay
+            retryCount={retryCount}
+            onPlayAgain={handlePlayAgain}
+            onHome={handleHome}
+          />
+        ) : (
+          <GameOverOverlay
+            retryCount={retryCount}
+            onPlayAgain={handlePlayAgain}
+            onHome={handleHome}
+          />
+        )
       ) : null}
     </>
   );
@@ -316,6 +357,7 @@ export const NumberMatch = ({
   sessionId,
   seed,
 }: NumberMatchProps) => {
+  const skin = useGameSkin('number-match', config.skin);
   const roundsInOrder = config.roundsInOrder === true;
   const [sessionEpoch, setSessionEpoch] = useState(0);
   const { locale } = useParams({ from: '/$locale' });
@@ -385,19 +427,26 @@ export const NumberMatch = ({
   if (!round0) return null;
 
   return (
-    <AnswerGame
-      key={sessionEpoch}
-      config={answerGameConfig}
-      initialState={sessionEpoch === 0 ? initialState : undefined}
-      sessionId={sessionId}
+    <div
+      className={`game-container skin-${skin.id}`}
+      style={skin.tokens as React.CSSProperties}
     >
-      <NumberMatchSession
-        numberMatchConfig={config}
-        roundOrder={roundOrder}
-        onRestartSession={() => {
-          setSessionEpoch((e) => e + 1);
-        }}
-      />
-    </AnswerGame>
+      {skin.SceneBackground ? <skin.SceneBackground /> : null}
+      <AnswerGame
+        key={sessionEpoch}
+        config={answerGameConfig}
+        initialState={sessionEpoch === 0 ? initialState : undefined}
+        sessionId={sessionId}
+      >
+        <NumberMatchSession
+          numberMatchConfig={config}
+          roundOrder={roundOrder}
+          skin={skin}
+          onRestartSession={() => {
+            setSessionEpoch((e) => e + 1);
+          }}
+        />
+      </AnswerGame>
+    </div>
   );
 };

@@ -105,7 +105,10 @@ describe('LetterTileBank', () => {
       </AnswerGameProvider>,
     );
     const hole = container.querySelector('[data-tile-bank-hole="t1"]');
-    expect(hole?.className).toMatch(/border-dashed/);
+    expect(hole?.className).toMatch(/border-2/);
+    expect(hole?.getAttribute('style')).toContain(
+      '--skin-hover-border-style',
+    );
     expect(hole?.textContent).toContain('c');
     bankDropState.isDragOver = false;
   });
@@ -127,8 +130,14 @@ describe('LetterTileBank', () => {
         <Preview />
       </AnswerGameProvider>,
     );
-    const overlays = container.querySelectorAll(
-      '.border-dashed.border-primary',
+    const overlays = [
+      ...container.querySelectorAll<HTMLDivElement>(
+        'div.pointer-events-none.absolute.inset-0.rounded-xl.border-2',
+      ),
+    ].filter((el) =>
+      (el.getAttribute('style') ?? '').includes(
+        '--skin-hover-border-style',
+      ),
     );
     expect(overlays.length).toBeGreaterThanOrEqual(1);
     bankDropState.isDragOver = false;

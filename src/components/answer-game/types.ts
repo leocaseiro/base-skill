@@ -20,6 +20,17 @@ export interface AnswerGameConfig {
    * @default 'text'
    */
   touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+  /** Skin ID for visual variant. Falls back to 'classic' if not registered. */
+  skin?: string;
+  /**
+   * Per-config timing overrides. Take precedence over the skin's own
+   * `timing` values and baseskill defaults.
+   */
+  timing?: {
+    roundAdvanceDelay?: number;
+    autoEjectDelay?: number;
+    levelCompleteDelay?: number;
+  };
   /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
   initialTiles?: TileItem[];
   initialZones?: AnswerZone[];

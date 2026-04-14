@@ -1,6 +1,6 @@
 {
   "name": "base-skill",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "imports": {
@@ -20,7 +20,7 @@
     "test:vr:report": "playwright show-report",
     "storybook": "storybook dev --port 6006",
     "build-storybook": "storybook build",
-    "test:scripts": "bash scripts/determine-bump.test.sh",
+    "test:scripts": "bash scripts/determine-bump.test.sh && bash scripts/check-no-master-push.test.sh && bash scripts/check-no-master-push.sh",
     "test:storybook": "test-storybook",
     "typecheck": "tsc --noEmit",
     "word:seed": "tsx scripts/seed-word-library.ts",
@@ -28,6 +28,8 @@
     "lint": "eslint . --max-warnings 0 && knip --no-config-hints",
     "lint:css": "stylelint 'src/**/*.css'",
     "lint:md": "markdownlint-cli2 '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees'",
+    "lint:actions": "actionlint",
+    "lint:shell": "shellcheck .husky/pre-commit .husky/pre-push .husky/post-merge $(find scripts -name '*.sh' 2>/dev/null) 2>/dev/null || true",
     "format": "prettier --check .",
     "fix": "prettier --write . && eslint --fix . && yarn fix:css && yarn fix:md",
     "fix:css": "stylelint --fix 'src/**/*.css' && prettier --write 'src/**/*.css'",
@@ -106,6 +108,7 @@
     "knip": "^6.1.1",
     "lint-staged": "^16.4.0",
     "markdownlint-cli2": "^0.22.0",
+    "picomatch": "^4.0.0",
     "prettier": "^3.8.1",
     "rehype-format": "^5.0.1",
     "rehype-raw": "^7.0.0",

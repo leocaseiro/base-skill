@@ -11,7 +11,12 @@ export const TextQuestion = ({ text }: TextQuestionProps) => {
     <button
       type="button"
       aria-label={`${text} — tap to hear`}
-      className="rounded-lg px-6 py-3 text-4xl font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
+      className="px-6 py-3 text-4xl font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
+      style={{
+        background: 'var(--skin-question-bg)',
+        color: 'var(--skin-question-text)',
+        borderRadius: 'var(--skin-question-radius)',
+      }}
       onClick={() => speakPrompt(text)}
     >
       {text}
