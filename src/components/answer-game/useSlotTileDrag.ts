@@ -84,10 +84,16 @@ export const useSlotTileDrag = ({
             // inner elements are preserved — avoids the shrunken-font issue
             // that occurs when reading fontSize from the button itself.
             ghost.innerHTML = element.innerHTML;
+            // Honor the active skin's tile radius so a round skin's drag
+            // ghost stays round. Falls back to 12px for the classic skin.
+            const computed = getComputedStyle(element);
+            const skinRadius = computed
+              .getPropertyValue('--skin-tile-radius')
+              .trim();
             Object.assign(ghost.style, {
               width: `${rect.width}px`,
               height: `${rect.height}px`,
-              borderRadius: '12px',
+              borderRadius: skinRadius || '12px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
