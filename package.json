@@ -20,7 +20,7 @@
     "test:vr:report": "playwright show-report",
     "storybook": "storybook dev --port 6006",
     "build-storybook": "storybook build",
-    "test:scripts": "bash scripts/determine-bump.test.sh",
+    "test:scripts": "bash scripts/determine-bump.test.sh && bash scripts/check-no-master-push.test.sh && bash scripts/check-no-master-push.sh",
     "test:storybook": "test-storybook",
     "typecheck": "tsc --noEmit",
     "word:seed": "tsx scripts/seed-word-library.ts",
