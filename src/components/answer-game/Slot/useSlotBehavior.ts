@@ -327,7 +327,19 @@ export const useSlotBehavior = (
     if (!isWrong || config.wrongTileBehavior !== 'lock-auto-eject')
       return;
     const timerId = setTimeout(() => {
+      const ejectedTileId =
+        stateRef.current.zones[index]?.placedTileId ?? null;
       dispatch({ type: 'EJECT_TILE', zoneIndex: index });
+      getGameEventBus().emit({
+        type: 'game:tile-ejected',
+        gameId: stateRef.current.config.gameId,
+        sessionId: '',
+        profileId: '',
+        timestamp: Date.now(),
+        roundIndex: stateRef.current.roundIndex,
+        zoneIndex: index,
+        tileId: ejectedTileId,
+      });
     }, 1000);
     return () => clearTimeout(timerId);
   }, [isWrong, config.wrongTileBehavior, dispatch, index]);
