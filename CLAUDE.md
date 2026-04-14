@@ -75,6 +75,24 @@ Config lives in `.markdownlint.yaml`. Most default rules are active; key disable
 
 **Never commit a markdown file that fails `yarn lint:md` or `npx prettier --check`.**
 
+## Test-Driven Development
+
+Every bug fix and every new feature **must** follow the red-green-refactor cycle.
+
+### Bug fixes
+
+1. Write a failing test that reproduces the bug **before** touching production code
+2. Confirm the test fails for the right reason (missing behaviour, not a syntax error)
+3. Apply the minimal fix
+4. Confirm the test goes green and no other tests regress
+5. **Never open a bug-fix PR without a regression test** — a fix without a test gives no
+   proof it caught the bug and no protection against future regressions
+
+### Features
+
+Use the `superpowers:test-driven-development` skill at the start of every feature
+branch. Write tests first; implement only enough code to make them pass.
+
 ## Pre-push Quality Gate
 
 A `.husky/pre-push` hook runs automatically on every `git push`. It enforces the
