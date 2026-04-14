@@ -47,6 +47,7 @@ export const GameEventBusDemo = () => {
       totalRounds: 1,
       correctCount: 0,
       durationMs: 0,
+      retryCount: 0,
     };
     busRef.current.emit(event);
   };

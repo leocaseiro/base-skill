@@ -84,6 +84,7 @@ export interface GameEndEvent extends BaseGameEvent {
   totalRounds: number;
   correctCount: number;
   durationMs: number;
+  retryCount: number;
 }
 
 export interface GameRoundAdvanceEvent extends BaseGameEvent {
