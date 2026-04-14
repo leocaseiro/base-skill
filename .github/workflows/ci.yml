@@ -86,6 +86,7 @@ jobs:
         uses: ludeeus/action-shellcheck@master
         with:
           additional_files: '.husky/pre-commit .husky/pre-push .husky/post-merge'
+          ignore_paths: 'node_modules .husky/_'
       - if: needs.detect-changes.outputs.shellcheck == 'true'
         name: Shell script tests (determine-bump, workflow guards)
         run: yarn test:scripts
