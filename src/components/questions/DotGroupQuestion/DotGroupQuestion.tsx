@@ -69,7 +69,13 @@ export const DotGroupQuestion = ({
           key={index}
           type="button"
           aria-label={`Dot ${index + 1} of ${count}`}
-          className="relative size-10 rounded-full bg-primary focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="relative size-10 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2"
+          style={{
+            background:
+              assigned === null
+                ? 'var(--skin-question-dot-bg)'
+                : 'var(--skin-question-dot-assigned-bg)',
+          }}
           onClick={() => handleDotTap(index)}
         >
           {assigned !== null && (
