@@ -4,6 +4,7 @@ import { useAnswerGameContext } from './useAnswerGameContext';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
 import { playSound } from '@/lib/audio/AudioFeedback';
 import { getGameEventBus } from '@/lib/game-event-bus';
+import { resolveSkin } from '@/lib/skin';
 
 export interface TileEvaluation {
   placeTile: (tileId: string, zoneIndex: number) => void;
@@ -18,6 +19,7 @@ export interface TileEvaluation {
 export function useTileEvaluation(): TileEvaluation {
   const state = useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
+  const skin = resolveSkin(state.config.gameId, state.config.skin);
 
   const placeTile = useCallback(
     (tileId: string, zoneIndex: number) => {
@@ -26,7 +28,9 @@ export function useTileEvaluation(): TileEvaluation {
       if (!tile || !zone) return;
 
       const correct = tile.value === zone.expectedValue;
-      playSound(correct ? 'correct' : 'wrong', 0.8);
+      if (!skin.suppressDefaultSounds) {
+        playSound(correct ? 'correct' : 'wrong', 0.8);
+      }
       dispatch({ type: 'PLACE_TILE', tileId, zoneIndex });
 
       getGameEventBus().emit({
@@ -42,7 +46,7 @@ export function useTileEvaluation(): TileEvaluation {
         zoneIndex,
       });
     },
-    [state, dispatch],
+    [state, dispatch, skin],
   );
 
   const typeTile = useCallback(
@@ -52,7 +56,9 @@ export function useTileEvaluation(): TileEvaluation {
 
       const correct =
         value.toLowerCase() === zone.expectedValue.toLowerCase();
-      playSound(correct ? 'correct' : 'wrong', 0.8);
+      if (!skin.suppressDefaultSounds) {
+        playSound(correct ? 'correct' : 'wrong', 0.8);
+      }
       dispatch({
         type: 'TYPE_TILE',
         tileId: `typed-${nanoid()}`,
@@ -73,7 +79,7 @@ export function useTileEvaluation(): TileEvaluation {
         zoneIndex,
       });
     },
-    [state, dispatch],
+    [state, dispatch, skin],
   );
 
   return { placeTile, typeTile };
