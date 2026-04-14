@@ -106,6 +106,29 @@ const SortNumbersSession = ({
   };
 
   useEffect(() => {
+    if (phase !== 'game-over') return;
+    getGameEventBus().emit({
+      type: 'game:end',
+      gameId: sortNumbersConfig.gameId,
+      sessionId: '',
+      profileId: '',
+      timestamp: Date.now(),
+      roundIndex,
+      finalScore: 0,
+      totalRounds: roundOrder.length,
+      correctCount: 0,
+      durationMs: 0,
+      retryCount,
+    });
+  }, [
+    phase,
+    sortNumbersConfig.gameId,
+    roundIndex,
+    roundOrder.length,
+    retryCount,
+  ]);
+
+  useEffect(() => {
     if (phase !== 'round-complete' || !confettiReady) return;
 
     const token = ++completionToken.current;

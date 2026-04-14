@@ -101,6 +101,36 @@ describe('useGameSkin', () => {
     expect(onWrongPlace).toHaveBeenCalledWith(2, '5');
   });
 
+  it('forwards retryCount from GameEndEvent to skin.onGameOver', () => {
+    const onGameOver = vi.fn();
+    registerSkin('sort-numbers', {
+      id: 'retry-test',
+      name: 'Retry Test',
+      tokens: {},
+      onGameOver,
+    });
+
+    renderHook(() => useGameSkin('sort-numbers', 'retry-test'));
+
+    act(() => {
+      getGameEventBus().emit({
+        type: 'game:end',
+        gameId: 'sort-numbers',
+        sessionId: '',
+        profileId: '',
+        timestamp: Date.now(),
+        roundIndex: 0,
+        finalScore: 0,
+        totalRounds: 1,
+        correctCount: 1,
+        durationMs: 100,
+        retryCount: 3,
+      });
+    });
+
+    expect(onGameOver).toHaveBeenCalledWith(3);
+  });
+
   it('unsubscribes on unmount', () => {
     const onCorrectPlace = vi.fn();
     registerSkin('sort-numbers', {

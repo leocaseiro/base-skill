@@ -105,7 +105,10 @@ describe('SortNumbersTileBank', () => {
       </AnswerGameProvider>,
     );
     const hole = container.querySelector('[data-tile-bank-hole="t2"]');
-    expect(hole?.className).toMatch(/border-dashed/);
+    expect(hole?.className).toMatch(/border-2/);
+    expect(hole?.getAttribute('style')).toContain(
+      '--skin-hover-border-style',
+    );
     expect(hole?.textContent).toContain('1');
     bankDropState.isDragOver = false;
   });

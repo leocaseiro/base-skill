@@ -1,5 +1,5 @@
 import type { TileItem } from '@/components/answer-game/types';
-import { skeuoStyle } from '@/components/answer-game/styles';
+import { tileStyle } from '@/components/answer-game/styles';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
@@ -20,7 +20,7 @@ const LetterTile = ({ tile }: { tile: TileItem }) => {
       type="button"
       aria-label={`Letter ${tile.label}`}
       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
-      style={skeuoStyle}
+      style={tileStyle()}
       onClick={handleClick}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -82,7 +82,11 @@ export const LetterTileBank = () => {
               >
                 <div
                   data-tile-bank-hole={tile.id}
-                  className="size-14 rounded-xl bg-muted/60 shadow-inner"
+                  className="size-14 rounded-xl"
+                  style={{
+                    background: 'var(--skin-bank-hole-bg)',
+                    boxShadow: 'var(--skin-bank-hole-shadow)',
+                  }}
                   aria-hidden="true"
                 />
                 <div
@@ -93,7 +97,12 @@ export const LetterTileBank = () => {
                 </div>
                 {isHoverTarget && (
                   <div
-                    className="pointer-events-none absolute inset-0 rounded-xl border-2 border-dashed border-primary"
+                    className="pointer-events-none absolute inset-0 rounded-xl border-2"
+                    style={{
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                    }}
                     aria-hidden="true"
                   />
                 )}
@@ -105,7 +114,18 @@ export const LetterTileBank = () => {
             <div
               key={tile.id}
               data-tile-bank-hole={tile.id}
-              className={`relative size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' border-2' : ''}`}
+              style={{
+                background: 'var(--skin-bank-hole-bg)',
+                boxShadow: 'var(--skin-bank-hole-shadow)',
+                ...(isHoverTarget
+                  ? {
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                    }
+                  : {}),
+              }}
               aria-hidden="true"
             >
               {isHoverTarget && (

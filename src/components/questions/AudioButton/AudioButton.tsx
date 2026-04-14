@@ -16,7 +16,11 @@ export const AudioButton = ({ prompt }: AudioButtonProps) => {
     <button
       type="button"
       aria-label="Hear the question"
-      className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md active:scale-95"
+      className="flex size-14 items-center justify-center rounded-full shadow-md active:scale-95"
+      style={{
+        background: 'var(--skin-question-audio-bg)',
+        color: 'var(--skin-question-audio-fg)',
+      }}
       onClick={() => speakPrompt(prompt)}
     >
       <Volume2 size={24} aria-hidden="true" />

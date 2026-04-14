@@ -12,13 +12,20 @@ export const ImageQuestion = ({ src, prompt }: ImageQuestionProps) => {
     <button
       type="button"
       aria-label={`${prompt} — tap to hear`}
-      className="rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2"
+      className="focus-visible:outline-2 focus-visible:outline-offset-2"
+      style={{
+        background: 'var(--skin-question-bg)',
+        color: 'var(--skin-question-text)',
+        borderRadius: 'var(--skin-question-radius)',
+        overflow: 'hidden',
+      }}
       onClick={() => speakPrompt(prompt)}
     >
       <img
         src={src}
         alt={prompt}
-        className="size-40 rounded-xl object-contain"
+        className="size-40 object-contain"
+        style={{ borderRadius: 'var(--skin-question-radius)' }}
       />
     </button>
   );

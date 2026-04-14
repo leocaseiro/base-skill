@@ -27,7 +27,12 @@ export const SentenceWithGaps = ({
             key={`gap-${String(seg.index)}`}
             index={seg.index}
             as="span"
-            className="mx-1 inline-flex min-w-16 items-center justify-center border-b-2 border-dashed px-2 align-baseline"
+            className="mx-1 inline-flex min-w-16 items-center justify-center border-b-2 px-2 align-baseline"
+            style={{
+              borderBottomColor: 'var(--skin-sentence-gap-border)',
+              borderBottomStyle:
+                'var(--skin-sentence-gap-style)' as React.CSSProperties['borderBottomStyle'],
+            }}
           >
             {({ label }) => (
               <span className="text-lg font-bold">
