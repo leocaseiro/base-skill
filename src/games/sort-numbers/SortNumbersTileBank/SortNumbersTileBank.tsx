@@ -105,9 +105,13 @@ export const SortNumbersTileBank = ({
               >
                 <div
                   data-tile-bank-hole={tile.id}
-                  className="size-14 rounded-xl bg-muted/60 shadow-inner"
+                  className="size-14 rounded-xl"
                   aria-hidden="true"
-                  style={holeRadiusStyle}
+                  style={{
+                    background: 'var(--skin-bank-hole-bg)',
+                    boxShadow: 'var(--skin-bank-hole-shadow)',
+                    ...holeRadiusStyle,
+                  }}
                 />
                 <div
                   className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
@@ -117,9 +121,14 @@ export const SortNumbersTileBank = ({
                 </div>
                 {isHoverTarget && (
                   <div
-                    className="pointer-events-none absolute inset-0 rounded-xl border-2 border-dashed border-primary"
+                    className="pointer-events-none absolute inset-0 rounded-xl border-2"
                     aria-hidden="true"
-                    style={holeRadiusStyle}
+                    style={{
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                      ...holeRadiusStyle,
+                    }}
                   />
                 )}
               </div>
@@ -130,9 +139,20 @@ export const SortNumbersTileBank = ({
             <div
               key={tile.id}
               data-tile-bank-hole={tile.id}
-              className={`relative size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' border-2' : ''}`}
               aria-hidden="true"
-              style={holeRadiusStyle}
+              style={{
+                background: 'var(--skin-bank-hole-bg)',
+                boxShadow: 'var(--skin-bank-hole-shadow)',
+                ...(isHoverTarget
+                  ? {
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                    }
+                  : {}),
+                ...holeRadiusStyle,
+              }}
             >
               {isHoverTarget && (
                 <span

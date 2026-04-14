@@ -82,7 +82,11 @@ export const LetterTileBank = () => {
               >
                 <div
                   data-tile-bank-hole={tile.id}
-                  className="size-14 rounded-xl bg-muted/60 shadow-inner"
+                  className="size-14 rounded-xl"
+                  style={{
+                    background: 'var(--skin-bank-hole-bg)',
+                    boxShadow: 'var(--skin-bank-hole-shadow)',
+                  }}
                   aria-hidden="true"
                 />
                 <div
@@ -93,7 +97,12 @@ export const LetterTileBank = () => {
                 </div>
                 {isHoverTarget && (
                   <div
-                    className="pointer-events-none absolute inset-0 rounded-xl border-2 border-dashed border-primary"
+                    className="pointer-events-none absolute inset-0 rounded-xl border-2"
+                    style={{
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                    }}
                     aria-hidden="true"
                   />
                 )}
@@ -105,7 +114,18 @@ export const LetterTileBank = () => {
             <div
               key={tile.id}
               data-tile-bank-hole={tile.id}
-              className={`relative size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' border-2' : ''}`}
+              style={{
+                background: 'var(--skin-bank-hole-bg)',
+                boxShadow: 'var(--skin-bank-hole-shadow)',
+                ...(isHoverTarget
+                  ? {
+                      borderColor: 'var(--skin-hover-border-color)',
+                      borderStyle:
+                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+                    }
+                  : {}),
+              }}
               aria-hidden="true"
             >
               {isHoverTarget && (
