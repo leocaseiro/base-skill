@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">3/43 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">43/43 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">4/171 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/42 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">42/42 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">3/170 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -5505,7 +5505,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const Consecutive = () =&gt; &lt;SortNumbers config={baseConfig} /&gt;;</code></pre>
+              <pre><code>const Consecutive = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5514,16 +5516,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const SkipByStepRangeMin = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      skip: { mode: &#39;by&#39;, step: 3, start: &#39;range-min&#39; },
-      rounds: [
-        { sequence: [2, 5, 8, 11] },
-        { sequence: [2, 5, 8, 11] },
-        { sequence: [2, 5, 8, 11] },
-      ],
-    }} /&gt;;</code></pre>
+              <pre><code>const SkipByStepRangeMin = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5532,16 +5527,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const SkipRandom = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      skip: { mode: &#39;random&#39; },
-      rounds: [
-        { sequence: [2, 7, 12, 18] },
-        { sequence: [3, 6, 11, 15] },
-        { sequence: [4, 9, 14, 20] },
-      ],
-    }} /&gt;;</code></pre>
+              <pre><code>const SkipRandom = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5550,12 +5538,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const DistractorsRandom = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      tileBankMode: &#39;distractors&#39;,
-      distractors: { source: &#39;random&#39;, count: 3 },
-    }} /&gt;;</code></pre>
+              <pre><code>const DistractorsRandom = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5564,18 +5549,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const DistractorsGapsOnly = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      skip: { mode: &#39;by&#39;, step: 2, start: &#39;range-min&#39; },
-      tileBankMode: &#39;distractors&#39;,
-      distractors: { source: &#39;gaps-only&#39;, count: &#39;all&#39; },
-      rounds: [
-        { sequence: [2, 4, 6, 8] },
-        { sequence: [2, 4, 6, 8] },
-        { sequence: [2, 4, 6, 8] },
-      ],
-    }} /&gt;;</code></pre>
+              <pre><code>const DistractorsGapsOnly = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5584,12 +5560,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const DistractorsFullRange = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      tileBankMode: &#39;distractors&#39;,
-      distractors: { source: &#39;full-range&#39;, count: 4 },
-    }} /&gt;;</code></pre>
+              <pre><code>const DistractorsFullRange = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5598,18 +5571,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const SimpleNoDistractors = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      configMode: &#39;simple&#39;,
-      direction: &#39;ascending&#39;,
-      quantity: 5,
-      skip: { mode: &#39;by&#39;, step: 2, start: 2 },
-      range: { min: 2, max: 10 },
-      tileBankMode: &#39;exact&#39;,
-      totalRounds: 1,
-      rounds: [{ sequence: [2, 4, 6, 8, 10] }],
-    }} /&gt;;</code></pre>
+              <pre><code>const SimpleNoDistractors = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5618,19 +5582,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const SimpleWithDistractors = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      configMode: &#39;simple&#39;,
-      direction: &#39;ascending&#39;,
-      quantity: 5,
-      skip: { mode: &#39;by&#39;, step: 2, start: 2 },
-      range: { min: 2, max: 10 },
-      tileBankMode: &#39;distractors&#39;,
-      distractors: { source: &#39;gaps-only&#39;, count: &#39;all&#39; },
-      totalRounds: 1,
-      rounds: [{ sequence: [2, 4, 6, 8, 10] }],
-    }} /&gt;;</code></pre>
+              <pre><code>const SimpleWithDistractors = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5639,18 +5593,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const SimpleDescending = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      configMode: &#39;simple&#39;,
-      direction: &#39;descending&#39;,
-      quantity: 5,
-      skip: { mode: &#39;by&#39;, step: 2, start: 2 },
-      range: { min: 2, max: 10 },
-      tileBankMode: &#39;exact&#39;,
-      totalRounds: 1,
-      rounds: [{ sequence: [2, 4, 6, 8, 10] }],
-    }} /&gt;;</code></pre>
+              <pre><code>const SimpleDescending = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5659,18 +5604,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const AdvancedWithFixedStart = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      configMode: &#39;advanced&#39;,
-      skip: { mode: &#39;by&#39;, step: 2, start: 3 },
-      range: { min: 1, max: 20 },
-      rounds: [
-        { sequence: [3, 5, 7, 9] },
-        { sequence: [3, 5, 7, 9] },
-        { sequence: [3, 5, 7, 9] },
-      ],
-    }} /&gt;;</code></pre>
+              <pre><code>const AdvancedWithFixedStart = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5679,26 +5615,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const LevelModeUnlimited = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      configMode: &#39;simple&#39;,
-      direction: &#39;ascending&#39;,
-      quantity: 5,
-      skip: { mode: &#39;by&#39;, step: 2, start: 2 },
-      range: { min: 2, max: 10 },
-      tileBankMode: &#39;exact&#39;,
-      totalRounds: 1,
-      rounds: [{ sequence: [2, 4, 6, 8, 10] }],
-      levelMode: {
-        generateNextLevel: createSortNumbersLevelGenerator({
-          start: 2,
-          step: 2,
-          quantity: 5,
-          direction: &#39;ascending&#39;,
-        }),
-      },
-    }} /&gt;;</code></pre>
+              <pre><code>const LevelModeUnlimited = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5707,27 +5626,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const LevelModeCapped = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      configMode: &#39;simple&#39;,
-      direction: &#39;ascending&#39;,
-      quantity: 3,
-      skip: { mode: &#39;by&#39;, step: 5, start: 5 },
-      range: { min: 5, max: 15 },
-      tileBankMode: &#39;exact&#39;,
-      totalRounds: 1,
-      rounds: [{ sequence: [5, 10, 15] }],
-      levelMode: {
-        maxLevels: 3,
-        generateNextLevel: createSortNumbersLevelGenerator({
-          start: 5,
-          step: 5,
-          quantity: 3,
-          direction: &#39;ascending&#39;,
-        }),
-      },
-    }} /&gt;;</code></pre>
+              <pre><code>const LevelModeCapped = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5736,26 +5637,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const LevelModeDescending = () =&gt; &lt;SortNumbers
-    config={{
-      ...baseConfig,
-      configMode: &#39;simple&#39;,
-      direction: &#39;descending&#39;,
-      quantity: 4,
-      skip: { mode: &#39;by&#39;, step: 3, start: 3 },
-      range: { min: 3, max: 12 },
-      tileBankMode: &#39;exact&#39;,
-      totalRounds: 1,
-      rounds: [{ sequence: [3, 6, 9, 12] }],
-      levelMode: {
-        generateNextLevel: createSortNumbersLevelGenerator({
-          start: 3,
-          step: 3,
-          quantity: 4,
-          direction: &#39;descending&#39;,
-        }),
-      },
-    }} /&gt;;</code></pre>
+              <pre><code>const LevelModeDescending = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5764,7 +5648,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const TenSlotsLongLabels = () =&gt; &lt;SortNumbers config={tenSlotsLongLabelsConfig} /&gt;;</code></pre>
+              <pre><code>const TenSlotsLongLabels = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5773,7 +5659,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const TenSlotsLongLabelsMobile = () =&gt; &lt;SortNumbers config={tenSlotsLongLabelsConfig} /&gt;;</code></pre>
+              <pre><code>const TenSlotsLongLabelsMobile = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5782,7 +5670,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const TenSlotsLongLabelsTabletPortrait = () =&gt; &lt;SortNumbers config={tenSlotsLongLabelsConfig} /&gt;;</code></pre>
+              <pre><code>const TenSlotsLongLabelsTabletPortrait = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5791,7 +5681,9 @@ sessionId?: string</code></pre>
               </div>
               
               
-              <pre><code>const TenSlotsLongLabelsDesktop = () =&gt; &lt;SortNumbers config={tenSlotsLongLabelsConfig} /&gt;;</code></pre>
+              <pre><code>const TenSlotsLongLabelsDesktop = ({ config, skinId }) =&gt; (
+  &lt;SortNumbers config={{ ...config, skin: skinId }} /&gt;
+);</code></pre>
             </div>
         </div>
     
@@ -5896,171 +5788,6 @@ sessionId?: string</code></pre>
 </article>
 <article
   class="card 
-  has-error 
-  has-info 
-  has-story-error
-  no-doc-error"
-  role="listitem"
-  aria-label="SortNumbersWithHarness">
-  <div class="head">
-    <div class="title">
-      <h2><span class="status-dot dot-err"></span> SortNumbersWithHarness</h2>
-      <div class="badges">
-        <label for="c-37-games-sortnumbers-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-37-games-sortnumbers-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-37-games-sortnumbers-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
-        
-      </div>
-    </div>
-    <div class="meta" title="./src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx">games-sortnumbers-skin-harness · ./src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx</div>
-    
-    
-    
-  </div>
-
-  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-37-games-sortnumbers-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-37-games-sortnumbers-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-37-games-sortnumbers-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
-  
-  
-
-  <div class="panels">
-    
-        <div class="panel panel-err">
-          
-    <div class="note err">
-      <div class="note-title">Prop type error</div>
-      <div class="note-body"><pre><code>No component file found for the &quot;SortNumbersWithHarness&quot; component.
-  66 | );
-  67 |
-&gt; 68 | const meta: Meta&lt;typeof SortNumbersWithHarness&gt; = {
-     | ^
-  69 |   title: &#39;Games/SortNumbers/Skin Harness&#39;,
-  70 |   component: SortNumbersWithHarness,
-  71 |   tags: [&#39;autodocs&#39;],
-
-./src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx:
-import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
-import { withRouter } from &#39;../../../../.storybook/decorators/withRouter&#39;;
-import { SortNumbers } from &#39;./SortNumbers&#39;;
-import type { SortNumbersConfig } from &#39;../types&#39;;
-import type { GameSkin } from &#39;@/lib/skin&#39;;
-import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import { SkinHarness, registerSkin } from &#39;@/lib/skin&#39;;
-
-/**
- * Demo skin to prove the harness wires callbacks and tokens end-to-end.
- * Replace or extend with your in-development skin while iterating.
- */
-const demoSkin: GameSkin = {
-  id: &#39;demo&#39;,
-  name: &#39;Demo Pink&#39;,
-  tokens: {
-    &#39;--skin-tile-bg&#39;: &#39;#ec4899&#39;,
-    &#39;--skin-tile-text&#39;: &#39;#fff&#39;,
-    &#39;--skin-tile-radius&#39;: &#39;50%&#39;,
-    &#39;--skin-slot-bg&#39;: &#39;#fdf2f8&#39;,
-    &#39;--skin-slot-border&#39;: &#39;#f472b6&#39;,
-    &#39;--skin-slot-radius&#39;: &#39;50%&#39;,
-  },
-  onCorrectPlace: (zoneIndex, value) =&gt; {
-    console.log(`[demo skin] correct @ zone ${zoneIndex}: ${value}`);
-  },
-  onWrongPlace: (zoneIndex, value) =&gt; {
-    console.log(`[demo skin] wrong @ zone ${zoneIndex}: ${value}`);
-  },
-};
-
-// Register at module load so `SkinHarness` sees the skin on first render.
-registerSkin(&#39;sort-numbers&#39;, demoSkin);
-
-const baseConfig: SortNumbersConfig = {
-  gameId: &#39;sort-numbers&#39;,
-  component: &#39;SortNumbers&#39;,
-  inputMethod: &#39;drag&#39;,
-  wrongTileBehavior: &#39;lock-manual&#39;,
-  tileBankMode: &#39;exact&#39;,
-  totalRounds: 3,
-  roundsInOrder: false,
-  ttsEnabled: false,
-  direction: &#39;ascending&#39;,
-  range: { min: 2, max: 20 },
-  quantity: 4,
-  skip: { mode: &#39;consecutive&#39; },
-  distractors: { source: &#39;random&#39;, count: 0 },
-  rounds: [
-    { sequence: [3, 4, 5, 6] },
-    { sequence: [7, 8, 9, 10] },
-    { sequence: [11, 12, 13, 14] },
-  ],
-};
-
-const SortNumbersWithHarness = ({
-  config,
-}: {
-  config: SortNumbersConfig;
-}) =&gt; (
-  &lt;SkinHarness gameId=&quot;sort-numbers&quot;&gt;
-    {({ skin }) =&gt; (
-      &lt;SortNumbers config={{ ...config, skin: skin.id }} /&gt;
-    )}
-  &lt;/SkinHarness&gt;
-);
-
-const meta: Meta&lt;typeof SortNumbersWithHarness&gt; = {
-  title: &#39;Games/SortNumbers/Skin Harness&#39;,
-  component: SortNumbersWithHarness,
-  tags: [&#39;autodocs&#39;],
-  decorators: [withDb, withRouter],
-  args: { config: baseConfig },
-};
-export default meta;
-
-type Story = StoryObj&lt;typeof SortNumbersWithHarness&gt;;
-
-export const Default: Story = {};
-</code></pre></div>
-    </div>
-        </div>
-    
-        <div class="panel panel-info">
-          
-    <div class="note info">
-      <div class="note-title">Info</div>
-      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
-    </div>
-        </div>
-    
-    
-        <div class="panel panel-stories">
-          
-            <div class="note err">
-              <div class="row">
-                <span class="ex-name">Default</span>
-                <span class="badge err">story error</span>
-              </div>
-              
-              
-              
-              <pre><code>Could not generate snippet without component name.</code></pre>
-            </div>
-          
-          
-          <div class="note ok">
-                <div class="row">
-                  <span class="ex-name">Imports</span>
-                </div>
-                <pre><code>import { SkinHarness, SortNumbers } from "base-skill";</code></pre>
-              </div>
-          
-          
-        </div>
-    
-  </div>
-</article>
-<article
-  class="card 
   no-error 
   has-info 
   no-story-error
@@ -6071,9 +5798,9 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> TextQuestion</h2>
       <div class="badges">
-        <label for="c-38-components-questions-textquestion-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-38-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-38-components-questions-textquestion-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-37-components-questions-textquestion-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-37-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-37-components-questions-textquestion-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -6085,10 +5812,10 @@ export const Default: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-38-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-38-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-37-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-37-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-38-components-questions-textquestion-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-37-components-questions-textquestion-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6169,8 +5896,8 @@ export const Default: Story = {};
       <h2><span class="status-dot dot-ok"></span> ThemeToggle</h2>
       <div class="badges">
         
-        <label for="c-39-components-themetoggle-info" class="badge info as-toggle">1 info</label>
-        <label for="c-39-components-themetoggle-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-38-components-themetoggle-info" class="badge info as-toggle">1 info</label>
+        <label for="c-38-components-themetoggle-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -6182,8 +5909,8 @@ export const Default: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-39-components-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-39-components-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-38-components-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-38-components-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6237,8 +5964,8 @@ export const Default: Story = {};
       <h2><span class="status-dot dot-ok"></span> UpdateBanner</h2>
       <div class="badges">
         
-        <label for="c-40-components-updatebanner-info" class="badge info as-toggle">1 info</label>
-        <label for="c-40-components-updatebanner-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-39-components-updatebanner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-39-components-updatebanner-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -6250,8 +5977,8 @@ export const Default: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-40-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-40-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-39-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-39-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6341,8 +6068,8 @@ export const Default: Story = {};
       <h2><span class="status-dot dot-ok"></span> WordLibraryExplorer</h2>
       <div class="badges">
         
-        <label for="c-41-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-41-data-wordlibraryexplorer-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-40-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
+        <label for="c-40-data-wordlibraryexplorer-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -6354,8 +6081,8 @@ export const Default: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-41-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-41-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-40-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-40-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6408,9 +6135,9 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> WordSpell</h2>
       <div class="badges">
-        <label for="c-42-games-word-spell-wordspell-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-42-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-42-games-word-spell-wordspell-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-41-games-word-spell-wordspell-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-41-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
+        <label for="c-41-games-word-spell-wordspell-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -6422,10 +6149,10 @@ export const Default: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-42-games-word-spell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-42-games-word-spell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-41-games-word-spell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-41-games-word-spell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-42-games-word-spell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-41-games-word-spell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6585,7 +6312,7 @@ sessionId?: string</code></pre>
           <label for="no-component-import-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component import found</span>
-            <span class="group-count">2</span>
+            <span class="group-count">1</span>
           </label>
           <div class="group-cards">
 <article
@@ -6999,171 +6726,6 @@ export const Scenario3CorrectAndRoundComplete: Story = {
   /&gt;
 );</code></pre>
             </div>
-        </div>
-    
-  </div>
-</article>
-<article
-  class="card 
-  has-error 
-  has-info 
-  has-story-error
-  no-doc-error"
-  role="listitem"
-  aria-label="SortNumbersWithHarness">
-  <div class="head">
-    <div class="title">
-      <h2><span class="status-dot dot-err"></span> SortNumbersWithHarness</h2>
-      <div class="badges">
-        <label for="c-error-1-games-sortnumbers-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-1-games-sortnumbers-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-1-games-sortnumbers-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
-        
-      </div>
-    </div>
-    <div class="meta" title="./src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx">games-sortnumbers-skin-harness · ./src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx</div>
-    
-    
-    
-  </div>
-
-  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-1-games-sortnumbers-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-1-games-sortnumbers-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-1-games-sortnumbers-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
-  
-  
-
-  <div class="panels">
-    
-        <div class="panel panel-err">
-          
-    <div class="note err">
-      <div class="note-title">Prop type error</div>
-      <div class="note-body"><pre><code>No component file found for the &quot;SortNumbersWithHarness&quot; component.
-  66 | );
-  67 |
-&gt; 68 | const meta: Meta&lt;typeof SortNumbersWithHarness&gt; = {
-     | ^
-  69 |   title: &#39;Games/SortNumbers/Skin Harness&#39;,
-  70 |   component: SortNumbersWithHarness,
-  71 |   tags: [&#39;autodocs&#39;],
-
-./src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx:
-import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
-import { withRouter } from &#39;../../../../.storybook/decorators/withRouter&#39;;
-import { SortNumbers } from &#39;./SortNumbers&#39;;
-import type { SortNumbersConfig } from &#39;../types&#39;;
-import type { GameSkin } from &#39;@/lib/skin&#39;;
-import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import { SkinHarness, registerSkin } from &#39;@/lib/skin&#39;;
-
-/**
- * Demo skin to prove the harness wires callbacks and tokens end-to-end.
- * Replace or extend with your in-development skin while iterating.
- */
-const demoSkin: GameSkin = {
-  id: &#39;demo&#39;,
-  name: &#39;Demo Pink&#39;,
-  tokens: {
-    &#39;--skin-tile-bg&#39;: &#39;#ec4899&#39;,
-    &#39;--skin-tile-text&#39;: &#39;#fff&#39;,
-    &#39;--skin-tile-radius&#39;: &#39;50%&#39;,
-    &#39;--skin-slot-bg&#39;: &#39;#fdf2f8&#39;,
-    &#39;--skin-slot-border&#39;: &#39;#f472b6&#39;,
-    &#39;--skin-slot-radius&#39;: &#39;50%&#39;,
-  },
-  onCorrectPlace: (zoneIndex, value) =&gt; {
-    console.log(`[demo skin] correct @ zone ${zoneIndex}: ${value}`);
-  },
-  onWrongPlace: (zoneIndex, value) =&gt; {
-    console.log(`[demo skin] wrong @ zone ${zoneIndex}: ${value}`);
-  },
-};
-
-// Register at module load so `SkinHarness` sees the skin on first render.
-registerSkin(&#39;sort-numbers&#39;, demoSkin);
-
-const baseConfig: SortNumbersConfig = {
-  gameId: &#39;sort-numbers&#39;,
-  component: &#39;SortNumbers&#39;,
-  inputMethod: &#39;drag&#39;,
-  wrongTileBehavior: &#39;lock-manual&#39;,
-  tileBankMode: &#39;exact&#39;,
-  totalRounds: 3,
-  roundsInOrder: false,
-  ttsEnabled: false,
-  direction: &#39;ascending&#39;,
-  range: { min: 2, max: 20 },
-  quantity: 4,
-  skip: { mode: &#39;consecutive&#39; },
-  distractors: { source: &#39;random&#39;, count: 0 },
-  rounds: [
-    { sequence: [3, 4, 5, 6] },
-    { sequence: [7, 8, 9, 10] },
-    { sequence: [11, 12, 13, 14] },
-  ],
-};
-
-const SortNumbersWithHarness = ({
-  config,
-}: {
-  config: SortNumbersConfig;
-}) =&gt; (
-  &lt;SkinHarness gameId=&quot;sort-numbers&quot;&gt;
-    {({ skin }) =&gt; (
-      &lt;SortNumbers config={{ ...config, skin: skin.id }} /&gt;
-    )}
-  &lt;/SkinHarness&gt;
-);
-
-const meta: Meta&lt;typeof SortNumbersWithHarness&gt; = {
-  title: &#39;Games/SortNumbers/Skin Harness&#39;,
-  component: SortNumbersWithHarness,
-  tags: [&#39;autodocs&#39;],
-  decorators: [withDb, withRouter],
-  args: { config: baseConfig },
-};
-export default meta;
-
-type Story = StoryObj&lt;typeof SortNumbersWithHarness&gt;;
-
-export const Default: Story = {};
-</code></pre></div>
-    </div>
-        </div>
-    
-        <div class="panel panel-info">
-          
-    <div class="note info">
-      <div class="note-title">Info</div>
-      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
-    </div>
-        </div>
-    
-    
-        <div class="panel panel-stories">
-          
-            <div class="note err">
-              <div class="row">
-                <span class="ex-name">Default</span>
-                <span class="badge err">story error</span>
-              </div>
-              
-              
-              
-              <pre><code>Could not generate snippet without component name.</code></pre>
-            </div>
-          
-          
-          <div class="note ok">
-                <div class="row">
-                  <span class="ex-name">Imports</span>
-                </div>
-                <pre><code>import { SkinHarness, SortNumbers } from "base-skill";</code></pre>
-              </div>
-          
-          
         </div>
     
   </div>
