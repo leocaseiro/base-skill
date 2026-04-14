@@ -1,4 +1,4 @@
-import { skeuoStyle } from '../styles';
+import { tileStyle } from '../styles';
 import { useAnswerGameContext } from '../useAnswerGameContext';
 import { useSlotBehavior } from './useSlotBehavior';
 import type { SlotRenderProps } from './useSlotBehavior';
@@ -171,7 +171,7 @@ export const Slot = ({
               aria-hidden={
                 isBeingDragged && !isPreview ? 'true' : undefined
               }
-              style={skeuoStyle}
+              style={tileStyle()}
               onClick={handleClick}
               onPointerDown={pointerHandlers.onPointerDown}
               onPointerMove={pointerHandlers.onPointerMove}
