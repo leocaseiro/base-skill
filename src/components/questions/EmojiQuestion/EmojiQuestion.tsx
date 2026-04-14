@@ -16,7 +16,12 @@ export const EmojiQuestion = ({
     <button
       type="button"
       aria-label={`${prompt} — tap to hear`}
-      className="rounded-xl p-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+      className="p-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+      style={{
+        background: 'var(--skin-question-bg)',
+        color: 'var(--skin-question-text)',
+        borderRadius: 'var(--skin-question-radius)',
+      }}
       onClick={() => speakPrompt(prompt)}
     >
       <span
