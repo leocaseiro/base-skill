@@ -18,7 +18,7 @@ export const ProgressHUD = ({
 
   return (
     <div
-      className="skin-hud flex items-center gap-[var(--skin-hud-gap)] rounded-[var(--skin-hud-radius)] bg-[var(--skin-hud-bg)] px-[0.75rem] py-[0.25rem]"
+      className="skin-hud group flex items-center gap-[var(--skin-hud-gap)] rounded-[var(--skin-hud-radius)] bg-[var(--skin-hud-bg)] px-[0.75rem] py-[0.25rem]"
       data-phase={phase}
     >
       {showLevel ? (
@@ -36,8 +36,9 @@ export const ProgressHUD = ({
         >
           {Array.from({ length: dotCount }).map((_, i) => (
             <li
-              key={i}
-              className="skin-hud__dot block size-[var(--skin-hud-dot-size)] rounded-full border border-[color:var(--skin-hud-dot-border)] data-[state=done]:bg-[color:var(--skin-hud-dot-fill)] data-[state=current]:bg-[color:var(--skin-hud-dot-fill)] data-[state=current]:ring-4 data-[state=current]:ring-[color:var(--skin-hud-dot-fill)]/25 data-[state=todo]:bg-[color:var(--skin-hud-dot-empty)] motion-safe:data-[state=current]:data-[phase=round-complete]:animate-pulse"
+              // eslint-disable-next-line react/no-array-index-key -- dots are positional and never reordered; index is the stable key
+              key={`dot-${i}`}
+              className="skin-hud__dot block size-[var(--skin-hud-dot-size)] rounded-full border border-[color:var(--skin-hud-dot-border)] data-[state=done]:bg-[color:var(--skin-hud-dot-fill)] data-[state=current]:bg-[color:var(--skin-hud-dot-fill)] data-[state=current]:ring-4 data-[state=current]:ring-[color:var(--skin-hud-dot-fill)]/25 data-[state=todo]:bg-[color:var(--skin-hud-dot-empty)] motion-safe:data-[state=current]:group-data-[phase=round-complete]:animate-pulse"
               data-state={
                 i < filledIndex
                   ? 'done'
