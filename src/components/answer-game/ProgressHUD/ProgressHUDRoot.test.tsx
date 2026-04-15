@@ -8,6 +8,7 @@ import type {
   ProgressHUDProps,
 } from '../types';
 import type { GameSkin } from '@/lib/skin';
+import type { ReactNode } from 'react';
 
 const makeState = (
   overrides: Partial<AnswerGameState> = {},
@@ -97,9 +98,9 @@ describe('ProgressHUDRoot', () => {
   });
 
   it('mounts skin.ProgressHUD when provided, receiving the props', () => {
-    const SkinHud = vi.fn<(p: ProgressHUDProps) => JSX.Element | null>(
-      () => <div data-testid="custom-hud" />,
-    );
+    const SkinHud = vi.fn<(p: ProgressHUDProps) => ReactNode>(() => (
+      <div data-testid="custom-hud" />
+    ));
     const skin: GameSkin = {
       id: 'custom',
       name: 'Custom',
