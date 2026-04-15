@@ -64,6 +64,9 @@ export const createInMemorySeenWordsStore = (): SeenWordsStore => {
  *      them and tops up at random from already-seen words, then resets
  *      the signature's seen set to exactly the words just picked —
  *      starting the next cycle fresh.
+ *   4. Not safe for concurrent callers on the same signature — the
+ *      read-compute-write pattern can race if two awaited calls
+ *      interleave. Callers are expected to serialize per signature.
  */
 export const pickWithRecycling = async (
   hits: WordHit[],
@@ -88,7 +91,10 @@ export const pickWithRecycling = async (
 
   const seenHits = hits.filter((h) => seen.has(h.word));
   const recycled = sampleHits(seenHits, limit - unseen.length, seed);
-  const picked = [...unseen, ...recycled];
+  const combined = [...unseen, ...recycled];
+  // Shuffle the combined pool so unseen and recycled words are interleaved,
+  // not segregated (unseen-first would be visually obvious on exhausted plays).
+  const picked = sampleHits(combined, limit, seed);
   await store.resetSeen(
     signature,
     picked.map((h) => h.word),

@@ -195,4 +195,29 @@ describe('pickWithRecycling', () => {
     );
     expect(picked.map((h) => h.word).toSorted()).toEqual(['a', 'b']);
   });
+
+  it('interleaves unseen and recycled words on exhausted plays (not unseen-first)', async () => {
+    // Pre-seed the signature so only 1 unseen word remains out of 5.
+    await store.resetSeen('sig', ['a', 'b', 'c', 'd']);
+    const hits = pool(['a', 'b', 'c', 'd', 'e']);
+
+    // 5 picks from a pool where only 'e' is unseen — must force recycling.
+    // Run multiple seeds; at least one should place 'e' somewhere other
+    // than index 0 (proving the combined pool is shuffled, not concatenated).
+    const positions = new Set<number>();
+    for (const seed of ['s1', 's2', 's3', 's4', 's5', 's6']) {
+      // Reset the seen state each iteration to make the test independent of ordering.
+      await store.resetSeen('sig', ['a', 'b', 'c', 'd']);
+      const picked = await pickWithRecycling(
+        hits,
+        5,
+        'sig',
+        store,
+        seed,
+      );
+      const eIdx = picked.findIndex((h) => h.word === 'e');
+      positions.add(eIdx);
+    }
+    expect(positions.size).toBeGreaterThan(1);
+  });
 });
