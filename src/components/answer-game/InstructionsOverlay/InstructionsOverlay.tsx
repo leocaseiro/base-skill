@@ -1,43 +1,55 @@
 // src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
-import { useEffect, useState } from 'react';
+import { useNavigate, useRouter } from '@tanstack/react-router';
+import { Settings as SettingsIcon } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import type { Cover } from '@/games/cover-type';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
-import type { ConfigField } from '@/lib/config-fields';
 import type { JSX } from 'react';
-import { ConfigFormFields } from '@/components/ConfigFormFields';
-import { GameNameChip } from '@/components/GameNameChip';
+import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
+import { GameCover } from '@/components/GameCover';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { getSimpleConfigFormRenderer } from '@/games/config-fields-registry';
+import { resolveCover } from '@/games/cover';
 import {
   BOOKMARK_COLORS,
-  BOOKMARK_COLOR_KEYS,
   DEFAULT_BOOKMARK_COLOR,
 } from '@/lib/bookmark-colors';
-import { configToTags } from '@/lib/config-tags';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
+import { suggestBookmarkName } from '@/lib/suggest-bookmark-name';
+
+export type SaveBookmarkInput = {
+  name: string;
+  color: BookmarkColorKey;
+  config: Record<string, unknown>;
+  cover?: Cover;
+};
 
 type InstructionsOverlayProps = {
   text: string;
   onStart: () => void;
   ttsEnabled: boolean;
   gameTitle: string;
+  gameId: string;
+  cover?: Cover;
+  bookmarkId?: string;
   bookmarkName?: string;
   bookmarkColor?: BookmarkColorKey;
-  subject?: string;
   config: Record<string, unknown>;
   onConfigChange: (config: Record<string, unknown>) => void;
-  onSaveBookmark: (
-    name: string,
-    color: BookmarkColorKey,
-  ) => Promise<void>;
+  onSaveBookmark: (input: SaveBookmarkInput) => Promise<string>;
   onUpdateBookmark?: (
     name: string,
     config: Record<string, unknown>,
+    extras?: { cover?: Cover; color?: BookmarkColorKey },
   ) => Promise<void>;
-  configFields?: ConfigField[];
-  renderConfigForm?: (props: {
-    config: Record<string, unknown>;
-    onChange: (config: Record<string, unknown>) => void;
-  }) => JSX.Element;
+  existingBookmarkNames?: readonly string[];
 };
 
 export const InstructionsOverlay = ({
@@ -45,21 +57,39 @@ export const InstructionsOverlay = ({
   onStart,
   ttsEnabled,
   gameTitle,
+  gameId,
+  cover,
+  bookmarkId,
   bookmarkName,
   bookmarkColor = DEFAULT_BOOKMARK_COLOR,
-  subject,
   config,
   onConfigChange,
   onSaveBookmark,
   onUpdateBookmark,
-  configFields,
-  renderConfigForm,
+  existingBookmarkNames = [],
 }: InstructionsOverlayProps): JSX.Element => {
   const { t } = useTranslation('games');
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [newBookmarkName, setNewBookmarkName] = useState('');
-  const [newBookmarkColor, setNewBookmarkColor] =
-    useState<BookmarkColorKey>(DEFAULT_BOOKMARK_COLOR);
+  const navigate = useNavigate({
+    from: '/$locale/game/$gameId',
+  });
+  const router = useRouter();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [savingName, setSavingName] = useState('');
+  const [saveSubmitAttempted, setSaveSubmitAttempted] = useState(false);
+  const saveNameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (saveDialogOpen) {
+      // Defer so the Radix Dialog finishes mounting before we grab focus.
+      const id = globalThis.setTimeout(
+        () => saveNameRef.current?.focus(),
+        0,
+      );
+      return () => globalThis.clearTimeout(id);
+    }
+    return;
+  }, [saveDialogOpen]);
 
   useEffect(() => {
     if (ttsEnabled) speak(text);
@@ -70,219 +100,276 @@ export const InstructionsOverlay = ({
   }, []);
 
   const settingsColors = BOOKMARK_COLORS[bookmarkColor];
-  const tags = configToTags(config);
+  const resolvedCover = resolveCover({ cover }, gameId);
+
+  const SimpleForm = getSimpleConfigFormRenderer(gameId);
+
+  const modalMode =
+    bookmarkId && bookmarkName
+      ? ({
+          kind: 'bookmark',
+          configId: bookmarkId,
+          name: bookmarkName,
+          color: bookmarkColor,
+          cover,
+        } as const)
+      : ({ kind: 'default' } as const);
+
+  const handlePlay = () => {
+    if (bookmarkId && bookmarkName && onUpdateBookmark) {
+      void (async () => {
+        try {
+          await onUpdateBookmark(bookmarkName, config, {
+            cover,
+            color: bookmarkColor,
+          });
+        } catch (error) {
+          console.error('Failed to save bookmark on play', error);
+        }
+        onStart();
+      })();
+      return;
+    }
+    setSaveSubmitAttempted(false);
+    setSavingName(
+      suggestBookmarkName(gameTitle, existingBookmarkNames),
+    );
+    setSaveDialogOpen(true);
+  };
+
+  const saveOnPlayError: string | null = (() => {
+    const trimmed = savingName.trim();
+    if (trimmed === '')
+      return t('instructions.nameRequired', {
+        defaultValue: 'Please enter a bookmark name.',
+      });
+    if (existingBookmarkNames.includes(trimmed))
+      return t('instructions.nameDuplicate', {
+        defaultValue: 'A bookmark with that name already exists.',
+      });
+    return null;
+  })();
+  const showSaveOnPlayError =
+    saveSubmitAttempted && saveOnPlayError !== null;
+
+  const handleSaveAndPlay = () => {
+    setSaveSubmitAttempted(true);
+    if (saveOnPlayError !== null) {
+      saveNameRef.current?.focus();
+      return;
+    }
+    const trimmed = savingName.trim();
+    void (async () => {
+      try {
+        const newId = await onSaveBookmark({
+          name: trimmed,
+          color: bookmarkColor,
+          config,
+          cover,
+        });
+        setSaveDialogOpen(false);
+        await navigate({
+          search: (prev) => ({ ...prev, configId: newId }),
+        });
+        onStart();
+      } catch (error) {
+        console.error('Failed to save bookmark on play', error);
+      }
+    })();
+  };
+
+  const handlePlayWithoutSaving = () => {
+    setSaveDialogOpen(false);
+    onStart();
+  };
 
   return createPortal(
     <div
       role="dialog"
       aria-label="Game instructions"
-      className="fixed inset-0 z-40 flex flex-col items-center justify-start overflow-y-auto bg-background/95 px-5 pb-8 pt-20"
+      className="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-background/95 px-5 pb-8 pt-24"
     >
-      <div className="flex w-full max-w-sm flex-col items-center gap-5">
-        {/* 1. Game name chip */}
-        <div className="w-full">
-          <GameNameChip
-            title={gameTitle}
-            bookmarkName={bookmarkName}
-            bookmarkColor={bookmarkColor}
-            subject={subject}
-          />
+      <div className="mx-auto flex w-full max-w-sm flex-col overflow-hidden rounded-3xl bg-card shadow-lg md:max-w-2xl">
+        {/* 1. Hero cover */}
+        <div className="flex justify-center bg-muted/40 p-4">
+          <GameCover cover={resolvedCover} size="hero" />
         </div>
 
-        {/* 2. Instructions text */}
-        <p className="max-w-xs text-center text-base font-semibold text-foreground leading-relaxed">
-          {text}
-        </p>
+        <div className="flex flex-col gap-4 p-4">
+          {/* 2. Title row + cog — matches GameCard heading/subtitle order */}
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h2
+                className="text-xl font-extrabold"
+                style={
+                  bookmarkName
+                    ? { color: settingsColors.text }
+                    : undefined
+                }
+              >
+                {bookmarkName ?? gameTitle}
+              </h2>
+              {bookmarkName && (
+                <p className="text-xs italic text-foreground/80">
+                  {gameTitle}
+                </p>
+              )}
+            </div>
+            <button
+              type="button"
+              aria-label={t('instructions.configure', {
+                defaultValue: 'Configure',
+              })}
+              onClick={() => setModalOpen(true)}
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+            >
+              <SettingsIcon size={18} />
+            </button>
+          </div>
 
-        {/* 3. Let's go button */}
-        <button
-          type="button"
-          onClick={onStart}
-          className="h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95"
-        >
-          {t('instructions.lets-go')}
-        </button>
+          {/* 3. Instructions text */}
+          <p className="text-center text-base font-semibold text-foreground leading-relaxed">
+            {text}
+          </p>
 
-        {/* 4. Settings chip (collapsed by default) */}
-        <div
-          className="w-full overflow-hidden rounded-xl border border-border"
-          style={
-            {
-              '--bookmark-play': settingsColors.playBg,
-            } as React.CSSProperties
-          }
-        >
-          {/* Settings header */}
+          {/* 4. Let's go button */}
           <button
             type="button"
-            aria-label={t('instructions.settings')}
-            onClick={() => setSettingsOpen((v) => !v)}
-            className="flex min-h-12 w-full items-center gap-2 bg-muted px-3 text-left"
-            style={
-              settingsOpen
-                ? { background: 'var(--bookmark-play)' }
-                : undefined
-            }
+            onClick={handlePlay}
+            className="h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95"
           >
-            <span
-              className={`flex-1 text-sm font-semibold ${settingsOpen ? 'text-white' : ''}`}
-            >
-              {t('instructions.settings')}
-            </span>
-            <span
-              className={`text-xs ${settingsOpen ? 'text-white/70' : ''}`}
-            >
-              {settingsOpen ? '▲' : '▼'}
-            </span>
+            {t('instructions.lets-go')}
           </button>
 
-          {/* Collapsed: config summary tags */}
-          {!settingsOpen && (
-            <div className="flex flex-wrap gap-1 bg-muted/50 px-3 pb-2 pt-1">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded bg-muted px-2 py-0.5 text-xs font-medium text-foreground"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Expanded: form + save actions */}
-          {settingsOpen && (
-            <div className="flex flex-col gap-3 bg-muted/30 p-3">
-              {renderConfigForm
-                ? renderConfigForm({
-                    config,
-                    onChange: onConfigChange,
-                  })
-                : configFields && (
-                    <ConfigFormFields
-                      fields={configFields}
-                      config={config}
-                      onChange={onConfigChange}
-                    />
-                  )}
-
-              <div className="border-t border-border pt-3 flex flex-col gap-2">
-                {bookmarkName && onUpdateBookmark ? (
-                  <>
-                    <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
-                      Bookmark name
-                      <input
-                        type="text"
-                        defaultValue={bookmarkName}
-                        id="instructions-bookmark-name"
-                        className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      aria-label={`Update ${bookmarkName}`}
-                      onClick={() => {
-                        const el =
-                          document.querySelector<HTMLInputElement>(
-                            '#instructions-bookmark-name',
-                          );
-                        void onUpdateBookmark(
-                          el?.value ?? bookmarkName,
-                          config,
-                        );
-                      }}
-                      className="h-12 w-full rounded-xl font-bold text-white text-sm"
-                      style={{ background: 'var(--bookmark-play)' }}
-                    >
-                      {t('instructions.updateBookmark', {
-                        name: bookmarkName,
-                        defaultValue: `Update "${bookmarkName}"`,
-                      })}
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Save as new bookmark"
-                      onClick={() => setSettingsOpen(false)}
-                      className="h-12 w-full rounded-xl border border-input bg-background text-sm font-semibold text-primary"
-                    >
-                      {t('instructions.saveAsNew', {
-                        defaultValue: 'Save as new bookmark…',
-                      })}
-                    </button>
-                  </>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-sm font-semibold text-foreground">
-                      {t('common:saveConfig.saveBookmarkLabel', {
-                        defaultValue: 'Save as bookmark',
-                      })}
-                    </span>
-                    <div
-                      className="grid gap-1"
-                      style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
-                      role="group"
-                      aria-label="Bookmark color"
-                    >
-                      {BOOKMARK_COLOR_KEYS.map((key) => (
-                        <button
-                          key={key}
-                          type="button"
-                          aria-label={key}
-                          aria-pressed={newBookmarkColor === key}
-                          onClick={() => setNewBookmarkColor(key)}
-                          className="h-8 w-8 rounded-full border-2 transition-transform hover:scale-110"
-                          style={{
-                            background: BOOKMARK_COLORS[key].playBg,
-                            borderColor:
-                              newBookmarkColor === key
-                                ? BOOKMARK_COLORS[key].playBg
-                                : 'transparent',
-                            outline:
-                              newBookmarkColor === key
-                                ? '3px solid white'
-                                : undefined,
-                            outlineOffset:
-                              newBookmarkColor === key
-                                ? '-4px'
-                                : undefined,
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={newBookmarkName}
-                        onChange={(e) =>
-                          setNewBookmarkName(e.target.value)
-                        }
-                        placeholder="e.g. Easy Mode"
-                        className="h-12 flex-1 rounded-lg border border-input bg-background px-3 text-sm"
-                      />
-                      <button
-                        type="button"
-                        aria-label="Save bookmark"
-                        onClick={() => {
-                          if (newBookmarkName.trim()) {
-                            void onSaveBookmark(
-                              newBookmarkName.trim(),
-                              newBookmarkColor,
-                            );
-                            setNewBookmarkName('');
-                          }
-                        }}
-                        className="h-12 w-12 flex-shrink-0 rounded-lg bg-primary text-lg text-primary-foreground"
-                      >
-                        🔖
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+          {/* 5. Simple settings form (always expanded) */}
+          {SimpleForm && (
+            <div className="border-t border-border pt-4">
+              <SimpleForm config={config} onChange={onConfigChange} />
             </div>
           )}
         </div>
       </div>
+
+      {/* Advanced config modal (opened by cog button) */}
+      <AdvancedConfigModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        gameId={gameId}
+        mode={modalMode}
+        config={config}
+        existingBookmarkNames={existingBookmarkNames}
+        onCancel={() => setModalOpen(false)}
+        onSaveNew={(payload) => {
+          void (async () => {
+            try {
+              const newId = await onSaveBookmark({
+                name: payload.name,
+                color: payload.color,
+                config: payload.config,
+                cover: payload.cover,
+              });
+              onConfigChange(payload.config);
+              setModalOpen(false);
+              await navigate({
+                search: (prev) => ({ ...prev, configId: newId }),
+              });
+            } catch (error) {
+              // Surface duplicate-name and similar errors; keep modal open.
+              console.error('Failed to save bookmark', error);
+            }
+          })();
+        }}
+        onUpdate={
+          onUpdateBookmark
+            ? (payload) => {
+                void (async () => {
+                  try {
+                    await onUpdateBookmark(
+                      payload.name,
+                      payload.config,
+                      {
+                        cover: payload.cover,
+                        color: payload.color,
+                      },
+                    );
+                    onConfigChange(payload.config);
+                    setModalOpen(false);
+                    await router.invalidate();
+                  } catch (error) {
+                    console.error('Failed to update bookmark', error);
+                  }
+                })();
+              }
+            : undefined
+        }
+      />
+
+      {/* Save-on-play prompt for default (non-bookmarked) games */}
+      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t('instructions.saveOnPlayTitle', {
+                defaultValue: 'Save these settings as a bookmark?',
+              })}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-semibold uppercase text-muted-foreground">
+                {t('instructions.saveOnPlayNameLabel', {
+                  defaultValue: 'Bookmark name',
+                })}
+              </span>
+              <input
+                ref={saveNameRef}
+                type="text"
+                value={savingName}
+                onChange={(e) => setSavingName(e.target.value)}
+                aria-invalid={showSaveOnPlayError}
+                aria-describedby={
+                  showSaveOnPlayError ? 'save-on-play-error' : undefined
+                }
+                className={`h-10 rounded-lg border bg-background px-3 text-sm ${
+                  showSaveOnPlayError
+                    ? 'border-destructive'
+                    : 'border-input'
+                }`}
+              />
+              {showSaveOnPlayError && (
+                <span
+                  id="save-on-play-error"
+                  role="alert"
+                  className="text-xs font-semibold text-destructive"
+                >
+                  {saveOnPlayError}
+                </span>
+              )}
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handlePlayWithoutSaving}
+                className="flex-1 rounded-lg border border-input bg-background py-2 text-sm"
+              >
+                {t('instructions.playWithoutSaving', {
+                  defaultValue: 'Play without saving',
+                })}
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveAndPlay}
+                aria-disabled={saveOnPlayError !== null}
+                className="flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
+              >
+                {t('instructions.saveAndPlay', {
+                  defaultValue: 'Save & play',
+                })}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>,
     document.body,
   );

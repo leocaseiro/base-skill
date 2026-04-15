@@ -354,6 +354,69 @@ describe('useSavedConfigs', () => {
     });
   });
 
+  it('save() persists the provided cover on the doc', async () => {
+    const { result } = renderHook(() => useSavedConfigsReady(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    await act(async () => {
+      await result.current.save({
+        gameId: 'word-spell',
+        name: 'Zoo Words',
+        config: {},
+        color: 'amber',
+        cover: { kind: 'emoji', emoji: '🦁' },
+      });
+    });
+    await waitFor(() =>
+      expect(result.current.savedConfigs).toHaveLength(1),
+    );
+    expect(result.current.savedConfigs[0]!.cover).toEqual({
+      kind: 'emoji',
+      emoji: '🦁',
+    });
+  });
+
+  it('updateConfig() applies extras (cover + color) when provided', async () => {
+    const { result } = renderHook(() => useSavedConfigsReady(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    await act(async () => {
+      await result.current.save({
+        gameId: 'word-spell',
+        name: 'Easy Mode',
+        config: { totalRounds: 3 },
+        color: 'indigo',
+      });
+    });
+    await waitFor(() =>
+      expect(result.current.savedConfigs).toHaveLength(1),
+    );
+    const id = result.current.savedConfigs[0]!.id;
+    await act(async () => {
+      await result.current.updateConfig(
+        id,
+        { totalRounds: 6 },
+        undefined,
+        {
+          cover: { kind: 'emoji', emoji: '🐯' },
+          color: 'teal',
+        },
+      );
+    });
+    await waitFor(() =>
+      expect(result.current.savedConfigs[0]?.color).toBe('teal'),
+    );
+    expect(result.current.savedConfigs[0]?.cover).toEqual({
+      kind: 'emoji',
+      emoji: '🐯',
+    });
+    expect(result.current.savedConfigs[0]?.config).toEqual({
+      totalRounds: 6,
+    });
+  });
+
   it('updateConfig() throws when new name already exists for same gameId', async () => {
     const { result } = renderHook(() => useSavedConfigsReady(), {
       wrapper: makeWrapper(db),
