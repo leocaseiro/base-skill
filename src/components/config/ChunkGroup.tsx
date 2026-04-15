@@ -48,7 +48,7 @@ export const ChunkGroup = ({
           </span>
           <span className="text-sm font-bold">{o.label}</span>
           {o.subtitle && (
-            <span className="text-xs italic text-muted-foreground">
+            <span className="text-xs italic text-foreground/80">
               {o.subtitle}
             </span>
           )}

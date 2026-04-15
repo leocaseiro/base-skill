@@ -203,7 +203,7 @@ export const InstructionsOverlay = ({
                 className="text-xl font-extrabold"
                 style={
                   bookmarkName
-                    ? { color: settingsColors.playBg }
+                    ? { color: settingsColors.text }
                     : undefined
                 }
               >
