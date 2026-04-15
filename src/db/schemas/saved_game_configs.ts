@@ -1,5 +1,5 @@
 import type { Cover } from '@/games/cover-type';
-import type { RxJsonSchema } from 'rxdb';
+import type { JsonSchema, RxJsonSchema } from 'rxdb';
 
 export type SavedGameConfigDoc = {
   id: string;
@@ -30,7 +30,7 @@ export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
           {
             type: 'object',
             properties: {
-              kind: { type: 'string', enum: ['emoji'] },
+              kind: { type: 'string', const: 'emoji' } as JsonSchema,
               emoji: { type: 'string', maxLength: 16 },
               gradient: {
                 type: 'array',
@@ -45,7 +45,7 @@ export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
           {
             type: 'object',
             properties: {
-              kind: { type: 'string', enum: ['image'] },
+              kind: { type: 'string', const: 'image' } as JsonSchema,
               src: { type: 'string', maxLength: 2048 },
               alt: { type: 'string', maxLength: 256 },
               background: { type: 'string', maxLength: 32 },
