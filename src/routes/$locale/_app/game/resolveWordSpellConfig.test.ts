@@ -41,6 +41,23 @@ describe('resolveWordSpellConfig', () => {
     expect(resolved.source).toBeUndefined();
   });
 
+  it('drops explicit rounds when advanced saved config has a source', () => {
+    const saved = {
+      component: 'WordSpell',
+      configMode: 'advanced',
+      source: {
+        type: 'word-library',
+        filter: { region: 'aus', level: 2 },
+      },
+      totalRounds: 4,
+    };
+
+    const resolved = resolveWordSpellConfig(saved);
+
+    expect(resolved.source).toEqual(saved.source);
+    expect(resolved.rounds ?? []).toEqual([]);
+  });
+
   it('returns emoji-based default when saved is null', () => {
     const resolved = resolveWordSpellConfig(null);
     expect(resolved.rounds?.length).toBe(8);

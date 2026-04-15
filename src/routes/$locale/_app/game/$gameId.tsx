@@ -225,6 +225,15 @@ export const resolveWordSpellConfig = (
     gameId: 'word-spell',
     component: 'WordSpell',
   };
+
+  // Library-sourced advanced configs: drop the emoji fallback rounds so
+  // useLibraryRounds samples from the library instead of short-circuiting
+  // to the explicit rounds branch.
+  if (merged.source) {
+    const { rounds: _rounds, ...rest } = merged;
+    return { ...rest };
+  }
+
   const targetTotal = Math.max(
     1,
     Math.min(
