@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { seedMathRandom } from './seed-math-random';
+import { startGame } from './start-game';
 
 test.beforeEach(async ({ page }) => {
   await seedMathRandom(page);
@@ -29,7 +30,7 @@ test('WordSpell picture mode renders letter tiles', async ({
 }) => {
   await page.goto('/en/game/word-spell');
   await page.getByRole('main').waitFor({ state: 'visible' });
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   const tiles = page.getByRole('button', { name: /^Letter /i });
   await expect(tiles.first()).toBeVisible();
 });
@@ -39,7 +40,7 @@ test('NumberMatch numeral-to-group renders numeral question', async ({
 }) => {
   await page.goto('/en/game/number-match');
   await page.getByRole('main').waitFor({ state: 'visible' });
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await expect(
     page.getByRole('button', { name: 'Hear the question' }),
   ).toBeVisible();
