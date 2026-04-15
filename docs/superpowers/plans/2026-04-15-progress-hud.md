@@ -78,6 +78,20 @@ Files created or modified in this plan:
   `ProgressHUDRoot` to the context/consumers map.
 - `src/components/answer-game/AnswerGame/AnswerGame.flows.mdx` — add the
   HUD render step to the game mount flow.
+- `src/components/game/GameShell.tsx` — remove the hardcoded "Round X / Y"
+  header span and the sub-bar progress-bar div; HUD owns round display now.
+- `src/components/game/GameShell.test.tsx` — replace the round-counter
+  assertion with negative assertions.
+- `src/components/answer-game/AnswerGameProvider.tsx` — drop the
+  `GameRoundContext.Provider` wrap; nothing consumes it anymore.
+- `src/lib/i18n/locales/en/games.json` and
+  `src/lib/i18n/locales/pt-BR/games.json` — remove the now-unused
+  `shell.round` key.
+
+**Deleted**
+
+- `src/lib/game-engine/GameRoundContext.tsx` — unused after `GameShell`
+  stops rendering a round counter.
 
 ---
 
@@ -1125,14 +1139,138 @@ git commit -m "feat(progress-hud): pass skin to AnswerGame in SortNumbers"
 
 ---
 
-## Task 10: Storybook stories for `ProgressHUD`
+## Task 10: Retire the hardcoded round label + progress bar in `GameShell`
+
+**Files:**
+
+- Modify: `src/components/game/GameShell.tsx:87-127`
+- Modify: `src/components/game/GameShell.test.tsx`
+- Modify: `src/components/answer-game/AnswerGameProvider.tsx`
+- Delete: `src/lib/game-engine/GameRoundContext.tsx`
+- Modify: `src/lib/i18n/locales/en/games.json`
+- Modify: `src/lib/i18n/locales/pt-BR/games.json`
+
+**Why:** `GameShell` currently renders a "Round X / Y" header span
+(`GameShell.tsx:100-105`) and a progress-bar div
+(`GameShell.tsx:109-127`) driven by `useGameRoundProgress()`. Both are
+broken for level-mode games (`totalRounds` is meaningless when levels are
+unbounded) and both become redundant once `ProgressHUDRoot` renders inside
+`AnswerGame`. Score and timer stay; only the round label + progress bar go.
+After removal nothing consumes `GameRoundContext`, so delete the file and
+drop the `Provider` wrap from `AnswerGameProvider`.
+
+- [ ] **Step 1: Write a failing test that asserts the round label is gone**
+
+Open `src/components/game/GameShell.test.tsx`. Replace the existing
+`it('renders round counter (1-indexed)', ...)` block (around line 113) with:
+
+```tsx
+it('does not render a round counter (HUD now owns round display)', () => {
+  renderShell();
+  expect(screen.queryByTestId('game-round')).not.toBeInTheDocument();
+});
+
+it('does not render the progress bar (HUD now owns round display)', () => {
+  const { container } = renderShell();
+  // The old progress bar used `.bg-primary` inside a `.rounded-full` track.
+  expect(
+    container.querySelector('.rounded-full .bg-primary'),
+  ).toBeNull();
+});
+```
+
+- [ ] **Step 2: Run the tests and confirm they fail**
+
+Run: `yarn vitest run src/components/game/GameShell.test.tsx`
+Expected: the two new assertions fail because `game-round` testid and the
+progress-bar nodes still render.
+
+- [ ] **Step 3: Remove the round label + progress bar from `GameShell`**
+
+Open `src/components/game/GameShell.tsx`. Delete the following:
+
+1. The `useGameRoundProgress` import (line 25).
+2. The `roundOverride`, `roundCurrent`, `roundTotal` locals (lines 61-63).
+3. The `<span data-testid="game-round"> ... </span>` block inside the
+   `<header>` (lines 100-105).
+4. The `<div className="flex-1"> ... </div>` progress-bar wrapper inside
+   the sub-bar (lines 111-120). Keep the outer sub-bar `<div>` so score
+   and timer still render; add a `justify-between` to keep them spaced:
+
+   ```tsx
+   {
+     /* Sub-bar: score + optional timer */
+   }
+   <div className="flex items-center justify-between border-b px-4 py-2 text-sm">
+     <span data-testid="game-score">{state.score}</span>
+     {config.timerVisible && config.timerDurationSeconds !== null && (
+       <span data-testid="game-timer">
+         ⏱ {config.timerDurationSeconds}s
+       </span>
+     )}
+   </div>;
+   ```
+
+- [ ] **Step 4: Run the tests and confirm they pass**
+
+Run: `yarn vitest run src/components/game/GameShell.test.tsx`
+Expected: all tests pass, including the two new negative assertions.
+
+- [ ] **Step 5: Drop the `GameRoundContext` plumbing**
+
+Open `src/components/answer-game/AnswerGameProvider.tsx`. Remove:
+
+1. The `GameRoundContext` import (line 22).
+2. The `roundProgress` local (lines 105-108).
+3. The outer `<GameRoundContext.Provider value={roundProgress}>` wrap,
+   keeping its children in place.
+
+Then delete `src/lib/game-engine/GameRoundContext.tsx` entirely:
+
+```bash
+git rm src/lib/game-engine/GameRoundContext.tsx
+```
+
+- [ ] **Step 6: Remove the now-unused `shell.round` i18n key**
+
+Open `src/lib/i18n/locales/en/games.json` and delete the `"round": "Round
+{{current}} / {{total}}",` line inside the `"shell"` object. Repeat for
+`src/lib/i18n/locales/pt-BR/games.json`.
+
+- [ ] **Step 7: Confirm no other consumer broke**
+
+Run in parallel:
+
+```bash
+yarn typecheck
+yarn vitest run
+yarn lint
+```
+
+Expected: all exit 0. Knip should not flag any new unused exports.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add src/components/game/GameShell.tsx \
+        src/components/game/GameShell.test.tsx \
+        src/components/answer-game/AnswerGameProvider.tsx \
+        src/lib/game-engine/GameRoundContext.tsx \
+        src/lib/i18n/locales/en/games.json \
+        src/lib/i18n/locales/pt-BR/games.json
+git commit -m "refactor(game-shell): retire hardcoded round label + progress bar"
+```
+
+---
+
+## Task 11: Storybook stories for `ProgressHUD`
 
 **Files:**
 
 - Create: `src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx`
 
 **Why:** Covers every flag combination and level-mode growth, gives designers
-a sandbox, and unblocks VR coverage in Task 11.
+a sandbox, and unblocks VR coverage in Task 12.
 
 - [ ] **Step 1: Create the stories file**
 
@@ -1232,14 +1370,19 @@ git commit -m "feat(progress-hud): storybook coverage for HUD variants"
 
 ---
 
-## Task 11: Visual regression coverage
+## Task 12: Visual regression coverage
 
 **Files:**
 
 - Modify: existing VR story files for WordSpell, NumberMatch, SortNumbers
+- Modify: existing `GameShell.stories.tsx` VR baselines (round + progress
+  bar removal from Task 10 will shift every existing shell snapshot)
 
 **Why:** Spec §3 requires VR for classic rounds, level-mode level growth,
-level-complete pop, and a mixed level+fraction config.
+level-complete pop, and a mixed level+fraction config. Task 10 also removed
+the "Round X / Y" span and progress bar from `GameShell`, so every existing
+shell-based VR baseline needs to be re-captured at the same time to keep
+the diff reviewable.
 
 - [ ] **Step 1: Find the current VR stories per game**
 
@@ -1290,7 +1433,7 @@ git commit -m "test(progress-hud): VR coverage for HUD across games"
 
 ---
 
-## Task 12: Update architecture docs
+## Task 13: Update architecture docs
 
 **Files:**
 
@@ -1329,7 +1472,7 @@ git commit -m "docs(progress-hud): architecture docs for HUD"
 
 ---
 
-## Task 13: Full gate + PR
+## Task 14: Full gate + PR
 
 - [ ] **Step 1: Run the full local suite**
 
