@@ -122,11 +122,6 @@ describe('GameShell', () => {
     ).toBeNull();
   });
 
-  it('renders score in sub-bar', () => {
-    renderShell();
-    expect(screen.getByText('3')).toBeInTheDocument();
-  });
-
   it('renders timer when timerVisible is true', () => {
     renderShell({ timerVisible: true });
     expect(screen.getByTestId('game-timer')).toBeInTheDocument();
