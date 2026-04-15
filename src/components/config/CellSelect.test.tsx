@@ -19,7 +19,7 @@ describe('CellSelect', () => {
         onChange={() => {}}
       />,
     );
-    expect(screen.getByText('One')).toBeInTheDocument();
+    expect(screen.getByRole('combobox')).toHaveValue('1');
   });
 
   it('fires onChange when the underlying select changes', async () => {
@@ -37,6 +37,6 @@ describe('CellSelect', () => {
     };
     render(<Harness />);
     await user.selectOptions(screen.getByLabelText('Count'), '2');
-    expect(screen.getByText('Two')).toBeInTheDocument();
+    expect(screen.getByRole('combobox')).toHaveValue('2');
   });
 });

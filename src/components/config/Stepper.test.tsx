@@ -25,7 +25,7 @@ const Harness = ({
   );
 };
 
-const getInput = () => screen.getByRole('spinbutton');
+const getInput = (): HTMLInputElement => screen.getByRole('spinbutton');
 
 describe('Stepper', () => {
   it('increments on + click', async () => {
