@@ -43,6 +43,8 @@ export const CoverPicker = ({
   );
   const currentEmoji =
     value?.kind === 'emoji' ? value.emoji : undefined;
+  const hasImage = value?.kind === 'image';
+  const isDefault = value === undefined;
 
   const pickEmoji = (emoji: string) => {
     setUrl('');
@@ -56,8 +58,7 @@ export const CoverPicker = ({
 
   const useDefault = () => {
     setUrl('');
-    const cleared: Cover | undefined = undefined;
-    onChange(cleared);
+    onChange();
   };
 
   return (
@@ -65,15 +66,18 @@ export const CoverPicker = ({
       <div className="text-xs font-semibold uppercase text-muted-foreground">
         Cover
       </div>
-      <div className="grid grid-cols-8 gap-1">
+      <div
+        className={`grid grid-cols-8 gap-1 ${hasImage ? 'opacity-40' : ''}`}
+      >
         {EMOJI_PALETTE.map((e) => (
           <button
             key={e}
             type="button"
             aria-label={e}
             aria-pressed={currentEmoji === e}
+            disabled={hasImage}
             onClick={() => pickEmoji(e)}
-            className={`aspect-square rounded-lg border-2 text-xl ${
+            className={`aspect-square rounded-lg border-2 text-xl disabled:cursor-not-allowed ${
               currentEmoji === e
                 ? 'border-primary bg-primary/10'
                 : 'border-transparent bg-muted'
@@ -88,12 +92,15 @@ export const CoverPicker = ({
         value={url}
         onChange={(e) => setImage(e.target.value)}
         placeholder="Image URL (optional)"
-        className="h-10 rounded-lg border border-input bg-background px-3 text-sm"
+        disabled={currentEmoji !== undefined}
+        className="h-10 rounded-lg border border-input bg-background px-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
       />
       <button
         type="button"
         onClick={useDefault}
-        className="self-start text-xs underline text-muted-foreground"
+        disabled={isDefault}
+        title="Reset to the game's default cover"
+        className="self-start rounded-lg px-2 py-1 text-xs font-semibold text-primary underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:text-muted-foreground disabled:no-underline"
       >
         Use game default
       </button>
