@@ -809,35 +809,90 @@ const Harness = ({
   );
 };
 
+const getInput = () =>
+  screen.getByRole('spinbutton') as HTMLInputElement;
+
 describe('Stepper', () => {
   it('increments on + click', async () => {
     const user = userEvent.setup();
     render(<Harness initial={3} min={1} max={10} />);
     await user.click(screen.getByRole('button', { name: /increase/i }));
-    expect(screen.getByText('4')).toBeInTheDocument();
+    expect(getInput().value).toBe('4');
   });
 
   it('decrements on - click', async () => {
     const user = userEvent.setup();
     render(<Harness initial={3} min={1} max={10} />);
     await user.click(screen.getByRole('button', { name: /decrease/i }));
-    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(getInput().value).toBe('2');
   });
 
-  it('clamps at max', async () => {
+  it('clamps at max on click', async () => {
     const user = userEvent.setup();
     render(<Harness initial={9} min={1} max={10} />);
     await user.click(screen.getByRole('button', { name: /increase/i }));
     await user.click(screen.getByRole('button', { name: /increase/i }));
-    expect(screen.getByText('10')).toBeInTheDocument();
+    expect(getInput().value).toBe('10');
   });
 
-  it('clamps at min', async () => {
+  it('clamps at min on click', async () => {
     const user = userEvent.setup();
     render(<Harness initial={2} min={1} max={10} />);
     await user.click(screen.getByRole('button', { name: /decrease/i }));
     await user.click(screen.getByRole('button', { name: /decrease/i }));
-    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(getInput().value).toBe('1');
+  });
+
+  it('increments on ArrowUp', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={3} min={1} max={10} />);
+    await user.click(getInput());
+    await user.keyboard('{ArrowUp}');
+    expect(getInput().value).toBe('4');
+  });
+
+  it('decrements on ArrowDown', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={3} min={1} max={10} />);
+    await user.click(getInput());
+    await user.keyboard('{ArrowDown}');
+    expect(getInput().value).toBe('2');
+  });
+
+  it('accepts typed input and commits on blur, clamped to range', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={3} min={1} max={10} />);
+    await user.clear(getInput());
+    await user.type(getInput(), '7');
+    await user.tab();
+    expect(getInput().value).toBe('7');
+  });
+
+  it('clamps typed input above max on blur', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={3} min={1} max={10} />);
+    await user.clear(getInput());
+    await user.type(getInput(), '99');
+    await user.tab();
+    expect(getInput().value).toBe('10');
+  });
+
+  it('reverts non-numeric input on blur', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={3} min={1} max={10} />);
+    await user.clear(getInput());
+    await user.type(getInput(), 'abc');
+    await user.tab();
+    expect(getInput().value).toBe('3');
+  });
+
+  it('strips leading zeros on commit', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={3} min={1} max={10} />);
+    await user.clear(getInput());
+    await user.type(getInput(), '007');
+    await user.tab();
+    expect(getInput().value).toBe('7');
   });
 });
 ```
@@ -855,7 +910,12 @@ Expected: FAIL — module not found.
 Create `src/components/config/Stepper.tsx`:
 
 ```tsx
-import type { JSX } from 'react';
+import {
+  useEffect,
+  useState,
+  type JSX,
+  type KeyboardEvent,
+} from 'react';
 
 type StepperProps = {
   value: number;
@@ -865,6 +925,9 @@ type StepperProps = {
   label: string;
 };
 
+const clamp = (n: number, min: number, max: number): number =>
+  Math.min(max, Math.max(min, n));
+
 export const Stepper = ({
   value,
   min,
@@ -872,8 +935,42 @@ export const Stepper = ({
   onChange,
   label,
 }: StepperProps): JSX.Element => {
-  const dec = () => onChange(Math.max(min, value - 1));
-  const inc = () => onChange(Math.min(max, value + 1));
+  const [draft, setDraft] = useState<string>(String(value));
+
+  useEffect(() => {
+    setDraft(String(value));
+  }, [value]);
+
+  const commit = (raw: string) => {
+    const trimmed = raw.trim();
+    const parsed = /^-?\d+$/.test(trimmed)
+      ? Number.parseInt(trimmed, 10)
+      : NaN;
+    if (Number.isFinite(parsed)) {
+      const next = clamp(parsed, min, max);
+      setDraft(String(next));
+      if (next !== value) onChange(next);
+    } else {
+      setDraft(String(value));
+    }
+  };
+
+  const dec = () => onChange(clamp(value - 1, min, max));
+  const inc = () => onChange(clamp(value + 1, min, max));
+
+  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      inc();
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      dec();
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      commit(draft);
+      event.currentTarget.blur();
+    }
+  };
 
   return (
     <div
@@ -890,9 +987,22 @@ export const Stepper = ({
       >
         −
       </button>
-      <div className="flex h-10 w-12 items-center justify-center font-bold">
-        {value}
-      </div>
+      <input
+        type="text"
+        inputMode="numeric"
+        pattern="-?[0-9]*"
+        role="spinbutton"
+        aria-label={label}
+        aria-valuenow={value}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={(event) => commit(event.target.value)}
+        onKeyDown={onKeyDown}
+        onFocus={(event) => event.target.select()}
+        className="h-10 w-12 bg-transparent text-center font-bold outline-none focus:ring-2 focus:ring-ring"
+      />
       <button
         type="button"
         aria-label={`Increase ${label}`}
@@ -906,6 +1016,8 @@ export const Stepper = ({
   );
 };
 ```
+
+> **Three input methods, on purpose:** chunky +/- buttons for kids on touch, ArrowUp/ArrowDown for keyboard users, and a real text input so parents/teachers can just type. We use `type="text"` + `inputMode="numeric"` + `pattern` instead of `type="number"` to avoid the native leading-zero weirdness and scroll-wheel foot-guns; parsing/clamping happens on blur and on Enter.
 
 - [ ] **Step 4: Run the test to verify it passes**
 
