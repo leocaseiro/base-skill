@@ -1,0 +1,1 @@
+import{u}from"./useNavigate-Bo61hb7n.js";import{u as n,r as a}from"./withRouter-CySRhIAb.js";import{r as c}from"./iframe-C6e1J645.js";function m(i){const r=u(),t=c.useRef(void 0);return n(r.stores.location,s=>{const e=s;if(r.options.defaultStructuralSharing){const o=a(t.current,e);return t.current=o,o}return e})}export{m as u};

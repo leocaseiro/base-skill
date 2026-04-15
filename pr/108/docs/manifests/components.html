@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">7/179 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">7/177 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -3265,7 +3265,7 @@ src: string</code></pre>
       <div class="badges">
         <label for="c-21-components-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-21-components-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-21-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-21-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -3505,7 +3505,7 @@ export const InstructionsOverlay = ({
                 {bookmarkName ?? gameTitle}
               &lt;/h2&gt;
               {bookmarkName &amp;&amp; (
-                &lt;p className=&quot;text-xs italic text-muted-foreground&quot;&gt;
+                &lt;p className=&quot;text-xs italic text-foreground/80&quot;&gt;
                   {gameTitle}
                 &lt;/p&gt;
               )}
@@ -3705,30 +3705,12 @@ export const InstructionsOverlay = ({
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const DefaultDark = () =&gt; &lt;InstructionsOverlay /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
                 <span class="ex-name">With Bookmark</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
               <pre><code>const WithBookmark = () =&gt; &lt;InstructionsOverlay bookmarkId=&quot;abc123&quot; bookmarkName=&quot;Easy Mode&quot; bookmarkColor=&quot;teal&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Bookmark Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithBookmarkDark = () =&gt; &lt;InstructionsOverlay bookmarkId=&quot;abc123&quot; bookmarkName=&quot;Easy Mode&quot; bookmarkColor=&quot;teal&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -7710,7 +7692,7 @@ export const HUD_Round5Of5: Story = {
       <div class="badges">
         <label for="c-error-0-components-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-0-components-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-error-0-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -7950,7 +7932,7 @@ export const InstructionsOverlay = ({
                 {bookmarkName ?? gameTitle}
               &lt;/h2&gt;
               {bookmarkName &amp;&amp; (
-                &lt;p className=&quot;text-xs italic text-muted-foreground&quot;&gt;
+                &lt;p className=&quot;text-xs italic text-foreground/80&quot;&gt;
                   {gameTitle}
                 &lt;/p&gt;
               )}
@@ -8150,30 +8132,12 @@ export const InstructionsOverlay = ({
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const DefaultDark = () =&gt; &lt;InstructionsOverlay /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
                 <span class="ex-name">With Bookmark</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
               <pre><code>const WithBookmark = () =&gt; &lt;InstructionsOverlay bookmarkId=&quot;abc123&quot; bookmarkName=&quot;Easy Mode&quot; bookmarkColor=&quot;teal&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Bookmark Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithBookmarkDark = () =&gt; &lt;InstructionsOverlay bookmarkId=&quot;abc123&quot; bookmarkName=&quot;Easy Mode&quot; bookmarkColor=&quot;teal&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
