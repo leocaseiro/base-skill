@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/46 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">46/46 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">7/188 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">7/177 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -2252,9 +2252,9 @@ visible: boolean</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> GameCard</h2>
       <div class="badges">
-        <label for="c-12-components-gamecard-props" class="badge ok as-toggle">7 prop types</label>
+        
         <label for="c-12-components-gamecard-info" class="badge info as-toggle">1 info</label>
-        <label for="c-12-components-gamecard-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-12-components-gamecard-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -2269,7 +2269,7 @@ visible: boolean</code></pre>
   <input id="c-12-components-gamecard-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-12-components-gamecard-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-12-components-gamecard-props" class="tg tg-props" type="checkbox" hidden />
+  
 
   <div class="panels">
     
@@ -2282,43 +2282,6 @@ visible: boolean</code></pre>
     </div>
         </div>
     
-        <div class="panel panel-props">
-          <div class="note ok">
-            <div class="row">
-              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">7 prop types</span>
-            </div>
-            <pre><code>Component: src/components/GameCard.tsx::GameCard</code></pre>
-            <pre><code>Props:</code></pre>
-            <pre><code>entry: {
-  id: string;
-  titleKey: string;
-  descriptionKey: string;
-  levels: GameLevel[];
-  subject: GameSubject;
-}
-
-onPlay: (gameId: string) =&gt; void
-
-onPlayWithConfig: (gameId: string, configId: string) =&gt; void
-
-onRemoveConfig: (configId: string) =&gt; Promise&lt;void&gt;
-
-onSaveConfig: (
-  gameId: string,
-  name: string,
-  color: BookmarkColorKey,
-) =&gt; Promise&lt;void&gt;
-
-onUpdateConfig: (
-  configId: string,
-  config: Record&lt;string, unknown&gt;,
-  name: string,
-) =&gt; Promise&lt;void&gt;
-
-savedConfigs: SavedGameConfigDoc[]</code></pre>
-          </div>
-        </div>
     
         <div class="panel panel-stories">
           
@@ -2340,75 +2303,40 @@ savedConfigs: SavedGameConfigDoc[]</code></pre>
               
               
               <pre><code>const Default = () =&gt; &lt;GameCard
-    entry={{
-      id: &#39;word-spell&#39;,
-      titleKey: &#39;word-spell&#39;,
-      descriptionKey: &#39;word-spell-description&#39;,
-      levels: [&#39;1&#39;, &#39;2&#39;],
-      subject: &#39;reading&#39;,
-    }}
-    savedConfigs={[]} /&gt;;</code></pre>
+    gameId=&quot;sort-numbers&quot;
+    title=&quot;Count in Order&quot;
+    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
+    variant=&quot;default&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">With Saved Config</span>
+                <span class="ex-name">Bookmark</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const WithSavedConfig = () =&gt; &lt;GameCard
-    entry={{
-      id: &#39;word-spell&#39;,
-      titleKey: &#39;word-spell&#39;,
-      descriptionKey: &#39;word-spell-description&#39;,
-      levels: [&#39;1&#39;, &#39;2&#39;],
-      subject: &#39;reading&#39;,
-    }}
-    savedConfigs={[
-      {
-        id: &#39;cfg-1&#39;,
-        profileId: &#39;default&#39;,
-        gameId: &#39;word-spell&#39;,
-        name: &#39;Easy Mode&#39;,
-        config: {},
-        color: &#39;indigo&#39;,
-        createdAt: new Date().toISOString(),
-      },
-    ]} /&gt;;</code></pre>
+              <pre><code>const Bookmark = () =&gt; &lt;GameCard
+    gameId=&quot;sort-numbers&quot;
+    title=&quot;Count in Order&quot;
+    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
+    variant=&quot;bookmark&quot;
+    bookmarkName=&quot;Skip by 2&quot;
+    bookmarkColor=&quot;amber&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Multi Level</span>
+                <span class="ex-name">Bookmark Purple</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const MultiLevel = () =&gt; &lt;GameCard
-    entry={{
-      id: &#39;number-match&#39;,
-      titleKey: &#39;number-match&#39;,
-      descriptionKey: &#39;number-match-description&#39;,
-      levels: [&#39;1&#39;, &#39;2&#39;, &#39;3&#39;],
-      subject: &#39;math&#39;,
-    }}
-    savedConfigs={[]} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Early Years Reading</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const EarlyYearsReading = () =&gt; &lt;GameCard
-    entry={{
-      id: &#39;word-spell&#39;,
-      titleKey: &#39;word-spell&#39;,
-      descriptionKey: &#39;word-spell-description&#39;,
-      levels: [&#39;PK&#39;, &#39;K&#39;],
-      subject: &#39;reading&#39;,
-    }}
-    savedConfigs={[]} /&gt;;</code></pre>
+              <pre><code>const BookmarkPurple = () =&gt; &lt;GameCard
+    gameId=&quot;sort-numbers&quot;
+    title=&quot;Count in Order&quot;
+    chips={[&#39;⬇️ Down&#39;, &#39;10 numbers&#39;, &#39;3s&#39;]}
+    variant=&quot;bookmark&quot;
+    bookmarkName=&quot;Big to Small&quot;
+    bookmarkColor=&quot;purple&quot; /&gt;;</code></pre>
             </div>
         </div>
     
@@ -2426,9 +2354,9 @@ savedConfigs: SavedGameConfigDoc[]</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> GameGrid</h2>
       <div class="badges">
-        <label for="c-13-components-gamegrid-props" class="badge ok as-toggle">10 prop types</label>
+        <label for="c-13-components-gamegrid-props" class="badge ok as-toggle">1 prop type</label>
         <label for="c-13-components-gamegrid-info" class="badge info as-toggle">1 info</label>
-        <label for="c-13-components-gamegrid-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-13-components-gamegrid-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -2460,37 +2388,11 @@ savedConfigs: SavedGameConfigDoc[]</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">10 prop types</span>
+              <span class="badge ok">1 prop type</span>
             </div>
             <pre><code>Component: src/components/GameGrid.tsx::GameGrid</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>entries: GameCatalogEntry[]
-
-onPageChange: (page: number) =&gt; void
-
-onPlay: (gameId: string) =&gt; void
-
-onPlayWithConfig: (gameId: string, configId: string) =&gt; void
-
-onRemoveConfig: (configId: string) =&gt; Promise&lt;void&gt;
-
-onSaveConfig: (
-  gameId: string,
-  name: string,
-  color: BookmarkColorKey,
-) =&gt; Promise&lt;void&gt;
-
-onUpdateConfig: (
-  configId: string,
-  config: Record&lt;string, unknown&gt;,
-  name: string,
-) =&gt; Promise&lt;void&gt;
-
-page: number
-
-savedConfigs: SavedGameConfigDoc[]
-
-totalPages: number</code></pre>
+            <pre><code>cards: ReactNode[]</code></pre>
           </div>
         </div>
     
@@ -2502,7 +2404,7 @@ totalPages: number</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { GameGrid } from "base-skill";</code></pre>
+                <pre><code>import { GameCard, GameGrid } from "base-skill";</code></pre>
               </div>
           
           
@@ -2513,39 +2415,7 @@ totalPages: number</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;GameGrid entries={SAMPLE_ENTRIES} savedConfigs={[]} page={1} totalPages={1} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Saved Config</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithSavedConfig = () =&gt; &lt;GameGrid
-    entries={SAMPLE_ENTRIES}
-    savedConfigs={[
-      {
-        id: &#39;cfg-1&#39;,
-        profileId: &#39;default&#39;,
-        gameId: &#39;word-spell&#39;,
-        name: &#39;Easy Mode&#39;,
-        config: {},
-        color: &#39;indigo&#39;,
-        createdAt: new Date().toISOString(),
-      },
-    ]}
-    page={1}
-    totalPages={1} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Paginated</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Paginated = () =&gt; &lt;GameGrid entries={SAMPLE_ENTRIES} savedConfigs={[]} page={2} totalPages={5} /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;GameGrid cards={SAMPLE_CARDS} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -2554,7 +2424,7 @@ totalPages: number</code></pre>
               </div>
               
               
-              <pre><code>const Empty = () =&gt; &lt;GameGrid entries={[]} savedConfigs={[]} page={1} totalPages={1} /&gt;;</code></pre>
+              <pre><code>const Empty = () =&gt; &lt;GameGrid cards={[]} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -3064,7 +2934,7 @@ sessionId: string</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { ConfigFormFields, GameNameChip, GameShell, SavedConfigChip } from "base-skill";</code></pre>
+                <pre><code>import { ConfigFormFields, GameNameChip, GameShell } from "base-skill";</code></pre>
               </div>
           
           
@@ -3395,7 +3265,7 @@ src: string</code></pre>
       <div class="badges">
         <label for="c-21-components-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-21-components-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-21-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-21-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -3424,45 +3294,57 @@ No suitable component definition found.
 You can debug your component file in this playground: https://react-docgen.dev/playground
 Code:
 // src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
-import { useEffect, useState } from &#39;react&#39;;
+import { useNavigate, useRouter } from &#39;@tanstack/react-router&#39;;
+import { Settings as SettingsIcon } from &#39;lucide-react&#39;;
+import { useEffect, useRef, useState } from &#39;react&#39;;
 import { createPortal } from &#39;react-dom&#39;;
 import { useTranslation } from &#39;react-i18next&#39;;
+import type { Cover } from &#39;@/games/cover-type&#39;;
 import type { BookmarkColorKey } from &#39;@/lib/bookmark-colors&#39;;
-import type { ConfigField } from &#39;@/lib/config-fields&#39;;
 import type { JSX } from &#39;react&#39;;
-import { ConfigFormFields } from &#39;@/components/ConfigFormFields&#39;;
-import { GameNameChip } from &#39;@/components/GameNameChip&#39;;
+import { AdvancedConfigModal } from &#39;@/components/AdvancedConfigModal&#39;;
+import { GameCover } from &#39;@/components/GameCover&#39;;
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from &#39;@/components/ui/dialog&#39;;
+import { getSimpleConfigFormRenderer } from &#39;@/games/config-fields-registry&#39;;
+import { resolveCover } from &#39;@/games/cover&#39;;
 import {
   BOOKMARK_COLORS,
-  BOOKMARK_COLOR_KEYS,
   DEFAULT_BOOKMARK_COLOR,
 } from &#39;@/lib/bookmark-colors&#39;;
-import { configToTags } from &#39;@/lib/config-tags&#39;;
 import { cancelSpeech, speak } from &#39;@/lib/speech/SpeechOutput&#39;;
+import { suggestBookmarkName } from &#39;@/lib/suggest-bookmark-name&#39;;
+
+export type SaveBookmarkInput = {
+  name: string;
+  color: BookmarkColorKey;
+  config: Record&lt;string, unknown&gt;;
+  cover?: Cover;
+};
 
 type InstructionsOverlayProps = {
   text: string;
   onStart: () =&gt; void;
   ttsEnabled: boolean;
   gameTitle: string;
+  gameId: string;
+  cover?: Cover;
+  bookmarkId?: string;
   bookmarkName?: string;
   bookmarkColor?: BookmarkColorKey;
-  subject?: string;
   config: Record&lt;string, unknown&gt;;
   onConfigChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
-  onSaveBookmark: (
-    name: string,
-    color: BookmarkColorKey,
-  ) =&gt; Promise&lt;void&gt;;
+  onSaveBookmark: (input: SaveBookmarkInput) =&gt; Promise&lt;string&gt;;
   onUpdateBookmark?: (
     name: string,
     config: Record&lt;string, unknown&gt;,
+    extras?: { cover?: Cover; color?: BookmarkColorKey },
   ) =&gt; Promise&lt;void&gt;;
-  configFields?: ConfigField[];
-  renderConfigForm?: (props: {
-    config: Record&lt;string, unknown&gt;;
-    onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
-  }) =&gt; JSX.Element;
+  existingBookmarkNames?: readonly string[];
 };
 
 export const InstructionsOverlay = ({
@@ -3470,21 +3352,39 @@ export const InstructionsOverlay = ({
   onStart,
   ttsEnabled,
   gameTitle,
+  gameId,
+  cover,
+  bookmarkId,
   bookmarkName,
   bookmarkColor = DEFAULT_BOOKMARK_COLOR,
-  subject,
   config,
   onConfigChange,
   onSaveBookmark,
   onUpdateBookmark,
-  configFields,
-  renderConfigForm,
+  existingBookmarkNames = [],
 }: InstructionsOverlayProps): JSX.Element =&gt; {
   const { t } = useTranslation(&#39;games&#39;);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [newBookmarkName, setNewBookmarkName] = useState(&#39;&#39;);
-  const [newBookmarkColor, setNewBookmarkColor] =
-    useState&lt;BookmarkColorKey&gt;(DEFAULT_BOOKMARK_COLOR);
+  const navigate = useNavigate({
+    from: &#39;/$locale/game/$gameId&#39;,
+  });
+  const router = useRouter();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [savingName, setSavingName] = useState(&#39;&#39;);
+  const [saveSubmitAttempted, setSaveSubmitAttempted] = useState(false);
+  const saveNameRef = useRef&lt;HTMLInputElement&gt;(null);
+
+  useEffect(() =&gt; {
+    if (saveDialogOpen) {
+      // Defer so the Radix Dialog finishes mounting before we grab focus.
+      const id = globalThis.setTimeout(
+        () =&gt; saveNameRef.current?.focus(),
+        0,
+      );
+      return () =&gt; globalThis.clearTimeout(id);
+    }
+    return;
+  }, [saveDialogOpen]);
 
   useEffect(() =&gt; {
     if (ttsEnabled) speak(text);
@@ -3495,219 +3395,276 @@ export const InstructionsOverlay = ({
   }, []);
 
   const settingsColors = BOOKMARK_COLORS[bookmarkColor];
-  const tags = configToTags(config);
+  const resolvedCover = resolveCover({ cover }, gameId);
+
+  const SimpleForm = getSimpleConfigFormRenderer(gameId);
+
+  const modalMode =
+    bookmarkId &amp;&amp; bookmarkName
+      ? ({
+          kind: &#39;bookmark&#39;,
+          configId: bookmarkId,
+          name: bookmarkName,
+          color: bookmarkColor,
+          cover,
+        } as const)
+      : ({ kind: &#39;default&#39; } as const);
+
+  const handlePlay = () =&gt; {
+    if (bookmarkId &amp;&amp; bookmarkName &amp;&amp; onUpdateBookmark) {
+      void (async () =&gt; {
+        try {
+          await onUpdateBookmark(bookmarkName, config, {
+            cover,
+            color: bookmarkColor,
+          });
+        } catch (error) {
+          console.error(&#39;Failed to save bookmark on play&#39;, error);
+        }
+        onStart();
+      })();
+      return;
+    }
+    setSaveSubmitAttempted(false);
+    setSavingName(
+      suggestBookmarkName(gameTitle, existingBookmarkNames),
+    );
+    setSaveDialogOpen(true);
+  };
+
+  const saveOnPlayError: string | null = (() =&gt; {
+    const trimmed = savingName.trim();
+    if (trimmed === &#39;&#39;)
+      return t(&#39;instructions.nameRequired&#39;, {
+        defaultValue: &#39;Please enter a bookmark name.&#39;,
+      });
+    if (existingBookmarkNames.includes(trimmed))
+      return t(&#39;instructions.nameDuplicate&#39;, {
+        defaultValue: &#39;A bookmark with that name already exists.&#39;,
+      });
+    return null;
+  })();
+  const showSaveOnPlayError =
+    saveSubmitAttempted &amp;&amp; saveOnPlayError !== null;
+
+  const handleSaveAndPlay = () =&gt; {
+    setSaveSubmitAttempted(true);
+    if (saveOnPlayError !== null) {
+      saveNameRef.current?.focus();
+      return;
+    }
+    const trimmed = savingName.trim();
+    void (async () =&gt; {
+      try {
+        const newId = await onSaveBookmark({
+          name: trimmed,
+          color: bookmarkColor,
+          config,
+          cover,
+        });
+        setSaveDialogOpen(false);
+        await navigate({
+          search: (prev) =&gt; ({ ...prev, configId: newId }),
+        });
+        onStart();
+      } catch (error) {
+        console.error(&#39;Failed to save bookmark on play&#39;, error);
+      }
+    })();
+  };
+
+  const handlePlayWithoutSaving = () =&gt; {
+    setSaveDialogOpen(false);
+    onStart();
+  };
 
   return createPortal(
     &lt;div
       role=&quot;dialog&quot;
       aria-label=&quot;Game instructions&quot;
-      className=&quot;fixed inset-0 z-40 flex flex-col items-center justify-start overflow-y-auto bg-background/95 px-5 pb-8 pt-20&quot;
+      className=&quot;fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-background/95 px-5 pb-8 pt-24&quot;
     &gt;
-      &lt;div className=&quot;flex w-full max-w-sm flex-col items-center gap-5&quot;&gt;
-        {/* 1. Game name chip */}
-        &lt;div className=&quot;w-full&quot;&gt;
-          &lt;GameNameChip
-            title={gameTitle}
-            bookmarkName={bookmarkName}
-            bookmarkColor={bookmarkColor}
-            subject={subject}
-          /&gt;
+      &lt;div className=&quot;mx-auto flex w-full max-w-sm flex-col overflow-hidden rounded-3xl bg-card shadow-lg md:max-w-2xl&quot;&gt;
+        {/* 1. Hero cover */}
+        &lt;div className=&quot;flex justify-center bg-muted/40 p-4&quot;&gt;
+          &lt;GameCover cover={resolvedCover} size=&quot;hero&quot; /&gt;
         &lt;/div&gt;
 
-        {/* 2. Instructions text */}
-        &lt;p className=&quot;max-w-xs text-center text-base font-semibold text-foreground leading-relaxed&quot;&gt;
-          {text}
-        &lt;/p&gt;
+        &lt;div className=&quot;flex flex-col gap-4 p-4&quot;&gt;
+          {/* 2. Title row + cog — matches GameCard heading/subtitle order */}
+          &lt;div className=&quot;flex items-center justify-between gap-2&quot;&gt;
+            &lt;div&gt;
+              &lt;h2
+                className=&quot;text-xl font-extrabold&quot;
+                style={
+                  bookmarkName
+                    ? { color: settingsColors.text }
+                    : undefined
+                }
+              &gt;
+                {bookmarkName ?? gameTitle}
+              &lt;/h2&gt;
+              {bookmarkName &amp;&amp; (
+                &lt;p className=&quot;text-xs italic text-foreground/80&quot;&gt;
+                  {gameTitle}
+                &lt;/p&gt;
+              )}
+            &lt;/div&gt;
+            &lt;button
+              type=&quot;button&quot;
+              aria-label={t(&#39;instructions.configure&#39;, {
+                defaultValue: &#39;Configure&#39;,
+              })}
+              onClick={() =&gt; setModalOpen(true)}
+              className=&quot;flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted&quot;
+            &gt;
+              &lt;SettingsIcon size={18} /&gt;
+            &lt;/button&gt;
+          &lt;/div&gt;
 
-        {/* 3. Let&#39;s go button */}
-        &lt;button
-          type=&quot;button&quot;
-          onClick={onStart}
-          className=&quot;h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95&quot;
-        &gt;
-          {t(&#39;instructions.lets-go&#39;)}
-        &lt;/button&gt;
+          {/* 3. Instructions text */}
+          &lt;p className=&quot;text-center text-base font-semibold text-foreground leading-relaxed&quot;&gt;
+            {text}
+          &lt;/p&gt;
 
-        {/* 4. Settings chip (collapsed by default) */}
-        &lt;div
-          className=&quot;w-full overflow-hidden rounded-xl border border-border&quot;
-          style={
-            {
-              &#39;--bookmark-play&#39;: settingsColors.playBg,
-            } as React.CSSProperties
-          }
-        &gt;
-          {/* Settings header */}
+          {/* 4. Let&#39;s go button */}
           &lt;button
             type=&quot;button&quot;
-            aria-label={t(&#39;instructions.settings&#39;)}
-            onClick={() =&gt; setSettingsOpen((v) =&gt; !v)}
-            className=&quot;flex min-h-12 w-full items-center gap-2 bg-muted px-3 text-left&quot;
-            style={
-              settingsOpen
-                ? { background: &#39;var(--bookmark-play)&#39; }
-                : undefined
-            }
+            onClick={handlePlay}
+            className=&quot;h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95&quot;
           &gt;
-            &lt;span
-              className={`flex-1 text-sm font-semibold ${settingsOpen ? &#39;text-white&#39; : &#39;&#39;}`}
-            &gt;
-              {t(&#39;instructions.settings&#39;)}
-            &lt;/span&gt;
-            &lt;span
-              className={`text-xs ${settingsOpen ? &#39;text-white/70&#39; : &#39;&#39;}`}
-            &gt;
-              {settingsOpen ? &#39;▲&#39; : &#39;▼&#39;}
-            &lt;/span&gt;
+            {t(&#39;instructions.lets-go&#39;)}
           &lt;/button&gt;
 
-          {/* Collapsed: config summary tags */}
-          {!settingsOpen &amp;&amp; (
-            &lt;div className=&quot;flex flex-wrap gap-1 bg-muted/50 px-3 pb-2 pt-1&quot;&gt;
-              {tags.map((tag) =&gt; (
-                &lt;span
-                  key={tag}
-                  className=&quot;rounded bg-muted px-2 py-0.5 text-xs font-medium text-foreground&quot;
-                &gt;
-                  {tag}
-                &lt;/span&gt;
-              ))}
-            &lt;/div&gt;
-          )}
-
-          {/* Expanded: form + save actions */}
-          {settingsOpen &amp;&amp; (
-            &lt;div className=&quot;flex flex-col gap-3 bg-muted/30 p-3&quot;&gt;
-              {renderConfigForm
-                ? renderConfigForm({
-                    config,
-                    onChange: onConfigChange,
-                  })
-                : configFields &amp;&amp; (
-                    &lt;ConfigFormFields
-                      fields={configFields}
-                      config={config}
-                      onChange={onConfigChange}
-                    /&gt;
-                  )}
-
-              &lt;div className=&quot;border-t border-border pt-3 flex flex-col gap-2&quot;&gt;
-                {bookmarkName &amp;&amp; onUpdateBookmark ? (
-                  &lt;&gt;
-                    &lt;label className=&quot;flex flex-col gap-1 text-sm font-semibold text-foreground&quot;&gt;
-                      Bookmark name
-                      &lt;input
-                        type=&quot;text&quot;
-                        defaultValue={bookmarkName}
-                        id=&quot;instructions-bookmark-name&quot;
-                        className=&quot;h-12 rounded-lg border border-input bg-background px-3 text-sm&quot;
-                      /&gt;
-                    &lt;/label&gt;
-                    &lt;button
-                      type=&quot;button&quot;
-                      aria-label={`Update ${bookmarkName}`}
-                      onClick={() =&gt; {
-                        const el =
-                          document.querySelector&lt;HTMLInputElement&gt;(
-                            &#39;#instructions-bookmark-name&#39;,
-                          );
-                        void onUpdateBookmark(
-                          el?.value ?? bookmarkName,
-                          config,
-                        );
-                      }}
-                      className=&quot;h-12 w-full rounded-xl font-bold text-white text-sm&quot;
-                      style={{ background: &#39;var(--bookmark-play)&#39; }}
-                    &gt;
-                      {t(&#39;instructions.updateBookmark&#39;, {
-                        name: bookmarkName,
-                        defaultValue: `Update &quot;${bookmarkName}&quot;`,
-                      })}
-                    &lt;/button&gt;
-                    &lt;button
-                      type=&quot;button&quot;
-                      aria-label=&quot;Save as new bookmark&quot;
-                      onClick={() =&gt; setSettingsOpen(false)}
-                      className=&quot;h-12 w-full rounded-xl border border-input bg-background text-sm font-semibold text-primary&quot;
-                    &gt;
-                      {t(&#39;instructions.saveAsNew&#39;, {
-                        defaultValue: &#39;Save as new bookmark…&#39;,
-                      })}
-                    &lt;/button&gt;
-                  &lt;/&gt;
-                ) : (
-                  &lt;div className=&quot;flex flex-col gap-2&quot;&gt;
-                    &lt;span className=&quot;text-sm font-semibold text-foreground&quot;&gt;
-                      {t(&#39;common:saveConfig.saveBookmarkLabel&#39;, {
-                        defaultValue: &#39;Save as bookmark&#39;,
-                      })}
-                    &lt;/span&gt;
-                    &lt;div
-                      className=&quot;grid gap-1&quot;
-                      style={{ gridTemplateColumns: &#39;repeat(6, 1fr)&#39; }}
-                      role=&quot;group&quot;
-                      aria-label=&quot;Bookmark color&quot;
-                    &gt;
-                      {BOOKMARK_COLOR_KEYS.map((key) =&gt; (
-                        &lt;button
-                          key={key}
-                          type=&quot;button&quot;
-                          aria-label={key}
-                          aria-pressed={newBookmarkColor === key}
-                          onClick={() =&gt; setNewBookmarkColor(key)}
-                          className=&quot;h-8 w-8 rounded-full border-2 transition-transform hover:scale-110&quot;
-                          style={{
-                            background: BOOKMARK_COLORS[key].playBg,
-                            borderColor:
-                              newBookmarkColor === key
-                                ? BOOKMARK_COLORS[key].playBg
-                                : &#39;transparent&#39;,
-                            outline:
-                              newBookmarkColor === key
-                                ? &#39;3px solid white&#39;
-                                : undefined,
-                            outlineOffset:
-                              newBookmarkColor === key
-                                ? &#39;-4px&#39;
-                                : undefined,
-                          }}
-                        /&gt;
-                      ))}
-                    &lt;/div&gt;
-                    &lt;div className=&quot;flex gap-2&quot;&gt;
-                      &lt;input
-                        type=&quot;text&quot;
-                        value={newBookmarkName}
-                        onChange={(e) =&gt;
-                          setNewBookmarkName(e.target.value)
-                        }
-                        placeholder=&quot;e.g. Easy Mode&quot;
-                        className=&quot;h-12 flex-1 rounded-lg border border-input bg-background px-3 text-sm&quot;
-                      /&gt;
-                      &lt;button
-                        type=&quot;button&quot;
-                        aria-label=&quot;Save bookmark&quot;
-                        onClick={() =&gt; {
-                          if (newBookmarkName.trim()) {
-                            void onSaveBookmark(
-                              newBookmarkName.trim(),
-                              newBookmarkColor,
-                            );
-                            setNewBookmarkName(&#39;&#39;);
-                          }
-                        }}
-                        className=&quot;h-12 w-12 flex-shrink-0 rounded-lg bg-primary text-lg text-primary-foreground&quot;
-                      &gt;
-                        🔖
-                      &lt;/button&gt;
-                    &lt;/div&gt;
-                  &lt;/div&gt;
-                )}
-              &lt;/div&gt;
+          {/* 5. Simple settings form (always expanded) */}
+          {SimpleForm &amp;&amp; (
+            &lt;div className=&quot;border-t border-border pt-4&quot;&gt;
+              &lt;SimpleForm config={config} onChange={onConfigChange} /&gt;
             &lt;/div&gt;
           )}
         &lt;/div&gt;
       &lt;/div&gt;
+
+      {/* Advanced config modal (opened by cog button) */}
+      &lt;AdvancedConfigModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        gameId={gameId}
+        mode={modalMode}
+        config={config}
+        existingBookmarkNames={existingBookmarkNames}
+        onCancel={() =&gt; setModalOpen(false)}
+        onSaveNew={(payload) =&gt; {
+          void (async () =&gt; {
+            try {
+              const newId = await onSaveBookmark({
+                name: payload.name,
+                color: payload.color,
+                config: payload.config,
+                cover: payload.cover,
+              });
+              onConfigChange(payload.config);
+              setModalOpen(false);
+              await navigate({
+                search: (prev) =&gt; ({ ...prev, configId: newId }),
+              });
+            } catch (error) {
+              // Surface duplicate-name and similar errors; keep modal open.
+              console.error(&#39;Failed to save bookmark&#39;, error);
+            }
+          })();
+        }}
+        onUpdate={
+          onUpdateBookmark
+            ? (payload) =&gt; {
+                void (async () =&gt; {
+                  try {
+                    await onUpdateBookmark(
+                      payload.name,
+                      payload.config,
+                      {
+                        cover: payload.cover,
+                        color: payload.color,
+                      },
+                    );
+                    onConfigChange(payload.config);
+                    setModalOpen(false);
+                    await router.invalidate();
+                  } catch (error) {
+                    console.error(&#39;Failed to update bookmark&#39;, error);
+                  }
+                })();
+              }
+            : undefined
+        }
+      /&gt;
+
+      {/* Save-on-play prompt for default (non-bookmarked) games */}
+      &lt;Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}&gt;
+        &lt;DialogContent&gt;
+          &lt;DialogHeader&gt;
+            &lt;DialogTitle&gt;
+              {t(&#39;instructions.saveOnPlayTitle&#39;, {
+                defaultValue: &#39;Save these settings as a bookmark?&#39;,
+              })}
+            &lt;/DialogTitle&gt;
+          &lt;/DialogHeader&gt;
+          &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+            &lt;label className=&quot;flex flex-col gap-1&quot;&gt;
+              &lt;span className=&quot;text-xs font-semibold uppercase text-muted-foreground&quot;&gt;
+                {t(&#39;instructions.saveOnPlayNameLabel&#39;, {
+                  defaultValue: &#39;Bookmark name&#39;,
+                })}
+              &lt;/span&gt;
+              &lt;input
+                ref={saveNameRef}
+                type=&quot;text&quot;
+                value={savingName}
+                onChange={(e) =&gt; setSavingName(e.target.value)}
+                aria-invalid={showSaveOnPlayError}
+                aria-describedby={
+                  showSaveOnPlayError ? &#39;save-on-play-error&#39; : undefined
+                }
+                className={`h-10 rounded-lg border bg-background px-3 text-sm ${
+                  showSaveOnPlayError
+                    ? &#39;border-destructive&#39;
+                    : &#39;border-input&#39;
+                }`}
+              /&gt;
+              {showSaveOnPlayError &amp;&amp; (
+                &lt;span
+                  id=&quot;save-on-play-error&quot;
+                  role=&quot;alert&quot;
+                  className=&quot;text-xs font-semibold text-destructive&quot;
+                &gt;
+                  {saveOnPlayError}
+                &lt;/span&gt;
+              )}
+            &lt;/label&gt;
+            &lt;div className=&quot;flex gap-2&quot;&gt;
+              &lt;button
+                type=&quot;button&quot;
+                onClick={handlePlayWithoutSaving}
+                className=&quot;flex-1 rounded-lg border border-input bg-background py-2 text-sm&quot;
+              &gt;
+                {t(&#39;instructions.playWithoutSaving&#39;, {
+                  defaultValue: &#39;Play without saving&#39;,
+                })}
+              &lt;/button&gt;
+              &lt;button
+                type=&quot;button&quot;
+                onClick={handleSaveAndPlay}
+                aria-disabled={saveOnPlayError !== null}
+                className=&quot;flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground&quot;
+              &gt;
+                {t(&#39;instructions.saveAndPlay&#39;, {
+                  defaultValue: &#39;Save &amp; play&#39;,
+                })}
+              &lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/DialogContent&gt;
+      &lt;/Dialog&gt;
     &lt;/div&gt;,
     document.body,
   );
@@ -3748,30 +3705,25 @@ export const InstructionsOverlay = ({
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default Dark</span>
+                <span class="ex-name">With Bookmark</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const DefaultDark = () =&gt; &lt;InstructionsOverlay /&gt;;</code></pre>
+              <pre><code>const WithBookmark = () =&gt; &lt;InstructionsOverlay bookmarkId=&quot;abc123&quot; bookmarkName=&quot;Easy Mode&quot; bookmarkColor=&quot;teal&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Settings Expanded</span>
+                <span class="ex-name">Word Spell Default</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const SettingsExpanded = () =&gt; &lt;InstructionsOverlay bookmarkName=&quot;Easy Mode&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Settings Expanded Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const SettingsExpandedDark = () =&gt; &lt;InstructionsOverlay bookmarkName=&quot;Easy Mode&quot; /&gt;;</code></pre>
+              <pre><code>const WordSpellDefault = () =&gt; &lt;InstructionsOverlay
+    text=&quot;Drag the letters to spell the word.&quot;
+    gameTitle=&quot;Word Spell&quot;
+    gameId=&quot;word-spell&quot;
+    config={{ inputMethod: &#39;drag&#39;, totalRounds: 8, ttsEnabled: true }} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -4044,113 +3996,14 @@ onNextLevel: () =&gt; void</code></pre>
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="LevelRow">
-  <div class="head">
-    <div class="title">
-      <h2><span class="status-dot dot-ok"></span> LevelRow</h2>
-      <div class="badges">
-        <label for="c-25-components-levelrow-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-25-components-levelrow-info" class="badge info as-toggle">1 info</label>
-        <label for="c-25-components-levelrow-stories" class="badge ok as-toggle">3 stories</label>
-        
-      </div>
-    </div>
-    <div class="meta" title="./src/components/LevelRow.stories.tsx">components-levelrow · ./src/components/LevelRow.stories.tsx</div>
-    
-    
-    
-  </div>
-
-  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
-  <input id="c-25-components-levelrow-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-25-components-levelrow-stories" class="tg tg-stories" type="checkbox" hidden />
-  
-  <input id="c-25-components-levelrow-props" class="tg tg-props" type="checkbox" hidden />
-
-  <div class="panels">
-    
-    
-        <div class="panel panel-info">
-          
-    <div class="note info">
-      <div class="note-title">Info</div>
-      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
-    </div>
-        </div>
-    
-        <div class="panel panel-props">
-          <div class="note ok">
-            <div class="row">
-              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">2 prop types</span>
-            </div>
-            <pre><code>Component: src/components/LevelRow.tsx::LevelRow</code></pre>
-            <pre><code>Props:</code></pre>
-            <pre><code>currentLevel: GameLevel | &#39;&#39;
-
-onLevelChange: (level: GameLevel | &#39;&#39;) =&gt; void</code></pre>
-          </div>
-        </div>
-    
-        <div class="panel panel-stories">
-          
-          
-          
-          <div class="note ok">
-                <div class="row">
-                  <span class="ex-name">Imports</span>
-                </div>
-                <pre><code>import { LevelRow } from "base-skill";</code></pre>
-              </div>
-          
-          
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">All Selected</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const AllSelected = () =&gt; &lt;LevelRow currentLevel=&quot;&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Kindergarten Selected</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const KindergartenSelected = () =&gt; &lt;LevelRow currentLevel=&quot;K&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Grade 3 Selected</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Grade3Selected = () =&gt; &lt;LevelRow currentLevel=&quot;3&quot; /&gt;;</code></pre>
-            </div>
-        </div>
-    
-  </div>
-</article>
-<article
-  class="card 
-  no-error 
-  has-info 
-  no-story-error
-  no-doc-error"
-  role="listitem"
   aria-label="NumberMatch">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NumberMatch</h2>
       <div class="badges">
-        <label for="c-26-games-number-match-numbermatch-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-26-games-number-match-numbermatch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-26-games-number-match-numbermatch-stories" class="badge ok as-toggle">14 stories</label>
+        <label for="c-25-games-number-match-numbermatch-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-25-games-number-match-numbermatch-info" class="badge info as-toggle">1 info</label>
+        <label for="c-25-games-number-match-numbermatch-stories" class="badge ok as-toggle">14 stories</label>
         
       </div>
     </div>
@@ -4162,10 +4015,10 @@ onLevelChange: (level: GameLevel | &#39;&#39;) =&gt; void</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-26-games-number-match-numbermatch-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-26-games-number-match-numbermatch-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-25-games-number-match-numbermatch-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-25-games-number-match-numbermatch-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-26-games-number-match-numbermatch-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-25-games-number-match-numbermatch-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4387,9 +4240,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> NumberMatchWithHarness</h2>
       <div class="badges">
-        <label for="c-27-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-27-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-27-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        <label for="c-26-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-26-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-26-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
         
       </div>
     </div>
@@ -4400,9 +4253,9 @@ sessionId?: string</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-27-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-27-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-27-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-26-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-26-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-26-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -4544,9 +4397,9 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NumeralTileBank</h2>
       <div class="badges">
-        <label for="c-28-games-number-match-numeraltilebank-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-28-games-number-match-numeraltilebank-info" class="badge info as-toggle">1 info</label>
-        <label for="c-28-games-number-match-numeraltilebank-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-27-games-number-match-numeraltilebank-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-27-games-number-match-numeraltilebank-info" class="badge info as-toggle">1 info</label>
+        <label for="c-27-games-number-match-numeraltilebank-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -4558,10 +4411,10 @@ export const Default: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-28-games-number-match-numeraltilebank-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-28-games-number-match-numeraltilebank-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-27-games-number-match-numeraltilebank-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-27-games-number-match-numeraltilebank-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-28-games-number-match-numeraltilebank-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-27-games-number-match-numeraltilebank-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4662,8 +4515,8 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
       <h2><span class="status-dot dot-ok"></span> OfflineIndicator</h2>
       <div class="badges">
         
-        <label for="c-29-components-offlineindicator-info" class="badge info as-toggle">1 info</label>
-        <label for="c-29-components-offlineindicator-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-28-components-offlineindicator-info" class="badge info as-toggle">1 info</label>
+        <label for="c-28-components-offlineindicator-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -4675,8 +4528,8 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-29-components-offlineindicator-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-29-components-offlineindicator-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-28-components-offlineindicator-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-28-components-offlineindicator-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -4738,9 +4591,9 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ProgressHUD</h2>
       <div class="badges">
-        <label for="c-30-answer-game-progresshud-props" class="badge ok as-toggle">8 prop types</label>
-        <label for="c-30-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
-        <label for="c-30-answer-game-progresshud-stories" class="badge ok as-toggle">9 stories</label>
+        <label for="c-29-answer-game-progresshud-props" class="badge ok as-toggle">8 prop types</label>
+        <label for="c-29-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
+        <label for="c-29-answer-game-progresshud-stories" class="badge ok as-toggle">9 stories</label>
         
       </div>
     </div>
@@ -4752,10 +4605,10 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-30-answer-game-progresshud-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-30-answer-game-progresshud-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-29-answer-game-progresshud-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-29-answer-game-progresshud-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-30-answer-game-progresshud-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-29-answer-game-progresshud-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4991,165 +4844,14 @@ totalRounds: number | null</code></pre>
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="SavedConfigChip">
-  <div class="head">
-    <div class="title">
-      <h2><span class="status-dot dot-ok"></span> SavedConfigChip</h2>
-      <div class="badges">
-        <label for="c-31-components-savedconfigchip-props" class="badge ok as-toggle">6 prop types</label>
-        <label for="c-31-components-savedconfigchip-info" class="badge info as-toggle">1 info</label>
-        <label for="c-31-components-savedconfigchip-stories" class="badge ok as-toggle">4 stories</label>
-        
-      </div>
-    </div>
-    <div class="meta" title="./src/components/SavedConfigChip.stories.tsx">components-savedconfigchip · ./src/components/SavedConfigChip.stories.tsx</div>
-    
-    
-    
-  </div>
-
-  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
-  <input id="c-31-components-savedconfigchip-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-31-components-savedconfigchip-stories" class="tg tg-stories" type="checkbox" hidden />
-  
-  <input id="c-31-components-savedconfigchip-props" class="tg tg-props" type="checkbox" hidden />
-
-  <div class="panels">
-    
-    
-        <div class="panel panel-info">
-          
-    <div class="note info">
-      <div class="note-title">Info</div>
-      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
-    </div>
-        </div>
-    
-        <div class="panel panel-props">
-          <div class="note ok">
-            <div class="row">
-              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">6 prop types</span>
-            </div>
-            <pre><code>Component: src/components/SavedConfigChip.tsx::SavedConfigChip</code></pre>
-            <pre><code>Props:</code></pre>
-            <pre><code>configFields: ConfigField[]
-
-doc: {
-  id: string;
-  profileId: string;
-  gameId: string;
-  name: string;
-  config: Record&lt;string, unknown&gt;;
-  createdAt: string;
-  color: string;
-}
-
-onDelete: (id: string) =&gt; void
-
-onPlay: (id: string) =&gt; void
-
-onSave: (
-  id: string,
-  config: Record&lt;string, unknown&gt;,
-  name: string,
-) =&gt; Promise&lt;void&gt;
-
-renderConfigForm?: (props: {
-  config: Record&lt;string, unknown&gt;;
-  onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
-}) =&gt; JSX.Element</code></pre>
-          </div>
-        </div>
-    
-        <div class="panel panel-stories">
-          
-          
-          
-          <div class="note ok">
-                <div class="row">
-                  <span class="ex-name">Imports</span>
-                </div>
-                <pre><code>import { SavedConfigChip } from "base-skill";</code></pre>
-              </div>
-          
-          
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Collapsed</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Collapsed = () =&gt; &lt;SavedConfigChip
-    doc={mockDoc}
-    configFields={fields}
-    onPlay={() =&gt; {}}
-    onDelete={() =&gt; {}}
-    onSave={async () =&gt; {}} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Collapsed Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const CollapsedDark = () =&gt; &lt;SavedConfigChip
-    doc={mockDoc}
-    configFields={fields}
-    onPlay={() =&gt; {}}
-    onDelete={() =&gt; {}}
-    onSave={async () =&gt; {}} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Teal Color</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const TealColor = () =&gt; &lt;SavedConfigChip
-    doc={{ ...mockDoc, color: &#39;teal&#39; }}
-    configFields={fields}
-    onPlay={() =&gt; {}}
-    onDelete={() =&gt; {}}
-    onSave={async () =&gt; {}} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Teal Color Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const TealColorDark = () =&gt; &lt;SavedConfigChip
-    doc={{ ...mockDoc, color: &#39;teal&#39; }}
-    configFields={fields}
-    onPlay={() =&gt; {}}
-    onDelete={() =&gt; {}}
-    onSave={async () =&gt; {}} /&gt;;</code></pre>
-            </div>
-        </div>
-    
-  </div>
-</article>
-<article
-  class="card 
-  no-error 
-  has-info 
-  no-story-error
-  no-doc-error"
-  role="listitem"
   aria-label="ScoreAnimation">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ScoreAnimation</h2>
       <div class="badges">
-        <label for="c-32-components-answer-game-scoreanimation-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-32-components-answer-game-scoreanimation-info" class="badge info as-toggle">1 info</label>
-        <label for="c-32-components-answer-game-scoreanimation-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-30-components-answer-game-scoreanimation-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-30-components-answer-game-scoreanimation-info" class="badge info as-toggle">1 info</label>
+        <label for="c-30-components-answer-game-scoreanimation-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -5161,10 +4863,10 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-32-components-answer-game-scoreanimation-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-32-components-answer-game-scoreanimation-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-30-components-answer-game-scoreanimation-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-30-components-answer-game-scoreanimation-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-32-components-answer-game-scoreanimation-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-30-components-answer-game-scoreanimation-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5236,8 +4938,8 @@ renderConfigForm?: (props: {
       <h2><span class="status-dot dot-ok"></span> Select</h2>
       <div class="badges">
         
-        <label for="c-33-components-ui-select-info" class="badge info as-toggle">1 info</label>
-        <label for="c-33-components-ui-select-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-31-components-ui-select-info" class="badge info as-toggle">1 info</label>
+        <label for="c-31-components-ui-select-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -5249,8 +4951,8 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-33-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-33-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-31-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-31-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -5335,8 +5037,8 @@ renderConfigForm?: (props: {
       <h2><span class="status-dot dot-ok"></span> Sheet</h2>
       <div class="badges">
         
-        <label for="c-34-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
-        <label for="c-34-components-ui-sheet-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-32-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
+        <label for="c-32-components-ui-sheet-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -5348,8 +5050,8 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-34-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-34-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-32-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-32-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -5443,9 +5145,9 @@ renderConfigForm?: (props: {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Slider</h2>
       <div class="badges">
-        <label for="c-35-components-ui-slider-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-35-components-ui-slider-info" class="badge info as-toggle">1 info</label>
-        <label for="c-35-components-ui-slider-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-33-components-ui-slider-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-33-components-ui-slider-info" class="badge info as-toggle">1 info</label>
+        <label for="c-33-components-ui-slider-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -5457,10 +5159,10 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-35-components-ui-slider-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-35-components-ui-slider-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-33-components-ui-slider-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-33-components-ui-slider-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-35-components-ui-slider-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-33-components-ui-slider-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5554,9 +5256,9 @@ min?: any = 0</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SlotRow</h2>
       <div class="badges">
-        <label for="c-36-answer-game-slot-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-36-answer-game-slot-info" class="badge info as-toggle">1 info</label>
-        <label for="c-36-answer-game-slot-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-34-answer-game-slot-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-34-answer-game-slot-info" class="badge info as-toggle">1 info</label>
+        <label for="c-34-answer-game-slot-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -5568,10 +5270,10 @@ min?: any = 0</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-36-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-36-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-34-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-34-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-36-answer-game-slot-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-34-answer-game-slot-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5861,9 +5563,9 @@ className?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbers</h2>
       <div class="badges">
-        <label for="c-37-games-sortnumbers-skin-harness-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-37-games-sortnumbers-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-37-games-sortnumbers-skin-harness-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-35-games-sortnumbers-skin-harness-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-35-games-sortnumbers-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-35-games-sortnumbers-skin-harness-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -5875,10 +5577,10 @@ className?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-37-games-sortnumbers-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-37-games-sortnumbers-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-35-games-sortnumbers-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-35-games-sortnumbers-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-37-games-sortnumbers-skin-harness-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-35-games-sortnumbers-skin-harness-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5997,9 +5699,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbers</h2>
       <div class="badges">
-        <label for="c-38-games-sort-numbers-sortnumbers-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-38-games-sort-numbers-sortnumbers-info" class="badge info as-toggle">1 info</label>
-        <label for="c-38-games-sort-numbers-sortnumbers-stories" class="badge ok as-toggle">17 stories</label>
+        <label for="c-36-games-sort-numbers-sortnumbers-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-36-games-sort-numbers-sortnumbers-info" class="badge info as-toggle">1 info</label>
+        <label for="c-36-games-sort-numbers-sortnumbers-stories" class="badge ok as-toggle">17 stories</label>
         
       </div>
     </div>
@@ -6011,10 +5713,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-38-games-sort-numbers-sortnumbers-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-38-games-sort-numbers-sortnumbers-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-36-games-sort-numbers-sortnumbers-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-36-games-sort-numbers-sortnumbers-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-38-games-sort-numbers-sortnumbers-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-36-games-sort-numbers-sortnumbers-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6260,9 +5962,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbersTileBank</h2>
       <div class="badges">
-        <label for="c-39-games-sort-numbers-sortnumberstilebank-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-39-games-sort-numbers-sortnumberstilebank-info" class="badge info as-toggle">1 info</label>
-        <label for="c-39-games-sort-numbers-sortnumberstilebank-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-37-games-sort-numbers-sortnumberstilebank-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-37-games-sort-numbers-sortnumberstilebank-info" class="badge info as-toggle">1 info</label>
+        <label for="c-37-games-sort-numbers-sortnumberstilebank-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -6274,10 +5976,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-39-games-sort-numbers-sortnumberstilebank-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-39-games-sort-numbers-sortnumberstilebank-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-37-games-sort-numbers-sortnumberstilebank-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-37-games-sort-numbers-sortnumberstilebank-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-39-games-sort-numbers-sortnumberstilebank-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-37-games-sort-numbers-sortnumberstilebank-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6357,9 +6059,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> TextQuestion</h2>
       <div class="badges">
-        <label for="c-40-components-questions-textquestion-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-40-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-40-components-questions-textquestion-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-38-components-questions-textquestion-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-38-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-38-components-questions-textquestion-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -6371,10 +6073,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-40-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-40-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-38-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-38-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-40-components-questions-textquestion-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-38-components-questions-textquestion-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6455,8 +6157,8 @@ sessionId?: string</code></pre>
       <h2><span class="status-dot dot-ok"></span> ThemeToggle</h2>
       <div class="badges">
         
-        <label for="c-41-components-themetoggle-info" class="badge info as-toggle">1 info</label>
-        <label for="c-41-components-themetoggle-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-39-components-themetoggle-info" class="badge info as-toggle">1 info</label>
+        <label for="c-39-components-themetoggle-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -6468,8 +6170,8 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-41-components-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-41-components-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-39-components-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-39-components-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6523,8 +6225,8 @@ sessionId?: string</code></pre>
       <h2><span class="status-dot dot-ok"></span> UpdateBanner</h2>
       <div class="badges">
         
-        <label for="c-42-components-updatebanner-info" class="badge info as-toggle">1 info</label>
-        <label for="c-42-components-updatebanner-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-40-components-updatebanner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-40-components-updatebanner-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -6536,8 +6238,8 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-42-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-42-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-40-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-40-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6627,8 +6329,8 @@ sessionId?: string</code></pre>
       <h2><span class="status-dot dot-ok"></span> WordLibraryExplorer</h2>
       <div class="badges">
         
-        <label for="c-43-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-43-data-wordlibraryexplorer-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-41-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
+        <label for="c-41-data-wordlibraryexplorer-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -6640,8 +6342,8 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-43-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-43-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-41-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-41-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6694,9 +6396,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> WordSpell</h2>
       <div class="badges">
-        <label for="c-44-games-word-spell-wordspell-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-44-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-44-games-word-spell-wordspell-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-42-games-word-spell-wordspell-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-42-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
+        <label for="c-42-games-word-spell-wordspell-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -6708,10 +6410,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-44-games-word-spell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-44-games-word-spell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-42-games-word-spell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-42-games-word-spell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-44-games-word-spell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-42-games-word-spell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6876,9 +6578,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
       <div class="badges">
-        <label for="c-45-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-45-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-45-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
+        <label for="c-43-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-43-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-43-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
         
       </div>
     </div>
@@ -6889,9 +6591,9 @@ sessionId?: string</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-45-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-45-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-45-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-43-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-43-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-43-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -7990,7 +7692,7 @@ export const HUD_Round5Of5: Story = {
       <div class="badges">
         <label for="c-error-0-components-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-0-components-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-error-0-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -8019,45 +7721,57 @@ No suitable component definition found.
 You can debug your component file in this playground: https://react-docgen.dev/playground
 Code:
 // src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
-import { useEffect, useState } from &#39;react&#39;;
+import { useNavigate, useRouter } from &#39;@tanstack/react-router&#39;;
+import { Settings as SettingsIcon } from &#39;lucide-react&#39;;
+import { useEffect, useRef, useState } from &#39;react&#39;;
 import { createPortal } from &#39;react-dom&#39;;
 import { useTranslation } from &#39;react-i18next&#39;;
+import type { Cover } from &#39;@/games/cover-type&#39;;
 import type { BookmarkColorKey } from &#39;@/lib/bookmark-colors&#39;;
-import type { ConfigField } from &#39;@/lib/config-fields&#39;;
 import type { JSX } from &#39;react&#39;;
-import { ConfigFormFields } from &#39;@/components/ConfigFormFields&#39;;
-import { GameNameChip } from &#39;@/components/GameNameChip&#39;;
+import { AdvancedConfigModal } from &#39;@/components/AdvancedConfigModal&#39;;
+import { GameCover } from &#39;@/components/GameCover&#39;;
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from &#39;@/components/ui/dialog&#39;;
+import { getSimpleConfigFormRenderer } from &#39;@/games/config-fields-registry&#39;;
+import { resolveCover } from &#39;@/games/cover&#39;;
 import {
   BOOKMARK_COLORS,
-  BOOKMARK_COLOR_KEYS,
   DEFAULT_BOOKMARK_COLOR,
 } from &#39;@/lib/bookmark-colors&#39;;
-import { configToTags } from &#39;@/lib/config-tags&#39;;
 import { cancelSpeech, speak } from &#39;@/lib/speech/SpeechOutput&#39;;
+import { suggestBookmarkName } from &#39;@/lib/suggest-bookmark-name&#39;;
+
+export type SaveBookmarkInput = {
+  name: string;
+  color: BookmarkColorKey;
+  config: Record&lt;string, unknown&gt;;
+  cover?: Cover;
+};
 
 type InstructionsOverlayProps = {
   text: string;
   onStart: () =&gt; void;
   ttsEnabled: boolean;
   gameTitle: string;
+  gameId: string;
+  cover?: Cover;
+  bookmarkId?: string;
   bookmarkName?: string;
   bookmarkColor?: BookmarkColorKey;
-  subject?: string;
   config: Record&lt;string, unknown&gt;;
   onConfigChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
-  onSaveBookmark: (
-    name: string,
-    color: BookmarkColorKey,
-  ) =&gt; Promise&lt;void&gt;;
+  onSaveBookmark: (input: SaveBookmarkInput) =&gt; Promise&lt;string&gt;;
   onUpdateBookmark?: (
     name: string,
     config: Record&lt;string, unknown&gt;,
+    extras?: { cover?: Cover; color?: BookmarkColorKey },
   ) =&gt; Promise&lt;void&gt;;
-  configFields?: ConfigField[];
-  renderConfigForm?: (props: {
-    config: Record&lt;string, unknown&gt;;
-    onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
-  }) =&gt; JSX.Element;
+  existingBookmarkNames?: readonly string[];
 };
 
 export const InstructionsOverlay = ({
@@ -8065,21 +7779,39 @@ export const InstructionsOverlay = ({
   onStart,
   ttsEnabled,
   gameTitle,
+  gameId,
+  cover,
+  bookmarkId,
   bookmarkName,
   bookmarkColor = DEFAULT_BOOKMARK_COLOR,
-  subject,
   config,
   onConfigChange,
   onSaveBookmark,
   onUpdateBookmark,
-  configFields,
-  renderConfigForm,
+  existingBookmarkNames = [],
 }: InstructionsOverlayProps): JSX.Element =&gt; {
   const { t } = useTranslation(&#39;games&#39;);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [newBookmarkName, setNewBookmarkName] = useState(&#39;&#39;);
-  const [newBookmarkColor, setNewBookmarkColor] =
-    useState&lt;BookmarkColorKey&gt;(DEFAULT_BOOKMARK_COLOR);
+  const navigate = useNavigate({
+    from: &#39;/$locale/game/$gameId&#39;,
+  });
+  const router = useRouter();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [savingName, setSavingName] = useState(&#39;&#39;);
+  const [saveSubmitAttempted, setSaveSubmitAttempted] = useState(false);
+  const saveNameRef = useRef&lt;HTMLInputElement&gt;(null);
+
+  useEffect(() =&gt; {
+    if (saveDialogOpen) {
+      // Defer so the Radix Dialog finishes mounting before we grab focus.
+      const id = globalThis.setTimeout(
+        () =&gt; saveNameRef.current?.focus(),
+        0,
+      );
+      return () =&gt; globalThis.clearTimeout(id);
+    }
+    return;
+  }, [saveDialogOpen]);
 
   useEffect(() =&gt; {
     if (ttsEnabled) speak(text);
@@ -8090,219 +7822,276 @@ export const InstructionsOverlay = ({
   }, []);
 
   const settingsColors = BOOKMARK_COLORS[bookmarkColor];
-  const tags = configToTags(config);
+  const resolvedCover = resolveCover({ cover }, gameId);
+
+  const SimpleForm = getSimpleConfigFormRenderer(gameId);
+
+  const modalMode =
+    bookmarkId &amp;&amp; bookmarkName
+      ? ({
+          kind: &#39;bookmark&#39;,
+          configId: bookmarkId,
+          name: bookmarkName,
+          color: bookmarkColor,
+          cover,
+        } as const)
+      : ({ kind: &#39;default&#39; } as const);
+
+  const handlePlay = () =&gt; {
+    if (bookmarkId &amp;&amp; bookmarkName &amp;&amp; onUpdateBookmark) {
+      void (async () =&gt; {
+        try {
+          await onUpdateBookmark(bookmarkName, config, {
+            cover,
+            color: bookmarkColor,
+          });
+        } catch (error) {
+          console.error(&#39;Failed to save bookmark on play&#39;, error);
+        }
+        onStart();
+      })();
+      return;
+    }
+    setSaveSubmitAttempted(false);
+    setSavingName(
+      suggestBookmarkName(gameTitle, existingBookmarkNames),
+    );
+    setSaveDialogOpen(true);
+  };
+
+  const saveOnPlayError: string | null = (() =&gt; {
+    const trimmed = savingName.trim();
+    if (trimmed === &#39;&#39;)
+      return t(&#39;instructions.nameRequired&#39;, {
+        defaultValue: &#39;Please enter a bookmark name.&#39;,
+      });
+    if (existingBookmarkNames.includes(trimmed))
+      return t(&#39;instructions.nameDuplicate&#39;, {
+        defaultValue: &#39;A bookmark with that name already exists.&#39;,
+      });
+    return null;
+  })();
+  const showSaveOnPlayError =
+    saveSubmitAttempted &amp;&amp; saveOnPlayError !== null;
+
+  const handleSaveAndPlay = () =&gt; {
+    setSaveSubmitAttempted(true);
+    if (saveOnPlayError !== null) {
+      saveNameRef.current?.focus();
+      return;
+    }
+    const trimmed = savingName.trim();
+    void (async () =&gt; {
+      try {
+        const newId = await onSaveBookmark({
+          name: trimmed,
+          color: bookmarkColor,
+          config,
+          cover,
+        });
+        setSaveDialogOpen(false);
+        await navigate({
+          search: (prev) =&gt; ({ ...prev, configId: newId }),
+        });
+        onStart();
+      } catch (error) {
+        console.error(&#39;Failed to save bookmark on play&#39;, error);
+      }
+    })();
+  };
+
+  const handlePlayWithoutSaving = () =&gt; {
+    setSaveDialogOpen(false);
+    onStart();
+  };
 
   return createPortal(
     &lt;div
       role=&quot;dialog&quot;
       aria-label=&quot;Game instructions&quot;
-      className=&quot;fixed inset-0 z-40 flex flex-col items-center justify-start overflow-y-auto bg-background/95 px-5 pb-8 pt-20&quot;
+      className=&quot;fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-background/95 px-5 pb-8 pt-24&quot;
     &gt;
-      &lt;div className=&quot;flex w-full max-w-sm flex-col items-center gap-5&quot;&gt;
-        {/* 1. Game name chip */}
-        &lt;div className=&quot;w-full&quot;&gt;
-          &lt;GameNameChip
-            title={gameTitle}
-            bookmarkName={bookmarkName}
-            bookmarkColor={bookmarkColor}
-            subject={subject}
-          /&gt;
+      &lt;div className=&quot;mx-auto flex w-full max-w-sm flex-col overflow-hidden rounded-3xl bg-card shadow-lg md:max-w-2xl&quot;&gt;
+        {/* 1. Hero cover */}
+        &lt;div className=&quot;flex justify-center bg-muted/40 p-4&quot;&gt;
+          &lt;GameCover cover={resolvedCover} size=&quot;hero&quot; /&gt;
         &lt;/div&gt;
 
-        {/* 2. Instructions text */}
-        &lt;p className=&quot;max-w-xs text-center text-base font-semibold text-foreground leading-relaxed&quot;&gt;
-          {text}
-        &lt;/p&gt;
+        &lt;div className=&quot;flex flex-col gap-4 p-4&quot;&gt;
+          {/* 2. Title row + cog — matches GameCard heading/subtitle order */}
+          &lt;div className=&quot;flex items-center justify-between gap-2&quot;&gt;
+            &lt;div&gt;
+              &lt;h2
+                className=&quot;text-xl font-extrabold&quot;
+                style={
+                  bookmarkName
+                    ? { color: settingsColors.text }
+                    : undefined
+                }
+              &gt;
+                {bookmarkName ?? gameTitle}
+              &lt;/h2&gt;
+              {bookmarkName &amp;&amp; (
+                &lt;p className=&quot;text-xs italic text-foreground/80&quot;&gt;
+                  {gameTitle}
+                &lt;/p&gt;
+              )}
+            &lt;/div&gt;
+            &lt;button
+              type=&quot;button&quot;
+              aria-label={t(&#39;instructions.configure&#39;, {
+                defaultValue: &#39;Configure&#39;,
+              })}
+              onClick={() =&gt; setModalOpen(true)}
+              className=&quot;flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted&quot;
+            &gt;
+              &lt;SettingsIcon size={18} /&gt;
+            &lt;/button&gt;
+          &lt;/div&gt;
 
-        {/* 3. Let&#39;s go button */}
-        &lt;button
-          type=&quot;button&quot;
-          onClick={onStart}
-          className=&quot;h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95&quot;
-        &gt;
-          {t(&#39;instructions.lets-go&#39;)}
-        &lt;/button&gt;
+          {/* 3. Instructions text */}
+          &lt;p className=&quot;text-center text-base font-semibold text-foreground leading-relaxed&quot;&gt;
+            {text}
+          &lt;/p&gt;
 
-        {/* 4. Settings chip (collapsed by default) */}
-        &lt;div
-          className=&quot;w-full overflow-hidden rounded-xl border border-border&quot;
-          style={
-            {
-              &#39;--bookmark-play&#39;: settingsColors.playBg,
-            } as React.CSSProperties
-          }
-        &gt;
-          {/* Settings header */}
+          {/* 4. Let&#39;s go button */}
           &lt;button
             type=&quot;button&quot;
-            aria-label={t(&#39;instructions.settings&#39;)}
-            onClick={() =&gt; setSettingsOpen((v) =&gt; !v)}
-            className=&quot;flex min-h-12 w-full items-center gap-2 bg-muted px-3 text-left&quot;
-            style={
-              settingsOpen
-                ? { background: &#39;var(--bookmark-play)&#39; }
-                : undefined
-            }
+            onClick={handlePlay}
+            className=&quot;h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95&quot;
           &gt;
-            &lt;span
-              className={`flex-1 text-sm font-semibold ${settingsOpen ? &#39;text-white&#39; : &#39;&#39;}`}
-            &gt;
-              {t(&#39;instructions.settings&#39;)}
-            &lt;/span&gt;
-            &lt;span
-              className={`text-xs ${settingsOpen ? &#39;text-white/70&#39; : &#39;&#39;}`}
-            &gt;
-              {settingsOpen ? &#39;▲&#39; : &#39;▼&#39;}
-            &lt;/span&gt;
+            {t(&#39;instructions.lets-go&#39;)}
           &lt;/button&gt;
 
-          {/* Collapsed: config summary tags */}
-          {!settingsOpen &amp;&amp; (
-            &lt;div className=&quot;flex flex-wrap gap-1 bg-muted/50 px-3 pb-2 pt-1&quot;&gt;
-              {tags.map((tag) =&gt; (
-                &lt;span
-                  key={tag}
-                  className=&quot;rounded bg-muted px-2 py-0.5 text-xs font-medium text-foreground&quot;
-                &gt;
-                  {tag}
-                &lt;/span&gt;
-              ))}
-            &lt;/div&gt;
-          )}
-
-          {/* Expanded: form + save actions */}
-          {settingsOpen &amp;&amp; (
-            &lt;div className=&quot;flex flex-col gap-3 bg-muted/30 p-3&quot;&gt;
-              {renderConfigForm
-                ? renderConfigForm({
-                    config,
-                    onChange: onConfigChange,
-                  })
-                : configFields &amp;&amp; (
-                    &lt;ConfigFormFields
-                      fields={configFields}
-                      config={config}
-                      onChange={onConfigChange}
-                    /&gt;
-                  )}
-
-              &lt;div className=&quot;border-t border-border pt-3 flex flex-col gap-2&quot;&gt;
-                {bookmarkName &amp;&amp; onUpdateBookmark ? (
-                  &lt;&gt;
-                    &lt;label className=&quot;flex flex-col gap-1 text-sm font-semibold text-foreground&quot;&gt;
-                      Bookmark name
-                      &lt;input
-                        type=&quot;text&quot;
-                        defaultValue={bookmarkName}
-                        id=&quot;instructions-bookmark-name&quot;
-                        className=&quot;h-12 rounded-lg border border-input bg-background px-3 text-sm&quot;
-                      /&gt;
-                    &lt;/label&gt;
-                    &lt;button
-                      type=&quot;button&quot;
-                      aria-label={`Update ${bookmarkName}`}
-                      onClick={() =&gt; {
-                        const el =
-                          document.querySelector&lt;HTMLInputElement&gt;(
-                            &#39;#instructions-bookmark-name&#39;,
-                          );
-                        void onUpdateBookmark(
-                          el?.value ?? bookmarkName,
-                          config,
-                        );
-                      }}
-                      className=&quot;h-12 w-full rounded-xl font-bold text-white text-sm&quot;
-                      style={{ background: &#39;var(--bookmark-play)&#39; }}
-                    &gt;
-                      {t(&#39;instructions.updateBookmark&#39;, {
-                        name: bookmarkName,
-                        defaultValue: `Update &quot;${bookmarkName}&quot;`,
-                      })}
-                    &lt;/button&gt;
-                    &lt;button
-                      type=&quot;button&quot;
-                      aria-label=&quot;Save as new bookmark&quot;
-                      onClick={() =&gt; setSettingsOpen(false)}
-                      className=&quot;h-12 w-full rounded-xl border border-input bg-background text-sm font-semibold text-primary&quot;
-                    &gt;
-                      {t(&#39;instructions.saveAsNew&#39;, {
-                        defaultValue: &#39;Save as new bookmark…&#39;,
-                      })}
-                    &lt;/button&gt;
-                  &lt;/&gt;
-                ) : (
-                  &lt;div className=&quot;flex flex-col gap-2&quot;&gt;
-                    &lt;span className=&quot;text-sm font-semibold text-foreground&quot;&gt;
-                      {t(&#39;common:saveConfig.saveBookmarkLabel&#39;, {
-                        defaultValue: &#39;Save as bookmark&#39;,
-                      })}
-                    &lt;/span&gt;
-                    &lt;div
-                      className=&quot;grid gap-1&quot;
-                      style={{ gridTemplateColumns: &#39;repeat(6, 1fr)&#39; }}
-                      role=&quot;group&quot;
-                      aria-label=&quot;Bookmark color&quot;
-                    &gt;
-                      {BOOKMARK_COLOR_KEYS.map((key) =&gt; (
-                        &lt;button
-                          key={key}
-                          type=&quot;button&quot;
-                          aria-label={key}
-                          aria-pressed={newBookmarkColor === key}
-                          onClick={() =&gt; setNewBookmarkColor(key)}
-                          className=&quot;h-8 w-8 rounded-full border-2 transition-transform hover:scale-110&quot;
-                          style={{
-                            background: BOOKMARK_COLORS[key].playBg,
-                            borderColor:
-                              newBookmarkColor === key
-                                ? BOOKMARK_COLORS[key].playBg
-                                : &#39;transparent&#39;,
-                            outline:
-                              newBookmarkColor === key
-                                ? &#39;3px solid white&#39;
-                                : undefined,
-                            outlineOffset:
-                              newBookmarkColor === key
-                                ? &#39;-4px&#39;
-                                : undefined,
-                          }}
-                        /&gt;
-                      ))}
-                    &lt;/div&gt;
-                    &lt;div className=&quot;flex gap-2&quot;&gt;
-                      &lt;input
-                        type=&quot;text&quot;
-                        value={newBookmarkName}
-                        onChange={(e) =&gt;
-                          setNewBookmarkName(e.target.value)
-                        }
-                        placeholder=&quot;e.g. Easy Mode&quot;
-                        className=&quot;h-12 flex-1 rounded-lg border border-input bg-background px-3 text-sm&quot;
-                      /&gt;
-                      &lt;button
-                        type=&quot;button&quot;
-                        aria-label=&quot;Save bookmark&quot;
-                        onClick={() =&gt; {
-                          if (newBookmarkName.trim()) {
-                            void onSaveBookmark(
-                              newBookmarkName.trim(),
-                              newBookmarkColor,
-                            );
-                            setNewBookmarkName(&#39;&#39;);
-                          }
-                        }}
-                        className=&quot;h-12 w-12 flex-shrink-0 rounded-lg bg-primary text-lg text-primary-foreground&quot;
-                      &gt;
-                        🔖
-                      &lt;/button&gt;
-                    &lt;/div&gt;
-                  &lt;/div&gt;
-                )}
-              &lt;/div&gt;
+          {/* 5. Simple settings form (always expanded) */}
+          {SimpleForm &amp;&amp; (
+            &lt;div className=&quot;border-t border-border pt-4&quot;&gt;
+              &lt;SimpleForm config={config} onChange={onConfigChange} /&gt;
             &lt;/div&gt;
           )}
         &lt;/div&gt;
       &lt;/div&gt;
+
+      {/* Advanced config modal (opened by cog button) */}
+      &lt;AdvancedConfigModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        gameId={gameId}
+        mode={modalMode}
+        config={config}
+        existingBookmarkNames={existingBookmarkNames}
+        onCancel={() =&gt; setModalOpen(false)}
+        onSaveNew={(payload) =&gt; {
+          void (async () =&gt; {
+            try {
+              const newId = await onSaveBookmark({
+                name: payload.name,
+                color: payload.color,
+                config: payload.config,
+                cover: payload.cover,
+              });
+              onConfigChange(payload.config);
+              setModalOpen(false);
+              await navigate({
+                search: (prev) =&gt; ({ ...prev, configId: newId }),
+              });
+            } catch (error) {
+              // Surface duplicate-name and similar errors; keep modal open.
+              console.error(&#39;Failed to save bookmark&#39;, error);
+            }
+          })();
+        }}
+        onUpdate={
+          onUpdateBookmark
+            ? (payload) =&gt; {
+                void (async () =&gt; {
+                  try {
+                    await onUpdateBookmark(
+                      payload.name,
+                      payload.config,
+                      {
+                        cover: payload.cover,
+                        color: payload.color,
+                      },
+                    );
+                    onConfigChange(payload.config);
+                    setModalOpen(false);
+                    await router.invalidate();
+                  } catch (error) {
+                    console.error(&#39;Failed to update bookmark&#39;, error);
+                  }
+                })();
+              }
+            : undefined
+        }
+      /&gt;
+
+      {/* Save-on-play prompt for default (non-bookmarked) games */}
+      &lt;Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}&gt;
+        &lt;DialogContent&gt;
+          &lt;DialogHeader&gt;
+            &lt;DialogTitle&gt;
+              {t(&#39;instructions.saveOnPlayTitle&#39;, {
+                defaultValue: &#39;Save these settings as a bookmark?&#39;,
+              })}
+            &lt;/DialogTitle&gt;
+          &lt;/DialogHeader&gt;
+          &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+            &lt;label className=&quot;flex flex-col gap-1&quot;&gt;
+              &lt;span className=&quot;text-xs font-semibold uppercase text-muted-foreground&quot;&gt;
+                {t(&#39;instructions.saveOnPlayNameLabel&#39;, {
+                  defaultValue: &#39;Bookmark name&#39;,
+                })}
+              &lt;/span&gt;
+              &lt;input
+                ref={saveNameRef}
+                type=&quot;text&quot;
+                value={savingName}
+                onChange={(e) =&gt; setSavingName(e.target.value)}
+                aria-invalid={showSaveOnPlayError}
+                aria-describedby={
+                  showSaveOnPlayError ? &#39;save-on-play-error&#39; : undefined
+                }
+                className={`h-10 rounded-lg border bg-background px-3 text-sm ${
+                  showSaveOnPlayError
+                    ? &#39;border-destructive&#39;
+                    : &#39;border-input&#39;
+                }`}
+              /&gt;
+              {showSaveOnPlayError &amp;&amp; (
+                &lt;span
+                  id=&quot;save-on-play-error&quot;
+                  role=&quot;alert&quot;
+                  className=&quot;text-xs font-semibold text-destructive&quot;
+                &gt;
+                  {saveOnPlayError}
+                &lt;/span&gt;
+              )}
+            &lt;/label&gt;
+            &lt;div className=&quot;flex gap-2&quot;&gt;
+              &lt;button
+                type=&quot;button&quot;
+                onClick={handlePlayWithoutSaving}
+                className=&quot;flex-1 rounded-lg border border-input bg-background py-2 text-sm&quot;
+              &gt;
+                {t(&#39;instructions.playWithoutSaving&#39;, {
+                  defaultValue: &#39;Play without saving&#39;,
+                })}
+              &lt;/button&gt;
+              &lt;button
+                type=&quot;button&quot;
+                onClick={handleSaveAndPlay}
+                aria-disabled={saveOnPlayError !== null}
+                className=&quot;flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground&quot;
+              &gt;
+                {t(&#39;instructions.saveAndPlay&#39;, {
+                  defaultValue: &#39;Save &amp; play&#39;,
+                })}
+              &lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/DialogContent&gt;
+      &lt;/Dialog&gt;
     &lt;/div&gt;,
     document.body,
   );
@@ -8343,30 +8132,25 @@ export const InstructionsOverlay = ({
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default Dark</span>
+                <span class="ex-name">With Bookmark</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const DefaultDark = () =&gt; &lt;InstructionsOverlay /&gt;;</code></pre>
+              <pre><code>const WithBookmark = () =&gt; &lt;InstructionsOverlay bookmarkId=&quot;abc123&quot; bookmarkName=&quot;Easy Mode&quot; bookmarkColor=&quot;teal&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Settings Expanded</span>
+                <span class="ex-name">Word Spell Default</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const SettingsExpanded = () =&gt; &lt;InstructionsOverlay bookmarkName=&quot;Easy Mode&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Settings Expanded Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const SettingsExpandedDark = () =&gt; &lt;InstructionsOverlay bookmarkName=&quot;Easy Mode&quot; /&gt;;</code></pre>
+              <pre><code>const WordSpellDefault = () =&gt; &lt;InstructionsOverlay
+    text=&quot;Drag the letters to spell the word.&quot;
+    gameTitle=&quot;Word Spell&quot;
+    gameId=&quot;word-spell&quot;
+    config={{ inputMethod: &#39;drag&#39;, totalRounds: 8, ttsEnabled: true }} /&gt;;</code></pre>
             </div>
         </div>
     
