@@ -5,80 +5,38 @@ const meta: Meta<typeof GameCard> = {
   component: GameCard,
   tags: ['autodocs'],
   args: {
-    entry: {
-      id: 'word-spell',
-      titleKey: 'word-spell',
-      descriptionKey: 'word-spell-description',
-      levels: ['1', '2'],
-      subject: 'reading',
-      defaultCover: {
-        kind: 'emoji',
-        emoji: '🔤',
-        gradient: ['#fde68a', '#fb923c'],
-      },
-    },
-    savedConfigs: [],
+    gameId: 'sort-numbers',
+    title: 'Count in Order',
+    chips: ['🚀 Up', '5 numbers', '2s'],
   },
   argTypes: {
-    onSaveConfig: { action: 'configSaved' },
-    onRemoveConfig: { action: 'configRemoved' },
-    onUpdateConfig: { action: 'configUpdated' },
     onPlay: { action: 'played' },
-    onPlayWithConfig: { action: 'playedWithConfig' },
+    onOpenCog: { action: 'cogOpened' },
   },
 };
 export default meta;
 
 type Story = StoryObj<typeof GameCard>;
 
-export const Default: Story = {};
-
-export const WithSavedConfig: Story = {
+export const Default: Story = {
   args: {
-    savedConfigs: [
-      {
-        id: 'cfg-1',
-        profileId: 'default',
-        gameId: 'word-spell',
-        name: 'Easy Mode',
-        config: {},
-        color: 'indigo',
-        createdAt: new Date().toISOString(),
-      },
-    ],
+    variant: 'default',
   },
 };
 
-export const MultiLevel: Story = {
+export const Bookmark: Story = {
   args: {
-    entry: {
-      id: 'number-match',
-      titleKey: 'number-match',
-      descriptionKey: 'number-match-description',
-      levels: ['1', '2', '3'],
-      subject: 'math',
-      defaultCover: {
-        kind: 'emoji',
-        emoji: '🔢',
-        gradient: ['#bae6fd', '#6366f1'],
-      },
-    },
+    variant: 'bookmark',
+    bookmarkName: 'Skip by 2',
+    bookmarkColor: 'amber',
   },
 };
 
-export const EarlyYearsReading: Story = {
+export const BookmarkPurple: Story = {
   args: {
-    entry: {
-      id: 'word-spell',
-      titleKey: 'word-spell',
-      descriptionKey: 'word-spell-description',
-      levels: ['PK', 'K'],
-      subject: 'reading',
-      defaultCover: {
-        kind: 'emoji',
-        emoji: '🔤',
-        gradient: ['#fde68a', '#fb923c'],
-      },
-    },
+    variant: 'bookmark',
+    bookmarkName: 'Big to Small',
+    bookmarkColor: 'purple',
+    chips: ['⬇️ Down', '10 numbers', '3s'],
   },
 };
