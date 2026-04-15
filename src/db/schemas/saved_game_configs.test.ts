@@ -43,4 +43,19 @@ describe('saved_game_configs schema v2', () => {
     });
     expect(doc.cover).toBeUndefined();
   });
+
+  it('rejects an invalid cover kind', async () => {
+    await expect(
+      db.saved_game_configs.insert({
+        id: 'test-bad-cover',
+        profileId: 'p1',
+        gameId: 'word-spell',
+        name: 'Bad',
+        config: {},
+        createdAt: new Date().toISOString(),
+        color: 'amber',
+        cover: { kind: 'unknown', emoji: '🦁' } as never,
+      }),
+    ).rejects.toThrow();
+  });
 });
