@@ -1,6 +1,5 @@
 import { withDb } from '../../.storybook/decorators/withDb';
 import { withRouter } from '../../.storybook/decorators/withRouter';
-import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
 import type { ConfigField } from '@/lib/config-fields';
 import type {
   GameEngineState,
@@ -12,7 +11,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
 import { GameShell } from '@/components/game/GameShell';
 import { GameNameChip } from '@/components/GameNameChip';
-import { SavedConfigChip } from '@/components/SavedConfigChip';
 
 // ── GameShell fixture data ────────────────────────────────────────────────
 
@@ -59,16 +57,6 @@ const sessionMeta: SessionMeta = {
 
 // ── Bookmark component fixture data ──────────────────────────────────────
 
-const savedDoc: SavedGameConfigDoc = {
-  id: 'cfg-showcase',
-  profileId: 'anonymous',
-  gameId: 'sort-numbers',
-  name: 'Easy Numbers',
-  config: { totalRounds: 8, inputMethod: 'drag' },
-  createdAt: new Date().toISOString(),
-  color: 'teal',
-};
-
 const configFields: ConfigField[] = [
   {
     type: 'select',
@@ -103,13 +91,6 @@ const ShowcaseBody = () => (
       bookmarkColor="teal"
     />
     <GameNameChip title="Word Spell" subject="reading" />
-    <SavedConfigChip
-      doc={savedDoc}
-      configFields={configFields}
-      onPlay={() => {}}
-      onDelete={() => {}}
-      onSave={async () => {}}
-    />
     <ConfigFormFields
       fields={configFields}
       config={{ inputMethod: 'drag', totalRounds: 8, ttsEnabled: true }}

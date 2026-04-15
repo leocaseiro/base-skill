@@ -6,19 +6,11 @@ const baseArgs = {
   onStart: () => {},
   ttsEnabled: false,
   gameTitle: 'Sort Numbers',
+  gameId: 'sort-numbers',
   bookmarkColor: 'indigo' as const,
-  config: { totalRounds: 8 },
+  config: { totalRounds: 5 },
   onConfigChange: () => {},
-  onSaveBookmark: async () => {},
-  configFields: [
-    {
-      type: 'number' as const,
-      key: 'totalRounds',
-      label: 'Total rounds',
-      min: 1,
-      max: 20,
-    },
-  ],
+  onSaveBookmark: async () => 'stub-id',
 };
 
 const meta: Meta<typeof InstructionsOverlay> = {
@@ -40,21 +32,21 @@ type Story = StoryObj<typeof InstructionsOverlay>;
 
 export const Default: Story = {};
 
-export const DefaultDark: Story = {
-  parameters: { globals: { theme: 'dark' } },
-};
-
-export const SettingsExpanded: Story = {
+export const WithBookmark: Story = {
   args: {
     ...baseArgs,
+    bookmarkId: 'abc123',
     bookmarkName: 'Easy Mode',
+    bookmarkColor: 'teal',
   },
 };
 
-export const SettingsExpandedDark: Story = {
+export const WordSpellDefault: Story = {
   args: {
     ...baseArgs,
-    bookmarkName: 'Easy Mode',
+    text: 'Drag the letters to spell the word.',
+    gameTitle: 'Word Spell',
+    gameId: 'word-spell',
+    config: { inputMethod: 'drag', totalRounds: 8, ttsEnabled: true },
   },
-  parameters: { globals: { theme: 'dark' } },
 };

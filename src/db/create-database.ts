@@ -38,6 +38,7 @@ const COLLECTIONS = {
         ...oldDoc,
         color: 'indigo',
       }),
+      2: (oldDoc: Record<string, unknown>) => oldDoc,
     },
   },
   themes: { schema: themesSchema },

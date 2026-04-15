@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { seedMathRandom } from './seed-math-random';
+import { startGame } from './start-game';
 import type { Page } from '@playwright/test';
 
 const MOBILE_VIEWPORT = { width: 390, height: 844 };
@@ -30,7 +31,8 @@ test('@visual home page', async ({ page }) => {
   await page.goto('/en/');
   await page.getByRole('main').waitFor({ state: 'visible' });
   await page
-    .getByRole('group', { name: /filter by grade level/i })
+    .getByRole('button', { name: /^Play / })
+    .first()
     .waitFor({ state: 'visible' });
   await expect(page).toHaveScreenshot('home.png', { fullPage: true });
 });
@@ -39,7 +41,8 @@ test('@visual home page dark', async ({ page }) => {
   await page.goto('/en/');
   await page.getByRole('main').waitFor({ state: 'visible' });
   await page
-    .getByRole('group', { name: /filter by grade level/i })
+    .getByRole('button', { name: /^Play / })
+    .first()
     .waitFor({ state: 'visible' });
   await setDarkMode(page);
   await expect(page).toHaveScreenshot('home-dark.png', {
@@ -76,7 +79,7 @@ test('@visual WordSpell picture mode mid-game layout', async ({
   page,
 }) => {
   await page.goto('/en/game/word-spell');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: /^Letter /i })
     .first()
@@ -90,7 +93,7 @@ test('@visual WordSpell picture mode mid-game layout dark', async ({
   page,
 }) => {
   await page.goto('/en/game/word-spell');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: /^Letter /i })
     .first()
@@ -110,7 +113,7 @@ test('@visual NumberMatch numeral-to-group layout', async ({
   page,
 }) => {
   await page.goto('/en/game/number-match');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: 'Hear the question' })
     .waitFor({ state: 'visible' });
@@ -124,7 +127,7 @@ test('@visual NumberMatch numeral-to-group layout dark', async ({
   page,
 }) => {
   await page.goto('/en/game/number-match');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: 'Hear the question' })
     .waitFor({ state: 'visible' });
@@ -140,7 +143,7 @@ test('@visual NumberMatch numeral-to-group layout mobile', async ({
 }) => {
   await page.setViewportSize(MOBILE_VIEWPORT);
   await page.goto('/en/game/number-match');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: 'Hear the question' })
     .waitFor({ state: 'visible' });
@@ -155,7 +158,7 @@ test('@visual NumberMatch numeral-to-group layout tablet portrait', async ({
 }) => {
   await page.setViewportSize(TABLET_PORTRAIT_VIEWPORT);
   await page.goto('/en/game/number-match');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: 'Hear the question' })
     .waitFor({ state: 'visible' });
@@ -165,18 +168,29 @@ test('@visual NumberMatch numeral-to-group layout tablet portrait', async ({
   );
 });
 
+type NumberMatchPair = { from: string; to: string };
+
+const MODE_TO_PAIR: Record<string, NumberMatchPair> = {
+  'group-to-numeral': { from: 'group', to: 'numeral' },
+  'cardinal-number-to-text': { from: 'numeral', to: 'word' },
+  'ordinal-number-to-text': { from: 'ordinal', to: 'word' },
+};
+
 async function selectNumberMatchMode(
   page: Page,
   mode: string,
 ): Promise<void> {
+  const pair = MODE_TO_PAIR[mode];
+  if (!pair) throw new Error(`Unhandled NumberMatch mode: ${mode}`);
   await page.goto('/en/game/number-match');
   await page
     .getByRole('button', { name: /let's go/i })
     .waitFor({ state: 'visible' });
-  // Open settings panel and switch the mode before starting the round.
-  await page.getByRole('button', { name: /settings/i }).click();
-  await page.getByLabel('Mode', { exact: true }).selectOption(mode);
-  await page.getByRole('button', { name: /let's go/i }).click();
+  // InstructionsOverlay renders NumberMatchSimpleConfigForm inline —
+  // change the pair via its "what you see" / "what you match" selects.
+  await page.getByLabel('what you see').selectOption(pair.from);
+  await page.getByLabel('what you match').selectOption(pair.to);
+  await startGame(page);
   await page
     .getByRole('button', { name: 'Hear the question' })
     .waitFor({ state: 'visible' });
@@ -221,7 +235,7 @@ test('@visual NumberMatch ordinal-number-to-text layout', async ({
 // unrelated layout so regressions in the DominoTile are easy to spot.
 test('@visual NumberMatch domino tile bank', async ({ page }) => {
   await page.goto('/en/game/number-match');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: 'Hear the question' })
     .waitFor({ state: 'visible' });
@@ -234,7 +248,7 @@ test('@visual NumberMatch domino tile bank', async ({ page }) => {
 
 test('@visual NumberMatch domino tile bank dark', async ({ page }) => {
   await page.goto('/en/game/number-match');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: 'Hear the question' })
     .waitFor({ state: 'visible' });
@@ -258,13 +272,11 @@ async function openNumberMatchWithDots(page: Page): Promise<void> {
   });
   await page.goto('/en/game/number-match');
   await page
-    .getByRole('button', { name: /settings/i })
-    .first()
-    .click();
-  await page
-    .getByLabel('Mode', { exact: true })
-    .selectOption('group-to-numeral');
-  await page.getByRole('button', { name: /let's go/i }).click();
+    .getByRole('button', { name: /let's go/i })
+    .waitFor({ state: 'visible' });
+  await page.getByLabel('what you see').selectOption('group');
+  await page.getByLabel('what you match').selectOption('numeral');
+  await startGame(page);
   await page
     .getByRole('button', { name: /^Dot 1 of/i })
     .waitFor({ state: 'visible' });
@@ -298,7 +310,7 @@ test('@visual NumberMatch countable dots partially tapped', async ({
 
 test('@visual SortNumbers mid-game layout', async ({ page }) => {
   await page.goto('/en/game/sort-numbers');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: /^Number /i })
     .first()
@@ -310,7 +322,7 @@ test('@visual SortNumbers mid-game layout', async ({ page }) => {
 
 test('@visual SortNumbers mid-game layout dark', async ({ page }) => {
   await page.goto('/en/game/sort-numbers');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: /^Number /i })
     .first()
@@ -324,7 +336,7 @@ test('@visual SortNumbers mid-game layout dark', async ({ page }) => {
 test('@visual SortNumbers mid-game layout mobile', async ({ page }) => {
   await page.setViewportSize(MOBILE_VIEWPORT);
   await page.goto('/en/game/sort-numbers');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: /^Number /i })
     .first()
@@ -339,7 +351,7 @@ test('@visual SortNumbers mid-game layout tablet portrait', async ({
 }) => {
   await page.setViewportSize(TABLET_PORTRAIT_VIEWPORT);
   await page.goto('/en/game/sort-numbers');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   await page
     .getByRole('button', { name: /^Number /i })
     .first()
@@ -381,7 +393,7 @@ test('@visual Slot drag preview target (empty slot hover)', async ({
   page,
 }) => {
   await page.goto('/en/game/word-spell');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   const tileButton = page
     .getByRole('button', { name: /^Letter /i })
     .first();
@@ -419,7 +431,7 @@ test('@visual Slot drag preview target dark (empty slot hover)', async ({
   page,
 }) => {
   await page.goto('/en/game/word-spell');
-  await page.getByRole('button', { name: /let's go/i }).click();
+  await startGame(page);
   const tileButton = page
     .getByRole('button', { name: /^Letter /i })
     .first();
