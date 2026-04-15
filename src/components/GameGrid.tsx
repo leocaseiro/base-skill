@@ -4,6 +4,7 @@ import type { GameCatalogEntry } from '@/games/registry';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 import { GameCard } from '@/components/GameCard';
 import { Button } from '@/components/ui/button';
+// TODO(Task 21): rewire GameGrid to new API — remove unused props below
 
 type GameGridProps = {
   entries: GameCatalogEntry[];
@@ -28,12 +29,12 @@ type GameGridProps = {
 
 export const GameGrid = ({
   entries,
-  savedConfigs,
-  onSaveConfig,
-  onRemoveConfig,
-  onUpdateConfig,
+  savedConfigs: _savedConfigs,
+  onSaveConfig: _onSaveConfig,
+  onRemoveConfig: _onRemoveConfig,
+  onUpdateConfig: _onUpdateConfig,
   onPlay,
-  onPlayWithConfig,
+  onPlayWithConfig: _onPlayWithConfig,
   page,
   totalPages,
   onPageChange,
@@ -51,15 +52,15 @@ export const GameGrid = ({
           {entries.map((entry) => (
             <GameCard
               key={entry.id}
-              entry={entry}
-              savedConfigs={savedConfigs.filter(
-                (c) => c.gameId === entry.id,
-              )}
-              onSaveConfig={onSaveConfig}
-              onRemoveConfig={onRemoveConfig}
-              onUpdateConfig={onUpdateConfig}
-              onPlay={onPlay}
-              onPlayWithConfig={onPlayWithConfig}
+              variant="default"
+              gameId={entry.id}
+              title={entry.id}
+              chips={[]}
+              cover={entry.defaultCover}
+              onPlay={() => onPlay(entry.id)}
+              onOpenCog={() => {
+                // TODO(Task 21): wire up settings
+              }}
             />
           ))}
         </div>
