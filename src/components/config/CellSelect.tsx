@@ -37,9 +37,10 @@ export const CellSelect = ({
         onChange={(e) => onChange(e.target.value)}
         className="absolute inset-0 cursor-pointer opacity-0"
       >
-        {/* Use label attribute instead of text content so getByText only matches the visible span */}
         {options.map((o) => (
-          <option key={o.value} value={o.value} label={o.label} />
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
         ))}
       </select>
     </label>
