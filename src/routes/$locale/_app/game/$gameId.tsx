@@ -351,7 +351,14 @@ const WordSpellGameBody = ({
   bookmarkCover: Cover | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, updateConfig } = useSavedConfigs();
+  const { save, updateConfig, savedConfigs } = useSavedConfigs();
+  const existingBookmarkNames = useMemo(
+    () =>
+      savedConfigs
+        .filter((d) => d.gameId === gameId)
+        .map((d) => d.name),
+    [savedConfigs, gameId],
+  );
   const initial = useMemo(
     () => resolveWordSpellConfig(gameSpecificConfig),
     [gameSpecificConfig],
@@ -384,14 +391,15 @@ const WordSpellGameBody = ({
         }
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-        onSaveBookmark={async (name, color) => {
-          await save({
+        onSaveBookmark={async ({ name, color, config, cover }) =>
+          save({
             gameId,
             name,
             color,
-            config: cfg as unknown as Record<string, unknown>,
-          });
-        }}
+            config,
+            cover,
+          })
+        }
         onUpdateBookmark={
           bookmarkId
             ? async (name, config, extras) => {
@@ -399,6 +407,7 @@ const WordSpellGameBody = ({
               }
             : undefined
         }
+        existingBookmarkNames={existingBookmarkNames}
       />
     );
   }
@@ -436,7 +445,14 @@ const NumberMatchGameBody = ({
   bookmarkCover: Cover | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, updateConfig } = useSavedConfigs();
+  const { save, updateConfig, savedConfigs } = useSavedConfigs();
+  const existingBookmarkNames = useMemo(
+    () =>
+      savedConfigs
+        .filter((d) => d.gameId === gameId)
+        .map((d) => d.name),
+    [savedConfigs, gameId],
+  );
   const initial = useMemo(
     () => resolveNumberMatchConfig(gameSpecificConfig),
     [gameSpecificConfig],
@@ -469,14 +485,15 @@ const NumberMatchGameBody = ({
         }
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
-        onSaveBookmark={async (name, color) => {
-          await save({
+        onSaveBookmark={async ({ name, color, config, cover }) =>
+          save({
             gameId,
             name,
             color,
-            config: cfg as unknown as Record<string, unknown>,
-          });
-        }}
+            config,
+            cover,
+          })
+        }
         onUpdateBookmark={
           bookmarkId
             ? async (name, config, extras) => {
@@ -484,6 +501,7 @@ const NumberMatchGameBody = ({
               }
             : undefined
         }
+        existingBookmarkNames={existingBookmarkNames}
       />
     );
   }
@@ -521,7 +539,14 @@ const SortNumbersGameBody = ({
   bookmarkCover: Cover | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, updateConfig } = useSavedConfigs();
+  const { save, updateConfig, savedConfigs } = useSavedConfigs();
+  const existingBookmarkNames = useMemo(
+    () =>
+      savedConfigs
+        .filter((d) => d.gameId === gameId)
+        .map((d) => d.name),
+    [savedConfigs, gameId],
+  );
   const initial = useMemo(
     () => resolveSortNumbersConfig(gameSpecificConfig),
     [gameSpecificConfig],
@@ -554,14 +579,15 @@ const SortNumbersGameBody = ({
         }
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
-        onSaveBookmark={async (name, color) => {
-          await save({
+        onSaveBookmark={async ({ name, color, config, cover }) =>
+          save({
             gameId,
             name,
             color,
-            config: cfg as unknown as Record<string, unknown>,
-          });
-        }}
+            config,
+            cover,
+          })
+        }
         onUpdateBookmark={
           bookmarkId
             ? async (name, config, extras) => {
@@ -569,6 +595,7 @@ const SortNumbersGameBody = ({
               }
             : undefined
         }
+        existingBookmarkNames={existingBookmarkNames}
       />
     );
   }

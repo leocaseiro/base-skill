@@ -10,7 +10,7 @@ const baseArgs = {
   bookmarkColor: 'indigo' as const,
   config: { totalRounds: 5 },
   onConfigChange: () => {},
-  onSaveBookmark: async () => {},
+  onSaveBookmark: async () => 'stub-id',
 };
 
 const meta: Meta<typeof InstructionsOverlay> = {

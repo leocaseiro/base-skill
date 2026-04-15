@@ -21,6 +21,11 @@ vi.mock('react-i18next', () => ({
         'instructions.configure': 'Configure',
         'instructions.cancel': 'Cancel',
         'instructions.saveAsNew': 'Save as new bookmark',
+        'instructions.saveOnPlayTitle':
+          'Save these settings as a bookmark?',
+        'instructions.saveOnPlayNameLabel': 'Bookmark name',
+        'instructions.saveAndPlay': 'Save & play',
+        'instructions.playWithoutSaving': 'Play without saving',
       };
       return map[key] ?? key;
     },
@@ -64,11 +69,42 @@ describe('InstructionsOverlay', () => {
     ).toBeInTheDocument();
   });
 
-  it('calls onStart when "Let\'s go!" is clicked', async () => {
+  it('prompts to save as bookmark when "Let\'s go!" is clicked on a default game', async () => {
     const onStart = vi.fn();
     render(<InstructionsOverlay {...baseProps} onStart={onStart} />);
     await userEvent.click(
       screen.getByRole('button', { name: /let's go/i }),
+    );
+    expect(
+      screen.getByText(/save these settings as a bookmark\?/i),
+    ).toBeInTheDocument();
+    expect(onStart).not.toHaveBeenCalled();
+    await userEvent.click(
+      screen.getByRole('button', { name: /play without saving/i }),
+    );
+    expect(onStart).toHaveBeenCalledOnce();
+  });
+
+  it('calls onStart immediately (and updates the bookmark) when playing a bookmarked game', async () => {
+    const onStart = vi.fn();
+    const onUpdateBookmark = vi.fn().mockResolvedValue();
+    render(
+      <InstructionsOverlay
+        {...baseProps}
+        onStart={onStart}
+        bookmarkId="abc123"
+        bookmarkName="Easy Mode"
+        bookmarkColor="teal"
+        onUpdateBookmark={onUpdateBookmark}
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /let's go/i }),
+    );
+    expect(onUpdateBookmark).toHaveBeenCalledWith(
+      'Easy Mode',
+      baseProps.config,
+      expect.objectContaining({ color: 'teal' }),
     );
     expect(onStart).toHaveBeenCalledOnce();
   });
