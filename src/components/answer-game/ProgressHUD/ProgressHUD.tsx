@@ -38,7 +38,7 @@ export const ProgressHUD = ({
             <li
               // eslint-disable-next-line react/no-array-index-key -- dots are positional and never reordered; index is the stable key
               key={`dot-${i}`}
-              className="skin-hud__dot block size-[var(--skin-hud-dot-size)] rounded-full border border-[color:var(--skin-hud-dot-border)] data-[state=done]:bg-[color:var(--skin-hud-dot-fill)] data-[state=current]:bg-[color:var(--skin-hud-dot-fill)] data-[state=current]:ring-4 data-[state=current]:ring-[color:var(--skin-hud-dot-fill)]/25 data-[state=todo]:bg-[color:var(--skin-hud-dot-empty)] motion-safe:data-[state=current]:group-data-[phase=round-complete]:animate-pulse"
+              className="skin-hud__dot block size-[var(--skin-hud-dot-size)] rounded-full border border-[color:var(--skin-hud-dot-border)] data-[state=done]:bg-[color:var(--skin-hud-dot-fill)] data-[state=current]:border-2 data-[state=current]:border-[color:var(--skin-hud-dot-current-border)] data-[state=current]:bg-[color:var(--skin-hud-dot-fill)] data-[state=todo]:bg-[color:var(--skin-hud-dot-empty)] motion-safe:data-[state=current]:group-data-[phase=round-complete]:animate-pulse"
               data-state={
                 i < filledIndex
                   ? 'done'

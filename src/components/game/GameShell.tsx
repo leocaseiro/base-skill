@@ -95,16 +95,14 @@ const GameShellChrome = ({
         </button>
       </header>
 
-      {/* Sub-bar: score + optional timer */}
-      <div className="flex items-center justify-between border-b px-4 py-2 text-sm">
-        <span data-testid="game-score">{state.score}</span>
-        {config.timerVisible &&
-          config.timerDurationSeconds !== null && (
-            <span data-testid="game-timer">
-              ⏱ {config.timerDurationSeconds}s
-            </span>
-          )}
-      </div>
+      {/* Sub-bar: optional timer */}
+      {config.timerVisible && config.timerDurationSeconds !== null && (
+        <div className="flex items-center justify-end border-b px-4 py-2 text-sm">
+          <span data-testid="game-timer">
+            ⏱ {config.timerDurationSeconds}s
+          </span>
+        </div>
+      )}
 
       {/* Game area (div, not main — app layout already has a single page <main>) */}
       <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4">
