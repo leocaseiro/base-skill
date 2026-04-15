@@ -1,7 +1,18 @@
 export type Direction = 'ascending' | 'descending';
 export type InputMethod = 'drag' | 'type' | 'both';
 
-export const directionLabel = (d: Direction) =>
+type DirectionLabel = {
+  emoji: string;
+  label: string;
+  subtitle: string;
+};
+
+type InputMethodLabel = {
+  emoji: string;
+  label: string;
+};
+
+export const directionLabel = (d: Direction): DirectionLabel =>
   d === 'ascending'
     ? {
         emoji: '🚀',
@@ -14,7 +25,7 @@ export const directionLabel = (d: Direction) =>
         subtitle: 'descending',
       };
 
-export const inputMethodLabel = (m: InputMethod) => {
+export const inputMethodLabel = (m: InputMethod): InputMethodLabel => {
   switch (m) {
     case 'drag': {
       return { emoji: '✋', label: 'Drag' };
