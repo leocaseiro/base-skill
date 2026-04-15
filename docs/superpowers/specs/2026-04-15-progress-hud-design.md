@@ -329,6 +329,12 @@ None at time of writing.
 
 ## Future Work
 
+- **RoundHeader component** (separate follow-up spec): a per-round descriptor
+  line (e.g. "Ascending · 1→10" for SortNumbers, "CVC word · 3 letters" for
+  WordSpell) rendered between the HUD and `<AnswerGame.Question>`. Lives
+  outside the HUD because it is game-authored round copy, not session
+  progress, and different games need wildly different shapes. Will land in
+  its own spec once this HUD ships.
 - Persistent progress writes: on `game:end`, upsert `progress` row with
   `lastScore`, `bestScore`, `totalStars`, `lastPlayedAt`, `completionCount`.
 - Dashboard "recents" row reading `progress.lastPlayedAt`.
