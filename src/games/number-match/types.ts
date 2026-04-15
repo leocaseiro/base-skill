@@ -1,6 +1,16 @@
 import type { AnswerGameConfig } from '@/components/answer-game/types';
 import type { ConfigField } from '@/lib/config-fields';
 
+export type NumberMatchSimpleConfig = {
+  configMode: 'simple';
+  from: 'numeral' | 'group' | 'word' | 'ordinal';
+  to: 'numeral' | 'group' | 'word' | 'ordinal';
+  rangeMin: number;
+  rangeMax: number;
+  inputMethod: 'drag' | 'type' | 'both';
+  distractorCount: number;
+};
+
 export interface NumberMatchRound {
   value: number;
   /** Fluent Emoji path for object-style tiles (e.g. "fluent-emoji/red-apple.svg") */
@@ -19,6 +29,7 @@ export type NumberMatchMode =
 
 export interface NumberMatchConfig extends AnswerGameConfig {
   component: 'NumberMatch';
+  configMode?: 'simple' | 'advanced';
   mode: NumberMatchMode;
   /** Visual style for quantity/group tiles */
   tileStyle: 'dots' | 'objects' | 'fingers';
