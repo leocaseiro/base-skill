@@ -39,3 +39,10 @@ export {
   filterWords,
 } from './filter';
 export { toWordSpellRound } from './adapters';
+export { sampleHits } from './sample';
+export {
+  createInMemorySeenWordsStore,
+  filterSignature,
+  pickWithRecycling,
+} from './seen-words';
+export type { SeenWordsStore } from './seen-words';

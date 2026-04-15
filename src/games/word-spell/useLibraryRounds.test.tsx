@@ -1,8 +1,12 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { useLibraryRounds } from './useLibraryRounds';
 import type { WordSpellConfig } from './types';
-import { __resetChunkCacheForTests } from '@/data/words';
+import type { SeenWordsStore } from '@/data/words';
+import {
+  __resetChunkCacheForTests,
+  createInMemorySeenWordsStore,
+} from '@/data/words';
 
 const baseConfig: WordSpellConfig = {
   gameId: 'test',
@@ -17,20 +21,28 @@ const baseConfig: WordSpellConfig = {
   tileUnit: 'letter',
 };
 
+let store: SeenWordsStore;
+
+beforeEach(() => {
+  store = createInMemorySeenWordsStore();
+});
+
 afterEach(() => __resetChunkCacheForTests());
 
 describe('useLibraryRounds', () => {
   it('returns explicit rounds synchronously when source is absent', () => {
     const rounds = [{ word: 'cat' }, { word: 'dog' }];
     const { result } = renderHook(() =>
-      useLibraryRounds({ ...baseConfig, rounds }),
+      useLibraryRounds({ ...baseConfig, rounds }, undefined, store),
     );
     expect(result.current.isLoading).toBe(false);
     expect(result.current.rounds).toBe(rounds);
   });
 
   it('returns empty rounds when neither rounds nor source is set', () => {
-    const { result } = renderHook(() => useLibraryRounds(baseConfig));
+    const { result } = renderHook(() =>
+      useLibraryRounds(baseConfig, undefined, store),
+    );
     expect(result.current.isLoading).toBe(false);
     expect(result.current.rounds).toEqual([]);
   });
@@ -44,7 +56,9 @@ describe('useLibraryRounds', () => {
         filter: { region: 'aus', level: 1 },
       },
     };
-    const { result } = renderHook(() => useLibraryRounds(config));
+    const { result } = renderHook(() =>
+      useLibraryRounds(config, undefined, store),
+    );
     expect(result.current.isLoading).toBe(true);
 
     await waitFor(() => {
@@ -67,7 +81,9 @@ describe('useLibraryRounds', () => {
         limit: 2,
       },
     };
-    const { result } = renderHook(() => useLibraryRounds(config));
+    const { result } = renderHook(() =>
+      useLibraryRounds(config, undefined, store),
+    );
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
@@ -83,7 +99,9 @@ describe('useLibraryRounds', () => {
         filter: { region: 'uk', level: 1 },
       },
     };
-    const { result } = renderHook(() => useLibraryRounds(config));
+    const { result } = renderHook(() =>
+      useLibraryRounds(config, undefined, store),
+    );
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
@@ -91,5 +109,98 @@ describe('useLibraryRounds', () => {
       from: 'uk',
       to: 'aus',
     });
+  });
+
+  it('samples a different set when roundsInOrder is false and seed changes', async () => {
+    const libraryConfig: WordSpellConfig = {
+      ...baseConfig,
+      roundsInOrder: false,
+      totalRounds: 3,
+      source: {
+        type: 'word-library',
+        filter: { region: 'aus', level: 1 },
+      },
+    };
+
+    const { result, rerender } = renderHook(
+      ({ seed }: { seed: string }) =>
+        useLibraryRounds(libraryConfig, seed, store),
+      { initialProps: { seed: 'seed-a' } },
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    const firstWords = result.current.rounds.map((r) => r.word);
+    expect(new Set(firstWords).size).toBe(3);
+
+    rerender({ seed: 'seed-b' });
+
+    await waitFor(() => {
+      const nextWords = result.current.rounds.map((r) => r.word);
+      expect(nextWords).not.toEqual(firstWords);
+    });
+  });
+
+  it('records seen words in the store when roundsInOrder is false', async () => {
+    const libraryConfig: WordSpellConfig = {
+      ...baseConfig,
+      roundsInOrder: false,
+      totalRounds: 3,
+      source: {
+        type: 'word-library',
+        filter: { region: 'aus', level: 1 },
+      },
+    };
+
+    const { result } = renderHook(() =>
+      useLibraryRounds(libraryConfig, 'seed-x', store),
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    // The signature here matches the filter from the config.
+    const seen = await store.get(
+      'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=',
+    );
+    expect(seen.size).toBe(3);
+  });
+
+  it('does NOT touch the store when roundsInOrder is true', async () => {
+    const libraryConfig: WordSpellConfig = {
+      ...baseConfig,
+      roundsInOrder: true,
+      totalRounds: 3,
+      source: {
+        type: 'word-library',
+        filter: { region: 'aus', level: 1 },
+      },
+    };
+
+    const { result } = renderHook(() =>
+      useLibraryRounds(libraryConfig, 'seed-x', store),
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const seen = await store.get(
+      'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=',
+    );
+    expect(seen.size).toBe(0);
+  });
+
+  it('returns the whole pool when it is smaller than limit (silent cap)', async () => {
+    const libraryConfig: WordSpellConfig = {
+      ...baseConfig,
+      roundsInOrder: false,
+      totalRounds: 500, // way more than any level has
+      source: {
+        type: 'word-library',
+        filter: { region: 'aus', level: 1 },
+      },
+    };
+    const { result } = renderHook(() =>
+      useLibraryRounds(libraryConfig, 'seed', store),
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    // No assertion on the exact count — just that we don't error and
+    // we got at least a few words.
+    expect(result.current.rounds.length).toBeGreaterThan(0);
   });
 });

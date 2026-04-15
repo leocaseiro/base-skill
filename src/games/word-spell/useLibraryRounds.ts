@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import type { WordSpellConfig, WordSpellRound } from './types';
-import type { Region } from '@/data/words';
-import { filterWords, toWordSpellRound } from '@/data/words';
+import type { Region, SeenWordsStore } from '@/data/words';
+import {
+  filterSignature,
+  filterWords,
+  pickWithRecycling,
+  toWordSpellRound,
+} from '@/data/words';
 
 interface LibraryRoundsState {
   rounds: WordSpellRound[];
@@ -18,6 +23,8 @@ const initialStateFor = (
 
 export const useLibraryRounds = (
   config: WordSpellConfig,
+  seed: string | undefined,
+  store: SeenWordsStore,
 ): LibraryRoundsState => {
   const [state, setState] = useState<LibraryRoundsState>(() =>
     initialStateFor(config),
@@ -49,7 +56,7 @@ export const useLibraryRounds = (
       return;
     }
 
-    const cancellation = { isCancelled: false };
+    const cancellation = { isCancelled: false as boolean };
 
     setState((prev) =>
       prev.isLoading ? prev : { ...prev, isLoading: true },
@@ -58,12 +65,22 @@ export const useLibraryRounds = (
     void (async () => {
       const result = await filterWords(source.filter);
       if (cancellation.isCancelled) return;
+
       const limit = source.limit ?? config.totalRounds;
-      const picked = result.hits
-        .slice(0, limit)
-        .map((hit) => toWordSpellRound(hit));
+      const picked = config.roundsInOrder
+        ? result.hits.slice(0, limit)
+        : await pickWithRecycling(
+            result.hits,
+            limit,
+            filterSignature(source.filter),
+            store,
+            seed,
+          );
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- isCancelled may be set to true by cleanup between awaits
+      if (cancellation.isCancelled) return;
+
       setState({
-        rounds: picked,
+        rounds: picked.map((hit) => toWordSpellRound(hit)),
         isLoading: false,
         usedFallback: result.usedFallback,
       });
@@ -72,7 +89,14 @@ export const useLibraryRounds = (
     return () => {
       cancellation.isCancelled = true;
     };
-  }, [config.rounds, config.source, config.totalRounds]);
+  }, [
+    config.rounds,
+    config.source,
+    config.totalRounds,
+    config.roundsInOrder,
+    seed,
+    store,
+  ]);
 
   return state;
 };
