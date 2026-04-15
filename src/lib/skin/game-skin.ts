@@ -1,3 +1,4 @@
+import type { ProgressHUDProps } from '@/components/answer-game/types';
 import type { ComponentType, ReactNode } from 'react';
 
 export interface GameSkinTiming {
@@ -63,6 +64,12 @@ export interface GameSkin {
   CelebrationOverlay?: ComponentType<GameSkinCelebrationOverlayProps>;
   RoundCompleteEffect?: ComponentType<{ visible: boolean }>;
   LevelCompleteOverlay?: ComponentType<GameSkinLevelCompleteOverlayProps>;
+  /**
+   * Replaces the default ProgressHUD rendered at the top of the game
+   * container. Always mounts when provided, regardless of `config.hud`
+   * flag state.
+   */
+  ProgressHUD?: ComponentType<ProgressHUDProps>;
   slotDecoration?: (
     zone: GameSkinZoneSnapshot,
     index: number,
