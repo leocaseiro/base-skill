@@ -289,7 +289,10 @@ export const WordSpell = ({
   const skin = useGameSkin('word-spell', config.skin);
   const [sessionEpoch, setSessionEpoch] = useState(0);
   const seenWordsStore = useSeenWordsStore();
-  const sampleSeed = useMemo(() => nanoid(), [sessionEpoch]);
+  const sampleSeed = useMemo(() => {
+    void sessionEpoch;
+    return nanoid();
+  }, [sessionEpoch]);
   const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
     config,
     sampleSeed,
