@@ -8,6 +8,7 @@ import type { SessionHistoryIndexDoc } from './schemas/session_history_index';
 import type { SettingsDoc } from './schemas/settings';
 import type { SyncMetaDoc } from './schemas/sync_meta';
 import type { ThemeDoc } from './schemas/themes';
+import type { WordSpellSeenWordsDoc } from './schemas/word_spell_seen_words';
 import type { RxCollection, RxDatabase } from 'rxdb';
 
 export type BaseSkillCollections = {
@@ -21,6 +22,7 @@ export type BaseSkillCollections = {
   session_history: RxCollection<SessionHistoryDoc>;
   session_history_index: RxCollection<SessionHistoryIndexDoc>;
   sync_meta: RxCollection<SyncMetaDoc>;
+  word_spell_seen_words: RxCollection<WordSpellSeenWordsDoc>;
 };
 
 export type BaseSkillDatabase = RxDatabase<BaseSkillCollections>;

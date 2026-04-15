@@ -8,6 +8,7 @@ import { sessionHistoryIndexSchema } from './session_history_index';
 import { settingsSchema } from './settings';
 import { syncMetaSchema } from './sync_meta';
 import { themesSchema } from './themes';
+import { wordSpellSeenWordsSchema } from './word_spell_seen_words';
 
 export { appMetaSchema } from './app-meta';
 export type { AppMetaDoc } from './app-meta';
@@ -29,6 +30,8 @@ export { syncMetaSchema } from './sync_meta';
 export type { SyncMetaDoc } from './sync_meta';
 export { themesSchema } from './themes';
 export type { ThemeDoc } from './themes';
+export { wordSpellSeenWordsSchema } from './word_spell_seen_words';
+export type { WordSpellSeenWordsDoc } from './word_spell_seen_words';
 
 export const MAX_SCHEMA_VERSION = Math.max(
   appMetaSchema.version,
@@ -41,4 +44,5 @@ export const MAX_SCHEMA_VERSION = Math.max(
   settingsSchema.version,
   syncMetaSchema.version,
   themesSchema.version,
+  wordSpellSeenWordsSchema.version,
 );

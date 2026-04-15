@@ -25,6 +25,7 @@ import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+import { useSeenWordsStore } from '@/db/hooks/useSeenWordsStore';
 import { buildRoundOrder } from '@/games/build-round-order';
 import { getGameEventBus } from '@/lib/game-event-bus';
 import { useGameSkin } from '@/lib/skin';
@@ -286,8 +287,17 @@ export const WordSpell = ({
   seed,
 }: WordSpellProps) => {
   const skin = useGameSkin('word-spell', config.skin);
-  const { rounds: resolvedRounds, isLoading } =
-    useLibraryRounds(config);
+  const [sessionEpoch, setSessionEpoch] = useState(0);
+  const seenWordsStore = useSeenWordsStore();
+  const sampleSeed = useMemo(() => {
+    void sessionEpoch;
+    return nanoid();
+  }, [sessionEpoch]);
+  const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
+    config,
+    sampleSeed,
+    seenWordsStore,
+  );
 
   const resolvedConfig = useMemo<WordSpellConfig>(
     () => ({ ...config, rounds: resolvedRounds }),
@@ -295,7 +305,6 @@ export const WordSpell = ({
   );
 
   const roundsInOrder = resolvedConfig.roundsInOrder === true;
-  const [sessionEpoch, setSessionEpoch] = useState(0);
 
   const roundOrder = useMemo(() => {
     void sessionEpoch;
