@@ -397,20 +397,20 @@ const sortedCsv = (xs: readonly string[] | undefined): string =>
  */
 export const filterSignature = (filter: WordFilter): string => {
   const parts: string[] = [
-    `r=${filter.region}`,
-    `l=${filter.level ?? ''}`,
-    `ls=${sortedCsv(filter.levels?.map(String))}`,
-    `lr=${filter.levelRange ? filter.levelRange.join('-') : ''}`,
-    `sc=${filter.syllableCountEq ?? ''}`,
-    `scr=${
+    `region=${filter.region}`,
+    `level=${filter.level ?? ''}`,
+    `levels=${sortedCsv(filter.levels?.map(String))}`,
+    `levelRange=${filter.levelRange ? filter.levelRange.join('-') : ''}`,
+    `syllableCountEq=${filter.syllableCountEq ?? ''}`,
+    `syllableCountRange=${
       filter.syllableCountRange
         ? filter.syllableCountRange.join('-')
         : ''
     }`,
-    `pa=${sortedCsv(filter.phonemesAllowed)}`,
-    `pr=${sortedCsv(filter.phonemesRequired)}`,
-    `ga=${sortedCsv(filter.graphemesAllowed)}`,
-    `gr=${sortedCsv(filter.graphemesRequired)}`,
+    `phonemesAllowed=${sortedCsv(filter.phonemesAllowed)}`,
+    `phonemesRequired=${sortedCsv(filter.phonemesRequired)}`,
+    `graphemesAllowed=${sortedCsv(filter.graphemesAllowed)}`,
+    `graphemesRequired=${sortedCsv(filter.graphemesRequired)}`,
   ];
   return parts.join('|');
 };
@@ -1167,7 +1167,7 @@ it('records seen words in the store when roundsInOrder is false', async () => {
 
   // The signature here matches the filter from the config.
   const seen = await store.get(
-    'r=aus|l=1|ls=|lr=|sc=|scr=|pa=|pr=|ga=|gr=',
+    'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=',
   );
   expect(seen.size).toBe(3);
 });
@@ -1189,7 +1189,7 @@ it('does NOT touch the store when roundsInOrder is true', async () => {
   await waitFor(() => expect(result.current.isLoading).toBe(false));
 
   const seen = await store.get(
-    'r=aus|l=1|ls=|lr=|sc=|scr=|pa=|pr=|ga=|gr=',
+    'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=',
   );
   expect(seen.size).toBe(0);
 });
