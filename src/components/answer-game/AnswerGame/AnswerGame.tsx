@@ -1,11 +1,19 @@
 import { AnswerGameProvider } from '../AnswerGameProvider';
+import { ProgressHUDRoot } from '../ProgressHUD/ProgressHUDRoot';
 import type { AnswerGameConfig, AnswerGameDraftState } from '../types';
+import type { GameSkin } from '@/lib/skin';
 import type { ReactNode } from 'react';
 
 interface AnswerGameProps {
   config: AnswerGameConfig;
   initialState?: AnswerGameDraftState;
   sessionId?: string;
+  /**
+   * Optional skin. Enables HUD override (`skin.ProgressHUD`) and is consumed
+   * by the default HUD for token access via the container's inline style.
+   * When omitted, the default HUD renders with classic tokens from the root.
+   */
+  skin?: GameSkin;
   children: ReactNode;
 }
 
@@ -13,6 +21,7 @@ const AnswerGameRoot = ({
   config,
   initialState,
   sessionId,
+  skin,
   children,
 }: AnswerGameProps) => (
   <AnswerGameProvider
@@ -21,6 +30,7 @@ const AnswerGameRoot = ({
     sessionId={sessionId}
   >
     <div className="flex min-h-0 w-full flex-col items-center">
+      <ProgressHUDRoot skin={skin} />
       {children}
     </div>
   </AnswerGameProvider>

@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { WordSpell } from './WordSpell';
@@ -78,8 +78,9 @@ describe('WordSpell', () => {
   });
 
   it('renders three answer slots for "cat"', () => {
-    render(<WordSpell config={config} />);
-    expect(screen.getAllByRole('listitem')).toHaveLength(3);
+    const { container } = render(<WordSpell config={config} />);
+    const answerZone = container.querySelector('.game-answer-zone')!;
+    expect(within(answerZone).getAllByRole('listitem')).toHaveLength(3);
   });
 
   it('does not render image in recall mode', () => {
@@ -123,10 +124,14 @@ describe('WordSpell Play again', () => {
       rounds: [{ word: 'a' }],
     };
 
-    render(<WordSpell config={oneRoundConfig} />);
+    const { container } = render(<WordSpell config={oneRoundConfig} />);
 
     // Game starts in playing phase — 1 answer slot visible, no game-over dialog
-    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    const answerZone = () =>
+      container.querySelector('.game-answer-zone')!;
+    expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
+      1,
+    );
     expect(
       screen.queryByRole('dialog', { name: 'Game complete' }),
     ).not.toBeInTheDocument();
@@ -153,6 +158,8 @@ describe('WordSpell Play again', () => {
     expect(
       screen.queryByRole('dialog', { name: 'Game complete' }),
     ).not.toBeInTheDocument();
-    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
+      1,
+    );
   });
 });
