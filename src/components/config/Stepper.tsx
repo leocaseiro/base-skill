@@ -96,7 +96,7 @@ export const Stepper = ({
         onBlur={(event) => commit(event.target.value)}
         onKeyDown={onKeyDown}
         onFocus={(event) => event.target.select()}
-        className="h-10 w-16 bg-transparent text-center font-bold outline-none focus:ring-2 focus:ring-ring"
+        className="h-10 w-16 bg-transparent text-center font-bold text-foreground outline-none focus:ring-2 focus:ring-ring"
       />
       <button
         type="button"

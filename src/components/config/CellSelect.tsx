@@ -25,9 +25,11 @@ export const CellSelect = ({
 
   return (
     <label className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-transparent bg-muted px-3 text-center">
-      <span className="text-base font-bold">{currentLabel}</span>
+      <span className="text-base font-bold text-foreground">
+        {currentLabel}
+      </span>
       {hint && (
-        <span className="text-xs italic text-muted-foreground">
+        <span className="text-xs italic text-foreground/80">
           {hint}
         </span>
       )}
