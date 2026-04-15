@@ -76,5 +76,18 @@ export const classicSkin: GameSkin = {
     '--skin-pip-color': 'currentColor',
     '--skin-pip-divider-color': 'currentColor',
     '--skin-pip-divider-opacity': '0.3',
+
+    // ── HUD tokens ────────────────────────────────────────────────
+    '--skin-hud-bg': 'transparent',
+    '--skin-hud-gap': '0.5rem',
+    '--skin-hud-padding': '0.25rem 0.75rem',
+    '--skin-hud-radius': '9999px',
+    '--skin-hud-dot-size': '0.875rem',
+    '--skin-hud-dot-fill': 'var(--bs-success)',
+    '--skin-hud-dot-empty': 'var(--bs-surface)',
+    '--skin-hud-dot-border': 'var(--bs-border)',
+    '--skin-hud-fraction-color': 'var(--bs-foreground)',
+    '--skin-hud-fraction-sep-color': 'var(--skin-hud-dot-fill)',
+    '--skin-hud-level-color': 'var(--bs-primary)',
   },
 };
