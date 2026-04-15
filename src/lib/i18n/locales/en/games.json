@@ -1,10 +1,10 @@
 {
-  "word-spell": "Word Spell",
-  "word-spell-description": "Drag letter tiles to spell the word shown in the picture.",
-  "number-match": "Number Match",
-  "number-match-description": "Match numerals to groups by dragging tiles to the right place.",
-  "sort-numbers": "Sort Numbers",
-  "sort-numbers-description": "Put the numbers in order from smallest to biggest — or biggest to smallest.",
+  "word-spell": "Spell It!",
+  "word-spell-description": "Drag letter tiles to spell the word.",
+  "number-match": "Match the Number!",
+  "number-match-description": "Match numerals to groups by dragging tiles.",
+  "sort-numbers": "Count in Order",
+  "sort-numbers-description": "Put the numbers in order!",
   "shell": {
     "round": "Round {{current}} / {{total}}",
     "undo": "Undo",
@@ -23,11 +23,22 @@
     "number-match": "Drag the tiles to match each number. Tap the number to hear it.",
     "sort-numbers": "Put the numbers in order! Drag each number to the right place.",
     "lets-go": "Let's go!",
-    "settings": "⚙️ Settings"
+    "settings": "⚙️ Settings",
+    "advanced": "Advanced",
+    "updateBookmark": "Update \"{{name}}\"",
+    "saveAsNew": "Save as new bookmark",
+    "cancel": "Cancel"
   },
   "sort-numbers-ui": {
-    "ascending-label": "Smallest → Biggest",
-    "descending-label": "Biggest → Smallest",
+    "ascending-label": "Going Up!",
+    "ascending-sub": "ascending",
+    "descending-label": "Going Down!",
+    "descending-sub": "descending",
     "arrange": "Put {{count}} numbers in {{direction}} order"
+  },
+  "input-method": {
+    "drag": "Drag",
+    "type": "Type",
+    "both": "Both"
   }
 }
