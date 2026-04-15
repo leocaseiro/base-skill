@@ -35,6 +35,7 @@ import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
 import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
 import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+import { resolveSimpleConfig as resolveWordSpellSimpleConfig } from '@/games/word-spell/resolve-simple-config';
 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
 import { loadGameConfig } from '@/lib/game-engine/config-loader';
 import { findInProgressSession } from '@/lib/game-engine/session-finder';
@@ -184,7 +185,7 @@ const makeDefaultSortNumbersConfig = (): SortNumbersConfig =>
     distractors: false,
   });
 
-const resolveWordSpellConfig = (
+export const resolveWordSpellConfig = (
   saved: Record<string, unknown> | null,
 ): WordSpellConfig => {
   const base: WordSpellConfig = {
@@ -194,6 +195,30 @@ const resolveWordSpellConfig = (
     })),
   };
   if (!saved || saved.component !== 'WordSpell') return base;
+
+  // Simple mode: library-sourced config from the Simple Config form.
+  // Delegate to word-spell's resolveSimpleConfig so library words load
+  // instead of the emoji-round fallback.
+  if (saved.configMode === 'simple') {
+    const savedSource = saved.source as
+      | { filter?: Record<string, unknown> }
+      | undefined;
+    const savedFilter = savedSource?.filter;
+    const savedInput = saved.inputMethod;
+    return resolveWordSpellSimpleConfig({
+      configMode: 'simple',
+      level:
+        typeof savedFilter?.level === 'number' ? savedFilter.level : 1,
+      phonemesAllowed: Array.isArray(savedFilter?.phonemesAllowed)
+        ? (savedFilter.phonemesAllowed as string[])
+        : [],
+      inputMethod:
+        savedInput === 'type' || savedInput === 'both'
+          ? savedInput
+          : 'drag',
+    });
+  }
+
   const merged: WordSpellConfig = {
     ...base,
     ...(saved as Partial<WordSpellConfig>),
