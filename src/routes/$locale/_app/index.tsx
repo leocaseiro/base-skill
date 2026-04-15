@@ -3,105 +3,43 @@ import {
   useNavigate,
   useParams,
 } from '@tanstack/react-router';
-import { useMemo } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { GameLevel, GameSubject } from '@/games/registry';
+import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
+import type { Cover } from '@/games/cover-type';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
-import type { ValidatorAdapter } from '@tanstack/react-router';
+import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
+import { GameCard } from '@/components/GameCard';
 import { GameGrid } from '@/components/GameGrid';
-import { LevelRow } from '@/components/LevelRow';
 import { getOrCreateDatabase } from '@/db/create-database';
 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
 import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
-import {
-  filterCatalog,
-  paginateCatalog,
-  sortByHasSavedConfigs,
-} from '@/games/catalog-utils';
+import { configToChips } from '@/games/config-chips';
 import { GAME_CATALOG } from '@/games/registry';
 
-type CatalogSearchInput = {
-  search?: string;
-  level?: string;
-  subject?: string;
-  page?: number | string;
-};
-
-type CatalogSearchOutput = {
-  search: string;
-  level: string;
-  subject: string;
-  page: number;
-};
-
-const catalogSearchValidator: ValidatorAdapter<
-  CatalogSearchInput,
-  CatalogSearchOutput
-> = {
-  types: {
-    input: {} as CatalogSearchInput,
-    output: {} as CatalogSearchOutput,
-  },
-  parse: (input: unknown) => {
-    const raw = (input ?? {}) as Record<string, unknown>;
-    const pageRaw =
-      typeof raw.page === 'number' && Number.isFinite(raw.page)
-        ? raw.page
-        : Number.parseInt(String(raw.page ?? '1'), 10) || 1;
-    return {
-      search: typeof raw.search === 'string' ? raw.search : '',
-      level: typeof raw.level === 'string' ? raw.level : '',
-      subject: typeof raw.subject === 'string' ? raw.subject : '',
-      page: Math.max(1, pageRaw),
+type ModalState =
+  | { kind: 'closed' }
+  | {
+      kind: 'open';
+      gameId: string;
+      mode:
+        | { kind: 'default' }
+        | {
+            kind: 'bookmark';
+            configId: string;
+            name: string;
+            color: BookmarkColorKey;
+            cover: Cover | undefined;
+          };
+      config: Record<string, unknown>;
     };
-  },
-};
-
-const PAGE_SIZE = 12;
 
 const HomeScreen = () => {
-  const { t } = useTranslation('common');
-  const { level, subject, search, page } = Route.useSearch();
+  const { t } = useTranslation('games');
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate({ from: '/$locale/' });
-  const {
-    savedConfigs,
-    gameIdsWithConfigs,
-    save,
-    remove,
-    updateConfig,
-  } = useSavedConfigs();
-
-  const filtered = useMemo(() => {
-    const result = filterCatalog(GAME_CATALOG, {
-      search,
-      level: level as GameLevel | '',
-      subject: subject as GameSubject | '',
-    });
-    return sortByHasSavedConfigs(result, gameIdsWithConfigs);
-  }, [search, level, subject, gameIdsWithConfigs]);
-
-  const {
-    items,
-    page: safePage,
-    totalPages,
-  } = useMemo(
-    () => paginateCatalog(filtered, page, PAGE_SIZE),
-    [filtered, page],
-  );
-
-  const updateSearch = (
-    patch: Partial<{
-      level: string;
-      subject: string;
-      search: string;
-      page: number;
-    }>,
-  ) => {
-    void navigate({
-      search: (prev) => ({ ...prev, ...patch }),
-    });
-  };
+  const { savedConfigs, save, updateConfig } = useSavedConfigs();
+  const [modal, setModal] = useState<ModalState>({ kind: 'closed' });
 
   const handlePlay = (gameId: string) => {
     void navigate({
@@ -111,7 +49,7 @@ const HomeScreen = () => {
     });
   };
 
-  const handlePlayWithConfig = (gameId: string, configId: string) => {
+  const handlePlayBookmark = (gameId: string, configId: string) => {
     void navigate({
       to: '/$locale/game/$gameId',
       params: { locale, gameId },
@@ -119,58 +57,109 @@ const HomeScreen = () => {
     });
   };
 
-  const handleSaveConfig = async (
-    gameId: string,
-    name: string,
-    color: string,
-  ): Promise<void> => {
+  const openDefaultCog = async (gameId: string) => {
     const db = await getOrCreateDatabase();
     const lastDoc = await db.saved_game_configs
       .findOne(lastSessionSavedConfigId(gameId))
       .exec();
-    const lastConfig = lastDoc?.config ?? {};
-    await save({
+    setModal({
+      kind: 'open',
       gameId,
-      name,
-      config: lastConfig,
-      color: color as BookmarkColorKey,
+      mode: { kind: 'default' },
+      config: lastDoc?.config ?? {},
     });
   };
 
-  const handleUpdateConfig = async (
-    configId: string,
-    config: Record<string, unknown>,
-    name: string,
-  ): Promise<void> => {
-    await updateConfig(configId, config, name);
+  const openBookmarkCog = (gameId: string, doc: SavedGameConfigDoc) => {
+    setModal({
+      kind: 'open',
+      gameId,
+      mode: {
+        kind: 'bookmark',
+        configId: doc.id,
+        name: doc.name,
+        color: doc.color as BookmarkColorKey,
+        cover: doc.cover,
+      },
+      config: doc.config,
+    });
   };
 
+  const defaults = GAME_CATALOG.map((entry) => (
+    <GameCard
+      key={`default-${entry.id}`}
+      variant="default"
+      gameId={entry.id}
+      title={t(entry.titleKey)}
+      chips={configToChips(entry.id, {})}
+      onPlay={() => handlePlay(entry.id)}
+      onOpenCog={() => void openDefaultCog(entry.id)}
+    />
+  ));
+  const bookmarks = savedConfigs.flatMap((doc) => {
+    const entry = GAME_CATALOG.find((g) => g.id === doc.gameId);
+    if (!entry) return [];
+    return [
+      <GameCard
+        key={`bm-${doc.id}`}
+        variant="bookmark"
+        gameId={doc.gameId}
+        title={t(entry.titleKey)}
+        bookmarkName={doc.name}
+        bookmarkColor={doc.color as BookmarkColorKey}
+        cover={doc.cover}
+        chips={configToChips(doc.gameId, doc.config)}
+        onPlay={() => handlePlayBookmark(doc.gameId, doc.id)}
+        onOpenCog={() => openBookmarkCog(doc.gameId, doc)}
+      />,
+    ];
+  });
+  const cards = [...defaults, ...bookmarks];
+
   return (
-    <div className="px-4 py-2">
-      <h1 className="sr-only">{t('home.title')}</h1>
-      <LevelRow
-        currentLevel={level as GameLevel | ''}
-        onLevelChange={(l) => updateSearch({ level: l, page: 1 })}
-      />
-      <div className="mt-4">
-        <GameGrid
-          entries={items}
-          savedConfigs={savedConfigs}
-          onSaveConfig={handleSaveConfig}
-          onRemoveConfig={remove}
-          onUpdateConfig={handleUpdateConfig}
-          onPlay={handlePlay}
-          onPlayWithConfig={handlePlayWithConfig}
-          page={safePage}
-          totalPages={totalPages}
-          onPageChange={(p) => updateSearch({ page: p })}
+    <div className="px-4 py-4">
+      <h1 className="sr-only">
+        {t('home.title', { defaultValue: 'Home' })}
+      </h1>
+      <GameGrid cards={cards} />
+
+      {modal.kind === 'open' && (
+        <AdvancedConfigModal
+          open
+          onOpenChange={(next) =>
+            setModal(next ? modal : { kind: 'closed' })
+          }
+          gameId={modal.gameId}
+          mode={modal.mode}
+          config={modal.config}
+          onCancel={() => setModal({ kind: 'closed' })}
+          onUpdate={async (payload) => {
+            if (payload.configId) {
+              await updateConfig(
+                payload.configId,
+                payload.config,
+                payload.name,
+                { cover: payload.cover, color: payload.color },
+              );
+            }
+            setModal({ kind: 'closed' });
+          }}
+          onSaveNew={async (payload) => {
+            await save({
+              gameId: modal.gameId,
+              name: payload.name,
+              config: payload.config,
+              color: payload.color,
+              cover: payload.cover,
+            });
+            setModal({ kind: 'closed' });
+          }}
         />
-      </div>
+      )}
     </div>
   );
 };
 
 export const Route = createFileRoute('/$locale/_app/')({
-  validateSearch: catalogSearchValidator,
   component: HomeScreen,
 });
