@@ -32,10 +32,6 @@ type Story = StoryObj<typeof InstructionsOverlay>;
 
 export const Default: Story = {};
 
-export const DefaultDark: Story = {
-  globals: { theme: 'dark' },
-};
-
 export const WithBookmark: Story = {
   args: {
     ...baseArgs,
@@ -43,16 +39,6 @@ export const WithBookmark: Story = {
     bookmarkName: 'Easy Mode',
     bookmarkColor: 'teal',
   },
-};
-
-export const WithBookmarkDark: Story = {
-  args: {
-    ...baseArgs,
-    bookmarkId: 'abc123',
-    bookmarkName: 'Easy Mode',
-    bookmarkColor: 'teal',
-  },
-  globals: { theme: 'dark' },
 };
 
 export const WordSpellDefault: Story = {

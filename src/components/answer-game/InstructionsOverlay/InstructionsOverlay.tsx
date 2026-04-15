@@ -210,7 +210,7 @@ export const InstructionsOverlay = ({
                 {bookmarkName ?? gameTitle}
               </h2>
               {bookmarkName && (
-                <p className="text-xs italic text-muted-foreground">
+                <p className="text-xs italic text-foreground/80">
                   {gameTitle}
                 </p>
               )}

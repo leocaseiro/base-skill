@@ -66,7 +66,7 @@ export const SortNumbersSimpleConfigForm = ({
       />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-2">
-        <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-muted-foreground">
+        <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-foreground/80">
           How many?
           <Stepper
             label="How many"
@@ -76,7 +76,7 @@ export const SortNumbersSimpleConfigForm = ({
             onChange={(v) => onChange({ ...config, quantity: v })}
           />
         </div>
-        <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-muted-foreground">
+        <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-foreground/80">
           Start at
           <Stepper
             label="Start"
@@ -91,7 +91,7 @@ export const SortNumbersSimpleConfigForm = ({
             }
           />
         </div>
-        <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-muted-foreground">
+        <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-foreground/80">
           Skip by
           <Stepper
             label="Skip"
