@@ -171,6 +171,13 @@ export interface GameSkin {
     onNextLevel: () => void;
     onDone: () => void;
   }>;
+  /**
+   * Replaces the default ProgressHUD rendered at the top of the game
+   * container. Override always mounts when provided, regardless of the
+   * `config.hud` flag state. See
+   * `2026-04-15-progress-hud-design.md` for the props contract.
+   */
+  ProgressHUD?: React.ComponentType<ProgressHUDProps>;
   /** Per-slot visual decoration (e.g. cracked egg shell over a filled slot) */
   slotDecoration?: (
     zone: {
@@ -230,6 +237,19 @@ in their defaults, so the classic skin follows whatever app theme is active.
 
 /* ── Celebration Tokens ── */
 --skin-celebration-emoji: '🐨';
+
+/* ── HUD Tokens (see 2026-04-15-progress-hud-design.md) ── */
+--skin-hud-bg: transparent;
+--skin-hud-gap: 0.5rem;
+--skin-hud-padding: 0.25rem 0.75rem;
+--skin-hud-radius: 9999px;
+--skin-hud-dot-size: 0.875rem;
+--skin-hud-dot-fill: var(--bs-success);
+--skin-hud-dot-empty: var(--bs-surface);
+--skin-hud-dot-border: var(--bs-border);
+--skin-hud-fraction-color: var(--bs-foreground);
+--skin-hud-fraction-sep-color: var(--skin-hud-dot-fill);
+--skin-hud-level-color: var(--bs-primary);
 ```
 
 #### Example: Dino Eggs Override

@@ -110,15 +110,16 @@ describe('GameShell', () => {
     expect(screen.getByText('Word Builder')).toBeInTheDocument();
   });
 
-  it('renders round counter (1-indexed)', () => {
+  it('does not render a round counter (HUD now owns round display)', () => {
     renderShell();
-    // roundIndex=1 → round display = 2
-    expect(screen.getByTestId('game-round')).toBeInTheDocument();
+    expect(screen.queryByTestId('game-round')).not.toBeInTheDocument();
   });
 
-  it('renders score in sub-bar', () => {
-    renderShell();
-    expect(screen.getByText('3')).toBeInTheDocument();
+  it('does not render the progress bar (HUD now owns round display)', () => {
+    const { container } = renderShell();
+    expect(
+      container.querySelector('.rounded-full .bg-primary'),
+    ).toBeNull();
   });
 
   it('renders timer when timerVisible is true', () => {

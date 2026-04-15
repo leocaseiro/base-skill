@@ -437,6 +437,7 @@ export const NumberMatch = ({
         config={answerGameConfig}
         initialState={sessionEpoch === 0 ? initialState : undefined}
         sessionId={sessionId}
+        skin={skin}
       >
         <NumberMatchSession
           numberMatchConfig={config}

@@ -108,25 +108,4 @@ describe('GameRoute', () => {
       expect(screen.getByText('Word Builder')).toBeInTheDocument();
     });
   });
-
-  it('renders instructions phase placeholder', async () => {
-    render(
-      <GameRoute
-        config={testConfig}
-        initialLog={null}
-        draftState={null}
-        sessionId="sess-route-001"
-        seed="seed-route"
-        meta={testMeta}
-        gameSpecificConfig={null}
-        bookmarkId={null}
-        bookmarkName={null}
-        bookmarkColor={null}
-      />,
-      { wrapper },
-    );
-    await waitFor(() => {
-      expect(screen.getByTestId('game-round')).toBeInTheDocument();
-    });
-  });
 });

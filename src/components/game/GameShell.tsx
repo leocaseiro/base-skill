@@ -22,7 +22,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useRxDB } from '@/db/hooks/useRxDB';
-import { useGameRoundProgress } from '@/lib/game-engine/GameRoundContext';
 import {
   GameEngineProvider,
   useGameDispatch,
@@ -58,9 +57,6 @@ const GameShellChrome = ({
   const { db } = useRxDB();
   const [exitOpen, setExitOpen] = useState(false);
 
-  const roundOverride = useGameRoundProgress();
-  const roundCurrent = roundOverride?.current ?? state.roundIndex + 1;
-  const roundTotal = roundOverride?.total ?? config.maxRounds;
   const title =
     config.title[locale] ?? config.title['en'] ?? config.gameId;
 
@@ -97,34 +93,16 @@ const GameShellChrome = ({
           <span aria-hidden="true">← </span>
           <span>{title}</span>
         </button>
-        <span className="text-sm font-medium" data-testid="game-round">
-          {t('shell.round', {
-            current: roundCurrent,
-            total: roundTotal,
-          })}
-        </span>
       </header>
 
-      {/* Sub-bar: score + progress + optional timer */}
-      <div className="flex items-center gap-4 border-b px-4 py-2 text-sm">
-        <span data-testid="game-score">{state.score}</span>
-        <div className="flex-1">
-          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-primary transition-all"
-              style={{
-                width: `${Math.round((roundCurrent / roundTotal) * 100)}%`,
-              }}
-            />
-          </div>
+      {/* Sub-bar: optional timer */}
+      {config.timerVisible && config.timerDurationSeconds !== null && (
+        <div className="flex items-center justify-end border-b px-4 py-2 text-sm">
+          <span data-testid="game-timer">
+            ⏱ {config.timerDurationSeconds}s
+          </span>
         </div>
-        {config.timerVisible &&
-          config.timerDurationSeconds !== null && (
-            <span data-testid="game-timer">
-              ⏱ {config.timerDurationSeconds}s
-            </span>
-          )}
-      </div>
+      )}
 
       {/* Game area (div, not main — app layout already has a single page <main>) */}
       <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4">
