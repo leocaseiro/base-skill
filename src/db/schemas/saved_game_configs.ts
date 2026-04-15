@@ -1,3 +1,4 @@
+import type { Cover } from '@/games/cover-type';
 import type { RxJsonSchema } from 'rxdb';
 
 export type SavedGameConfigDoc = {
@@ -8,11 +9,12 @@ export type SavedGameConfigDoc = {
   config: Record<string, unknown>;
   createdAt: string;
   color: string;
+  cover?: Cover;
 };
 
 export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
   {
-    version: 1,
+    version: 2,
     primaryKey: 'id',
     type: 'object',
     properties: {
@@ -23,6 +25,36 @@ export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
       config: { type: 'object' },
       createdAt: { type: 'string', format: 'date-time' },
       color: { type: 'string', maxLength: 32 },
+      cover: {
+        oneOf: [
+          {
+            type: 'object',
+            properties: {
+              kind: { type: 'string', enum: ['emoji'] },
+              emoji: { type: 'string', maxLength: 16 },
+              gradient: {
+                type: 'array',
+                items: { type: 'string' },
+                minItems: 2,
+                maxItems: 2,
+              },
+            },
+            required: ['kind', 'emoji'],
+            additionalProperties: false,
+          },
+          {
+            type: 'object',
+            properties: {
+              kind: { type: 'string', enum: ['image'] },
+              src: { type: 'string', maxLength: 2048 },
+              alt: { type: 'string', maxLength: 256 },
+              background: { type: 'string', maxLength: 32 },
+            },
+            required: ['kind', 'src'],
+            additionalProperties: false,
+          },
+        ],
+      },
     },
     required: [
       'id',
