@@ -21,6 +21,9 @@ developer-style labels. The changes land in four areas:
    strip, colored ribbon, and bookmark icon — so parents set up presets once
    and kids just tap a card. Every bookmark can also carry its **own cover**
    (emoji or image URL), falling back to the game's default when unset.
+5. **Per-card cog opens a modal with the full Advanced form.** Saving from
+   the modal updates the current bookmark (if any) or creates a new one —
+   it never overwrites a game default.
 
 Audience pattern: **kid-first, parent-assist** (chosen in brainstorming). Kids
 drive, parents tweak without leaving the page.
@@ -150,20 +153,25 @@ New structure:
 
 ```text
 ┌───────────────────────────────────────────┐
-│  BaseSkill logo          ⚙️ Parent gear   │  ← compact topbar
+│  BaseSkill logo                           │  ← compact topbar
 ├───────────────────────────────────────────┤
-│  [cover]   [cover]   [cover]   [cover]    │
-│  Title     Title     Title     Title      │
-│  chips     chips     chips     chips      │
-│  [Play ]   [Play ]   [Play ]   [Play ]    │
+│  [cover]    [cover]    [cover]    [cover] │
+│  Title  ⚙️  Title  ⚙️  Title  ⚙️  Title ⚙️│
+│  chips      chips      chips      chips   │
+│  [Play ]    [Play ]    [Play ]    [Play ] │
 │                                            │
-│  [cover with ribbon]   [cover with ribbon] …
+│  [cover ribbon ⚙️]  [cover ribbon ⚙️]  …
 │  Title                                     │
 │  "Bookmark name"                           │
 │  chips                                     │
 │  [Play ]                                   │
 └───────────────────────────────────────────┘
 ```
+
+Each card carries its **own cog** (⚙️) in the top-right. Tapping the cog
+opens the **advanced config modal** (see "Cog + advanced modal" below). No
+global parent gear in the topbar — the per-card cog is the only advanced
+surface on the homepage.
 
 ### Responsive grid
 
@@ -226,24 +234,65 @@ The card list is sorted:
 
 ### Level / subject filters
 
-Removed from the homepage. Kids don't use them. Parents can find the same
-filtering behavior behind the **⚙️ Parent** button in the topbar (a simple
-sheet with level + subject selects, plus a link to the existing Parent
-route). Out of scope for this spec: redesigning the Parent route itself.
+Removed from the homepage. Kids don't use them. Level is already a
+per-game simple-config control (Spell It!), and subject is implicit in
+the three-game catalog today. Parents can still access the full
+`/$locale/_app/parent/*` route via the existing nav for bulk oversight.
+Out of scope for this spec: redesigning the Parent route itself.
+
+## Cog + advanced modal
+
+Every card — default or bookmark — shows a small **⚙️ cog** in its top-right
+corner. Tapping it opens a modal that renders the **full advanced config
+form** for that game (the existing `ConfigFormFields` output, unchanged).
+
+The modal replaces what used to be an inline "Advanced ⚙️" link inside the
+simple form. The simple form stays the kid-friendly default; the advanced
+form lives entirely behind the cog.
+
+### Modal entry points
+
+- **Homepage card cog** — opens the modal pre-filled with that card's
+  config (the game default for a default card; the bookmark's config for a
+  bookmark card).
+- **Instructions screen cog** — same modal, same behavior. Replaces the
+  inline "Advanced ⚙️" link previously shown under the simple form.
+
+### Modal contents
+
+- Cover picker (emoji palette + image URL input + "Use game default").
+- Bookmark name field (required when saving as new; pre-filled for existing
+  bookmarks).
+- Bookmark color picker (for "Save as new").
+- **Full advanced form** (existing `ConfigFormFields` + `renderConfigForm`
+  per game, no visual changes).
+- Save bar:
+  - If opened from a **bookmark card**: `Update "{bookmark name}"`
+    (primary) + `Save as new bookmark` (secondary) + `Cancel`.
+  - If opened from a **default card**: `Save as new bookmark` (primary
+    only) + `Cancel`. There is no "Update default" button — **defaults are
+    immutable**.
+
+### Never overwrites defaults
+
+Saving from the modal always either updates an existing bookmark or
+creates a new one. The `GAME_CATALOG` default config is never persisted
+to; it is the immutable starting point. If a parent wants a different
+"default-feeling" experience, they save a bookmark — that bookmark becomes
+the card they and the kid tap.
 
 ## Simple config forms
 
 Every game gets a `<SimpleConfigForm gameId>` component. This is the **default**
 view for:
 
-1. Editing a game's default config from the homepage (via a small edit
-   affordance — exact flow picked during implementation).
-2. The Instructions screen's settings panel.
-3. The bookmark save/update dialog's config preview.
+1. The Instructions screen's settings panel.
+2. The bookmark save/update dialog's config preview (inside the cog modal
+   — see "Cog + advanced modal" above).
 
-Below each simple form is an `Advanced ⚙️` link that reveals the existing
-`ConfigFormFields` output for that game, unchanged. The persisted data model
-stays the same — `SortNumbersSimpleConfig` uses the existing `configMode:
+The simple form never exposes an inline "Advanced" link. The advanced form
+is reachable only via the per-card cog. The persisted data model stays the
+same — `SortNumbersSimpleConfig` uses the existing `configMode:
 'simple' | 'advanced'` discriminator; Match the Number! and Spell It! gain
 analogous simple-mode types.
 
@@ -278,7 +327,6 @@ These are intentionally simple — no custom dropdowns or popovers. Native
 ┌ How do you answer? ──────────────────────┐
 │ [ChunkGroup: ✋ Drag | ⌨️ Type | ✨ Both] │
 └──────────────────────────────────────────┘
-[Advanced ⚙️]
 ```
 
 Notes:
@@ -313,7 +361,6 @@ Notes:
 ┌ Extra wrong tiles ───────────────────────┐
 │ [Stepper: 3]                             │
 └──────────────────────────────────────────┘
-[Advanced ⚙️]
 ```
 
 Notes:
@@ -352,7 +399,6 @@ Notes:
 ┌ How do you answer? ──────────────────────┐
 │ [ChunkGroup: ✋ Drag | ⌨️ Type | ✨ Both] │
 └──────────────────────────────────────────┘
-[Advanced ⚙️]
 ```
 
 Notes:
@@ -363,8 +409,8 @@ Notes:
 => start + i * step)` (reverse when descending). Uses the existing
   `resolveSimpleConfig` helper.
 - Direction ChunkGroup stores `ascending` / `descending` as it does today.
-- Distractors default OFF in simple (not shown). Parent enables via advanced.
-- Advanced link reveals the existing `ConfigFormFields(sortNumbersConfigFields)`.
+- Distractors default OFF in simple (not shown). Parent enables via the
+  advanced cog modal (see "Cog + advanced modal").
 
 ## Instructions screen
 
@@ -377,24 +423,24 @@ mostly content:
 - `← Back` affordance (new).
 - **Cover** (new, replacing the text-only `GameNameChip` at the top).
 - Game title + bookmark badge (if launched from a bookmark).
+- **Cog ⚙️** in the header (matches the homepage card cog) — opens the
+  advanced config modal.
 - Instructions text + TTS speaker (unchanged).
 - **Big "Let's go!" CTA** (styled bigger/more playful than today).
 - Settings chevron (collapsed).
 
 **Settings expanded:**
 
-- `<SimpleConfigForm gameId>` — same component as the homepage card's edit
-  view (single source of truth).
-- `Advanced ⚙️` link beneath the simple form reveals the existing advanced
-  form (`ConfigFormFields` + `renderConfigForm`) inline. Toggling advanced
-  on does **not** hide the simple form above — they stack so the user can
-  see both and the advanced form is positioned as "extra controls", not a
-  replacement.
+- `<SimpleConfigForm gameId>` — same component used by the cog modal's
+  preview area (single source of truth for simple-mode rendering).
+- **No inline Advanced link.** The advanced form lives exclusively behind
+  the cog modal. The simple form stays focused on the kid-friendly
+  controls.
 - Save bar beneath:
   - If launched from a bookmark: `Update "{bookmark name}"` (primary) +
-    `Save as new…` (secondary). Same behavior as today.
-  - If launched from a default: `Save as new bookmark` flow with the
-    existing bookmark-color picker.
+    `Save as new bookmark` (secondary). Same behavior as today.
+  - If launched from a default: `Save as new bookmark` only (defaults are
+    immutable — see "Cog + advanced modal").
 
 ## Data and typing changes
 
@@ -490,9 +536,13 @@ Update `docs/architecture/*.mdx` co-located docs only if logic in
 
 ## Open questions (to resolve in implementation plan)
 
-- Exact homepage affordance for _editing a game default_ without saving a
-  bookmark (long-press gear on the card vs. tapping the card's chips vs.
-  tapping cover to enter a preview screen). Not blocking design approval.
-- Whether the Parent gear in the top bar opens a lightweight sheet or
-  navigates to `/parent`. Default: sheet with level/subject + link to full
-  Parent route.
+- **Resolved:** editing a game default. Game defaults are **immutable**.
+  Tapping a default card's cog opens the advanced modal with the default
+  config pre-filled; the only save action is `Save as new bookmark`. There
+  is no in-place edit of defaults. The "personalized default" feel comes
+  from a bookmark the parent saves once and the kid taps thereafter.
+- Cog affordance on small screens: whether the cog is always visible in
+  the card's top-right corner or revealed by long-press. Default:
+  always visible (a 28×28 tap target is fine alongside the Play button).
+- Modal presentation on mobile: full-screen sheet vs. centered modal with
+  backdrop. Default: full-screen sheet on `< sm`, centered dialog above.
