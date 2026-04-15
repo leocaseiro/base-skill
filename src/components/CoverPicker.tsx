@@ -39,7 +39,7 @@ const EMOJI_PALETTE = [
 
 type CoverPickerProps = {
   value: Cover | undefined;
-  onChange: (cover: Cover | undefined) => void;
+  onChange: (cover?: Cover) => void;
 };
 
 const selectedGradientKey = (
@@ -108,7 +108,7 @@ export const CoverPicker = ({
     onChange();
   };
 
-  const applyGradient = (key: GradientKey | undefined) => {
+  const applyGradient = (key?: GradientKey) => {
     if (!value) return;
     if (value.kind === 'emoji') {
       onChange({

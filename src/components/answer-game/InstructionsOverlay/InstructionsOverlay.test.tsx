@@ -87,7 +87,7 @@ describe('InstructionsOverlay', () => {
 
   it('calls onStart immediately (and updates the bookmark) when playing a bookmarked game', async () => {
     const onStart = vi.fn();
-    const onUpdateBookmark = vi.fn().mockResolvedValue();
+    const onUpdateBookmark = vi.fn(async () => {});
     render(
       <InstructionsOverlay
         {...baseProps}
