@@ -56,7 +56,8 @@ export const CoverPicker = ({
 
   const useDefault = () => {
     setUrl('');
-    onChange();
+    const cleared: Cover | undefined = undefined;
+    onChange(cleared);
   };
 
   return (
