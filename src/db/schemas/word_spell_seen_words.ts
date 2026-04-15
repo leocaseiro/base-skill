@@ -14,7 +14,8 @@ export const wordSpellSeenWordsSchema: RxJsonSchema<WordSpellSeenWordsDoc> =
     primaryKey: 'id',
     type: 'object',
     properties: {
-      id: { type: 'string', maxLength: 256 },
+      // 550 = profileId (36) + '__' (2) + signature (512)
+      id: { type: 'string', maxLength: 550 },
       profileId: { type: 'string', maxLength: 36 },
       signature: { type: 'string', maxLength: 512 },
       words: { type: 'array', items: { type: 'string' } },
