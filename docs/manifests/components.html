@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/172 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/46 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">46/46 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">7/188 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -701,7 +701,7 @@
     <div class="title">
       <h2><span class="status-dot dot-err"></span> AnswerGame</h2>
       <div class="badges">
-        <label for="c-1-components-answer-game-answergame-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-1-components-answer-game-answergame-props" class="badge ok as-toggle">5 prop types</label>
         <label for="c-1-components-answer-game-answergame-info" class="badge info as-toggle">1 info</label>
         <label for="c-1-components-answer-game-answergame-stories" class="badge err as-toggle">2/4 story errors</label>
         
@@ -735,7 +735,7 @@
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">4 prop types</span>
+              <span class="badge ok">5 prop types</span>
             </div>
             <pre><code>Component: src/components/answer-game/AnswerGame/AnswerGame.tsx</code></pre>
             <pre><code>Props:</code></pre>
@@ -745,7 +745,15 @@ config: AnswerGameConfig
 
 initialState?: AnswerGameDraftState
 
-sessionId?: string</code></pre>
+sessionId?: string
+
+/**
+ * Optional skin. When provided, `skin.ProgressHUD` (if defined) replaces
+ * the default HUD; otherwise the default HUD renders. `skin.tokens` are
+ * applied by individual game components on their own game container, not
+ * here.
+ */
+skin?: GameSkin</code></pre>
           </div>
         </div>
     
@@ -4725,14 +4733,272 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="ProgressHUD">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> ProgressHUD</h2>
+      <div class="badges">
+        <label for="c-30-answer-game-progresshud-props" class="badge ok as-toggle">8 prop types</label>
+        <label for="c-30-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
+        <label for="c-30-answer-game-progresshud-stories" class="badge ok as-toggle">9 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx">answer-game-progresshud · ./src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-30-answer-game-progresshud-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-30-answer-game-progresshud-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-30-answer-game-progresshud-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">8 prop types</span>
+            </div>
+            <pre><code>Component: src/components/answer-game/ProgressHUD/ProgressHUD.tsx::ProgressHUD</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>/**
+ * Whether the game uses levelMode.
+ */
+isLevelMode: boolean
+
+/**
+ * 0-based index of the current level; 0 when levelMode is off.
+ */
+levelIndex: number
+
+/**
+ * Lifecycle phase — enables pop/celebration animations on transition.
+ */
+phase: | &#39;playing&#39;
+| &#39;round-complete&#39;
+| &#39;level-complete&#39;
+| &#39;game-over&#39;
+
+/**
+ * 0-based index of the current round.
+ */
+roundIndex: number
+
+/**
+ * Resolved visibility flags after merging defaults + config.
+ */
+showDots: boolean
+
+showFraction: boolean
+
+showLevel: boolean
+
+/**
+ * Total rounds in the session; null for unbounded level mode.
+ */
+totalRounds: number | null</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { ProgressHUD } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Classic Round 3 Of 5</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Classic_Round3Of5 = () =&gt; &lt;ProgressHUD
+    roundIndex={2}
+    totalRounds={5}
+    levelIndex={0}
+    isLevelMode={false}
+    phase=&quot;playing&quot;
+    showDots
+    showFraction
+    showLevel={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Classic Last Round</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Classic_LastRound = () =&gt; &lt;ProgressHUD
+    roundIndex={4}
+    totalRounds={5}
+    levelIndex={0}
+    isLevelMode={false}
+    phase=&quot;playing&quot;
+    showDots
+    showFraction
+    showLevel={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Dots Only</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const DotsOnly = () =&gt; &lt;ProgressHUD
+    roundIndex={2}
+    totalRounds={5}
+    levelIndex={0}
+    isLevelMode={false}
+    phase=&quot;playing&quot;
+    showDots
+    showFraction={false}
+    showLevel={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Fraction Only</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const FractionOnly = () =&gt; &lt;ProgressHUD
+    roundIndex={2}
+    totalRounds={5}
+    levelIndex={0}
+    isLevelMode={false}
+    phase=&quot;playing&quot;
+    showDots={false}
+    showFraction
+    showLevel={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Level Mode Level 3</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LevelMode_Level3 = () =&gt; &lt;ProgressHUD
+    roundIndex={2}
+    totalRounds={null}
+    levelIndex={2}
+    isLevelMode
+    phase=&quot;playing&quot;
+    showDots
+    showFraction={false}
+    showLevel /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Level Mode Level 10</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LevelMode_Level10 = () =&gt; &lt;ProgressHUD
+    roundIndex={2}
+    totalRounds={null}
+    levelIndex={9}
+    isLevelMode
+    phase=&quot;playing&quot;
+    showDots
+    showFraction={false}
+    showLevel /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Mixed Level Plus Fraction</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Mixed_LevelPlusFraction = () =&gt; &lt;ProgressHUD
+    roundIndex={2}
+    totalRounds={5}
+    levelIndex={2}
+    isLevelMode
+    phase=&quot;playing&quot;
+    showDots
+    showFraction
+    showLevel /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Round Complete Phase</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const RoundCompletePhase = () =&gt; &lt;ProgressHUD
+    roundIndex={2}
+    totalRounds={5}
+    levelIndex={0}
+    isLevelMode={false}
+    phase=&quot;round-complete&quot;
+    showDots
+    showFraction
+    showLevel={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">All Flags Off</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const AllFlagsOff = () =&gt; &lt;ProgressHUD
+    roundIndex={2}
+    totalRounds={5}
+    levelIndex={0}
+    isLevelMode={false}
+    phase=&quot;playing&quot;
+    showDots={false}
+    showFraction={false}
+    showLevel={false} /&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="SavedConfigChip">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SavedConfigChip</h2>
       <div class="badges">
-        <label for="c-30-components-savedconfigchip-props" class="badge ok as-toggle">6 prop types</label>
-        <label for="c-30-components-savedconfigchip-info" class="badge info as-toggle">1 info</label>
-        <label for="c-30-components-savedconfigchip-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-31-components-savedconfigchip-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-31-components-savedconfigchip-info" class="badge info as-toggle">1 info</label>
+        <label for="c-31-components-savedconfigchip-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -4744,10 +5010,10 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-30-components-savedconfigchip-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-30-components-savedconfigchip-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-31-components-savedconfigchip-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-31-components-savedconfigchip-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-30-components-savedconfigchip-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-31-components-savedconfigchip-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4881,9 +5147,9 @@ renderConfigForm?: (props: {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ScoreAnimation</h2>
       <div class="badges">
-        <label for="c-31-components-answer-game-scoreanimation-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-31-components-answer-game-scoreanimation-info" class="badge info as-toggle">1 info</label>
-        <label for="c-31-components-answer-game-scoreanimation-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-32-components-answer-game-scoreanimation-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-32-components-answer-game-scoreanimation-info" class="badge info as-toggle">1 info</label>
+        <label for="c-32-components-answer-game-scoreanimation-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -4895,10 +5161,10 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-31-components-answer-game-scoreanimation-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-31-components-answer-game-scoreanimation-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-32-components-answer-game-scoreanimation-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-32-components-answer-game-scoreanimation-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-31-components-answer-game-scoreanimation-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-32-components-answer-game-scoreanimation-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4970,8 +5236,8 @@ renderConfigForm?: (props: {
       <h2><span class="status-dot dot-ok"></span> Select</h2>
       <div class="badges">
         
-        <label for="c-32-components-ui-select-info" class="badge info as-toggle">1 info</label>
-        <label for="c-32-components-ui-select-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-33-components-ui-select-info" class="badge info as-toggle">1 info</label>
+        <label for="c-33-components-ui-select-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -4983,8 +5249,8 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-32-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-32-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-33-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-33-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -5069,8 +5335,8 @@ renderConfigForm?: (props: {
       <h2><span class="status-dot dot-ok"></span> Sheet</h2>
       <div class="badges">
         
-        <label for="c-33-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
-        <label for="c-33-components-ui-sheet-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-34-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
+        <label for="c-34-components-ui-sheet-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -5082,8 +5348,8 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-33-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-33-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-34-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-34-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -5177,9 +5443,9 @@ renderConfigForm?: (props: {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Slider</h2>
       <div class="badges">
-        <label for="c-34-components-ui-slider-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-34-components-ui-slider-info" class="badge info as-toggle">1 info</label>
-        <label for="c-34-components-ui-slider-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-35-components-ui-slider-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-35-components-ui-slider-info" class="badge info as-toggle">1 info</label>
+        <label for="c-35-components-ui-slider-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -5191,10 +5457,10 @@ renderConfigForm?: (props: {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-34-components-ui-slider-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-34-components-ui-slider-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-35-components-ui-slider-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-35-components-ui-slider-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-34-components-ui-slider-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-35-components-ui-slider-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5288,9 +5554,9 @@ min?: any = 0</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SlotRow</h2>
       <div class="badges">
-        <label for="c-35-answer-game-slot-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-35-answer-game-slot-info" class="badge info as-toggle">1 info</label>
-        <label for="c-35-answer-game-slot-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-36-answer-game-slot-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-36-answer-game-slot-info" class="badge info as-toggle">1 info</label>
+        <label for="c-36-answer-game-slot-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -5302,10 +5568,10 @@ min?: any = 0</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-35-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-35-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-36-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-36-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-35-answer-game-slot-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-36-answer-game-slot-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5595,9 +5861,145 @@ className?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbers</h2>
       <div class="badges">
-        <label for="c-36-games-sort-numbers-sortnumbers-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-36-games-sort-numbers-sortnumbers-info" class="badge info as-toggle">1 info</label>
-        <label for="c-36-games-sort-numbers-sortnumbers-stories" class="badge ok as-toggle">17 stories</label>
+        <label for="c-37-games-sortnumbers-skin-harness-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-37-games-sortnumbers-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-37-games-sortnumbers-skin-harness-stories" class="badge ok as-toggle">5 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx">games-sortnumbers-skin-harness · ./src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-37-games-sortnumbers-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-37-games-sortnumbers-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-37-games-sortnumbers-skin-harness-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">4 prop types</span>
+            </div>
+            <pre><code>Component: src/games/sort-numbers/SortNumbers/SortNumbers.tsx::SortNumbers</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>config: SortNumbersConfig
+
+initialState?: AnswerGameDraftState
+
+seed?: string
+
+sessionId?: string</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { SortNumbers } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Level Mode Level 1</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LevelMode_Level1 = () =&gt; &lt;SortNumbers
+    config={levelModeConfig}
+    initialState={levelDraftState(0)}
+    seed=&quot;storybook&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Level Mode Level 3</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LevelMode_Level3 = () =&gt; &lt;SortNumbers
+    config={levelModeConfig}
+    initialState={levelDraftState(2)}
+    seed=&quot;storybook&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Level Mode Level 10</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LevelMode_Level10 = () =&gt; &lt;SortNumbers
+    config={levelModeConfig}
+    initialState={levelDraftState(9)}
+    seed=&quot;storybook&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Level Mode Level Complete Pop</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LevelMode_LevelCompletePop = () =&gt; &lt;SortNumbers
+    config={levelModeConfig}
+    initialState={levelDraftState(2, &#39;round-complete&#39;)}
+    seed=&quot;storybook&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Mixed Level Plus Fraction</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Mixed_LevelPlusFraction = () =&gt; &lt;SortNumbers
+    config={mixedModeConfig}
+    initialState={levelDraftState(2)}
+    seed=&quot;storybook&quot; /&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="SortNumbers">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> SortNumbers</h2>
+      <div class="badges">
+        <label for="c-38-games-sort-numbers-sortnumbers-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-38-games-sort-numbers-sortnumbers-info" class="badge info as-toggle">1 info</label>
+        <label for="c-38-games-sort-numbers-sortnumbers-stories" class="badge ok as-toggle">17 stories</label>
         
       </div>
     </div>
@@ -5609,10 +6011,10 @@ className?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-36-games-sort-numbers-sortnumbers-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-36-games-sort-numbers-sortnumbers-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-38-games-sort-numbers-sortnumbers-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-38-games-sort-numbers-sortnumbers-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-36-games-sort-numbers-sortnumbers-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-38-games-sort-numbers-sortnumbers-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5858,9 +6260,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbersTileBank</h2>
       <div class="badges">
-        <label for="c-37-games-sort-numbers-sortnumberstilebank-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-37-games-sort-numbers-sortnumberstilebank-info" class="badge info as-toggle">1 info</label>
-        <label for="c-37-games-sort-numbers-sortnumberstilebank-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-39-games-sort-numbers-sortnumberstilebank-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-39-games-sort-numbers-sortnumberstilebank-info" class="badge info as-toggle">1 info</label>
+        <label for="c-39-games-sort-numbers-sortnumberstilebank-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -5872,10 +6274,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-37-games-sort-numbers-sortnumberstilebank-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-37-games-sort-numbers-sortnumberstilebank-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-39-games-sort-numbers-sortnumberstilebank-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-39-games-sort-numbers-sortnumberstilebank-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-37-games-sort-numbers-sortnumberstilebank-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-39-games-sort-numbers-sortnumberstilebank-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5955,9 +6357,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> TextQuestion</h2>
       <div class="badges">
-        <label for="c-38-components-questions-textquestion-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-38-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-38-components-questions-textquestion-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-40-components-questions-textquestion-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-40-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-40-components-questions-textquestion-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -5969,10 +6371,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-38-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-38-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-40-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-40-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-38-components-questions-textquestion-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-40-components-questions-textquestion-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6053,8 +6455,8 @@ sessionId?: string</code></pre>
       <h2><span class="status-dot dot-ok"></span> ThemeToggle</h2>
       <div class="badges">
         
-        <label for="c-39-components-themetoggle-info" class="badge info as-toggle">1 info</label>
-        <label for="c-39-components-themetoggle-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-41-components-themetoggle-info" class="badge info as-toggle">1 info</label>
+        <label for="c-41-components-themetoggle-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -6066,8 +6468,8 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-39-components-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-39-components-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-41-components-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-41-components-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6121,8 +6523,8 @@ sessionId?: string</code></pre>
       <h2><span class="status-dot dot-ok"></span> UpdateBanner</h2>
       <div class="badges">
         
-        <label for="c-40-components-updatebanner-info" class="badge info as-toggle">1 info</label>
-        <label for="c-40-components-updatebanner-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-42-components-updatebanner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-42-components-updatebanner-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -6134,8 +6536,8 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-40-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-40-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-42-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-42-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6225,8 +6627,8 @@ sessionId?: string</code></pre>
       <h2><span class="status-dot dot-ok"></span> WordLibraryExplorer</h2>
       <div class="badges">
         
-        <label for="c-41-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-41-data-wordlibraryexplorer-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-43-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
+        <label for="c-43-data-wordlibraryexplorer-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -6238,8 +6640,8 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-41-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-41-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-43-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-43-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6292,9 +6694,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> WordSpell</h2>
       <div class="badges">
-        <label for="c-42-games-word-spell-wordspell-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-42-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-42-games-word-spell-wordspell-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-44-games-word-spell-wordspell-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-44-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
+        <label for="c-44-games-word-spell-wordspell-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -6306,10 +6708,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-42-games-word-spell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-42-games-word-spell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-44-games-word-spell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-44-games-word-spell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-42-games-word-spell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-44-games-word-spell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6474,9 +6876,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
       <div class="badges">
-        <label for="c-43-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-43-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-43-games-wordspell-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        <label for="c-45-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-45-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-45-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
         
       </div>
     </div>
@@ -6487,9 +6889,9 @@ sessionId?: string</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-43-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-43-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-43-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-45-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-45-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-45-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6500,19 +6902,20 @@ sessionId?: string</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;WordSpellWithHarness&quot; component.
-  57 | );
-  58 |
-&gt; 59 | const meta: Meta&lt;typeof WordSpellWithHarness&gt; = {
-     | ^
-  60 |   title: &#39;Games/WordSpell/Skin Harness&#39;,
-  61 |   component: WordSpellWithHarness,
-  62 |   tags: [&#39;autodocs&#39;],
+  127 | );
+  128 |
+&gt; 129 | const meta: Meta&lt;typeof WordSpellWithHarness&gt; = {
+      | ^
+  130 |   title: &#39;Games/WordSpell/Skin Harness&#39;,
+  131 |   component: WordSpellWithHarness,
+  132 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
 import { withRouter } from &#39;../../../../.storybook/decorators/withRouter&#39;;
 import { WordSpell } from &#39;./WordSpell&#39;;
 import type { WordSpellConfig } from &#39;../types&#39;;
+import type { AnswerGameDraftState } from &#39;@/components/answer-game/types&#39;;
 import type { GameSkin } from &#39;@/lib/skin&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import { SkinHarness, registerSkin } from &#39;@/lib/skin&#39;;
@@ -6540,6 +6943,67 @@ const demoSkin: GameSkin = {
 
 registerSkin(&#39;word-spell&#39;, demoSkin);
 
+const fiveRoundConfig: WordSpellConfig = {
+  gameId: &#39;word-spell&#39;,
+  component: &#39;WordSpell&#39;,
+  inputMethod: &#39;drag&#39;,
+  wrongTileBehavior: &#39;lock-manual&#39;,
+  tileBankMode: &#39;exact&#39;,
+  totalRounds: 5,
+  roundsInOrder: true,
+  ttsEnabled: false,
+  tileUnit: &#39;letter&#39;,
+  mode: &#39;picture&#39;,
+  rounds: [
+    { word: &#39;cat&#39;, image: &#39;https://placehold.co/160?text=cat&#39; },
+    { word: &#39;dog&#39;, image: &#39;https://placehold.co/160?text=dog&#39; },
+    { word: &#39;hen&#39;, image: &#39;https://placehold.co/160?text=hen&#39; },
+    { word: &#39;pig&#39;, image: &#39;https://placehold.co/160?text=pig&#39; },
+    { word: &#39;fox&#39;, image: &#39;https://placehold.co/160?text=fox&#39; },
+  ],
+};
+
+// Stable tiles/zones for &quot;dog&quot; (round index 1) — used in HUD stories
+const dogDraftState = (roundIndex: number): AnswerGameDraftState =&gt; ({
+  allTiles: [
+    { id: &#39;tile-d&#39;, label: &#39;d&#39;, value: &#39;d&#39; },
+    { id: &#39;tile-g&#39;, label: &#39;g&#39;, value: &#39;g&#39; },
+    { id: &#39;tile-o&#39;, label: &#39;o&#39;, value: &#39;o&#39; },
+  ],
+  bankTileIds: [&#39;tile-d&#39;, &#39;tile-g&#39;, &#39;tile-o&#39;],
+  zones: [
+    {
+      id: &#39;z0&#39;,
+      index: 0,
+      expectedValue: &#39;d&#39;,
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+    {
+      id: &#39;z1&#39;,
+      index: 1,
+      expectedValue: &#39;o&#39;,
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+    {
+      id: &#39;z2&#39;,
+      index: 2,
+      expectedValue: &#39;g&#39;,
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+  ],
+  activeSlotIndex: 0,
+  phase: &#39;playing&#39;,
+  roundIndex,
+  retryCount: 0,
+  levelIndex: 0,
+});
+
 const baseConfig: WordSpellConfig = {
   gameId: &#39;word-spell&#39;,
   component: &#39;WordSpell&#39;,
@@ -6552,18 +7016,26 @@ const baseConfig: WordSpellConfig = {
   tileUnit: &#39;letter&#39;,
   mode: &#39;picture&#39;,
   rounds: [
-    { word: &#39;cat&#39;, image: &#39;https://placehold.co/160?text=🐱&#39; },
-    { word: &#39;dog&#39;, image: &#39;https://placehold.co/160?text=🐶&#39; },
+    { word: &#39;cat&#39;, image: &#39;https://placehold.co/160?text=cat&#39; },
+    { word: &#39;dog&#39;, image: &#39;https://placehold.co/160?text=dog&#39; },
   ],
 };
 
 const WordSpellWithHarness = ({
   config,
+  initialState,
 }: {
   config: WordSpellConfig;
+  initialState?: AnswerGameDraftState;
 }) =&gt; (
   &lt;SkinHarness gameId=&quot;word-spell&quot;&gt;
-    {({ skin }) =&gt; &lt;WordSpell config={{ ...config, skin: skin.id }} /&gt;}
+    {({ skin }) =&gt; (
+      &lt;WordSpell
+        config={{ ...config, skin: skin.id }}
+        initialState={initialState}
+        seed=&quot;storybook&quot;
+      /&gt;
+    )}
   &lt;/SkinHarness&gt;
 );
 
@@ -6579,6 +7051,20 @@ export default meta;
 type Story = StoryObj&lt;typeof WordSpellWithHarness&gt;;
 
 export const Default: Story = {};
+
+export const HUD_Round2Of5: Story = {
+  args: {
+    config: fiveRoundConfig,
+    initialState: dogDraftState(1),
+  },
+};
+
+export const HUD_Round5Of5: Story = {
+  args: {
+    config: fiveRoundConfig,
+    initialState: dogDraftState(4),
+  },
+};
 </code></pre></div>
     </div>
         </div>
@@ -6597,6 +7083,26 @@ export const Default: Story = {};
             <div class="note err">
               <div class="row">
                 <span class="ex-name">Default</span>
+                <span class="badge err">story error</span>
+              </div>
+              
+              
+              
+              <pre><code>Could not generate snippet without component name.</code></pre>
+            </div>
+            <div class="note err">
+              <div class="row">
+                <span class="ex-name">HUD Round 2 Of 5</span>
+                <span class="badge err">story error</span>
+              </div>
+              
+              
+              
+              <pre><code>Could not generate snippet without component name.</code></pre>
+            </div>
+            <div class="note err">
+              <div class="row">
+                <span class="ex-name">HUD Round 5 Of 5</span>
                 <span class="badge err">story error</span>
               </div>
               
@@ -7214,7 +7720,7 @@ export const Default: Story = {};
       <div class="badges">
         <label for="c-error-2-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-2-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-2-games-wordspell-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        <label for="c-error-2-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
         
       </div>
     </div>
@@ -7238,19 +7744,20 @@ export const Default: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;WordSpellWithHarness&quot; component.
-  57 | );
-  58 |
-&gt; 59 | const meta: Meta&lt;typeof WordSpellWithHarness&gt; = {
-     | ^
-  60 |   title: &#39;Games/WordSpell/Skin Harness&#39;,
-  61 |   component: WordSpellWithHarness,
-  62 |   tags: [&#39;autodocs&#39;],
+  127 | );
+  128 |
+&gt; 129 | const meta: Meta&lt;typeof WordSpellWithHarness&gt; = {
+      | ^
+  130 |   title: &#39;Games/WordSpell/Skin Harness&#39;,
+  131 |   component: WordSpellWithHarness,
+  132 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
 import { withRouter } from &#39;../../../../.storybook/decorators/withRouter&#39;;
 import { WordSpell } from &#39;./WordSpell&#39;;
 import type { WordSpellConfig } from &#39;../types&#39;;
+import type { AnswerGameDraftState } from &#39;@/components/answer-game/types&#39;;
 import type { GameSkin } from &#39;@/lib/skin&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import { SkinHarness, registerSkin } from &#39;@/lib/skin&#39;;
@@ -7278,6 +7785,67 @@ const demoSkin: GameSkin = {
 
 registerSkin(&#39;word-spell&#39;, demoSkin);
 
+const fiveRoundConfig: WordSpellConfig = {
+  gameId: &#39;word-spell&#39;,
+  component: &#39;WordSpell&#39;,
+  inputMethod: &#39;drag&#39;,
+  wrongTileBehavior: &#39;lock-manual&#39;,
+  tileBankMode: &#39;exact&#39;,
+  totalRounds: 5,
+  roundsInOrder: true,
+  ttsEnabled: false,
+  tileUnit: &#39;letter&#39;,
+  mode: &#39;picture&#39;,
+  rounds: [
+    { word: &#39;cat&#39;, image: &#39;https://placehold.co/160?text=cat&#39; },
+    { word: &#39;dog&#39;, image: &#39;https://placehold.co/160?text=dog&#39; },
+    { word: &#39;hen&#39;, image: &#39;https://placehold.co/160?text=hen&#39; },
+    { word: &#39;pig&#39;, image: &#39;https://placehold.co/160?text=pig&#39; },
+    { word: &#39;fox&#39;, image: &#39;https://placehold.co/160?text=fox&#39; },
+  ],
+};
+
+// Stable tiles/zones for &quot;dog&quot; (round index 1) — used in HUD stories
+const dogDraftState = (roundIndex: number): AnswerGameDraftState =&gt; ({
+  allTiles: [
+    { id: &#39;tile-d&#39;, label: &#39;d&#39;, value: &#39;d&#39; },
+    { id: &#39;tile-g&#39;, label: &#39;g&#39;, value: &#39;g&#39; },
+    { id: &#39;tile-o&#39;, label: &#39;o&#39;, value: &#39;o&#39; },
+  ],
+  bankTileIds: [&#39;tile-d&#39;, &#39;tile-g&#39;, &#39;tile-o&#39;],
+  zones: [
+    {
+      id: &#39;z0&#39;,
+      index: 0,
+      expectedValue: &#39;d&#39;,
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+    {
+      id: &#39;z1&#39;,
+      index: 1,
+      expectedValue: &#39;o&#39;,
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+    {
+      id: &#39;z2&#39;,
+      index: 2,
+      expectedValue: &#39;g&#39;,
+      placedTileId: null,
+      isWrong: false,
+      isLocked: false,
+    },
+  ],
+  activeSlotIndex: 0,
+  phase: &#39;playing&#39;,
+  roundIndex,
+  retryCount: 0,
+  levelIndex: 0,
+});
+
 const baseConfig: WordSpellConfig = {
   gameId: &#39;word-spell&#39;,
   component: &#39;WordSpell&#39;,
@@ -7290,18 +7858,26 @@ const baseConfig: WordSpellConfig = {
   tileUnit: &#39;letter&#39;,
   mode: &#39;picture&#39;,
   rounds: [
-    { word: &#39;cat&#39;, image: &#39;https://placehold.co/160?text=🐱&#39; },
-    { word: &#39;dog&#39;, image: &#39;https://placehold.co/160?text=🐶&#39; },
+    { word: &#39;cat&#39;, image: &#39;https://placehold.co/160?text=cat&#39; },
+    { word: &#39;dog&#39;, image: &#39;https://placehold.co/160?text=dog&#39; },
   ],
 };
 
 const WordSpellWithHarness = ({
   config,
+  initialState,
 }: {
   config: WordSpellConfig;
+  initialState?: AnswerGameDraftState;
 }) =&gt; (
   &lt;SkinHarness gameId=&quot;word-spell&quot;&gt;
-    {({ skin }) =&gt; &lt;WordSpell config={{ ...config, skin: skin.id }} /&gt;}
+    {({ skin }) =&gt; (
+      &lt;WordSpell
+        config={{ ...config, skin: skin.id }}
+        initialState={initialState}
+        seed=&quot;storybook&quot;
+      /&gt;
+    )}
   &lt;/SkinHarness&gt;
 );
 
@@ -7317,6 +7893,20 @@ export default meta;
 type Story = StoryObj&lt;typeof WordSpellWithHarness&gt;;
 
 export const Default: Story = {};
+
+export const HUD_Round2Of5: Story = {
+  args: {
+    config: fiveRoundConfig,
+    initialState: dogDraftState(1),
+  },
+};
+
+export const HUD_Round5Of5: Story = {
+  args: {
+    config: fiveRoundConfig,
+    initialState: dogDraftState(4),
+  },
+};
 </code></pre></div>
     </div>
         </div>
@@ -7335,6 +7925,26 @@ export const Default: Story = {};
             <div class="note err">
               <div class="row">
                 <span class="ex-name">Default</span>
+                <span class="badge err">story error</span>
+              </div>
+              
+              
+              
+              <pre><code>Could not generate snippet without component name.</code></pre>
+            </div>
+            <div class="note err">
+              <div class="row">
+                <span class="ex-name">HUD Round 2 Of 5</span>
+                <span class="badge err">story error</span>
+              </div>
+              
+              
+              
+              <pre><code>Could not generate snippet without component name.</code></pre>
+            </div>
+            <div class="note err">
+              <div class="row">
+                <span class="ex-name">HUD Round 5 Of 5</span>
                 <span class="badge err">story error</span>
               </div>
               
@@ -7962,7 +8572,34 @@ sequenceDiagram
 
 ---
 
-## 6. Round Progression
+## 6. HUD Auto-Mount
+
+`AnswerGame` renders a `ProgressHUDRoot` as the first child of its outer
+flex container every time a session mounts. No per-game wiring is
+required.
+
+```mermaid
+sequenceDiagram
+  participant Game as WordSpell / NumberMatch / SortNumbers
+  participant AG as AnswerGame
+  participant Root as ProgressHUDRoot
+  participant Ctx as AnswerGameStateContext
+  participant HUD as ProgressHUD (default or skin.ProgressHUD)
+
+  Game-&gt;&gt;AG: render &lt;AnswerGame config skin&gt;
+  AG-&gt;&gt;Root: mount as first child
+  Root-&gt;&gt;Ctx: read config, phase, roundIndex, levelIndex, isLevelMode
+  Root-&gt;&gt;Root: resolveHudFlags(config.hud, isLevelMode)
+  alt skin.ProgressHUD defined
+    Root-&gt;&gt;HUD: render skin.ProgressHUD with resolved props
+  else default
+    Root-&gt;&gt;HUD: render built-in ProgressHUD with resolved props
+  end
+```
+
+---
+
+## 7. Round Progression
 
 &gt; **Status: planned — not yet fully implemented.**
 &gt; The phase transition to `&#39;round-complete&#39;` is implemented. The 750ms delay before
@@ -8136,8 +8773,13 @@ export const useAnswerGameContext = (): AnswerGameState
 export const useAnswerGameDispatch = (): Dispatch&lt;AnswerGameAction&gt;
 ```
 
-The provider also supplies `GameRoundContext` with `{ current: number, total: number }`
-for progress display.
+### Consumers of the state context
+
+- `ProgressHUDRoot` (`ProgressHUD/ProgressHUDRoot.tsx`) reads `config`,
+  `phase`, `roundIndex`, `levelIndex`, `isLevelMode` to drive the session
+  progress HUD. It resolves `config.hud` flags via `resolveHudFlags` and
+  either renders the default `ProgressHUD` or forwards props to
+  `skin.ProgressHUD` when the active skin overrides it.
 
 ---
 
@@ -8155,6 +8797,7 @@ for progress display.
 | `roundsInOrder`          | `boolean`                                        | `false`             | When `true`, rounds play in config order; otherwise shuffled once per session                                                                                            |
 | `ttsEnabled`             | `boolean`                                        | —                   | Enables TTS on tile pronounce and answer evaluation                                                                                                                      |
 | `touchKeyboardInputMode` | `&#39;text&#39; \| &#39;numeric&#39; \| &#39;none&#39;`                  | `&#39;text&#39;`            | Sets the OS keyboard type hint for mobile input                                                                                                                          |
+| `hud`                    | `HudConfig`                                      | Resolved by mode    | Toggles `showDots`, `showFraction`, `showLevel` on the auto-mounted `ProgressHUD`. Defaults differ for classic vs. level-mode games; see `resolveHudFlags`               |
 </code></pre>
           </div>
         </div>
