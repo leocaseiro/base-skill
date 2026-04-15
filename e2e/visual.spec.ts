@@ -31,7 +31,8 @@ test('@visual home page', async ({ page }) => {
   await page.goto('/en/');
   await page.getByRole('main').waitFor({ state: 'visible' });
   await page
-    .getByRole('group', { name: /filter by grade level/i })
+    .getByRole('button', { name: /^Play / })
+    .first()
     .waitFor({ state: 'visible' });
   await expect(page).toHaveScreenshot('home.png', { fullPage: true });
 });
@@ -40,7 +41,8 @@ test('@visual home page dark', async ({ page }) => {
   await page.goto('/en/');
   await page.getByRole('main').waitFor({ state: 'visible' });
   await page
-    .getByRole('group', { name: /filter by grade level/i })
+    .getByRole('button', { name: /^Play / })
+    .first()
     .waitFor({ state: 'visible' });
   await setDarkMode(page);
   await expect(page).toHaveScreenshot('home-dark.png', {
@@ -166,17 +168,28 @@ test('@visual NumberMatch numeral-to-group layout tablet portrait', async ({
   );
 });
 
+type NumberMatchPair = { from: string; to: string };
+
+const MODE_TO_PAIR: Record<string, NumberMatchPair> = {
+  'group-to-numeral': { from: 'group', to: 'numeral' },
+  'cardinal-number-to-text': { from: 'numeral', to: 'word' },
+  'ordinal-number-to-text': { from: 'ordinal', to: 'word' },
+};
+
 async function selectNumberMatchMode(
   page: Page,
   mode: string,
 ): Promise<void> {
+  const pair = MODE_TO_PAIR[mode];
+  if (!pair) throw new Error(`Unhandled NumberMatch mode: ${mode}`);
   await page.goto('/en/game/number-match');
   await page
     .getByRole('button', { name: /let's go/i })
     .waitFor({ state: 'visible' });
-  // Open settings panel and switch the mode before starting the round.
-  await page.getByRole('button', { name: /settings/i }).click();
-  await page.getByLabel('Mode', { exact: true }).selectOption(mode);
+  // InstructionsOverlay renders NumberMatchSimpleConfigForm inline —
+  // change the pair via its "what you see" / "what you match" selects.
+  await page.getByLabel('what you see').selectOption(pair.from);
+  await page.getByLabel('what you match').selectOption(pair.to);
   await startGame(page);
   await page
     .getByRole('button', { name: 'Hear the question' })
@@ -259,12 +272,10 @@ async function openNumberMatchWithDots(page: Page): Promise<void> {
   });
   await page.goto('/en/game/number-match');
   await page
-    .getByRole('button', { name: /settings/i })
-    .first()
-    .click();
-  await page
-    .getByLabel('Mode', { exact: true })
-    .selectOption('group-to-numeral');
+    .getByRole('button', { name: /let's go/i })
+    .waitFor({ state: 'visible' });
+  await page.getByLabel('what you see').selectOption('group');
+  await page.getByLabel('what you match').selectOption('numeral');
   await startGame(page);
   await page
     .getByRole('button', { name: /^Dot 1 of/i })
