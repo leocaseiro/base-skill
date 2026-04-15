@@ -109,7 +109,7 @@ describe('GameRoute', () => {
     });
   });
 
-  it('renders instructions phase placeholder', async () => {
+  it('renders game shell chrome (score visible)', async () => {
     render(
       <GameRoute
         config={testConfig}
@@ -126,7 +126,7 @@ describe('GameRoute', () => {
       { wrapper },
     );
     await waitFor(() => {
-      expect(screen.getByTestId('game-round')).toBeInTheDocument();
+      expect(screen.getByTestId('game-score')).toBeInTheDocument();
     });
   });
 });
