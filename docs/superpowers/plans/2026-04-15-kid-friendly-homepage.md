@@ -42,7 +42,6 @@ Radix (dialog, sheet) + Tailwind + lucide-react icons + Vitest + Playwright
 - `src/games/number-match/NumberMatchSimpleConfigForm.tsx` — form.
 - `src/games/sort-numbers/SortNumbersSimpleConfigForm.tsx` — replacement.
 - `src/components/AdvancedConfigModal.tsx` — cog-launched modal.
-- `src/components/GameCardV2.tsx` — redesigned card (replaces `GameCard`).
 - `src/db/migrations/saved_game_configs_v2.ts` — schema migration helper.
 
 **Modified files:**
@@ -54,6 +53,9 @@ Radix (dialog, sheet) + Tailwind + lucide-react icons + Vitest + Playwright
 - `src/games/number-match/types.ts` — add `NumberMatchSimpleConfig`, `configMode`.
 - `src/games/config-fields-registry.ts` — add simple-form renderers.
 - `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` — cover + cog + SimpleConfigForm.
+- `src/components/GameCard.tsx` — redesign in place: variant prop (default/bookmark), cover, chips, cog button.
+- `src/components/GameCard.test.tsx` — rewritten for new API.
+- `src/components/GameCard.stories.tsx` — updated variants.
 - `src/routes/$locale/_app/index.tsx` — flat grid, no filters, bookmark cards.
 - `src/components/GameGrid.tsx` — responsive grid, flattened input (game + bookmark cards mixed).
 - `src/lib/i18n/locales/en/games.json` — title renames, direction labels, settings keys.
@@ -61,7 +63,6 @@ Radix (dialog, sheet) + Tailwind + lucide-react icons + Vitest + Playwright
 
 **Deleted files (after refactor):**
 
-- `src/components/GameCard.tsx` — superseded by `GameCardV2`.
 - `src/components/SavedConfigChip.tsx` — bookmark cards replace inline chips. (Only if unused after refactor; confirm with `knip` before deleting.)
 - `src/games/sort-numbers/SortNumbersConfigForm/*` — replaced by `SortNumbersSimpleConfigForm` + advanced modal.
 - `src/components/LevelRow.tsx` — removed filter affordance (guard with knip).
@@ -3493,28 +3494,32 @@ git commit -m "feat(homepage): AdvancedConfigModal launched from per-card cog"
 
 ---
 
-### Task 20: `GameCardV2` — cover, chips, cog, bookmark variant
+### Task 20: Redesign `GameCard` in place — cover, chips, cog, bookmark variant
 
 **Files:**
 
-- Create: `src/components/GameCardV2.tsx`
-- Create: `src/components/GameCardV2.test.tsx`
+- Modify: `src/components/GameCard.tsx` (full rewrite — single call site, no parallel path)
+- Modify: `src/components/GameCard.test.tsx` (rewrite for new API)
+- Modify: `src/components/GameCard.stories.tsx` (update variants)
 
-- [ ] **Step 1: Write the failing test**
+> **Why in-place, not V2:** `GameCard` has one call site (the homepage route
+> we're rewriting in Task 21). A parallel file would be dead weight. The old
+> tests and stories are rewritten against the new API in the same commit.
 
-Covers: default card renders cover + chips + cog + Play; bookmark variant
-adds ribbon + bookmark icon + subtitle; clicking cog fires `onOpenCog`.
+- [ ] **Step 1: Rewrite the failing test**
+
+Replace `src/components/GameCard.test.tsx` contents:
 
 ```tsx
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { GameCardV2 } from './GameCardV2';
+import { GameCard } from './GameCard';
 
-describe('GameCardV2', () => {
+describe('GameCard', () => {
   it('renders a default card with chips, cog, and Play', () => {
     render(
-      <GameCardV2
+      <GameCard
         variant="default"
         gameId="sort-numbers"
         title="Count in Order"
@@ -3534,7 +3539,7 @@ describe('GameCardV2', () => {
 
   it('adds a bookmark name subtitle for bookmark variant', () => {
     render(
-      <GameCardV2
+      <GameCard
         variant="bookmark"
         gameId="sort-numbers"
         title="Count in Order"
@@ -3552,7 +3557,7 @@ describe('GameCardV2', () => {
     const user = userEvent.setup();
     const onOpenCog = vi.fn();
     render(
-      <GameCardV2
+      <GameCard
         variant="default"
         gameId="sort-numbers"
         title="Count in Order"
@@ -3570,17 +3575,17 @@ describe('GameCardV2', () => {
 - [ ] **Step 2: Run the test to verify it fails**
 
 ```bash
-yarn vitest run src/components/GameCardV2.test.tsx
+yarn vitest run src/components/GameCard.test.tsx
 ```
 
-Expected: FAIL.
+Expected: FAIL — props don't match (old API).
 
-- [ ] **Step 3: Implement the card**
+- [ ] **Step 3: Rewrite `GameCard.tsx`**
 
-Create `src/components/GameCardV2.tsx`:
+Replace `src/components/GameCard.tsx` contents:
 
 ```tsx
-import { BookmarkIcon, Settings2Icon } from 'lucide-react';
+import { BookmarkIcon, SettingsIcon } from 'lucide-react';
 import type { JSX } from 'react';
 import type { Cover } from '@/games/cover-type';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
@@ -3607,9 +3612,9 @@ type BookmarkVariant = Common & {
   bookmarkColor: BookmarkColorKey;
 };
 
-type GameCardV2Props = DefaultVariant | BookmarkVariant;
+type GameCardProps = DefaultVariant | BookmarkVariant;
 
-export const GameCardV2 = (props: GameCardV2Props): JSX.Element => {
+export const GameCard = (props: GameCardProps): JSX.Element => {
   const { gameId, title, chips, onPlay, onOpenCog } = props;
   const cover = props.cover ?? resolveDefaultCover(gameId);
   const colorKey =
@@ -3654,7 +3659,7 @@ export const GameCardV2 = (props: GameCardV2Props): JSX.Element => {
             onClick={onOpenCog}
             className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground"
           >
-            <Settings2Icon size={14} />
+            <SettingsIcon size={14} />
           </button>
         </div>
 
@@ -3690,19 +3695,28 @@ export const GameCardV2 = (props: GameCardV2Props): JSX.Element => {
 };
 ```
 
-- [ ] **Step 4: Run the test**
+- [ ] **Step 4: Update the Storybook stories**
+
+Rewrite `src/components/GameCard.stories.tsx` to cover the `default` and
+`bookmark` variants with realistic chips. Keep Storybook passing:
 
 ```bash
-yarn vitest run src/components/GameCardV2.test.tsx
+yarn storybook:test
+```
+
+- [ ] **Step 5: Run the test**
+
+```bash
+yarn vitest run src/components/GameCard.test.tsx
 ```
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/components/GameCardV2.tsx src/components/GameCardV2.test.tsx
-git commit -m "feat(homepage): GameCardV2 with cover, chips, cog, bookmark variant"
+git add src/components/GameCard.tsx src/components/GameCard.test.tsx src/components/GameCard.stories.tsx
+git commit -m "feat(homepage): redesign GameCard with variant, cover, chips, cog"
 ```
 
 ---
@@ -3747,7 +3761,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
-import { GameCardV2 } from '@/components/GameCardV2';
+import { GameCard } from '@/components/GameCard';
 import { GameGrid } from '@/components/GameGrid';
 import { getOrCreateDatabase } from '@/db/create-database';
 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
@@ -3831,7 +3845,7 @@ const HomeScreen = () => {
       const title = t(entry.titleKey);
       const chips = configToChips(entry.id, {});
       return (
-        <GameCardV2
+        <GameCard
           key={`default-${entry.id}`}
           variant="default"
           gameId={entry.id}
@@ -3846,7 +3860,7 @@ const HomeScreen = () => {
       const entry = GAME_CATALOG.find((g) => g.id === doc.gameId);
       if (!entry) return null;
       return (
-        <GameCardV2
+        <GameCard
           key={`bm-${doc.id}`}
           variant="bookmark"
           gameId={doc.gameId}
@@ -3951,10 +3965,11 @@ git commit -m "feat(homepage): flat grid with default + bookmark cards and cog m
 
 **Files:**
 
-- Delete: `src/components/GameCard.tsx`
 - Delete: `src/components/SavedConfigChip.tsx` (if `knip` confirms unused)
 - Delete: `src/components/LevelRow.tsx` (if unused)
 - Delete: `src/games/sort-numbers/SortNumbersConfigForm/` (replaced by new simple form + advanced modal)
+
+> `GameCard.tsx` is kept — Task 20 rewrites it in place.
 
 - [ ] **Step 1: Confirm each file is unused**
 
@@ -3967,8 +3982,8 @@ Note the list of unused files. For each confirmed-unused:
 - [ ] **Step 2: Delete and rerun knip**
 
 ```bash
-git rm src/components/GameCard.tsx src/components/GameCard.test.tsx src/components/GameCard.stories.tsx 2>/dev/null || true
-# repeat for each confirmed-unused file
+git rm src/components/SavedConfigChip.tsx src/components/LevelRow.tsx 2>/dev/null || true
+git rm -r src/games/sort-numbers/SortNumbersConfigForm 2>/dev/null || true
 yarn knip
 yarn typecheck
 ```
@@ -4047,7 +4062,7 @@ Key changes:
       onClick={() => setModalOpen(true)}
       className="flex h-10 w-10 items-center justify-center rounded-full bg-muted"
     >
-      <Settings2Icon size={18} />
+      <SettingsIcon size={18} />
     </button>
   </div>
 </div>;
@@ -4197,7 +4212,7 @@ gh pr create --title "feat(homepage): kid-friendly homepage and simple config" -
 
 ## Test plan
 
-- [x] Unit tests for Cover, GameCover, config primitives, resolvers, configToChips, pairToMode, simple forms, AdvancedConfigModal, GameCardV2
+- [x] Unit tests for Cover, GameCover, config primitives, resolvers, configToChips, pairToMode, simple forms, AdvancedConfigModal, GameCard
 - [x] E2E kid flow (tap card → instructions → Let's go)
 - [x] VR baselines updated (homepage grid + instructions overlay)
 EOF
@@ -4226,7 +4241,7 @@ Watch the PR. If anything fails, fix it in a follow-up commit — never use
   this.
 - **Deferred:** the spec's "cog on small screens: always visible vs
   long-press" open question is resolved in favor of **always visible**
-  (already implemented in `GameCardV2`).
+  (already implemented in `GameCard`).
 - **Non-breaking:** the RxDB v1→v2 migration is a no-op, so existing
   bookmarks survive. The advanced form inside the modal is the same
   `ConfigFormFields` component, so persisted configs stay compatible.
