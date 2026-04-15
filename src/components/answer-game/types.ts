@@ -50,6 +50,8 @@ export interface AnswerGameConfig {
       zones: AnswerZone[];
     } | null;
   };
+  /** Controls which HUD elements render. Each flag is independent. */
+  hud?: HudConfig;
 }
 
 export interface TileItem {
@@ -131,4 +133,30 @@ export interface AnswerGameDraftState {
   roundIndex: number;
   retryCount: number;
   levelIndex: number;
+}
+
+export interface HudConfig {
+  /** Bullet row, one dot per round (classic) or per level (level mode). */
+  showDots?: boolean;
+  /** "3/5" label; auto-hides when totalRounds is null. */
+  showFraction?: boolean;
+  /** "LEVEL N" label; most useful with level mode. */
+  showLevel?: boolean;
+}
+
+export interface ProgressHUDProps {
+  /** 0-based index of the current round. */
+  roundIndex: number;
+  /** Total rounds in the session; null for unbounded level mode. */
+  totalRounds: number | null;
+  /** 0-based index of the current level; 0 when levelMode is off. */
+  levelIndex: number;
+  /** Whether the game uses levelMode. */
+  isLevelMode: boolean;
+  /** Lifecycle phase — enables pop/celebration animations on transition. */
+  phase: AnswerGamePhase;
+  /** Resolved visibility flags after merging defaults + config. */
+  showDots: boolean;
+  showFraction: boolean;
+  showLevel: boolean;
 }

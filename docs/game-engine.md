@@ -1144,7 +1144,64 @@ None — triggered imperatively by parent game component after `game:score` even
 
 ---
 
-## 8. Difficulty Progression
+### 7.9 ProgressHUD
+
+**Purpose**: Pinned heads-up display at the top of the game container showing
+session progress through composable elements: a bullet-dot row for
+pre-readers, a `3/5` fraction label, and a `LEVEL N` label for unbounded
+level-mode games. Rendered automatically by `AnswerGame` as the first child
+of the game container. Full design: [2026-04-15-progress-hud-design.md](./superpowers/specs/2026-04-15-progress-hud-design.md).
+
+#### Props Interface
+
+```typescript
+export interface ProgressHUDProps {
+  roundIndex: number;
+  totalRounds: number | null; // null in unbounded level mode
+  levelIndex: number;
+  isLevelMode: boolean;
+  phase: AnswerGamePhase;
+  showDots: boolean;
+  showFraction: boolean;
+  showLevel: boolean;
+}
+```
+
+#### Key Behaviors
+
+- Rendered automatically by `AnswerGame`; individual games do not mount it
+- Resolves visibility flags: `config.hud` overrides defaults (classic games
+  default to dots + fraction; level-mode games default to dots + level)
+- Fraction element hides automatically when `totalRounds` is `null`
+- Returns `null` when all three flags are `false`
+- Dot count: `totalRounds` in classic mode, `levelIndex + 1` in level mode
+- Current dot receives a pop animation while `phase === 'round-complete'` or
+  `phase === 'level-complete'`
+- Skin can replace the default via `GameSkin.ProgressHUD` — override always
+  mounts when provided, regardless of flag state
+
+#### Accessibility
+
+- Dot row rendered as `<ol>` with `aria-label="round progress"`
+- Fraction and level labels use `aria-live="polite"` so screen readers
+  announce transitions
+- `prefers-reduced-motion`: pop animation replaced with a colour-only fill
+  transition
+
+#### Event Bus Interactions
+
+- Reads live state from `AnswerGameState` via `useAnswerGameContext`
+- Does not emit events itself — purely a view
+
+---
+
+## 8. Difficulty Progression (deferred)
+
+> **Status:** The config-driven easy/medium/hard model and in-session adaptive
+> streak detailed below are **deferred**. The current shipped model uses
+> `AnswerGameConfig.levelMode.generateNextLevel` to progress the game via
+> content regeneration (see `src/games/level-system.mdx`). The §8 model will
+> be re-evaluated once real classroom usage data is available.
 
 ### Config-Driven Difficulty
 

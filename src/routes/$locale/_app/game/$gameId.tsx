@@ -30,6 +30,7 @@ import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
 import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+import { createAdvancedLevelGenerator } from '@/games/sort-numbers/advanced-level-generator';
 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
 import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
 import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
@@ -284,8 +285,9 @@ const resolveSortNumbersConfig = (
     merged.configMode = 'advanced';
   }
 
-  const tr = Math.max(1, merged.totalRounds);
-  merged.totalRounds = tr;
+  // Advanced mode always runs as level mode with a single seeded round; the
+  // generator produces a fresh round per level using the configured rules.
+  merged.totalRounds = 1;
 
   // Normalize skip: mode 'by' requires step and start.
   if (merged.skip.mode === 'by') {
@@ -311,20 +313,27 @@ const resolveSortNumbersConfig = (
 
   if (
     !Array.isArray(merged.rounds) ||
-    merged.rounds.length === 0 ||
-    merged.rounds.length !== tr ||
+    merged.rounds.length !== 1 ||
     roundsStale
   ) {
     merged.rounds = generateSortRounds({
       range: merged.range,
       quantity: merged.quantity,
       skip: merged.skip,
-      totalRounds: tr,
+      totalRounds: 1,
     });
   }
 
-  // Advanced configs don't support level mode — clear the leaked base default.
-  merged.levelMode = undefined;
+  merged.levelMode = {
+    generateNextLevel: createAdvancedLevelGenerator({
+      range: merged.range,
+      quantity: merged.quantity,
+      skip: merged.skip,
+      direction: merged.direction,
+      tileBankMode: merged.tileBankMode,
+      distractors: merged.distractors,
+    }),
+  };
 
   return merged;
 };

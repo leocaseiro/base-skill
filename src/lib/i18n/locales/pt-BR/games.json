@@ -6,7 +6,6 @@
   "sort-numbers": "Conte na Ordem",
   "sort-numbers-description": "Coloque os números em ordem do menor para o maior — ou do maior para o menor.",
   "shell": {
-    "round": "Rodada {{current}} / {{total}}",
     "undo": "Desfazer",
     "pause": "Pausar",
     "exit": "Sair"

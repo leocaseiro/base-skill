@@ -156,17 +156,48 @@ Build the reusable game infrastructure (no specific games yet).
 
 ## Milestone 5 -- Reference Games
 
-Implement the 5 reference games. Each game is independent and can be built in parallel.
+Implement the reference games. Each game is independent and can be built in
+parallel.
 
-**ASYNC (all 5 are independent):**
+**Shipped (ASYNC, all independent):**
 
-- **Word Builder** (K-Year 2, Reading) -- uses `DragAndDrop` + TTS hints, per-language word lists
-- **Number Match** (Pre-K/K, Math) -- uses `DragAndDrop` with snap, object-group visuals
-- **Math Facts** (Year 1-4, Math) -- uses `MultipleChoice` + `Timer`, visual number line
-- **Read Aloud** (Year 1-3, Reading) -- uses `SpeechInput` (STT), sentence display, evaluation
-- **Letter Tracing** (Pre-K/K, Letters) -- uses `LetterTracer`, TTS for letter names
+- **WordSpell** (K-Year 2, Reading) -- `AnswerGame` + `LetterTileBank`,
+  supports scramble / sentence-gap / recall modes, per-language word lists.
+  Supersets the original "Word Builder" plus sentence-gap prompts.
+- **NumberMatch** (Pre-K/K, Math) -- `AnswerGame` with emoji/image counting,
+  drag-and-drop tile placement.
+- **SortNumbers** (K-Year 3, Math) -- `AnswerGame` with `levelMode`
+  (unlimited levels via `generateNextLevel`); continues sequences.
 
-Each game should include: unit tests for game logic, integration test for full lifecycle, i18n content for `en` + `pt-BR`.
+Each shipped game has: unit tests for game logic, integration tests for full
+lifecycle, i18n content for `en` + `pt-BR`, Storybook stories, VR coverage,
+and opt-in per-game skins (see
+`docs/superpowers/specs/2026-04-13-game-skin-system-design.md`).
+
+**Deferred reference games (no milestone yet):**
+
+- **Math Facts** (Year 1-4, Math) -- would use `MultipleChoice` + `Timer`,
+  visual number line
+- **Read Aloud** (Year 1-3, Reading) -- would use `SpeechInput` (STT),
+  sentence display, evaluation
+- **Letter Tracing** (Pre-K/K, Letters) -- would use `LetterTracer`, TTS for
+  letter names
+
+These three remain desirable but are not in the near-term roadmap; prioritise
+progression tooling, persistent progress, and parent features on the existing
+three games first.
+
+**Between M4 and M5 -- progression work streams (in progress):**
+
+- **Progress HUD** (dots + fraction + level label) --
+  [design](./superpowers/specs/2026-04-15-progress-hud-design.md). Adds the
+  8th reusable game component (`ProgressHUD`) and ships default HUD on
+  WordSpell / NumberMatch / SortNumbers.
+- **Persistent progress** (writes to the `progress` collection) -- separate
+  future spec.
+- **Session recorder wiring for `AnswerGame` path** -- separate future spec.
+- **Adaptive difficulty** (PRD §8) -- deferred in favour of
+  `levelMode.generateNextLevel`.
 
 ---
 
