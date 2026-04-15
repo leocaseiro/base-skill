@@ -1,111 +1,11 @@
-import { useTranslation } from 'react-i18next';
-import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
-import type { GameCatalogEntry } from '@/games/registry';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
-import { GameCard } from '@/components/GameCard';
-import { Button } from '@/components/ui/button';
-// TODO(Task 21): rewire GameGrid to new API — remove unused props below
+import type { JSX, ReactNode } from 'react';
 
 type GameGridProps = {
-  entries: GameCatalogEntry[];
-  savedConfigs: SavedGameConfigDoc[];
-  onSaveConfig: (
-    gameId: string,
-    name: string,
-    color: BookmarkColorKey,
-  ) => Promise<void>;
-  onRemoveConfig: (configId: string) => Promise<void>;
-  onUpdateConfig: (
-    configId: string,
-    config: Record<string, unknown>,
-    name: string,
-  ) => Promise<void>;
-  onPlay: (gameId: string) => void;
-  onPlayWithConfig: (gameId: string, configId: string) => void;
-  page: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
+  cards: ReactNode[];
 };
 
-export const GameGrid = ({
-  entries,
-  savedConfigs: _savedConfigs,
-  onSaveConfig: _onSaveConfig,
-  onRemoveConfig: _onRemoveConfig,
-  onUpdateConfig: _onUpdateConfig,
-  onPlay,
-  onPlayWithConfig: _onPlayWithConfig,
-  page,
-  totalPages,
-  onPageChange,
-}: GameGridProps) => {
-  const { t } = useTranslation('common');
-
-  return (
-    <div className="flex flex-col gap-6">
-      {entries.length === 0 ? (
-        <p className="py-16 text-center text-muted-foreground">
-          No games found
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {entries.map((entry) => (
-            <GameCard
-              key={entry.id}
-              variant="default"
-              gameId={entry.id}
-              title={entry.id}
-              chips={[]}
-              cover={entry.defaultCover}
-              onPlay={() => onPlay(entry.id)}
-              onOpenCog={() => {
-                // TODO(Task 21): wire up settings
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {totalPages > 1 && (
-        <nav
-          className="flex items-center justify-center gap-3"
-          aria-label="Pagination"
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page <= 1}
-            onClick={() => onPageChange(page - 1)}
-          >
-            {t('pagination.previous')}
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {t('pagination.pageOf', { page, total: totalPages })}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => onPageChange(page + 1)}
-          >
-            {t('pagination.next')}
-          </Button>
-        </nav>
-      )}
-
-      {totalPages <= 1 && (
-        <nav
-          className="flex items-center justify-center gap-3"
-          aria-label="Pagination"
-        >
-          <Button variant="outline" size="sm" disabled>
-            {t('pagination.previous')}
-          </Button>
-          <Button variant="outline" size="sm" disabled>
-            {t('pagination.next')}
-          </Button>
-        </nav>
-      )}
-    </div>
-  );
-};
+export const GameGrid = ({ cards }: GameGridProps): JSX.Element => (
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+    {cards}
+  </div>
+);

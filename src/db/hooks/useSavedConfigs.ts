@@ -4,6 +4,8 @@ import { EMPTY } from 'rxjs';
 import { useRxDB } from './useRxDB';
 import { useRxQuery } from './useRxQuery';
 import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
+import type { Cover } from '@/games/cover-type';
+import type { BookmarkColorKey } from '@/lib/bookmark-colors';
 import {
   ANONYMOUS_PROFILE_ID,
   isLastSessionSavedConfigId,
@@ -15,6 +17,12 @@ type SaveInput = {
   name: string;
   config: Record<string, unknown>;
   color: string;
+  cover?: Cover;
+};
+
+type UpdateConfigExtras = {
+  cover?: Cover;
+  color?: BookmarkColorKey;
 };
 
 type UseSavedConfigsResult = {
@@ -28,6 +36,7 @@ type UseSavedConfigsResult = {
     id: string,
     config: Record<string, unknown>,
     name?: string,
+    extras?: UpdateConfigExtras,
   ) => Promise<void>;
   /** Upserts IndexedDB doc for "resume last settings" (not shown as a named chip) */
   persistLastSessionConfig: (
@@ -70,6 +79,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
     name,
     config,
     color,
+    cover,
   }: SaveInput): Promise<void> => {
     if (!db) return;
     const trimmed = name.trim();
@@ -89,6 +99,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
       config,
       color,
       createdAt: new Date().toISOString(),
+      ...(cover ? { cover } : {}),
     };
     await db.saved_game_configs.insert(doc);
   };
@@ -120,6 +131,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
       id: string,
       config: Record<string, unknown>,
       name?: string,
+      extras?: UpdateConfigExtras,
     ): Promise<void> => {
       if (!db) return;
       const doc = await db.saved_game_configs.findOne(id).exec();
@@ -142,6 +154,12 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
           );
         }
         patch.name = trimmed;
+      }
+      if (extras?.cover !== undefined) {
+        patch.cover = extras.cover;
+      }
+      if (extras?.color !== undefined) {
+        patch.color = extras.color;
       }
       await doc.incrementalPatch(patch);
     },
