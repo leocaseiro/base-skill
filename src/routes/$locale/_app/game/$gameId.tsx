@@ -34,7 +34,6 @@ import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
 import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
 import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
-import { SortNumbersConfigForm } from '@/games/sort-numbers/SortNumbersConfigForm/SortNumbersConfigForm';
 import { wordSpellConfigFields } from '@/games/word-spell/types';
 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
 import { loadGameConfig } from '@/lib/game-engine/config-loader';
@@ -560,9 +559,6 @@ const SortNumbersGameBody = ({
               }
             : undefined
         }
-        renderConfigForm={({ config: c, onChange: oc }) => (
-          <SortNumbersConfigForm config={c} onChange={oc} />
-        )}
       />
     );
   }
