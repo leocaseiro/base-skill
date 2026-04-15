@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
 import type { Cover } from '@/games/cover-type';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { JSX } from 'react';
 import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
 import { GameCard } from '@/components/GameCard';
 import { GameGrid } from '@/components/GameGrid';
@@ -34,8 +35,8 @@ type ModalState =
       config: Record<string, unknown>;
     };
 
-const HomeScreen = () => {
-  const { t } = useTranslation('games');
+const HomeScreen = (): JSX.Element => {
+  const { t } = useTranslation(['games', 'common']);
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate({ from: '/$locale/' });
   const { savedConfigs, save, updateConfig } = useSavedConfigs();
@@ -118,17 +119,15 @@ const HomeScreen = () => {
 
   return (
     <div className="px-4 py-4">
-      <h1 className="sr-only">
-        {t('home.title', { defaultValue: 'Home' })}
-      </h1>
+      <h1 className="sr-only">{t('common:home.title')}</h1>
       <GameGrid cards={cards} />
 
       {modal.kind === 'open' && (
         <AdvancedConfigModal
           open
-          onOpenChange={(next) =>
-            setModal(next ? modal : { kind: 'closed' })
-          }
+          onOpenChange={(next) => {
+            if (!next) setModal({ kind: 'closed' });
+          }}
           gameId={modal.gameId}
           mode={modal.mode}
           config={modal.config}
