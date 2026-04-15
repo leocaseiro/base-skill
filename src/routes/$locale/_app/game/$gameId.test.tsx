@@ -101,6 +101,7 @@ describe('GameRoute', () => {
         bookmarkId={null}
         bookmarkName={null}
         bookmarkColor={null}
+        bookmarkCover={null}
       />,
       { wrapper },
     );
@@ -122,6 +123,7 @@ describe('GameRoute', () => {
         bookmarkId={null}
         bookmarkName={null}
         bookmarkColor={null}
+        bookmarkCover={null}
       />,
       { wrapper },
     );
