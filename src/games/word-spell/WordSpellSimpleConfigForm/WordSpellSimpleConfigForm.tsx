@@ -37,16 +37,30 @@ export const WordSpellSimpleConfigForm = ({
       : 'drag';
 
   const unitsAtLevel = GRAPHEMES_BY_LEVEL[level] ?? [];
-  const allPhonemesAtLevel = unitsAtLevel.map((u) => u.p);
+  // Multiple graphemes can teach the same phoneme at one level
+  // (e.g. level 2 has c, k, ck → /k/). Collapse them into one chip per sound
+  // so toggling is unambiguous.
+  const phonemeToGraphemes = new Map<string, string[]>();
+  for (const u of unitsAtLevel) {
+    const existing = phonemeToGraphemes.get(u.p);
+    if (existing) {
+      existing.push(u.g);
+    } else {
+      phonemeToGraphemes.set(u.p, [u.g]);
+    }
+  }
+  const allPhonemesAtLevel = [...phonemeToGraphemes.keys()];
   const phonemesAllowed =
     source?.filter.phonemesAllowed ?? allPhonemesAtLevel;
-  const chips = unitsAtLevel.map((u) => ({
-    value: u.p,
-    label: `${u.g} /${u.p}/`,
+  const chips = allPhonemesAtLevel.map((p) => ({
+    value: p,
+    label: `${(phonemeToGraphemes.get(p) ?? []).join(', ')} /${p}/`,
   }));
 
   const setLevel = (n: number) => {
-    const available = (GRAPHEMES_BY_LEVEL[n] ?? []).map((u) => u.p);
+    const available = [
+      ...new Set((GRAPHEMES_BY_LEVEL[n] ?? []).map((u) => u.p)),
+    ];
     onChange({
       ...config,
       source: {
