@@ -14,7 +14,6 @@ import {
   BOOKMARK_COLORS,
   DEFAULT_BOOKMARK_COLOR,
 } from '@/lib/bookmark-colors';
-import { configToTags } from '@/lib/config-tags';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
 
 type InstructionsOverlayProps = {
@@ -56,7 +55,6 @@ export const InstructionsOverlay = ({
   onUpdateBookmark,
 }: InstructionsOverlayProps): JSX.Element => {
   const { t } = useTranslation('games');
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
@@ -68,7 +66,6 @@ export const InstructionsOverlay = ({
   }, []);
 
   const settingsColors = BOOKMARK_COLORS[bookmarkColor];
-  const tags = configToTags(config);
   const resolvedCover = resolveCover({ cover }, gameId);
 
   const SimpleForm = getSimpleConfigFormRenderer(gameId);
@@ -133,62 +130,12 @@ export const InstructionsOverlay = ({
           {t('instructions.lets-go')}
         </button>
 
-        {/* 4. Settings chip (collapsed by default) */}
-        <div
-          className="w-full overflow-hidden rounded-xl border border-border"
-          style={
-            {
-              '--bookmark-play': settingsColors.playBg,
-            } as React.CSSProperties
-          }
-        >
-          {/* Settings header */}
-          <button
-            type="button"
-            aria-label={t('instructions.settings')}
-            onClick={() => setSettingsOpen((v) => !v)}
-            className="flex min-h-12 w-full items-center gap-2 bg-muted px-3 text-left"
-            style={
-              settingsOpen
-                ? { background: 'var(--bookmark-play)' }
-                : undefined
-            }
-          >
-            <span
-              className={`flex-1 text-sm font-semibold ${settingsOpen ? 'text-white' : ''}`}
-            >
-              {t('instructions.settings')}
-            </span>
-            <span
-              className={`text-xs ${settingsOpen ? 'text-white/70' : ''}`}
-            >
-              {settingsOpen ? '▲' : '▼'}
-            </span>
-          </button>
-
-          {/* Collapsed: config summary tags */}
-          {!settingsOpen && (
-            <div className="flex flex-wrap gap-1 bg-muted/50 px-3 pb-2 pt-1">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded bg-muted px-2 py-0.5 text-xs font-medium text-foreground"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Expanded: simple settings form */}
-          {settingsOpen && (
-            <div className="flex flex-col gap-3 bg-muted/30 p-3">
-              {SimpleForm && (
-                <SimpleForm config={config} onChange={onConfigChange} />
-              )}
-            </div>
-          )}
-        </div>
+        {/* 4. Simple settings form (always expanded) */}
+        {SimpleForm && (
+          <div className="flex w-full flex-col gap-3 rounded-xl border border-border bg-muted/30 p-3">
+            <SimpleForm config={config} onChange={onConfigChange} />
+          </div>
+        )}
       </div>
 
       {/* Advanced config modal (opened by cog button) */}
