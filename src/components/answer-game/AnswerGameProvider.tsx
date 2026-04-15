@@ -19,7 +19,6 @@ import type {
   AnswerGameState,
 } from './types';
 import type { Dispatch, ReactNode } from 'react';
-import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
 import { useAnswerGameDraftSync } from '@/lib/game-engine/useAnswerGameDraftSync';
 import { DbContext } from '@/providers/DbProvider';
 
@@ -102,31 +101,24 @@ export const AnswerGameProvider = ({
     initialState,
   ]);
 
-  const roundProgress = {
-    current: state.roundIndex + 1,
-    total: config.totalRounds,
-  };
-
   const usesTyping = config.inputMethod !== 'drag';
 
   return (
-    <GameRoundContext.Provider value={roundProgress}>
-      <AnswerGameStateContext.Provider value={state}>
-        <AnswerGameDispatchContext.Provider value={dispatch}>
-          {usesTyping ? (
-            <TouchKeyboardAdapter
-              inputMode={config.touchKeyboardInputMode ?? 'text'}
-            >
-              <KeyboardInputAdapter />
-              {children}
-            </TouchKeyboardAdapter>
-          ) : (
-            <TouchKeyboardContext.Provider value={null}>
-              {children}
-            </TouchKeyboardContext.Provider>
-          )}
-        </AnswerGameDispatchContext.Provider>
-      </AnswerGameStateContext.Provider>
-    </GameRoundContext.Provider>
+    <AnswerGameStateContext.Provider value={state}>
+      <AnswerGameDispatchContext.Provider value={dispatch}>
+        {usesTyping ? (
+          <TouchKeyboardAdapter
+            inputMode={config.touchKeyboardInputMode ?? 'text'}
+          >
+            <KeyboardInputAdapter />
+            {children}
+          </TouchKeyboardAdapter>
+        ) : (
+          <TouchKeyboardContext.Provider value={null}>
+            {children}
+          </TouchKeyboardContext.Provider>
+        )}
+      </AnswerGameDispatchContext.Provider>
+    </AnswerGameStateContext.Provider>
   );
 };

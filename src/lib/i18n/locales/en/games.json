@@ -6,7 +6,6 @@
   "sort-numbers": "Sort Numbers",
   "sort-numbers-description": "Put the numbers in order from smallest to biggest — or biggest to smallest.",
   "shell": {
-    "round": "Round {{current}} / {{total}}",
     "undo": "Undo",
     "pause": "Pause",
     "exit": "Exit"
