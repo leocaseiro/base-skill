@@ -1,6 +1,5 @@
 import { NumberMatchSimpleConfigForm } from './number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm';
 import { numberMatchConfigFields } from './number-match/types';
-import { SortNumbersConfigForm } from './sort-numbers/SortNumbersConfigForm/SortNumbersConfigForm';
 import { SortNumbersSimpleConfigForm } from './sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm';
 import { sortNumbersConfigFields } from './sort-numbers/types';
 import { wordSpellConfigFields } from './word-spell/types';
@@ -35,19 +34,6 @@ type ConfigFormRendererProps = {
 type ConfigFormRenderer = (
   props: ConfigFormRendererProps,
 ) => JSX.Element;
-
-export const getConfigFormRenderer = (
-  gameId: string,
-): ConfigFormRenderer | undefined => {
-  switch (gameId) {
-    case 'sort-numbers': {
-      return SortNumbersConfigForm;
-    }
-    default: {
-      return undefined;
-    }
-  }
-};
 
 export const getSimpleConfigFormRenderer = (
   gameId: string,
