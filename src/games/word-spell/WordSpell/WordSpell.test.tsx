@@ -79,7 +79,9 @@ describe('WordSpell', () => {
 
   it('renders three answer slots for "cat"', () => {
     const { container } = render(<WordSpell config={config} />);
-    const answerZone = container.querySelector('.game-answer-zone')!;
+    const answerZone = container.querySelector<HTMLElement>(
+      '.game-answer-zone',
+    )!;
     expect(within(answerZone).getAllByRole('listitem')).toHaveLength(3);
   });
 
@@ -128,7 +130,7 @@ describe('WordSpell Play again', () => {
 
     // Game starts in playing phase — 1 answer slot visible, no game-over dialog
     const answerZone = () =>
-      container.querySelector('.game-answer-zone')!;
+      container.querySelector<HTMLElement>('.game-answer-zone')!;
     expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
       1,
     );
