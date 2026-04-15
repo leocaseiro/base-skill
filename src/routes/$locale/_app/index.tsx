@@ -39,7 +39,8 @@ const HomeScreen = (): JSX.Element => {
   const { t } = useTranslation(['games', 'common']);
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate({ from: '/$locale/' });
-  const { savedConfigs, save, updateConfig } = useSavedConfigs();
+  const { savedConfigs, save, updateConfig, lastSessionConfigs } =
+    useSavedConfigs();
   const [modal, setModal] = useState<ModalState>({ kind: 'closed' });
 
   const handlePlay = (gameId: string) => {
@@ -92,7 +93,10 @@ const HomeScreen = (): JSX.Element => {
       variant="default"
       gameId={entry.id}
       title={t(entry.titleKey)}
-      chips={configToChips(entry.id, {})}
+      chips={configToChips(
+        entry.id,
+        lastSessionConfigs[entry.id] ?? {},
+      )}
       onPlay={() => handlePlay(entry.id)}
       onOpenCog={() => void openDefaultCog(entry.id)}
     />
@@ -131,6 +135,9 @@ const HomeScreen = (): JSX.Element => {
           gameId={modal.gameId}
           mode={modal.mode}
           config={modal.config}
+          existingBookmarkNames={savedConfigs
+            .filter((d) => d.gameId === modal.gameId)
+            .map((d) => d.name)}
           onCancel={() => setModal({ kind: 'closed' })}
           onUpdate={async (payload) => {
             if (payload.configId) {
