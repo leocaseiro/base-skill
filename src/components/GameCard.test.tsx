@@ -48,7 +48,7 @@ describe('GameCard', () => {
       />,
       { wrapper },
     );
-    expect(screen.getByText('Word Spell')).toBeInTheDocument();
+    expect(screen.getByText('Spell It!')).toBeInTheDocument();
   });
 
   it('renders level badges', () => {
