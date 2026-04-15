@@ -39,4 +39,29 @@ describe('ChipStrip', () => {
       'true',
     );
   });
+
+  it('deselects a chip that is currently selected', async () => {
+    const user = userEvent.setup();
+    const Harness = () => {
+      const [selected, setSelected] = useState<string[]>(['a']);
+      return (
+        <ChipStrip
+          chips={CHIPS}
+          selected={selected}
+          mode="toggleable"
+          onChange={setSelected}
+        />
+      );
+    };
+    render(<Harness />);
+    expect(screen.getByRole('button', { name: /A/i })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await user.click(screen.getByRole('button', { name: /A/i }));
+    expect(screen.getByRole('button', { name: /A/i })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
+  });
 });
