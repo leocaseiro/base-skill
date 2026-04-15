@@ -333,6 +333,7 @@ export const SortNumbers = ({
       initialZones: zones,
       slotInteraction: 'free-swap' as const,
       levelMode: config.levelMode,
+      hud: config.hud,
     }),
     [
       config.gameId,
@@ -343,6 +344,7 @@ export const SortNumbers = ({
       config.roundsInOrder,
       config.ttsEnabled,
       config.levelMode,
+      config.hud,
       tiles,
       zones,
     ],
@@ -361,6 +363,7 @@ export const SortNumbers = ({
         config={answerGameConfig}
         initialState={sessionEpoch === 0 ? initialState : undefined}
         sessionId={sessionId}
+        skin={skin}
       >
         <SortNumbersSession
           sortNumbersConfig={config}

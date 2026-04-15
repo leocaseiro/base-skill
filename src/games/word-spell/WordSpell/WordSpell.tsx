@@ -378,6 +378,7 @@ export const WordSpell = ({
         config={answerGameConfig}
         initialState={sessionEpoch === 0 ? initialState : undefined}
         sessionId={sessionId}
+        skin={skin}
       >
         <WordSpellSession
           wordSpellConfig={resolvedConfig}

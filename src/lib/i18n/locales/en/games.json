@@ -6,7 +6,6 @@
   "sort-numbers": "Count in Order",
   "sort-numbers-description": "Put the numbers in order!",
   "shell": {
-    "round": "Round {{current}} / {{total}}",
     "undo": "Undo",
     "pause": "Pause",
     "exit": "Exit"
