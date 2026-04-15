@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Cover } from '@/games/cover-type';
 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
@@ -45,6 +45,8 @@ type AdvancedConfigModalProps = {
   onCancel: () => void;
   onUpdate?: (payload: SavePayload) => void;
   onSaveNew: (payload: SavePayload) => void;
+  /** Names of existing bookmarks for this game — used to surface duplicate-name errors inline. */
+  existingBookmarkNames?: readonly string[];
 };
 
 export const AdvancedConfigModal = ({
@@ -56,6 +58,7 @@ export const AdvancedConfigModal = ({
   onCancel,
   onUpdate,
   onSaveNew,
+  existingBookmarkNames = [],
 }: AdvancedConfigModalProps): JSX.Element => {
   const { t } = useTranslation('games');
   const [config, setConfig] =
@@ -69,15 +72,61 @@ export const AdvancedConfigModal = ({
   const [color, setColor] = useState<BookmarkColorKey>(
     mode.kind === 'bookmark' ? mode.color : DEFAULT_BOOKMARK_COLOR,
   );
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const fields = getAdvancedConfigFields(gameId);
 
+  const trimmedName = name.trim();
+  const currentBookmarkName =
+    mode.kind === 'bookmark' ? mode.name : null;
+  const namesTaken = new Set(
+    existingBookmarkNames.filter((n) => n !== currentBookmarkName),
+  );
+
+  const nameError: string | null = (() => {
+    if (trimmedName === '')
+      return t('instructions.nameRequired', {
+        defaultValue: 'Please enter a bookmark name.',
+      });
+    if (namesTaken.has(trimmedName))
+      return t('instructions.nameDuplicate', {
+        defaultValue: 'A bookmark with that name already exists.',
+      });
+    return null;
+  })();
+
+  const saveNewInvalid = nameError !== null;
+  const updateIsRename =
+    currentBookmarkName !== null && trimmedName !== currentBookmarkName;
+  const updateInvalid = updateIsRename && nameError !== null;
+  const showNameError = submitAttempted && nameError !== null;
+
   const payload: SavePayload = {
     configId: mode.kind === 'bookmark' ? mode.configId : undefined,
-    name,
+    name: trimmedName,
     color,
     cover,
     config,
+  };
+
+  const handleSaveNew = () => {
+    setSubmitAttempted(true);
+    if (saveNewInvalid) {
+      nameInputRef.current?.focus();
+      return;
+    }
+    onSaveNew(payload);
+  };
+
+  const handleUpdate = () => {
+    if (!onUpdate) return;
+    setSubmitAttempted(true);
+    if (updateInvalid) {
+      nameInputRef.current?.focus();
+      return;
+    }
+    onUpdate(payload);
   };
 
   return (
@@ -97,12 +146,28 @@ export const AdvancedConfigModal = ({
               Bookmark name
             </span>
             <input
+              ref={nameInputRef}
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Skip by 2"
-              className="h-10 rounded-lg border border-input bg-background px-3 text-sm"
+              aria-invalid={showNameError}
+              aria-describedby={
+                showNameError ? 'bookmark-name-error' : undefined
+              }
+              className={`h-10 rounded-lg border bg-background px-3 text-sm ${
+                showNameError ? 'border-destructive' : 'border-input'
+              }`}
             />
+            {showNameError && (
+              <span
+                id="bookmark-name-error"
+                role="alert"
+                className="text-xs font-semibold text-destructive"
+              >
+                {nameError}
+              </span>
+            )}
           </label>
 
           <div>
@@ -159,7 +224,8 @@ export const AdvancedConfigModal = ({
             {mode.kind === 'bookmark' && onUpdate && (
               <button
                 type="button"
-                onClick={() => onUpdate(payload)}
+                onClick={handleUpdate}
+                aria-disabled={updateInvalid}
                 className="flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
               >
                 {t('instructions.updateBookmark', {
@@ -170,7 +236,8 @@ export const AdvancedConfigModal = ({
             )}
             <button
               type="button"
-              onClick={() => onSaveNew(payload)}
+              onClick={handleSaveNew}
+              aria-disabled={saveNewInvalid}
               className={`flex-1 rounded-lg py-2 text-sm font-bold ${
                 mode.kind === 'default'
                   ? 'bg-primary text-primary-foreground'
