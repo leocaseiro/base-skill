@@ -118,8 +118,13 @@ export const useAnswerGameContext = (): AnswerGameState
 export const useAnswerGameDispatch = (): Dispatch<AnswerGameAction>
 ```
 
-The provider also supplies `GameRoundContext` with `{ current: number, total: number }`
-for progress display.
+### Consumers of the state context
+
+- `ProgressHUDRoot` (`ProgressHUD/ProgressHUDRoot.tsx`) reads `config`,
+  `phase`, `roundIndex`, `levelIndex`, `isLevelMode` to drive the session
+  progress HUD. It resolves `config.hud` flags via `resolveHudFlags` and
+  either renders the default `ProgressHUD` or forwards props to
+  `skin.ProgressHUD` when the active skin overrides it.
 
 ---
 
@@ -137,3 +142,4 @@ for progress display.
 | `roundsInOrder`          | `boolean`                                        | `false`             | When `true`, rounds play in config order; otherwise shuffled once per session                                                                                            |
 | `ttsEnabled`             | `boolean`                                        | —                   | Enables TTS on tile pronounce and answer evaluation                                                                                                                      |
 | `touchKeyboardInputMode` | `'text' \| 'numeric' \| 'none'`                  | `'text'`            | Sets the OS keyboard type hint for mobile input                                                                                                                          |
+| `hud`                    | `HudConfig`                                      | Resolved by mode    | Toggles `showDots`, `showFraction`, `showLevel` on the auto-mounted `ProgressHUD`. Defaults differ for classic vs. level-mode games; see `resolveHudFlags`               |

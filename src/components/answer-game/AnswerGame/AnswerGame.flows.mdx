@@ -168,7 +168,34 @@ sequenceDiagram
 
 ---
 
-## 6. Round Progression
+## 6. HUD Auto-Mount
+
+`AnswerGame` renders a `ProgressHUDRoot` as the first child of its outer
+flex container every time a session mounts. No per-game wiring is
+required.
+
+```mermaid
+sequenceDiagram
+  participant Game as WordSpell / NumberMatch / SortNumbers
+  participant AG as AnswerGame
+  participant Root as ProgressHUDRoot
+  participant Ctx as AnswerGameStateContext
+  participant HUD as ProgressHUD (default or skin.ProgressHUD)
+
+  Game->>AG: render <AnswerGame config skin>
+  AG->>Root: mount as first child
+  Root->>Ctx: read config, phase, roundIndex, levelIndex, isLevelMode
+  Root->>Root: resolveHudFlags(config.hud, isLevelMode)
+  alt skin.ProgressHUD defined
+    Root->>HUD: render skin.ProgressHUD with resolved props
+  else default
+    Root->>HUD: render built-in ProgressHUD with resolved props
+  end
+```
+
+---
+
+## 7. Round Progression
 
 > **Status: planned — not yet fully implemented.**
 > The phase transition to `'round-complete'` is implemented. The 750ms delay before
