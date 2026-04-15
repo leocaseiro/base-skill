@@ -85,9 +85,9 @@ export const InstructionsOverlay = ({
     <div
       role="dialog"
       aria-label="Game instructions"
-      className="fixed inset-0 z-40 flex flex-col items-center justify-start overflow-y-auto bg-background/95 px-5 pb-8 pt-24"
+      className="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-background/95 px-5 pb-8 pt-24"
     >
-      <div className="flex w-full max-w-sm flex-col overflow-hidden rounded-3xl bg-card shadow-lg">
+      <div className="mx-auto flex w-full max-w-sm flex-col overflow-hidden rounded-3xl bg-card shadow-lg">
         {/* 1. Hero cover */}
         <div className="flex justify-center bg-muted/40 p-4">
           <GameCover cover={resolvedCover} size="hero" />
