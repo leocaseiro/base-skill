@@ -361,6 +361,7 @@ export const SortNumbers = ({
         config={answerGameConfig}
         initialState={sessionEpoch === 0 ? initialState : undefined}
         sessionId={sessionId}
+        skin={skin}
       >
         <SortNumbersSession
           sortNumbersConfig={config}
