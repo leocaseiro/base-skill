@@ -88,4 +88,24 @@ describe('ProgressHUD', () => {
       'round-complete',
     );
   });
+
+  it('applies animate-pulse to the current dot when phase is round-complete', () => {
+    const { container } = render(
+      <ProgressHUD
+        {...baseProps}
+        roundIndex={2}
+        phase="round-complete"
+      />,
+    );
+    const currentDot = container.querySelector(
+      '[data-state="current"]',
+    );
+    expect(currentDot).not.toBeNull();
+    // Confirm the `group` class is on the wrapper so `group-data-*` applies
+    expect(container.firstChild).toHaveClass('group');
+    // The dot should carry the conditional pulse class
+    expect(currentDot?.className).toMatch(
+      /group-data-\[phase=round-complete\]:animate-pulse/,
+    );
+  });
 });
