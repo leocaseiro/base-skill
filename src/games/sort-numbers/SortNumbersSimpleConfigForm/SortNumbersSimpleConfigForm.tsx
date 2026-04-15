@@ -16,16 +16,14 @@ export const SortNumbersSimpleConfigForm = ({
     config.direction === 'descending' ? 'descending' : 'ascending';
   const quantity =
     typeof config.quantity === 'number' ? config.quantity : 5;
-  const rawSkip = config.skip as
-    | { mode: 'by'; step: number; start: number }
-    | undefined;
-  const skip: { mode: 'by'; step: number; start: number } = rawSkip ?? {
-    mode: 'by',
-    step: 2,
-    start: 2,
+  const rawSkip = (config.skip ?? {}) as {
+    mode?: string;
+    step?: unknown;
+    start?: unknown;
   };
-  const step = skip.step;
-  const start = skip.start;
+  const step = typeof rawSkip.step === 'number' ? rawSkip.step : 2;
+  const start = typeof rawSkip.start === 'number' ? rawSkip.start : 2;
+  const skip = { mode: 'by' as const, step, start };
   const inputMethod =
     config.inputMethod === 'type'
       ? 'type'
@@ -67,14 +65,14 @@ export const SortNumbersSimpleConfigForm = ({
         onChange={(d) => onChange({ ...config, direction: d })}
       />
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-2">
         <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-muted-foreground">
           How many?
           <Stepper
             label="How many"
             value={quantity}
             min={2}
-            max={8}
+            max={10}
             onChange={(v) => onChange({ ...config, quantity: v })}
           />
         </div>
@@ -84,7 +82,7 @@ export const SortNumbersSimpleConfigForm = ({
             label="Start"
             value={start}
             min={1}
-            max={99}
+            max={10_000}
             onChange={(v) =>
               onChange({
                 ...config,
@@ -99,7 +97,7 @@ export const SortNumbersSimpleConfigForm = ({
             label="Skip"
             value={step}
             min={1}
-            max={10}
+            max={10_000}
             onChange={(v) =>
               onChange({ ...config, skip: { ...skip, step: v } })
             }
