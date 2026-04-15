@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { InstructionsOverlay } from './InstructionsOverlay';
-import type { ConfigField } from '@/lib/config-fields';
 
 vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
@@ -19,40 +18,36 @@ vi.mock('react-i18next', () => ({
       const map: Record<string, string> = {
         'instructions.lets-go': "Let's go!",
         'instructions.settings': '⚙️ Settings',
+        'instructions.configure': 'Configure',
+        'instructions.cancel': 'Cancel',
+        'instructions.saveAsNew': 'Save as new bookmark',
       };
       return map[key] ?? key;
     },
   }),
 }));
 
-const fields: ConfigField[] = [
-  {
-    type: 'select',
-    key: 'inputMethod',
-    label: 'Input method',
-    options: [
-      { value: 'drag', label: 'drag' },
-      { value: 'type', label: 'type' },
-    ],
-  },
-];
-
 const baseProps = {
   text: 'Drag the letters to spell the word.',
   onStart: vi.fn(),
   ttsEnabled: false,
-  gameTitle: 'Word Spell',
-  subject: 'reading' as const,
-  config: { inputMethod: 'drag', totalRounds: 8, ttsEnabled: true },
+  gameTitle: 'Sort Numbers',
+  gameId: 'sort-numbers',
+  config: { totalRounds: 5 },
   onConfigChange: vi.fn(),
   onSaveBookmark: vi.fn(),
-  configFields: fields,
 };
 
 describe('InstructionsOverlay', () => {
-  it('renders the game title chip', () => {
+  it('renders the game title', () => {
     render(<InstructionsOverlay {...baseProps} />);
-    expect(screen.getByText('Word Spell')).toBeInTheDocument();
+    expect(screen.getByText('Sort Numbers')).toBeInTheDocument();
+  });
+
+  it('renders the GameCover at the top', () => {
+    render(<InstructionsOverlay {...baseProps} />);
+    // sort-numbers default cover is the 📊 emoji
+    expect(screen.getByText('📊')).toBeInTheDocument();
   });
 
   it('renders instructions text', () => {
@@ -79,21 +74,43 @@ describe('InstructionsOverlay', () => {
   });
 
   it('renders settings chip collapsed by default', () => {
-    render(<InstructionsOverlay {...baseProps} />);
-    expect(
-      screen.queryByLabelText('Input method'),
-    ).not.toBeInTheDocument();
+    render(
+      <InstructionsOverlay
+        {...baseProps}
+        gameId="word-spell"
+        gameTitle="Word Spell"
+        config={{
+          inputMethod: 'drag',
+          totalRounds: 8,
+          ttsEnabled: true,
+        }}
+      />,
+    );
+    // The chip is collapsed — WordSpell simple form label should not be visible
+    expect(screen.queryByText('Level')).not.toBeInTheDocument();
   });
 
   it('expands settings chip when tapped', async () => {
-    render(<InstructionsOverlay {...baseProps} />);
+    render(
+      <InstructionsOverlay
+        {...baseProps}
+        gameId="word-spell"
+        gameTitle="Word Spell"
+        config={{
+          inputMethod: 'drag',
+          totalRounds: 8,
+          ttsEnabled: true,
+        }}
+      />,
+    );
     await userEvent.click(
       screen.getByRole('button', { name: /settings/i }),
     );
-    expect(screen.getByLabelText('Input method')).toBeInTheDocument();
+    // WordSpellSimpleConfigForm renders a "Level" label in CellSelect
+    expect(screen.getByText('Level')).toBeInTheDocument();
   });
 
-  it('renders bookmarkName in the chip when provided', () => {
+  it('renders bookmarkName when provided', () => {
     render(
       <InstructionsOverlay
         {...baseProps}
@@ -104,34 +121,12 @@ describe('InstructionsOverlay', () => {
     expect(screen.getByText('Easy Mode')).toBeInTheDocument();
   });
 
-  it('shows "Save as bookmark" input when no bookmarkName', async () => {
+  it('shows a cog button that opens the AdvancedConfigModal', async () => {
+    const user = userEvent.setup();
     render(<InstructionsOverlay {...baseProps} />);
-    await userEvent.click(
-      screen.getByRole('button', { name: /settings/i }),
+    await user.click(
+      screen.getByRole('button', { name: /configure/i }),
     );
-    expect(
-      screen.getByPlaceholderText(/e\.g\. easy mode/i),
-    ).toBeInTheDocument();
-  });
-
-  it('shows Update and Save as new buttons when bookmarkName is provided', async () => {
-    const onUpdateBookmark = vi.fn();
-    render(
-      <InstructionsOverlay
-        {...baseProps}
-        bookmarkName="Easy Mode"
-        bookmarkColor="teal"
-        onUpdateBookmark={onUpdateBookmark}
-      />,
-    );
-    await userEvent.click(
-      screen.getByRole('button', { name: /settings/i }),
-    );
-    expect(
-      screen.getByRole('button', { name: /update/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /save as new/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });
