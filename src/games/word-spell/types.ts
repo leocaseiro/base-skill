@@ -2,6 +2,13 @@ import type { AnswerGameConfig } from '@/components/answer-game/types';
 import type { WordSpellSource } from '@/data/words';
 import type { ConfigField } from '@/lib/config-fields';
 
+export type WordSpellSimpleConfig = {
+  configMode: 'simple';
+  level: number;
+  phonemesAllowed: string[];
+  inputMethod: 'drag' | 'type' | 'both';
+};
+
 export interface GapDefinition {
   word: string;
   distractors?: string[];
@@ -27,6 +34,7 @@ export interface WordSpellRound {
 
 export interface WordSpellConfig extends AnswerGameConfig {
   component: 'WordSpell';
+  configMode?: 'simple' | 'advanced';
   mode: 'picture' | 'scramble' | 'recall' | 'sentence-gap';
   /** @default 'letter' */
   tileUnit: 'letter' | 'syllable' | 'word';
