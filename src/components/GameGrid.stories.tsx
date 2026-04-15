@@ -9,6 +9,11 @@ const SAMPLE_ENTRIES: GameCatalogEntry[] = [
     descriptionKey: 'word-spell-description',
     levels: ['PK', 'K', '1'],
     subject: 'reading',
+    defaultCover: {
+      kind: 'emoji',
+      emoji: '🔤',
+      gradient: ['#fde68a', '#fb923c'],
+    },
   },
   {
     id: 'number-match',
@@ -16,6 +21,11 @@ const SAMPLE_ENTRIES: GameCatalogEntry[] = [
     descriptionKey: 'number-match-description',
     levels: ['1', '2'],
     subject: 'math',
+    defaultCover: {
+      kind: 'emoji',
+      emoji: '🔢',
+      gradient: ['#bae6fd', '#6366f1'],
+    },
   },
 ];
 

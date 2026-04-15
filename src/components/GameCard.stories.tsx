@@ -11,6 +11,11 @@ const meta: Meta<typeof GameCard> = {
       descriptionKey: 'word-spell-description',
       levels: ['1', '2'],
       subject: 'reading',
+      defaultCover: {
+        kind: 'emoji',
+        emoji: '🔤',
+        gradient: ['#fde68a', '#fb923c'],
+      },
     },
     savedConfigs: [],
   },
@@ -52,6 +57,11 @@ export const MultiLevel: Story = {
       descriptionKey: 'number-match-description',
       levels: ['1', '2', '3'],
       subject: 'math',
+      defaultCover: {
+        kind: 'emoji',
+        emoji: '🔢',
+        gradient: ['#bae6fd', '#6366f1'],
+      },
     },
   },
 };
@@ -64,6 +74,11 @@ export const EarlyYearsReading: Story = {
       descriptionKey: 'word-spell-description',
       levels: ['PK', 'K'],
       subject: 'reading',
+      defaultCover: {
+        kind: 'emoji',
+        emoji: '🔤',
+        gradient: ['#fde68a', '#fb923c'],
+      },
     },
   },
 };

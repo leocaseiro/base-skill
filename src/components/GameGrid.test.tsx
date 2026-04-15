@@ -17,6 +17,7 @@ const makeEntries = (count: number): GameCatalogEntry[] =>
     descriptionKey: `game-${i}-description`,
     levels: ['1'] as const,
     subject: 'math' as const,
+    defaultCover: { kind: 'emoji' as const, emoji: '🎮' },
   }));
 
 describe('GameGrid', () => {
