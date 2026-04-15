@@ -85,13 +85,17 @@ export const InstructionsOverlay = ({
     <div
       role="dialog"
       aria-label="Game instructions"
-      className="fixed inset-0 z-40 flex flex-col items-center justify-start overflow-y-auto bg-background/95 px-5 pb-8 pt-10"
+      className="fixed inset-0 z-40 flex flex-col items-center justify-start overflow-y-auto bg-background/95 px-5 pb-8 pt-24"
     >
-      <div className="flex w-full max-w-sm flex-col items-center gap-5">
-        {/* 1. Hero cover + title row */}
-        <div className="w-full">
+      <div className="flex w-full max-w-sm flex-col overflow-hidden rounded-3xl bg-card shadow-lg">
+        {/* 1. Hero cover */}
+        <div className="flex justify-center bg-muted/40 p-4">
           <GameCover cover={resolvedCover} size="hero" />
-          <div className="mt-3 flex items-center justify-between gap-2">
+        </div>
+
+        <div className="flex flex-col gap-4 p-4">
+          {/* 2. Title row + cog */}
+          <div className="flex items-center justify-between gap-2">
             <div>
               <h2 className="text-xl font-extrabold">{gameTitle}</h2>
               {bookmarkName && (
@@ -114,28 +118,28 @@ export const InstructionsOverlay = ({
               <SettingsIcon size={18} />
             </button>
           </div>
+
+          {/* 3. Instructions text */}
+          <p className="text-center text-base font-semibold text-foreground leading-relaxed">
+            {text}
+          </p>
+
+          {/* 4. Let's go button */}
+          <button
+            type="button"
+            onClick={onStart}
+            className="h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95"
+          >
+            {t('instructions.lets-go')}
+          </button>
+
+          {/* 5. Simple settings form (always expanded) */}
+          {SimpleForm && (
+            <div className="border-t border-border pt-4">
+              <SimpleForm config={config} onChange={onConfigChange} />
+            </div>
+          )}
         </div>
-
-        {/* 2. Instructions text */}
-        <p className="max-w-xs text-center text-base font-semibold text-foreground leading-relaxed">
-          {text}
-        </p>
-
-        {/* 3. Let's go button */}
-        <button
-          type="button"
-          onClick={onStart}
-          className="h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95"
-        >
-          {t('instructions.lets-go')}
-        </button>
-
-        {/* 4. Simple settings form (always expanded) */}
-        {SimpleForm && (
-          <div className="flex w-full flex-col gap-3 rounded-xl border border-border bg-muted/30 p-3">
-            <SimpleForm config={config} onChange={onConfigChange} />
-          </div>
-        )}
       </div>
 
       {/* Advanced config modal (opened by cog button) */}

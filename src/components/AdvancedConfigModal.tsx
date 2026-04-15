@@ -122,13 +122,20 @@ export const AdvancedConfigModal = ({
                   aria-label={key}
                   aria-pressed={color === key}
                   onClick={() => setColor(key)}
-                  className="h-8 w-8 rounded-full border-2"
+                  className="h-8 w-8 rounded-full border-2 transition-transform hover:scale-110"
                   style={{
                     background: BOOKMARK_COLORS[key].playBg,
                     borderColor:
                       color === key
                         ? BOOKMARK_COLORS[key].playBg
                         : 'transparent',
+                    outline:
+                      color === key ? '3px solid white' : undefined,
+                    outlineOffset: color === key ? '-4px' : undefined,
+                    boxShadow:
+                      color === key
+                        ? `0 0 0 2px ${BOOKMARK_COLORS[key].playBg}`
+                        : undefined,
                   }}
                 />
               ))}

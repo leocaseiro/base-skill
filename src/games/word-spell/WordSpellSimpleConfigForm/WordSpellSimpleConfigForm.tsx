@@ -31,13 +31,15 @@ export const WordSpellSimpleConfigForm = ({
       : undefined;
   const level =
     typeof source?.filter.level === 'number' ? source.filter.level : 1;
-  const phonemesAllowed = source?.filter.phonemesAllowed ?? [];
   const inputMethod =
     config.inputMethod === 'type' || config.inputMethod === 'both'
       ? config.inputMethod
       : 'drag';
 
   const unitsAtLevel = GRAPHEMES_BY_LEVEL[level] ?? [];
+  const allPhonemesAtLevel = unitsAtLevel.map((u) => u.p);
+  const phonemesAllowed =
+    source?.filter.phonemesAllowed ?? allPhonemesAtLevel;
   const chips = unitsAtLevel.map((u) => ({
     value: u.p,
     label: `${u.g} /${u.p}/`,
@@ -50,7 +52,7 @@ export const WordSpellSimpleConfigForm = ({
       source: {
         type: 'word-library',
         filter: {
-          region: 'aus',
+          ...(source?.filter ?? { region: 'aus' }),
           level: n,
           phonemesAllowed: available,
         },
@@ -64,7 +66,7 @@ export const WordSpellSimpleConfigForm = ({
       source: {
         type: 'word-library',
         filter: {
-          region: 'aus',
+          ...(source?.filter ?? { region: 'aus' }),
           level,
           phonemesAllowed: next,
         },
