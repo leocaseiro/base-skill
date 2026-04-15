@@ -17,6 +17,11 @@ const mockEntry: GameCatalogEntry = {
   descriptionKey: 'word-spell-description',
   levels: ['1', '2'],
   subject: 'reading',
+  defaultCover: {
+    kind: 'emoji',
+    emoji: '🔤',
+    gradient: ['#fde68a', '#fb923c'],
+  },
 };
 
 const mockConfig: SavedGameConfigDoc = {

@@ -1,4 +1,4 @@
-import type { Cover } from '@/games/cover';
+import type { Cover } from '@/games/cover-type';
 import type { JSX } from 'react';
 
 type GameCoverProps = {
