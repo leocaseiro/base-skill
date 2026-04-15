@@ -61,9 +61,9 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
         </div>
 
         <div className="flex flex-col gap-1 px-3 pb-3">
-          <h3 className="text-sm font-bold leading-tight text-foreground">
+          <h2 className="text-sm font-bold leading-tight text-foreground">
             {headingText}
-          </h3>
+          </h2>
           {subtitleText && (
             <p className="text-xs italic text-muted-foreground">
               {subtitleText}
