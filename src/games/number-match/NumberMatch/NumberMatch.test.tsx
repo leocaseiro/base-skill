@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { NumberMatch } from './NumberMatch';
@@ -83,8 +83,11 @@ describe('NumberMatch', () => {
   });
 
   it('renders one pair zone per round value', () => {
-    render(<NumberMatch config={config} />);
-    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    const { container } = render(<NumberMatch config={config} />);
+    const answerZone = container.querySelector<HTMLElement>(
+      '.game-answer-zone',
+    )!;
+    expect(within(answerZone).getAllByRole('listitem')).toHaveLength(1);
   });
 
   it('shows correct tile plus distractors in the bank', () => {
@@ -121,10 +124,16 @@ describe('NumberMatch Play again', () => {
       rounds: [{ value: 1 }],
     };
 
-    render(<NumberMatch config={oneRoundConfig} />);
+    const { container } = render(
+      <NumberMatch config={oneRoundConfig} />,
+    );
 
     // Game starts in playing phase — 1 answer slot visible, no game-over dialog
-    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    const answerZone = () =>
+      container.querySelector<HTMLElement>('.game-answer-zone')!;
+    expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
+      1,
+    );
     expect(
       screen.queryByRole('dialog', { name: 'Game complete' }),
     ).not.toBeInTheDocument();
@@ -151,6 +160,8 @@ describe('NumberMatch Play again', () => {
     expect(
       screen.queryByRole('dialog', { name: 'Game complete' }),
     ).not.toBeInTheDocument();
-    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
+      1,
+    );
   });
 });
