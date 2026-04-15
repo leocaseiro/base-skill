@@ -73,7 +73,7 @@ describe('InstructionsOverlay', () => {
     expect(onStart).toHaveBeenCalledOnce();
   });
 
-  it('renders settings chip collapsed by default', () => {
+  it('renders the simple settings form expanded by default', () => {
     render(
       <InstructionsOverlay
         {...baseProps}
@@ -86,27 +86,7 @@ describe('InstructionsOverlay', () => {
         }}
       />,
     );
-    // The chip is collapsed — WordSpell simple form label should not be visible
-    expect(screen.queryByText('Level')).not.toBeInTheDocument();
-  });
-
-  it('expands settings chip when tapped', async () => {
-    render(
-      <InstructionsOverlay
-        {...baseProps}
-        gameId="word-spell"
-        gameTitle="Word Spell"
-        config={{
-          inputMethod: 'drag',
-          totalRounds: 8,
-          ttsEnabled: true,
-        }}
-      />,
-    );
-    await userEvent.click(
-      screen.getByRole('button', { name: /settings/i }),
-    );
-    // WordSpellSimpleConfigForm renders a "Level" label in CellSelect
+    // WordSpellSimpleConfigForm renders a "Level" label in CellSelect — no toggle needed
     expect(screen.getByText('Level')).toBeInTheDocument();
   });
 
