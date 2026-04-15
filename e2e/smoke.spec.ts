@@ -21,7 +21,7 @@ test('game catalog renders', async ({ page }) => {
   await page.goto(localeHomePath('en'));
   await page.getByRole('main').waitFor({ state: 'visible' });
   await expect(
-    page.getByRole('group', { name: /filter by grade level/i }),
+    page.getByRole('button', { name: /^Play / }).first(),
   ).toBeVisible();
 });
 

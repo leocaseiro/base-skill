@@ -33,7 +33,7 @@ type Story = StoryObj<typeof InstructionsOverlay>;
 export const Default: Story = {};
 
 export const DefaultDark: Story = {
-  parameters: { globals: { theme: 'dark' } },
+  globals: { theme: 'dark' },
 };
 
 export const WithBookmark: Story = {
@@ -52,7 +52,7 @@ export const WithBookmarkDark: Story = {
     bookmarkName: 'Easy Mode',
     bookmarkColor: 'teal',
   },
-  parameters: { globals: { theme: 'dark' } },
+  globals: { theme: 'dark' },
 };
 
 export const WordSpellDefault: Story = {
