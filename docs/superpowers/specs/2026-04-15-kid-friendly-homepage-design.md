@@ -19,15 +19,19 @@ developer-style labels. The changes land in four areas:
    unchanged.
 4. **Saved bookmarks become first-class homepage cards** with a config chip
    strip, colored ribbon, and bookmark icon — so parents set up presets once
-   and kids just tap a card.
+   and kids just tap a card. Every bookmark can also carry its **own cover**
+   (emoji or image URL), falling back to the game's default when unset.
 
 Audience pattern: **kid-first, parent-assist** (chosen in brainstorming). Kids
 drive, parents tweak without leaving the page.
 
 ## Non-goals
 
-- No custom illustrations/AI art for v1 — covers stay emoji-based (Approach C
-  from brainstorming). Swappable later via a `<GameCover gameId>` component.
+- Game defaults stay emoji-based for v1. The cover type supports images
+  (URL or asset path) so bookmarks can opt in today, but no game default
+  ships with an image in this spec.
+- No device file uploads — image covers accept a URL string only. A future
+  upload flow can reuse the same `cover.src` field.
 - No sectioned category layout (Favorites / Math / Reading). With only three
   games today, a flat grid is honest. Revisit when catalog grows past ~6
   games.
@@ -61,22 +65,80 @@ so parents can tie the UI back to schoolwork.
 
 ## Covers (v1)
 
-Each game has a `GameCover` component that renders:
+Covers are **per-config**, not just per-game. A saved bookmark can carry its
+own cover (e.g. 🦁 for "Zoo Words"); when none is set, it falls back to the
+game's default cover. The underlying render supports a **hybrid** of emoji or
+image so bookmarks can opt into real artwork without forcing the whole catalog
+onto an image pipeline.
 
-- A themed gradient background (rounded corners, ~4/3 aspect ratio).
-- A single large emoji centered on top.
+### Cover type
 
-Gradients and emoji per game:
+```ts
+// src/games/cover.ts (new)
+export type Cover =
+  | { kind: 'emoji'; emoji: string; gradient?: [string, string] }
+  | { kind: 'image'; src: string; alt?: string; background?: string };
+```
 
-| Game              | Gradient                                 | Emoji |
-| ----------------- | ---------------------------------------- | ----- |
-| Spell It!         | `#fde68a → #fb923c` (warm yellow→orange) | 🔤    |
-| Match the Number! | `#bae6fd → #6366f1` (sky blue→indigo)    | 🔢    |
-| Count in Order    | `#bbf7d0 → #10b981` (mint→emerald)       | 📊    |
+- `emoji` covers keep the zero-art v1 story: a single large emoji on a themed
+  two-stop gradient.
+- `image` covers accept a URL or imported asset (PNG / WebP / SVG). `src` is
+  stored as-is; `background` is an optional solid CSS colour used as a
+  fallback while the image loads.
 
-The component takes `gameId` and optionally a `size` variant (homepage card,
-instructions hero, etc.). The emoji+gradient strategy is a one-line swap to
-SVG or raster later, per game.
+### GameCover component
+
+`<GameCover cover={...} size="card" | "hero" />` renders either variant. The
+component lives in `src/components/GameCover.tsx` and is the single consumer
+of the `Cover` type. All callers (homepage cards, instructions hero, save-
+config preview) go through it.
+
+If `cover` is undefined, the component falls back to
+`resolveDefaultCover(gameId)`.
+
+### Per-game defaults
+
+Each `GAME_CATALOG` entry carries a `defaultCover: Cover` (emoji for v1):
+
+| Game              | Default emoji | Gradient                                 |
+| ----------------- | ------------- | ---------------------------------------- |
+| Spell It!         | 🔤            | `#fde68a → #fb923c` (warm yellow→orange) |
+| Match the Number! | 🔢            | `#bae6fd → #6366f1` (sky blue→indigo)    |
+| Count in Order    | 📊            | `#bbf7d0 → #10b981` (mint→emerald)       |
+
+Any game default can later be swapped to an `image` cover by changing only
+the registry entry.
+
+### Per-bookmark cover
+
+`SavedGameConfigDoc` (see `src/db/schemas/saved_game_configs.ts`) gains an
+optional `cover?: Cover` field. Unset means "inherit the game default".
+
+Resolution order at render time:
+
+1. If the bookmark has `cover`, use it.
+2. Otherwise, use the game's `defaultCover`.
+3. The bookmark's colored ribbon + icon + subtitle still differentiate it
+   even when it inherits the game cover.
+
+### Picking a cover (save / update bookmark flow)
+
+The bookmark save dialog and the Instructions screen's "Update" flow both
+show a small cover picker:
+
+- **Emoji picker** — a curated palette of ~24 emojis grouped by theme
+  (animals, food, nature, numbers, shapes). Tap an emoji + pick a gradient
+  preset (same palette as the bookmark color picker) → stored as
+  `{ kind: 'emoji', emoji, gradient }`.
+- **Image input** — a single text input labeled "Image URL (optional)". If
+  filled, it overrides the emoji and stores `{ kind: 'image', src }`. Paste
+  a public URL or a relative path to a file in `public/`.
+- **"Use game default"** — clears the cover field, falling back to the
+  game's `defaultCover`.
+
+File upload from the device is **out of scope for v1** — we only accept a
+URL string today. The data model supports a future upload flow without
+schema changes (the `src` field is just a string).
 
 ## Homepage
 
@@ -125,13 +187,13 @@ Two card variants, both built on a single `GameCard` component:
 
 **Bookmark card** (one per `SavedGameConfigDoc`):
 
-- Same cover, but with:
-  - **Colored top ribbon** matching the bookmark color
-  - **Bookmark icon** in the top-right corner of the cover
-- Game title
-- **Bookmark name** as a subtitle under the title (e.g. "My Words")
-- 2–3 config chips reflecting **the bookmark's config**, not the game default
-- Play button styled in the bookmark's color
+- Cover: the bookmark's own `cover` if set, otherwise the game default.
+- **Colored top ribbon** matching the bookmark color.
+- **Bookmark icon** in the top-right corner of the cover.
+- Game title.
+- **Bookmark name** as a subtitle under the title (e.g. "My Words").
+- 2–3 config chips reflecting **the bookmark's config**, not the game default.
+- Play button styled in the bookmark's color.
 
 Clicking a default card navigates to the game with no `configId`. Clicking a
 bookmark card navigates with `configId` (same behavior as today's
@@ -336,9 +398,13 @@ mostly content:
 
 ## Data and typing changes
 
-- `GAME_CATALOG` gains a `cover: { emoji: string; gradient: [string, string] }`
-  field (or derivation via `getGameCover(gameId)` — implementation choice for
-  the plan).
+- `Cover` union type in `src/games/cover.ts` (new).
+- `GAME_CATALOG` gains a `defaultCover: Cover` field per entry.
+- `SavedGameConfigDoc` schema gains an optional `cover?: Cover`. RxDB
+  migration bumps the `saved_game_configs` schema version and adds the new
+  optional field — existing docs remain valid with `cover: undefined`.
+- `resolveCover(doc, gameId): Cover` helper in `src/games/cover.ts`
+  implements the fallback chain (bookmark cover → game default).
 - `WordSpellConfig` gains a `configMode?: 'simple' | 'advanced'` and a
   `WordSpellSimpleConfig` type mirroring `SortNumbersSimpleConfig`.
 - `NumberMatchConfig` gains the same `configMode` + `NumberMatchSimpleConfig`
@@ -401,6 +467,10 @@ Single PR to master via the existing CI gating. Files likely touched:
 - `src/components/GameCard.tsx`, `src/components/GameGrid.tsx` (or split
   into `GameCoverCard` + `BookmarkCoverCard` if the size grows).
 - `src/components/GameCover.tsx` (new)
+- `src/components/CoverPicker.tsx` (new — emoji palette + image URL input)
+- `src/games/cover.ts` (new — `Cover` type + `resolveCover` helper)
+- `src/db/schemas/saved_game_configs.ts` (add optional `cover` field +
+  migration bump)
 - `src/components/config/{ChunkGroup,CellSelect,Stepper,ChipStrip}.tsx`
   (new)
 - `src/games/{word-spell,number-match,sort-numbers}/*SimpleConfigForm.tsx`
