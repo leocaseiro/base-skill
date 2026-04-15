@@ -84,7 +84,9 @@ describe('NumberMatch', () => {
 
   it('renders one pair zone per round value', () => {
     const { container } = render(<NumberMatch config={config} />);
-    const answerZone = container.querySelector('.game-answer-zone')!;
+    const answerZone = container.querySelector<HTMLElement>(
+      '.game-answer-zone',
+    )!;
     expect(within(answerZone).getAllByRole('listitem')).toHaveLength(1);
   });
 
@@ -128,7 +130,7 @@ describe('NumberMatch Play again', () => {
 
     // Game starts in playing phase — 1 answer slot visible, no game-over dialog
     const answerZone = () =>
-      container.querySelector('.game-answer-zone')!;
+      container.querySelector<HTMLElement>('.game-answer-zone')!;
     expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
       1,
     );
