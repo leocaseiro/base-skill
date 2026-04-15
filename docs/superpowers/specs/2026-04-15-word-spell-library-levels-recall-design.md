@@ -294,6 +294,14 @@ Confirm and update the default where `WordSpellConfig` is instantiated
 by the catalog / Simple Config form. When `true`, the game skips the
 sampler and recycling entirely — see the branching below.
 
+**Scope note:** `DEFAULT_WORD_SPELL_CONFIG` in
+`src/routes/$locale/_app/game/$gameId.tsx` stays `roundsInOrder: true`
+— its inline comment documents why (VR determinism with hand-authored
+emoji rounds). The "default to false" directive applies to the
+library-sourced configs produced by the kid-friendly-homepage Simple
+Config form. Coordinate with that PR so its form emits
+`roundsInOrder: false` whenever it sets `source`.
+
 ## Hook integration
 
 ### `src/games/word-spell/useLibraryRounds.ts`
