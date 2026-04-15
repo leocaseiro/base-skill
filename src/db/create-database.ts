@@ -16,6 +16,7 @@ import {
   settingsSchema,
   syncMetaSchema,
   themesSchema,
+  wordSpellSeenWordsSchema,
 } from './schemas';
 import type { BaseSkillCollections, BaseSkillDatabase } from './types';
 import type { RxDatabase } from 'rxdb';
@@ -60,6 +61,7 @@ const COLLECTIONS = {
     },
   },
   sync_meta: { schema: syncMetaSchema },
+  word_spell_seen_words: { schema: wordSpellSeenWordsSchema },
 } as const;
 
 async function addBaseSkillCollections(
