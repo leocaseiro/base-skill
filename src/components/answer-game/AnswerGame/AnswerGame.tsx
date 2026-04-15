@@ -9,9 +9,10 @@ interface AnswerGameProps {
   initialState?: AnswerGameDraftState;
   sessionId?: string;
   /**
-   * Optional skin. Enables HUD override (`skin.ProgressHUD`) and is consumed
-   * by the default HUD for token access via the container's inline style.
-   * When omitted, the default HUD renders with classic tokens from the root.
+   * Optional skin. When provided, `skin.ProgressHUD` (if defined) replaces
+   * the default HUD; otherwise the default HUD renders. `skin.tokens` are
+   * applied by individual game components on their own game container, not
+   * here.
    */
   skin?: GameSkin;
   children: ReactNode;
