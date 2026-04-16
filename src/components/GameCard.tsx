@@ -1,4 +1,4 @@
-import { BookmarkIcon, SettingsIcon } from 'lucide-react';
+import { CircleDashed, CircleDot, SettingsIcon } from 'lucide-react';
 import type { Cover } from '@/games/cover-type';
 import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
@@ -16,13 +16,13 @@ type Common = {
 };
 
 type DefaultVariant = Common & { variant: 'default' };
-type BookmarkVariant = Common & {
-  variant: 'bookmark';
-  bookmarkName: string;
-  bookmarkColor: GameColorKey;
+type CustomGameVariant = Common & {
+  variant: 'customGame';
+  customGameName: string;
+  customGameColor: GameColorKey;
 };
 
-type GameCardProps = DefaultVariant | BookmarkVariant;
+type GameCardProps = DefaultVariant | CustomGameVariant;
 
 export const GameCard = (props: GameCardProps): JSX.Element => {
   const { gameId, title, chips, onPlay, onOpenCog } = props;
@@ -30,17 +30,19 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
     props.cover === undefined
       ? resolveDefaultCover(gameId)
       : props.cover;
-  const badgeBg =
-    props.variant === 'bookmark'
-      ? GAME_COLORS[props.bookmarkColor].playBg
-      : undefined;
 
-  const headingText =
-    props.variant === 'bookmark' ? props.bookmarkName : title;
-  const subtitleText = props.variant === 'bookmark' ? title : undefined;
+  const isCustom = props.variant === 'customGame';
+  const headingText = isCustom ? props.customGameName : title;
+  const subtitleText = isCustom ? title : undefined;
+  const badgeBg = isCustom
+    ? GAME_COLORS[props.customGameColor].playBg
+    : undefined;
 
   return (
-    <div className="relative flex flex-col overflow-hidden rounded-2xl bg-card shadow-sm">
+    <div
+      className="relative flex flex-col overflow-hidden rounded-2xl bg-card shadow-sm"
+      data-card-type={isCustom ? 'custom' : 'default'}
+    >
       <button
         type="button"
         aria-label={`Play ${headingText}`}
@@ -49,15 +51,20 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
       >
         <div className="relative p-2">
           <GameCover cover={cover} size="card" />
-          {props.variant === 'bookmark' && badgeBg && (
-            <span
-              aria-hidden="true"
-              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-xs text-white shadow"
-              style={{ background: badgeBg }}
-            >
-              <BookmarkIcon size={14} />
-            </span>
-          )}
+          <span
+            aria-hidden="true"
+            className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-xs shadow"
+            style={{
+              background: badgeBg ?? 'rgb(255 255 255 / 70%)',
+              color: isCustom ? 'white' : 'var(--muted-foreground)',
+            }}
+          >
+            {isCustom ? (
+              <CircleDot size={14} />
+            ) : (
+              <CircleDashed size={14} />
+            )}
+          </span>
         </div>
 
         <div className="flex flex-col gap-1 px-3 pb-3">

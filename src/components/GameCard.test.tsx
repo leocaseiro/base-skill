@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { GameCard } from './GameCard';
 
 describe('GameCard', () => {
-  it('renders a default card with chips, cog, and Play', () => {
+  it('renders a default card with chips, cog, Play, and the default type badge', () => {
     render(
       <GameCard
         variant="default"
@@ -22,22 +22,29 @@ describe('GameCard', () => {
     expect(
       screen.getByRole('button', { name: /settings/i }),
     ).toBeInTheDocument();
+    // Default type indicator: CircleDashed icon
+    expect(
+      document.querySelector('[data-card-type="default"]'),
+    ).not.toBeNull();
   });
 
-  it('adds a bookmark name subtitle for bookmark variant', () => {
+  it('renders a custom-game variant with the custom type badge and the saved name as heading', () => {
     render(
       <GameCard
-        variant="bookmark"
+        variant="customGame"
         gameId="sort-numbers"
         title="Count in Order"
-        bookmarkName="Skip by 2"
-        bookmarkColor="amber"
+        customGameName="Skip by 2"
+        customGameColor="amber"
         chips={['🚀 Up', '5 numbers', '2s']}
         onPlay={vi.fn()}
         onOpenCog={vi.fn()}
       />,
     );
     expect(screen.getByText('Skip by 2')).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-card-type="custom"]'),
+    ).not.toBeNull();
   });
 
   it('fires onOpenCog when the cog is tapped', async () => {

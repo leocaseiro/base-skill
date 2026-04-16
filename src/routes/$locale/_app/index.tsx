@@ -107,11 +107,11 @@ const HomeScreen = (): JSX.Element => {
     return [
       <GameCard
         key={`bm-${doc.id}`}
-        variant="bookmark"
+        variant="customGame"
         gameId={doc.gameId}
         title={t(entry.titleKey)}
-        bookmarkName={doc.name}
-        bookmarkColor={doc.color as GameColorKey}
+        customGameName={doc.name}
+        customGameColor={doc.color as GameColorKey}
         cover={doc.cover}
         chips={configToChips(doc.gameId, doc.config)}
         onPlay={() => handlePlayBookmark(doc.gameId, doc.id)}
