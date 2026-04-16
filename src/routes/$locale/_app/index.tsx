@@ -26,7 +26,7 @@ type ModalState =
       mode:
         | { kind: 'default' }
         | {
-            kind: 'bookmark';
+            kind: 'customGame';
             configId: string;
             name: string;
             color: GameColorKey;
@@ -77,7 +77,7 @@ const HomeScreen = (): JSX.Element => {
       kind: 'open',
       gameId,
       mode: {
-        kind: 'bookmark',
+        kind: 'customGame',
         configId: doc.id,
         name: doc.name,
         color: doc.color as GameColorKey,
@@ -135,7 +135,7 @@ const HomeScreen = (): JSX.Element => {
           gameId={modal.gameId}
           mode={modal.mode}
           config={modal.config}
-          existingBookmarkNames={savedConfigs
+          existingCustomGameNames={savedConfigs
             .filter((d) => d.gameId === modal.gameId)
             .map((d) => d.name)}
           onCancel={() => setModal({ kind: 'closed' })}
