@@ -1,10 +1,10 @@
 import { BookmarkIcon, SettingsIcon } from 'lucide-react';
 import type { Cover } from '@/games/cover-type';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
 import { GameCover } from '@/components/GameCover';
 import { resolveDefaultCover } from '@/games/cover';
-import { BOOKMARK_COLORS } from '@/lib/bookmark-colors';
+import { GAME_COLORS } from '@/lib/game-colors';
 
 type Common = {
   gameId: string;
@@ -19,7 +19,7 @@ type DefaultVariant = Common & { variant: 'default' };
 type BookmarkVariant = Common & {
   variant: 'bookmark';
   bookmarkName: string;
-  bookmarkColor: BookmarkColorKey;
+  bookmarkColor: GameColorKey;
 };
 
 type GameCardProps = DefaultVariant | BookmarkVariant;
@@ -32,7 +32,7 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
       : props.cover;
   const badgeBg =
     props.variant === 'bookmark'
-      ? BOOKMARK_COLORS[props.bookmarkColor].playBg
+      ? GAME_COLORS[props.bookmarkColor].playBg
       : undefined;
 
   const headingText =

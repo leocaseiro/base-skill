@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
 import type { Cover } from '@/games/cover-type';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
 import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
 import { GameCard } from '@/components/GameCard';
@@ -29,7 +29,7 @@ type ModalState =
             kind: 'bookmark';
             configId: string;
             name: string;
-            color: BookmarkColorKey;
+            color: GameColorKey;
             cover: Cover | undefined;
           };
       config: Record<string, unknown>;
@@ -80,7 +80,7 @@ const HomeScreen = (): JSX.Element => {
         kind: 'bookmark',
         configId: doc.id,
         name: doc.name,
-        color: doc.color as BookmarkColorKey,
+        color: doc.color as GameColorKey,
         cover: doc.cover,
       },
       config: doc.config,
@@ -111,7 +111,7 @@ const HomeScreen = (): JSX.Element => {
         gameId={doc.gameId}
         title={t(entry.titleKey)}
         bookmarkName={doc.name}
-        bookmarkColor={doc.color as BookmarkColorKey}
+        bookmarkColor={doc.color as GameColorKey}
         cover={doc.cover}
         chips={configToChips(doc.gameId, doc.config)}
         onPlay={() => handlePlayBookmark(doc.gameId, doc.id)}

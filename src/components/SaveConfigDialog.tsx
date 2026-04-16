@@ -1,7 +1,7 @@
 // src/components/SaveConfigDialog.tsx
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,16 +13,16 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
-  BOOKMARK_COLORS,
-  BOOKMARK_COLOR_KEYS,
-  DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
+  DEFAULT_GAME_COLOR,
+  GAME_COLORS,
+  GAME_COLOR_KEYS,
+} from '@/lib/game-colors';
 
 type SaveConfigDialogProps = {
   open: boolean;
   suggestedName: string;
   existingNames: string[];
-  onSave: (name: string, color: BookmarkColorKey) => void;
+  onSave: (name: string, color: GameColorKey) => void;
   onCancel: () => void;
 };
 
@@ -35,9 +35,7 @@ export const SaveConfigDialog = ({
 }: SaveConfigDialogProps): JSX.Element | null => {
   const { t } = useTranslation('common');
   const [name, setName] = useState(suggestedName);
-  const [color, setColor] = useState<BookmarkColorKey>(
-    DEFAULT_BOOKMARK_COLOR,
-  );
+  const [color, setColor] = useState<GameColorKey>(DEFAULT_GAME_COLOR);
   const [error, setError] = useState('');
 
   const handleSave = () => {
@@ -55,7 +53,7 @@ export const SaveConfigDialog = ({
 
   if (!open) return null;
 
-  const previewColors = BOOKMARK_COLORS[color];
+  const previewColors = GAME_COLORS[color];
 
   return (
     <Dialog
@@ -94,7 +92,7 @@ export const SaveConfigDialog = ({
               role="group"
               aria-label={t('saveConfig.colorLabel')}
             >
-              {BOOKMARK_COLOR_KEYS.map((key) => (
+              {GAME_COLOR_KEYS.map((key) => (
                 <button
                   key={key}
                   type="button"
@@ -103,10 +101,10 @@ export const SaveConfigDialog = ({
                   onClick={() => setColor(key)}
                   className="h-9 w-9 rounded-full border-2 transition-transform hover:scale-110"
                   style={{
-                    background: BOOKMARK_COLORS[key].playBg,
+                    background: GAME_COLORS[key].playBg,
                     borderColor:
                       color === key
-                        ? BOOKMARK_COLORS[key].playBg
+                        ? GAME_COLORS[key].playBg
                         : 'transparent',
                     outline:
                       color === key ? `3px solid white` : undefined,

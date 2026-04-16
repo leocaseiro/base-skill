@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { Cover } from '@/games/cover-type';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
 import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
 import { GameCover } from '@/components/GameCover';
@@ -17,16 +17,13 @@ import {
 } from '@/components/ui/dialog';
 import { getSimpleConfigFormRenderer } from '@/games/config-fields-registry';
 import { resolveCover } from '@/games/cover';
-import {
-  BOOKMARK_COLORS,
-  DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
+import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
 import { suggestBookmarkName } from '@/lib/suggest-bookmark-name';
 
 export type SaveBookmarkInput = {
   name: string;
-  color: BookmarkColorKey;
+  color: GameColorKey;
   config: Record<string, unknown>;
   cover?: Cover;
 };
@@ -40,14 +37,14 @@ type InstructionsOverlayProps = {
   cover?: Cover;
   bookmarkId?: string;
   bookmarkName?: string;
-  bookmarkColor?: BookmarkColorKey;
+  bookmarkColor?: GameColorKey;
   config: Record<string, unknown>;
   onConfigChange: (config: Record<string, unknown>) => void;
   onSaveBookmark: (input: SaveBookmarkInput) => Promise<string>;
   onUpdateBookmark?: (
     name: string,
     config: Record<string, unknown>,
-    extras?: { cover?: Cover; color?: BookmarkColorKey },
+    extras?: { cover?: Cover; color?: GameColorKey },
   ) => Promise<void>;
   existingBookmarkNames?: readonly string[];
 };
@@ -61,7 +58,7 @@ export const InstructionsOverlay = ({
   cover,
   bookmarkId,
   bookmarkName,
-  bookmarkColor = DEFAULT_BOOKMARK_COLOR,
+  bookmarkColor = DEFAULT_GAME_COLOR,
   config,
   onConfigChange,
   onSaveBookmark,
@@ -99,7 +96,7 @@ export const InstructionsOverlay = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount to speak instructions once
   }, []);
 
-  const settingsColors = BOOKMARK_COLORS[bookmarkColor];
+  const settingsColors = GAME_COLORS[bookmarkColor];
   const resolvedCover = resolveCover({ cover }, gameId);
 
   const SimpleForm = getSimpleConfigFormRenderer(gameId);
