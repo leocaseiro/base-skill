@@ -13,6 +13,7 @@ import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
 import { GameCard } from '@/components/GameCard';
 import { GameGrid } from '@/components/GameGrid';
 import { getOrCreateDatabase } from '@/db/create-database';
+import { useBookmarks } from '@/db/hooks/useBookmarks';
 import { useCustomGames } from '@/db/hooks/useCustomGames';
 import { lastSessionConfigId } from '@/db/last-session-game-config';
 import { configToChips } from '@/games/config-chips';
@@ -41,6 +42,7 @@ const HomeScreen = (): JSX.Element => {
   const navigate = useNavigate({ from: '/$locale/' });
   const { customGames, save, update, remove, lastSessionConfigs } =
     useCustomGames();
+  const { isBookmarked, toggle } = useBookmarks();
   const [modal, setModal] = useState<ModalState>({ kind: 'closed' });
 
   const handlePlayDefault = (gameId: string) => {
@@ -99,6 +101,13 @@ const HomeScreen = (): JSX.Element => {
       )}
       onPlay={() => handlePlayDefault(entry.id)}
       onOpenCog={() => void openDefaultCog(entry.id)}
+      isBookmarked={isBookmarked({
+        targetType: 'game',
+        targetId: entry.id,
+      })}
+      onToggleBookmark={() =>
+        void toggle({ targetType: 'game', targetId: entry.id })
+      }
     />
   ));
   const customCards = customGames.flatMap((doc) => {
@@ -116,6 +125,13 @@ const HomeScreen = (): JSX.Element => {
         chips={configToChips(doc.gameId, doc.config)}
         onPlay={() => handlePlayCustomGame(doc.gameId, doc.id)}
         onOpenCog={() => openCustomGameCog(doc.gameId, doc)}
+        isBookmarked={isBookmarked({
+          targetType: 'customGame',
+          targetId: doc.id,
+        })}
+        onToggleBookmark={() =>
+          void toggle({ targetType: 'customGame', targetId: doc.id })
+        }
       />,
     ];
   });
