@@ -69,7 +69,7 @@ describe('InstructionsOverlay', () => {
     ).toBeInTheDocument();
   });
 
-  it('prompts to save as bookmark when "Let\'s go!" is clicked on a default game', async () => {
+  it('prompts to save as custom game when "Let\'s go!" is clicked on a default game', async () => {
     const onStart = vi.fn();
     render(<InstructionsOverlay {...baseProps} onStart={onStart} />);
     await userEvent.click(
@@ -85,7 +85,7 @@ describe('InstructionsOverlay', () => {
     expect(onStart).toHaveBeenCalledOnce();
   });
 
-  it('calls onStart immediately (and updates the bookmark) when playing a bookmarked game', async () => {
+  it('calls onStart immediately (and updates the custom game) when playing a custom game', async () => {
     const onStart = vi.fn();
     const onUpdateCustomGame = vi.fn(async () => {});
     render(

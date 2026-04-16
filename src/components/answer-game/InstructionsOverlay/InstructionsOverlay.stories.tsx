@@ -32,7 +32,7 @@ type Story = StoryObj<typeof InstructionsOverlay>;
 
 export const Default: Story = {};
 
-export const WithBookmark: Story = {
+export const WithCustomGame: Story = {
   args: {
     ...baseArgs,
     customGameId: 'abc123',
