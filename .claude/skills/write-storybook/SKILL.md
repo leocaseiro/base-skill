@@ -36,7 +36,7 @@ const meta: Meta<typeof MyComponent> = {
     // shared default props
   },
   argTypes: {
-    onSomeAction: { action: 'someAction' },
+    // Add a control for every non-callback, non-JSX prop. See "Controls Policy" below.
   },
 };
 export default meta;
@@ -87,6 +87,91 @@ decorators: [
 ],
 ```
 
+## Controls Policy
+
+Every prop that isn't a callback, JSX node, or complex object MUST have an explicit `argTypes` entry with a proper interactive control. **Raw JSON object inputs in the Controls panel are not acceptable** — they make stories useless as a playground for designers and QA.
+
+### Mapping
+
+| Prop type                    | Control                                                                           |
+| ---------------------------- | --------------------------------------------------------------------------------- |
+| String union / enum          | `control: { type: 'select' }` with `options: [...]` (or `'radio'` for ≤4 options) |
+| Boolean                      | `control: 'boolean'`                                                              |
+| Bounded number               | `control: { type: 'range', min, max, step }`                                      |
+| Free-text                    | `control: 'text'`                                                                 |
+| Color                        | `control: 'color'`                                                                |
+| Multi-select array of unions | `control: 'multi-select'` with `options`                                          |
+| Callback (`onFoo`)           | `control: false` (auto-mocked by global `argTypesRegex`)                          |
+| JSX / ReactNode              | `control: false`                                                                  |
+
+### Example
+
+```tsx
+const meta: Meta<typeof MyButton> = {
+  component: MyButton,
+  tags: ['autodocs'],
+  argTypes: {
+    variant: {
+      control: { type: 'select' },
+      options: ['primary', 'secondary', 'ghost'],
+    },
+    size: {
+      control: { type: 'radio' },
+      options: ['sm', 'md', 'lg'],
+    },
+    disabled: { control: 'boolean' },
+    rounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    icon: { control: false }, // ReactNode
+    onClick: { control: false }, // auto-mocked
+  },
+};
+```
+
+> **Don't add** `argTypes: { onClick: { action: 'clicked' } }` — `.storybook/preview.tsx` sets `actions: { argTypesRegex: '^on[A-Z].*' }` globally, which already wires every `onFoo` prop to the Actions panel. Adding it manually is harmless but noisy.
+
+## Complex Object Props
+
+When a component takes a config-shaped object (e.g., a game `config` with mode + difficulty + counts), do NOT expose the whole object as a single JSON control. Break each meaningful field into a top-level arg and assemble the object in a custom `render` function.
+
+```tsx
+type GameMode = 'easy' | 'hard';
+
+interface GameConfig {
+  mode: GameMode;
+  rounds: number;
+}
+
+interface GameConfigFormProps {
+  config: GameConfig;
+  onSubmit: (config: GameConfig) => void;
+}
+
+const meta: Meta<GameConfigFormProps & GameConfig> = {
+  component: GameConfigForm,
+  args: {
+    mode: 'easy',
+    rounds: 5,
+  },
+  argTypes: {
+    mode: {
+      control: { type: 'select' },
+      options: ['easy', 'hard'] satisfies GameMode[],
+    },
+    rounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    config: { control: false },
+  },
+  render: ({ mode, rounds, ...rest }) => (
+    <GameConfigForm config={{ mode, rounds }} {...rest} />
+  ),
+};
+```
+
+The Controls panel now shows individual `mode` and `rounds` inputs, and the rendered story reflects them. Reuse this pattern for any nested object — never let a JSON blob appear in Controls.
+
 ## Required Story Variants
 
 Cover these states to give Storybook meaningful value:
@@ -96,17 +181,6 @@ Cover these states to give Storybook meaningful value:
 - **Loading / error** — if component has async states
 - **Edge case** — long text, zero items, boundary values
 - **Interaction states** — selected, bookmarked, disabled, etc.
-
-## argTypes for Event Handlers
-
-Any prop starting with `on` should use `{ action: '...' }`:
-
-```tsx
-argTypes: {
-  onBookmarkToggle: { action: 'bookmarkToggled' },
-  onPlay: { action: 'played' },
-},
-```
 
 ## Running Storybook Tests
 
