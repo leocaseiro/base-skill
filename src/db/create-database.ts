@@ -28,7 +28,12 @@ const DB_NAME = 'baseskill-data-test';
 const PRODUCTION_DB_NAME = 'baseskill-data';
 
 const COLLECTIONS = {
-  app_meta: { schema: appMetaSchema },
+  app_meta: {
+    schema: appMetaSchema,
+    migrationStrategies: {
+      1: (oldDoc: Record<string, unknown>) => oldDoc,
+    },
+  },
   custom_games: { schema: customGamesSchema },
   profiles: { schema: profilesSchema },
   progress: { schema: progressSchema },

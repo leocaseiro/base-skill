@@ -6,10 +6,11 @@ export type AppMetaDoc = {
   rxdbSchemaVersion: number;
   lastMigrationAt: string | null;
   installId: string;
+  customGamesMigrated?: boolean;
 };
 
 export const appMetaSchema: RxJsonSchema<AppMetaDoc> = {
-  version: 0,
+  version: 1,
   primaryKey: 'id',
   type: 'object',
   properties: {
@@ -36,6 +37,9 @@ export const appMetaSchema: RxJsonSchema<AppMetaDoc> = {
     installId: {
       type: 'string',
       maxLength: 64,
+    },
+    customGamesMigrated: {
+      type: 'boolean',
     },
   },
   required: ['id', 'appVersion', 'rxdbSchemaVersion', 'installId'],
