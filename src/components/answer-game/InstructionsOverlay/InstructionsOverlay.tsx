@@ -260,7 +260,7 @@ export const InstructionsOverlay = ({
         onCancel={() => setModalOpen(false)}
         onDelete={
           customGameId && onDeleteCustomGame
-            ? (id) => onDeleteCustomGame(id)
+            ? onDeleteCustomGame
             : undefined
         }
         onSaveNew={(payload) => {

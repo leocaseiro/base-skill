@@ -195,7 +195,34 @@ sequenceDiagram
 
 ---
 
-## 7. Round Progression
+## 7. Custom Game Delete
+
+User deletes the current custom game from the `InstructionsOverlay` settings cog.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant IO as InstructionsOverlay
+  participant ACM as AdvancedConfigModal
+  participant Hook as useCustomGames
+  participant DB as custom_games (RxDB)
+  participant Nav as useNavigate
+
+  User->>IO: click cog (Configure)
+  IO->>ACM: open modal (mode = customGame)
+  User->>ACM: click Delete
+  ACM->>ACM: open confirmation dialog
+  User->>ACM: click Delete (confirm)
+  ACM->>IO: call onDeleteCustomGame(configId)
+  IO->>Hook: remove(id)
+  Hook->>DB: doc.remove()
+  IO->>Nav: navigate({ search: prev => ({ ...prev, configId: undefined }) })
+  ACM->>ACM: close confirmation dialog + modal
+```
+
+---
+
+## 8. Round Progression
 
 > **Status: planned — not yet fully implemented.**
 > The phase transition to `'round-complete'` is implemented. The 750ms delay before
