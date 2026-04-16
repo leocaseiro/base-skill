@@ -26,6 +26,7 @@ import type { JSX } from 'react';
 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
 import { GameShell } from '@/components/game/GameShell';
 import { getOrCreateDatabase } from '@/db/create-database';
+import { useBookmarks } from '@/db/hooks/useBookmarks';
 import { useCustomGames } from '@/db/hooks/useCustomGames';
 import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
 import { lastSessionConfigId } from '@/db/last-session-game-config';
@@ -395,6 +396,10 @@ const WordSpellGameBody = ({
 }): JSX.Element => {
   const { t } = useTranslation('games');
   const { save, update, remove, customGames } = useCustomGames();
+  const { isBookmarked, toggle } = useBookmarks();
+  const bookmarkTarget = customGameId
+    ? ({ targetType: 'customGame', targetId: customGameId } as const)
+    : ({ targetType: 'game', targetId: gameId } as const);
   const navigate = useNavigate({ from: '/$locale/game/$gameId' });
   const existingCustomGameNames = useMemo(
     () =>
@@ -460,6 +465,8 @@ const WordSpellGameBody = ({
             : undefined
         }
         existingCustomGameNames={existingCustomGameNames}
+        isBookmarked={isBookmarked(bookmarkTarget)}
+        onToggleBookmark={() => void toggle(bookmarkTarget)}
       />
     );
   }
@@ -498,6 +505,10 @@ const NumberMatchGameBody = ({
 }): JSX.Element => {
   const { t } = useTranslation('games');
   const { save, update, remove, customGames } = useCustomGames();
+  const { isBookmarked, toggle } = useBookmarks();
+  const bookmarkTarget = customGameId
+    ? ({ targetType: 'customGame', targetId: customGameId } as const)
+    : ({ targetType: 'game', targetId: gameId } as const);
   const navigate = useNavigate({ from: '/$locale/game/$gameId' });
   const existingCustomGameNames = useMemo(
     () =>
@@ -563,6 +574,8 @@ const NumberMatchGameBody = ({
             : undefined
         }
         existingCustomGameNames={existingCustomGameNames}
+        isBookmarked={isBookmarked(bookmarkTarget)}
+        onToggleBookmark={() => void toggle(bookmarkTarget)}
       />
     );
   }
@@ -601,6 +614,10 @@ const SortNumbersGameBody = ({
 }): JSX.Element => {
   const { t } = useTranslation('games');
   const { save, update, remove, customGames } = useCustomGames();
+  const { isBookmarked, toggle } = useBookmarks();
+  const bookmarkTarget = customGameId
+    ? ({ targetType: 'customGame', targetId: customGameId } as const)
+    : ({ targetType: 'game', targetId: gameId } as const);
   const navigate = useNavigate({ from: '/$locale/game/$gameId' });
   const existingCustomGameNames = useMemo(
     () =>
@@ -666,6 +683,8 @@ const SortNumbersGameBody = ({
             : undefined
         }
         existingCustomGameNames={existingCustomGameNames}
+        isBookmarked={isBookmarked(bookmarkTarget)}
+        onToggleBookmark={() => void toggle(bookmarkTarget)}
       />
     );
   }
