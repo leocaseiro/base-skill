@@ -7,6 +7,7 @@ import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
 import { checkVersionAndMigrate } from './migrations';
 import {
   appMetaSchema,
+  customGamesSchema,
   gameConfigOverridesSchema,
   profilesSchema,
   progressSchema,
@@ -28,6 +29,7 @@ const PRODUCTION_DB_NAME = 'baseskill-data';
 
 const COLLECTIONS = {
   app_meta: { schema: appMetaSchema },
+  custom_games: { schema: customGamesSchema },
   profiles: { schema: profilesSchema },
   progress: { schema: progressSchema },
   settings: { schema: settingsSchema },
