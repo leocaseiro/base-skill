@@ -41,7 +41,7 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
   return (
     <div
       className="relative flex flex-col overflow-hidden rounded-2xl bg-card shadow-sm"
-      data-card-type={isCustom ? 'custom' : 'default'}
+      data-card-type={isCustom ? 'customGame' : 'default'}
     >
       <button
         type="button"
