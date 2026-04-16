@@ -98,10 +98,10 @@ describe('GameRoute', () => {
         seed="seed-route"
         meta={testMeta}
         gameSpecificConfig={null}
-        bookmarkId={null}
-        bookmarkName={null}
-        bookmarkColor={null}
-        bookmarkCover={null}
+        customGameId={null}
+        customGameName={null}
+        customGameColor={null}
+        customGameCover={null}
       />,
       { wrapper },
     );
