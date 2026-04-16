@@ -1,7 +1,7 @@
 // src/components/SaveConfigDialog.tsx
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,16 +13,16 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
-  BOOKMARK_COLORS,
-  BOOKMARK_COLOR_KEYS,
-  DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
+  DEFAULT_GAME_COLOR,
+  GAME_COLORS,
+  GAME_COLOR_KEYS,
+} from '@/lib/game-colors';
 
 type SaveConfigDialogProps = {
   open: boolean;
   suggestedName: string;
   existingNames: string[];
-  onSave: (name: string, color: BookmarkColorKey) => void;
+  onSave: (name: string, color: GameColorKey) => void;
   onCancel: () => void;
 };
 
@@ -35,19 +35,17 @@ export const SaveConfigDialog = ({
 }: SaveConfigDialogProps): JSX.Element | null => {
   const { t } = useTranslation('common');
   const [name, setName] = useState(suggestedName);
-  const [color, setColor] = useState<BookmarkColorKey>(
-    DEFAULT_BOOKMARK_COLOR,
-  );
+  const [color, setColor] = useState<GameColorKey>(DEFAULT_GAME_COLOR);
   const [error, setError] = useState('');
 
   const handleSave = () => {
     const trimmed = name.trim();
     if (!trimmed) {
-      setError(t('saveConfig.errorEmpty'));
+      setError(t('customGame.errorEmpty'));
       return;
     }
     if (existingNames.includes(trimmed)) {
-      setError(t('saveConfig.errorDuplicate', { name: trimmed }));
+      setError(t('customGame.errorDuplicate', { name: trimmed }));
       return;
     }
     onSave(trimmed, color);
@@ -55,7 +53,7 @@ export const SaveConfigDialog = ({
 
   if (!open) return null;
 
-  const previewColors = BOOKMARK_COLORS[color];
+  const previewColors = GAME_COLORS[color];
 
   return (
     <Dialog
@@ -64,7 +62,7 @@ export const SaveConfigDialog = ({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('saveConfig.title')}</DialogTitle>
+          <DialogTitle>{t('customGame.title')}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-2">
           <div className="flex flex-col gap-2">
@@ -74,8 +72,8 @@ export const SaveConfigDialog = ({
                 setName(e.target.value);
                 setError('');
               }}
-              placeholder={t('saveConfig.placeholder')}
-              aria-label={t('saveConfig.nameLabel')}
+              placeholder={t('customGame.placeholder')}
+              aria-label={t('customGame.nameLabel')}
             />
             {error && (
               <p role="alert" className="text-sm text-destructive">
@@ -86,15 +84,15 @@ export const SaveConfigDialog = ({
 
           <div className="flex flex-col gap-2">
             <span className="text-sm font-semibold">
-              {t('saveConfig.colorLabel')}
+              {t('customGame.colorLabel')}
             </span>
             <div
               className="grid gap-2"
               style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
               role="group"
-              aria-label={t('saveConfig.colorLabel')}
+              aria-label={t('customGame.colorLabel')}
             >
-              {BOOKMARK_COLOR_KEYS.map((key) => (
+              {GAME_COLOR_KEYS.map((key) => (
                 <button
                   key={key}
                   type="button"
@@ -103,10 +101,10 @@ export const SaveConfigDialog = ({
                   onClick={() => setColor(key)}
                   className="h-9 w-9 rounded-full border-2 transition-transform hover:scale-110"
                   style={{
-                    background: BOOKMARK_COLORS[key].playBg,
+                    background: GAME_COLORS[key].playBg,
                     borderColor:
                       color === key
-                        ? BOOKMARK_COLORS[key].playBg
+                        ? GAME_COLORS[key].playBg
                         : 'transparent',
                     outline:
                       color === key ? `3px solid white` : undefined,
@@ -127,16 +125,16 @@ export const SaveConfigDialog = ({
               style={
                 {
                   borderColor: previewColors.border,
-                  '--bookmark-play': previewColors.playBg,
+                  '--game-play': previewColors.playBg,
                 } as React.CSSProperties
               }
             >
-              <div className="bookmark-tag-bg bookmark-text px-3 py-2 text-sm font-semibold">
-                {name || t('saveConfig.placeholder')}
+              <div className="game-tag-bg game-text px-3 py-2 text-sm font-semibold">
+                {name || t('customGame.placeholder')}
               </div>
               <div
                 className="flex w-10 items-center justify-center text-sm text-white"
-                style={{ background: 'var(--bookmark-play)' }}
+                style={{ background: 'var(--game-play)' }}
               >
                 ▶
               </div>
@@ -145,9 +143,9 @@ export const SaveConfigDialog = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>
-            {t('saveConfig.cancel')}
+            {t('customGame.cancel')}
           </Button>
-          <Button onClick={handleSave}>{t('saveConfig.save')}</Button>
+          <Button onClick={handleSave}>{t('customGame.save')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

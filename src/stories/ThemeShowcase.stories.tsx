@@ -55,7 +55,7 @@ const sessionMeta: SessionMeta = {
   initialState,
 };
 
-// ── Bookmark component fixture data ──────────────────────────────────────
+// ── Custom game component fixture data ──────────────────────────────────────
 
 const configFields: ConfigField[] = [
   {
@@ -87,8 +87,8 @@ const ShowcaseBody = () => (
   <div className="flex flex-col gap-4 p-4">
     <GameNameChip
       title="Sort Numbers"
-      bookmarkName="Easy Numbers"
-      bookmarkColor="teal"
+      customGameName="Easy Numbers"
+      customGameColor="teal"
     />
     <GameNameChip title="Word Spell" subject="reading" />
     <ConfigFormFields

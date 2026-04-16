@@ -1,10 +1,12 @@
 # Milestone 3 — App Shell Implementation Plan
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the full app shell for BaseSkill: a working game grid home screen (anonymous-first), a rebuilt header and footer, offline indicator, bookmarks (with anonymous RxDB support), and a wired settings screen.
+**Goal:** Build the full app shell for BaseSkill: a working game grid home screen (anonymous-first), a rebuilt header and footer, offline indicator, custom games (with anonymous RxDB support), and a wired settings screen.
 
-**Architecture:** Shell-first — layout wiring (`_app.tsx`) and shared components (Header, Footer, OfflineIndicator) are built before feature screens. The home route (`/$locale/_app/index`) owns filter/pagination state via TanStack Router search params and composes dumb child components. RxDB hooks (`useBookmarks`, `useSettings`) use the existing `useRxDB` + `useRxQuery` patterns from M2; they default to `profileId: 'anonymous'` for unauthenticated users.
+**Architecture:** Shell-first — layout wiring (`_app.tsx`) and shared components (Header, Footer, OfflineIndicator) are built before feature screens. The home route (`/$locale/_app/index`) owns filter/pagination state via TanStack Router search params and composes dumb child components. RxDB hooks (`useCustom games`, `useSettings`) use the existing `useRxDB` + `useRxQuery` patterns from M2; they default to `profileId: 'anonymous'` for unauthenticated users.
 
 **Tech Stack:** TanStack Router (search params, Link, useNavigate, useParams), RxDB + existing hooks (useRxDB, useRxQuery), react-i18next, shadcn/ui (Button, Card, Sheet, Input, DropdownMenu, Slider, Select), lucide-react, nanoid.
 
@@ -27,36 +29,36 @@ All subsequent commands run from `./worktrees/milestone-3-app-shell/`.
 
 ## File Map
 
-| File                                       | Action | Purpose                                                               |
-| ------------------------------------------ | ------ | --------------------------------------------------------------------- |
-| `src/games/registry.ts`                    | Modify | Add `GameLevel`, `GameSubject` types; extend `GameCatalogEntry`       |
-| `src/games/registry.test.ts`               | Modify | Test `levels` and `subject` fields                                    |
-| `src/games/catalog-utils.ts`               | Create | Pure `filterCatalog` and `paginateCatalog` functions                  |
-| `src/games/catalog-utils.test.ts`          | Create | Unit tests for filter + paginate                                      |
-| `src/lib/i18n/locales/en/common.json`      | Modify | Add nav, search, levels, subjects, offline, pagination, bookmark keys |
-| `src/lib/i18n/locales/pt-BR/common.json`   | Modify | Portuguese translations for same keys                                 |
-| `src/components/ui/input.tsx`              | Create | shadcn add input                                                      |
-| `src/components/ui/dropdown-menu.tsx`      | Create | shadcn add dropdown-menu                                              |
-| `src/components/ui/slider.tsx`             | Create | shadcn add slider                                                     |
-| `src/components/ui/select.tsx`             | Create | shadcn add select                                                     |
-| `src/components/GameCard.tsx`              | Create | Single game card (dumb — accepts callbacks)                           |
-| `src/components/GameCard.test.tsx`         | Create | Render + interaction tests                                            |
-| `src/components/LevelRow.tsx`              | Create | Grade-level pill buttons (dumb)                                       |
-| `src/components/LevelRow.test.tsx`         | Create | Interaction tests                                                     |
-| `src/components/GameGrid.tsx`              | Create | Grid + pagination (dumb, receives filtered items)                     |
-| `src/components/GameGrid.test.tsx`         | Create | Render tests                                                          |
-| `src/components/OfflineIndicator.tsx`      | Create | `navigator.onLine` banner                                             |
-| `src/components/OfflineIndicator.test.tsx` | Create | Online/offline state tests                                            |
-| `src/components/Header.tsx`                | Modify | Rebuild: logo, search, filters sheet, language dropdown, menu sheet   |
-| `src/components/Footer.tsx`                | Modify | Rebuild: mirrors header menu                                          |
-| `src/routes/$locale/_app.tsx`              | Modify | Wire Header, OfflineIndicator, Footer into layout                     |
-| `src/routes/$locale/_app/index.tsx`        | Modify | Home screen: search params, compose LevelRow + GameGrid               |
-| `src/routes/$locale/_app/index.test.tsx`   | Modify | Update test to match new home screen                                  |
-| `src/db/hooks/useBookmarks.ts`             | Create | Toggle bookmark for anonymous user                                    |
-| `src/db/hooks/useBookmarks.test.ts`        | Create | RxDB integration tests                                                |
-| `src/db/hooks/useSettings.ts`              | Create | Read/write anonymous settings doc                                     |
-| `src/db/hooks/useSettings.test.ts`         | Create | RxDB integration tests                                                |
-| `src/routes/$locale/_app/settings.tsx`     | Modify | Wire volume, speechRate, themeId, language to RxDB                    |
+| File                                       | Action | Purpose                                                                  |
+| ------------------------------------------ | ------ | ------------------------------------------------------------------------ |
+| `src/games/registry.ts`                    | Modify | Add `GameLevel`, `GameSubject` types; extend `GameCatalogEntry`          |
+| `src/games/registry.test.ts`               | Modify | Test `levels` and `subject` fields                                       |
+| `src/games/catalog-utils.ts`               | Create | Pure `filterCatalog` and `paginateCatalog` functions                     |
+| `src/games/catalog-utils.test.ts`          | Create | Unit tests for filter + paginate                                         |
+| `src/lib/i18n/locales/en/common.json`      | Modify | Add nav, search, levels, subjects, offline, pagination, custom game keys |
+| `src/lib/i18n/locales/pt-BR/common.json`   | Modify | Portuguese translations for same keys                                    |
+| `src/components/ui/input.tsx`              | Create | shadcn add input                                                         |
+| `src/components/ui/dropdown-menu.tsx`      | Create | shadcn add dropdown-menu                                                 |
+| `src/components/ui/slider.tsx`             | Create | shadcn add slider                                                        |
+| `src/components/ui/select.tsx`             | Create | shadcn add select                                                        |
+| `src/components/GameCard.tsx`              | Create | Single game card (dumb — accepts callbacks)                              |
+| `src/components/GameCard.test.tsx`         | Create | Render + interaction tests                                               |
+| `src/components/LevelRow.tsx`              | Create | Grade-level pill buttons (dumb)                                          |
+| `src/components/LevelRow.test.tsx`         | Create | Interaction tests                                                        |
+| `src/components/GameGrid.tsx`              | Create | Grid + pagination (dumb, receives filtered items)                        |
+| `src/components/GameGrid.test.tsx`         | Create | Render tests                                                             |
+| `src/components/OfflineIndicator.tsx`      | Create | `navigator.onLine` banner                                                |
+| `src/components/OfflineIndicator.test.tsx` | Create | Online/offline state tests                                               |
+| `src/components/Header.tsx`                | Modify | Rebuild: logo, search, filters sheet, language dropdown, menu sheet      |
+| `src/components/Footer.tsx`                | Modify | Rebuild: mirrors header menu                                             |
+| `src/routes/$locale/_app.tsx`              | Modify | Wire Header, OfflineIndicator, Footer into layout                        |
+| `src/routes/$locale/_app/index.tsx`        | Modify | Home screen: search params, compose LevelRow + GameGrid                  |
+| `src/routes/$locale/_app/index.test.tsx`   | Modify | Update test to match new home screen                                     |
+| `src/db/hooks/useCustom games.ts`          | Create | Toggle custom game for anonymous user                                    |
+| `src/db/hooks/useCustom games.test.ts`     | Create | RxDB integration tests                                                   |
+| `src/db/hooks/useSettings.ts`              | Create | Read/write anonymous settings doc                                        |
+| `src/db/hooks/useSettings.test.ts`         | Create | RxDB integration tests                                                   |
+| `src/routes/$locale/_app/settings.tsx`     | Modify | Wire volume, speechRate, themeId, language to RxDB                       |
 
 ---
 
@@ -403,9 +405,9 @@ git commit -m "feat(catalog): add filterCatalog and paginateCatalog utilities"
     "next": "Next",
     "pageOf": "Page {{page}} of {{total}}"
   },
-  "bookmark": {
-    "add": "Bookmark",
-    "remove": "Remove bookmark"
+  "custom game": {
+    "add": "Custom game",
+    "remove": "Remove custom game"
   }
 }
 ```
@@ -449,7 +451,7 @@ git commit -m "feat(catalog): add filterCatalog and paginateCatalog utilities"
     "next": "Próximo",
     "pageOf": "Página {{page}} de {{total}}"
   },
-  "bookmark": {
+  "custom game": {
     "add": "Favoritar",
     "remove": "Remover favorito"
   }
@@ -549,8 +551,8 @@ describe('GameCard', () => {
     render(
       <GameCard
         entry={mockEntry}
-        isBookmarked={false}
-        onBookmarkToggle={vi.fn()}
+        isCustom gameed={false}
+        onCustom gameToggle={vi.fn()}
         onPlay={vi.fn()}
       />,
       { wrapper },
@@ -562,8 +564,8 @@ describe('GameCard', () => {
     render(
       <GameCard
         entry={mockEntry}
-        isBookmarked={false}
-        onBookmarkToggle={vi.fn()}
+        isCustom gameed={false}
+        onCustom gameToggle={vi.fn()}
         onPlay={vi.fn()}
       />,
       { wrapper },
@@ -577,8 +579,8 @@ describe('GameCard', () => {
     render(
       <GameCard
         entry={mockEntry}
-        isBookmarked={false}
-        onBookmarkToggle={vi.fn()}
+        isCustom gameed={false}
+        onCustom gameToggle={vi.fn()}
         onPlay={onPlay}
       />,
       { wrapper },
@@ -589,35 +591,35 @@ describe('GameCard', () => {
     expect(onPlay).toHaveBeenCalledWith('math-addition');
   });
 
-  it('calls onBookmarkToggle with gameId when bookmark button is clicked', async () => {
-    const onBookmarkToggle = vi.fn();
+  it('calls onCustom gameToggle with gameId when custom game button is clicked', async () => {
+    const onCustom gameToggle = vi.fn();
     render(
       <GameCard
         entry={mockEntry}
-        isBookmarked={false}
-        onBookmarkToggle={onBookmarkToggle}
+        isCustom gameed={false}
+        onCustom gameToggle={onCustom gameToggle}
         onPlay={vi.fn()}
       />,
       { wrapper },
     );
     await userEvent.click(
-      screen.getByRole('button', { name: /bookmark/i }),
+      screen.getByRole('button', { name: /custom game/i }),
     );
-    expect(onBookmarkToggle).toHaveBeenCalledWith('math-addition');
+    expect(onCustom gameToggle).toHaveBeenCalledWith('math-addition');
   });
 
-  it('shows "remove bookmark" aria-label when isBookmarked is true', () => {
+  it('shows "remove custom game" aria-label when isCustom gameed is true', () => {
     render(
       <GameCard
         entry={mockEntry}
-        isBookmarked={true}
-        onBookmarkToggle={vi.fn()}
+        isCustom gameed={true}
+        onCustom gameToggle={vi.fn()}
         onPlay={vi.fn()}
       />,
       { wrapper },
     );
     expect(
-      screen.getByRole('button', { name: /remove bookmark/i }),
+      screen.getByRole('button', { name: /remove custom game/i }),
     ).toBeInTheDocument();
   });
 });
@@ -642,7 +644,7 @@ Expected: FAIL — `Cannot find module './GameCard'`.
 Create `src/components/GameCard.tsx`:
 
 ```tsx
-import { BookmarkIcon } from 'lucide-react';
+import { Custom gameIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -655,15 +657,15 @@ import type { GameCatalogEntry } from '@/games/registry';
 
 type GameCardProps = {
   entry: GameCatalogEntry;
-  isBookmarked: boolean;
-  onBookmarkToggle: (gameId: string) => void;
+  isCustom gameed: boolean;
+  onCustom gameToggle: (gameId: string) => void;
   onPlay: (gameId: string) => void;
 };
 
 export const GameCard = ({
   entry,
-  isBookmarked,
-  onBookmarkToggle,
+  isCustom gameed,
+  onCustom gameToggle,
   onPlay,
 }: GameCardProps) => {
   const { t } = useTranslation('games');
@@ -680,15 +682,15 @@ export const GameCard = ({
             variant="ghost"
             size="icon"
             aria-label={
-              isBookmarked
-                ? tCommon('bookmark.remove')
-                : tCommon('bookmark.add')
+              isCustom gameed
+                ? tCommon('custom game.remove')
+                : tCommon('custom game.add')
             }
-            onClick={() => onBookmarkToggle(entry.id)}
+            onClick={() => onCustom gameToggle(entry.id)}
           >
-            <BookmarkIcon
+            <Custom gameIcon
               size={16}
-              className={isBookmarked ? 'fill-current' : ''}
+              className={isCustom gameed ? 'fill-current' : ''}
             />
           </Button>
         </div>
@@ -725,7 +727,7 @@ Expected: PASS (5 tests).
 
 ```bash
 git add src/components/GameCard.tsx src/components/GameCard.test.tsx
-git commit -m "feat(ui): add GameCard component with bookmark and play callbacks"
+git commit -m "feat(ui): add GameCard component with custom game and play callbacks"
 ```
 
 ---
@@ -919,8 +921,10 @@ describe('GameGrid', () => {
     render(
       <GameGrid
         entries={entries}
-        bookmarkedIds={new Set()}
-        onBookmarkToggle={vi.fn()}
+        custom
+        gameedIds={new Set()}
+        onCustom
+        gameToggle={vi.fn()}
         onPlay={vi.fn()}
         page={1}
         totalPages={1}
@@ -937,8 +941,10 @@ describe('GameGrid', () => {
     render(
       <GameGrid
         entries={makeEntries(1)}
-        bookmarkedIds={new Set()}
-        onBookmarkToggle={vi.fn()}
+        custom
+        gameedIds={new Set()}
+        onCustom
+        gameToggle={vi.fn()}
         onPlay={vi.fn()}
         page={2}
         totalPages={3}
@@ -959,8 +965,10 @@ describe('GameGrid', () => {
     render(
       <GameGrid
         entries={makeEntries(1)}
-        bookmarkedIds={new Set()}
-        onBookmarkToggle={vi.fn()}
+        custom
+        gameedIds={new Set()}
+        onCustom
+        gameToggle={vi.fn()}
         onPlay={vi.fn()}
         page={2}
         totalPages={3}
@@ -978,8 +986,10 @@ describe('GameGrid', () => {
     render(
       <GameGrid
         entries={makeEntries(1)}
-        bookmarkedIds={new Set()}
-        onBookmarkToggle={vi.fn()}
+        custom
+        gameedIds={new Set()}
+        onCustom
+        gameToggle={vi.fn()}
         onPlay={vi.fn()}
         page={1}
         totalPages={1}
@@ -999,8 +1009,10 @@ describe('GameGrid', () => {
     render(
       <GameGrid
         entries={[]}
-        bookmarkedIds={new Set()}
-        onBookmarkToggle={vi.fn()}
+        custom
+        gameedIds={new Set()}
+        onCustom
+        gameToggle={vi.fn()}
         onPlay={vi.fn()}
         page={1}
         totalPages={1}
@@ -1033,8 +1045,8 @@ import type { GameCatalogEntry } from '@/games/registry';
 
 type GameGridProps = {
   entries: GameCatalogEntry[];
-  bookmarkedIds: Set<string>;
-  onBookmarkToggle: (gameId: string) => void;
+  custom gameedIds: Set<string>;
+  onCustom gameToggle: (gameId: string) => void;
   onPlay: (gameId: string) => void;
   page: number;
   totalPages: number;
@@ -1043,8 +1055,8 @@ type GameGridProps = {
 
 export const GameGrid = ({
   entries,
-  bookmarkedIds,
-  onBookmarkToggle,
+  custom gameedIds,
+  onCustom gameToggle,
   onPlay,
   page,
   totalPages,
@@ -1064,8 +1076,8 @@ export const GameGrid = ({
             <GameCard
               key={entry.id}
               entry={entry}
-              isBookmarked={bookmarkedIds.has(entry.id)}
-              onBookmarkToggle={onBookmarkToggle}
+              isCustom gameed={custom gameedIds.has(entry.id)}
+              onCustom gameToggle={onCustom gameToggle}
               onPlay={onPlay}
             />
           ))}
@@ -1647,7 +1659,7 @@ import { LevelRow } from '@/components/LevelRow';
 import { filterCatalog, paginateCatalog } from '@/games/catalog-utils';
 import type { GameLevel, GameSubject } from '@/games/registry';
 import { GAME_CATALOG } from '@/games/registry';
-import { useBookmarks } from '@/db/hooks/useBookmarks';
+import { useCustom games } from '@/db/hooks/useCustom games';
 
 const PAGE_SIZE = 12;
 
@@ -1655,7 +1667,7 @@ const HomeScreen = () => {
   const { level, subject, search, page } = Route.useSearch();
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate({ from: '/$locale/_app/' });
-  const { bookmarkedIds, toggle } = useBookmarks();
+  const { custom gameedIds, toggle } = useCustom games();
 
   const filtered = useMemo(
     () =>
@@ -1705,8 +1717,8 @@ const HomeScreen = () => {
       <div className="mt-4">
         <GameGrid
           entries={items}
-          bookmarkedIds={bookmarkedIds}
-          onBookmarkToggle={toggle}
+          custom gameedIds={custom gameedIds}
+          onCustom gameToggle={toggle}
           onPlay={handlePlay}
           page={safePage}
           totalPages={totalPages}
@@ -1745,21 +1757,21 @@ git commit -m "feat(home): game grid with search params, level filter, and pagin
 
 ---
 
-## Task 12: `useBookmarks` hook
+## Task 12: `useCustom games` hook
 
 **Files:**
 
-- Create: `src/db/hooks/useBookmarks.ts`
-- Create: `src/db/hooks/useBookmarks.test.ts`
+- Create: `src/db/hooks/useCustom games.ts`
+- Create: `src/db/hooks/useCustom games.test.ts`
 - **Step 1: Write the failing tests**
 
-Create `src/db/hooks/useBookmarks.test.ts`:
+Create `src/db/hooks/useCustom games.test.ts`:
 
 ```ts
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
 import { afterEach, describe, expect, it } from 'vitest';
-import { useBookmarks } from './useBookmarks';
+import { useCustom games } from './useCustom games';
 import {
   createTestDatabase,
   destroyTestDatabase,
@@ -1784,46 +1796,46 @@ afterEach(async () => {
   db = undefined;
 });
 
-describe('useBookmarks', () => {
-  it('starts with an empty set of bookmarked ids', async () => {
+describe('useCustom games', () => {
+  it('starts with an empty set of custom gameed ids', async () => {
     db = await createTestDatabase();
-    const { result } = renderHook(() => useBookmarks(), {
+    const { result } = renderHook(() => useCustom games(), {
       wrapper: makeWrapper(db!),
     });
-    await waitFor(() => expect(result.current.bookmarkedIds).toBeDefined());
-    expect(result.current.bookmarkedIds.size).toBe(0);
+    await waitFor(() => expect(result.current.custom gameedIds).toBeDefined());
+    expect(result.current.custom gameedIds.size).toBe(0);
   });
 
-  it('adds a bookmark when toggle is called on an unbookmarked game', async () => {
+  it('adds a custom game when toggle is called on an uncustom gameed game', async () => {
     db = await createTestDatabase();
-    const { result } = renderHook(() => useBookmarks(), {
+    const { result } = renderHook(() => useCustom games(), {
       wrapper: makeWrapper(db!),
     });
-    await waitFor(() => expect(result.current.bookmarkedIds).toBeDefined());
+    await waitFor(() => expect(result.current.custom gameedIds).toBeDefined());
 
     await act(async () => {
       await result.current.toggle('math-addition');
     });
 
-    expect(result.current.bookmarkedIds.has('math-addition')).toBe(true);
+    expect(result.current.custom gameedIds.has('math-addition')).toBe(true);
   });
 
-  it('removes the bookmark when toggle is called on an already-bookmarked game', async () => {
+  it('removes the custom game when toggle is called on an already-custom gameed game', async () => {
     db = await createTestDatabase();
-    const { result } = renderHook(() => useBookmarks(), {
+    const { result } = renderHook(() => useCustom games(), {
       wrapper: makeWrapper(db!),
     });
-    await waitFor(() => expect(result.current.bookmarkedIds).toBeDefined());
+    await waitFor(() => expect(result.current.custom gameedIds).toBeDefined());
 
     await act(async () => {
       await result.current.toggle('math-addition');
     });
-    expect(result.current.bookmarkedIds.has('math-addition')).toBe(true);
+    expect(result.current.custom gameedIds.has('math-addition')).toBe(true);
 
     await act(async () => {
       await result.current.toggle('math-addition');
     });
-    expect(result.current.bookmarkedIds.has('math-addition')).toBe(false);
+    expect(result.current.custom gameedIds.has('math-addition')).toBe(false);
   });
 });
 ```
@@ -1831,53 +1843,53 @@ describe('useBookmarks', () => {
 - **Step 2: Run — expect failure**
 
 ```bash
-yarn test src/db/hooks/useBookmarks.test.ts
+yarn test src/db/hooks/useCustom games.test.ts
 ```
 
-Expected: FAIL — `Cannot find module './useBookmarks'`.
+Expected: FAIL — `Cannot find module './useCustom games'`.
 
-- **Step 3: Implement `useBookmarks.ts`**
+- **Step 3: Implement `useCustom games.ts`**
 
-Create `src/db/hooks/useBookmarks.ts`:
+Create `src/db/hooks/useCustom games.ts`:
 
 ```ts
 import { nanoid } from 'nanoid';
 import { useMemo } from 'react';
 import { useRxDB } from './useRxDB';
 import { useRxQuery } from './useRxQuery';
-import type { BookmarkDoc } from '@/db/schemas/bookmarks';
+import type { Custom gameDoc } from '@/db/schemas/custom games';
 
 const ANONYMOUS_PROFILE_ID = 'anonymous';
 
-type UseBookmarksResult = {
-  bookmarkedIds: Set<string>;
+type UseCustom gamesResult = {
+  custom gameedIds: Set<string>;
   toggle: (gameId: string) => Promise<void>;
 };
 
-export function useBookmarks(): UseBookmarksResult {
+export function useCustom games(): UseCustom gamesResult {
   const { db } = useRxDB();
 
   const query$ = useMemo(() => {
     if (!db) return null;
-    return db.bookmarks.find({
+    return db.custom games.find({
       selector: { profileId: ANONYMOUS_PROFILE_ID },
     }).$;
   }, [db]);
 
-  const docs = useRxQuery<BookmarkDoc[]>(
+  const docs = useRxQuery<Custom gameDoc[]>(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- query$ is only null when db is undefined; hook won't render useful data then
     query$ ?? new (require('rxjs').Subject)(),
     [],
   );
 
-  const bookmarkedIds = useMemo(
+  const custom gameedIds = useMemo(
     () => new Set(docs.map((d) => d.gameId)),
     [docs],
   );
 
   const toggle = async (gameId: string): Promise<void> => {
     if (!db) return;
-    const existing = await db.bookmarks
+    const existing = await db.custom games
       .findOne({
         selector: { profileId: ANONYMOUS_PROFILE_ID, gameId },
       })
@@ -1885,17 +1897,17 @@ export function useBookmarks(): UseBookmarksResult {
     if (existing) {
       await existing.remove();
     } else {
-      const doc: BookmarkDoc = {
+      const doc: Custom gameDoc = {
         id: nanoid(21),
         profileId: ANONYMOUS_PROFILE_ID,
         gameId,
         createdAt: new Date().toISOString(),
       };
-      await db.bookmarks.insert(doc);
+      await db.custom games.insert(doc);
     }
   };
 
-  return { bookmarkedIds, toggle };
+  return { custom gameedIds, toggle };
 }
 ```
 
@@ -1906,7 +1918,7 @@ Note: the `require('rxjs').Subject` fallback for when `db` is undefined lets `us
 ```ts
 import { EMPTY } from 'rxjs';
 // ...
-const docs = useRxQuery<BookmarkDoc[]>(query$ ?? EMPTY, []);
+const docs = useRxQuery<Custom gameDoc[]>(query$ ?? EMPTY, []);
 ```
 
 Use `EMPTY` from `rxjs` (already a dependency). Update the import at the top:
@@ -1915,7 +1927,7 @@ Use `EMPTY` from `rxjs` (already a dependency). Update the import at the top:
 import { EMPTY } from 'rxjs';
 ```
 
-And remove the `require` line from `useBookmarks.ts`. Final implementation:
+And remove the `require` line from `useCustom games.ts`. Final implementation:
 
 ```ts
 import { EMPTY } from 'rxjs';
@@ -1923,38 +1935,38 @@ import { nanoid } from 'nanoid';
 import { useMemo } from 'react';
 import { useRxDB } from './useRxDB';
 import { useRxQuery } from './useRxQuery';
-import type { BookmarkDoc } from '@/db/schemas/bookmarks';
+import type { Custom gameDoc } from '@/db/schemas/custom games';
 
 const ANONYMOUS_PROFILE_ID = 'anonymous';
 
-type UseBookmarksResult = {
-  bookmarkedIds: Set<string>;
+type UseCustom gamesResult = {
+  custom gameedIds: Set<string>;
   toggle: (gameId: string) => Promise<void>;
 };
 
-export function useBookmarks(): UseBookmarksResult {
+export function useCustom games(): UseCustom gamesResult {
   const { db } = useRxDB();
 
   const query$ = useMemo(
     () =>
       db
-        ? db.bookmarks.find({
+        ? db.custom games.find({
             selector: { profileId: ANONYMOUS_PROFILE_ID },
           }).$
         : EMPTY,
     [db],
   );
 
-  const docs = useRxQuery<BookmarkDoc[]>(query$, []);
+  const docs = useRxQuery<Custom gameDoc[]>(query$, []);
 
-  const bookmarkedIds = useMemo(
+  const custom gameedIds = useMemo(
     () => new Set(docs.map((d) => d.gameId)),
     [docs],
   );
 
   const toggle = async (gameId: string): Promise<void> => {
     if (!db) return;
-    const existing = await db.bookmarks
+    const existing = await db.custom games
       .findOne({
         selector: { profileId: ANONYMOUS_PROFILE_ID, gameId },
       })
@@ -1962,24 +1974,24 @@ export function useBookmarks(): UseBookmarksResult {
     if (existing) {
       await existing.remove();
     } else {
-      const doc: BookmarkDoc = {
+      const doc: Custom gameDoc = {
         id: nanoid(21),
         profileId: ANONYMOUS_PROFILE_ID,
         gameId,
         createdAt: new Date().toISOString(),
       };
-      await db.bookmarks.insert(doc);
+      await db.custom games.insert(doc);
     }
   };
 
-  return { bookmarkedIds, toggle };
+  return { custom gameedIds, toggle };
 }
 ```
 
 - **Step 4: Run — expect pass**
 
 ```bash
-yarn test src/db/hooks/useBookmarks.test.ts
+yarn test src/db/hooks/useCustom games.test.ts
 ```
 
 Expected: PASS (3 tests).
@@ -1987,8 +1999,8 @@ Expected: PASS (3 tests).
 - **Step 5: Commit**
 
 ```bash
-git add src/db/hooks/useBookmarks.ts src/db/hooks/useBookmarks.test.ts
-git commit -m "feat(db): add useBookmarks hook with anonymous profile support"
+git add src/db/hooks/useCustom games.ts src/db/hooks/useCustom games.test.ts
+git commit -m "feat(db): add useCustom games hook with anonymous profile support"
 ```
 
 ---
@@ -2338,7 +2350,7 @@ Open `http://localhost:3000/en/` and verify:
 - Game grid shows 3 game cards (from the stub catalog)
 - Clicking a level pill filters the grid
 - Typing in search filters the grid
-- Clicking bookmark icon toggles the filled/unfilled state
+- Clicking custom game icon toggles the filled/unfilled state
 - Footer mirrors header menu
 - Navigating to `/en/settings` shows volume, speech rate, and language controls
 - **Step 5: Open a PR**
@@ -2346,6 +2358,6 @@ Open `http://localhost:3000/en/` and verify:
 ```bash
 cd ../..
 gh pr create \
-  --title "feat(m3): app shell — game grid, header, footer, bookmarks, settings" \
-  --body "Implements Milestone 3 app shell. Anonymous-first game grid with level filter, search, pagination. Header with search/filters/language/menu. Footer mirrors header. Offline indicator. useBookmarks and useSettings hooks wired to RxDB anonymous profile."
+  --title "feat(m3): app shell — game grid, header, footer, custom games, settings" \
+  --body "Implements Milestone 3 app shell. Anonymous-first game grid with level filter, search, pagination. Header with search/filters/language/menu. Footer mirrors header. Offline indicator. useCustom games and useSettings hooks wired to RxDB anonymous profile."
 ```

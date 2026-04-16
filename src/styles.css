@@ -562,33 +562,33 @@ a:hover {
   --skeuo-text-shadow: rgb(0 0 0 / 40%);
 }
 
-/* Bookmark colour utilities — derived from --bookmark-play set per-component */
-.bookmark-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
+/* Game colour utilities — derived from --game-play set per-component */
+.game-bg {
+  background: color-mix(in srgb, var(--game-play) 12%, transparent);
 }
 
-.dark .bookmark-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 20%, transparent);
+.dark .game-bg {
+  background: color-mix(in srgb, var(--game-play) 20%, transparent);
 }
 
-.bookmark-tag-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 18%, transparent);
+.game-tag-bg {
+  background: color-mix(in srgb, var(--game-play) 18%, transparent);
 }
 
-.dark .bookmark-tag-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 25%, transparent);
+.dark .game-tag-bg {
+  background: color-mix(in srgb, var(--game-play) 25%, transparent);
 }
 
-.bookmark-text {
-  /* Darken the bookmark colour so it meets WCAG AA 4.5:1 against the lightly-tinted
-   * bookmark-bg (which is 12–20 % of the same colour on a light background). */
-  color: color-mix(in srgb, var(--bookmark-play) 60%, #000);
+.game-text {
+  /* Darken the game colour so it meets WCAG AA 4.5:1 against the lightly-tinted
+   * game-bg (which is 12–20 % of the same colour on a light background). */
+  color: color-mix(in srgb, var(--game-play) 60%, #000);
 }
 
-.dark .bookmark-text {
-  /* Lighten for dark backgrounds so the mix-against-transparent bookmark-bg
+.dark .game-text {
+  /* Lighten for dark backgrounds so the mix-against-transparent game-bg
    * still provides sufficient contrast. */
-  color: color-mix(in srgb, var(--bookmark-play) 60%, #fff);
+  color: color-mix(in srgb, var(--game-play) 60%, #fff);
 }
 
 @layer base {

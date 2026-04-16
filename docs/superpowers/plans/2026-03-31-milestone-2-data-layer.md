@@ -1,5 +1,7 @@
 # Milestone 2 — Data Layer and Core Infrastructure Implementation Plan
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use @superpowers/subagent-driven-development (recommended) or @superpowers/executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship RxDB (all collections, migrations, React hooks), document the TanStack Query decision, and deliver internal event bus, locale-prefixed i18n, RxDB-backed theme engine with static default, speech wrappers, plus a static game registry — matching [docs/brainstorms/2026-03-31-milestone-2-brainstorm.md](../brainstorms/2026-03-31-milestone-2-brainstorm.md) and [docs/data-model.md](../data-model.md).
@@ -273,7 +275,7 @@ Expected: **PASS** (commit any type fixes immediately if you touched files).
 - Modify: `src/db/create-database.ts`
 - Modify: `src/db/types.ts`
 - Test: extend `src/db/create-database.test.ts`
-- **Step 1: Transcribe schemas** from `docs/data-model.md` for `profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`. Export `MAX_SCHEMA_VERSION` in `schemas/index.ts` using the same formula as the doc §6.
+- **Step 1: Transcribe schemas** from `docs/data-model.md` for `profiles`, `progress`, `settings`, `game_config_overrides`, `custom games`, `themes`, `session_history`, `session_history_index`, `sync_meta`. Export `MAX_SCHEMA_VERSION` in `schemas/index.ts` using the same formula as the doc §6.
 
 **Commit:**
 

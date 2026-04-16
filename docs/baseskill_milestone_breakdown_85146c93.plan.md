@@ -12,7 +12,7 @@ todos:
     content: 'Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services'
     status: completed
   - id: m3-app-shell
-    content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents'
+    content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, custom games, recents'
     status: pending
   - id: m4-game-engine
     content: 'Milestone 4: Game lifecycle, game shell UI, config loader + override merging, session recorder, 7 reusable game components'
@@ -96,7 +96,7 @@ Set up RxDB and the foundational systems that everything else depends on.
 
 **SYNC (must complete in order):**
 
-1. RxDB database initialization and schema definitions for all collections (`profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`)
+1. RxDB database initialization and schema definitions for all collections (`profiles`, `progress`, `settings`, `game_config_overrides`, `custom games`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`)
 2. Schema migration framework (version tracking via `app_meta`)
 3. React hooks for reactive RxDB queries
 4. Evaluate TanStack Query integration -- determine if TanStack Query should wrap RxDB observables for cache management, or if RxDB's reactive queries are sufficient via custom hooks. Decision impacts all downstream data access patterns.
@@ -120,13 +120,13 @@ Build the user-facing shell: navigation, profile management, and dashboard. TanS
 2. **Profile picker / home screen** -- create profile, select profile, avatar picker, grade-level selector; use `beforeLoad` guard to redirect to profile picker if no active profile
 3. **Family sharing** -- quick profile switching, parent PIN gate for settings (route guard on `/parent` routes)
 4. **App layout shell** -- root layout with header, back button, breadcrumbs (parent view), grade-adaptive navigation (icons for Pre-K, text+icons for older)
-5. **Dashboard** -- game grid by subject/grade, bookmarked games row, recently played row; use route `loader` to pre-fetch game catalog + bookmarks from RxDB
+5. **Dashboard** -- game grid by subject/grade, custom gameed games row, recently played row; use route `loader` to pre-fetch game catalog + custom games from RxDB
 6. **Settings screen** -- volume, speech rate, active language, theme selector per profile
 7. **Offline indicator** -- `navigator.onLine` listener, banner component, last-sync timestamp
 
 **ASYNC (can start once profile + layout exist):**
 
-- **Bookmark system** -- bookmark/unbookmark games, persist to `bookmarks` collection
+- **Custom game system** -- custom game/uncustom game games, persist to `custom games` collection
 - **Recents tracking** -- update `progress` collection with last-played timestamps, query for dashboard
 
 ---
@@ -277,7 +277,7 @@ graph TD
 | ----- | ----------------------------------------------- |
 | M0    | Most design docs can be written concurrently    |
 | M2    | Event bus, i18n, theme engine, speech services  |
-| M3    | Bookmarks, recents (after shell exists)         |
+| M3    | Custom games, recents (after shell exists)      |
 | M4    | All 7 reusable game components                  |
 | M5    | All 5 reference games                           |
 | M6    | OneDrive plugin, Google Drive plugin, CF Worker |

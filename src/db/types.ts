@@ -1,4 +1,5 @@
 import type { AppMetaDoc } from './schemas/app-meta';
+import type { CustomGameDoc } from './schemas/custom_games';
 import type { GameConfigOverridesDoc } from './schemas/game_config_overrides';
 import type { ProfileDoc } from './schemas/profiles';
 import type { ProgressDoc } from './schemas/progress';
@@ -13,6 +14,7 @@ import type { RxCollection, RxDatabase } from 'rxdb';
 
 export type BaseSkillCollections = {
   app_meta: RxCollection<AppMetaDoc>;
+  custom_games: RxCollection<CustomGameDoc>;
   profiles: RxCollection<ProfileDoc>;
   progress: RxCollection<ProgressDoc>;
   settings: RxCollection<SettingsDoc>;

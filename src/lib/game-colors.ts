@@ -1,5 +1,5 @@
-// src/lib/bookmark-colors.ts
-export const BOOKMARK_COLOR_KEYS = [
+// src/lib/game-colors.ts
+export const GAME_COLOR_KEYS = [
   'indigo',
   'teal',
   'rose',
@@ -14,7 +14,7 @@ export const BOOKMARK_COLOR_KEYS = [
   'cyan',
 ] as const;
 
-export type BookmarkColorKey = (typeof BOOKMARK_COLOR_KEYS)[number];
+export type GameColorKey = (typeof GAME_COLOR_KEYS)[number];
 
 export type ColorTokens = {
   border: string; // used for selected ring in colour picker
@@ -22,7 +22,7 @@ export type ColorTokens = {
   text: string; // contrast-safe colour for text on light card backgrounds (≥3:1 large bold)
 };
 
-export const BOOKMARK_COLORS: Record<BookmarkColorKey, ColorTokens> = {
+export const GAME_COLORS: Record<GameColorKey, ColorTokens> = {
   indigo: { border: '#c7d2fe', playBg: '#6366f1', text: '#4338ca' },
   teal: { border: '#99f6e4', playBg: '#14b8a6', text: '#0f766e' },
   rose: { border: '#fecdd3', playBg: '#f43f5e', text: '#be123c' },
@@ -37,4 +37,4 @@ export const BOOKMARK_COLORS: Record<BookmarkColorKey, ColorTokens> = {
   cyan: { border: '#a5f3fc', playBg: '#06b6d4', text: '#0e7490' },
 };
 
-export const DEFAULT_BOOKMARK_COLOR: BookmarkColorKey = 'indigo';
+export const DEFAULT_GAME_COLOR: GameColorKey = 'indigo';

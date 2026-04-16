@@ -9,23 +9,23 @@ describe('GameNameChip', () => {
     expect(screen.getByText('Word Spell')).toBeInTheDocument();
   });
 
-  it('renders bookmarkName badge when provided', () => {
+  it('renders customGameName badge when provided', () => {
     render(
-      <GameNameChip title="Word Spell" bookmarkName="Easy Mode" />,
+      <GameNameChip title="Word Spell" customGameName="Easy Mode" />,
     );
     expect(screen.getByText('Easy Mode')).toBeInTheDocument();
   });
 
-  it('renders subject badge when no bookmarkName', () => {
+  it('renders subject badge when no customGameName', () => {
     render(<GameNameChip title="Word Spell" subject="reading" />);
     expect(screen.getByText('reading')).toBeInTheDocument();
   });
 
-  it('does not render subject badge when bookmarkName is present', () => {
+  it('does not render subject badge when customGameName is present', () => {
     render(
       <GameNameChip
         title="Word Spell"
-        bookmarkName="Easy Mode"
+        customGameName="Easy Mode"
         subject="reading"
       />,
     );

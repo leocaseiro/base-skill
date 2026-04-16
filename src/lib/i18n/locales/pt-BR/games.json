@@ -24,9 +24,20 @@
     "lets-go": "Vamos lá!",
     "advanced": "Avançado",
     "settings": "⚙️ Configurações",
-    "updateBookmark": "Atualizar \"{{name}}\"",
-    "saveAsNew": "Salvar como novo favorito",
-    "cancel": "Cancelar"
+    "updateCustomGame": "Atualizar \"{{name}}\"",
+    "saveAsNew": "Salvar como novo jogo personalizado",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "deleteConfirmTitle": "Excluir \"{{name}}\"?",
+    "deleteConfirmBody": "Este jogo personalizado será removido. Essa ação não pode ser desfeita.",
+    "customGameNameLabel": "Nome do jogo personalizado",
+    "nameRequired": "Por favor, insira um nome para o jogo personalizado.",
+    "nameDuplicate": "Já existe um jogo personalizado com esse nome.",
+    "saveOnPlayTitle": "Salvar essas configurações como um jogo personalizado?",
+    "saveOnPlayNameLabel": "Nome do jogo personalizado",
+    "saveAndPlay": "Salvar e jogar",
+    "playWithoutSaving": "Jogar sem salvar",
+    "configure": "Configurar"
   },
   "sort-numbers-ui": {
     "ascending-label": "Pra Cima!",

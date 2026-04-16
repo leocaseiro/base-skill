@@ -1,5 +1,7 @@
 # SortNumbers Skip & Distractor Config — Simple/Advanced Mode Plan
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a simple/advanced config system to SortNumbers so teachers can configure skip-by sequences in 5 fields (simple mode) while retaining full control (advanced mode). Also fix the stale-rounds bug and support a fixed numeric start in skip-by mode.
@@ -1413,16 +1415,16 @@ type InstructionsOverlayProps = {
   onStart: () => void;
   ttsEnabled: boolean;
   gameTitle: string;
-  bookmarkName?: string;
-  bookmarkColor?: BookmarkColorKey;
+  custom gameName?: string;
+  custom gameColor?: Custom gameColorKey;
   subject: 'math' | 'reading';
   config: Record<string, unknown>;
   onConfigChange: (config: Record<string, unknown>) => void;
-  onSaveBookmark?: (
+  onSaveCustom game?: (
     name: string,
-    color: BookmarkColorKey,
+    color: Custom gameColorKey,
   ) => Promise<void>;
-  onUpdateBookmark?: (
+  onUpdateCustom game?: (
     name: string,
     config: Record<string, unknown>,
   ) => Promise<void>;
