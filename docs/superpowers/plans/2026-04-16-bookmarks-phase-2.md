@@ -1020,15 +1020,33 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
 };
 ```
 
-- [ ] **Step 4: Update the stories file.**
+- [ ] **Step 4: Author the bookmark stories in `GameCard.stories.tsx`.**
 
-In `src/components/GameCard.stories.tsx`, append two new exports after the existing ones:
+Storybook is the visual contract for the bookmark UI — every state we render in production should have a story. Append four new exports after the existing ones (one per `variant × isBookmarked` combination):
 
 ```tsx
+export const NotBookmarked: Story = {
+  args: {
+    variant: 'default',
+    isBookmarked: false,
+    onToggleBookmark: () => {},
+  },
+};
+
 export const Bookmarked: Story = {
   args: {
     variant: 'default',
     isBookmarked: true,
+    onToggleBookmark: () => {},
+  },
+};
+
+export const NotBookmarkedCustomGame: Story = {
+  args: {
+    variant: 'customGame',
+    customGameName: 'Skip by 2',
+    customGameColor: 'amber',
+    isBookmarked: false,
     onToggleBookmark: () => {},
   },
 };
@@ -1044,7 +1062,17 @@ export const BookmarkedCustomGame: Story = {
 };
 ```
 
-Also add `argTypes.onToggleBookmark: { action: 'bookmarkToggled' }` to the existing `meta.argTypes` block (so the action shows in the Storybook actions panel).
+Also add `onToggleBookmark: { action: 'bookmarkToggled' }` to the existing `meta.argTypes` block so toggle clicks surface in the Storybook actions panel:
+
+```ts
+argTypes: {
+  onPlay: { action: 'played' },
+  onOpenCog: { action: 'cogOpened' },
+  onToggleBookmark: { action: 'bookmarkToggled' },
+},
+```
+
+These stories double as visual regression fixtures (`yarn test:storybook` smoke-renders each one) and as the source baselines for any future VR snapshots that target the GameCard in isolation.
 
 - [ ] **Step 5: Run the tests — expect green.**
 
@@ -1223,27 +1251,62 @@ Replace the existing title-row JSX block (the `{/* 2. Title row + cog … */}` `
 </div>;
 ```
 
-- [ ] **Step 4: Update the stories file.**
+- [ ] **Step 4: Author the bookmark stories in `InstructionsOverlay.stories.tsx`.**
 
-In `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`, append two new exports:
+Cover both bookmark states for both the default game and the custom-game header variant. Append four new exports after the existing ones:
 
 ```tsx
+export const NotBookmarked: Story = {
+  args: {
+    ...baseArgs,
+    isBookmarked: false,
+    onToggleBookmark: () => {},
+  },
+};
+
 export const Bookmarked: Story = {
   args: {
+    ...baseArgs,
     isBookmarked: true,
     onToggleBookmark: () => {},
   },
 };
 
-export const NotBookmarkedToggleable: Story = {
+export const NotBookmarkedCustomGame: Story = {
   args: {
+    ...baseArgs,
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal',
     isBookmarked: false,
+    onToggleBookmark: () => {},
+  },
+};
+
+export const BookmarkedCustomGame: Story = {
+  args: {
+    ...baseArgs,
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal',
+    isBookmarked: true,
     onToggleBookmark: () => {},
   },
 };
 ```
 
-(Reuse the existing `Default` story's args via composition if the file already uses that pattern; otherwise spread the default args inline.)
+Also extend the existing `meta.argTypes` to surface the new action:
+
+```ts
+argTypes: {
+  onStart: { action: 'started' },
+  onSaveCustomGame: { action: 'customGameSaved' },
+  onUpdateCustomGame: { action: 'customGameUpdated' },
+  onToggleBookmark: { action: 'bookmarkToggled' },
+},
+```
+
+These stories give Storybook autodocs a rendered preview of every bookmark state and let `yarn test:storybook` catch regressions where the Star button fails to render or throws on toggle.
 
 - [ ] **Step 5: Run the test — expect green.**
 
@@ -1659,7 +1722,29 @@ yarn build
 
 Expected: all PASS. The smart-pipelines `Triggered checks:` output at pre-push time should list `prettier, eslint, stylelint, markdownlint, actionlint, shellcheck, knip, typecheck, unit, build`.
 
-- [ ] **Step 2: Confirm the new symbols exist and are wired.**
+- [ ] **Step 2: Run the Storybook test runner against the new bookmark stories.**
+
+The test runner smoke-renders every story (autodocs + explicit exports) and fails on render errors or a11y violations. The new `Bookmarked`, `NotBookmarked`, `BookmarkedCustomGame`, and `NotBookmarkedCustomGame` stories on both `GameCard` and `InstructionsOverlay` must render cleanly.
+
+In one terminal:
+
+```bash
+yarn storybook
+```
+
+Wait for the line `Storybook started on => http://localhost:6006/`.
+
+In a second terminal:
+
+```bash
+yarn test:storybook --url http://localhost:6006
+```
+
+Expected: PASS for every story including the eight new bookmark exports. If a story throws, fix the component or props in Task 4 / Task 5 — do not "fix" the story by removing the failing case.
+
+Stop the Storybook dev server (`Ctrl+C` in the first terminal) once the runner exits green.
+
+- [ ] **Step 3: Confirm the new symbols exist and are wired.**
 
 Quick sanity grep — every line should resolve to a real file/symbol:
 
@@ -1669,7 +1754,7 @@ Grep pattern="useBookmarks|bookmarkId|BookmarkDoc|bookmarksSchema" path="src" ou
 
 Expected: at minimum `src/db/bookmark-id.ts`, `src/db/schemas/bookmarks.ts`, `src/db/hooks/useBookmarks.ts`, `src/components/GameCard.tsx`, `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`, `src/routes/$locale/_app/index.tsx`, `src/routes/$locale/_app/game/$gameId.tsx`, plus the schema barrel and types files.
 
-- [ ] **Step 3: Push and open the PR.**
+- [ ] **Step 4: Push and open the PR.**
 
 ```bash
 git push -u origin feat/bookmarks-phase-2
@@ -1691,6 +1776,7 @@ Plan: `docs/superpowers/plans/2026-04-16-bookmarks-phase-2.md`.
 - [x] `yarn lint`
 - [x] `yarn lint:md`
 - [x] `yarn test` (unit, including new schema + hook + cascade tests)
+- [x] `yarn test:storybook` (smoke-renders the eight new bookmark stories on `GameCard` + `InstructionsOverlay`)
 - [x] `yarn test:vr` (Docker baselines refreshed for new Star buttons)
 - [x] `yarn test:e2e --grep "bookmark a default game"`
 - [x] `yarn build`
@@ -1712,8 +1798,9 @@ Expected: PR opens against `master`. CI runs the full smart-pipeline. Share the 
 - Data model (`BookmarkDoc`, composite id, `targetType` enum) → Task 1.
 - `useBookmarks` API (`bookmarks`, `isBookmarked`, `toggle`, `add`, `remove`) → Task 2.
 - "No deletion cascade" semantics — un-bookmarking doesn't touch sources → Tasks 2 (toggle/add/remove only touch `bookmarks`). Cascade-clean of orphaned bookmarks when the source custom game is deleted → Task 3 (defensive cleanup; the spec is silent on this edge case so I added it explicitly).
-- UI surfaces: `GameCard` Star toggle on default + custom → Task 4 (component) + Task 6 (wiring).
-- UI surfaces: `InstructionsOverlay` Star next to cog → Task 5 (component) + Task 7 (wiring across all three game bodies).
+- UI surfaces: `GameCard` Star toggle on default + custom → Task 4 (component, including Storybook stories `Bookmarked`, `NotBookmarked`, `BookmarkedCustomGame`, `NotBookmarkedCustomGame`) + Task 6 (wiring).
+- UI surfaces: `InstructionsOverlay` Star next to cog → Task 5 (component, including Storybook stories for both bookmark states across default and custom-game headers) + Task 7 (wiring across all three game bodies).
+- Storybook coverage for every new visual state is verified via `yarn test:storybook` in Task 11 Step 2 (matches the CI step `test:storybook --url http://localhost:6006`).
 - i18n for accessible labels → Task 8.
 - Out-of-scope (search/filter, ordering, folders, multi-device sync) → not implemented.
 
