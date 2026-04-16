@@ -208,7 +208,8 @@ describe('AdvancedConfigModal', () => {
 
   it('calls onDelete with the configId and closes the modal on Confirm', async () => {
     const user = userEvent.setup();
-    const onDelete = vi.fn().mockResolvedValue();
+    // eslint-disable-next-line unicorn/no-useless-undefined -- TypeScript requires the explicit undefined argument for mockResolvedValue<void>
+    const onDelete = vi.fn().mockResolvedValue(undefined);
     const onOpenChange = vi.fn();
     render(
       <AdvancedConfigModal
