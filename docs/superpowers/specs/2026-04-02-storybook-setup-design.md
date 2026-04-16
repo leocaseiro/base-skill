@@ -1,5 +1,7 @@
 # Storybook Setup Design
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+
 **Date:** 2026-04-02
 **Status:** Approved
 
@@ -65,7 +67,7 @@ const meta: Meta<typeof GameCard> = {
   component: GameCard,
   tags: ['autodocs'],
   args: {
-    isBookmarked: false,
+    isCustom gameed: false,
   },
 };
 export default meta;
@@ -73,14 +75,14 @@ export default meta;
 type Story = StoryObj<typeof GameCard>;
 
 export const Default: Story = { args: { ... } };
-export const Bookmarked: Story = { args: { isBookmarked: true } };
+export const Custom gameed: Story = { args: { isCustom gameed: true } };
 ```
 
 **Rules:**
 
 - All component stories get `tags: ['autodocs']` — auto-generates a docs page with prop table and live examples
-- Callbacks (`onPlay`, `onBookmarkToggle`, etc.) are wired via `argTypes` as Actions so clicks log in the Actions panel
-- Each meaningful visual state gets its own named export (`Default`, `Bookmarked`, `Loading`, `Empty`, etc.)
+- Callbacks (`onPlay`, `onCustom gameToggle`, etc.) are wired via `argTypes` as Actions so clicks log in the Actions panel
+- Each meaningful visual state gets its own named export (`Default`, `Custom gameed`, `Loading`, `Empty`, etc.)
 - shadcn/ui primitives (`button.tsx`, `card.tsx`, `input.tsx`, etc.) also get stories — they are the VR baselines for the design system
 - `export default meta` is required by Storybook's CSF format — `.stories.tsx` files and all `.storybook/` config files are treated as framework config files, exempt from the project's no-default-export rule
 
@@ -125,23 +127,23 @@ src/lib/speech/SpeechOutput.demo.tsx      ← minimal interactive React componen
 
 The `.demo.tsx` file is Storybook-only — not a test, not production code. It provides just enough UI to exercise the service interactively.
 
-**RxDB hooks** (`useSettings`, `useBookmarks`, `useRxQuery`) wrap their demos in a `<DbProvider>` backed by `fake-indexeddb` (already a dev dependency) so reactive state changes are visible live without touching real storage.
+**RxDB hooks** (`useSettings`, `useCustom games`, `useRxQuery`) wrap their demos in a `<DbProvider>` backed by `fake-indexeddb` (already a dev dependency) so reactive state changes are visible live without touching real storage.
 
 **Pure utils** (`css-vars.ts`, `catalog-utils.ts`, `i18n`) get MDX-only documentation — no interactive demo where output is not visual.
 
 **Services covered in this milestone:**
 
-| Module           | Story type | Interactive?                |
-| ---------------- | ---------- | --------------------------- |
-| `SpeechOutput`   | MDX + demo | Yes — speak button          |
-| `SpeechInput`    | MDX + demo | Yes — listen button         |
-| `game-event-bus` | MDX + demo | Yes — emit/subscribe UI     |
-| `useSettings`    | MDX + demo | Yes — wrapped in DbProvider |
-| `useBookmarks`   | MDX + demo | Yes — wrapped in DbProvider |
-| `useRxQuery`     | MDX + demo | Yes — wrapped in DbProvider |
-| `css-vars`       | MDX only   | No                          |
-| `catalog-utils`  | MDX only   | No                          |
-| `i18n`           | MDX only   | No                          |
+| Module            | Story type | Interactive?                |
+| ----------------- | ---------- | --------------------------- |
+| `SpeechOutput`    | MDX + demo | Yes — speak button          |
+| `SpeechInput`     | MDX + demo | Yes — listen button         |
+| `game-event-bus`  | MDX + demo | Yes — emit/subscribe UI     |
+| `useSettings`     | MDX + demo | Yes — wrapped in DbProvider |
+| `useCustom games` | MDX + demo | Yes — wrapped in DbProvider |
+| `useRxQuery`      | MDX + demo | Yes — wrapped in DbProvider |
+| `css-vars`        | MDX only   | No                          |
+| `catalog-utils`   | MDX only   | No                          |
+| `i18n`            | MDX only   | No                          |
 
 ---
 
@@ -297,7 +299,7 @@ Keep this entry alongside the Playwright server in `.mcp.json`; if `mcp-add` ove
 | Task                                   | Tool                                                      |
 | -------------------------------------- | --------------------------------------------------------- |
 | "What props does `GameCard` accept?"   | Storybook MCP — queries story metadata                    |
-| "Show me the Bookmarked variant"       | Storybook MCP — previews story live                       |
+| "Show me the Custom gameed variant"    | Storybook MCP — previews story live                       |
 | "Why is this VR test failing?"         | Playwright MCP — navigates browser, takes screenshot      |
 | "Write a story for this new component" | Storybook MCP — provides component context for generation |
 
@@ -311,6 +313,6 @@ This milestone establishes the framework. Stories are written for **all currentl
 
 - `src/components/` — all components including shadcn/ui primitives
 - `src/lib/` — speech, theme, i18n, game-event-bus
-- `src/db/hooks/` — useSettings, useBookmarks, useRxQuery, useRxDB
+- `src/db/hooks/` — useSettings, useCustom games, useRxQuery, useRxDB
 
 Stories for **M4 game engine components** (`DragAndDrop`, `LetterTracer`, `MultipleChoice`, etc.) are written as part of M4 implementation, following the conventions established here.

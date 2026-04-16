@@ -1,5 +1,7 @@
 # Dark Mode Fix, A11Y Colour Enforcement & VR Tests
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+
 **Date:** 2026-04-07  
 **Branch strategy:** Single PR (`feat/dark-mode-a11y-vr`)  
 **Status:** Approved — ready for implementation plan
@@ -64,7 +66,7 @@ The `.dark {}` block (already present, already correct) now wins — no changes 
 
 ### Changes
 
-**`src/lib/bookmark-colors.ts`** — remove `bg`, `tagBg`, `tagText`, `headerText` from `ColorTokens`. Keep `border` and `playBg`.
+**`src/lib/custom game-colors.ts`** — remove `bg`, `tagBg`, `tagText`, `headerText` from `ColorTokens`. Keep `border` and `playBg`.
 
 ```ts
 export type ColorTokens = {
@@ -76,26 +78,42 @@ export type ColorTokens = {
 **`src/styles.css`** — add utility classes:
 
 ```css
-.bookmark-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
+.custom game-bg {
+  background: color-mix(
+    in srgb,
+    var(--custom game-play) 12%,
+    transparent
+  );
 }
-.dark .bookmark-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 20%, transparent);
+.dark .custom game-bg {
+  background: color-mix(
+    in srgb,
+    var(--custom game-play) 20%,
+    transparent
+  );
 }
 
-.bookmark-tag-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 18%, transparent);
+.custom game-tag-bg {
+  background: color-mix(
+    in srgb,
+    var(--custom game-play) 18%,
+    transparent
+  );
 }
-.dark .bookmark-tag-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 25%, transparent);
+.dark .custom game-tag-bg {
+  background: color-mix(
+    in srgb,
+    var(--custom game-play) 25%,
+    transparent
+  );
 }
 
-.bookmark-text {
-  color: var(--bookmark-play);
+.custom game-text {
+  color: var(--custom game-play);
 }
 ```
 
-**Components to update** — set `style={{ '--bookmark-play': colors.playBg } as React.CSSProperties}` and replace inline background/color with the new utility classes:
+**Components to update** — set `style={{ '--custom game-play': colors.playBg } as React.CSSProperties}` and replace inline background/color with the new utility classes:
 
 - `src/components/GameNameChip.tsx`
 - `src/components/SavedConfigChip.tsx`
@@ -145,7 +163,7 @@ Add to `eslint.config.js` using `no-restricted-syntax` (no new package needed):
 }
 ```
 
-**Exemption:** `src/lib/bookmark-colors.ts` is a constants file (not a JSX file), so the JSX rule does not apply. `playBg`/`border` hex values there remain the canonical palette definitions.
+**Exemption:** `src/lib/custom game-colors.ts` is a constants file (not a JSX file), so the JSX rule does not apply. `playBg`/`border` hex values there remain the canonical palette definitions.
 
 ---
 
@@ -211,24 +229,24 @@ export const withDarkMode: Decorator = (Story) => (
 
 ## A11Y Contrast Requirement
 
-All colours used by the design system must meet **WCAG AA** (4.5:1 for text, 3:1 for UI components) in both light and dark mode. The `--bs-*` palette in `src/styles.css` and `src/db/seed-themes.ts` already meets AA for the ocean and forest presets (documented in existing comments). New dark-mode colour additions (e.g. `color-mix` overlays for bookmarks) must be validated before merging — the VR tests serve as the visual gate; contrast ratio checks are a PR checklist item.
+All colours used by the design system must meet **WCAG AA** (4.5:1 for text, 3:1 for UI components) in both light and dark mode. The `--bs-*` palette in `src/styles.css` and `src/db/seed-themes.ts` already meets AA for the ocean and forest presets (documented in existing comments). New dark-mode colour additions (e.g. `color-mix` overlays for custom games) must be validated before merging — the VR tests serve as the visual gate; contrast ratio checks are a PR checklist item.
 
 ---
 
 ## Files Changed Summary
 
-| File                                                                     | Change type                                                          |
-| ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
-| `src/styles.css`                                                         | Add `:root` shadcn-from-bs derivations; add bookmark utility classes |
-| `src/lib/theme/css-vars.ts`                                              | Remove shadcn vars from inline set                                   |
-| `src/lib/theme/default-tokens.ts`                                        | Remove shadcn vars from inline set                                   |
-| `src/lib/bookmark-colors.ts`                                             | Slim `ColorTokens` to `border` + `playBg`                            |
-| `src/components/GameNameChip.tsx`                                        | Switch to `--bookmark-play` + utility classes                        |
-| `src/components/SavedConfigChip.tsx`                                     | Switch to `--bookmark-play` + utility classes; fix hardcoded red     |
-| `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` | Switch to `--bookmark-play`; fix hardcoded white/70                  |
-| `src/components/SaveConfigDialog.tsx`                                    | Switch to `--bookmark-play` + utility classes                        |
-| `.stylelintrc`                                                           | Add `color-named` + `declaration-property-value-disallowed-list`     |
-| `eslint.config.js`                                                       | Add `no-restricted-syntax` inline colour rule                        |
-| `e2e/visual.spec.ts`                                                     | Add dark variants + SortNumbers + InstructionsOverlay                |
-| `.storybook/decorators.tsx`                                              | New `withDarkMode` decorator                                         |
-| 6x story files                                                           | New/updated with dark variants                                       |
+| File                                                                     | Change type                                                             |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| `src/styles.css`                                                         | Add `:root` shadcn-from-bs derivations; add custom game utility classes |
+| `src/lib/theme/css-vars.ts`                                              | Remove shadcn vars from inline set                                      |
+| `src/lib/theme/default-tokens.ts`                                        | Remove shadcn vars from inline set                                      |
+| `src/lib/custom game-colors.ts`                                          | Slim `ColorTokens` to `border` + `playBg`                               |
+| `src/components/GameNameChip.tsx`                                        | Switch to `--custom game-play` + utility classes                        |
+| `src/components/SavedConfigChip.tsx`                                     | Switch to `--custom game-play` + utility classes; fix hardcoded red     |
+| `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` | Switch to `--custom game-play`; fix hardcoded white/70                  |
+| `src/components/SaveConfigDialog.tsx`                                    | Switch to `--custom game-play` + utility classes                        |
+| `.stylelintrc`                                                           | Add `color-named` + `declaration-property-value-disallowed-list`        |
+| `eslint.config.js`                                                       | Add `no-restricted-syntax` inline colour rule                           |
+| `e2e/visual.spec.ts`                                                     | Add dark variants + SortNumbers + InstructionsOverlay                   |
+| `.storybook/decorators.tsx`                                              | New `withDarkMode` decorator                                            |
+| 6x story files                                                           | New/updated with dark variants                                          |

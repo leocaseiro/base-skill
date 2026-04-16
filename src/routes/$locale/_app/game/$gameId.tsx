@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,7 @@ import type {
   WordSpellConfig,
   WordSpellRound,
 } from '@/games/word-spell/types';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import type { InProgressSession } from '@/lib/game-engine/session-finder';
 import type {
   GameEngineState,
@@ -26,9 +26,9 @@ import type { JSX } from 'react';
 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
 import { GameShell } from '@/components/game/GameShell';
 import { getOrCreateDatabase } from '@/db/create-database';
+import { useCustomGames } from '@/db/hooks/useCustomGames';
 import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
-import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
-import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
+import { lastSessionConfigId } from '@/db/last-session-game-config';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
 import { createAdvancedLevelGenerator } from '@/games/sort-numbers/advanced-level-generator';
 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
@@ -68,10 +68,10 @@ interface GameRouteLoaderData {
   seed: string;
   meta: SessionMeta;
   gameSpecificConfig: Record<string, unknown> | null;
-  bookmarkId: string | null;
-  bookmarkName: string | null;
-  bookmarkColor: string | null;
-  bookmarkCover: Cover | null;
+  customGameId: string | null;
+  customGameName: string | null;
+  customGameColor: string | null;
+  customGameCover: Cover | null;
 }
 
 const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
@@ -378,29 +378,28 @@ const WordSpellGameBody = ({
   seed,
   draftState,
   gameSpecificConfig,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor,
-  bookmarkCover,
+  customGameId,
+  customGameName,
+  customGameColor,
+  customGameCover,
 }: {
   gameId: string;
   sessionId: string;
   seed: string;
   draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
-  bookmarkId: string | null;
-  bookmarkName: string | null;
-  bookmarkColor: string | null;
-  bookmarkCover: Cover | null;
+  customGameId: string | null;
+  customGameName: string | null;
+  customGameColor: string | null;
+  customGameCover: Cover | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, updateConfig, savedConfigs } = useSavedConfigs();
-  const existingBookmarkNames = useMemo(
+  const { save, update, remove, customGames } = useCustomGames();
+  const navigate = useNavigate({ from: '/$locale/game/$gameId' });
+  const existingCustomGameNames = useMemo(
     () =>
-      savedConfigs
-        .filter((d) => d.gameId === gameId)
-        .map((d) => d.name),
-    [savedConfigs, gameId],
+      customGames.filter((d) => d.gameId === gameId).map((d) => d.name),
+    [customGames, gameId],
   );
   const initial = useMemo(
     () => resolveWordSpellConfig(gameSpecificConfig),
@@ -426,15 +425,15 @@ const WordSpellGameBody = ({
         ttsEnabled={cfg.ttsEnabled}
         gameTitle={t('word-spell')}
         gameId={gameId}
-        cover={bookmarkCover ?? undefined}
-        bookmarkId={bookmarkId ?? undefined}
-        bookmarkName={bookmarkName ?? undefined}
-        bookmarkColor={
-          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+        cover={customGameCover ?? undefined}
+        customGameId={customGameId ?? undefined}
+        customGameName={customGameName ?? undefined}
+        customGameColor={
+          (customGameColor ?? undefined) as GameColorKey | undefined
         }
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-        onSaveBookmark={async ({ name, color, config, cover }) =>
+        onSaveCustomGame={async ({ name, color, config, cover }) =>
           save({
             gameId,
             name,
@@ -443,14 +442,24 @@ const WordSpellGameBody = ({
             cover,
           })
         }
-        onUpdateBookmark={
-          bookmarkId
+        onUpdateCustomGame={
+          customGameId
             ? async (name, config, extras) => {
-                await updateConfig(bookmarkId, config, name, extras);
+                await update(customGameId, config, name, extras);
               }
             : undefined
         }
-        existingBookmarkNames={existingBookmarkNames}
+        onDeleteCustomGame={
+          customGameId
+            ? async (id) => {
+                await remove(id);
+                await navigate({
+                  search: (prev) => ({ ...prev, configId: undefined }),
+                });
+              }
+            : undefined
+        }
+        existingCustomGameNames={existingCustomGameNames}
       />
     );
   }
@@ -472,29 +481,28 @@ const NumberMatchGameBody = ({
   seed,
   draftState,
   gameSpecificConfig,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor,
-  bookmarkCover,
+  customGameId,
+  customGameName,
+  customGameColor,
+  customGameCover,
 }: {
   gameId: string;
   sessionId: string;
   seed: string;
   draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
-  bookmarkId: string | null;
-  bookmarkName: string | null;
-  bookmarkColor: string | null;
-  bookmarkCover: Cover | null;
+  customGameId: string | null;
+  customGameName: string | null;
+  customGameColor: string | null;
+  customGameCover: Cover | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, updateConfig, savedConfigs } = useSavedConfigs();
-  const existingBookmarkNames = useMemo(
+  const { save, update, remove, customGames } = useCustomGames();
+  const navigate = useNavigate({ from: '/$locale/game/$gameId' });
+  const existingCustomGameNames = useMemo(
     () =>
-      savedConfigs
-        .filter((d) => d.gameId === gameId)
-        .map((d) => d.name),
-    [savedConfigs, gameId],
+      customGames.filter((d) => d.gameId === gameId).map((d) => d.name),
+    [customGames, gameId],
   );
   const initial = useMemo(
     () => resolveNumberMatchConfig(gameSpecificConfig),
@@ -520,15 +528,15 @@ const NumberMatchGameBody = ({
         ttsEnabled={cfg.ttsEnabled}
         gameTitle={t('number-match')}
         gameId={gameId}
-        cover={bookmarkCover ?? undefined}
-        bookmarkId={bookmarkId ?? undefined}
-        bookmarkName={bookmarkName ?? undefined}
-        bookmarkColor={
-          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+        cover={customGameCover ?? undefined}
+        customGameId={customGameId ?? undefined}
+        customGameName={customGameName ?? undefined}
+        customGameColor={
+          (customGameColor ?? undefined) as GameColorKey | undefined
         }
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
-        onSaveBookmark={async ({ name, color, config, cover }) =>
+        onSaveCustomGame={async ({ name, color, config, cover }) =>
           save({
             gameId,
             name,
@@ -537,14 +545,24 @@ const NumberMatchGameBody = ({
             cover,
           })
         }
-        onUpdateBookmark={
-          bookmarkId
+        onUpdateCustomGame={
+          customGameId
             ? async (name, config, extras) => {
-                await updateConfig(bookmarkId, config, name, extras);
+                await update(customGameId, config, name, extras);
               }
             : undefined
         }
-        existingBookmarkNames={existingBookmarkNames}
+        onDeleteCustomGame={
+          customGameId
+            ? async (id) => {
+                await remove(id);
+                await navigate({
+                  search: (prev) => ({ ...prev, configId: undefined }),
+                });
+              }
+            : undefined
+        }
+        existingCustomGameNames={existingCustomGameNames}
       />
     );
   }
@@ -566,29 +584,28 @@ const SortNumbersGameBody = ({
   seed,
   draftState,
   gameSpecificConfig,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor,
-  bookmarkCover,
+  customGameId,
+  customGameName,
+  customGameColor,
+  customGameCover,
 }: {
   gameId: string;
   sessionId: string;
   seed: string;
   draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
-  bookmarkId: string | null;
-  bookmarkName: string | null;
-  bookmarkColor: string | null;
-  bookmarkCover: Cover | null;
+  customGameId: string | null;
+  customGameName: string | null;
+  customGameColor: string | null;
+  customGameCover: Cover | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, updateConfig, savedConfigs } = useSavedConfigs();
-  const existingBookmarkNames = useMemo(
+  const { save, update, remove, customGames } = useCustomGames();
+  const navigate = useNavigate({ from: '/$locale/game/$gameId' });
+  const existingCustomGameNames = useMemo(
     () =>
-      savedConfigs
-        .filter((d) => d.gameId === gameId)
-        .map((d) => d.name),
-    [savedConfigs, gameId],
+      customGames.filter((d) => d.gameId === gameId).map((d) => d.name),
+    [customGames, gameId],
   );
   const initial = useMemo(
     () => resolveSortNumbersConfig(gameSpecificConfig),
@@ -614,15 +631,15 @@ const SortNumbersGameBody = ({
         ttsEnabled={cfg.ttsEnabled}
         gameTitle={t('sort-numbers')}
         gameId={gameId}
-        cover={bookmarkCover ?? undefined}
-        bookmarkId={bookmarkId ?? undefined}
-        bookmarkName={bookmarkName ?? undefined}
-        bookmarkColor={
-          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+        cover={customGameCover ?? undefined}
+        customGameId={customGameId ?? undefined}
+        customGameName={customGameName ?? undefined}
+        customGameColor={
+          (customGameColor ?? undefined) as GameColorKey | undefined
         }
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
-        onSaveBookmark={async ({ name, color, config, cover }) =>
+        onSaveCustomGame={async ({ name, color, config, cover }) =>
           save({
             gameId,
             name,
@@ -631,14 +648,24 @@ const SortNumbersGameBody = ({
             cover,
           })
         }
-        onUpdateBookmark={
-          bookmarkId
+        onUpdateCustomGame={
+          customGameId
             ? async (name, config, extras) => {
-                await updateConfig(bookmarkId, config, name, extras);
+                await update(customGameId, config, name, extras);
               }
             : undefined
         }
-        existingBookmarkNames={existingBookmarkNames}
+        onDeleteCustomGame={
+          customGameId
+            ? async (id) => {
+                await remove(id);
+                await navigate({
+                  search: (prev) => ({ ...prev, configId: undefined }),
+                });
+              }
+            : undefined
+        }
+        existingCustomGameNames={existingCustomGameNames}
       />
     );
   }
@@ -660,20 +687,20 @@ const GameBody = ({
   seed,
   draftState,
   gameSpecificConfig,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor,
-  bookmarkCover,
+  customGameId,
+  customGameName,
+  customGameColor,
+  customGameCover,
 }: {
   gameId: string;
   sessionId: string;
   seed: string;
   draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
-  bookmarkId: string | null;
-  bookmarkName: string | null;
-  bookmarkColor: string | null;
-  bookmarkCover: Cover | null;
+  customGameId: string | null;
+  customGameName: string | null;
+  customGameColor: string | null;
+  customGameCover: Cover | null;
 }): JSX.Element => {
   if (gameId === 'sort-numbers') {
     return (
@@ -683,10 +710,10 @@ const GameBody = ({
         seed={seed}
         draftState={draftState}
         gameSpecificConfig={gameSpecificConfig}
-        bookmarkId={bookmarkId}
-        bookmarkName={bookmarkName}
-        bookmarkColor={bookmarkColor}
-        bookmarkCover={bookmarkCover}
+        customGameId={customGameId}
+        customGameName={customGameName}
+        customGameColor={customGameColor}
+        customGameCover={customGameCover}
       />
     );
   }
@@ -699,10 +726,10 @@ const GameBody = ({
         seed={seed}
         draftState={draftState}
         gameSpecificConfig={gameSpecificConfig}
-        bookmarkId={bookmarkId}
-        bookmarkName={bookmarkName}
-        bookmarkColor={bookmarkColor}
-        bookmarkCover={bookmarkCover}
+        customGameId={customGameId}
+        customGameName={customGameName}
+        customGameColor={customGameColor}
+        customGameCover={customGameCover}
       />
     );
   }
@@ -715,10 +742,10 @@ const GameBody = ({
         seed={seed}
         draftState={draftState}
         gameSpecificConfig={gameSpecificConfig}
-        bookmarkId={bookmarkId}
-        bookmarkName={bookmarkName}
-        bookmarkColor={bookmarkColor}
-        bookmarkCover={bookmarkCover}
+        customGameId={customGameId}
+        customGameName={customGameName}
+        customGameColor={customGameColor}
+        customGameCover={customGameCover}
       />
     );
   }
@@ -738,10 +765,10 @@ export const GameRoute = ({
   seed,
   meta,
   gameSpecificConfig,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor,
-  bookmarkCover,
+  customGameId,
+  customGameName,
+  customGameColor,
+  customGameCover,
 }: GameRouteLoaderData): JSX.Element => (
   <GameShell
     config={config}
@@ -757,10 +784,10 @@ export const GameRoute = ({
       seed={seed}
       draftState={draftState}
       gameSpecificConfig={gameSpecificConfig}
-      bookmarkId={bookmarkId}
-      bookmarkName={bookmarkName}
-      bookmarkColor={bookmarkColor}
-      bookmarkCover={bookmarkCover}
+      customGameId={customGameId}
+      customGameName={customGameName}
+      customGameColor={customGameColor}
+      customGameCover={customGameCover}
     />
   </GameShell>
 );
@@ -814,10 +841,10 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
           initialState,
         },
         gameSpecificConfig: null,
-        bookmarkId: null,
-        bookmarkName: null,
-        bookmarkColor: null,
-        bookmarkCover: null,
+        customGameId: null,
+        customGameName: null,
+        customGameColor: null,
+        customGameCover: null,
       };
     }
 
@@ -836,25 +863,25 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
     const draftState = inProgressSession?.draftState ?? null;
 
     let gameSpecificConfig: Record<string, unknown> | null = null;
-    let bookmarkId: string | null = null;
-    let bookmarkName: string | null = null;
-    let bookmarkColor: string | null = null;
-    let bookmarkCover: Cover | null = null;
+    let customGameId: string | null = null;
+    let customGameName: string | null = null;
+    let customGameColor: string | null = null;
+    let customGameCover: Cover | null = null;
 
     if (deps.configId) {
-      const savedDoc = await db.saved_game_configs
+      const savedDoc = await db.custom_games
         .findOne(deps.configId)
         .exec();
       if (savedDoc) {
         gameSpecificConfig = savedDoc.config;
-        bookmarkId = savedDoc.id;
-        bookmarkName = savedDoc.name;
-        bookmarkColor = savedDoc.color;
-        bookmarkCover = savedDoc.cover ?? null;
+        customGameId = savedDoc.id;
+        customGameName = savedDoc.name;
+        customGameColor = savedDoc.color;
+        customGameCover = savedDoc.cover ?? null;
       }
     } else {
       const lastDoc = await db.saved_game_configs
-        .findOne(lastSessionSavedConfigId(gameId))
+        .findOne(lastSessionConfigId(gameId))
         .exec();
       if (lastDoc) gameSpecificConfig = lastDoc.config;
     }
@@ -893,10 +920,10 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
       seed,
       meta,
       gameSpecificConfig,
-      bookmarkId,
-      bookmarkName,
-      bookmarkColor,
-      bookmarkCover,
+      customGameId,
+      customGameName,
+      customGameColor,
+      customGameCover,
     };
   },
   component: RouteComponent,

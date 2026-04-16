@@ -1,4 +1,4 @@
-export const suggestBookmarkName = (
+export const suggestCustomGameName = (
   gameTitle: string,
   existing: readonly string[],
 ): string => {

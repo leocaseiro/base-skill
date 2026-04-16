@@ -5,16 +5,16 @@ import {
 } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
+import type { CustomGameDoc } from '@/db/schemas/custom_games';
 import type { Cover } from '@/games/cover-type';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
 import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
 import { GameCard } from '@/components/GameCard';
 import { GameGrid } from '@/components/GameGrid';
 import { getOrCreateDatabase } from '@/db/create-database';
-import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
-import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
+import { useCustomGames } from '@/db/hooks/useCustomGames';
+import { lastSessionConfigId } from '@/db/last-session-game-config';
 import { configToChips } from '@/games/config-chips';
 import { GAME_CATALOG } from '@/games/registry';
 
@@ -26,10 +26,10 @@ type ModalState =
       mode:
         | { kind: 'default' }
         | {
-            kind: 'bookmark';
+            kind: 'customGame';
             configId: string;
             name: string;
-            color: BookmarkColorKey;
+            color: GameColorKey;
             cover: Cover | undefined;
           };
       config: Record<string, unknown>;
@@ -39,11 +39,11 @@ const HomeScreen = (): JSX.Element => {
   const { t } = useTranslation(['games', 'common']);
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate({ from: '/$locale/' });
-  const { savedConfigs, save, updateConfig, lastSessionConfigs } =
-    useSavedConfigs();
+  const { customGames, save, update, remove, lastSessionConfigs } =
+    useCustomGames();
   const [modal, setModal] = useState<ModalState>({ kind: 'closed' });
 
-  const handlePlay = (gameId: string) => {
+  const handlePlayDefault = (gameId: string) => {
     void navigate({
       to: '/$locale/game/$gameId',
       params: { locale, gameId },
@@ -51,7 +51,7 @@ const HomeScreen = (): JSX.Element => {
     });
   };
 
-  const handlePlayBookmark = (gameId: string, configId: string) => {
+  const handlePlayCustomGame = (gameId: string, configId: string) => {
     void navigate({
       to: '/$locale/game/$gameId',
       params: { locale, gameId },
@@ -62,7 +62,7 @@ const HomeScreen = (): JSX.Element => {
   const openDefaultCog = async (gameId: string) => {
     const db = await getOrCreateDatabase();
     const lastDoc = await db.saved_game_configs
-      .findOne(lastSessionSavedConfigId(gameId))
+      .findOne(lastSessionConfigId(gameId))
       .exec();
     setModal({
       kind: 'open',
@@ -72,15 +72,15 @@ const HomeScreen = (): JSX.Element => {
     });
   };
 
-  const openBookmarkCog = (gameId: string, doc: SavedGameConfigDoc) => {
+  const openCustomGameCog = (gameId: string, doc: CustomGameDoc) => {
     setModal({
       kind: 'open',
       gameId,
       mode: {
-        kind: 'bookmark',
+        kind: 'customGame',
         configId: doc.id,
         name: doc.name,
-        color: doc.color as BookmarkColorKey,
+        color: doc.color as GameColorKey,
         cover: doc.cover,
       },
       config: doc.config,
@@ -97,29 +97,29 @@ const HomeScreen = (): JSX.Element => {
         entry.id,
         lastSessionConfigs[entry.id] ?? {},
       )}
-      onPlay={() => handlePlay(entry.id)}
+      onPlay={() => handlePlayDefault(entry.id)}
       onOpenCog={() => void openDefaultCog(entry.id)}
     />
   ));
-  const bookmarks = savedConfigs.flatMap((doc) => {
+  const customCards = customGames.flatMap((doc) => {
     const entry = GAME_CATALOG.find((g) => g.id === doc.gameId);
     if (!entry) return [];
     return [
       <GameCard
-        key={`bm-${doc.id}`}
-        variant="bookmark"
+        key={`custom-${doc.id}`}
+        variant="customGame"
         gameId={doc.gameId}
         title={t(entry.titleKey)}
-        bookmarkName={doc.name}
-        bookmarkColor={doc.color as BookmarkColorKey}
+        customGameName={doc.name}
+        customGameColor={doc.color as GameColorKey}
         cover={doc.cover}
         chips={configToChips(doc.gameId, doc.config)}
-        onPlay={() => handlePlayBookmark(doc.gameId, doc.id)}
-        onOpenCog={() => openBookmarkCog(doc.gameId, doc)}
+        onPlay={() => handlePlayCustomGame(doc.gameId, doc.id)}
+        onOpenCog={() => openCustomGameCog(doc.gameId, doc)}
       />,
     ];
   });
-  const cards = [...defaults, ...bookmarks];
+  const cards = [...defaults, ...customCards];
 
   return (
     <div className="px-4 py-4">
@@ -135,13 +135,13 @@ const HomeScreen = (): JSX.Element => {
           gameId={modal.gameId}
           mode={modal.mode}
           config={modal.config}
-          existingBookmarkNames={savedConfigs
+          existingCustomGameNames={customGames
             .filter((d) => d.gameId === modal.gameId)
             .map((d) => d.name)}
           onCancel={() => setModal({ kind: 'closed' })}
           onUpdate={async (payload) => {
             if (payload.configId) {
-              await updateConfig(
+              await update(
                 payload.configId,
                 payload.config,
                 payload.name,
@@ -158,6 +158,10 @@ const HomeScreen = (): JSX.Element => {
               color: payload.color,
               cover: payload.cover,
             });
+            setModal({ kind: 'closed' });
+          }}
+          onDelete={async (configId) => {
+            await remove(configId);
             setModal({ kind: 'closed' });
           }}
         />

@@ -35,7 +35,7 @@
     "pageOf": "Página {{page}} de {{total}}"
   },
   "play": "Jogar",
-  "saveConfig": {
+  "customGame": {
     "title": "Salvar configuração",
     "nameLabel": "Nome da configuração",
     "placeholder": "ex: Fácil",
@@ -46,8 +46,8 @@
     "errorDuplicate": "Já existe uma configuração chamada \"{{name}}\"",
     "colorLabel": "Cor",
     "update": "Actualizar \"{{name}}\"",
-    "saveAsNew": "Salvar como novo favorito…",
-    "saveBookmarkLabel": "Salvar como favorito",
-    "saveBookmarkPlaceholder": "ex: Modo Fácil"
+    "saveAsNew": "Salvar como novo jogo personalizado…",
+    "saveCustomGameLabel": "Salvar como jogo personalizado",
+    "saveCustomGamePlaceholder": "ex: Modo Fácil"
   }
 }

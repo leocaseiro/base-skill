@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import { migrateCustomGames } from './migrate-custom-games';
 import { MAX_SCHEMA_VERSION } from './schemas';
 import type { BaseSkillDatabase } from './types';
 
@@ -41,4 +42,5 @@ export async function checkVersionAndMigrate(
       appVersion: getAppVersion(),
     });
   }
+  await migrateCustomGames(db);
 }

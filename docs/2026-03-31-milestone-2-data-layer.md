@@ -273,7 +273,7 @@ Expected: **PASS** (commit any type fixes immediately if you touched files).
 - Modify: `src/db/create-database.ts`
 - Modify: `src/db/types.ts`
 - Test: extend `src/db/create-database.test.ts`
-- **Step 1: Transcribe schemas** from `docs/data-model.md` for `profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`. Export `MAX_SCHEMA_VERSION` in `schemas/index.ts` using the same formula as the doc §6.
+- **Step 1: Transcribe schemas** from `docs/data-model.md` for `profiles`, `progress`, `settings`, `game_config_overrides`, `custom games`, `themes`, `session_history`, `session_history_index`, `sync_meta`. Export `MAX_SCHEMA_VERSION` in `schemas/index.ts` using the same formula as the doc §6.
 
 **Commit:**
 

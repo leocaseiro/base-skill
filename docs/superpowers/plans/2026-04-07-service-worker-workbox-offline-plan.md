@@ -1,5 +1,7 @@
 # Service Worker, Workbox & Offline-First Implementation Plan
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use
 > checkbox (`- [ ]`) syntax for tracking.
@@ -1292,9 +1294,9 @@ interrupting play.
     sessionId: string;
     meta: SessionMeta;
     gameSpecificConfig: Record<string, unknown> | null;
-    bookmarkId: string | null;
-    bookmarkName: string | null;
-    bookmarkColor: string | null;
+    custom gameId: string | null;
+    custom gameName: string | null;
+    custom gameColor: string | null;
   }
   ```
 
@@ -1345,9 +1347,9 @@ interrupting play.
     sessionId,
     meta,
     gameSpecificConfig,
-    bookmarkId,
-    bookmarkName,
-    bookmarkColor,
+    custom gameId,
+    custom gameName,
+    custom gameColor,
   };
   ```
 
@@ -1361,17 +1363,17 @@ interrupting play.
     sessionId,
     draftState,
     gameSpecificConfig,
-    bookmarkId,
-    bookmarkName,
-    bookmarkColor,
+    custom gameId,
+    custom gameName,
+    custom gameColor,
   }: {
     gameId: string;
     sessionId: string;
     draftState: AnswerGameDraftState | null;
     gameSpecificConfig: Record<string, unknown> | null;
-    bookmarkId: string | null;
-    bookmarkName: string | null;
-    bookmarkColor: string | null;
+    custom gameId: string | null;
+    custom gameName: string | null;
+    custom gameColor: string | null;
   }): JSX.Element => {
     const { t } = useTranslation('games');
     const { save, updateConfig } = useSavedConfigs();
@@ -1398,14 +1400,14 @@ interrupting play.
           onStart={() => setShowInstructions(false)}
           ttsEnabled={cfg.ttsEnabled}
           gameTitle={t('word-spell')}
-          bookmarkName={bookmarkName ?? undefined}
-          bookmarkColor={
-            (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+          custom gameName={custom gameName ?? undefined}
+          custom gameColor={
+            (custom gameColor ?? undefined) as Custom gameColorKey | undefined
           }
           subject="reading"
           config={cfg as unknown as Record<string, unknown>}
           onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-          onSaveBookmark={async (name, color) => {
+          onSaveCustom game={async (name, color) => {
             await save({
               gameId,
               name,
@@ -1413,10 +1415,10 @@ interrupting play.
               config: cfg as unknown as Record<string, unknown>,
             });
           }}
-          onUpdateBookmark={
-            bookmarkId
+          onUpdateCustom game={
+            custom gameId
               ? async (name, config) => {
-                  await updateConfig(bookmarkId, config, name);
+                  await updateConfig(custom gameId, config, name);
                 }
               : undefined
           }
@@ -1444,17 +1446,17 @@ interrupting play.
     sessionId,
     draftState,
     gameSpecificConfig,
-    bookmarkId,
-    bookmarkName,
-    bookmarkColor,
+    custom gameId,
+    custom gameName,
+    custom gameColor,
   }: {
     gameId: string;
     sessionId: string;
     draftState: AnswerGameDraftState | null;
     gameSpecificConfig: Record<string, unknown> | null;
-    bookmarkId: string | null;
-    bookmarkName: string | null;
-    bookmarkColor: string | null;
+    custom gameId: string | null;
+    custom gameName: string | null;
+    custom gameColor: string | null;
   }): JSX.Element => {
     const { t } = useTranslation('games');
     const { save, updateConfig } = useSavedConfigs();
@@ -1481,14 +1483,14 @@ interrupting play.
           onStart={() => setShowInstructions(false)}
           ttsEnabled={cfg.ttsEnabled}
           gameTitle={t('number-match')}
-          bookmarkName={bookmarkName ?? undefined}
-          bookmarkColor={
-            (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+          custom gameName={custom gameName ?? undefined}
+          custom gameColor={
+            (custom gameColor ?? undefined) as Custom gameColorKey | undefined
           }
           subject="math"
           config={cfg as unknown as Record<string, unknown>}
           onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
-          onSaveBookmark={async (name, color) => {
+          onSaveCustom game={async (name, color) => {
             await save({
               gameId,
               name,
@@ -1496,10 +1498,10 @@ interrupting play.
               config: cfg as unknown as Record<string, unknown>,
             });
           }}
-          onUpdateBookmark={
-            bookmarkId
+          onUpdateCustom game={
+            custom gameId
               ? async (name, config) => {
-                  await updateConfig(bookmarkId, config, name);
+                  await updateConfig(custom gameId, config, name);
                 }
               : undefined
           }
@@ -1527,17 +1529,17 @@ interrupting play.
     sessionId,
     draftState,
     gameSpecificConfig,
-    bookmarkId,
-    bookmarkName,
-    bookmarkColor,
+    custom gameId,
+    custom gameName,
+    custom gameColor,
   }: {
     gameId: string;
     sessionId: string;
     draftState: AnswerGameDraftState | null;
     gameSpecificConfig: Record<string, unknown> | null;
-    bookmarkId: string | null;
-    bookmarkName: string | null;
-    bookmarkColor: string | null;
+    custom gameId: string | null;
+    custom gameName: string | null;
+    custom gameColor: string | null;
   }): JSX.Element => {
     const { t } = useTranslation('games');
     const { save, updateConfig } = useSavedConfigs();
@@ -1564,14 +1566,14 @@ interrupting play.
           onStart={() => setShowInstructions(false)}
           ttsEnabled={cfg.ttsEnabled}
           gameTitle={t('sort-numbers')}
-          bookmarkName={bookmarkName ?? undefined}
-          bookmarkColor={
-            (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+          custom gameName={custom gameName ?? undefined}
+          custom gameColor={
+            (custom gameColor ?? undefined) as Custom gameColorKey | undefined
           }
           subject="math"
           config={cfg as unknown as Record<string, unknown>}
           onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
-          onSaveBookmark={async (name, color) => {
+          onSaveCustom game={async (name, color) => {
             await save({
               gameId,
               name,
@@ -1579,10 +1581,10 @@ interrupting play.
               config: cfg as unknown as Record<string, unknown>,
             });
           }}
-          onUpdateBookmark={
-            bookmarkId
+          onUpdateCustom game={
+            custom gameId
               ? async (name, config) => {
-                  await updateConfig(bookmarkId, config, name);
+                  await updateConfig(custom gameId, config, name);
                 }
               : undefined
           }
@@ -1610,17 +1612,17 @@ interrupting play.
     sessionId,
     draftState,
     gameSpecificConfig,
-    bookmarkId,
-    bookmarkName,
-    bookmarkColor,
+    custom gameId,
+    custom gameName,
+    custom gameColor,
   }: {
     gameId: string;
     sessionId: string;
     draftState: AnswerGameDraftState | null;
     gameSpecificConfig: Record<string, unknown> | null;
-    bookmarkId: string | null;
-    bookmarkName: string | null;
-    bookmarkColor: string | null;
+    custom gameId: string | null;
+    custom gameName: string | null;
+    custom gameColor: string | null;
   }): JSX.Element => {
     if (gameId === 'sort-numbers') {
       return (
@@ -1629,9 +1631,9 @@ interrupting play.
           sessionId={sessionId}
           draftState={draftState}
           gameSpecificConfig={gameSpecificConfig}
-          bookmarkId={bookmarkId}
-          bookmarkName={bookmarkName}
-          bookmarkColor={bookmarkColor}
+          custom gameId={custom gameId}
+          custom gameName={custom gameName}
+          custom gameColor={custom gameColor}
         />
       );
     }
@@ -1643,9 +1645,9 @@ interrupting play.
           sessionId={sessionId}
           draftState={draftState}
           gameSpecificConfig={gameSpecificConfig}
-          bookmarkId={bookmarkId}
-          bookmarkName={bookmarkName}
-          bookmarkColor={bookmarkColor}
+          custom gameId={custom gameId}
+          custom gameName={custom gameName}
+          custom gameColor={custom gameColor}
         />
       );
     }
@@ -1657,9 +1659,9 @@ interrupting play.
           sessionId={sessionId}
           draftState={draftState}
           gameSpecificConfig={gameSpecificConfig}
-          bookmarkId={bookmarkId}
-          bookmarkName={bookmarkName}
-          bookmarkColor={bookmarkColor}
+          custom gameId={custom gameId}
+          custom gameName={custom gameName}
+          custom gameColor={custom gameColor}
         />
       );
     }
@@ -1682,9 +1684,9 @@ interrupting play.
     sessionId,
     meta,
     gameSpecificConfig,
-    bookmarkId,
-    bookmarkName,
-    bookmarkColor,
+    custom gameId,
+    custom gameName,
+    custom gameColor,
   }: GameRouteLoaderData): JSX.Element => (
     <GameShell
       config={config}
@@ -1699,9 +1701,9 @@ interrupting play.
         sessionId={sessionId}
         draftState={draftState}
         gameSpecificConfig={gameSpecificConfig}
-        bookmarkId={bookmarkId}
-        bookmarkName={bookmarkName}
-        bookmarkColor={bookmarkColor}
+        custom gameId={custom gameId}
+        custom gameName={custom gameName}
+        custom gameColor={custom gameColor}
       />
     </GameShell>
   );

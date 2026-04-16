@@ -19,17 +19,17 @@ export const DefaultDark: Story = {
   decorators: [withDarkMode],
 };
 
-export const WithBookmark: Story = {
+export const WithCustomGame: Story = {
   args: {
-    bookmarkName: 'Easy Mode',
-    bookmarkColor: 'indigo',
+    customGameName: 'Easy Mode',
+    customGameColor: 'indigo',
   },
 };
 
-export const WithBookmarkDark: Story = {
+export const WithCustomGameDark: Story = {
   args: {
-    bookmarkName: 'Easy Mode',
-    bookmarkColor: 'indigo',
+    customGameName: 'Easy Mode',
+    customGameColor: 'indigo',
   },
   decorators: [withDarkMode],
 };
@@ -65,8 +65,8 @@ export const AllColors: Story = {
         <GameNameChip
           key={color}
           title="Word Spell"
-          bookmarkName={color}
-          bookmarkColor={color}
+          customGameName={color}
+          customGameColor={color}
         />
       ))}
     </div>

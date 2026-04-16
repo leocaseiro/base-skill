@@ -20,10 +20,10 @@ vi.mock('react-i18next', () => ({
         'instructions.settings': '⚙️ Settings',
         'instructions.configure': 'Configure',
         'instructions.cancel': 'Cancel',
-        'instructions.saveAsNew': 'Save as new bookmark',
+        'instructions.saveAsNew': 'Save as new custom game',
         'instructions.saveOnPlayTitle':
-          'Save these settings as a bookmark?',
-        'instructions.saveOnPlayNameLabel': 'Bookmark name',
+          'Save these settings as a custom game?',
+        'instructions.saveOnPlayNameLabel': 'Custom game name',
         'instructions.saveAndPlay': 'Save & play',
         'instructions.playWithoutSaving': 'Play without saving',
       };
@@ -40,7 +40,7 @@ const baseProps = {
   gameId: 'sort-numbers',
   config: { totalRounds: 5 },
   onConfigChange: vi.fn(),
-  onSaveBookmark: vi.fn(),
+  onSaveCustomGame: vi.fn(),
 };
 
 describe('InstructionsOverlay', () => {
@@ -69,14 +69,14 @@ describe('InstructionsOverlay', () => {
     ).toBeInTheDocument();
   });
 
-  it('prompts to save as bookmark when "Let\'s go!" is clicked on a default game', async () => {
+  it('prompts to save as custom game when "Let\'s go!" is clicked on a default game', async () => {
     const onStart = vi.fn();
     render(<InstructionsOverlay {...baseProps} onStart={onStart} />);
     await userEvent.click(
       screen.getByRole('button', { name: /let's go/i }),
     );
     expect(
-      screen.getByText(/save these settings as a bookmark\?/i),
+      screen.getByText(/save these settings as a custom game\?/i),
     ).toBeInTheDocument();
     expect(onStart).not.toHaveBeenCalled();
     await userEvent.click(
@@ -85,23 +85,23 @@ describe('InstructionsOverlay', () => {
     expect(onStart).toHaveBeenCalledOnce();
   });
 
-  it('calls onStart immediately (and updates the bookmark) when playing a bookmarked game', async () => {
+  it('calls onStart immediately (and updates the custom game) when playing a custom game', async () => {
     const onStart = vi.fn();
-    const onUpdateBookmark = vi.fn(async () => {});
+    const onUpdateCustomGame = vi.fn(async () => {});
     render(
       <InstructionsOverlay
         {...baseProps}
         onStart={onStart}
-        bookmarkId="abc123"
-        bookmarkName="Easy Mode"
-        bookmarkColor="teal"
-        onUpdateBookmark={onUpdateBookmark}
+        customGameId="abc123"
+        customGameName="Easy Mode"
+        customGameColor="teal"
+        onUpdateCustomGame={onUpdateCustomGame}
       />,
     );
     await userEvent.click(
       screen.getByRole('button', { name: /let's go/i }),
     );
-    expect(onUpdateBookmark).toHaveBeenCalledWith(
+    expect(onUpdateCustomGame).toHaveBeenCalledWith(
       'Easy Mode',
       baseProps.config,
       expect.objectContaining({ color: 'teal' }),
@@ -126,12 +126,12 @@ describe('InstructionsOverlay', () => {
     expect(screen.getByText('Level')).toBeInTheDocument();
   });
 
-  it('renders bookmarkName when provided', () => {
+  it('renders customGameName when provided', () => {
     render(
       <InstructionsOverlay
         {...baseProps}
-        bookmarkName="Easy Mode"
-        bookmarkColor="teal"
+        customGameName="Easy Mode"
+        customGameColor="teal"
       />,
     );
     expect(screen.getByText('Easy Mode')).toBeInTheDocument();

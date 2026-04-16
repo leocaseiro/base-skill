@@ -24,19 +24,19 @@ export const Default: Story = {
   },
 };
 
-export const Bookmark: Story = {
+export const CustomGame: Story = {
   args: {
-    variant: 'bookmark',
-    bookmarkName: 'Skip by 2',
-    bookmarkColor: 'amber',
+    variant: 'customGame',
+    customGameName: 'Skip by 2',
+    customGameColor: 'amber',
   },
 };
 
-export const BookmarkPurple: Story = {
+export const CustomGamePurple: Story = {
   args: {
-    variant: 'bookmark',
-    bookmarkName: 'Big to Small',
-    bookmarkColor: 'purple',
+    variant: 'customGame',
+    customGameName: 'Big to Small',
+    customGameColor: 'purple',
     chips: ['⬇️ Down', '10 numbers', '3s'],
   },
 };

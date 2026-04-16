@@ -3,13 +3,14 @@ import { useCallback, useMemo } from 'react';
 import { EMPTY } from 'rxjs';
 import { useRxDB } from './useRxDB';
 import { useRxQuery } from './useRxQuery';
+import type { CustomGameDoc } from '@/db/schemas/custom_games';
 import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
 import type { Cover } from '@/games/cover-type';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import {
   ANONYMOUS_PROFILE_ID,
-  isLastSessionSavedConfigId,
-  lastSessionSavedConfigId,
+  isLastSessionConfigId,
+  lastSessionConfigId,
 } from '@/db/last-session-game-config';
 
 type SaveInput = {
@@ -20,40 +21,38 @@ type SaveInput = {
   cover?: Cover;
 };
 
-type UpdateConfigExtras = {
+type UpdateExtras = {
   cover?: Cover;
-  color?: BookmarkColorKey;
+  color?: GameColorKey;
 };
 
-type UseSavedConfigsResult = {
-  savedConfigs: SavedGameConfigDoc[];
-  gameIdsWithConfigs: Set<string>;
-  getByGameId: (gameId: string) => SavedGameConfigDoc[];
-  /** Map of gameId → last-session config (if any). Drives default-card chips on the home grid. */
+type UseCustomGamesResult = {
+  customGames: CustomGameDoc[];
+  gameIdsWithCustomGames: Set<string>;
+  getByGameId: (gameId: string) => CustomGameDoc[];
   lastSessionConfigs: Record<string, Record<string, unknown>>;
   save: (input: SaveInput) => Promise<string>;
   remove: (id: string) => Promise<void>;
   rename: (id: string, newName: string) => Promise<void>;
-  updateConfig: (
+  update: (
     id: string,
     config: Record<string, unknown>,
     name?: string,
-    extras?: UpdateConfigExtras,
+    extras?: UpdateExtras,
   ) => Promise<void>;
-  /** Upserts IndexedDB doc for "resume last settings" (not shown as a named chip) */
   persistLastSessionConfig: (
     gameId: string,
     config: Record<string, unknown>,
   ) => Promise<void>;
 };
 
-export const useSavedConfigs = (): UseSavedConfigsResult => {
+export const useCustomGames = (): UseCustomGamesResult => {
   const { db } = useRxDB();
 
-  const query$ = useMemo(
+  const customGamesQuery$ = useMemo(
     () =>
       db
-        ? db.saved_game_configs.find({
+        ? db.custom_games.find({
             selector: { profileId: ANONYMOUS_PROFILE_ID },
             sort: [{ createdAt: 'asc' }],
           }).$
@@ -61,28 +60,40 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
     [db],
   );
 
-  const docs = useRxQuery<SavedGameConfigDoc[]>(query$, []);
+  const savedGameConfigsQuery$ = useMemo(
+    () =>
+      db
+        ? db.saved_game_configs.find({
+            selector: { profileId: ANONYMOUS_PROFILE_ID },
+          }).$
+        : EMPTY,
+    [db],
+  );
 
-  const savedConfigs = useMemo(
-    () => docs.filter((d) => !isLastSessionSavedConfigId(d.id)),
-    [docs],
+  const customGames = useRxQuery<CustomGameDoc[]>(
+    customGamesQuery$,
+    [],
+  );
+  const sessionDocs = useRxQuery<SavedGameConfigDoc[]>(
+    savedGameConfigsQuery$,
+    [],
   );
 
   const lastSessionConfigs = useMemo(() => {
     const map: Record<string, Record<string, unknown>> = {};
-    for (const d of docs) {
-      if (isLastSessionSavedConfigId(d.id)) map[d.gameId] = d.config;
+    for (const d of sessionDocs) {
+      if (isLastSessionConfigId(d.id)) map[d.gameId] = d.config;
     }
     return map;
-  }, [docs]);
+  }, [sessionDocs]);
 
-  const gameIdsWithConfigs = useMemo(
-    () => new Set(savedConfigs.map((d) => d.gameId)),
-    [savedConfigs],
+  const gameIdsWithCustomGames = useMemo(
+    () => new Set(customGames.map((d) => d.gameId)),
+    [customGames],
   );
 
-  const getByGameId = (gameId: string): SavedGameConfigDoc[] =>
-    savedConfigs.filter((d) => d.gameId === gameId);
+  const getByGameId = (gameId: string): CustomGameDoc[] =>
+    customGames.filter((d) => d.gameId === gameId);
 
   const save = async ({
     gameId,
@@ -93,15 +104,15 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
   }: SaveInput): Promise<string> => {
     if (!db) throw new Error('Database not ready');
     const trimmed = name.trim();
-    const namesForGame = savedConfigs
+    const namesForGame = customGames
       .filter((d) => d.gameId === gameId)
       .map((d) => d.name);
     if (namesForGame.includes(trimmed)) {
       throw new Error(
-        `A saved config named "${trimmed}" already exists for this game`,
+        `A custom game named "${trimmed}" already exists for this game`,
       );
     }
-    const doc: SavedGameConfigDoc = {
+    const doc: CustomGameDoc = {
       id: nanoid(21),
       profileId: ANONYMOUS_PROFILE_ID,
       gameId,
@@ -116,43 +127,43 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
       createdAt: new Date().toISOString(),
       ...(cover ? { cover } : {}),
     };
-    await db.saved_game_configs.insert(doc);
+    await db.custom_games.insert(doc);
     return doc.id;
   };
 
   const remove = async (id: string): Promise<void> => {
     if (!db) return;
-    const doc = await db.saved_game_configs.findOne(id).exec();
+    const doc = await db.custom_games.findOne(id).exec();
     if (doc) await doc.remove();
   };
 
   const rename = async (id: string, newName: string): Promise<void> => {
     if (!db) return;
-    const doc = await db.saved_game_configs.findOne(id).exec();
+    const doc = await db.custom_games.findOne(id).exec();
     if (!doc) return;
     const trimmed = newName.trim();
-    const namesForGame = savedConfigs
+    const namesForGame = customGames
       .filter((d) => d.gameId === doc.gameId && d.id !== id)
       .map((d) => d.name);
     if (namesForGame.includes(trimmed)) {
       throw new Error(
-        `A saved config named "${trimmed}" already exists for this game`,
+        `A custom game named "${trimmed}" already exists for this game`,
       );
     }
     await doc.incrementalPatch({ name: trimmed });
   };
 
-  const updateConfig = useCallback(
+  const update = useCallback(
     async (
       id: string,
       config: Record<string, unknown>,
       name?: string,
-      extras?: UpdateConfigExtras,
+      extras?: UpdateExtras,
     ): Promise<void> => {
       if (!db) return;
-      const doc = await db.saved_game_configs.findOne(id).exec();
+      const doc = await db.custom_games.findOne(id).exec();
       if (!doc) return;
-      const patch: Partial<SavedGameConfigDoc> = {
+      const patch: Partial<CustomGameDoc> = {
         // eslint-disable-next-line unicorn/prefer-structured-clone -- structuredClone throws on functions; we want them silently dropped
         config: JSON.parse(JSON.stringify(config)) as Record<
           string,
@@ -161,7 +172,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
       };
       if (name !== undefined) {
         const trimmed = name.trim();
-        const siblings = await db.saved_game_configs
+        const siblings = await db.custom_games
           .find({
             selector: {
               gameId: doc.gameId,
@@ -172,7 +183,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
         const namesForGame = siblings.map((d) => d.name);
         if (namesForGame.includes(trimmed)) {
           throw new Error(
-            `A saved config named "${trimmed}" already exists for this game`,
+            `A custom game named "${trimmed}" already exists for this game`,
           );
         }
         patch.name = trimmed;
@@ -191,7 +202,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
   const persistLastSessionConfig = useCallback(
     async (gameId: string, config: Record<string, unknown>) => {
       if (!db) return;
-      const id = lastSessionSavedConfigId(gameId);
+      const id = lastSessionConfigId(gameId);
       const now = new Date().toISOString();
       const existing = await db.saved_game_configs.findOne(id).exec();
       await (existing
@@ -210,14 +221,14 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
   );
 
   return {
-    savedConfigs,
-    gameIdsWithConfigs,
+    customGames,
+    gameIdsWithCustomGames,
     getByGameId,
     lastSessionConfigs,
     save,
     remove,
     rename,
-    updateConfig,
+    update,
     persistLastSessionConfig,
   };
 };

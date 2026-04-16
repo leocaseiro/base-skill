@@ -7,10 +7,10 @@ const baseArgs = {
   ttsEnabled: false,
   gameTitle: 'Sort Numbers',
   gameId: 'sort-numbers',
-  bookmarkColor: 'indigo' as const,
+  customGameColor: 'indigo' as const,
   config: { totalRounds: 5 },
   onConfigChange: () => {},
-  onSaveBookmark: async () => 'stub-id',
+  onSaveCustomGame: async () => 'stub-id',
 };
 
 const meta: Meta<typeof InstructionsOverlay> = {
@@ -19,8 +19,8 @@ const meta: Meta<typeof InstructionsOverlay> = {
   args: baseArgs,
   argTypes: {
     onStart: { action: 'started' },
-    onSaveBookmark: { action: 'bookmarkSaved' },
-    onUpdateBookmark: { action: 'bookmarkUpdated' },
+    onSaveCustomGame: { action: 'customGameSaved' },
+    onUpdateCustomGame: { action: 'customGameUpdated' },
   },
   parameters: {
     layout: 'fullscreen',
@@ -32,12 +32,12 @@ type Story = StoryObj<typeof InstructionsOverlay>;
 
 export const Default: Story = {};
 
-export const WithBookmark: Story = {
+export const WithCustomGame: Story = {
   args: {
     ...baseArgs,
-    bookmarkId: 'abc123',
-    bookmarkName: 'Easy Mode',
-    bookmarkColor: 'teal',
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal',
   },
 };
 

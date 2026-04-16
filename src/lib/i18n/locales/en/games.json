@@ -24,9 +24,20 @@
     "lets-go": "Let's go!",
     "settings": "⚙️ Settings",
     "advanced": "Advanced",
-    "updateBookmark": "Update \"{{name}}\"",
-    "saveAsNew": "Save as new bookmark",
-    "cancel": "Cancel"
+    "updateCustomGame": "Update \"{{name}}\"",
+    "saveAsNew": "Save as new custom game",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete \"{{name}}\"?",
+    "deleteConfirmBody": "This custom game will be removed. You can't undo this.",
+    "customGameNameLabel": "Custom game name",
+    "nameRequired": "Please enter a custom game name.",
+    "nameDuplicate": "A custom game with that name already exists.",
+    "saveOnPlayTitle": "Save these settings as a custom game?",
+    "saveOnPlayNameLabel": "Custom game name",
+    "saveAndPlay": "Save & play",
+    "playWithoutSaving": "Play without saving",
+    "configure": "Configure"
   },
   "sort-numbers-ui": {
     "ascending-label": "Going Up!",

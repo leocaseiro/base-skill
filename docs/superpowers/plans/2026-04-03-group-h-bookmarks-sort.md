@@ -1,10 +1,12 @@
-# Group H: Bookmarks Sorted to Top — Implementation Plan
+# Group H: Custom games Sorted to Top — Implementation Plan
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Bookmarked games always appear at the top of the catalog, before non-bookmarked games, while preserving the existing filter and pagination behaviour.
+**Goal:** Custom gameed games always appear at the top of the catalog, before non-custom gameed games, while preserving the existing filter and pagination behaviour.
 
-**Architecture:** Add a `sortByBookmarks` function to `catalog-utils.ts` that stably sorts an array of `GameCatalogEntry` items — bookmarked IDs first, original order preserved within each group. The home route calls it inside the existing `filtered` `useMemo` after `filterCatalog`. No schema changes, no new hooks.
+**Architecture:** Add a `sortByCustom games` function to `catalog-utils.ts` that stably sorts an array of `GameCatalogEntry` items — custom gameed IDs first, original order preserved within each group. The home route calls it inside the existing `filtered` `useMemo` after `filterCatalog`. No schema changes, no new hooks.
 
 **Tech Stack:** TypeScript, Vitest
 
@@ -14,15 +16,15 @@
 
 ## File Map
 
-| File                                | Action | Responsibility                                |
-| ----------------------------------- | ------ | --------------------------------------------- |
-| `src/games/catalog-utils.ts`        | Modify | Add `sortByBookmarks(entries, bookmarkedIds)` |
-| `src/games/catalog-utils.test.ts`   | Modify | Add tests for `sortByBookmarks`               |
-| `src/routes/$locale/_app/index.tsx` | Modify | Call `sortByBookmarks` in `filtered` useMemo  |
+| File                                | Action | Responsibility                                      |
+| ----------------------------------- | ------ | --------------------------------------------------- |
+| `src/games/catalog-utils.ts`        | Modify | Add `sortByCustom games(entries, custom gameedIds)` |
+| `src/games/catalog-utils.test.ts`   | Modify | Add tests for `sortByCustom games`                  |
+| `src/routes/$locale/_app/index.tsx` | Modify | Call `sortByCustom games` in `filtered` useMemo     |
 
 ---
 
-## Task 1: Add sortByBookmarks to catalog-utils
+## Task 1: Add sortByCustom games to catalog-utils
 
 **Files:**
 
@@ -34,9 +36,9 @@
   Open `src/games/catalog-utils.test.ts` and add:
 
   ```ts
-  import { sortByBookmarks } from './catalog-utils';
+  import { sortByCustom games } from './catalog-utils';
 
-  describe('sortByBookmarks', () => {
+  describe('sortByCustom games', () => {
     const entries = [
       {
         id: 'alpha',
@@ -58,22 +60,22 @@
       },
     ];
 
-    it('moves bookmarked entries to the front', () => {
-      const result = sortByBookmarks(entries, new Set(['gamma']));
+    it('moves custom gameed entries to the front', () => {
+      const result = sortByCustom games(entries, new Set(['gamma']));
       expect(result[0].id).toBe('gamma');
       expect(result[1].id).toBe('alpha');
       expect(result[2].id).toBe('beta');
     });
 
-    it('preserves original order among non-bookmarked entries', () => {
-      const result = sortByBookmarks(entries, new Set(['beta']));
+    it('preserves original order among non-custom gameed entries', () => {
+      const result = sortByCustom games(entries, new Set(['beta']));
       expect(result[0].id).toBe('beta');
       expect(result[1].id).toBe('alpha');
       expect(result[2].id).toBe('gamma');
     });
 
-    it('preserves original order among multiple bookmarked entries', () => {
-      const result = sortByBookmarks(
+    it('preserves original order among multiple custom gameed entries', () => {
+      const result = sortByCustom games(
         entries,
         new Set(['gamma', 'alpha']),
       );
@@ -82,8 +84,8 @@
       expect(result[2].id).toBe('beta');
     });
 
-    it('returns original order when no bookmarks', () => {
-      const result = sortByBookmarks(entries, new Set());
+    it('returns original order when no custom games', () => {
+      const result = sortByCustom games(entries, new Set());
       expect(result.map((e) => e.id)).toEqual([
         'alpha',
         'beta',
@@ -93,7 +95,7 @@
 
     it('does not mutate the input array', () => {
       const copy = [...entries];
-      sortByBookmarks(entries, new Set(['beta']));
+      sortByCustom games(entries, new Set(['beta']));
       expect(entries).toEqual(copy);
     });
   });
@@ -105,22 +107,22 @@
   yarn test src/games/catalog-utils.test.ts 2>&1 | tail -10
   ```
 
-  Expected: FAIL — `sortByBookmarks is not exported`.
+  Expected: FAIL — `sortByCustom games is not exported`.
 
-- [ ] **Step 2: Add `sortByBookmarks` to `catalog-utils.ts`**
+- [ ] **Step 2: Add `sortByCustom games` to `catalog-utils.ts`**
 
   Open `src/games/catalog-utils.ts` and append:
 
   ```ts
-  export function sortByBookmarks<T extends { id: string }>(
+  export function sortByCustom games<T extends { id: string }>(
     entries: T[],
-    bookmarkedIds: Set<string>,
+    custom gameedIds: Set<string>,
   ): T[] {
-    if (bookmarkedIds.size === 0) return entries;
+    if (custom gameedIds.size === 0) return entries;
     return [...entries].sort((a, b) => {
-      const aBookmarked = bookmarkedIds.has(a.id) ? 0 : 1;
-      const bBookmarked = bookmarkedIds.has(b.id) ? 0 : 1;
-      return aBookmarked - bBookmarked;
+      const aCustom gameed = custom gameedIds.has(a.id) ? 0 : 1;
+      const bCustom gameed = custom gameedIds.has(b.id) ? 0 : 1;
+      return aCustom gameed - bCustom gameed;
     });
   }
   ```
@@ -131,32 +133,32 @@
   yarn test src/games/catalog-utils.test.ts 2>&1 | tail -10
   ```
 
-  Expected: all `sortByBookmarks` tests PASS.
+  Expected: all `sortByCustom games` tests PASS.
 
 - [ ] **Step 4: Commit**
 
   ```bash
   git add src/games/catalog-utils.ts src/games/catalog-utils.test.ts
-  git commit -m "feat(catalog): add sortByBookmarks utility"
+  git commit -m "feat(catalog): add sortByCustom games utility"
   ```
 
 ---
 
-## Task 2: Use sortByBookmarks in home route
+## Task 2: Use sortByCustom games in home route
 
 **Files:**
 
 - Modify: `src/routes/$locale/_app/index.tsx`
 
-- [ ] **Step 1: Import and call sortByBookmarks**
+- [ ] **Step 1: Import and call sortByCustom games**
 
-  In `src/routes/$locale/_app/index.tsx`, add `sortByBookmarks` to the import:
+  In `src/routes/$locale/_app/index.tsx`, add `sortByCustom games` to the import:
 
   ```ts
   import {
     filterCatalog,
     paginateCatalog,
-    sortByBookmarks,
+    sortByCustom games,
   } from '@/games/catalog-utils';
   ```
 
@@ -169,11 +171,11 @@
       level: level as GameLevel | '',
       subject: subject as GameSubject | '',
     });
-    return sortByBookmarks(result, bookmarkedIds);
-  }, [search, level, subject, bookmarkedIds]);
+    return sortByCustom games(result, custom gameedIds);
+  }, [search, level, subject, custom gameedIds]);
   ```
 
-  Note: `bookmarkedIds` is a `Set<string>` already returned by `useBookmarks()` — just add it to the dependency array.
+  Note: `custom gameedIds` is a `Set<string>` already returned by `useCustom games()` — just add it to the dependency array.
 
 - [ ] **Step 2: Run typecheck + tests**
 
@@ -186,7 +188,7 @@
 
   ```bash
   git add "src/routes/\$locale/_app/index.tsx"
-  git commit -m "feat(catalog): bookmarked games sorted to top of catalog"
+  git commit -m "feat(catalog): custom gameed games sorted to top of catalog"
   ```
 
 ---
@@ -205,7 +207,7 @@
 
   Start `yarn dev`, navigate to `/en`:
   1. Note the current order of games in the grid
-  2. Bookmark "Number Match" (long-press or bookmark icon)
+  2. Custom game "Number Match" (long-press or custom game icon)
   3. Page re-renders — "Number Match" now appears first
-  4. Apply a filter — bookmarked games still appear first within filtered results
-  5. Remove the bookmark — order returns to default
+  4. Apply a filter — custom gameed games still appear first within filtered results
+  5. Remove the custom game — order returns to default
