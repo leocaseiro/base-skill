@@ -4,7 +4,6 @@ import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
 import { GameCover } from '@/components/GameCover';
 import { resolveDefaultCover } from '@/games/cover';
-import { GAME_COLORS } from '@/lib/game-colors';
 
 type Common = {
   gameId: string;
@@ -34,9 +33,6 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
   const isCustom = props.variant === 'customGame';
   const headingText = isCustom ? props.customGameName : title;
   const subtitleText = isCustom ? title : undefined;
-  const badgeBg = isCustom
-    ? GAME_COLORS[props.customGameColor].playBg
-    : undefined;
 
   return (
     <div
@@ -49,26 +45,25 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
         onClick={onPlay}
         className="flex flex-col text-left active:scale-[0.98]"
       >
-        <div className="relative p-2">
+        <div className="p-2">
           <GameCover cover={cover} size="card" />
-          <span
-            aria-hidden="true"
-            className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-xs shadow"
-            style={{
-              background: badgeBg ?? 'rgb(255 255 255 / 70%)',
-              color: isCustom ? 'white' : 'var(--muted-foreground)',
-            }}
-          >
-            {isCustom ? (
-              <CircleDot size={14} />
-            ) : (
-              <CircleDashed size={14} />
-            )}
-          </span>
         </div>
 
         <div className="flex flex-col gap-1 px-3 pb-3">
-          <h2 className="text-sm font-bold leading-tight text-foreground">
+          <h2 className="flex items-center gap-1.5 text-sm font-bold leading-tight text-foreground">
+            {isCustom ? (
+              <CircleDot
+                size={14}
+                aria-hidden="true"
+                className="shrink-0 text-muted-foreground"
+              />
+            ) : (
+              <CircleDashed
+                size={14}
+                aria-hidden="true"
+                className="shrink-0 text-muted-foreground"
+              />
+            )}
             {headingText}
           </h2>
           {subtitleText && (
