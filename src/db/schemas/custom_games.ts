@@ -1,0 +1,68 @@
+import type { Cover } from '@/games/cover-type';
+import type { JsonSchema, RxJsonSchema } from 'rxdb';
+
+export type CustomGameDoc = {
+  id: string;
+  profileId: string;
+  gameId: string;
+  name: string;
+  config: Record<string, unknown>;
+  createdAt: string;
+  color: string;
+  cover?: Cover;
+};
+
+export const customGamesSchema: RxJsonSchema<CustomGameDoc> = {
+  version: 1,
+  primaryKey: 'id',
+  type: 'object',
+  properties: {
+    id: { type: 'string', maxLength: 36 },
+    profileId: { type: 'string', maxLength: 36 },
+    gameId: { type: 'string', maxLength: 64 },
+    name: { type: 'string', maxLength: 128 },
+    config: { type: 'object' },
+    createdAt: { type: 'string', format: 'date-time' },
+    color: { type: 'string', maxLength: 32 },
+    cover: {
+      oneOf: [
+        {
+          type: 'object',
+          properties: {
+            kind: { type: 'string', const: 'emoji' } as JsonSchema,
+            emoji: { type: 'string', maxLength: 16 },
+            gradient: {
+              type: 'array',
+              items: { type: 'string' },
+              minItems: 2,
+              maxItems: 2,
+            },
+          },
+          required: ['kind', 'emoji'],
+          additionalProperties: false,
+        },
+        {
+          type: 'object',
+          properties: {
+            kind: { type: 'string', const: 'image' } as JsonSchema,
+            src: { type: 'string', maxLength: 2048 },
+            alt: { type: 'string', maxLength: 256 },
+            background: { type: 'string', maxLength: 32 },
+          },
+          required: ['kind', 'src'],
+          additionalProperties: false,
+        },
+      ],
+    },
+  },
+  required: [
+    'id',
+    'profileId',
+    'gameId',
+    'name',
+    'config',
+    'createdAt',
+    'color',
+  ],
+  additionalProperties: false,
+};
