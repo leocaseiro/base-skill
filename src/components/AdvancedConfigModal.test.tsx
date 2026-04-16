@@ -9,20 +9,22 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
 );
 
+const customGameMode = {
+  kind: 'customGame' as const,
+  configId: 'abc',
+  name: 'Skip by 2',
+  color: 'amber' as const,
+  cover: undefined,
+};
+
 describe('AdvancedConfigModal', () => {
-  it('shows "Update" and "Save as new" buttons when editing a bookmark', () => {
+  it('shows "Update" and "Save as new" buttons when editing a custom game', () => {
     render(
       <AdvancedConfigModal
         open
         onOpenChange={() => {}}
         gameId="sort-numbers"
-        mode={{
-          kind: 'bookmark',
-          configId: 'abc',
-          name: 'Skip by 2',
-          color: 'amber',
-          cover: undefined,
-        }}
+        mode={customGameMode}
         config={{ direction: 'ascending' }}
         onCancel={() => {}}
         onUpdate={vi.fn()}
@@ -79,7 +81,7 @@ describe('AdvancedConfigModal', () => {
     );
     expect(onSaveNew).not.toHaveBeenCalled();
     expect(
-      screen.getByText(/please enter a bookmark name/i),
+      screen.getByText(/please enter a custom game name/i),
     ).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/skip by 2/i)).toHaveFocus();
   });
@@ -94,7 +96,7 @@ describe('AdvancedConfigModal', () => {
         gameId="sort-numbers"
         mode={{ kind: 'default' }}
         config={{}}
-        existingBookmarkNames={['Skip by 2']}
+        existingCustomGameNames={['Skip by 2']}
         onCancel={() => {}}
         onSaveNew={onSaveNew}
       />,
@@ -107,7 +109,7 @@ describe('AdvancedConfigModal', () => {
     );
     expect(onSaveNew).not.toHaveBeenCalled();
     expect(
-      screen.getByText(/bookmark with that name already exists/i),
+      screen.getByText(/custom game with that name already exists/i),
     ).toBeInTheDocument();
     expect(input).toHaveFocus();
   });
@@ -120,15 +122,9 @@ describe('AdvancedConfigModal', () => {
         open
         onOpenChange={() => {}}
         gameId="sort-numbers"
-        mode={{
-          kind: 'bookmark',
-          configId: 'abc',
-          name: 'Skip by 2',
-          color: 'amber',
-          cover: undefined,
-        }}
+        mode={customGameMode}
         config={{ direction: 'ascending' }}
-        existingBookmarkNames={['Skip by 2', 'Other']}
+        existingCustomGameNames={['Skip by 2', 'Other']}
         onCancel={() => {}}
         onUpdate={onUpdate}
         onSaveNew={vi.fn()}
@@ -141,36 +137,100 @@ describe('AdvancedConfigModal', () => {
     expect(onUpdate).toHaveBeenCalled();
   });
 
-  it('calls onUpdate with the latest config and name', async () => {
-    const user = userEvent.setup();
-    const onUpdate = vi.fn();
+  it('does NOT render a Delete button for default mode', () => {
     render(
       <AdvancedConfigModal
         open
         onOpenChange={() => {}}
         gameId="sort-numbers"
-        mode={{
-          kind: 'bookmark',
-          configId: 'abc',
-          name: 'Skip by 2',
-          color: 'amber',
-          cover: undefined,
-        }}
-        config={{ direction: 'ascending' }}
+        mode={{ kind: 'default' }}
+        config={{}}
         onCancel={() => {}}
-        onUpdate={onUpdate}
         onSaveNew={vi.fn()}
+        onDelete={vi.fn()}
       />,
       { wrapper },
     );
+    expect(
+      screen.queryByRole('button', { name: /^delete$/i }),
+    ).toBeNull();
+  });
+
+  it('renders a Delete button for customGame mode', () => {
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="sort-numbers"
+        mode={customGameMode}
+        config={{}}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+        onUpdate={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+      { wrapper },
+    );
+    expect(
+      screen.getByRole('button', { name: /^delete$/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete', async () => {
+    const user = userEvent.setup();
+    const onDelete = vi.fn();
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="sort-numbers"
+        mode={customGameMode}
+        config={{}}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+        onUpdate={vi.fn()}
+        onDelete={onDelete}
+      />,
+      { wrapper },
+    );
+    await user.click(screen.getByRole('button', { name: /^delete$/i }));
+    expect(
+      screen.getByText(/delete "skip by 2"\?/i),
+    ).toBeInTheDocument();
     await user.click(
-      screen.getByRole('button', { name: /update "skip by 2"/i }),
+      screen
+        .getByRole('button', { name: /^cancel$/i })
+        .closest('button') ??
+        screen.getByRole('button', { name: /^cancel$/i }),
     );
-    expect(onUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Skip by 2',
-        configId: 'abc',
-      }),
+    expect(onDelete).not.toHaveBeenCalled();
+  });
+
+  it('calls onDelete with the configId and closes the modal on Confirm', async () => {
+    const user = userEvent.setup();
+    const onDelete = vi.fn().mockResolvedValue();
+    const onOpenChange = vi.fn();
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={onOpenChange}
+        gameId="sort-numbers"
+        mode={customGameMode}
+        config={{}}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+        onUpdate={vi.fn()}
+        onDelete={onDelete}
+      />,
+      { wrapper },
     );
+    await user.click(screen.getByRole('button', { name: /^delete$/i }));
+    // Confirmation dialog's destructive button has label "Delete"
+    const confirms = screen.getAllByRole('button', {
+      name: /^delete$/i,
+    });
+    // The second "Delete" is the confirmation button inside the nested dialog
+    await user.click(confirms.at(-1)!);
+    expect(onDelete).toHaveBeenCalledWith('abc');
   });
 });

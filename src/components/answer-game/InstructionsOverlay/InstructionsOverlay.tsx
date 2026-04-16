@@ -104,7 +104,7 @@ export const InstructionsOverlay = ({
   const modalMode =
     bookmarkId && bookmarkName
       ? ({
-          kind: 'bookmark',
+          kind: 'customGame',
           configId: bookmarkId,
           name: bookmarkName,
           color: bookmarkColor,
@@ -254,7 +254,7 @@ export const InstructionsOverlay = ({
         gameId={gameId}
         mode={modalMode}
         config={config}
-        existingBookmarkNames={existingBookmarkNames}
+        existingCustomGameNames={existingBookmarkNames}
         onCancel={() => setModalOpen(false)}
         onSaveNew={(payload) => {
           void (async () => {
