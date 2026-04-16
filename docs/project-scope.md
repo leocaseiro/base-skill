@@ -39,11 +39,11 @@ The core document. Contains:
   - **Child (Pre-K through Year 6+)** -- the primary user. UX adapts to grade level: full TTS/icon-driven navigation for young children, text-based for older children. Covers the entire age range.
   - **Parent/Guardian** -- manages profiles, customizes game settings per child, monitors progress, sets up cloud sync, selects TTS voices and language.
   - **Family (shared device)** -- the scenario where multiple children share one device with quick profile switching via the home screen.
-- **User Stories**: Organized by persona, covering core flows (pick a game, play, track progress, switch profiles, sync data, bookmark games, go offline/online, customize theme, parent overrides game settings, review session history, clear old data)
+- **User Stories**: Organized by persona, covering core flows (pick a game, play, track progress, switch profiles, sync data, custom game games, go offline/online, customize theme, parent overrides game settings, review session history, clear old data)
 - **Feature Requirements (Functional)**:
   - Account system (device-local profiles, sub-accounts for family sharing, no server-side auth, parent PIN for settings)
   - Game catalog (categories by grade: pre-K, K, years 1-6+; subjects: letters, math, reading, etc.)
-  - Game bookmarks and recents (children can bookmark favorite games; recently played games appear at the top of the dashboard)
+  - Game custom games and recents (children can custom game favorite games; recently played games appear at the top of the dashboard)
   - Offline-first gameplay with cloud sync (cloud storage providers, e.g. Google Drive / OneDrive, via RxDB)
   - Offline/online indicator (visible warning banner when offline; auto-detects reconnection and dismisses)
   - Speech integration (text-to-speech for instructions, speech-to-text for answers; parent-selectable voice per language per profile)
@@ -103,13 +103,13 @@ The core document. Contains:
   - `progress` -- per-game progress (scores, completion, streaks, timestamps)
   - `settings` -- app preferences (volume, speech rate, active profile)
   - `game_config_overrides` -- parent customizations per game or per grade band (retries, timer duration, always-win mode, difficulty level)
-  - `bookmarks` -- bookmarked games per profile (gameId, timestamp)
+  - `custom games` -- custom gameed games per profile (gameId, timestamp)
   - `themes` -- pre-defined + user-cloned themes (name, colors, fonts, owned by profile or family)
   - `session_history` -- one document per chunk of gameplay events. Fields: `id`, `sessionId`, `profileId`, `gameId`, `chunkIndex` (0-based, increments when a session overflows), `events[]` (timestamped array: `{ timestamp, action, payload, result }`), `createdAt`. Each document is capped at ~200 events or ~50KB to keep sync payloads small.
   - `session_history_index` -- one lightweight summary document per session. Fields: `sessionId`, `profileId`, `gameId`, `startedAt`, `endedAt`, `duration`, `finalScore`, `totalEvents`, `totalChunks`. Enables listing/filtering sessions without loading full event data.
   - `sync_meta` -- cloud sync state (last sync timestamp, conflict resolution, deviceId, device name)
   - `app_meta` -- app version (semver), last migration version, RxDB schema version
-- **Relationships**: profile -> progress (1:many), profile -> settings (1:1), profile -> game_config_overrides (1:many), profile -> bookmarks (1:many), profile|family -> themes (1:many), profile -> session_history_index (1:many), session_history_index -> session_history (1:many via sessionId)
+- **Relationships**: profile -> progress (1:many), profile -> settings (1:1), profile -> game_config_overrides (1:many), profile -> custom games (1:many), profile|family -> themes (1:many), profile -> session_history_index (1:many), session_history_index -> session_history (1:many via sessionId)
 - **Chunking Rules**:
   - Each `session_history` document is bounded: max ~200 events or ~50KB (whichever is hit first)
   - When a session exceeds the cap, the recorder creates a new document with `chunkIndex` incremented
@@ -159,7 +159,7 @@ The core document. Contains:
   - Users can **clone any theme and modify** it (color picker, font selector)
   - Theme can be set **per child** (each profile has its own theme) or **per family** (shared theme across all profiles)
   - Themes stored in RxDB `themes` collection, synced across devices
-- **Core Layouts**: Home (profile picker), Dashboard (game grid by subject/grade with bookmarked/recent games at top), Game Shell (consistent header + game area + controls), Settings, Parent Settings (game overrides, sync, session history viewer, data management, analytics)
+- **Core Layouts**: Home (profile picker), Dashboard (game grid by subject/grade with custom gameed/recent games at top), Game Shell (consistent header + game area + controls), Settings, Parent Settings (game overrides, sync, session history viewer, data management, analytics)
 - **Navigation**: Simple, icon-driven; back button always visible; breadcrumb for parents; grade-level adaptive (icons only for Pre-K, text+icons for older)
 - **Drag and Drop Helpers**:
   - Magnetic/snap effect: draggable items "pull toward" valid drop zones when within a configurable proximity threshold
@@ -203,13 +203,13 @@ New document covering multi-language support:
 
 - **Unit + Component Tests**: **Vitest** (test runner) + **React Testing Library** (component rendering and DOM queries); coverage targets for game logic, RxDB operations, component rendering, parent override merging
 - **TypeScript Strictness**: `strict: true`, `noImplicitAny: true`; ESLint with `@typescript-eslint/no-explicit-any` rule set to error; CI fails on any `any` usage
-- **E2E Tests**: Playwright; critical user flows (profile creation, game play, progress saving, cloud sync, offline/online transitions, profile switching, bookmark/recent games, session history recording and viewing, data cleanup flows)
+- **E2E Tests**: Playwright; critical user flows (profile creation, game play, progress saving, cloud sync, offline/online transitions, profile switching, custom game/recent games, session history recording and viewing, data cleanup flows)
 - **Visual Regression**: Playwright screenshots or Chromatic; baseline comparisons for key screens across all pre-defined themes
 - **Accessibility Tests**: axe-core integration in component tests; Playwright accessibility audits on all pages
 - **Offline Tests**: Service worker testing strategy; simulate offline/online transitions; verify offline indicator appears/disappears; verify RxDB queues and replays sync
 - **i18n Tests**: Verify all UI strings render correctly in en and pt-BR; snapshot tests for both languages
 - **Session History Tests**: Verify event recording during gameplay, chunk rollover when threshold exceeded, index summary accuracy, lazy-load of chunks in viewer, cleanup cascade (deleting index deletes all chunks)
-- **Test Data**: Fixtures and seed data for RxDB collections (profiles, progress, overrides, bookmarks, themes, session_history, session_history_index)
+- **Test Data**: Fixtures and seed data for RxDB collections (profiles, progress, overrides, custom games, themes, session_history, session_history_index)
 
 ## 9. CI/CD (`docs/ci-cd.md`)
 

@@ -1,5 +1,7 @@
 # WordSpell + NumberMatch — Design Spec
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+
 **Date:** 2026-04-03
 **Status:** In Review
 **Milestone:** 5 — Reference Games
@@ -272,7 +274,7 @@ interface NumberMatchRound {
 
 ---
 
-## 4. Shared: Game Presets and Bookmarks
+## 4. Shared: Game Presets and Custom games
 
 Both games support named presets (difficulty variants of the same `gameId`):
 
@@ -303,10 +305,10 @@ Both games support named presets (difficulty variants of the same `gameId`):
 }
 ```
 
-**Bookmark UX:**
+**Custom game UX:**
 
 - Dashboard game card: long-press (or ⋯ menu) → "Save as preset" → child names it.
-- Stored in RxDB `bookmarks` as `{ gameId, presetId, label }`.
+- Stored in RxDB `custom games` as `{ gameId, presetId, label }`.
 - Preset badge appears on the game card; tap to launch that config directly.
 - Parent can create / rename / delete presets in Parent Settings → Game Overrides.
 

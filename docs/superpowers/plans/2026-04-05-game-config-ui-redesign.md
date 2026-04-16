@@ -1,8 +1,10 @@
 # Game Config UI Redesign Implementation Plan
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Relocate game config editing from a floating gameplay overlay to (a) expandable bookmark chips on the homepage and (b) a collapsible settings section on the instructions screen, while adding bookmark colors, game descriptions, and last-config snapshotting.
+**Goal:** Relocate game config editing from a floating gameplay overlay to (a) expandable custom game chips on the homepage and (b) a collapsible settings section on the instructions screen, while adding custom game colors, game descriptions, and last-config snapshotting.
 
 **Architecture:** Foundation types and utilities first, then DB schema change, then UI leaf components (`GameNameChip`, `SavedConfigChip`, `ConfigFormFields`), then composite updates (`GameCard`, `SaveConfigDialog`, `InstructionsOverlay`), and finally wiring in the route components. Each task is independently testable and committable.
 
@@ -15,7 +17,7 @@
 | Action | Path                                                                          |
 | ------ | ----------------------------------------------------------------------------- |
 | Create | `src/lib/config-fields.ts`                                                    |
-| Create | `src/lib/bookmark-colors.ts`                                                  |
+| Create | `src/lib/custom game-colors.ts`                                               |
 | Create | `src/lib/config-tags.ts`                                                      |
 | Create | `src/lib/config-tags.test.ts`                                                 |
 | Create | `src/games/config-fields-registry.ts`                                         |
@@ -54,12 +56,12 @@
 
 ---
 
-## Task 1: Foundation — `ConfigField`, `BookmarkColor`, `configToTags`
+## Task 1: Foundation — `ConfigField`, `Custom gameColor`, `configToTags`
 
 **Files:**
 
 - Create: `src/lib/config-fields.ts`
-- Create: `src/lib/bookmark-colors.ts`
+- Create: `src/lib/custom game-colors.ts`
 - Create: `src/lib/config-tags.ts`
 - Create: `src/lib/config-tags.test.ts`
 
@@ -84,10 +86,10 @@ export type ConfigField =
   | { type: 'checkbox'; key: string; label: string };
 ```
 
-- [ ] **Step 1.2: Create `src/lib/bookmark-colors.ts`**
+- [ ] **Step 1.2: Create `src/lib/custom game-colors.ts`**
 
 ```ts
-// src/lib/bookmark-colors.ts
+// src/lib/custom game-colors.ts
 export const BOOKMARK_COLOR_KEYS = [
   'indigo',
   'teal',
@@ -103,7 +105,7 @@ export const BOOKMARK_COLOR_KEYS = [
   'cyan',
 ] as const;
 
-export type BookmarkColorKey = (typeof BOOKMARK_COLOR_KEYS)[number];
+export type Custom gameColorKey = (typeof BOOKMARK_COLOR_KEYS)[number];
 
 export type ColorTokens = {
   bg: string;
@@ -114,7 +116,7 @@ export type ColorTokens = {
   headerText: string;
 };
 
-export const BOOKMARK_COLORS: Record<BookmarkColorKey, ColorTokens> = {
+export const BOOKMARK_COLORS: Record<Custom gameColorKey, ColorTokens> = {
   indigo: {
     bg: '#eef2ff',
     border: '#c7d2fe',
@@ -213,7 +215,7 @@ export const BOOKMARK_COLORS: Record<BookmarkColorKey, ColorTokens> = {
   },
 };
 
-export const DEFAULT_BOOKMARK_COLOR: BookmarkColorKey = 'indigo';
+export const DEFAULT_BOOKMARK_COLOR: Custom gameColorKey = 'indigo';
 ```
 
 - [ ] **Step 1.3: Write the failing test for `configToTags`**
@@ -306,8 +308,8 @@ Expected: all 6 tests PASS
 - [ ] **Step 1.7: Commit**
 
 ```bash
-git add src/lib/config-fields.ts src/lib/bookmark-colors.ts src/lib/config-tags.ts src/lib/config-tags.test.ts
-git commit -m "feat: add ConfigField type, bookmark color palette, and configToTags utility"
+git add src/lib/config-fields.ts src/lib/custom game-colors.ts src/lib/config-tags.ts src/lib/config-tags.test.ts
+git commit -m "feat: add ConfigField type, custom game color palette, and configToTags utility"
 ```
 
 ---
@@ -1029,23 +1031,24 @@ describe('GameNameChip', () => {
     expect(screen.getByText('Word Spell')).toBeInTheDocument();
   });
 
-  it('renders bookmarkName badge when provided', () => {
+  it('renders custom gameName badge when provided', () => {
     render(
-      <GameNameChip title="Word Spell" bookmarkName="Easy Mode" />,
+      <GameNameChip title="Word Spell" custom gameName="Easy Mode" />,
     );
     expect(screen.getByText('Easy Mode')).toBeInTheDocument();
   });
 
-  it('renders subject badge when no bookmarkName', () => {
+  it('renders subject badge when no custom gameName', () => {
     render(<GameNameChip title="Word Spell" subject="reading" />);
     expect(screen.getByText('reading')).toBeInTheDocument();
   });
 
-  it('does not render subject badge when bookmarkName is present', () => {
+  it('does not render subject badge when custom gameName is present', () => {
     render(
       <GameNameChip
         title="Word Spell"
-        bookmarkName="Easy Mode"
+        custom
+        gameName="Easy Mode"
         subject="reading"
       />,
     );
@@ -1070,24 +1073,24 @@ import type { JSX } from 'react';
 import {
   BOOKMARK_COLORS,
   DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+} from '@/lib/custom game-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 
 type GameNameChipProps = {
   title: string;
-  bookmarkName?: string;
-  bookmarkColor?: BookmarkColorKey;
+  custom gameName?: string;
+  custom gameColor?: Custom gameColorKey;
   subject?: string;
 };
 
 export const GameNameChip = ({
   title,
-  bookmarkName,
-  bookmarkColor = DEFAULT_BOOKMARK_COLOR,
+  custom gameName,
+  custom gameColor = DEFAULT_BOOKMARK_COLOR,
   subject,
 }: GameNameChipProps): JSX.Element => {
-  const colors = bookmarkName
-    ? BOOKMARK_COLORS[bookmarkColor]
+  const colors = custom gameName
+    ? BOOKMARK_COLORS[custom gameColor]
     : BOOKMARK_COLORS.slate;
 
   return (
@@ -1105,7 +1108,7 @@ export const GameNameChip = ({
         >
           {title}
         </span>
-        {bookmarkName && (
+        {custom gameName && (
           <span
             className="rounded px-2 py-0.5 text-xs font-semibold"
             style={{
@@ -1114,10 +1117,10 @@ export const GameNameChip = ({
               border: `1px solid ${colors.border}`,
             }}
           >
-            {bookmarkName}
+            {custom gameName}
           </span>
         )}
-        {!bookmarkName && subject && (
+        {!custom gameName && subject && (
           <span
             className="rounded px-2 py-0.5 text-xs font-medium text-muted-foreground"
             style={{ background: colors.bg }}
@@ -1148,7 +1151,7 @@ git commit -m "feat: add GameNameChip display-only identity chip"
 
 ---
 
-## Task 6: `SavedConfigChip` — expandable bookmark chip with inline form
+## Task 6: `SavedConfigChip` — expandable custom game chip with inline form
 
 **Files:**
 
@@ -1189,7 +1192,7 @@ const fields: ConfigField[] = [
 ];
 
 describe('SavedConfigChip', () => {
-  it('renders the bookmark name', () => {
+  it('renders the custom game name', () => {
     render(
       <SavedConfigChip
         doc={mockDoc}
@@ -1333,8 +1336,8 @@ import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
 import {
   BOOKMARK_COLORS,
   DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+} from '@/lib/custom game-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 import type { ConfigField } from '@/lib/config-fields';
 import { configToTags } from '@/lib/config-tags';
 
@@ -1362,7 +1365,7 @@ export const SavedConfigChip = ({
   const [editName, setEditName] = useState(doc.name);
 
   const colorKey =
-    (doc.color as BookmarkColorKey) ?? DEFAULT_BOOKMARK_COLOR;
+    (doc.color as Custom gameColorKey) ?? DEFAULT_BOOKMARK_COLOR;
   const colors = BOOKMARK_COLORS[colorKey];
   const tags = configToTags(doc.config);
 
@@ -1466,7 +1469,7 @@ export const SavedConfigChip = ({
             onChange={setEditConfig}
           />
           <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
-            Bookmark name
+            Custom game name
             <input
               type="text"
               value={editName}
@@ -1511,7 +1514,7 @@ Expected: all 7 tests PASS
 
 ```bash
 git add src/components/SavedConfigChip.tsx src/components/SavedConfigChip.test.tsx
-git commit -m "feat: add SavedConfigChip expandable bookmark chip with inline form"
+git commit -m "feat: add SavedConfigChip expandable custom game chip with inline form"
 ```
 
 ---
@@ -1593,9 +1596,9 @@ Inside the `saveConfig` object, add:
 ```json
 "colorLabel": "Colour",
 "update": "Update \"{{name}}\"",
-"saveAsNew": "Save as new bookmark…",
-"saveBookmarkLabel": "Save as bookmark",
-"saveBookmarkPlaceholder": "e.g. Easy Mode"
+"saveAsNew": "Save as new custom game…",
+"saveCustom gameLabel": "Save as custom game",
+"saveCustom gamePlaceholder": "e.g. Easy Mode"
 ```
 
 - [ ] **Step 7.5: Add the same keys to `src/lib/i18n/locales/pt-BR/common.json`**
@@ -1604,8 +1607,8 @@ Inside the `saveConfig` object, add:
 "colorLabel": "Cor",
 "update": "Actualizar \"{{name}}\"",
 "saveAsNew": "Salvar como novo favorito…",
-"saveBookmarkLabel": "Salvar como favorito",
-"saveBookmarkPlaceholder": "ex: Modo Fácil"
+"saveCustom gameLabel": "Salvar como favorito",
+"saveCustom gamePlaceholder": "ex: Modo Fácil"
 ```
 
 - [ ] **Step 7.6: Update `src/components/SaveConfigDialog.tsx`**
@@ -1629,14 +1632,14 @@ import {
   BOOKMARK_COLOR_KEYS,
   BOOKMARK_COLORS,
   DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+} from '@/lib/custom game-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 
 type SaveConfigDialogProps = {
   open: boolean;
   suggestedName: string;
   existingNames: string[];
-  onSave: (name: string, color: BookmarkColorKey) => void;
+  onSave: (name: string, color: Custom gameColorKey) => void;
   onCancel: () => void;
 };
 
@@ -1649,7 +1652,7 @@ export const SaveConfigDialog = ({
 }: SaveConfigDialogProps) => {
   const { t } = useTranslation('common');
   const [name, setName] = useState(suggestedName);
-  const [color, setColor] = useState<BookmarkColorKey>(
+  const [color, setColor] = useState<Custom gameColorKey>(
     DEFAULT_BOOKMARK_COLOR,
   );
   const [error, setError] = useState('');
@@ -1776,7 +1779,7 @@ Replace the entire file:
 
 ```tsx
 // src/components/GameCard.tsx
-import { BookmarkIcon } from 'lucide-react';
+import { Custom gameIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
@@ -1791,7 +1794,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 
 type GameCardProps = {
   entry: GameCatalogEntry;
@@ -1799,7 +1802,7 @@ type GameCardProps = {
   onSaveConfig: (
     gameId: string,
     name: string,
-    color: BookmarkColorKey,
+    color: Custom gameColorKey,
   ) => Promise<void>;
   onRemoveConfig: (configId: string) => Promise<void>;
   onUpdateConfig: (
@@ -1841,7 +1844,7 @@ export const GameCard = ({
   const hasConfigs = savedConfigs.length > 0;
   const configFields = getConfigFields(entry.id);
 
-  const handleSave = async (name: string, color: BookmarkColorKey) => {
+  const handleSave = async (name: string, color: Custom gameColorKey) => {
     await onSaveConfig(entry.id, name, color);
     setDialogOpen(false);
   };
@@ -1860,7 +1863,7 @@ export const GameCard = ({
               aria-label={tCommon('saveConfig.title')}
               onClick={() => setDialogOpen(true)}
             >
-              <BookmarkIcon
+              <Custom gameIcon
                 size={16}
                 className={hasConfigs ? 'fill-current' : ''}
               />
@@ -1928,7 +1931,7 @@ type GameGridProps = {
   onSaveConfig: (
     gameId: string,
     name: string,
-    color: BookmarkColorKey,
+    color: Custom gameColorKey,
   ) => Promise<void>;
   onRemoveConfig: (configId: string) => Promise<void>;
   onUpdateConfig: (
@@ -1944,7 +1947,7 @@ type GameGridProps = {
 };
 ```
 
-Add `import type { BookmarkColorKey } from '@/lib/bookmark-colors';` to imports.
+Add `import type { Custom gameColorKey } from '@/lib/custom game-colors';` to imports.
 
 Pass `onUpdateConfig={onUpdateConfig}` to `<GameCard>` in the render.
 
@@ -2074,7 +2077,7 @@ const baseProps = {
   subject: 'reading' as const,
   config: { inputMethod: 'drag', totalRounds: 8, ttsEnabled: true },
   onConfigChange: vi.fn(),
-  onSaveBookmark: vi.fn(),
+  onSaveCustom game: vi.fn(),
   configFields: fields,
 };
 
@@ -2122,18 +2125,18 @@ describe('InstructionsOverlay', () => {
     expect(screen.getByLabelText('Input method')).toBeInTheDocument();
   });
 
-  it('renders bookmarkName in the chip when provided', () => {
+  it('renders custom gameName in the chip when provided', () => {
     render(
       <InstructionsOverlay
         {...baseProps}
-        bookmarkName="Easy Mode"
-        bookmarkColor="teal"
+        custom gameName="Easy Mode"
+        custom gameColor="teal"
       />,
     );
     expect(screen.getByText('Easy Mode')).toBeInTheDocument();
   });
 
-  it('shows "Save as bookmark" input when no bookmarkName', async () => {
+  it('shows "Save as custom game" input when no custom gameName', async () => {
     render(<InstructionsOverlay {...baseProps} />);
     await userEvent.click(
       screen.getByRole('button', { name: /settings/i }),
@@ -2143,14 +2146,14 @@ describe('InstructionsOverlay', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows Update and Save as new buttons when bookmarkName is provided', async () => {
-    const onUpdateBookmark = vi.fn();
+  it('shows Update and Save as new buttons when custom gameName is provided', async () => {
+    const onUpdateCustom game = vi.fn();
     render(
       <InstructionsOverlay
         {...baseProps}
-        bookmarkName="Easy Mode"
-        bookmarkColor="teal"
-        onUpdateBookmark={onUpdateBookmark}
+        custom gameName="Easy Mode"
+        custom gameColor="teal"
+        onUpdateCustom game={onUpdateCustom game}
       />,
     );
     await userEvent.click(
@@ -2172,7 +2175,7 @@ describe('InstructionsOverlay', () => {
 yarn test src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
 ```
 
-Expected: failures on new prop tests (gameTitle, bookmarkName, settings chip, etc.)
+Expected: failures on new prop tests (gameTitle, custom gameName, settings chip, etc.)
 
 - [ ] **Step 8.3: Replace `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`**
 
@@ -2182,11 +2185,11 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
 import { GameNameChip } from '@/components/GameNameChip';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 import {
   BOOKMARK_COLORS,
   DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
+} from '@/lib/custom game-colors';
 import type { ConfigField } from '@/lib/config-fields';
 import { configToTags } from '@/lib/config-tags';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
@@ -2196,16 +2199,16 @@ interface InstructionsOverlayProps {
   onStart: () => void;
   ttsEnabled: boolean;
   gameTitle: string;
-  bookmarkName?: string;
-  bookmarkColor?: BookmarkColorKey;
+  custom gameName?: string;
+  custom gameColor?: Custom gameColorKey;
   subject?: string;
   config: Record<string, unknown>;
   onConfigChange: (config: Record<string, unknown>) => void;
-  onSaveBookmark: (
+  onSaveCustom game: (
     name: string,
-    color: BookmarkColorKey,
+    color: Custom gameColorKey,
   ) => Promise<void>;
-  onUpdateBookmark?: (
+  onUpdateCustom game?: (
     name: string,
     config: Record<string, unknown>,
   ) => Promise<void>;
@@ -2217,18 +2220,18 @@ export const InstructionsOverlay = ({
   onStart,
   ttsEnabled,
   gameTitle,
-  bookmarkName,
-  bookmarkColor = DEFAULT_BOOKMARK_COLOR,
+  custom gameName,
+  custom gameColor = DEFAULT_BOOKMARK_COLOR,
   subject,
   config,
   onConfigChange,
-  onSaveBookmark,
-  onUpdateBookmark,
+  onSaveCustom game,
+  onUpdateCustom game,
   configFields,
 }: InstructionsOverlayProps) => {
   const { t } = useTranslation('games');
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [newBookmarkName, setNewBookmarkName] = useState('');
+  const [newCustom gameName, setNewCustom gameName] = useState('');
 
   useEffect(() => {
     if (ttsEnabled) speak(text);
@@ -2239,7 +2242,7 @@ export const InstructionsOverlay = ({
   }, []);
 
   const settingsColors =
-    BOOKMARK_COLORS[bookmarkColor ?? DEFAULT_BOOKMARK_COLOR];
+    BOOKMARK_COLORS[custom gameColor ?? DEFAULT_BOOKMARK_COLOR];
   const tags = configToTags(config);
 
   return (
@@ -2253,8 +2256,8 @@ export const InstructionsOverlay = ({
         <div className="w-full">
           <GameNameChip
             title={gameTitle}
-            bookmarkName={bookmarkName}
-            bookmarkColor={bookmarkColor}
+            custom gameName={custom gameName}
+            custom gameColor={custom gameColor}
             subject={subject}
           />
         </div>
@@ -2329,73 +2332,73 @@ export const InstructionsOverlay = ({
               />
 
               <div className="border-t border-border pt-3 flex flex-col gap-2">
-                {bookmarkName && onUpdateBookmark ? (
+                {custom gameName && onUpdateCustom game ? (
                   <>
                     <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
-                      Bookmark name
+                      Custom game name
                       <input
                         type="text"
-                        defaultValue={bookmarkName}
-                        id="instructions-bookmark-name"
+                        defaultValue={custom gameName}
+                        id="instructions-custom game-name"
                         className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
                       />
                     </label>
                     <button
                       type="button"
-                      aria-label={`Update ${bookmarkName}`}
+                      aria-label={`Update ${custom gameName}`}
                       onClick={() => {
                         const el = document.getElementById(
-                          'instructions-bookmark-name',
+                          'instructions-custom game-name',
                         ) as HTMLInputElement | null;
-                        void onUpdateBookmark(
-                          el?.value ?? bookmarkName,
+                        void onUpdateCustom game(
+                          el?.value ?? custom gameName,
                           config,
                         );
                       }}
                       className="h-12 w-full rounded-xl font-bold text-white text-sm"
                       style={{ background: settingsColors.playBg }}
                     >
-                      {t('instructions.updateBookmark', {
-                        name: bookmarkName,
-                        defaultValue: `Update "${bookmarkName}"`,
+                      {t('instructions.updateCustom game', {
+                        name: custom gameName,
+                        defaultValue: `Update "${custom gameName}"`,
                       })}
                     </button>
                     <button
                       type="button"
-                      aria-label="Save as new bookmark"
+                      aria-label="Save as new custom game"
                       onClick={() => setSettingsOpen(false)}
                       className="h-12 w-full rounded-xl border border-input bg-background text-sm font-semibold text-primary"
                     >
                       {t('instructions.saveAsNew', {
-                        defaultValue: 'Save as new bookmark…',
+                        defaultValue: 'Save as new custom game…',
                       })}
                     </button>
                   </>
                 ) : (
                   <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
-                    {t('common:saveConfig.saveBookmarkLabel', {
-                      defaultValue: 'Save as bookmark',
+                    {t('common:saveConfig.saveCustom gameLabel', {
+                      defaultValue: 'Save as custom game',
                     })}
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        value={newBookmarkName}
+                        value={newCustom gameName}
                         onChange={(e) =>
-                          setNewBookmarkName(e.target.value)
+                          setNewCustom gameName(e.target.value)
                         }
                         placeholder="e.g. Easy Mode"
                         className="h-12 flex-1 rounded-lg border border-input bg-background px-3 text-sm"
                       />
                       <button
                         type="button"
-                        aria-label="Save bookmark"
+                        aria-label="Save custom game"
                         onClick={() => {
-                          if (newBookmarkName.trim()) {
-                            void onSaveBookmark(
-                              newBookmarkName.trim(),
+                          if (newCustom gameName.trim()) {
+                            void onSaveCustom game(
+                              newCustom gameName.trim(),
                               DEFAULT_BOOKMARK_COLOR,
                             );
-                            setNewBookmarkName('');
+                            setNewCustom gameName('');
                           }
                         }}
                         className="h-12 w-12 flex-shrink-0 rounded-lg bg-primary text-lg text-primary-foreground"
@@ -2441,7 +2444,7 @@ Expected: all 9 tests PASS
 
 ```bash
 git add src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx src/lib/i18n/locales/en/games.json src/lib/i18n/locales/pt-BR/games.json
-git commit -m "feat: redesign InstructionsOverlay with game chip, settings, bookmark save"
+git commit -m "feat: redesign InstructionsOverlay with game chip, settings, custom game save"
 ```
 
 ---
@@ -2493,7 +2496,7 @@ yarn test src/games/sort-numbers/SortNumbers/SortNumbers.test.tsx
 
 Expected: all remaining tests PASS
 
-- [ ] **Step 9.5: Rewrite `$gameId.tsx` — remove config panels, add bookmark loader data, lift instructions**
+- [ ] **Step 9.5: Rewrite `$gameId.tsx` — remove config panels, add custom game loader data, lift instructions**
 
 Replace the relevant sections of `src/routes/$locale/_app/game/$gameId.tsx`.
 
@@ -2506,7 +2509,7 @@ import { wordSpellConfigFields } from '@/games/word-spell/types';
 import { numberMatchConfigFields } from '@/games/number-match/types';
 import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 ```
 
 **Update `GameRouteLoaderData`:**
@@ -2518,18 +2521,18 @@ interface GameRouteLoaderData {
   sessionId: string;
   meta: SessionMeta;
   gameSpecificConfig: Record<string, unknown> | null;
-  bookmarkId: string | null;
-  bookmarkName: string | null;
-  bookmarkColor: string | null;
+  custom gameId: string | null;
+  custom gameName: string | null;
+  custom gameColor: string | null;
 }
 ```
 
-**Update the loader** to also fetch and return bookmark metadata:
+**Update the loader** to also fetch and return custom game metadata:
 
 ```ts
-let bookmarkId: string | null = null;
-let bookmarkName: string | null = null;
-let bookmarkColor: string | null = null;
+let custom gameId: string | null = null;
+let custom gameName: string | null = null;
+let custom gameColor: string | null = null;
 
 if (deps.configId) {
   const savedDoc = await db.saved_game_configs
@@ -2537,9 +2540,9 @@ if (deps.configId) {
     .exec();
   if (savedDoc) {
     gameSpecificConfig = savedDoc.config;
-    bookmarkId = savedDoc.id;
-    bookmarkName = savedDoc.name;
-    bookmarkColor = savedDoc.color;
+    custom gameId = savedDoc.id;
+    custom gameName = savedDoc.name;
+    custom gameColor = savedDoc.color;
   }
 } else {
   const lastDoc = await db.saved_game_configs
@@ -2554,9 +2557,9 @@ return {
   sessionId,
   meta,
   gameSpecificConfig,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor,
+  custom gameId,
+  custom gameName,
+  custom gameColor,
 };
 ```
 
@@ -2568,15 +2571,15 @@ return {
 const WordSpellGameBody = ({
   gameId,
   gameSpecificConfig,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor,
+  custom gameId,
+  custom gameName,
+  custom gameColor,
 }: {
   gameId: string;
   gameSpecificConfig: Record<string, unknown> | null;
-  bookmarkId: string | null;
-  bookmarkName: string | null;
-  bookmarkColor: string | null;
+  custom gameId: string | null;
+  custom gameName: string | null;
+  custom gameColor: string | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
   const { save, updateConfig } = useSavedConfigs();
@@ -2601,12 +2604,12 @@ const WordSpellGameBody = ({
         onStart={() => setShowInstructions(false)}
         ttsEnabled={cfg.ttsEnabled}
         gameTitle={t('word-spell')}
-        bookmarkName={bookmarkName ?? undefined}
-        bookmarkColor={(bookmarkColor as BookmarkColorKey) ?? undefined}
+        custom gameName={custom gameName ?? undefined}
+        custom gameColor={(custom gameColor as Custom gameColorKey) ?? undefined}
         subject="reading"
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-        onSaveBookmark={async (name, color) => {
+        onSaveCustom game={async (name, color) => {
           await save({
             gameId,
             name,
@@ -2614,10 +2617,10 @@ const WordSpellGameBody = ({
             config: cfg as unknown as Record<string, unknown>,
           });
         }}
-        onUpdateBookmark={
-          bookmarkId
+        onUpdateCustom game={
+          custom gameId
             ? async (name, config) => {
-                await updateConfig(bookmarkId, config, name);
+                await updateConfig(custom gameId, config, name);
               }
             : undefined
         }
@@ -2636,15 +2639,15 @@ const WordSpellGameBody = ({
 const NumberMatchGameBody = ({
   gameId,
   gameSpecificConfig,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor,
+  custom gameId,
+  custom gameName,
+  custom gameColor,
 }: {
   gameId: string;
   gameSpecificConfig: Record<string, unknown> | null;
-  bookmarkId: string | null;
-  bookmarkName: string | null;
-  bookmarkColor: string | null;
+  custom gameId: string | null;
+  custom gameName: string | null;
+  custom gameColor: string | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
   const { save, updateConfig } = useSavedConfigs();
@@ -2669,12 +2672,12 @@ const NumberMatchGameBody = ({
         onStart={() => setShowInstructions(false)}
         ttsEnabled={cfg.ttsEnabled}
         gameTitle={t('number-match')}
-        bookmarkName={bookmarkName ?? undefined}
-        bookmarkColor={(bookmarkColor as BookmarkColorKey) ?? undefined}
+        custom gameName={custom gameName ?? undefined}
+        custom gameColor={(custom gameColor as Custom gameColorKey) ?? undefined}
         subject="math"
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
-        onSaveBookmark={async (name, color) => {
+        onSaveCustom game={async (name, color) => {
           await save({
             gameId,
             name,
@@ -2682,10 +2685,10 @@ const NumberMatchGameBody = ({
             config: cfg as unknown as Record<string, unknown>,
           });
         }}
-        onUpdateBookmark={
-          bookmarkId
+        onUpdateCustom game={
+          custom gameId
             ? async (name, config) => {
-                await updateConfig(bookmarkId, config, name);
+                await updateConfig(custom gameId, config, name);
               }
             : undefined
         }
@@ -2704,15 +2707,15 @@ const NumberMatchGameBody = ({
 const SortNumbersGameBody = ({
   gameId,
   gameSpecificConfig,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor,
+  custom gameId,
+  custom gameName,
+  custom gameColor,
 }: {
   gameId: string;
   gameSpecificConfig: Record<string, unknown> | null;
-  bookmarkId: string | null;
-  bookmarkName: string | null;
-  bookmarkColor: string | null;
+  custom gameId: string | null;
+  custom gameName: string | null;
+  custom gameColor: string | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
   const { save, updateConfig } = useSavedConfigs();
@@ -2737,12 +2740,12 @@ const SortNumbersGameBody = ({
         onStart={() => setShowInstructions(false)}
         ttsEnabled={cfg.ttsEnabled}
         gameTitle={t('sort-numbers')}
-        bookmarkName={bookmarkName ?? undefined}
-        bookmarkColor={(bookmarkColor as BookmarkColorKey) ?? undefined}
+        custom gameName={custom gameName ?? undefined}
+        custom gameColor={(custom gameColor as Custom gameColorKey) ?? undefined}
         subject="math"
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
-        onSaveBookmark={async (name, color) => {
+        onSaveCustom game={async (name, color) => {
           await save({
             gameId,
             name,
@@ -2750,10 +2753,10 @@ const SortNumbersGameBody = ({
             config: cfg as unknown as Record<string, unknown>,
           });
         }}
-        onUpdateBookmark={
-          bookmarkId
+        onUpdateCustom game={
+          custom gameId
             ? async (name, config) => {
-                await updateConfig(bookmarkId, config, name);
+                await updateConfig(custom gameId, config, name);
               }
             : undefined
         }
@@ -2772,24 +2775,24 @@ const SortNumbersGameBody = ({
 const GameBody = ({
   gameId,
   gameSpecificConfig,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor,
+  custom gameId,
+  custom gameName,
+  custom gameColor,
 }: {
   gameId: string;
   gameSpecificConfig: Record<string, unknown> | null;
-  bookmarkId: string | null;
-  bookmarkName: string | null;
-  bookmarkColor: string | null;
+  custom gameId: string | null;
+  custom gameName: string | null;
+  custom gameColor: string | null;
 }): JSX.Element => {
   if (gameId === 'sort-numbers') {
     return (
       <SortNumbersGameBody
         gameId={gameId}
         gameSpecificConfig={gameSpecificConfig}
-        bookmarkId={bookmarkId}
-        bookmarkName={bookmarkName}
-        bookmarkColor={bookmarkColor}
+        custom gameId={custom gameId}
+        custom gameName={custom gameName}
+        custom gameColor={custom gameColor}
       />
     );
   }
@@ -2798,9 +2801,9 @@ const GameBody = ({
       <WordSpellGameBody
         gameId={gameId}
         gameSpecificConfig={gameSpecificConfig}
-        bookmarkId={bookmarkId}
-        bookmarkName={bookmarkName}
-        bookmarkColor={bookmarkColor}
+        custom gameId={custom gameId}
+        custom gameName={custom gameName}
+        custom gameColor={custom gameColor}
       />
     );
   }
@@ -2809,9 +2812,9 @@ const GameBody = ({
       <NumberMatchGameBody
         gameId={gameId}
         gameSpecificConfig={gameSpecificConfig}
-        bookmarkId={bookmarkId}
-        bookmarkName={bookmarkName}
-        bookmarkColor={bookmarkColor}
+        custom gameId={custom gameId}
+        custom gameName={custom gameName}
+        custom gameColor={custom gameColor}
       />
     );
   }
@@ -2832,9 +2835,9 @@ export const GameRoute = ({
   sessionId,
   meta,
   gameSpecificConfig,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor,
+  custom gameId,
+  custom gameName,
+  custom gameColor,
 }: GameRouteLoaderData): JSX.Element => (
   <GameShell
     config={config}
@@ -2847,9 +2850,9 @@ export const GameRoute = ({
     <GameBody
       gameId={config.gameId}
       gameSpecificConfig={gameSpecificConfig}
-      bookmarkId={bookmarkId}
-      bookmarkName={bookmarkName}
-      bookmarkColor={bookmarkColor}
+      custom gameId={custom gameId}
+      custom gameName={custom gameName}
+      custom gameColor={custom gameColor}
     />
   </GameShell>
 );
@@ -2880,7 +2883,7 @@ git commit -m "feat: lift instructions to game bodies, remove config panels from
 
 ---
 
-## Task 10: `index.tsx` — snapshot last-played config on bookmark save
+## Task 10: `index.tsx` — snapshot last-played config on custom game save
 
 **Files:**
 
@@ -2912,7 +2915,7 @@ const handleSaveConfig = async (
     gameId,
     name,
     config: lastConfig,
-    color: color as BookmarkColorKey,
+    color: color as Custom gameColorKey,
   });
 };
 ```
@@ -2934,7 +2937,7 @@ Add missing imports at the top:
 ```ts
 import { getOrCreateDatabase } from '@/db/create-database';
 import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 ```
 
 Pass `onUpdateConfig={handleUpdateConfig}` to `<GameGrid>`.
@@ -2959,7 +2962,7 @@ Expected: all tests PASS
 
 ```bash
 git add src/routes/$locale/_app/index.tsx
-git commit -m "feat: snapshot last-played config when saving a bookmark from homepage"
+git commit -m "feat: snapshot last-played config when saving a custom game from homepage"
 ```
 
 ---
@@ -2968,24 +2971,24 @@ git commit -m "feat: snapshot last-played config when saving a bookmark from hom
 
 After writing the plan, checking spec coverage:
 
-| Spec requirement                                            | Covered by task                     |
-| ----------------------------------------------------------- | ----------------------------------- |
-| Hide config panel during gameplay                           | Task 9 (remove `*ConfigPanel`)      |
-| GameCard: game description                                  | Task 7 (descriptionKey + rendering) |
-| GameCard: expandable bookmark chips with config tags        | Task 6 + 7                          |
-| GameCard: inline edit form                                  | Task 4 + 6                          |
-| Bookmark color (chosen at save time)                        | Task 1 + 2 + 7                      |
-| Save config snapshots last-played config                    | Task 10                             |
-| `configToTags` auto-generates summary                       | Task 1                              |
-| `ConfigField` / `configFields` per game                     | Task 3                              |
-| `config-fields-registry` lookup                             | Task 3                              |
-| `GameNameChip` display-only                                 | Task 5                              |
-| `SavedConfigChip` component                                 | Task 6                              |
-| `useSavedConfigs.updateConfig`                              | Task 2                              |
-| `SavedGameConfigDoc.color` + migration                      | Task 2                              |
-| `InstructionsOverlay` redesign                              | Task 8                              |
-| Instructions: GameNameChip → text → Let's go! → ⚙️ Settings | Task 8                              |
-| Settings: collapsed with tags, expandable with form         | Task 8                              |
-| Settings: Update bookmark / Save as new / Save bookmark     | Task 8                              |
-| Lift instructions out of game components                    | Task 9                              |
-| Bookmark metadata (id, name, color) in loader               | Task 9                              |
+| Spec requirement                                              | Covered by task                     |
+| ------------------------------------------------------------- | ----------------------------------- |
+| Hide config panel during gameplay                             | Task 9 (remove `*ConfigPanel`)      |
+| GameCard: game description                                    | Task 7 (descriptionKey + rendering) |
+| GameCard: expandable custom game chips with config tags       | Task 6 + 7                          |
+| GameCard: inline edit form                                    | Task 4 + 6                          |
+| Custom game color (chosen at save time)                       | Task 1 + 2 + 7                      |
+| Save config snapshots last-played config                      | Task 10                             |
+| `configToTags` auto-generates summary                         | Task 1                              |
+| `ConfigField` / `configFields` per game                       | Task 3                              |
+| `config-fields-registry` lookup                               | Task 3                              |
+| `GameNameChip` display-only                                   | Task 5                              |
+| `SavedConfigChip` component                                   | Task 6                              |
+| `useSavedConfigs.updateConfig`                                | Task 2                              |
+| `SavedGameConfigDoc.color` + migration                        | Task 2                              |
+| `InstructionsOverlay` redesign                                | Task 8                              |
+| Instructions: GameNameChip → text → Let's go! → ⚙️ Settings   | Task 8                              |
+| Settings: collapsed with tags, expandable with form           | Task 8                              |
+| Settings: Update custom game / Save as new / Save custom game | Task 8                              |
+| Lift instructions out of game components                      | Task 9                              |
+| Custom game metadata (id, name, color) in loader              | Task 9                              |

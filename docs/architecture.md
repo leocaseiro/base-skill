@@ -141,10 +141,10 @@ export const Route = createFileRoute('/_app/dashboard')({
     }
   },
   loader: async ({ context }) => {
-    // Pre-fetch game catalog + bookmarks from RxDB
+    // Pre-fetch game catalog + custom games from RxDB
     return {
       games: await context.db.games.find().exec(),
-      bookmarks: await context.db.bookmarks
+      custom games: await context.db.custom games
         .find({ selector: { profileId: context.activeProfile.id } })
         .exec(),
     };
@@ -223,7 +223,7 @@ __root.tsx
     └── [child route outlet]
         ├── _app/index.tsx     → ProfilePicker
         ├── _app/dashboard.tsx → Dashboard
-        │   ├── BookmarkedGamesRow
+        │   ├── Custom gameedGamesRow
         │   ├── RecentGamesRow
         │   └── GameGrid (by subject/grade)
         ├── _app/game/$gameId.tsx → GameShell
@@ -449,7 +449,7 @@ OAuth tokens are stored **encrypted in IndexedDB** — never in `localStorage` o
 Each synced record includes a `deviceId` field (generated once per device, stored in `sync_meta`):
 
 - **Device-specific data** (e.g., available TTS voices) is tagged with `deviceId` and not applied on other devices.
-- **Shared data** (progress, bookmarks, themes) syncs across all devices.
+- **Shared data** (progress, custom games, themes) syncs across all devices.
 - On a new device, if the synced voice is unavailable, the app falls back to the OS default voice for that language.
 
 ### Conflict Resolution
@@ -460,7 +460,7 @@ Each synced record includes a `deviceId` field (generated once per device, store
 | `progress`              | Merge: take max score, sum stars, extend streaks              |
 | `settings`              | Last-write-wins (per profile)                                 |
 | `game_config_overrides` | Last-write-wins (by `updatedAt`)                              |
-| `bookmarks`             | Union (all bookmarks from all devices kept)                   |
+| `custom games`          | Union (all custom games from all devices kept)                |
 | `themes`                | Last-write-wins (by `updatedAt`)                              |
 | `session_history`       | Append-only; no conflicts (chunks are immutable once written) |
 | `session_history_index` | Append-only; no conflicts                                     |

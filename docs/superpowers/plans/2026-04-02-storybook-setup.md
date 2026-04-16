@@ -1,5 +1,7 @@
 # Storybook Setup Implementation Plan
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Install and configure Storybook 10.3+ with full component/service stories, visual regression testing, a11y CI, GitHub Pages deployment at `/base-skill/docs/`, and agent-facing Storybook MCP.
@@ -52,8 +54,8 @@
 - `src/lib/game-event-bus.demo.tsx`
 - `src/db/hooks/useSettings.stories.mdx`
 - `src/db/hooks/useSettings.demo.tsx`
-- `src/db/hooks/useBookmarks.stories.mdx`
-- `src/db/hooks/useBookmarks.demo.tsx`
+- `src/db/hooks/useCustom games.stories.mdx`
+- `src/db/hooks/useCustom games.demo.tsx`
 - `src/db/hooks/useRxQuery.stories.mdx`
 - `src/db/hooks/useRxQuery.demo.tsx`
 
@@ -1126,7 +1128,7 @@ git commit -m "docs(storybook): add AlertDialog, DropdownMenu, Sheet, and Sonner
 
 - Create: `src/components/GameCard.stories.tsx`
 
-`GameCard` props: `entry: GameCatalogEntry`, `isBookmarked: boolean`, `onBookmarkToggle: (gameId: string) => void`, `onPlay: (gameId: string) => void`. It uses `useTranslation` — i18n is already initialised in `preview.ts`.
+`GameCard` props: `entry: GameCatalogEntry`, `isCustom gameed: boolean`, `onCustom gameToggle: (gameId: string) => void`, `onPlay: (gameId: string) => void`. It uses `useTranslation` — i18n is already initialised in `preview.ts`.
 
 - **Step 1: Write `GameCard.stories.tsx`**
 
@@ -1145,10 +1147,10 @@ const meta: Meta<typeof GameCard> = {
       levels: ['1', '2'],
       subject: 'math',
     },
-    isBookmarked: false,
+    isCustom gameed: false,
   },
   argTypes: {
-    onBookmarkToggle: { action: 'bookmarkToggled' },
+    onCustom gameToggle: { action: 'custom gameToggled' },
     onPlay: { action: 'played' },
   },
 };
@@ -1158,8 +1160,8 @@ type Story = StoryObj<typeof GameCard>;
 
 export const Default: Story = {};
 
-export const Bookmarked: Story = {
-  args: { isBookmarked: true },
+export const Custom gameed: Story = {
+  args: { isCustom gameed: true },
 };
 
 export const MultiLevel: Story = {
@@ -1208,7 +1210,7 @@ git commit -m "docs(storybook): add GameCard stories"
 
 - Create: `src/components/GameGrid.stories.tsx`
 
-`GameGrid` props: `entries`, `bookmarkedIds`, `onBookmarkToggle`, `onPlay`, `page`, `totalPages`, `onPageChange`.
+`GameGrid` props: `entries`, `custom gameedIds`, `onCustom gameToggle`, `onPlay`, `page`, `totalPages`, `onPageChange`.
 
 - **Step 1: Write `GameGrid.stories.tsx`**
 
@@ -1243,12 +1245,12 @@ const meta: Meta<typeof GameGrid> = {
   tags: ['autodocs'],
   args: {
     entries: SAMPLE_ENTRIES,
-    bookmarkedIds: new Set<string>(),
+    custom gameedIds: new Set<string>(),
     page: 1,
     totalPages: 1,
   },
   argTypes: {
-    onBookmarkToggle: { action: 'bookmarkToggled' },
+    onCustom gameToggle: { action: 'custom gameToggled' },
     onPlay: { action: 'played' },
     onPageChange: { action: 'pageChanged' },
   },
@@ -1259,9 +1261,9 @@ type Story = StoryObj<typeof GameGrid>;
 
 export const Default: Story = {};
 
-export const WithBookmarks: Story = {
+export const WithCustom games: Story = {
   args: {
-    bookmarkedIds: new Set(['math-addition']),
+    custom gameedIds: new Set(['math-addition']),
   },
 };
 
@@ -1905,20 +1907,20 @@ git commit -m "docs(storybook): add useSettings MDX story and fake-indexeddb dem
 
 ---
 
-## Task 22: useBookmarks MDX + interactive demo
+## Task 22: useCustom games MDX + interactive demo
 
 **Files:**
 
-- Create: `src/db/hooks/useBookmarks.stories.mdx`
-- Create: `src/db/hooks/useBookmarks.demo.tsx`
-- **Step 1: Write `useBookmarks.demo.tsx`**
+- Create: `src/db/hooks/useCustom games.stories.mdx`
+- Create: `src/db/hooks/useCustom games.demo.tsx`
+- **Step 1: Write `useCustom games.demo.tsx`**
 
 ```tsx
-// src/db/hooks/useBookmarks.demo.tsx
+// src/db/hooks/useCustom games.demo.tsx
 import { IDBFactory } from 'fake-indexeddb';
 import { DbProvider } from '#/providers/DbProvider';
 import { getOrCreateDatabase } from '#/db';
-import { useBookmarks } from './useBookmarks';
+import { useCustom games } from './useCustom games';
 import { Button } from '#/components/ui/button';
 
 const GAME_IDS = [
@@ -1933,26 +1935,26 @@ const openFakeDatabase = () => {
   return getOrCreateDatabase();
 };
 
-const BookmarksInner = () => {
-  const { bookmarkedIds, toggle } = useBookmarks();
+const Custom gamesInner = () => {
+  const { custom gameedIds, toggle } = useCustom games();
 
   return (
     <div className="flex flex-col gap-3 p-4">
       <p className="text-sm text-muted-foreground">
-        Bookmarked:{' '}
-        {bookmarkedIds.size === 0
+        Custom gameed:{' '}
+        {custom gameedIds.size === 0
           ? 'none'
-          : [...bookmarkedIds].join(', ')}
+          : [...custom gameedIds].join(', ')}
       </p>
       <div className="flex flex-wrap gap-2">
         {GAME_IDS.map((id) => (
           <Button
             key={id}
             size="sm"
-            variant={bookmarkedIds.has(id) ? 'default' : 'outline'}
+            variant={custom gameedIds.has(id) ? 'default' : 'outline'}
             onClick={() => void toggle(id)}
           >
-            {bookmarkedIds.has(id) ? '★' : '☆'} {id}
+            {custom gameedIds.has(id) ? '★' : '☆'} {id}
           </Button>
         ))}
       </div>
@@ -1960,31 +1962,31 @@ const BookmarksInner = () => {
   );
 };
 
-export const UseBookmarksDemo = () => (
+export const UseCustom gamesDemo = () => (
   <DbProvider openDatabase={openFakeDatabase}>
-    <BookmarksInner />
+    <Custom gamesInner />
   </DbProvider>
 );
 ```
 
-- **Step 2: Write `useBookmarks.stories.mdx`**
+- **Step 2: Write `useCustom games.stories.mdx`**
 
 ````mdx
-{/* src/db/hooks/useBookmarks.stories.mdx */}
+{/* src/db/hooks/useCustom games.stories.mdx */}
 import { Meta } from '@storybook/blocks';
-import { UseBookmarksDemo } from './useBookmarks.demo';
+import { UseCustom gamesDemo } from './useCustom games.demo';
 
-<Meta title="DB Hooks/useBookmarks" />
+<Meta title="DB Hooks/useCustom games" />
 
-# useBookmarks
+# useCustom games
 
-Reactive hook that tracks the anonymous profile's bookmarked game IDs in RxDB.
+Reactive hook that tracks the anonymous profile's custom gameed game IDs in RxDB.
 
 ## Return value
 
 ```ts
-type UseBookmarksResult = {
-  bookmarkedIds: Set<string>;
+type UseCustom gamesResult = {
+  custom gameedIds: Set<string>;
   toggle: (gameId: string) => Promise<void>;
 };
 ```
@@ -1992,7 +1994,7 @@ type UseBookmarksResult = {
 
 ## Interactive Demo
 
-Click the buttons to toggle bookmarks. State is reactive — changes persist within the demo session and are reflected immediately via RxDB's observable queries. Uses `fake-indexeddb` (no real storage).
+Click the buttons to toggle custom games. State is reactive — changes persist within the demo session and are reflected immediately via RxDB's observable queries. Uses `fake-indexeddb` (no real storage).
 
 ````
 
@@ -2007,8 +2009,8 @@ Expected: exits 0.
 - **Step 4: Commit**
 
 ```bash
-git add src/db/hooks/useBookmarks.stories.mdx src/db/hooks/useBookmarks.demo.tsx
-git commit -m "docs(storybook): add useBookmarks MDX story and fake-indexeddb demo"
+git add src/db/hooks/useCustom games.stories.mdx src/db/hooks/useCustom games.demo.tsx
+git commit -m "docs(storybook): add useCustom games MDX story and fake-indexeddb demo"
 ```
 
 ---

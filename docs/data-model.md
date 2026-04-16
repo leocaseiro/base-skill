@@ -14,7 +14,7 @@
    - [progress](#22-progress)
    - [settings](#23-settings)
    - [game_config_overrides](#24-game_config_overrides)
-   - [bookmarks](#25-bookmarks)
+   - [custom games](#25-custom games)
    - [themes](#26-themes)
    - [session_history](#27-session_history)
    - [session_history_index](#28-session_history_index)
@@ -51,7 +51,7 @@ RxDB is the **exclusive local data layer** for BaseSkill. All reads and writes g
 | `progress`              | per-profile + per-game | ✅     | Game progress, scores, badges   |
 | `settings`              | per-profile            | ✅     | App preferences                 |
 | `game_config_overrides` | per-profile            | ✅     | Parent-set game customizations  |
-| `bookmarks`             | per-profile            | ✅     | Favorited games                 |
+| `custom games`          | per-profile            | ✅     | Favorited games                 |
 | `themes`                | global + per-family    | ✅     | UI themes (presets and custom)  |
 | `session_history`       | per-session chunk      | ✅     | Raw event log chunks            |
 | `session_history_index` | per-session            | ✅     | Session summary index           |
@@ -448,7 +448,7 @@ More specific scopes take precedence over less specific ones.
 
 ---
 
-### 2.5 `bookmarks`
+### 2.5 `custom games`
 
 Games favorited by a profile. Simple join-table style; one document per `(profileId, gameId)` pair.
 
@@ -1014,7 +1014,7 @@ erDiagram
         string scopeValue
     }
 
-    bookmarks {
+    custom games {
         string id PK
         string profileId FK
         string gameId
@@ -1058,7 +1058,7 @@ erDiagram
     profiles ||--o{ progress : "profileId"
     profiles ||--o| settings : "profileId = id"
     profiles ||--o{ game_config_overrides : "profileId"
-    profiles ||--o{ bookmarks : "profileId"
+    profiles ||--o{ custom games : "profileId"
     profiles ||--o{ session_history_index : "profileId"
     profiles ||--o{ session_history : "profileId"
     profiles }o--|| themes : "themeId"
@@ -1070,7 +1070,7 @@ erDiagram
 **Notes on relationships:**
 
 - All foreign keys are plain string references. RxDB does not enforce referential integrity — application code is responsible.
-- `progress.id` and `bookmarks.id` use `${profileId}_${gameId}` composite keys, making FK joins unnecessary for common queries.
+- `progress.id` and `custom games.id` use `${profileId}_${gameId}` composite keys, making FK joins unnecessary for common queries.
 - `settings.id` equals `profileId`, so lookup is a direct `findOne('settings', profileId)`.
 - `session_history_index.sessionId` is the primary key, and all `session_history` docs reference it via `sessionId`.
 
@@ -1136,7 +1136,7 @@ When a profile is deleted, all associated data must be deleted atomically in thi
 3. `progress` — query `{ profileId }`, bulk delete
 4. `settings` — delete by `id = profileId`
 5. `game_config_overrides` — query `{ profileId }`, bulk delete
-6. `bookmarks` — query `{ profileId }`, bulk delete
+6. `custom games` — query `{ profileId }`, bulk delete
 7. `themes` — query `{ ownedByProfileId: profileId, isPreset: false }`, bulk delete (only non-preset custom themes owned by this profile)
 8. `profiles` — delete the profile document itself
 
@@ -1156,7 +1156,7 @@ async function deleteProfile(
   await db.game_config_overrides
     .find({ selector: { profileId } })
     .remove();
-  await db.bookmarks.find({ selector: { profileId } }).remove();
+  await db.custom games.find({ selector: { profileId } }).remove();
   await db.themes
     .find({
       selector: { ownedByProfileId: profileId, isPreset: false },
@@ -1296,7 +1296,7 @@ async function checkVersionAndMigrate(db: RxDatabase): Promise<void> {
 | `progress`              | ✅    | Merge conflict resolution                     |
 | `settings`              | ✅    | Last-write-wins; voice prefs are device-aware |
 | `game_config_overrides` | ✅    | Last-write-wins                               |
-| `bookmarks`             | ✅    | Union merge                                   |
+| `custom games`          | ✅    | Union merge                                   |
 | `themes`                | ✅    | Last-write-wins for custom; presets are local |
 | `session_history`       | ✅    | Append-only; immutable chunks                 |
 | `session_history_index` | ✅    | Full document sync                            |
@@ -1349,21 +1349,21 @@ function mergeProgress(
 }
 ```
 
-#### Union Merge: `bookmarks`
+#### Union Merge: `custom games`
 
-Bookmarks are never deleted during sync; new bookmarks from either device are added:
+Custom games are never deleted during sync; new custom games from either device are added:
 
 ```typescript
-function mergeBookmarks(
-  localSet: BookmarkDoc[],
-  remoteSet: BookmarkDoc[],
-): BookmarkDoc[] {
+function mergeCustom games(
+  localSet: Custom gameDoc[],
+  remoteSet: Custom gameDoc[],
+): Custom gameDoc[] {
   const seen = new Set(localSet.map((b) => b.id));
   const merged = [...localSet];
-  for (const bookmark of remoteSet) {
-    if (!seen.has(bookmark.id)) {
-      merged.push(bookmark);
-      seen.add(bookmark.id);
+  for (const custom game of remoteSet) {
+    if (!seen.has(custom game.id)) {
+      merged.push(custom game);
+      seen.add(custom game.id);
     }
   }
   return merged;
@@ -1575,7 +1575,7 @@ const MAX_SCHEMA_VERSION = Math.max(
   progressSchema.version, // 0
   settingsSchema.version, // 0
   gameConfigOverridesSchema.version, // 0
-  bookmarksSchema.version, // 0
+  custom gamesSchema.version, // 0
   themesSchema.version, // 0
   sessionHistorySchema.version, // 0
   sessionHistoryIndexSchema.version, // 0
@@ -1635,7 +1635,7 @@ Add these indexes to improve query performance:
 // In game_config_overrides schema
 "indexes": ["profileId", ["profileId", "scope"]]
 
-// In bookmarks schema
+// In custom games schema
 "indexes": ["profileId"]
 ```
 
@@ -1647,11 +1647,11 @@ const activeProfile$ = db.profiles.findOne({
   selector: { isActive: true },
 }).$; // RxJS Observable
 
-// All bookmarks for active profile
-const bookmarks$ = activeProfile$.pipe(
+// All custom games for active profile
+const custom games$ = activeProfile$.pipe(
   switchMap((profile) =>
     profile
-      ? db.bookmarks.find({ selector: { profileId: profile.id } }).$
+      ? db.custom games.find({ selector: { profileId: profile.id } }).$
       : of([]),
   ),
 );

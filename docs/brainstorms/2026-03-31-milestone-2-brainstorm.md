@@ -12,7 +12,7 @@ Milestone 2 establishes the **local-first data plane** and **cross-cutting servi
 
 **SYNC (ordered):**
 
-1. **RxDB** — All collections from `docs/data-model.md`: `profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`; IndexedDB storage; schemas aligned with JSON Schema + version fields.
+1. **RxDB** — All collections from `docs/data-model.md`: `profiles`, `progress`, `settings`, `game_config_overrides`, `custom games`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`; IndexedDB storage; schemas aligned with JSON Schema + version fields.
 2. **Migrations** — Framework driven by `app_meta` (and RxDB migration hooks) so schema changes are explicit and testable.
 3. **React integration** — Hooks (or thin wrappers) so UI subscribes reactively to queries and collections without leaking RxDB types into every component.
 4. **TanStack Query decision** — Document whether Query adds value on top of RxDB for this app, or whether custom hooks over RxDB observables are sufficient through Milestone 6+.
@@ -26,7 +26,7 @@ Milestone 2 establishes the **local-first data plane** and **cross-cutting servi
 
 **Repo reality today:** No `rxdb` in `package.json` yet; `src/routes/__root.tsx` and `ThemeToggle` use `localStorage` for light/dark. `docs/data-model.md` states user-facing data must go through RxDB — M2 should **replace or narrow** localStorage usage so it does not contradict the authoritative data model (system/bootstrap exceptions should be explicit and minimal).
 
-**Product constraint (pre-profile):** Users are **not** required to pick a profile (“signed in”) to see a **usable homepage with the full game list**. Locale and theme must have **sensible defaults** so that screen is fully styled and translated. Profile (and RxDB-backed settings) gate **per-child** features (progress, bookmarks, parent overrides), not casual browsing. _Note:_ `docs/baseskill_milestone_breakdown_85146c93.plan.md` / `docs/ui-ux.md` currently lean profile-first in places; **Milestone 3 routing and guards** should be updated during planning so they match this constraint.
+**Product constraint (pre-profile):** Users are **not** required to pick a profile (“signed in”) to see a **usable homepage with the full game list**. Locale and theme must have **sensible defaults** so that screen is fully styled and translated. Profile (and RxDB-backed settings) gate **per-child** features (progress, custom games, parent overrides), not casual browsing. _Note:_ `docs/baseskill_milestone_breakdown_85146c93.plan.md` / `docs/ui-ux.md` currently lean profile-first in places; **Milestone 3 routing and guards** should be updated during planning so they match this constraint.
 
 ---
 
@@ -52,7 +52,7 @@ Milestone 2 establishes the **local-first data plane** and **cross-cutting servi
 
 ## Key Decisions
 
-1. **Data access:** Implement **RxDB-only** reactive reads/writes per `docs/data-model.md` for **persisted** profile/settings/theme/bookmarks/progress. **Exceptions (documented in architecture):** (a) **URL locale** is authoritative for language segment (`/en/…`, `/pt-BR/…`); **default locale `en`** when navigating from `/` (redirect to `/en/…` or equivalent). (b) **Built-in default theme** via static CSS variables / app shell so the UI is correct before RxDB opens. (c) Optional tiny allowlist later (e.g. migration flags) — avoid duplicating RxDB fields in `localStorage` for signed-in users.
+1. **Data access:** Implement **RxDB-only** reactive reads/writes per `docs/data-model.md` for **persisted** profile/settings/theme/custom games/progress. **Exceptions (documented in architecture):** (a) **URL locale** is authoritative for language segment (`/en/…`, `/pt-BR/…`); **default locale `en`** when navigating from `/` (redirect to `/en/…` or equivalent). (b) **Built-in default theme** via static CSS variables / app shell so the UI is correct before RxDB opens. (c) Optional tiny allowlist later (e.g. migration flags) — avoid duplicating RxDB fields in `localStorage` for signed-in users.
 2. **TanStack Query:** **Defer** adding `@tanstack/react-query` until cloud/network features justify it; M2 “evaluate” step = written decision + hook conventions, not necessarily a new dependency.
 3. **Theme transition:** Plan explicit cutover from current `localStorage` theme mode to **RxDB-backed themes** + CSS variables for users with persisted settings, while keeping a **static default theme** for anonymous and first-paint. Preserve `prefers-color-scheme` / “auto” behavior per `docs/ui-ux.md` where product still requires it.
 4. **Event bus:** Implement as **separate module** from RxDB (events are not a substitute for persisted state); align with game-engine spec for session recording. **M2 scope:** **internal-only** (core + bundled games); extension points **documented** for later; **no** versioned third-party registration API in this milestone.

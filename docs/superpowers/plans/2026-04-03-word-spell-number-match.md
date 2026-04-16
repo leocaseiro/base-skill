@@ -1,5 +1,7 @@
 # WordSpell + NumberMatch Implementation Plan
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the WordSpell and NumberMatch reference games as React compositions over the `AnswerGame` primitive, each with their own slot components (tile bank + answer zones), types, Storybook stories, i18n strings, game registry entries, and E2E/VR tests.
@@ -2149,7 +2151,7 @@ Expected: all pass. Skip with `SKIP_E2E=1` if game routes not yet wired and docu
 | E2E WordSpell picture mode                                 | Task 10                                                                                                          |
 | E2E NumberMatch drag to zone                               | Task 10                                                                                                          |
 | VR screenshots both games                                  | Task 10                                                                                                          |
-| Preset / bookmark UX                                       | Out of scope for this plan — tracked separately in M5 presets spec                                               |
+| Preset / custom game UX                                    | Out of scope for this plan — tracked separately in M5 presets spec                                               |
 | Image assets (Fluent Emoji)                                | Paths referenced in config; asset bundling is a build-time concern handled by Vite code-splitting, not this plan |
 
 ---

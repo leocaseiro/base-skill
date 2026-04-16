@@ -1,10 +1,12 @@
 # Dark Mode Fix, A11Y Colour Enforcement & VR Tests Implementation Plan
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Fix dark mode CSS variable specificity, replace hardcoded bookmark colours with CSS utility classes, add Stylelint/ESLint colour enforcement, expand VR test coverage to include dark mode and SortNumbers screens, and add a Storybook theme showcase page with 4 locked-theme VR snapshots (Ocean/Forest × light/dark).
+**Goal:** Fix dark mode CSS variable specificity, replace hardcoded custom game colours with CSS utility classes, add Stylelint/ESLint colour enforcement, expand VR test coverage to include dark mode and SortNumbers screens, and add a Storybook theme showcase page with 4 locked-theme VR snapshots (Ocean/Forest × light/dark).
 
-**Architecture:** CSS-first fix — inline styles only set `--bs-*` vars; shadcn vars derive from `--bs-*` in `:root` so the `.dark` class cascade wins. Bookmark colours collapse to two tokens (`border`, `playBg`); CSS utility classes using `color-mix` handle all other tints. Components set `--bookmark-play` as a CSS custom property and use utility classes.
+**Architecture:** CSS-first fix — inline styles only set `--bs-*` vars; shadcn vars derive from `--bs-*` in `:root` so the `.dark` class cascade wins. Custom game colours collapse to two tokens (`border`, `playBg`); CSS utility classes using `color-mix` handle all other tints. Components set `--custom game-play` as a CSS custom property and use utility classes.
 
 **Tech Stack:** React 19, TypeScript, Tailwind CSS v4, CSS `color-mix()`, Playwright E2E, Storybook 10, Vitest.
 
@@ -17,7 +19,7 @@
 | Modify | `src/styles.css`                                                                 |
 | Modify | `src/lib/theme/css-vars.ts`                                                      |
 | Modify | `src/lib/theme/default-tokens.ts`                                                |
-| Modify | `src/lib/bookmark-colors.ts`                                                     |
+| Modify | `src/lib/custom game-colors.ts`                                                  |
 | Modify | `src/components/GameNameChip.tsx`                                                |
 | Modify | `src/components/SavedConfigChip.tsx`                                             |
 | Modify | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`         |
@@ -176,46 +178,62 @@ git commit -m "fix(theme): wire shadcn vars from --bs-* in CSS so .dark class wi
 
 ---
 
-## Task 3: Bookmark CSS Utility Classes + Slim ColorTokens Type
+## Task 3: Custom game CSS Utility Classes + Slim ColorTokens Type
 
 Replace the 6-token `ColorTokens` type with 2 tokens (`border`, `playBg`). All light/dark tints now come from CSS utility classes using `color-mix`.
 
 **Files:**
 
 - Modify: `src/styles.css`
-- Modify: `src/lib/bookmark-colors.ts`
+- Modify: `src/lib/custom game-colors.ts`
 
-- [ ] **Step 1: Add bookmark utility classes to `src/styles.css`**
+- [ ] **Step 1: Add custom game utility classes to `src/styles.css`**
 
 After the `.dark {}` media query block (after line ~151), add:
 
 ```css
-/* Bookmark colour utilities — derived from --bookmark-play set per-component */
-.bookmark-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
+/* Custom game colour utilities — derived from --custom game-play set per-component */
+.custom game-bg {
+  background: color-mix(
+    in srgb,
+    var(--custom game-play) 12%,
+    transparent
+  );
 }
-.dark .bookmark-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 20%, transparent);
+.dark .custom game-bg {
+  background: color-mix(
+    in srgb,
+    var(--custom game-play) 20%,
+    transparent
+  );
 }
 
-.bookmark-tag-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 18%, transparent);
+.custom game-tag-bg {
+  background: color-mix(
+    in srgb,
+    var(--custom game-play) 18%,
+    transparent
+  );
 }
-.dark .bookmark-tag-bg {
-  background: color-mix(in srgb, var(--bookmark-play) 25%, transparent);
+.dark .custom game-tag-bg {
+  background: color-mix(
+    in srgb,
+    var(--custom game-play) 25%,
+    transparent
+  );
 }
 
-.bookmark-text {
-  color: var(--bookmark-play);
+.custom game-text {
+  color: var(--custom game-play);
 }
 ```
 
-- [ ] **Step 2: Slim `ColorTokens` in `src/lib/bookmark-colors.ts`**
+- [ ] **Step 2: Slim `ColorTokens` in `src/lib/custom game-colors.ts`**
 
 Replace the `ColorTokens` type and all palette entries:
 
 ```ts
-// src/lib/bookmark-colors.ts
+// src/lib/custom game-colors.ts
 export const BOOKMARK_COLOR_KEYS = [
   'indigo',
   'teal',
@@ -231,14 +249,14 @@ export const BOOKMARK_COLOR_KEYS = [
   'cyan',
 ] as const;
 
-export type BookmarkColorKey = (typeof BOOKMARK_COLOR_KEYS)[number];
+export type Custom gameColorKey = (typeof BOOKMARK_COLOR_KEYS)[number];
 
 export type ColorTokens = {
   border: string; // used for selected ring in colour picker
   playBg: string; // primary colour — all other uses derived from this via CSS utility classes
 };
 
-export const BOOKMARK_COLORS: Record<BookmarkColorKey, ColorTokens> = {
+export const BOOKMARK_COLORS: Record<Custom gameColorKey, ColorTokens> = {
   indigo: { border: '#c7d2fe', playBg: '#6366f1' },
   teal: { border: '#99f6e4', playBg: '#14b8a6' },
   rose: { border: '#fecdd3', playBg: '#f43f5e' },
@@ -253,7 +271,7 @@ export const BOOKMARK_COLORS: Record<BookmarkColorKey, ColorTokens> = {
   cyan: { border: '#a5f3fc', playBg: '#06b6d4' },
 };
 
-export const DEFAULT_BOOKMARK_COLOR: BookmarkColorKey = 'indigo';
+export const DEFAULT_BOOKMARK_COLOR: Custom gameColorKey = 'indigo';
 ```
 
 - [ ] **Step 3: Run TypeScript check — expect failures in 4 component files**
@@ -266,9 +284,9 @@ Expected: TypeScript errors in `GameNameChip.tsx`, `SavedConfigChip.tsx`, `Instr
 
 ---
 
-## Task 4: Update All Components to Use Bookmark Utility Classes
+## Task 4: Update All Components to Use Custom game Utility Classes
 
-Fix TypeScript failures from Task 3 by updating all 4 components to use `--bookmark-play` CSS var + utility classes. Also fixes the two hardcoded colours (Section 3 of spec).
+Fix TypeScript failures from Task 3 by updating all 4 components to use `--custom game-play` CSS var + utility classes. Also fixes the two hardcoded colours (Section 3 of spec).
 
 **Files:**
 
@@ -282,28 +300,28 @@ Fix TypeScript failures from Task 3 by updating all 4 components to use `--bookm
 Full file replacement:
 
 ```tsx
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 import type { JSX } from 'react';
 import {
   BOOKMARK_COLORS,
   DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
+} from '@/lib/custom game-colors';
 
 type GameNameChipProps = {
   title: string;
-  bookmarkName?: string;
-  bookmarkColor?: BookmarkColorKey;
+  custom gameName?: string;
+  custom gameColor?: Custom gameColorKey;
   subject?: string;
 };
 
 export const GameNameChip = ({
   title,
-  bookmarkName,
-  bookmarkColor = DEFAULT_BOOKMARK_COLOR,
+  custom gameName,
+  custom gameColor = DEFAULT_BOOKMARK_COLOR,
   subject,
 }: GameNameChipProps): JSX.Element => {
-  const colors = bookmarkName
-    ? BOOKMARK_COLORS[bookmarkColor]
+  const colors = custom gameName
+    ? BOOKMARK_COLORS[custom gameColor]
     : BOOKMARK_COLORS.slate;
 
   return (
@@ -312,22 +330,22 @@ export const GameNameChip = ({
       style={
         {
           borderColor: colors.border,
-          '--bookmark-play': colors.playBg,
+          '--custom game-play': colors.playBg,
         } as React.CSSProperties
       }
     >
-      <div className="bookmark-bg flex min-h-12 items-center gap-2 px-3">
-        <span className="bookmark-text text-sm font-bold">{title}</span>
-        {bookmarkName && (
+      <div className="custom game-bg flex min-h-12 items-center gap-2 px-3">
+        <span className="custom game-text text-sm font-bold">{title}</span>
+        {custom gameName && (
           <span
-            className="bookmark-bg bookmark-text rounded border px-2 py-0.5 text-xs font-semibold"
+            className="custom game-bg custom game-text rounded border px-2 py-0.5 text-xs font-semibold"
             style={{ borderColor: colors.border }}
           >
-            {bookmarkName}
+            {custom gameName}
           </span>
         )}
-        {!bookmarkName && subject && (
-          <span className="bookmark-bg rounded px-2 py-0.5 text-xs font-medium text-muted-foreground">
+        {!custom gameName && subject && (
+          <span className="custom game-bg rounded px-2 py-0.5 text-xs font-medium text-muted-foreground">
             {subject}
           </span>
         )}
@@ -345,11 +363,11 @@ Full file replacement:
 // src/components/SavedConfigChip.tsx
 import { useState } from 'react';
 import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 import type { ConfigField } from '@/lib/config-fields';
 import type { JSX } from 'react';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
-import { BOOKMARK_COLORS } from '@/lib/bookmark-colors';
+import { BOOKMARK_COLORS } from '@/lib/custom game-colors';
 import { configToTags } from '@/lib/config-tags';
 
 type SavedConfigChipProps = {
@@ -375,7 +393,7 @@ export const SavedConfigChip = ({
   const [editConfig, setEditConfig] = useState(doc.config);
   const [editName, setEditName] = useState(doc.name);
 
-  const colorKey = doc.color as BookmarkColorKey;
+  const colorKey = doc.color as Custom gameColorKey;
   const colors = BOOKMARK_COLORS[colorKey];
   const tags = configToTags(doc.config);
 
@@ -395,19 +413,19 @@ export const SavedConfigChip = ({
       className="overflow-hidden rounded-xl border-2"
       style={
         {
-          '--bookmark-play': colors.playBg,
+          '--custom game-play': colors.playBg,
           borderColor: expanded ? colors.playBg : colors.border,
           boxShadow: expanded
-            ? `0 0 0 3px color-mix(in srgb, var(--bookmark-play) 12%, transparent)`
+            ? `0 0 0 3px color-mix(in srgb, var(--custom game-play) 12%, transparent)`
             : undefined,
         } as React.CSSProperties
       }
     >
       {/* Header row */}
       <div
-        className={`flex min-h-12 items-stretch ${!expanded ? 'bookmark-tag-bg' : ''}`}
+        className={`flex min-h-12 items-stretch ${!expanded ? 'custom game-tag-bg' : ''}`}
         style={
-          expanded ? { background: 'var(--bookmark-play)' } : undefined
+          expanded ? { background: 'var(--custom game-play)' } : undefined
         }
       >
         <button
@@ -417,12 +435,12 @@ export const SavedConfigChip = ({
           className="flex min-h-12 flex-1 items-center gap-2 px-3 text-left"
         >
           <span
-            className={`text-sm font-semibold ${expanded ? 'text-white' : 'bookmark-text'}`}
+            className={`text-sm font-semibold ${expanded ? 'text-white' : 'custom game-text'}`}
           >
             {doc.name}
           </span>
           <span
-            className={`ml-auto text-xs ${expanded ? 'text-white/70' : 'bookmark-text'}`}
+            className={`ml-auto text-xs ${expanded ? 'text-white/70' : 'custom game-text'}`}
           >
             {expanded ? '▲' : '▼'}
           </span>
@@ -432,7 +450,7 @@ export const SavedConfigChip = ({
           aria-label={`Play ${doc.name}`}
           onClick={() => onPlay(doc.id)}
           className="flex min-h-12 w-12 items-center justify-center text-sm text-white"
-          style={{ background: 'var(--bookmark-play)' }}
+          style={{ background: 'var(--custom game-play)' }}
         >
           ▶
         </button>
@@ -452,11 +470,11 @@ export const SavedConfigChip = ({
 
       {/* Collapsed: config summary tags */}
       {!expanded && (
-        <div className="bookmark-bg flex flex-wrap gap-1 px-3 pb-2 pt-1">
+        <div className="custom game-bg flex flex-wrap gap-1 px-3 pb-2 pt-1">
           {tags.map((tag) => (
             <span
               key={tag}
-              className="bookmark-tag-bg bookmark-text rounded px-2 py-0.5 text-xs font-medium"
+              className="custom game-tag-bg custom game-text rounded px-2 py-0.5 text-xs font-medium"
             >
               {tag}
             </span>
@@ -466,14 +484,14 @@ export const SavedConfigChip = ({
 
       {/* Expanded: inline form */}
       {expanded && (
-        <div className="bookmark-bg flex flex-col gap-3 p-3">
+        <div className="custom game-bg flex flex-col gap-3 p-3">
           <ConfigFormFields
             fields={configFields}
             config={editConfig}
             onChange={setEditConfig}
           />
           <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
-            Bookmark name
+            Custom game name
             <input
               type="text"
               value={editName}
@@ -510,8 +528,8 @@ export const SavedConfigChip = ({
 
 Key changes:
 
-- Add `'--bookmark-play': settingsColors.playBg` to settings section div
-- Replace `style={{ background: settingsColors.playBg }}` with `style={{ background: 'var(--bookmark-play)' }}`
+- Add `'--custom game-play': settingsColors.playBg` to settings section div
+- Replace `style={{ background: settingsColors.playBg }}` with `style={{ background: 'var(--custom game-play)' }}`
 - Replace `color: settingsOpen ? 'rgba(255,255,255,0.7)' : undefined` with `className` conditional
 - `bg-background/95` on the dialog div already works after Task 2
 
@@ -522,7 +540,7 @@ Full file replacement:
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 import type { ConfigField } from '@/lib/config-fields';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
 import { GameNameChip } from '@/components/GameNameChip';
@@ -530,7 +548,7 @@ import {
   BOOKMARK_COLORS,
   BOOKMARK_COLOR_KEYS,
   DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
+} from '@/lib/custom game-colors';
 import { configToTags } from '@/lib/config-tags';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
 
@@ -539,16 +557,16 @@ interface InstructionsOverlayProps {
   onStart: () => void;
   ttsEnabled: boolean;
   gameTitle: string;
-  bookmarkName?: string;
-  bookmarkColor?: BookmarkColorKey;
+  custom gameName?: string;
+  custom gameColor?: Custom gameColorKey;
   subject?: string;
   config: Record<string, unknown>;
   onConfigChange: (config: Record<string, unknown>) => void;
-  onSaveBookmark: (
+  onSaveCustom game: (
     name: string,
-    color: BookmarkColorKey,
+    color: Custom gameColorKey,
   ) => Promise<void>;
-  onUpdateBookmark?: (
+  onUpdateCustom game?: (
     name: string,
     config: Record<string, unknown>,
   ) => Promise<void>;
@@ -560,20 +578,20 @@ export const InstructionsOverlay = ({
   onStart,
   ttsEnabled,
   gameTitle,
-  bookmarkName,
-  bookmarkColor = DEFAULT_BOOKMARK_COLOR,
+  custom gameName,
+  custom gameColor = DEFAULT_BOOKMARK_COLOR,
   subject,
   config,
   onConfigChange,
-  onSaveBookmark,
-  onUpdateBookmark,
+  onSaveCustom game,
+  onUpdateCustom game,
   configFields,
 }: InstructionsOverlayProps) => {
   const { t } = useTranslation('games');
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [newBookmarkName, setNewBookmarkName] = useState('');
-  const [newBookmarkColor, setNewBookmarkColor] =
-    useState<BookmarkColorKey>(DEFAULT_BOOKMARK_COLOR);
+  const [newCustom gameName, setNewCustom gameName] = useState('');
+  const [newCustom gameColor, setNewCustom gameColor] =
+    useState<Custom gameColorKey>(DEFAULT_BOOKMARK_COLOR);
 
   useEffect(() => {
     if (ttsEnabled) speak(text);
@@ -583,7 +601,7 @@ export const InstructionsOverlay = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount to speak instructions once
   }, []);
 
-  const settingsColors = BOOKMARK_COLORS[bookmarkColor];
+  const settingsColors = BOOKMARK_COLORS[custom gameColor];
   const tags = configToTags(config);
 
   return createPortal(
@@ -597,8 +615,8 @@ export const InstructionsOverlay = ({
         <div className="w-full">
           <GameNameChip
             title={gameTitle}
-            bookmarkName={bookmarkName}
-            bookmarkColor={bookmarkColor}
+            custom gameName={custom gameName}
+            custom gameColor={custom gameColor}
             subject={subject}
           />
         </div>
@@ -622,7 +640,7 @@ export const InstructionsOverlay = ({
           className="w-full overflow-hidden rounded-xl border border-border"
           style={
             {
-              '--bookmark-play': settingsColors.playBg,
+              '--custom game-play': settingsColors.playBg,
             } as React.CSSProperties
           }
         >
@@ -634,7 +652,7 @@ export const InstructionsOverlay = ({
             className="flex min-h-12 w-full items-center gap-2 bg-muted px-3 text-left"
             style={
               settingsOpen
-                ? { background: 'var(--bookmark-play)' }
+                ? { background: 'var(--custom game-play)' }
                 : undefined
             }
           >
@@ -674,82 +692,82 @@ export const InstructionsOverlay = ({
               />
 
               <div className="border-t border-border pt-3 flex flex-col gap-2">
-                {bookmarkName && onUpdateBookmark ? (
+                {custom gameName && onUpdateCustom game ? (
                   <>
                     <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
-                      Bookmark name
+                      Custom game name
                       <input
                         type="text"
-                        defaultValue={bookmarkName}
-                        id="instructions-bookmark-name"
+                        defaultValue={custom gameName}
+                        id="instructions-custom game-name"
                         className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
                       />
                     </label>
                     <button
                       type="button"
-                      aria-label={`Update ${bookmarkName}`}
+                      aria-label={`Update ${custom gameName}`}
                       onClick={() => {
                         const el =
                           document.querySelector<HTMLInputElement>(
-                            '#instructions-bookmark-name',
+                            '#instructions-custom game-name',
                           );
-                        void onUpdateBookmark(
-                          el?.value ?? bookmarkName,
+                        void onUpdateCustom game(
+                          el?.value ?? custom gameName,
                           config,
                         );
                       }}
                       className="h-12 w-full rounded-xl font-bold text-white text-sm"
-                      style={{ background: 'var(--bookmark-play)' }}
+                      style={{ background: 'var(--custom game-play)' }}
                     >
-                      {t('instructions.updateBookmark', {
-                        name: bookmarkName,
-                        defaultValue: `Update "${bookmarkName}"`,
+                      {t('instructions.updateCustom game', {
+                        name: custom gameName,
+                        defaultValue: `Update "${custom gameName}"`,
                       })}
                     </button>
                     <button
                       type="button"
-                      aria-label="Save as new bookmark"
+                      aria-label="Save as new custom game"
                       onClick={() => setSettingsOpen(false)}
                       className="h-12 w-full rounded-xl border border-input bg-background text-sm font-semibold text-primary"
                     >
                       {t('instructions.saveAsNew', {
-                        defaultValue: 'Save as new bookmark…',
+                        defaultValue: 'Save as new custom game…',
                       })}
                     </button>
                   </>
                 ) : (
                   <div className="flex flex-col gap-2">
                     <span className="text-sm font-semibold text-foreground">
-                      {t('common:saveConfig.saveBookmarkLabel', {
-                        defaultValue: 'Save as bookmark',
+                      {t('common:saveConfig.saveCustom gameLabel', {
+                        defaultValue: 'Save as custom game',
                       })}
                     </span>
                     <div
                       className="grid gap-1"
                       style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
                       role="group"
-                      aria-label="Bookmark color"
+                      aria-label="Custom game color"
                     >
                       {BOOKMARK_COLOR_KEYS.map((key) => (
                         <button
                           key={key}
                           type="button"
                           aria-label={key}
-                          aria-pressed={newBookmarkColor === key}
-                          onClick={() => setNewBookmarkColor(key)}
+                          aria-pressed={newCustom gameColor === key}
+                          onClick={() => setNewCustom gameColor(key)}
                           className="h-8 w-8 rounded-full border-2 transition-transform hover:scale-110"
                           style={{
                             background: BOOKMARK_COLORS[key].playBg,
                             borderColor:
-                              newBookmarkColor === key
+                              newCustom gameColor === key
                                 ? BOOKMARK_COLORS[key].playBg
                                 : 'transparent',
                             outline:
-                              newBookmarkColor === key
+                              newCustom gameColor === key
                                 ? '3px solid white'
                                 : undefined,
                             outlineOffset:
-                              newBookmarkColor === key
+                              newCustom gameColor === key
                                 ? '-4px'
                                 : undefined,
                           }}
@@ -759,23 +777,23 @@ export const InstructionsOverlay = ({
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        value={newBookmarkName}
+                        value={newCustom gameName}
                         onChange={(e) =>
-                          setNewBookmarkName(e.target.value)
+                          setNewCustom gameName(e.target.value)
                         }
                         placeholder="e.g. Easy Mode"
                         className="h-12 flex-1 rounded-lg border border-input bg-background px-3 text-sm"
                       />
                       <button
                         type="button"
-                        aria-label="Save bookmark"
+                        aria-label="Save custom game"
                         onClick={() => {
-                          if (newBookmarkName.trim()) {
-                            void onSaveBookmark(
-                              newBookmarkName.trim(),
-                              newBookmarkColor,
+                          if (newCustom gameName.trim()) {
+                            void onSaveCustom game(
+                              newCustom gameName.trim(),
+                              newCustom gameColor,
                             );
-                            setNewBookmarkName('');
+                            setNewCustom gameName('');
                           }
                         }}
                         className="h-12 w-12 flex-shrink-0 rounded-lg bg-primary text-lg text-primary-foreground"
@@ -798,7 +816,7 @@ export const InstructionsOverlay = ({
 
 - [ ] **Step 4: Update `src/components/SaveConfigDialog.tsx`**
 
-The preview section uses `previewColors.tagBg` and `previewColors.headerText` — replace with bookmark utility classes. Set `--bookmark-play` on the preview container.
+The preview section uses `previewColors.tagBg` and `previewColors.headerText` — replace with custom game utility classes. Set `--custom game-play` on the preview container.
 
 Replace the preview `<div className="flex flex-col gap-1">` block (lines ~120–144) with:
 
@@ -815,16 +833,16 @@ Replace the preview `<div className="flex flex-col gap-1">` block (lines ~120–
     style={
       {
         borderColor: previewColors.border,
-        '--bookmark-play': previewColors.playBg,
+        '--custom game-play': previewColors.playBg,
       } as React.CSSProperties
     }
   >
-    <div className="bookmark-tag-bg bookmark-text px-3 py-2 text-sm font-semibold">
+    <div className="custom game-tag-bg custom game-text px-3 py-2 text-sm font-semibold">
       {name || t('saveConfig.placeholder')}
     </div>
     <div
       className="flex w-10 items-center justify-center text-sm text-white"
-      style={{ background: 'var(--bookmark-play)' }}
+      style={{ background: 'var(--custom game-play)' }}
     >
       ▶
     </div>
@@ -855,11 +873,11 @@ Expected: all pass (existing tests check DOM content and interactions, not inlin
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/lib/bookmark-colors.ts src/styles.css \
+git add src/lib/custom game-colors.ts src/styles.css \
   src/components/GameNameChip.tsx src/components/SavedConfigChip.tsx \
   src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx \
   src/components/SaveConfigDialog.tsx
-git commit -m "feat(bookmark): replace hardcoded colour tokens with CSS utility classes"
+git commit -m "feat(custom game): replace hardcoded colour tokens with CSS utility classes"
 ```
 
 ---
@@ -941,7 +959,7 @@ Find the rules object in the second config block (starting around line 46, conta
 yarn lint
 ```
 
-Expected: 0 errors. The `BOOKMARK_COLORS` object in `src/lib/bookmark-colors.ts` is NOT a JSX file, so the JSX selector rule doesn't apply there. The `playBg`/`border` hex values in that file remain as the canonical palette definitions.
+Expected: 0 errors. The `BOOKMARK_COLORS` object in `src/lib/custom game-colors.ts` is NOT a JSX file, so the JSX selector rule doesn't apply there. The `playBg`/`border` hex values in that file remain as the canonical palette definitions.
 
 - [ ] **Step 5: Commit**
 
@@ -1263,17 +1281,17 @@ export const DefaultDark: Story = {
   decorators: [withDarkMode],
 };
 
-export const WithBookmark: Story = {
+export const WithCustom game: Story = {
   args: {
-    bookmarkName: 'Easy Mode',
-    bookmarkColor: 'indigo',
+    custom gameName: 'Easy Mode',
+    custom gameColor: 'indigo',
   },
 };
 
-export const WithBookmarkDark: Story = {
+export const WithCustom gameDark: Story = {
   args: {
-    bookmarkName: 'Easy Mode',
-    bookmarkColor: 'indigo',
+    custom gameName: 'Easy Mode',
+    custom gameColor: 'indigo',
   },
   decorators: [withDarkMode],
 };
@@ -1309,8 +1327,8 @@ export const AllColors: Story = {
         <GameNameChip
           key={color}
           title="Word Spell"
-          bookmarkName={color}
-          bookmarkColor={color}
+          custom gameName={color}
+          custom gameColor={color}
         />
       ))}
     </div>
@@ -1466,10 +1484,10 @@ const baseArgs = {
   onStart: () => {},
   ttsEnabled: false,
   gameTitle: 'Sort Numbers',
-  bookmarkColor: 'indigo' as const,
+  custom gameColor: 'indigo' as const,
   config: { totalRounds: 8 },
   onConfigChange: () => {},
-  onSaveBookmark: async () => {},
+  onSaveCustom game: async () => {},
   configFields: [
     {
       type: 'number' as const,
@@ -1487,8 +1505,8 @@ const meta: Meta<typeof InstructionsOverlay> = {
   args: baseArgs,
   argTypes: {
     onStart: { action: 'started' },
-    onSaveBookmark: { action: 'bookmarkSaved' },
-    onUpdateBookmark: { action: 'bookmarkUpdated' },
+    onSaveCustom game: { action: 'custom gameSaved' },
+    onUpdateCustom game: { action: 'custom gameUpdated' },
   },
   parameters: {
     // InstructionsOverlay is fixed-position and full-screen via portal —
@@ -1509,14 +1527,14 @@ export const DefaultDark: Story = {
 export const SettingsExpanded: Story = {
   args: {
     ...baseArgs,
-    bookmarkName: 'Easy Mode',
+    custom gameName: 'Easy Mode',
   },
 };
 
 export const SettingsExpandedDark: Story = {
   args: {
     ...baseArgs,
-    bookmarkName: 'Easy Mode',
+    custom gameName: 'Easy Mode',
   },
   decorators: [withDarkMode],
 };
@@ -1695,7 +1713,7 @@ git add \
   src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx \
   src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx \
   src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx
-git commit -m "feat(storybook): add dark mode story variants for bookmark and sort-numbers components"
+git commit -m "feat(storybook): add dark mode story variants for custom game and sort-numbers components"
 ```
 
 ---
@@ -1743,7 +1761,7 @@ SKIP_E2E=1 git push
 
 ## Task 10: Theme Showcase Page + 4 VR Stories
 
-A full-page Storybook story that stacks the app shell chrome with the key bookmark components below it. Four story exports — one per theme × mode combination — each locking its theme via `parameters.globals` so the VR test runner always captures the correct palette regardless of the toolbar selection.
+A full-page Storybook story that stacks the app shell chrome with the key custom game components below it. Four story exports — one per theme × mode combination — each locking its theme via `parameters.globals` so the VR test runner always captures the correct palette regardless of the toolbar selection.
 
 **Why `parameters.globals` instead of a custom decorator:** The `withTheme` decorator already reads `context.globals.theme` and applies CSS vars + dark class globally. Locking `globals` per story is the standard Storybook pattern for this — no new decorator machinery needed.
 
@@ -1877,7 +1895,7 @@ Expected: 0 errors.
 
 - [ ] **Step 4: Create `src/stories/ThemeShowcase.stories.tsx`**
 
-The page stacks the GameShell chrome (for app shell context) with a scrollable body of the key bookmark components. `GameShell` needs `withDb` + `withRouter` decorators. The bookmark section below uses `GameNameChip`, `SavedConfigChip`, and `ConfigFormFields` so both the shell theme and the component colours are visible in one frame.
+The page stacks the GameShell chrome (for app shell context) with a scrollable body of the key custom game components. `GameShell` needs `withDb` + `withRouter` decorators. The custom game section below uses `GameNameChip`, `SavedConfigChip`, and `ConfigFormFields` so both the shell theme and the component colours are visible in one frame.
 
 Each of the 4 exports locks its theme via `parameters.globals` — the `withTheme` decorator reads this and applies the correct CSS vars.
 
@@ -1941,7 +1959,7 @@ const sessionMeta: SessionMeta = {
   initialState,
 };
 
-// ── Bookmark component fixture data ──────────────────────────────────────
+// ── Custom game component fixture data ──────────────────────────────────────
 
 const savedDoc: SavedGameConfigDoc = {
   id: 'cfg-showcase',
@@ -1983,8 +2001,10 @@ const ShowcaseBody = () => (
   <div className="flex flex-col gap-4 p-4">
     <GameNameChip
       title="Sort Numbers"
-      bookmarkName="Easy Numbers"
-      bookmarkColor="teal"
+      custom
+      gameName="Easy Numbers"
+      custom
+      gameColor="teal"
     />
     <GameNameChip title="Word Spell" subject="reading" />
     <SavedConfigChip
@@ -2061,8 +2081,8 @@ yarn storybook
 Navigate to **Pages → ThemeShowcase** and cycle through OceanLight, OceanDark, ForestLight, ForestDark. Verify:
 
 - App shell chrome (header, score bar, timer) picks up each palette
-- `GameNameChip` bookmark tint is visible
-- `SavedConfigChip` border/play button uses the teal bookmark colour
+- `GameNameChip` custom game tint is visible
+- `SavedConfigChip` border/play button uses the teal custom game colour
 - `ConfigFormFields` inputs use `bg-background` (dark in dark mode)
 - Dark stories show dark backgrounds throughout
 
@@ -2079,7 +2099,7 @@ git commit -m "feat(storybook): add forest theme variants and 4-theme showcase V
 
 **Section 1 — CSS Variable Architecture Fix:** ✅ Covered in Task 2 (`css-vars.ts`, `default-tokens.ts`, `styles.css :root` additions).
 
-**Section 2 — BOOKMARK_COLORS Dark Mode:** ✅ Covered in Tasks 3–4 (slim `ColorTokens`, bookmark utility classes, all 4 components updated).
+**Section 2 — BOOKMARK_COLORS Dark Mode:** ✅ Covered in Tasks 3–4 (slim `ColorTokens`, custom game utility classes, all 4 components updated).
 
 **Section 3 — Hardcoded Colour Cleanup:**
 

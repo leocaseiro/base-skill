@@ -1,5 +1,7 @@
 # Kid-Friendly Homepage & Simple Config — Design Spec
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+
 Date: 2026-04-15
 Branch: `design/kid-friendly-homepage`
 
@@ -17,12 +19,12 @@ developer-style labels. The changes land in four areas:
    buttons, native-`<select>` dropdown cells, and +/− steppers. The existing
    dev-style "advanced" form moves behind an `Advanced ⚙️` link and stays
    unchanged.
-4. **Saved bookmarks become first-class homepage cards** with a config chip
-   strip, colored ribbon, and bookmark icon — so parents set up presets once
-   and kids just tap a card. Every bookmark can also carry its **own cover**
+4. **Saved custom games become first-class homepage cards** with a config chip
+   strip, colored ribbon, and custom game icon — so parents set up presets once
+   and kids just tap a card. Every custom game can also carry its **own cover**
    (emoji or image URL), falling back to the game's default when unset.
 5. **Per-card cog opens a modal with the full Advanced form.** Saving from
-   the modal updates the current bookmark (if any) or creates a new one —
+   the modal updates the current custom game (if any) or creates a new one —
    it never overwrites a game default.
 
 Audience pattern: **kid-first, parent-assist** (chosen in brainstorming). Kids
@@ -31,7 +33,7 @@ drive, parents tweak without leaving the page.
 ## Non-goals
 
 - Game defaults stay emoji-based for v1. The cover type supports images
-  (URL or asset path) so bookmarks can opt in today, but no game default
+  (URL or asset path) so custom games can opt in today, but no game default
   ships with an image in this spec.
 - No device file uploads — image covers accept a URL string only. A future
   upload flow can reuse the same `cover.src` field.
@@ -68,10 +70,10 @@ so parents can tie the UI back to schoolwork.
 
 ## Covers (v1)
 
-Covers are **per-config**, not just per-game. A saved bookmark can carry its
+Covers are **per-config**, not just per-game. A saved custom game can carry its
 own cover (e.g. 🦁 for "Zoo Words"); when none is set, it falls back to the
 game's default cover. The underlying render supports a **hybrid** of emoji or
-image so bookmarks can opt into real artwork without forcing the whole catalog
+image so custom games can opt into real artwork without forcing the whole catalog
 onto an image pipeline.
 
 ### Cover type
@@ -112,26 +114,26 @@ Each `GAME_CATALOG` entry carries a `defaultCover: Cover` (emoji for v1):
 Any game default can later be swapped to an `image` cover by changing only
 the registry entry.
 
-### Per-bookmark cover
+### Per-custom game cover
 
 `SavedGameConfigDoc` (see `src/db/schemas/saved_game_configs.ts`) gains an
 optional `cover?: Cover` field. Unset means "inherit the game default".
 
 Resolution order at render time:
 
-1. If the bookmark has `cover`, use it.
+1. If the custom game has `cover`, use it.
 2. Otherwise, use the game's `defaultCover`.
-3. The bookmark's colored ribbon + icon + subtitle still differentiate it
+3. The custom game's colored ribbon + icon + subtitle still differentiate it
    even when it inherits the game cover.
 
-### Picking a cover (save / update bookmark flow)
+### Picking a cover (save / update custom game flow)
 
-The bookmark save dialog and the Instructions screen's "Update" flow both
+The custom game save dialog and the Instructions screen's "Update" flow both
 show a small cover picker:
 
 - **Emoji picker** — a curated palette of ~24 emojis grouped by theme
   (animals, food, nature, numbers, shapes). Tap an emoji + pick a gradient
-  preset (same palette as the bookmark color picker) → stored as
+  preset (same palette as the custom game color picker) → stored as
   `{ kind: 'emoji', emoji, gradient }`.
 - **Image input** — a single text input labeled "Image URL (optional)". If
   filled, it overrides the emoji and stores `{ kind: 'image', src }`. Paste
@@ -162,7 +164,7 @@ New structure:
 │                                            │
 │  [cover ribbon ⚙️]  [cover ribbon ⚙️]  …
 │  Title                                     │
-│  "Bookmark name"                           │
+│  "Custom game name"                           │
 │  chips                                     │
 │  [Play ]                                   │
 └───────────────────────────────────────────┘
@@ -193,25 +195,25 @@ Two card variants, both built on a single `GameCard` component:
   values (see "Config chip rules" below)
 - Big "Play" button
 
-**Bookmark card** (one per `SavedGameConfigDoc`):
+**Custom game card** (one per `SavedGameConfigDoc`):
 
-- Cover: the bookmark's own `cover` if set, otherwise the game default.
-- **Colored top ribbon** matching the bookmark color.
-- **Bookmark icon** in the top-right corner of the cover.
+- Cover: the custom game's own `cover` if set, otherwise the game default.
+- **Colored top ribbon** matching the custom game color.
+- **Custom game icon** in the top-right corner of the cover.
 - Game title.
-- **Bookmark name** as a subtitle under the title (e.g. "My Words").
-- 2–3 config chips reflecting **the bookmark's config**, not the game default.
-- Play button styled in the bookmark's color.
+- **Custom game name** as a subtitle under the title (e.g. "My Words").
+- 2–3 config chips reflecting **the custom game's config**, not the game default.
+- Play button styled in the custom game's color.
 
 Clicking a default card navigates to the game with no `configId`. Clicking a
-bookmark card navigates with `configId` (same behavior as today's
+custom game card navigates with `configId` (same behavior as today's
 `handlePlayWithConfig`).
 
 ### Config chip rules
 
 Chips surface the most salient values from the **simple config** (see
 "Simple config forms" below). Verbose over tight — parents need to pick
-bookmarks apart at a glance.
+custom games apart at a glance.
 
 | Game              | Chips (in order, `·` separated)                                            |
 | ----------------- | -------------------------------------------------------------------------- |
@@ -226,11 +228,11 @@ and the instructions-screen summary stay in sync.
 
 The card list is sorted:
 
-1. **Last-played first** (game or bookmark). Requires reading `session_history`
+1. **Last-played first** (game or custom game). Requires reading `session_history`
    for the current profile and taking the most-recent entry per
    `(gameId, configId)`.
 2. Then **game defaults** in registry order.
-3. Then **other bookmarks**, grouped by `gameId`.
+3. Then **other custom games**, grouped by `gameId`.
 
 ### Level / subject filters
 
@@ -242,7 +244,7 @@ Out of scope for this spec: redesigning the Parent route itself.
 
 ## Cog + advanced modal
 
-Every card — default or bookmark — shows a small **⚙️ cog** in its top-right
+Every card — default or custom game — shows a small **⚙️ cog** in its top-right
 corner. Tapping it opens a modal that renders the **full advanced config
 form** for that game (the existing `ConfigFormFields` output, unchanged).
 
@@ -253,32 +255,32 @@ form lives entirely behind the cog.
 ### Modal entry points
 
 - **Homepage card cog** — opens the modal pre-filled with that card's
-  config (the game default for a default card; the bookmark's config for a
-  bookmark card).
+  config (the game default for a default card; the custom game's config for a
+  custom game card).
 - **Instructions screen cog** — same modal, same behavior. Replaces the
   inline "Advanced ⚙️" link previously shown under the simple form.
 
 ### Modal contents
 
 - Cover picker (emoji palette + image URL input + "Use game default").
-- Bookmark name field (required when saving as new; pre-filled for existing
-  bookmarks).
-- Bookmark color picker (for "Save as new").
+- Custom game name field (required when saving as new; pre-filled for existing
+  custom games).
+- Custom game color picker (for "Save as new").
 - **Full advanced form** (existing `ConfigFormFields` + `renderConfigForm`
   per game, no visual changes).
 - Save bar:
-  - If opened from a **bookmark card**: `Update "{bookmark name}"`
-    (primary) + `Save as new bookmark` (secondary) + `Cancel`.
-  - If opened from a **default card**: `Save as new bookmark` (primary
+  - If opened from a **custom game card**: `Update "{custom game name}"`
+    (primary) + `Save as new custom game` (secondary) + `Cancel`.
+  - If opened from a **default card**: `Save as new custom game` (primary
     only) + `Cancel`. There is no "Update default" button — **defaults are
     immutable**.
 
 ### Never overwrites defaults
 
-Saving from the modal always either updates an existing bookmark or
+Saving from the modal always either updates an existing custom game or
 creates a new one. The `GAME_CATALOG` default config is never persisted
 to; it is the immutable starting point. If a parent wants a different
-"default-feeling" experience, they save a bookmark — that bookmark becomes
+"default-feeling" experience, they save a custom game — that custom game becomes
 the card they and the kid tap.
 
 ## Simple config forms
@@ -287,7 +289,7 @@ Every game gets a `<SimpleConfigForm gameId>` component. This is the **default**
 view for:
 
 1. The Instructions screen's settings panel.
-2. The bookmark save/update dialog's config preview (inside the cog modal
+2. The custom game save/update dialog's config preview (inside the cog modal
    — see "Cog + advanced modal" above).
 
 The simple form never exposes an inline "Advanced" link. The advanced form
@@ -422,7 +424,7 @@ mostly content:
 
 - `← Back` affordance (new).
 - **Cover** (new, replacing the text-only `GameNameChip` at the top).
-- Game title + bookmark badge (if launched from a bookmark).
+- Game title + custom game badge (if launched from a custom game).
 - **Cog ⚙️** in the header (matches the homepage card cog) — opens the
   advanced config modal.
 - Instructions text + TTS speaker (unchanged).
@@ -437,9 +439,9 @@ mostly content:
   the cog modal. The simple form stays focused on the kid-friendly
   controls.
 - Save bar beneath:
-  - If launched from a bookmark: `Update "{bookmark name}"` (primary) +
-    `Save as new bookmark` (secondary). Same behavior as today.
-  - If launched from a default: `Save as new bookmark` only (defaults are
+  - If launched from a custom game: `Update "{custom game name}"` (primary) +
+    `Save as new custom game` (secondary). Same behavior as today.
+  - If launched from a default: `Save as new custom game` only (defaults are
     immutable — see "Cog + advanced modal").
 
 ## Data and typing changes
@@ -450,7 +452,7 @@ mostly content:
   migration bumps the `saved_game_configs` schema version and adds the new
   optional field — existing docs remain valid with `cover: undefined`.
 - `resolveCover(doc, gameId): Cover` helper in `src/games/cover.ts`
-  implements the fallback chain (bookmark cover → game default).
+  implements the fallback chain (custom game cover → game default).
 - `WordSpellConfig` gains a `configMode?: 'simple' | 'advanced'` and a
   `WordSpellSimpleConfig` type mirroring `SortNumbersSimpleConfig`.
 - `NumberMatchConfig` gains the same `configMode` + `NumberMatchSimpleConfig`
@@ -485,8 +487,8 @@ that simple doesn't touch keep their default values from the full shape).
 - Native `<select>` inside CellSelect is keyboard-operable without custom
   event plumbing.
 - ChunkGroup uses radio semantics when single-select.
-- Color-only differentiation of bookmark ribbons is supplemented by the
-  bookmark icon and the subtitle name so colorblind users still disambiguate.
+- Color-only differentiation of custom game ribbons is supplemented by the
+  custom game icon and the subtitle name so colorblind users still disambiguate.
 - Instructions screen keeps the existing `role="dialog"` behavior.
 
 ## Testing
@@ -498,11 +500,11 @@ that simple doesn't touch keep their default values from the full shape).
   - Advanced toggle reveals the existing form inline.
   - Preview / chips reflect current simple config.
 - VR tests (new snapshots):
-  - Homepage with: (a) defaults only, (b) defaults + bookmarks, (c)
-    bookmarks only (edge case). Mobile and desktop widths.
+  - Homepage with: (a) defaults only, (b) defaults + custom games, (c)
+    custom games only (edge case). Mobile and desktop widths.
   - Instructions screen for each game, settings collapsed and expanded.
-- E2E: kid flow — open homepage → tap bookmark card → see instructions →
-  press "Let's go!" → game starts with bookmark config applied.
+- E2E: kid flow — open homepage → tap custom game card → see instructions →
+  press "Let's go!" → game starts with custom game config applied.
 - No changes to existing game-engine tests.
 
 ## Rollout
@@ -511,7 +513,7 @@ Single PR to master via the existing CI gating. Files likely touched:
 
 - `src/routes/$locale/_app/index.tsx`
 - `src/components/GameCard.tsx`, `src/components/GameGrid.tsx` (or split
-  into `GameCoverCard` + `BookmarkCoverCard` if the size grows).
+  into `GameCoverCard` + `Custom gameCoverCard` if the size grows).
 - `src/components/GameCover.tsx` (new)
 - `src/components/CoverPicker.tsx` (new — emoji palette + image URL input)
 - `src/games/cover.ts` (new — `Cover` type + `resolveCover` helper)
@@ -538,9 +540,9 @@ Update `docs/architecture/*.mdx` co-located docs only if logic in
 
 - **Resolved:** editing a game default. Game defaults are **immutable**.
   Tapping a default card's cog opens the advanced modal with the default
-  config pre-filled; the only save action is `Save as new bookmark`. There
+  config pre-filled; the only save action is `Save as new custom game`. There
   is no in-place edit of defaults. The "personalized default" feel comes
-  from a bookmark the parent saves once and the kid taps thereafter.
+  from a custom game the parent saves once and the kid taps thereafter.
 - Cog affordance on small screens: whether the cog is always visible in
   the card's top-right corner or revealed by long-press. Default:
   always visible (a 28×28 tap target is fine alongside the Play button).
