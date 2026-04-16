@@ -7,6 +7,7 @@ import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
 import { checkVersionAndMigrate } from './migrations';
 import {
   appMetaSchema,
+  bookmarksSchema,
   customGamesSchema,
   gameConfigOverridesSchema,
   profilesSchema,
@@ -34,6 +35,7 @@ const COLLECTIONS = {
       1: (oldDoc: Record<string, unknown>) => oldDoc,
     },
   },
+  bookmarks: { schema: bookmarksSchema },
   custom_games: { schema: customGamesSchema },
   profiles: { schema: profilesSchema },
   progress: { schema: progressSchema },
