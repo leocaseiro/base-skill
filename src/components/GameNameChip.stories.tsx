@@ -19,14 +19,14 @@ export const DefaultDark: Story = {
   decorators: [withDarkMode],
 };
 
-export const WithBookmark: Story = {
+export const WithCustomGame: Story = {
   args: {
     customGameName: 'Easy Mode',
     customGameColor: 'indigo',
   },
 };
 
-export const WithBookmarkDark: Story = {
+export const WithCustomGameDark: Story = {
   args: {
     customGameName: 'Easy Mode',
     customGameColor: 'indigo',
