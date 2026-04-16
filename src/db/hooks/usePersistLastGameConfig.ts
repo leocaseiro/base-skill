@@ -1,16 +1,16 @@
 import { useEffect, useRef } from 'react';
-import { useSavedConfigs } from './useSavedConfigs';
+import { useCustomGames } from './useCustomGames';
 
 /**
- * Debounced write of the current in-game settings to RxDB (IndexedDB) so
- * “Play” from the home screen without a named save restores the last panel state.
- * Also flushes the latest config when the game body unmounts (e.g. navigating home).
+ * Debounced write of the current in-game settings to IndexedDB so "Play" from
+ * the home screen without a named save restores the last panel state. Also
+ * flushes the latest config when the game body unmounts (e.g. navigating home).
  */
 export const usePersistLastGameConfig = (
   gameId: string,
   config: Record<string, unknown>,
 ): void => {
-  const { persistLastSessionConfig } = useSavedConfigs();
+  const { persistLastSessionConfig } = useCustomGames();
   const latestRef = useRef({ gameId, config });
 
   const serialized = JSON.stringify(config);
