@@ -35,7 +35,22 @@ const COLLECTIONS = {
       1: (oldDoc: Record<string, unknown>) => oldDoc,
     },
   },
-  bookmarks: { schema: bookmarksSchema },
+  bookmarks: {
+    schema: bookmarksSchema,
+    migrationStrategies: {
+      1: (oldDoc: Record<string, unknown>) => {
+        const profileId = oldDoc.profileId as string;
+        const gameId = oldDoc.gameId as string;
+        return {
+          id: `${profileId}:game:${gameId}`,
+          profileId,
+          targetType: 'game',
+          targetId: gameId,
+          createdAt: oldDoc.createdAt,
+        };
+      },
+    },
+  },
   custom_games: { schema: customGamesSchema },
   profiles: { schema: profilesSchema },
   progress: { schema: progressSchema },
