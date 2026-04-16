@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">7/177 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">7/185 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2254,7 +2254,7 @@ visible: boolean</code></pre>
       <div class="badges">
         
         <label for="c-12-components-gamecard-info" class="badge info as-toggle">1 info</label>
-        <label for="c-12-components-gamecard-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-12-components-gamecard-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -2337,6 +2337,70 @@ visible: boolean</code></pre>
     variant=&quot;customGame&quot;
     customGameName=&quot;Big to Small&quot;
     customGameColor=&quot;purple&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Not Bookmarked</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const NotBookmarked = () =&gt; &lt;GameCard
+    gameId=&quot;sort-numbers&quot;
+    title=&quot;Count in Order&quot;
+    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
+    variant=&quot;default&quot;
+    isBookmarked={false}
+    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Bookmarked</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Bookmarked = () =&gt; &lt;GameCard
+    gameId=&quot;sort-numbers&quot;
+    title=&quot;Count in Order&quot;
+    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
+    variant=&quot;default&quot;
+    isBookmarked
+    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Not Bookmarked Custom Game</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const NotBookmarkedCustomGame = () =&gt; &lt;GameCard
+    gameId=&quot;sort-numbers&quot;
+    title=&quot;Count in Order&quot;
+    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
+    variant=&quot;customGame&quot;
+    customGameName=&quot;Skip by 2&quot;
+    customGameColor=&quot;amber&quot;
+    isBookmarked={false}
+    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Bookmarked Custom Game</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const BookmarkedCustomGame = () =&gt; &lt;GameCard
+    gameId=&quot;sort-numbers&quot;
+    title=&quot;Count in Order&quot;
+    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
+    variant=&quot;customGame&quot;
+    customGameName=&quot;Skip by 2&quot;
+    customGameColor=&quot;amber&quot;
+    isBookmarked
+    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -3265,7 +3329,7 @@ src: string</code></pre>
       <div class="badges">
         <label for="c-21-components-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-21-components-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-21-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-21-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -3295,7 +3359,7 @@ You can debug your component file in this playground: https://react-docgen.dev/p
 Code:
 // src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
 import { useNavigate, useRouter } from &#39;@tanstack/react-router&#39;;
-import { Settings as SettingsIcon } from &#39;lucide-react&#39;;
+import { Settings as SettingsIcon, Star } from &#39;lucide-react&#39;;
 import { useEffect, useRef, useState } from &#39;react&#39;;
 import { createPortal } from &#39;react-dom&#39;;
 import { useTranslation } from &#39;react-i18next&#39;;
@@ -3315,6 +3379,57 @@ import { resolveCover } from &#39;@/games/cover&#39;;
 import { DEFAULT_GAME_COLOR, GAME_COLORS } from &#39;@/lib/game-colors&#39;;
 import { cancelSpeech, speak } from &#39;@/lib/speech/SpeechOutput&#39;;
 import { suggestCustomGameName } from &#39;@/lib/suggest-custom-game-name&#39;;
+
+type HeaderActionsProps = {
+  isBookmarked?: boolean;
+  onToggleBookmark?: () =&gt; void;
+  onOpenSettings: () =&gt; void;
+};
+
+const HeaderActions = ({
+  isBookmarked,
+  onToggleBookmark,
+  onOpenSettings,
+}: HeaderActionsProps): JSX.Element =&gt; {
+  const { t } = useTranslation([&#39;games&#39;, &#39;common&#39;]);
+  return (
+    &lt;div className=&quot;flex items-center gap-2&quot;&gt;
+      {onToggleBookmark &amp;&amp; (
+        &lt;button
+          type=&quot;button&quot;
+          aria-label={
+            isBookmarked
+              ? t(&#39;common:bookmark.remove&#39;, {
+                  defaultValue: &#39;Remove bookmark&#39;,
+                })
+              : t(&#39;common:bookmark.add&#39;, {
+                  defaultValue: &#39;Add bookmark&#39;,
+                })
+          }
+          aria-pressed={isBookmarked ?? false}
+          onClick={onToggleBookmark}
+          className=&quot;flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted&quot;
+        &gt;
+          &lt;Star
+            size={18}
+            aria-hidden=&quot;true&quot;
+            fill={isBookmarked ? &#39;currentColor&#39; : &#39;none&#39;}
+          /&gt;
+        &lt;/button&gt;
+      )}
+      &lt;button
+        type=&quot;button&quot;
+        aria-label={t(&#39;instructions.configure&#39;, {
+          defaultValue: &#39;Configure&#39;,
+        })}
+        onClick={onOpenSettings}
+        className=&quot;flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted&quot;
+      &gt;
+        &lt;SettingsIcon size={18} /&gt;
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+};
 
 export type SaveCustomGameInput = {
   name: string;
@@ -3343,6 +3458,8 @@ type InstructionsOverlayProps = {
   ) =&gt; Promise&lt;void&gt;;
   onDeleteCustomGame?: (configId: string) =&gt; Promise&lt;void&gt;;
   existingCustomGameNames?: readonly string[];
+  isBookmarked?: boolean;
+  onToggleBookmark?: () =&gt; void;
 };
 
 export const InstructionsOverlay = ({
@@ -3361,8 +3478,10 @@ export const InstructionsOverlay = ({
   onUpdateCustomGame,
   onDeleteCustomGame,
   existingCustomGameNames = [],
+  isBookmarked,
+  onToggleBookmark,
 }: InstructionsOverlayProps): JSX.Element =&gt; {
-  const { t } = useTranslation(&#39;games&#39;);
+  const { t } = useTranslation([&#39;games&#39;, &#39;common&#39;]);
   const navigate = useNavigate({
     from: &#39;/$locale/game/$gameId&#39;,
   });
@@ -3490,7 +3609,7 @@ export const InstructionsOverlay = ({
         &lt;/div&gt;
 
         &lt;div className=&quot;flex flex-col gap-4 p-4&quot;&gt;
-          {/* 2. Title row + cog — matches GameCard heading/subtitle order */}
+          {/* 2. Title row + bookmark + cog — matches GameCard heading/subtitle order */}
           &lt;div className=&quot;flex items-center justify-between gap-2&quot;&gt;
             &lt;div&gt;
               &lt;h2
@@ -3509,16 +3628,11 @@ export const InstructionsOverlay = ({
                 &lt;/p&gt;
               )}
             &lt;/div&gt;
-            &lt;button
-              type=&quot;button&quot;
-              aria-label={t(&#39;instructions.configure&#39;, {
-                defaultValue: &#39;Configure&#39;,
-              })}
-              onClick={() =&gt; setModalOpen(true)}
-              className=&quot;flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted&quot;
-            &gt;
-              &lt;SettingsIcon size={18} /&gt;
-            &lt;/button&gt;
+            &lt;HeaderActions
+              isBookmarked={isBookmarked}
+              onToggleBookmark={onToggleBookmark}
+              onOpenSettings={() =&gt; setModalOpen(true)}
+            /&gt;
           &lt;/div&gt;
 
           {/* 3. Instructions text */}
@@ -3731,6 +3845,52 @@ export const InstructionsOverlay = ({
     gameTitle=&quot;Word Spell&quot;
     gameId=&quot;word-spell&quot;
     config={{ inputMethod: &#39;drag&#39;, totalRounds: 8, ttsEnabled: true }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Not Bookmarked</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const NotBookmarked = () =&gt; &lt;InstructionsOverlay isBookmarked={false} onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Bookmarked</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Bookmarked = () =&gt; &lt;InstructionsOverlay isBookmarked onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Not Bookmarked Custom Game</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const NotBookmarkedCustomGame = () =&gt; &lt;InstructionsOverlay
+    customGameId=&quot;abc123&quot;
+    customGameName=&quot;Easy Mode&quot;
+    customGameColor=&quot;teal&quot;
+    isBookmarked={false}
+    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Bookmarked Custom Game</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const BookmarkedCustomGame = () =&gt; &lt;InstructionsOverlay
+    customGameId=&quot;abc123&quot;
+    customGameName=&quot;Easy Mode&quot;
+    customGameColor=&quot;teal&quot;
+    isBookmarked
+    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -7699,7 +7859,7 @@ export const HUD_Round5Of5: Story = {
       <div class="badges">
         <label for="c-error-0-components-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-0-components-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-error-0-components-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -7729,7 +7889,7 @@ You can debug your component file in this playground: https://react-docgen.dev/p
 Code:
 // src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
 import { useNavigate, useRouter } from &#39;@tanstack/react-router&#39;;
-import { Settings as SettingsIcon } from &#39;lucide-react&#39;;
+import { Settings as SettingsIcon, Star } from &#39;lucide-react&#39;;
 import { useEffect, useRef, useState } from &#39;react&#39;;
 import { createPortal } from &#39;react-dom&#39;;
 import { useTranslation } from &#39;react-i18next&#39;;
@@ -7749,6 +7909,57 @@ import { resolveCover } from &#39;@/games/cover&#39;;
 import { DEFAULT_GAME_COLOR, GAME_COLORS } from &#39;@/lib/game-colors&#39;;
 import { cancelSpeech, speak } from &#39;@/lib/speech/SpeechOutput&#39;;
 import { suggestCustomGameName } from &#39;@/lib/suggest-custom-game-name&#39;;
+
+type HeaderActionsProps = {
+  isBookmarked?: boolean;
+  onToggleBookmark?: () =&gt; void;
+  onOpenSettings: () =&gt; void;
+};
+
+const HeaderActions = ({
+  isBookmarked,
+  onToggleBookmark,
+  onOpenSettings,
+}: HeaderActionsProps): JSX.Element =&gt; {
+  const { t } = useTranslation([&#39;games&#39;, &#39;common&#39;]);
+  return (
+    &lt;div className=&quot;flex items-center gap-2&quot;&gt;
+      {onToggleBookmark &amp;&amp; (
+        &lt;button
+          type=&quot;button&quot;
+          aria-label={
+            isBookmarked
+              ? t(&#39;common:bookmark.remove&#39;, {
+                  defaultValue: &#39;Remove bookmark&#39;,
+                })
+              : t(&#39;common:bookmark.add&#39;, {
+                  defaultValue: &#39;Add bookmark&#39;,
+                })
+          }
+          aria-pressed={isBookmarked ?? false}
+          onClick={onToggleBookmark}
+          className=&quot;flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted&quot;
+        &gt;
+          &lt;Star
+            size={18}
+            aria-hidden=&quot;true&quot;
+            fill={isBookmarked ? &#39;currentColor&#39; : &#39;none&#39;}
+          /&gt;
+        &lt;/button&gt;
+      )}
+      &lt;button
+        type=&quot;button&quot;
+        aria-label={t(&#39;instructions.configure&#39;, {
+          defaultValue: &#39;Configure&#39;,
+        })}
+        onClick={onOpenSettings}
+        className=&quot;flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted&quot;
+      &gt;
+        &lt;SettingsIcon size={18} /&gt;
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+};
 
 export type SaveCustomGameInput = {
   name: string;
@@ -7777,6 +7988,8 @@ type InstructionsOverlayProps = {
   ) =&gt; Promise&lt;void&gt;;
   onDeleteCustomGame?: (configId: string) =&gt; Promise&lt;void&gt;;
   existingCustomGameNames?: readonly string[];
+  isBookmarked?: boolean;
+  onToggleBookmark?: () =&gt; void;
 };
 
 export const InstructionsOverlay = ({
@@ -7795,8 +8008,10 @@ export const InstructionsOverlay = ({
   onUpdateCustomGame,
   onDeleteCustomGame,
   existingCustomGameNames = [],
+  isBookmarked,
+  onToggleBookmark,
 }: InstructionsOverlayProps): JSX.Element =&gt; {
-  const { t } = useTranslation(&#39;games&#39;);
+  const { t } = useTranslation([&#39;games&#39;, &#39;common&#39;]);
   const navigate = useNavigate({
     from: &#39;/$locale/game/$gameId&#39;,
   });
@@ -7924,7 +8139,7 @@ export const InstructionsOverlay = ({
         &lt;/div&gt;
 
         &lt;div className=&quot;flex flex-col gap-4 p-4&quot;&gt;
-          {/* 2. Title row + cog — matches GameCard heading/subtitle order */}
+          {/* 2. Title row + bookmark + cog — matches GameCard heading/subtitle order */}
           &lt;div className=&quot;flex items-center justify-between gap-2&quot;&gt;
             &lt;div&gt;
               &lt;h2
@@ -7943,16 +8158,11 @@ export const InstructionsOverlay = ({
                 &lt;/p&gt;
               )}
             &lt;/div&gt;
-            &lt;button
-              type=&quot;button&quot;
-              aria-label={t(&#39;instructions.configure&#39;, {
-                defaultValue: &#39;Configure&#39;,
-              })}
-              onClick={() =&gt; setModalOpen(true)}
-              className=&quot;flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted&quot;
-            &gt;
-              &lt;SettingsIcon size={18} /&gt;
-            &lt;/button&gt;
+            &lt;HeaderActions
+              isBookmarked={isBookmarked}
+              onToggleBookmark={onToggleBookmark}
+              onOpenSettings={() =&gt; setModalOpen(true)}
+            /&gt;
           &lt;/div&gt;
 
           {/* 3. Instructions text */}
@@ -8165,6 +8375,52 @@ export const InstructionsOverlay = ({
     gameTitle=&quot;Word Spell&quot;
     gameId=&quot;word-spell&quot;
     config={{ inputMethod: &#39;drag&#39;, totalRounds: 8, ttsEnabled: true }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Not Bookmarked</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const NotBookmarked = () =&gt; &lt;InstructionsOverlay isBookmarked={false} onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Bookmarked</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Bookmarked = () =&gt; &lt;InstructionsOverlay isBookmarked onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Not Bookmarked Custom Game</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const NotBookmarkedCustomGame = () =&gt; &lt;InstructionsOverlay
+    customGameId=&quot;abc123&quot;
+    customGameName=&quot;Easy Mode&quot;
+    customGameColor=&quot;teal&quot;
+    isBookmarked={false}
+    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Bookmarked Custom Game</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const BookmarkedCustomGame = () =&gt; &lt;InstructionsOverlay
+    customGameId=&quot;abc123&quot;
+    customGameName=&quot;Easy Mode&quot;
+    customGameColor=&quot;teal&quot;
+    isBookmarked
+    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
             </div>
         </div>
     
