@@ -117,10 +117,10 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
             e.stopPropagation();
             onToggleBookmark();
           }}
-          className="absolute right-2 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 text-foreground shadow"
+          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-card/80 text-foreground shadow"
         >
           <Star
-            size={16}
+            size={14}
             aria-hidden="true"
             fill={isBookmarked ? 'currentColor' : 'none'}
           />
