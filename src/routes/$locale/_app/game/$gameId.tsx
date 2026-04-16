@@ -13,7 +13,7 @@ import type {
   WordSpellConfig,
   WordSpellRound,
 } from '@/games/word-spell/types';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import type { InProgressSession } from '@/lib/game-engine/session-finder';
 import type {
   GameEngineState,
@@ -430,7 +430,7 @@ const WordSpellGameBody = ({
         bookmarkId={bookmarkId ?? undefined}
         bookmarkName={bookmarkName ?? undefined}
         bookmarkColor={
-          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+          (bookmarkColor ?? undefined) as GameColorKey | undefined
         }
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
@@ -524,7 +524,7 @@ const NumberMatchGameBody = ({
         bookmarkId={bookmarkId ?? undefined}
         bookmarkName={bookmarkName ?? undefined}
         bookmarkColor={
-          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+          (bookmarkColor ?? undefined) as GameColorKey | undefined
         }
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
@@ -618,7 +618,7 @@ const SortNumbersGameBody = ({
         bookmarkId={bookmarkId ?? undefined}
         bookmarkName={bookmarkName ?? undefined}
         bookmarkColor={
-          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+          (bookmarkColor ?? undefined) as GameColorKey | undefined
         }
         config={cfg as unknown as Record<string, unknown>}
         onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}

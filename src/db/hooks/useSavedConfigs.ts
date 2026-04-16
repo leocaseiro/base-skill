@@ -5,7 +5,7 @@ import { useRxDB } from './useRxDB';
 import { useRxQuery } from './useRxQuery';
 import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
 import type { Cover } from '@/games/cover-type';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import {
   ANONYMOUS_PROFILE_ID,
   isLastSessionSavedConfigId,
@@ -22,7 +22,7 @@ type SaveInput = {
 
 type UpdateConfigExtras = {
   cover?: Cover;
-  color?: BookmarkColorKey;
+  color?: GameColorKey;
 };
 
 type UseSavedConfigsResult = {

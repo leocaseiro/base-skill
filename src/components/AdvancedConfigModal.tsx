@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Cover } from '@/games/cover-type';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
 import { CoverPicker } from '@/components/CoverPicker';
@@ -13,10 +13,10 @@ import {
 } from '@/components/ui/dialog';
 import { getAdvancedConfigFields } from '@/games/config-fields-registry';
 import {
-  BOOKMARK_COLORS,
-  BOOKMARK_COLOR_KEYS,
-  DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
+  DEFAULT_GAME_COLOR,
+  GAME_COLORS,
+  GAME_COLOR_KEYS,
+} from '@/lib/game-colors';
 
 export type AdvancedConfigModalMode =
   | { kind: 'default' }
@@ -24,14 +24,14 @@ export type AdvancedConfigModalMode =
       kind: 'bookmark';
       configId: string;
       name: string;
-      color: BookmarkColorKey;
+      color: GameColorKey;
       cover: Cover | undefined;
     };
 
 type SavePayload = {
   configId?: string;
   name: string;
-  color: BookmarkColorKey;
+  color: GameColorKey;
   cover: Cover | undefined;
   config: Record<string, unknown>;
 };
@@ -69,8 +69,8 @@ export const AdvancedConfigModal = ({
   const [name, setName] = useState<string>(
     mode.kind === 'bookmark' ? mode.name : '',
   );
-  const [color, setColor] = useState<BookmarkColorKey>(
-    mode.kind === 'bookmark' ? mode.color : DEFAULT_BOOKMARK_COLOR,
+  const [color, setColor] = useState<GameColorKey>(
+    mode.kind === 'bookmark' ? mode.color : DEFAULT_GAME_COLOR,
   );
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -180,7 +180,7 @@ export const AdvancedConfigModal = ({
               role="group"
               aria-label="Bookmark color"
             >
-              {BOOKMARK_COLOR_KEYS.map((key) => (
+              {GAME_COLOR_KEYS.map((key) => (
                 <button
                   key={key}
                   type="button"
@@ -189,17 +189,17 @@ export const AdvancedConfigModal = ({
                   onClick={() => setColor(key)}
                   className="h-8 w-8 rounded-full border-2 transition-transform hover:scale-110"
                   style={{
-                    background: BOOKMARK_COLORS[key].playBg,
+                    background: GAME_COLORS[key].playBg,
                     borderColor:
                       color === key
-                        ? BOOKMARK_COLORS[key].playBg
+                        ? GAME_COLORS[key].playBg
                         : 'transparent',
                     outline:
                       color === key ? '3px solid white' : undefined,
                     outlineOffset: color === key ? '-4px' : undefined,
                     boxShadow:
                       color === key
-                        ? `0 0 0 2px ${BOOKMARK_COLORS[key].playBg}`
+                        ? `0 0 0 2px ${GAME_COLORS[key].playBg}`
                         : undefined,
                   }}
                 />

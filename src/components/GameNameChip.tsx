@@ -1,26 +1,23 @@
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
-import {
-  BOOKMARK_COLORS,
-  DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
+import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
 
 type GameNameChipProps = {
   title: string;
   bookmarkName?: string;
-  bookmarkColor?: BookmarkColorKey;
+  bookmarkColor?: GameColorKey;
   subject?: string;
 };
 
 export const GameNameChip = ({
   title,
   bookmarkName,
-  bookmarkColor = DEFAULT_BOOKMARK_COLOR,
+  bookmarkColor = DEFAULT_GAME_COLOR,
   subject,
 }: GameNameChipProps): JSX.Element => {
   const colors = bookmarkName
-    ? BOOKMARK_COLORS[bookmarkColor]
-    : BOOKMARK_COLORS.slate;
+    ? GAME_COLORS[bookmarkColor]
+    : GAME_COLORS.slate;
 
   return (
     <div
