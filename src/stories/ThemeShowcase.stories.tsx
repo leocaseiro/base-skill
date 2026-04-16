@@ -55,7 +55,7 @@ const sessionMeta: SessionMeta = {
   initialState,
 };
 
-// ── Bookmark component fixture data ──────────────────────────────────────
+// ── Custom game component fixture data ──────────────────────────────────────
 
 const configFields: ConfigField[] = [
   {
