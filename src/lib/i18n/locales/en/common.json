@@ -35,7 +35,7 @@
     "pageOf": "Page {{page}} of {{total}}"
   },
   "play": "Play",
-  "saveConfig": {
+  "customGame": {
     "title": "Save configuration",
     "nameLabel": "Configuration name",
     "placeholder": "e.g. Easy Mode",
@@ -46,8 +46,8 @@
     "errorDuplicate": "A configuration named \"{{name}}\" already exists",
     "colorLabel": "Colour",
     "update": "Update \"{{name}}\"",
-    "saveAsNew": "Save as new bookmark…",
-    "saveBookmarkLabel": "Save as bookmark",
-    "saveBookmarkPlaceholder": "e.g. Easy Mode"
+    "saveAsNew": "Save as new custom game…",
+    "saveCustomGameLabel": "Save as custom game",
+    "saveCustomGamePlaceholder": "e.g. Easy Mode"
   }
 }
