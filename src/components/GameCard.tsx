@@ -4,6 +4,7 @@ import {
   SettingsIcon,
   Star,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Cover } from '@/games/cover-type';
 import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
@@ -32,6 +33,7 @@ type CustomGameVariant = Common & {
 type GameCardProps = DefaultVariant | CustomGameVariant;
 
 export const GameCard = (props: GameCardProps): JSX.Element => {
+  const { t } = useTranslation('common');
   const {
     gameId,
     title,
@@ -103,7 +105,13 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
       {onToggleBookmark && (
         <button
           type="button"
-          aria-label={isBookmarked ? `Remove bookmark` : `Add bookmark`}
+          aria-label={
+            isBookmarked
+              ? t('bookmark.remove', {
+                  defaultValue: 'Remove bookmark',
+                })
+              : t('bookmark.add', { defaultValue: 'Add bookmark' })
+          }
           aria-pressed={isBookmarked ?? false}
           onClick={(e) => {
             e.stopPropagation();
