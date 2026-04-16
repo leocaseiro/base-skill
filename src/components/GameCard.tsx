@@ -1,4 +1,10 @@
-import { CircleDashed, CircleDot, SettingsIcon } from 'lucide-react';
+import {
+  CircleDashed,
+  CircleDot,
+  SettingsIcon,
+  Star,
+} from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Cover } from '@/games/cover-type';
 import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
@@ -12,6 +18,9 @@ type Common = {
   cover?: Cover;
   onPlay: () => void;
   onOpenCog: () => void;
+  /** Bookmark state — when both `isBookmarked` and `onToggleBookmark` are provided, a Star toggle renders in the cover top-right. */
+  isBookmarked?: boolean;
+  onToggleBookmark?: () => void;
 };
 
 type DefaultVariant = Common & { variant: 'default' };
@@ -24,7 +33,16 @@ type CustomGameVariant = Common & {
 type GameCardProps = DefaultVariant | CustomGameVariant;
 
 export const GameCard = (props: GameCardProps): JSX.Element => {
-  const { gameId, title, chips, onPlay, onOpenCog } = props;
+  const { t } = useTranslation('common');
+  const {
+    gameId,
+    title,
+    chips,
+    onPlay,
+    onOpenCog,
+    isBookmarked,
+    onToggleBookmark,
+  } = props;
   const cover =
     props.cover === undefined
       ? resolveDefaultCover(gameId)
@@ -45,7 +63,7 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
         onClick={onPlay}
         className="flex flex-col text-left active:scale-[0.98]"
       >
-        <div className="p-2">
+        <div className="relative p-2">
           <GameCover cover={cover} size="card" />
         </div>
 
@@ -83,6 +101,31 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
           </div>
         </div>
       </button>
+
+      {onToggleBookmark && (
+        <button
+          type="button"
+          aria-label={
+            isBookmarked
+              ? t('bookmark.remove', {
+                  defaultValue: 'Remove bookmark',
+                })
+              : t('bookmark.add', { defaultValue: 'Add bookmark' })
+          }
+          aria-pressed={isBookmarked ?? false}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleBookmark();
+          }}
+          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-card/80 text-foreground shadow"
+        >
+          <Star
+            size={14}
+            aria-hidden="true"
+            fill={isBookmarked ? 'currentColor' : 'none'}
+          />
+        </button>
+      )}
 
       <button
         type="button"

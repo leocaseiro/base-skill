@@ -21,6 +21,7 @@ describe('createTestDatabase', () => {
     db = await createTestDatabase();
     const names = [
       'app_meta',
+      'bookmarks',
       'custom_games',
       'profiles',
       'progress',

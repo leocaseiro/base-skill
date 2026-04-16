@@ -1,6 +1,6 @@
 // src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
 import { useNavigate, useRouter } from '@tanstack/react-router';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, Star } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,57 @@ import { resolveCover } from '@/games/cover';
 import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
 import { suggestCustomGameName } from '@/lib/suggest-custom-game-name';
+
+type HeaderActionsProps = {
+  isBookmarked?: boolean;
+  onToggleBookmark?: () => void;
+  onOpenSettings: () => void;
+};
+
+const HeaderActions = ({
+  isBookmarked,
+  onToggleBookmark,
+  onOpenSettings,
+}: HeaderActionsProps): JSX.Element => {
+  const { t } = useTranslation(['games', 'common']);
+  return (
+    <div className="flex items-center gap-2">
+      {onToggleBookmark && (
+        <button
+          type="button"
+          aria-label={
+            isBookmarked
+              ? t('common:bookmark.remove', {
+                  defaultValue: 'Remove bookmark',
+                })
+              : t('common:bookmark.add', {
+                  defaultValue: 'Add bookmark',
+                })
+          }
+          aria-pressed={isBookmarked ?? false}
+          onClick={onToggleBookmark}
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+        >
+          <Star
+            size={18}
+            aria-hidden="true"
+            fill={isBookmarked ? 'currentColor' : 'none'}
+          />
+        </button>
+      )}
+      <button
+        type="button"
+        aria-label={t('instructions.configure', {
+          defaultValue: 'Configure',
+        })}
+        onClick={onOpenSettings}
+        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+      >
+        <SettingsIcon size={18} />
+      </button>
+    </div>
+  );
+};
 
 export type SaveCustomGameInput = {
   name: string;
@@ -48,6 +99,8 @@ type InstructionsOverlayProps = {
   ) => Promise<void>;
   onDeleteCustomGame?: (configId: string) => Promise<void>;
   existingCustomGameNames?: readonly string[];
+  isBookmarked?: boolean;
+  onToggleBookmark?: () => void;
 };
 
 export const InstructionsOverlay = ({
@@ -66,8 +119,10 @@ export const InstructionsOverlay = ({
   onUpdateCustomGame,
   onDeleteCustomGame,
   existingCustomGameNames = [],
+  isBookmarked,
+  onToggleBookmark,
 }: InstructionsOverlayProps): JSX.Element => {
-  const { t } = useTranslation('games');
+  const { t } = useTranslation(['games', 'common']);
   const navigate = useNavigate({
     from: '/$locale/game/$gameId',
   });
@@ -195,7 +250,7 @@ export const InstructionsOverlay = ({
         </div>
 
         <div className="flex flex-col gap-4 p-4">
-          {/* 2. Title row + cog — matches GameCard heading/subtitle order */}
+          {/* 2. Title row + bookmark + cog — matches GameCard heading/subtitle order */}
           <div className="flex items-center justify-between gap-2">
             <div>
               <h2
@@ -214,16 +269,11 @@ export const InstructionsOverlay = ({
                 </p>
               )}
             </div>
-            <button
-              type="button"
-              aria-label={t('instructions.configure', {
-                defaultValue: 'Configure',
-              })}
-              onClick={() => setModalOpen(true)}
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
-            >
-              <SettingsIcon size={18} />
-            </button>
+            <HeaderActions
+              isBookmarked={isBookmarked}
+              onToggleBookmark={onToggleBookmark}
+              onOpenSettings={() => setModalOpen(true)}
+            />
           </div>
 
           {/* 3. Instructions text */}

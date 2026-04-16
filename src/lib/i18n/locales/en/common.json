@@ -35,6 +35,10 @@
     "pageOf": "Page {{page}} of {{total}}"
   },
   "play": "Play",
+  "bookmark": {
+    "add": "Add bookmark",
+    "remove": "Remove bookmark"
+  },
   "customGame": {
     "title": "Save configuration",
     "nameLabel": "Configuration name",
