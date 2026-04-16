@@ -16,7 +16,7 @@ afterEach(async () => {
   await destroyTestDatabase(db);
 });
 
-describe('bookmarks schema v1', () => {
+describe('bookmarks schema v0', () => {
   it('inserts a bookmark for a default game', async () => {
     const id = bookmarkId('anonymous', 'game', 'word-spell');
     const doc = await db.bookmarks.insert({

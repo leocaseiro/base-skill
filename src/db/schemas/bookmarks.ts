@@ -12,7 +12,7 @@ export type BookmarkDoc = {
 };
 
 export const bookmarksSchema: RxJsonSchema<BookmarkDoc> = {
-  version: 1,
+  version: 0,
   primaryKey: 'id',
   type: 'object',
   properties: {
