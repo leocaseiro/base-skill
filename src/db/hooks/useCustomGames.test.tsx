@@ -172,6 +172,93 @@ describe('useCustomGames', () => {
     ).toBe(false);
   });
 
+  it('rename() renames a custom game', async () => {
+    const { result } = renderHook(() => useCustomGamesReady(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    await act(async () => {
+      await result.current.save({
+        gameId: 'word-spell',
+        name: 'Easy Mode',
+        config: {},
+        color: 'indigo',
+      });
+    });
+    await waitFor(() =>
+      expect(result.current.customGames).toHaveLength(1),
+    );
+    const id = result.current.customGames[0]!.id;
+    await act(async () => {
+      await result.current.rename(id, 'Hard Mode');
+    });
+    await waitFor(() =>
+      expect(result.current.customGames[0]?.name).toBe('Hard Mode'),
+    );
+  });
+
+  it('rename() throws when new name already exists for same gameId', async () => {
+    const { result } = renderHook(() => useCustomGamesReady(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    await act(async () => {
+      await result.current.save({
+        gameId: 'word-spell',
+        name: 'Easy Mode',
+        config: {},
+        color: 'indigo',
+      });
+    });
+    await waitFor(() =>
+      expect(result.current.customGames).toHaveLength(1),
+    );
+    await act(async () => {
+      await result.current.save({
+        gameId: 'word-spell',
+        name: 'Hard Mode',
+        config: {},
+        color: 'indigo',
+      });
+    });
+    await waitFor(() =>
+      expect(result.current.customGames).toHaveLength(2),
+    );
+    const id = result.current.customGames[0]!.id;
+    await expect(
+      act(async () => {
+        await result.current.rename(id, 'Hard Mode');
+      }),
+    ).rejects.toThrow('already exists');
+  });
+
+  it('getByGameId() returns only custom games for the given gameId', async () => {
+    const { result } = renderHook(() => useCustomGamesReady(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    await act(async () => {
+      await result.current.save({
+        gameId: 'word-spell',
+        name: 'WS Config',
+        config: {},
+        color: 'indigo',
+      });
+      await result.current.save({
+        gameId: 'number-match',
+        name: 'NM Config',
+        config: {},
+        color: 'indigo',
+      });
+    });
+    await waitFor(() =>
+      expect(result.current.customGames).toHaveLength(2),
+    );
+    const wsGames = result.current.getByGameId('word-spell');
+    expect(wsGames).toHaveLength(1);
+    expect(wsGames[0]?.gameId).toBe('word-spell');
+  });
+
   it('persistLastSessionConfig upserts a hidden doc in saved_game_configs and omits it from customGames', async () => {
     const { result } = renderHook(() => useCustomGamesReady(), {
       wrapper: makeWrapper(db),
