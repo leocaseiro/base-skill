@@ -19,7 +19,7 @@ import { getSimpleConfigFormRenderer } from '@/games/config-fields-registry';
 import { resolveCover } from '@/games/cover';
 import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
-import { suggestBookmarkName } from '@/lib/suggest-bookmark-name';
+import { suggestCustomGameName } from '@/lib/suggest-custom-game-name';
 
 export type SaveBookmarkInput = {
   name: string;
@@ -129,7 +129,7 @@ export const InstructionsOverlay = ({
     }
     setSaveSubmitAttempted(false);
     setSavingName(
-      suggestBookmarkName(gameTitle, existingBookmarkNames),
+      suggestCustomGameName(gameTitle, existingBookmarkNames),
     );
     setSaveDialogOpen(true);
   };
