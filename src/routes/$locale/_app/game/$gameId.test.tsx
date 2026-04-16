@@ -1,5 +1,11 @@
 // src/routes/$locale/_app/game/$gameId.test.tsx
-import { render, screen, waitFor } from '@testing-library/react';
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   afterEach,
   beforeEach,
@@ -21,6 +27,7 @@ import {
   createTestDatabase,
   destroyTestDatabase,
 } from '@/db/create-database';
+import { ANONYMOUS_PROFILE_ID } from '@/db/last-session-game-config';
 import { DbProvider } from '@/providers/DbProvider';
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
@@ -76,6 +83,10 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+  // Unmount all rendered components before destroying the db so that
+  // hook cleanup effects (e.g. usePersistLastGameConfig flush-on-unmount)
+  // resolve against the live db instead of a destroyed one.
+  cleanup();
   await destroyTestDatabase(db);
 });
 
@@ -107,6 +118,76 @@ describe('GameRoute', () => {
     );
     await waitFor(() => {
       expect(screen.getByText('Word Builder')).toBeInTheDocument();
+    });
+  });
+
+  it('deletes a custom game: removes doc from DB and triggers navigation', async () => {
+    const user = userEvent.setup();
+
+    // Insert a custom game document into the DB
+    const customId = 'custom-game-test-id';
+    await db.custom_games.insert({
+      id: customId,
+      profileId: ANONYMOUS_PROFILE_ID,
+      gameId: 'word-spell',
+      name: 'My Custom Spelling',
+      config: { component: 'WordSpell' },
+      color: 'amber',
+      createdAt: new Date().toISOString(),
+    });
+
+    const wordSpellConfig: ResolvedGameConfig = {
+      ...testConfig,
+      gameId: 'word-spell',
+    };
+
+    render(
+      <GameRoute
+        config={wordSpellConfig}
+        initialLog={null}
+        draftState={null}
+        sessionId="sess-delete-001"
+        seed="seed-delete"
+        meta={{ ...testMeta, gameId: 'word-spell' }}
+        gameSpecificConfig={{ component: 'WordSpell' }}
+        customGameId={customId}
+        customGameName="My Custom Spelling"
+        customGameColor="amber"
+        customGameCover={null}
+      />,
+      { wrapper },
+    );
+
+    // Wait for the InstructionsOverlay to render (cog/settings button)
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: /configure/i }),
+      ).toBeInTheDocument();
+    });
+
+    // Open the AdvancedConfigModal via the cog button
+    await user.click(
+      screen.getByRole('button', { name: /configure/i }),
+    );
+
+    // Click the Delete button (in the AdvancedConfigModal) to open the confirmation dialog
+    const deleteBtn = await screen.findByRole('button', {
+      name: /^delete$/i,
+    });
+    await user.click(deleteBtn);
+
+    // After the confirmation dialog opens, Radix marks the parent dialog as
+    // aria-hidden, leaving only the confirmation's Delete button accessible.
+    // findByRole will locate the destructive confirm button.
+    const confirmDeleteBtn = await screen.findByRole('button', {
+      name: /^delete$/i,
+    });
+    await user.click(confirmDeleteBtn);
+
+    // The document must be removed from the DB
+    await waitFor(async () => {
+      const doc = await db.custom_games.findOne(customId).exec();
+      expect(doc).toBeNull();
     });
   });
 });
