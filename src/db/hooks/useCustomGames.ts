@@ -7,6 +7,7 @@ import type { CustomGameDoc } from '@/db/schemas/custom_games';
 import type { SavedGameConfigDoc } from '@/db/schemas/saved_game_configs';
 import type { Cover } from '@/games/cover-type';
 import type { GameColorKey } from '@/lib/game-colors';
+import { bookmarkId } from '@/db/bookmark-id';
 import {
   ANONYMOUS_PROFILE_ID,
   isLastSessionConfigId,
@@ -135,6 +136,10 @@ export const useCustomGames = (): UseCustomGamesResult => {
     if (!db) return;
     const doc = await db.custom_games.findOne(id).exec();
     if (doc) await doc.remove();
+    const bookmark = await db.bookmarks
+      .findOne(bookmarkId(ANONYMOUS_PROFILE_ID, 'customGame', id))
+      .exec();
+    if (bookmark) await bookmark.remove();
   };
 
   const rename = async (id: string, newName: string): Promise<void> => {

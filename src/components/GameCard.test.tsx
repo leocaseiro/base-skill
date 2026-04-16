@@ -64,4 +64,75 @@ describe('GameCard', () => {
     await user.click(screen.getByRole('button', { name: /settings/i }));
     expect(onOpenCog).toHaveBeenCalled();
   });
+
+  it('does not render the Star button when onToggleBookmark is omitted', () => {
+    render(
+      <GameCard
+        variant="default"
+        gameId="sort-numbers"
+        title="Count in Order"
+        chips={[]}
+        onPlay={vi.fn()}
+        onOpenCog={vi.fn()}
+      />,
+    );
+    expect(
+      screen.queryByRole('button', { name: /bookmark/i }),
+    ).toBeNull();
+  });
+
+  it('renders an outline Star (aria-pressed=false) when isBookmarked is false', () => {
+    render(
+      <GameCard
+        variant="default"
+        gameId="sort-numbers"
+        title="Count in Order"
+        chips={[]}
+        onPlay={vi.fn()}
+        onOpenCog={vi.fn()}
+        isBookmarked={false}
+        onToggleBookmark={vi.fn()}
+      />,
+    );
+    const star = screen.getByRole('button', { name: /bookmark/i });
+    expect(star).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('renders a filled Star (aria-pressed=true) when isBookmarked is true', () => {
+    render(
+      <GameCard
+        variant="default"
+        gameId="sort-numbers"
+        title="Count in Order"
+        chips={[]}
+        onPlay={vi.fn()}
+        onOpenCog={vi.fn()}
+        isBookmarked
+        onToggleBookmark={vi.fn()}
+      />,
+    );
+    const star = screen.getByRole('button', { name: /bookmark/i });
+    expect(star).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('clicking the Star fires onToggleBookmark and does NOT fire onPlay', async () => {
+    const user = userEvent.setup();
+    const onPlay = vi.fn();
+    const onToggleBookmark = vi.fn();
+    render(
+      <GameCard
+        variant="default"
+        gameId="sort-numbers"
+        title="Count in Order"
+        chips={[]}
+        onPlay={onPlay}
+        onOpenCog={vi.fn()}
+        isBookmarked={false}
+        onToggleBookmark={onToggleBookmark}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: /bookmark/i }));
+    expect(onToggleBookmark).toHaveBeenCalledTimes(1);
+    expect(onPlay).not.toHaveBeenCalled();
+  });
 });

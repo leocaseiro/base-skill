@@ -12,6 +12,7 @@ const meta: Meta<typeof GameCard> = {
   argTypes: {
     onPlay: { action: 'played' },
     onOpenCog: { action: 'cogOpened' },
+    onToggleBookmark: { action: 'bookmarkToggled' },
   },
 };
 export default meta;
@@ -38,5 +39,41 @@ export const CustomGamePurple: Story = {
     customGameName: 'Big to Small',
     customGameColor: 'purple',
     chips: ['⬇️ Down', '10 numbers', '3s'],
+  },
+};
+
+export const NotBookmarked: Story = {
+  args: {
+    variant: 'default',
+    isBookmarked: false,
+    onToggleBookmark: () => {},
+  },
+};
+
+export const Bookmarked: Story = {
+  args: {
+    variant: 'default',
+    isBookmarked: true,
+    onToggleBookmark: () => {},
+  },
+};
+
+export const NotBookmarkedCustomGame: Story = {
+  args: {
+    variant: 'customGame',
+    customGameName: 'Skip by 2',
+    customGameColor: 'amber',
+    isBookmarked: false,
+    onToggleBookmark: () => {},
+  },
+};
+
+export const BookmarkedCustomGame: Story = {
+  args: {
+    variant: 'customGame',
+    customGameName: 'Skip by 2',
+    customGameColor: 'amber',
+    isBookmarked: true,
+    onToggleBookmark: () => {},
   },
 };

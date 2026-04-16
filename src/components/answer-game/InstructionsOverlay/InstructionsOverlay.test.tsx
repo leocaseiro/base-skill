@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { InstructionsOverlay } from './InstructionsOverlay';
+import type React from 'react';
 
 vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
@@ -42,6 +43,25 @@ const baseProps = {
   onConfigChange: vi.fn(),
   onSaveCustomGame: vi.fn(),
 };
+
+const renderOverlay = (
+  overrides: Partial<
+    React.ComponentProps<typeof InstructionsOverlay>
+  > = {},
+) =>
+  render(
+    <InstructionsOverlay
+      text="Spell the word."
+      onStart={() => {}}
+      ttsEnabled={false}
+      gameTitle="Word Spell"
+      gameId="word-spell"
+      config={{}}
+      onConfigChange={() => {}}
+      onSaveCustomGame={vi.fn().mockResolvedValue('id')}
+      {...overrides}
+    />,
+  );
 
 describe('InstructionsOverlay', () => {
   it('renders the game title', () => {
@@ -144,5 +164,41 @@ describe('InstructionsOverlay', () => {
       screen.getByRole('button', { name: /configure/i }),
     );
     expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('does not render a Star button when onToggleBookmark is omitted', () => {
+    renderOverlay({});
+    expect(
+      screen.queryByRole('button', { name: /bookmark/i }),
+    ).toBeNull();
+  });
+
+  it('renders aria-pressed=false when isBookmarked is false', () => {
+    renderOverlay({
+      isBookmarked: false,
+      onToggleBookmark: vi.fn(),
+    });
+    const star = screen.getByRole('button', { name: /bookmark/i });
+    expect(star).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('renders aria-pressed=true when isBookmarked is true', () => {
+    renderOverlay({
+      isBookmarked: true,
+      onToggleBookmark: vi.fn(),
+    });
+    const star = screen.getByRole('button', { name: /bookmark/i });
+    expect(star).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('clicking the Star fires onToggleBookmark', async () => {
+    const user = userEvent.setup();
+    const onToggleBookmark = vi.fn();
+    renderOverlay({
+      isBookmarked: false,
+      onToggleBookmark,
+    });
+    await user.click(screen.getByRole('button', { name: /bookmark/i }));
+    expect(onToggleBookmark).toHaveBeenCalledTimes(1);
   });
 });

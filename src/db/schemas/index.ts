@@ -1,4 +1,5 @@
 import { appMetaSchema } from './app-meta';
+import { bookmarksSchema } from './bookmarks';
 import { customGamesSchema } from './custom_games';
 import { gameConfigOverridesSchema } from './game_config_overrides';
 import { profilesSchema } from './profiles';
@@ -13,6 +14,8 @@ import { wordSpellSeenWordsSchema } from './word_spell_seen_words';
 
 export { appMetaSchema } from './app-meta';
 export type { AppMetaDoc } from './app-meta';
+export { bookmarksSchema } from './bookmarks';
+export type { BookmarkDoc, BookmarkTargetType } from './bookmarks';
 export { customGamesSchema } from './custom_games';
 export type { CustomGameDoc } from './custom_games';
 export { gameConfigOverridesSchema } from './game_config_overrides';
@@ -38,6 +41,7 @@ export type { WordSpellSeenWordsDoc } from './word_spell_seen_words';
 
 export const MAX_SCHEMA_VERSION = Math.max(
   appMetaSchema.version,
+  bookmarksSchema.version,
   customGamesSchema.version,
   gameConfigOverridesSchema.version,
   profilesSchema.version,

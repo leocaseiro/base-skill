@@ -92,6 +92,44 @@ describe('useCustomGames', () => {
     ).rejects.toThrow('already exists');
   });
 
+  it('remove() also deletes the matching bookmark row (cascade)', async () => {
+    const { result } = renderHook(() => useCustomGamesReady(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+
+    let id = '';
+    await act(async () => {
+      id = await result.current.save({
+        gameId: 'word-spell',
+        name: 'To Delete',
+        config: {},
+        color: 'indigo',
+      });
+    });
+    await waitFor(() =>
+      expect(result.current.customGames).toHaveLength(1),
+    );
+
+    // Manually seed a bookmark row for this custom game.
+    await db.bookmarks.insert({
+      id: `anonymous:customGame:${id}`,
+      profileId: 'anonymous',
+      targetType: 'customGame',
+      targetId: id,
+      createdAt: new Date().toISOString(),
+    });
+    expect(await db.bookmarks.find().exec()).toHaveLength(1);
+
+    await act(async () => {
+      await result.current.remove(id);
+    });
+    await waitFor(() =>
+      expect(result.current.customGames).toHaveLength(0),
+    );
+    expect(await db.bookmarks.find().exec()).toHaveLength(0);
+  });
+
   it('remove() deletes a custom game by id', async () => {
     const { result } = renderHook(() => useCustomGamesReady(), {
       wrapper: makeWrapper(db),
