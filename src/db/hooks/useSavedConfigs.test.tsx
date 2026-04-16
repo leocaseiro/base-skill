@@ -9,7 +9,7 @@ import {
   createTestDatabase,
   destroyTestDatabase,
 } from '@/db/create-database';
-import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
+import { lastSessionConfigId } from '@/db/last-session-game-config';
 import { DbProvider } from '@/providers/DbProvider';
 
 let db: BaseSkillDatabase;
@@ -270,7 +270,7 @@ describe('useSavedConfigs', () => {
     });
     expect(result.current.savedConfigs).toHaveLength(0);
     const raw = await db.saved_game_configs
-      .findOne(lastSessionSavedConfigId('word-spell'))
+      .findOne(lastSessionConfigId('word-spell'))
       .exec();
     expect(raw?.config).toMatchObject({ mode: 'picture' });
     await act(async () => {
@@ -281,7 +281,7 @@ describe('useSavedConfigs', () => {
       });
     });
     const raw2 = await db.saved_game_configs
-      .findOne(lastSessionSavedConfigId('word-spell'))
+      .findOne(lastSessionConfigId('word-spell'))
       .exec();
     expect(raw2?.config).toMatchObject({ mode: 'scramble' });
     expect(result.current.savedConfigs).toHaveLength(0);

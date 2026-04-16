@@ -14,7 +14,7 @@ import { GameCard } from '@/components/GameCard';
 import { GameGrid } from '@/components/GameGrid';
 import { getOrCreateDatabase } from '@/db/create-database';
 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
-import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
+import { lastSessionConfigId } from '@/db/last-session-game-config';
 import { configToChips } from '@/games/config-chips';
 import { GAME_CATALOG } from '@/games/registry';
 
@@ -62,7 +62,7 @@ const HomeScreen = (): JSX.Element => {
   const openDefaultCog = async (gameId: string) => {
     const db = await getOrCreateDatabase();
     const lastDoc = await db.saved_game_configs
-      .findOne(lastSessionSavedConfigId(gameId))
+      .findOne(lastSessionConfigId(gameId))
       .exec();
     setModal({
       kind: 'open',

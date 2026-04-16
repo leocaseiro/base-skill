@@ -28,7 +28,7 @@ import { GameShell } from '@/components/game/GameShell';
 import { getOrCreateDatabase } from '@/db/create-database';
 import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
-import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
+import { lastSessionConfigId } from '@/db/last-session-game-config';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
 import { createAdvancedLevelGenerator } from '@/games/sort-numbers/advanced-level-generator';
 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
@@ -854,7 +854,7 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
       }
     } else {
       const lastDoc = await db.saved_game_configs
-        .findOne(lastSessionSavedConfigId(gameId))
+        .findOne(lastSessionConfigId(gameId))
         .exec();
       if (lastDoc) gameSpecificConfig = lastDoc.config;
     }

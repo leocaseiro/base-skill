@@ -8,8 +8,8 @@ import type { Cover } from '@/games/cover-type';
 import type { GameColorKey } from '@/lib/game-colors';
 import {
   ANONYMOUS_PROFILE_ID,
-  isLastSessionSavedConfigId,
-  lastSessionSavedConfigId,
+  isLastSessionConfigId,
+  lastSessionConfigId,
 } from '@/db/last-session-game-config';
 
 type SaveInput = {
@@ -64,14 +64,14 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
   const docs = useRxQuery<SavedGameConfigDoc[]>(query$, []);
 
   const savedConfigs = useMemo(
-    () => docs.filter((d) => !isLastSessionSavedConfigId(d.id)),
+    () => docs.filter((d) => !isLastSessionConfigId(d.id)),
     [docs],
   );
 
   const lastSessionConfigs = useMemo(() => {
     const map: Record<string, Record<string, unknown>> = {};
     for (const d of docs) {
-      if (isLastSessionSavedConfigId(d.id)) map[d.gameId] = d.config;
+      if (isLastSessionConfigId(d.id)) map[d.gameId] = d.config;
     }
     return map;
   }, [docs]);
@@ -191,7 +191,7 @@ export const useSavedConfigs = (): UseSavedConfigsResult => {
   const persistLastSessionConfig = useCallback(
     async (gameId: string, config: Record<string, unknown>) => {
       if (!db) return;
-      const id = lastSessionSavedConfigId(gameId);
+      const id = lastSessionConfigId(gameId);
       const now = new Date().toISOString();
       const existing = await db.saved_game_configs.findOne(id).exec();
       await (existing
