@@ -31,6 +31,7 @@ describe('createTestDatabase', () => {
       'session_history',
       'session_history_index',
       'sync_meta',
+      'word_spell_seen_words',
     ] as const;
     for (const name of names) {
       expect(db[name]).toBeDefined();
