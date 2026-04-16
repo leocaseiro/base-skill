@@ -21,6 +21,57 @@ import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
 import { suggestCustomGameName } from '@/lib/suggest-custom-game-name';
 
+type HeaderActionsProps = {
+  isBookmarked?: boolean;
+  onToggleBookmark?: () => void;
+  onOpenSettings: () => void;
+};
+
+const HeaderActions = ({
+  isBookmarked,
+  onToggleBookmark,
+  onOpenSettings,
+}: HeaderActionsProps): JSX.Element => {
+  const { t } = useTranslation(['games', 'common']);
+  return (
+    <div className="flex items-center gap-2">
+      {onToggleBookmark && (
+        <button
+          type="button"
+          aria-label={
+            isBookmarked
+              ? t('common:bookmark.remove', {
+                  defaultValue: 'Remove bookmark',
+                })
+              : t('common:bookmark.add', {
+                  defaultValue: 'Add bookmark',
+                })
+          }
+          aria-pressed={isBookmarked ?? false}
+          onClick={onToggleBookmark}
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+        >
+          <Star
+            size={18}
+            aria-hidden="true"
+            fill={isBookmarked ? 'currentColor' : 'none'}
+          />
+        </button>
+      )}
+      <button
+        type="button"
+        aria-label={t('instructions.configure', {
+          defaultValue: 'Configure',
+        })}
+        onClick={onOpenSettings}
+        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+      >
+        <SettingsIcon size={18} />
+      </button>
+    </div>
+  );
+};
+
 export type SaveCustomGameInput = {
   name: string;
   color: GameColorKey;
@@ -218,41 +269,11 @@ export const InstructionsOverlay = ({
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              {onToggleBookmark && (
-                <button
-                  type="button"
-                  aria-label={
-                    isBookmarked
-                      ? t('common:bookmark.remove', {
-                          defaultValue: 'Remove bookmark',
-                        })
-                      : t('common:bookmark.add', {
-                          defaultValue: 'Add bookmark',
-                        })
-                  }
-                  aria-pressed={isBookmarked ?? false}
-                  onClick={onToggleBookmark}
-                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
-                >
-                  <Star
-                    size={18}
-                    aria-hidden="true"
-                    fill={isBookmarked ? 'currentColor' : 'none'}
-                  />
-                </button>
-              )}
-              <button
-                type="button"
-                aria-label={t('instructions.configure', {
-                  defaultValue: 'Configure',
-                })}
-                onClick={() => setModalOpen(true)}
-                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
-              >
-                <SettingsIcon size={18} />
-              </button>
-            </div>
+            <HeaderActions
+              isBookmarked={isBookmarked}
+              onToggleBookmark={onToggleBookmark}
+              onOpenSettings={() => setModalOpen(true)}
+            />
           </div>
 
           {/* 3. Instructions text */}
