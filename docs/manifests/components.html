@@ -2310,33 +2310,33 @@ visible: boolean</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Bookmark</span>
+                <span class="ex-name">Custom Game</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Bookmark = () =&gt; &lt;GameCard
+              <pre><code>const CustomGame = () =&gt; &lt;GameCard
     gameId=&quot;sort-numbers&quot;
     title=&quot;Count in Order&quot;
     chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
-    variant=&quot;bookmark&quot;
-    bookmarkName=&quot;Skip by 2&quot;
-    bookmarkColor=&quot;amber&quot; /&gt;;</code></pre>
+    variant=&quot;customGame&quot;
+    customGameName=&quot;Skip by 2&quot;
+    customGameColor=&quot;amber&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Bookmark Purple</span>
+                <span class="ex-name">Custom Game Purple</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const BookmarkPurple = () =&gt; &lt;GameCard
+              <pre><code>const CustomGamePurple = () =&gt; &lt;GameCard
     gameId=&quot;sort-numbers&quot;
     title=&quot;Count in Order&quot;
     chips={[&#39;⬇️ Down&#39;, &#39;10 numbers&#39;, &#39;3s&#39;]}
-    variant=&quot;bookmark&quot;
-    bookmarkName=&quot;Big to Small&quot;
-    bookmarkColor=&quot;purple&quot; /&gt;;</code></pre>
+    variant=&quot;customGame&quot;
+    customGameName=&quot;Big to Small&quot;
+    customGameColor=&quot;purple&quot; /&gt;;</code></pre>
             </div>
         </div>
     
@@ -2480,9 +2480,9 @@ visible: boolean</code></pre>
             </div>
             <pre><code>Component: src/components/GameNameChip.tsx::GameNameChip</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>bookmarkColor?: (typeof BOOKMARK_COLOR_KEYS)[number] = &#39;indigo&#39;
+            <pre><code>customGameColor?: (typeof GAME_COLOR_KEYS)[number] = &#39;indigo&#39;
 
-bookmarkName?: string
+customGameName?: string
 
 subject?: string
 
@@ -2522,21 +2522,21 @@ title: string</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">With Bookmark</span>
+                <span class="ex-name">With Custom Game</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const WithBookmark = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; bookmarkName=&quot;Easy Mode&quot; bookmarkColor=&quot;indigo&quot; /&gt;;</code></pre>
+              <pre><code>const WithCustomGame = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; customGameName=&quot;Easy Mode&quot; customGameColor=&quot;indigo&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">With Bookmark Dark</span>
+                <span class="ex-name">With Custom Game Dark</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const WithBookmarkDark = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; bookmarkName=&quot;Easy Mode&quot; bookmarkColor=&quot;indigo&quot; /&gt;;</code></pre>
+              <pre><code>const WithCustomGameDark = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; customGameName=&quot;Easy Mode&quot; customGameColor=&quot;indigo&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -2584,8 +2584,8 @@ title: string</code></pre>
       &lt;GameNameChip
         key={color}
         title=&quot;Word Spell&quot;
-        bookmarkName={color}
-        bookmarkColor={color}
+        customGameName={color}
+        customGameColor={color}
       /&gt;
     ))}
   &lt;/div&gt;
@@ -3300,7 +3300,7 @@ import { useEffect, useRef, useState } from &#39;react&#39;;
 import { createPortal } from &#39;react-dom&#39;;
 import { useTranslation } from &#39;react-i18next&#39;;
 import type { Cover } from &#39;@/games/cover-type&#39;;
-import type { BookmarkColorKey } from &#39;@/lib/bookmark-colors&#39;;
+import type { GameColorKey } from &#39;@/lib/game-colors&#39;;
 import type { JSX } from &#39;react&#39;;
 import { AdvancedConfigModal } from &#39;@/components/AdvancedConfigModal&#39;;
 import { GameCover } from &#39;@/components/GameCover&#39;;
@@ -3312,16 +3312,13 @@ import {
 } from &#39;@/components/ui/dialog&#39;;
 import { getSimpleConfigFormRenderer } from &#39;@/games/config-fields-registry&#39;;
 import { resolveCover } from &#39;@/games/cover&#39;;
-import {
-  BOOKMARK_COLORS,
-  DEFAULT_BOOKMARK_COLOR,
-} from &#39;@/lib/bookmark-colors&#39;;
+import { DEFAULT_GAME_COLOR, GAME_COLORS } from &#39;@/lib/game-colors&#39;;
 import { cancelSpeech, speak } from &#39;@/lib/speech/SpeechOutput&#39;;
-import { suggestBookmarkName } from &#39;@/lib/suggest-bookmark-name&#39;;
+import { suggestCustomGameName } from &#39;@/lib/suggest-custom-game-name&#39;;
 
-export type SaveBookmarkInput = {
+export type SaveCustomGameInput = {
   name: string;
-  color: BookmarkColorKey;
+  color: GameColorKey;
   config: Record&lt;string, unknown&gt;;
   cover?: Cover;
 };
@@ -3333,18 +3330,19 @@ type InstructionsOverlayProps = {
   gameTitle: string;
   gameId: string;
   cover?: Cover;
-  bookmarkId?: string;
-  bookmarkName?: string;
-  bookmarkColor?: BookmarkColorKey;
+  customGameId?: string;
+  customGameName?: string;
+  customGameColor?: GameColorKey;
   config: Record&lt;string, unknown&gt;;
   onConfigChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
-  onSaveBookmark: (input: SaveBookmarkInput) =&gt; Promise&lt;string&gt;;
-  onUpdateBookmark?: (
+  onSaveCustomGame: (input: SaveCustomGameInput) =&gt; Promise&lt;string&gt;;
+  onUpdateCustomGame?: (
     name: string,
     config: Record&lt;string, unknown&gt;,
-    extras?: { cover?: Cover; color?: BookmarkColorKey },
+    extras?: { cover?: Cover; color?: GameColorKey },
   ) =&gt; Promise&lt;void&gt;;
-  existingBookmarkNames?: readonly string[];
+  onDeleteCustomGame?: (configId: string) =&gt; Promise&lt;void&gt;;
+  existingCustomGameNames?: readonly string[];
 };
 
 export const InstructionsOverlay = ({
@@ -3354,14 +3352,15 @@ export const InstructionsOverlay = ({
   gameTitle,
   gameId,
   cover,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor = DEFAULT_BOOKMARK_COLOR,
+  customGameId,
+  customGameName,
+  customGameColor = DEFAULT_GAME_COLOR,
   config,
   onConfigChange,
-  onSaveBookmark,
-  onUpdateBookmark,
-  existingBookmarkNames = [],
+  onSaveCustomGame,
+  onUpdateCustomGame,
+  onDeleteCustomGame,
+  existingCustomGameNames = [],
 }: InstructionsOverlayProps): JSX.Element =&gt; {
   const { t } = useTranslation(&#39;games&#39;);
   const navigate = useNavigate({
@@ -3394,32 +3393,32 @@ export const InstructionsOverlay = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount to speak instructions once
   }, []);
 
-  const settingsColors = BOOKMARK_COLORS[bookmarkColor];
+  const settingsColors = GAME_COLORS[customGameColor];
   const resolvedCover = resolveCover({ cover }, gameId);
 
   const SimpleForm = getSimpleConfigFormRenderer(gameId);
 
   const modalMode =
-    bookmarkId &amp;&amp; bookmarkName
+    customGameId &amp;&amp; customGameName
       ? ({
-          kind: &#39;bookmark&#39;,
-          configId: bookmarkId,
-          name: bookmarkName,
-          color: bookmarkColor,
+          kind: &#39;customGame&#39;,
+          configId: customGameId,
+          name: customGameName,
+          color: customGameColor,
           cover,
         } as const)
       : ({ kind: &#39;default&#39; } as const);
 
   const handlePlay = () =&gt; {
-    if (bookmarkId &amp;&amp; bookmarkName &amp;&amp; onUpdateBookmark) {
+    if (customGameId &amp;&amp; customGameName &amp;&amp; onUpdateCustomGame) {
       void (async () =&gt; {
         try {
-          await onUpdateBookmark(bookmarkName, config, {
+          await onUpdateCustomGame(customGameName, config, {
             cover,
-            color: bookmarkColor,
+            color: customGameColor,
           });
         } catch (error) {
-          console.error(&#39;Failed to save bookmark on play&#39;, error);
+          console.error(&#39;Failed to save custom game on play&#39;, error);
         }
         onStart();
       })();
@@ -3427,7 +3426,7 @@ export const InstructionsOverlay = ({
     }
     setSaveSubmitAttempted(false);
     setSavingName(
-      suggestBookmarkName(gameTitle, existingBookmarkNames),
+      suggestCustomGameName(gameTitle, existingCustomGameNames),
     );
     setSaveDialogOpen(true);
   };
@@ -3436,11 +3435,11 @@ export const InstructionsOverlay = ({
     const trimmed = savingName.trim();
     if (trimmed === &#39;&#39;)
       return t(&#39;instructions.nameRequired&#39;, {
-        defaultValue: &#39;Please enter a bookmark name.&#39;,
+        defaultValue: &#39;Please enter a custom game name.&#39;,
       });
-    if (existingBookmarkNames.includes(trimmed))
+    if (existingCustomGameNames.includes(trimmed))
       return t(&#39;instructions.nameDuplicate&#39;, {
-        defaultValue: &#39;A bookmark with that name already exists.&#39;,
+        defaultValue: &#39;A custom game with that name already exists.&#39;,
       });
     return null;
   })();
@@ -3456,9 +3455,9 @@ export const InstructionsOverlay = ({
     const trimmed = savingName.trim();
     void (async () =&gt; {
       try {
-        const newId = await onSaveBookmark({
+        const newId = await onSaveCustomGame({
           name: trimmed,
-          color: bookmarkColor,
+          color: customGameColor,
           config,
           cover,
         });
@@ -3468,7 +3467,7 @@ export const InstructionsOverlay = ({
         });
         onStart();
       } catch (error) {
-        console.error(&#39;Failed to save bookmark on play&#39;, error);
+        console.error(&#39;Failed to save custom game on play&#39;, error);
       }
     })();
   };
@@ -3497,14 +3496,14 @@ export const InstructionsOverlay = ({
               &lt;h2
                 className=&quot;text-xl font-extrabold&quot;
                 style={
-                  bookmarkName
+                  customGameName
                     ? { color: settingsColors.text }
                     : undefined
                 }
               &gt;
-                {bookmarkName ?? gameTitle}
+                {customGameName ?? gameTitle}
               &lt;/h2&gt;
-              {bookmarkName &amp;&amp; (
+              {customGameName &amp;&amp; (
                 &lt;p className=&quot;text-xs italic text-foreground/80&quot;&gt;
                   {gameTitle}
                 &lt;/p&gt;
@@ -3552,12 +3551,17 @@ export const InstructionsOverlay = ({
         gameId={gameId}
         mode={modalMode}
         config={config}
-        existingBookmarkNames={existingBookmarkNames}
+        existingCustomGameNames={existingCustomGameNames}
         onCancel={() =&gt; setModalOpen(false)}
+        onDelete={
+          customGameId &amp;&amp; onDeleteCustomGame
+            ? onDeleteCustomGame
+            : undefined
+        }
         onSaveNew={(payload) =&gt; {
           void (async () =&gt; {
             try {
-              const newId = await onSaveBookmark({
+              const newId = await onSaveCustomGame({
                 name: payload.name,
                 color: payload.color,
                 config: payload.config,
@@ -3570,16 +3574,16 @@ export const InstructionsOverlay = ({
               });
             } catch (error) {
               // Surface duplicate-name and similar errors; keep modal open.
-              console.error(&#39;Failed to save bookmark&#39;, error);
+              console.error(&#39;Failed to save custom game&#39;, error);
             }
           })();
         }}
         onUpdate={
-          onUpdateBookmark
+          onUpdateCustomGame
             ? (payload) =&gt; {
                 void (async () =&gt; {
                   try {
-                    await onUpdateBookmark(
+                    await onUpdateCustomGame(
                       payload.name,
                       payload.config,
                       {
@@ -3591,7 +3595,10 @@ export const InstructionsOverlay = ({
                     setModalOpen(false);
                     await router.invalidate();
                   } catch (error) {
-                    console.error(&#39;Failed to update bookmark&#39;, error);
+                    console.error(
+                      &#39;Failed to update custom game&#39;,
+                      error,
+                    );
                   }
                 })();
               }
@@ -3599,13 +3606,13 @@ export const InstructionsOverlay = ({
         }
       /&gt;
 
-      {/* Save-on-play prompt for default (non-bookmarked) games */}
+      {/* Save-on-play prompt for default (non-custom-game) games */}
       &lt;Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}&gt;
         &lt;DialogContent&gt;
           &lt;DialogHeader&gt;
             &lt;DialogTitle&gt;
               {t(&#39;instructions.saveOnPlayTitle&#39;, {
-                defaultValue: &#39;Save these settings as a bookmark?&#39;,
+                defaultValue: &#39;Save these settings as a custom game?&#39;,
               })}
             &lt;/DialogTitle&gt;
           &lt;/DialogHeader&gt;
@@ -3613,7 +3620,7 @@ export const InstructionsOverlay = ({
             &lt;label className=&quot;flex flex-col gap-1&quot;&gt;
               &lt;span className=&quot;text-xs font-semibold uppercase text-muted-foreground&quot;&gt;
                 {t(&#39;instructions.saveOnPlayNameLabel&#39;, {
-                  defaultValue: &#39;Bookmark name&#39;,
+                  defaultValue: &#39;Custom game name&#39;,
                 })}
               &lt;/span&gt;
               &lt;input
@@ -3705,12 +3712,12 @@ export const InstructionsOverlay = ({
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">With Bookmark</span>
+                <span class="ex-name">With Custom Game</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const WithBookmark = () =&gt; &lt;InstructionsOverlay bookmarkId=&quot;abc123&quot; bookmarkName=&quot;Easy Mode&quot; bookmarkColor=&quot;teal&quot; /&gt;;</code></pre>
+              <pre><code>const WithCustomGame = () =&gt; &lt;InstructionsOverlay customGameId=&quot;abc123&quot; customGameName=&quot;Easy Mode&quot; customGameColor=&quot;teal&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -7727,7 +7734,7 @@ import { useEffect, useRef, useState } from &#39;react&#39;;
 import { createPortal } from &#39;react-dom&#39;;
 import { useTranslation } from &#39;react-i18next&#39;;
 import type { Cover } from &#39;@/games/cover-type&#39;;
-import type { BookmarkColorKey } from &#39;@/lib/bookmark-colors&#39;;
+import type { GameColorKey } from &#39;@/lib/game-colors&#39;;
 import type { JSX } from &#39;react&#39;;
 import { AdvancedConfigModal } from &#39;@/components/AdvancedConfigModal&#39;;
 import { GameCover } from &#39;@/components/GameCover&#39;;
@@ -7739,16 +7746,13 @@ import {
 } from &#39;@/components/ui/dialog&#39;;
 import { getSimpleConfigFormRenderer } from &#39;@/games/config-fields-registry&#39;;
 import { resolveCover } from &#39;@/games/cover&#39;;
-import {
-  BOOKMARK_COLORS,
-  DEFAULT_BOOKMARK_COLOR,
-} from &#39;@/lib/bookmark-colors&#39;;
+import { DEFAULT_GAME_COLOR, GAME_COLORS } from &#39;@/lib/game-colors&#39;;
 import { cancelSpeech, speak } from &#39;@/lib/speech/SpeechOutput&#39;;
-import { suggestBookmarkName } from &#39;@/lib/suggest-bookmark-name&#39;;
+import { suggestCustomGameName } from &#39;@/lib/suggest-custom-game-name&#39;;
 
-export type SaveBookmarkInput = {
+export type SaveCustomGameInput = {
   name: string;
-  color: BookmarkColorKey;
+  color: GameColorKey;
   config: Record&lt;string, unknown&gt;;
   cover?: Cover;
 };
@@ -7760,18 +7764,19 @@ type InstructionsOverlayProps = {
   gameTitle: string;
   gameId: string;
   cover?: Cover;
-  bookmarkId?: string;
-  bookmarkName?: string;
-  bookmarkColor?: BookmarkColorKey;
+  customGameId?: string;
+  customGameName?: string;
+  customGameColor?: GameColorKey;
   config: Record&lt;string, unknown&gt;;
   onConfigChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
-  onSaveBookmark: (input: SaveBookmarkInput) =&gt; Promise&lt;string&gt;;
-  onUpdateBookmark?: (
+  onSaveCustomGame: (input: SaveCustomGameInput) =&gt; Promise&lt;string&gt;;
+  onUpdateCustomGame?: (
     name: string,
     config: Record&lt;string, unknown&gt;,
-    extras?: { cover?: Cover; color?: BookmarkColorKey },
+    extras?: { cover?: Cover; color?: GameColorKey },
   ) =&gt; Promise&lt;void&gt;;
-  existingBookmarkNames?: readonly string[];
+  onDeleteCustomGame?: (configId: string) =&gt; Promise&lt;void&gt;;
+  existingCustomGameNames?: readonly string[];
 };
 
 export const InstructionsOverlay = ({
@@ -7781,14 +7786,15 @@ export const InstructionsOverlay = ({
   gameTitle,
   gameId,
   cover,
-  bookmarkId,
-  bookmarkName,
-  bookmarkColor = DEFAULT_BOOKMARK_COLOR,
+  customGameId,
+  customGameName,
+  customGameColor = DEFAULT_GAME_COLOR,
   config,
   onConfigChange,
-  onSaveBookmark,
-  onUpdateBookmark,
-  existingBookmarkNames = [],
+  onSaveCustomGame,
+  onUpdateCustomGame,
+  onDeleteCustomGame,
+  existingCustomGameNames = [],
 }: InstructionsOverlayProps): JSX.Element =&gt; {
   const { t } = useTranslation(&#39;games&#39;);
   const navigate = useNavigate({
@@ -7821,32 +7827,32 @@ export const InstructionsOverlay = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount to speak instructions once
   }, []);
 
-  const settingsColors = BOOKMARK_COLORS[bookmarkColor];
+  const settingsColors = GAME_COLORS[customGameColor];
   const resolvedCover = resolveCover({ cover }, gameId);
 
   const SimpleForm = getSimpleConfigFormRenderer(gameId);
 
   const modalMode =
-    bookmarkId &amp;&amp; bookmarkName
+    customGameId &amp;&amp; customGameName
       ? ({
-          kind: &#39;bookmark&#39;,
-          configId: bookmarkId,
-          name: bookmarkName,
-          color: bookmarkColor,
+          kind: &#39;customGame&#39;,
+          configId: customGameId,
+          name: customGameName,
+          color: customGameColor,
           cover,
         } as const)
       : ({ kind: &#39;default&#39; } as const);
 
   const handlePlay = () =&gt; {
-    if (bookmarkId &amp;&amp; bookmarkName &amp;&amp; onUpdateBookmark) {
+    if (customGameId &amp;&amp; customGameName &amp;&amp; onUpdateCustomGame) {
       void (async () =&gt; {
         try {
-          await onUpdateBookmark(bookmarkName, config, {
+          await onUpdateCustomGame(customGameName, config, {
             cover,
-            color: bookmarkColor,
+            color: customGameColor,
           });
         } catch (error) {
-          console.error(&#39;Failed to save bookmark on play&#39;, error);
+          console.error(&#39;Failed to save custom game on play&#39;, error);
         }
         onStart();
       })();
@@ -7854,7 +7860,7 @@ export const InstructionsOverlay = ({
     }
     setSaveSubmitAttempted(false);
     setSavingName(
-      suggestBookmarkName(gameTitle, existingBookmarkNames),
+      suggestCustomGameName(gameTitle, existingCustomGameNames),
     );
     setSaveDialogOpen(true);
   };
@@ -7863,11 +7869,11 @@ export const InstructionsOverlay = ({
     const trimmed = savingName.trim();
     if (trimmed === &#39;&#39;)
       return t(&#39;instructions.nameRequired&#39;, {
-        defaultValue: &#39;Please enter a bookmark name.&#39;,
+        defaultValue: &#39;Please enter a custom game name.&#39;,
       });
-    if (existingBookmarkNames.includes(trimmed))
+    if (existingCustomGameNames.includes(trimmed))
       return t(&#39;instructions.nameDuplicate&#39;, {
-        defaultValue: &#39;A bookmark with that name already exists.&#39;,
+        defaultValue: &#39;A custom game with that name already exists.&#39;,
       });
     return null;
   })();
@@ -7883,9 +7889,9 @@ export const InstructionsOverlay = ({
     const trimmed = savingName.trim();
     void (async () =&gt; {
       try {
-        const newId = await onSaveBookmark({
+        const newId = await onSaveCustomGame({
           name: trimmed,
-          color: bookmarkColor,
+          color: customGameColor,
           config,
           cover,
         });
@@ -7895,7 +7901,7 @@ export const InstructionsOverlay = ({
         });
         onStart();
       } catch (error) {
-        console.error(&#39;Failed to save bookmark on play&#39;, error);
+        console.error(&#39;Failed to save custom game on play&#39;, error);
       }
     })();
   };
@@ -7924,14 +7930,14 @@ export const InstructionsOverlay = ({
               &lt;h2
                 className=&quot;text-xl font-extrabold&quot;
                 style={
-                  bookmarkName
+                  customGameName
                     ? { color: settingsColors.text }
                     : undefined
                 }
               &gt;
-                {bookmarkName ?? gameTitle}
+                {customGameName ?? gameTitle}
               &lt;/h2&gt;
-              {bookmarkName &amp;&amp; (
+              {customGameName &amp;&amp; (
                 &lt;p className=&quot;text-xs italic text-foreground/80&quot;&gt;
                   {gameTitle}
                 &lt;/p&gt;
@@ -7979,12 +7985,17 @@ export const InstructionsOverlay = ({
         gameId={gameId}
         mode={modalMode}
         config={config}
-        existingBookmarkNames={existingBookmarkNames}
+        existingCustomGameNames={existingCustomGameNames}
         onCancel={() =&gt; setModalOpen(false)}
+        onDelete={
+          customGameId &amp;&amp; onDeleteCustomGame
+            ? onDeleteCustomGame
+            : undefined
+        }
         onSaveNew={(payload) =&gt; {
           void (async () =&gt; {
             try {
-              const newId = await onSaveBookmark({
+              const newId = await onSaveCustomGame({
                 name: payload.name,
                 color: payload.color,
                 config: payload.config,
@@ -7997,16 +8008,16 @@ export const InstructionsOverlay = ({
               });
             } catch (error) {
               // Surface duplicate-name and similar errors; keep modal open.
-              console.error(&#39;Failed to save bookmark&#39;, error);
+              console.error(&#39;Failed to save custom game&#39;, error);
             }
           })();
         }}
         onUpdate={
-          onUpdateBookmark
+          onUpdateCustomGame
             ? (payload) =&gt; {
                 void (async () =&gt; {
                   try {
-                    await onUpdateBookmark(
+                    await onUpdateCustomGame(
                       payload.name,
                       payload.config,
                       {
@@ -8018,7 +8029,10 @@ export const InstructionsOverlay = ({
                     setModalOpen(false);
                     await router.invalidate();
                   } catch (error) {
-                    console.error(&#39;Failed to update bookmark&#39;, error);
+                    console.error(
+                      &#39;Failed to update custom game&#39;,
+                      error,
+                    );
                   }
                 })();
               }
@@ -8026,13 +8040,13 @@ export const InstructionsOverlay = ({
         }
       /&gt;
 
-      {/* Save-on-play prompt for default (non-bookmarked) games */}
+      {/* Save-on-play prompt for default (non-custom-game) games */}
       &lt;Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}&gt;
         &lt;DialogContent&gt;
           &lt;DialogHeader&gt;
             &lt;DialogTitle&gt;
               {t(&#39;instructions.saveOnPlayTitle&#39;, {
-                defaultValue: &#39;Save these settings as a bookmark?&#39;,
+                defaultValue: &#39;Save these settings as a custom game?&#39;,
               })}
             &lt;/DialogTitle&gt;
           &lt;/DialogHeader&gt;
@@ -8040,7 +8054,7 @@ export const InstructionsOverlay = ({
             &lt;label className=&quot;flex flex-col gap-1&quot;&gt;
               &lt;span className=&quot;text-xs font-semibold uppercase text-muted-foreground&quot;&gt;
                 {t(&#39;instructions.saveOnPlayNameLabel&#39;, {
-                  defaultValue: &#39;Bookmark name&#39;,
+                  defaultValue: &#39;Custom game name&#39;,
                 })}
               &lt;/span&gt;
               &lt;input
@@ -8132,12 +8146,12 @@ export const InstructionsOverlay = ({
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">With Bookmark</span>
+                <span class="ex-name">With Custom Game</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const WithBookmark = () =&gt; &lt;InstructionsOverlay bookmarkId=&quot;abc123&quot; bookmarkName=&quot;Easy Mode&quot; bookmarkColor=&quot;teal&quot; /&gt;;</code></pre>
+              <pre><code>const WithCustomGame = () =&gt; &lt;InstructionsOverlay customGameId=&quot;abc123&quot; customGameName=&quot;Easy Mode&quot; customGameColor=&quot;teal&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -8383,7 +8397,36 @@ sequenceDiagram
 
 ---
 
-## 7. Round Progression
+## 7. Custom Game Delete
+
+User deletes the current custom game from the `InstructionsOverlay` settings cog.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant GameBody as GameBody ($gameId.tsx)
+  participant IO as InstructionsOverlay
+  participant ACM as AdvancedConfigModal
+  participant Hook as useCustomGames
+  participant DB as custom_games (RxDB)
+  participant Nav as useNavigate
+
+  User-&gt;&gt;IO: click cog (Configure)
+  IO-&gt;&gt;ACM: open modal (mode = customGame)
+  User-&gt;&gt;ACM: click Delete
+  ACM-&gt;&gt;ACM: open confirmation dialog
+  User-&gt;&gt;ACM: click Delete (confirm)
+  ACM-&gt;&gt;IO: call onDeleteCustomGame(configId)
+  IO-&gt;&gt;GameBody: onDeleteCustomGame(configId) [prop callback into $gameId.tsx]
+  GameBody-&gt;&gt;Hook: remove(id)
+  Hook-&gt;&gt;DB: doc.remove()
+  GameBody-&gt;&gt;Nav: navigate({ search: prev =&gt; ({ ...prev, configId: undefined }) })
+  ACM-&gt;&gt;ACM: close confirmation dialog + modal
+```
+
+---
+
+## 8. Round Progression
 
 &gt; **Status: planned — not yet fully implemented.**
 &gt; The phase transition to `&#39;round-complete&#39;` is implemented. The 750ms delay before
