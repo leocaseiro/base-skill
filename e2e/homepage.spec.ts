@@ -20,9 +20,9 @@ test('kid flow: tap a default card, see instructions, play without saving', asyn
   await expect(letsGo).toBeVisible();
   await letsGo.click();
 
-  // Save-on-play prompt asks whether to bookmark these settings.
+  // Save-on-play prompt asks whether to save these settings as a custom game.
   await expect(
-    page.getByText(/save these settings as a bookmark\?/i),
+    page.getByText(/save these settings as a custom game\?/i),
   ).toBeVisible();
 
   // Kid opts out — go straight into the game.

@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 
 /**
- * Clicks Let's go and dismisses the save-on-play bookmark prompt if it
+ * Clicks Let's go and dismisses the save-on-play custom game prompt if it
  * appears. Use in tests that don't exercise the save-prompt UX itself.
  */
 export const startGame = async (page: Page): Promise<void> => {
@@ -16,6 +16,6 @@ export const startGame = async (page: Page): Promise<void> => {
     });
     await playWithoutSaving.click();
   } catch {
-    // No prompt — the game is already bookmarked and started directly.
+    // No prompt — already a custom game or no unsaved settings.
   }
 };
