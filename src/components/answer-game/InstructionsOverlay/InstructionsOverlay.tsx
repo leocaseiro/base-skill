@@ -46,6 +46,7 @@ type InstructionsOverlayProps = {
     config: Record<string, unknown>,
     extras?: { cover?: Cover; color?: GameColorKey },
   ) => Promise<void>;
+  onDeleteCustomGame?: (configId: string) => Promise<void>;
   existingCustomGameNames?: readonly string[];
 };
 
@@ -63,6 +64,7 @@ export const InstructionsOverlay = ({
   onConfigChange,
   onSaveCustomGame,
   onUpdateCustomGame,
+  onDeleteCustomGame,
   existingCustomGameNames = [],
 }: InstructionsOverlayProps): JSX.Element => {
   const { t } = useTranslation('games');
@@ -256,6 +258,11 @@ export const InstructionsOverlay = ({
         config={config}
         existingCustomGameNames={existingCustomGameNames}
         onCancel={() => setModalOpen(false)}
+        onDelete={
+          customGameId && onDeleteCustomGame
+            ? (id) => onDeleteCustomGame(id)
+            : undefined
+        }
         onSaveNew={(payload) => {
           void (async () => {
             try {

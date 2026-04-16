@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -26,8 +26,8 @@ import type { JSX } from 'react';
 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
 import { GameShell } from '@/components/game/GameShell';
 import { getOrCreateDatabase } from '@/db/create-database';
+import { useCustomGames } from '@/db/hooks/useCustomGames';
 import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
-import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
 import { lastSessionConfigId } from '@/db/last-session-game-config';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
 import { createAdvancedLevelGenerator } from '@/games/sort-numbers/advanced-level-generator';
@@ -394,13 +394,12 @@ const WordSpellGameBody = ({
   customGameCover: Cover | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, updateConfig, savedConfigs } = useSavedConfigs();
+  const { save, update, remove, customGames } = useCustomGames();
+  const navigate = useNavigate({ from: '/$locale/game/$gameId' });
   const existingCustomGameNames = useMemo(
     () =>
-      savedConfigs
-        .filter((d) => d.gameId === gameId)
-        .map((d) => d.name),
-    [savedConfigs, gameId],
+      customGames.filter((d) => d.gameId === gameId).map((d) => d.name),
+    [customGames, gameId],
   );
   const initial = useMemo(
     () => resolveWordSpellConfig(gameSpecificConfig),
@@ -446,7 +445,17 @@ const WordSpellGameBody = ({
         onUpdateCustomGame={
           customGameId
             ? async (name, config, extras) => {
-                await updateConfig(customGameId, config, name, extras);
+                await update(customGameId, config, name, extras);
+              }
+            : undefined
+        }
+        onDeleteCustomGame={
+          customGameId
+            ? async (id) => {
+                await remove(id);
+                await navigate({
+                  search: (prev) => ({ ...prev, configId: undefined }),
+                });
               }
             : undefined
         }
@@ -488,13 +497,12 @@ const NumberMatchGameBody = ({
   customGameCover: Cover | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, updateConfig, savedConfigs } = useSavedConfigs();
+  const { save, update, remove, customGames } = useCustomGames();
+  const navigate = useNavigate({ from: '/$locale/game/$gameId' });
   const existingCustomGameNames = useMemo(
     () =>
-      savedConfigs
-        .filter((d) => d.gameId === gameId)
-        .map((d) => d.name),
-    [savedConfigs, gameId],
+      customGames.filter((d) => d.gameId === gameId).map((d) => d.name),
+    [customGames, gameId],
   );
   const initial = useMemo(
     () => resolveNumberMatchConfig(gameSpecificConfig),
@@ -540,7 +548,17 @@ const NumberMatchGameBody = ({
         onUpdateCustomGame={
           customGameId
             ? async (name, config, extras) => {
-                await updateConfig(customGameId, config, name, extras);
+                await update(customGameId, config, name, extras);
+              }
+            : undefined
+        }
+        onDeleteCustomGame={
+          customGameId
+            ? async (id) => {
+                await remove(id);
+                await navigate({
+                  search: (prev) => ({ ...prev, configId: undefined }),
+                });
               }
             : undefined
         }
@@ -582,13 +600,12 @@ const SortNumbersGameBody = ({
   customGameCover: Cover | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, updateConfig, savedConfigs } = useSavedConfigs();
+  const { save, update, remove, customGames } = useCustomGames();
+  const navigate = useNavigate({ from: '/$locale/game/$gameId' });
   const existingCustomGameNames = useMemo(
     () =>
-      savedConfigs
-        .filter((d) => d.gameId === gameId)
-        .map((d) => d.name),
-    [savedConfigs, gameId],
+      customGames.filter((d) => d.gameId === gameId).map((d) => d.name),
+    [customGames, gameId],
   );
   const initial = useMemo(
     () => resolveSortNumbersConfig(gameSpecificConfig),
@@ -634,7 +651,17 @@ const SortNumbersGameBody = ({
         onUpdateCustomGame={
           customGameId
             ? async (name, config, extras) => {
-                await updateConfig(customGameId, config, name, extras);
+                await update(customGameId, config, name, extras);
+              }
+            : undefined
+        }
+        onDeleteCustomGame={
+          customGameId
+            ? async (id) => {
+                await remove(id);
+                await navigate({
+                  search: (prev) => ({ ...prev, configId: undefined }),
+                });
               }
             : undefined
         }
@@ -842,7 +869,7 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
     let customGameCover: Cover | null = null;
 
     if (deps.configId) {
-      const savedDoc = await db.saved_game_configs
+      const savedDoc = await db.custom_games
         .findOne(deps.configId)
         .exec();
       if (savedDoc) {
