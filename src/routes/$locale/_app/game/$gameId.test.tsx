@@ -30,7 +30,8 @@ import {
 import { ANONYMOUS_PROFILE_ID } from '@/db/last-session-game-config';
 import { DbProvider } from '@/providers/DbProvider';
 
-const mockNavigate = vi.fn().mockResolvedValue();
+// eslint-disable-next-line unicorn/no-useless-undefined -- mockResolvedValue requires an explicit argument
+const mockNavigate = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
   const actual =
