@@ -1,6 +1,6 @@
 // src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
 import { useNavigate, useRouter } from '@tanstack/react-router';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, Star } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -48,6 +48,8 @@ type InstructionsOverlayProps = {
   ) => Promise<void>;
   onDeleteCustomGame?: (configId: string) => Promise<void>;
   existingCustomGameNames?: readonly string[];
+  isBookmarked?: boolean;
+  onToggleBookmark?: () => void;
 };
 
 export const InstructionsOverlay = ({
@@ -66,6 +68,8 @@ export const InstructionsOverlay = ({
   onUpdateCustomGame,
   onDeleteCustomGame,
   existingCustomGameNames = [],
+  isBookmarked,
+  onToggleBookmark,
 }: InstructionsOverlayProps): JSX.Element => {
   const { t } = useTranslation('games');
   const navigate = useNavigate({
@@ -195,7 +199,7 @@ export const InstructionsOverlay = ({
         </div>
 
         <div className="flex flex-col gap-4 p-4">
-          {/* 2. Title row + cog — matches GameCard heading/subtitle order */}
+          {/* 2. Title row + bookmark + cog — matches GameCard heading/subtitle order */}
           <div className="flex items-center justify-between gap-2">
             <div>
               <h2
@@ -214,16 +218,35 @@ export const InstructionsOverlay = ({
                 </p>
               )}
             </div>
-            <button
-              type="button"
-              aria-label={t('instructions.configure', {
-                defaultValue: 'Configure',
-              })}
-              onClick={() => setModalOpen(true)}
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
-            >
-              <SettingsIcon size={18} />
-            </button>
+            <div className="flex items-center gap-2">
+              {onToggleBookmark && (
+                <button
+                  type="button"
+                  aria-label={
+                    isBookmarked ? 'Remove bookmark' : 'Add bookmark'
+                  }
+                  aria-pressed={isBookmarked ?? false}
+                  onClick={onToggleBookmark}
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+                >
+                  <Star
+                    size={18}
+                    aria-hidden="true"
+                    fill={isBookmarked ? 'currentColor' : 'none'}
+                  />
+                </button>
+              )}
+              <button
+                type="button"
+                aria-label={t('instructions.configure', {
+                  defaultValue: 'Configure',
+                })}
+                onClick={() => setModalOpen(true)}
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+              >
+                <SettingsIcon size={18} />
+              </button>
+            </div>
           </div>
 
           {/* 3. Instructions text */}

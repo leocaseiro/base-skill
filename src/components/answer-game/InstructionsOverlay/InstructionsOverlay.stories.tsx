@@ -21,6 +21,7 @@ const meta: Meta<typeof InstructionsOverlay> = {
     onStart: { action: 'started' },
     onSaveCustomGame: { action: 'customGameSaved' },
     onUpdateCustomGame: { action: 'customGameUpdated' },
+    onToggleBookmark: { action: 'bookmarkToggled' },
   },
   parameters: {
     layout: 'fullscreen',
@@ -48,5 +49,43 @@ export const WordSpellDefault: Story = {
     gameTitle: 'Word Spell',
     gameId: 'word-spell',
     config: { inputMethod: 'drag', totalRounds: 8, ttsEnabled: true },
+  },
+};
+
+export const NotBookmarked: Story = {
+  args: {
+    ...baseArgs,
+    isBookmarked: false,
+    onToggleBookmark: () => {},
+  },
+};
+
+export const Bookmarked: Story = {
+  args: {
+    ...baseArgs,
+    isBookmarked: true,
+    onToggleBookmark: () => {},
+  },
+};
+
+export const NotBookmarkedCustomGame: Story = {
+  args: {
+    ...baseArgs,
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal',
+    isBookmarked: false,
+    onToggleBookmark: () => {},
+  },
+};
+
+export const BookmarkedCustomGame: Story = {
+  args: {
+    ...baseArgs,
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal',
+    isBookmarked: true,
+    onToggleBookmark: () => {},
   },
 };
