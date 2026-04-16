@@ -126,7 +126,7 @@ describe('InstructionsOverlay', () => {
     expect(screen.getByText('Level')).toBeInTheDocument();
   });
 
-  it('renders bookmarkName when provided', () => {
+  it('renders customGameName when provided', () => {
     render(
       <InstructionsOverlay
         {...baseProps}
