@@ -202,6 +202,7 @@ User deletes the current custom game from the `InstructionsOverlay` settings cog
 ```mermaid
 sequenceDiagram
   actor User
+  participant GameBody as GameBody ($gameId.tsx)
   participant IO as InstructionsOverlay
   participant ACM as AdvancedConfigModal
   participant Hook as useCustomGames
@@ -214,9 +215,10 @@ sequenceDiagram
   ACM->>ACM: open confirmation dialog
   User->>ACM: click Delete (confirm)
   ACM->>IO: call onDeleteCustomGame(configId)
-  IO->>Hook: remove(id)
+  IO->>GameBody: onDeleteCustomGame(configId) [prop callback into $gameId.tsx]
+  GameBody->>Hook: remove(id)
   Hook->>DB: doc.remove()
-  IO->>Nav: navigate({ search: prev => ({ ...prev, configId: undefined }) })
+  GameBody->>Nav: navigate({ search: prev => ({ ...prev, configId: undefined }) })
   ACM->>ACM: close confirmation dialog + modal
 ```
 
