@@ -71,7 +71,7 @@ export const InstructionsOverlay = ({
   isBookmarked,
   onToggleBookmark,
 }: InstructionsOverlayProps): JSX.Element => {
-  const { t } = useTranslation('games');
+  const { t } = useTranslation(['games', 'common']);
   const navigate = useNavigate({
     from: '/$locale/game/$gameId',
   });
@@ -223,7 +223,13 @@ export const InstructionsOverlay = ({
                 <button
                   type="button"
                   aria-label={
-                    isBookmarked ? 'Remove bookmark' : 'Add bookmark'
+                    isBookmarked
+                      ? t('common:bookmark.remove', {
+                          defaultValue: 'Remove bookmark',
+                        })
+                      : t('common:bookmark.add', {
+                          defaultValue: 'Add bookmark',
+                        })
                   }
                   aria-pressed={isBookmarked ?? false}
                   onClick={onToggleBookmark}
