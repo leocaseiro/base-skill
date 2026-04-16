@@ -1,4 +1,4 @@
-export type BookmarkTargetType = 'game' | 'customGame';
+import type { BookmarkTargetType } from './schemas/bookmarks';
 
 export type BookmarkTarget = {
   profileId: string;
@@ -34,3 +34,5 @@ export const parseBookmarkId = (id: string): BookmarkTarget | null => {
     targetId,
   };
 };
+
+export { type BookmarkTargetType } from './schemas/bookmarks';
