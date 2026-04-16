@@ -93,7 +93,7 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 | C-01 | Pre-K child | Hear the instructions read aloud             | I can play even if I can't read                                                               |
 | C-02 | Any child   | Pick a game from pictures/icons              | I can find a game without reading                                                             |
 | C-03 | Any child   | See my stars and progress                    | I feel rewarded for learning                                                                  |
-| C-04 | Any child   | Bookmark my favorite games                   | I can find them quickly next time                                                             |
+| C-04 | Any child   | Custom game my favorite games                | I can find them quickly next time                                                             |
 | C-05 | Any child   | See my recently played games                 | I can continue where I left off                                                               |
 | C-06 | Any child   | Choose my theme (ocean, space, etc.)         | The app feels like mine                                                                       |
 | C-07 | Any child   | Play games offline on a plane                | Learning doesn't stop without Wi-Fi (games may require individual download depending on size) |
@@ -144,11 +144,11 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 - **Filtering/browsing**: Grade filter on dashboard; subject filter; search (text + TTS for younger children).
 - **Game catalog format**: Games are defined by JSON config files that describe the game's metadata and content, **not** the game logic itself. The JSON config specifies: game ID, title, description, subject, grade band, asset references (images, audio), content data (word lists, number ranges, sentences per locale), difficulty levels, evaluation criteria, and default settings (retries, timer, win-mode). The actual game **logic and UI** lives in reusable React game components (e.g., `LetterTracer`, `MultipleChoice`, `DragAndDrop`, `WordBuilder`). A JSON config tells an existing component _what content to render_. This means the community can add new games that use existing mechanics (e.g., a new spelling word list) by contributing only a JSON file and assets. Truly new game _mechanics_ require a new React component, but new _content variations_ within existing mechanics are JSON-only contributions.
 
-### 5.3 Bookmarks and Recents
+### 5.3 Custom games and Recents
 
-- **Bookmarks**: Child can bookmark any game from the game card or in-game. Bookmarked games appear in a dedicated row at the top of the dashboard.
-- **Recently played**: Last-played games tracked per profile. A "Recently Played" row appears below bookmarks on the dashboard.
-- **Persistence**: Bookmarks and recents stored in RxDB and synced to cloud.
+- **Custom games**: Child can custom game any game from the game card or in-game. Custom gameed games appear in a dedicated row at the top of the dashboard.
+- **Recently played**: Last-played games tracked per profile. A "Recently Played" row appears below custom games on the dashboard.
+- **Persistence**: Custom games and recents stored in RxDB and synced to cloud.
 
 ### 5.4 Offline-First Gameplay
 

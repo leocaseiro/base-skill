@@ -276,7 +276,7 @@ const collections = [
   'progress',
   'settings',
   'game_config_overrides',
-  'bookmarks',
+  'custom games',
   'themes',
   'session_history_chunks',
   'session_history_index',
@@ -499,9 +499,9 @@ Play a game, hard-refresh the page, verify that progress (score, last played tim
 
 Create two profiles, accumulate progress on profile A, switch to profile B, verify profile B has no progress, switch back to A, verify progress is intact.
 
-#### `tests/e2e/bookmarks.spec.ts`
+#### `tests/e2e/custom games.spec.ts`
 
-Bookmark a game via the star button, verify the game appears in the "Bookmarked" row on the dashboard, unbookmark it, verify it disappears.
+Custom game a game via the star button, verify the game appears in the "Custom gameed" row on the dashboard, uncustom game it, verify it disappears.
 
 #### `tests/e2e/recents.spec.ts`
 
@@ -725,7 +725,7 @@ test('sync queue accumulates mutations while offline', async ({
 }) => {
   await page.goto('/dashboard');
   await context.setOffline(true);
-  // Trigger a write operation (e.g. bookmark a game)
+  // Trigger a write operation (e.g. custom game a game)
   await page.evaluate(async () => {
     const db = await getDb();
     const queueItems = await db.sync_queue.find().exec();
@@ -932,7 +932,7 @@ All fixtures live in `tests/fixtures/`. They export typed constant objects that 
 | `progress.ts`              | Sample progress docs for multiple games per profile                             |
 | `settings.ts`              | Sample settings per profile                                                     |
 | `game_config_overrides.ts` | Sample overrides at each scope level                                            |
-| `bookmarks.ts`             | Sample bookmarks                                                                |
+| `custom games.ts`          | Sample custom games                                                             |
 | `themes.ts`                | All 6 preset themes + 1 cloned custom theme                                     |
 | `session_history.ts`       | 2 sessions: one with 1 chunk, one with 3 chunks                                 |
 | `session_history_index.ts` | Corresponding index documents                                                   |

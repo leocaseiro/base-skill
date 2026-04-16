@@ -1,5 +1,7 @@
 # Mobile Resilience: Dark Mode Fix, Voice Crash Guard, ErrorBoundary
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+
 **Date:** 2026-04-13
 **Status:** Approved
 
@@ -182,5 +184,5 @@ createTanStackRouter({
 The dark mode fix in Section 1 overlaps with the approved spec at
 `docs/superpowers/specs/2026-04-07-dark-mode-a11y-vr-design.md` (Section 1: CSS
 Variable Architecture Fix). This spec narrows scope to just the `.dark` block
-fix and the `DotGroupQuestion` hardcoded color. The broader bookmark colour,
+fix and the `DotGroupQuestion` hardcoded color. The broader custom game colour,
 linting enforcement, and VR test work from that spec remain for a future branch.

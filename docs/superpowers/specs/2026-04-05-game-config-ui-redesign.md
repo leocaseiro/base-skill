@@ -1,5 +1,7 @@
 # Game Config UI Redesign
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+
 **Date:** 2026-04-05  
 **Status:** Approved
 
@@ -10,7 +12,7 @@
 Three related changes to how game configuration is presented and edited:
 
 1. **Hide config panel during gameplay** — the floating `<details>/<summary>` overlay is removed from the game screen entirely.
-2. **GameCard homepage redesign** — saved configs (bookmarks) show color-themed expandable chips with config tags and an inline editable form. Game description text is added to each card.
+2. **GameCard homepage redesign** — saved configs (custom games) show color-themed expandable chips with config tags and an inline editable form. Game description text is added to each card.
 3. **Instructions screen redesign** — the instructions overlay gains a game-name chip, and a collapsible ⚙️ Settings chip below the "Let's go!" button that lets the user tweak and save config before starting.
 
 ---
@@ -29,7 +31,7 @@ The three `*ConfigPanel` components (`WordSpellConfigPanel`, `NumberMatchConfigP
 
 `GameCatalogEntry` in `src/games/registry.ts` gains a `descriptionKey: string` field (i18n key). Each game in `GAME_CATALOG` gets a short one-sentence description. The `GameCard` renders it as a `<p>` below the title, above the level badges.
 
-### 2b. Bookmark chip component — `SavedConfigChip`
+### 2b. Custom game chip component — `SavedConfigChip`
 
 A new shared component `src/components/SavedConfigChip.tsx` replaces the inline chip markup in `GameCard`. It handles both collapsed and expanded states.
 
@@ -38,21 +40,21 @@ A new shared component `src/components/SavedConfigChip.tsx` replaces the inline 
 - Header row: `min-height: 48px`, horizontally split into three zones:
   - **Name button** (flex-1): taps to toggle expand
   - **▶ Play button** (48×48): navigates directly to the game with this config
-  - **✕ Delete button** (48×48): removes the bookmark
+  - **✕ Delete button** (48×48): removes the custom game
 - Below the header: a row of small config summary tags auto-generated from `config` (e.g., `drag`, `8 rounds`, `picture`, `TTS on`)
-- Color is derived from the saved `color` field on the bookmark doc
+- Color is derived from the saved `color` field on the custom game doc
 
 **Expanded state (editing):**
 
-- Header turns solid with the bookmark color, shows `▲` indicator
+- Header turns solid with the custom game color, shows `▲` indicator
 - Below the header: an inline form with game-specific fields (selects, number inputs, checkboxes), all `min-height: 48px`
 - At the bottom of the form:
   - Editable name input
-  - **Save** button (updates the bookmark's name + config in RxDB)
+  - **Save** button (updates the custom game's name + config in RxDB)
   - **Cancel** button (reverts to collapsed without saving)
 - Only one chip can be expanded at a time per card
 
-### 2c. Bookmark color
+### 2c. Custom game color
 
 `SavedGameConfigDoc` gains a `color: string` field (one of 12 palette keys: `indigo`, `teal`, `rose`, `amber`, `sky`, `lime`, `purple`, `orange`, `pink`, `emerald`, `slate`, `cyan`). Each key maps to a `{ bg, border, tagBg, tagText, playBg, text }` token set.
 
@@ -69,7 +71,7 @@ The color is chosen in the **Save Config Dialog** (`SaveConfigDialog.tsx`), whic
 1. Read the `last:anonymous:<gameId>` doc from `db.saved_game_configs` at save time
 2. Pass that doc's `config` (or `{}` if not yet played) to `useSavedConfigs.save()`
 
-This ensures bookmarks always start from the last-played state.
+This ensures custom games always start from the last-played state.
 
 ### 2e. Config summary tag generation
 
@@ -88,13 +90,13 @@ interface InstructionsOverlayProps {
   ttsEnabled: boolean;
   // new:
   gameTitle: string;
-  bookmarkName?: string; // present when launched via a saved config
-  bookmarkColor?: string; // palette key, same as SavedConfigChip
-  subject?: string; // shown as tag when no bookmark
+  custom gameName?: string; // present when launched via a saved config
+  custom gameColor?: string; // palette key, same as SavedConfigChip
+  subject?: string; // shown as tag when no custom game
   config: Record<string, unknown>;
   onConfigChange: (config: Record<string, unknown>) => void;
-  onSaveBookmark: (name: string, color: string) => Promise<void>;
-  onUpdateBookmark?: (
+  onSaveCustom game: (name: string, color: string) => Promise<void>;
+  onUpdateCustom game?: (
     name: string,
     config: Record<string, unknown>,
   ) => Promise<void>;
@@ -104,7 +106,7 @@ interface InstructionsOverlayProps {
 
 ### Layout (top to bottom, vertically centered, scrollable)
 
-1. **Game name chip** — a display-only `GameNameChip` component (not `SavedConfigChip`). Visually identical to the `SavedConfigChip` collapsed header but has no tap-to-expand, no play button, and no delete button. Shows `bookmarkName` badge if present; otherwise shows `subject` tag. Uses `bookmarkColor` or neutral grey.
+1. **Game name chip** — a display-only `GameNameChip` component (not `SavedConfigChip`). Visually identical to the `SavedConfigChip` collapsed header but has no tap-to-expand, no play button, and no delete button. Shows `custom gameName` badge if present; otherwise shows `subject` tag. Uses `custom gameColor` or neutral grey.
 
 2. **Instructions text** — `text` prop, `font-size: 16px`, centered, `max-width: 280px`.
 
@@ -113,14 +115,14 @@ interface InstructionsOverlayProps {
 4. **⚙️ Settings chip** — collapsible (collapsed by default). Uses the same `SavedConfigChip` expand/collapse pattern with neutral grey styling.
    - **Collapsed**: shows `⚙️ Settings` label + `▼` + config summary tags
    - **Expanded**: shows the game-specific form fields + a save section at the bottom:
-     - If `bookmarkName` present: editable name input, "Update `<name>`" button, "Save as new…" button
-     - If no bookmark: name input + 🔖 save button inline
+     - If `custom gameName` present: editable name input, "Update `<name>`" button, "Save as new…" button
+     - If no custom game: name input + 🔖 save button inline
 
 ### Config changes on the instructions screen
 
 `onConfigChange` is called on every field change. The parent (`*GameBody`) updates its local config state. `usePersistLastGameConfig` continues to handle persistence — no extra save is needed for "just playing."
 
-Saving/updating a bookmark calls `onSaveBookmark` or `onUpdateBookmark` which write to RxDB via `useSavedConfigs`.
+Saving/updating a custom game calls `onSaveCustom game` or `onUpdateCustom game` which write to RxDB via `useSavedConfigs`.
 
 ---
 
@@ -164,7 +166,7 @@ Each game defines and exports its own `configFields: ConfigField[]` array. This 
 
 ## 6. `useSavedConfigs` — new method
 
-A new `updateConfig(id: string, config: Record<string, unknown>, name?: string): Promise<void>` method is added to `useSavedConfigs`. It finds the doc by id and patches `config` (and optionally `name`) via `incrementalPatch`. This is used by the "Update bookmark" action on the instructions screen.
+A new `updateConfig(id: string, config: Record<string, unknown>, name?: string): Promise<void>` method is added to `useSavedConfigs`. It finds the doc by id and patches `config` (and optionally `name`) via `incrementalPatch`. This is used by the "Update custom game" action on the instructions screen.
 
 ---
 
@@ -182,7 +184,7 @@ A new `updateConfig(id: string, config: Record<string, unknown>, name?: string):
 
 | New / Changed | File                                                                     | Notes                                                                     |
 | ------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| New           | `src/components/SavedConfigChip.tsx`                                     | Collapsible bookmark chip with inline form                                |
+| New           | `src/components/SavedConfigChip.tsx`                                     | Collapsible custom game chip with inline form                             |
 | New           | `src/components/GameNameChip.tsx`                                        | Display-only game name chip for instructions screen                       |
 | New           | `src/lib/config-tags.ts`                                                 | `configToTags()` pure function                                            |
 | Changed       | `src/components/GameCard.tsx`                                            | Add description, replace chip markup with `SavedConfigChip`               |
@@ -190,6 +192,6 @@ A new `updateConfig(id: string, config: Record<string, unknown>, name?: string):
 | Changed       | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` | Full redesign per spec                                                    |
 | Changed       | `src/games/registry.ts`                                                  | Add `descriptionKey` to `GameCatalogEntry`                                |
 | Changed       | `src/db/schemas/saved_game_configs.ts`                                   | Add `color` field, bump schema version                                    |
-| Changed       | `src/routes/$locale/_app/index.tsx`                                      | Snapshot last config on bookmark save                                     |
+| Changed       | `src/routes/$locale/_app/index.tsx`                                      | Snapshot last config on custom game save                                  |
 | Changed       | `src/routes/$locale/_app/game/$gameId.tsx`                               | Remove `*ConfigPanel` components; pass new props to `InstructionsOverlay` |
 | Changed       | Each game's config types                                                 | Export `configFields: ConfigField[]`                                      |

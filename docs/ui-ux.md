@@ -540,7 +540,7 @@ interface ThemeDocument {
 - Right: settings gear icon → navigates to Child Settings
 - Background: `--bs-surface` with a bottom border `1px solid --bs-primary/20`
 
-**Bookmarked games row**: horizontally scrollable, snap scroll (CSS `scroll-snap-type: x mandatory`). Shows games the child has bookmarked. If empty, row is hidden entirely.
+**Custom gameed games row**: horizontally scrollable, snap scroll (CSS `scroll-snap-type: x mandatory`). Shows games the child has custom gameed. If empty, row is hidden entirely.
 
 **Recently played / Keep Playing row**: horizontally scrollable. Shows last 6 games played, ordered by most recent. Card shows in-progress badge if last session was incomplete.
 
@@ -739,7 +739,7 @@ Implementation: a `useGradeNavMode()` hook returns `'icon-only' | 'icon-label' |
 
 ```
 ┌─────────────────────┐
-│  [★] bookmark icon  │  ← top-right, 32×32px tap area
+│  [★] custom game icon  │  ← top-right, 32×32px tap area
 │                     │
 │   Game Illustration │  ← top 60% of card, full-bleed image
 │    (96×96px icon    │
@@ -762,7 +762,7 @@ Implementation: a `useGradeNavMode()` hook returns `'icon-only' | 'icon-label' |
 
 **Grade badge**: pill shape, `--bs-accent/20` background, `--bs-text` text. e.g. "Year 2".
 
-**Bookmark icon**: top-right corner, overlaid on the illustration. Bookmarked state: filled star icon (`--bs-accent`). Unbookmarked: outline star (`--bs-text/40`). Tap toggles — writes to RxDB `bookmarks`. `aria-label="Bookmark Counting Bears"`.
+**Custom game icon**: top-right corner, overlaid on the illustration. Custom gameed state: filled star icon (`--bs-accent`). Uncustom gameed: outline star (`--bs-text/40`). Tap toggles — writes to RxDB `custom games`. `aria-label="Custom game Counting Bears"`.
 
 **Star rating**: shown only if the child has played this game. 1–3 stars based on best score bracket. If unplayed, this area is empty (not shown as 0 stars).
 

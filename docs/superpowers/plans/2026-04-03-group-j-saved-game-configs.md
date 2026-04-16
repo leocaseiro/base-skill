@@ -1,10 +1,12 @@
 # Group J: Saved Game Configurations — Implementation Plan
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the simple bookmark system with saved game configurations — each "bookmark" is a named snapshot of game settings; games with saved configs sort to the top of the catalog; config chips on each card let users launch directly with saved settings.
+**Goal:** Replace the simple custom game system with saved game configurations — each "custom game" is a named snapshot of game settings; games with saved configs sort to the top of the catalog; config chips on each card let users launch directly with saved settings.
 
-**Architecture:** `SavedGameConfigDoc` replaces `BookmarkDoc` in RxDB. A new `useSavedConfigs` hook replaces `useBookmarks`. `GameCard` gains config chips (one per saved config) that launch the game with that config via a `?configId=` search param. A `SaveConfigDialog` handles naming + duplicate validation. `sortByHasSavedConfigs` in `catalog-utils.ts` moves games with configs to the top (absorbs Group H).
+**Architecture:** `SavedGameConfigDoc` replaces `Custom gameDoc` in RxDB. A new `useSavedConfigs` hook replaces `useCustom games`. `GameCard` gains config chips (one per saved config) that launch the game with that config via a `?configId=` search param. A `SaveConfigDialog` handles naming + duplicate validation. `sortByHasSavedConfigs` in `catalog-utils.ts` moves games with configs to the top (absorbs Group H).
 
 **Tech Stack:** TypeScript, RxDB, React 19, TanStack Router v1, Vitest + RTL
 
@@ -14,25 +16,25 @@
 
 ## File Map
 
-| File                                       | Action | Responsibility                                       |
-| ------------------------------------------ | ------ | ---------------------------------------------------- |
-| `src/db/schemas/saved_game_configs.ts`     | Create | `SavedGameConfigDoc` type + RxDB schema              |
-| `src/db/schemas/bookmarks.ts`              | Delete | Replaced by saved_game_configs                       |
-| `src/db/schemas/index.ts`                  | Modify | Swap bookmark exports for saved_game_configs         |
-| `src/db/types.ts`                          | Modify | Swap `bookmarks` collection for `saved_game_configs` |
-| `src/db/create-database.ts`                | Modify | Register new collection, remove bookmarks            |
-| `src/db/hooks/useSavedConfigs.ts`          | Create | CRUD + name validation (replaces useBookmarks)       |
-| `src/db/hooks/useSavedConfigs.test.ts`     | Create | Unit tests for hook                                  |
-| `src/db/hooks/useBookmarks.ts`             | Delete | Replaced by useSavedConfigs                          |
-| `src/games/catalog-utils.ts`               | Modify | Add `sortByHasSavedConfigs` (absorbs Group H)        |
-| `src/games/catalog-utils.test.ts`          | Modify | Tests for `sortByHasSavedConfigs`                    |
-| `src/components/SaveConfigDialog.tsx`      | Create | Name input modal with duplicate validation           |
-| `src/components/SaveConfigDialog.test.tsx` | Create | Tests for dialog                                     |
-| `src/components/GameCard.tsx`              | Modify | Config chips, bookmark → save-config behavior        |
-| `src/components/GameCard.test.tsx`         | Modify | Update tests for new props                           |
-| `src/components/GameGrid.tsx`              | Modify | Pass savedConfigs + handlers                         |
-| `src/routes/$locale/_app/index.tsx`        | Modify | Use `useSavedConfigs`, sort catalog                  |
-| `src/routes/$locale/_app/game/$gameId.tsx` | Modify | Accept `configId` search param, load saved config    |
+| File                                       | Action | Responsibility                                          |
+| ------------------------------------------ | ------ | ------------------------------------------------------- |
+| `src/db/schemas/saved_game_configs.ts`     | Create | `SavedGameConfigDoc` type + RxDB schema                 |
+| `src/db/schemas/custom games.ts`           | Delete | Replaced by saved_game_configs                          |
+| `src/db/schemas/index.ts`                  | Modify | Swap custom game exports for saved_game_configs         |
+| `src/db/types.ts`                          | Modify | Swap `custom games` collection for `saved_game_configs` |
+| `src/db/create-database.ts`                | Modify | Register new collection, remove custom games            |
+| `src/db/hooks/useSavedConfigs.ts`          | Create | CRUD + name validation (replaces useCustom games)       |
+| `src/db/hooks/useSavedConfigs.test.ts`     | Create | Unit tests for hook                                     |
+| `src/db/hooks/useCustom games.ts`          | Delete | Replaced by useSavedConfigs                             |
+| `src/games/catalog-utils.ts`               | Modify | Add `sortByHasSavedConfigs` (absorbs Group H)           |
+| `src/games/catalog-utils.test.ts`          | Modify | Tests for `sortByHasSavedConfigs`                       |
+| `src/components/SaveConfigDialog.tsx`      | Create | Name input modal with duplicate validation              |
+| `src/components/SaveConfigDialog.test.tsx` | Create | Tests for dialog                                        |
+| `src/components/GameCard.tsx`              | Modify | Config chips, custom game → save-config behavior        |
+| `src/components/GameCard.test.tsx`         | Modify | Update tests for new props                              |
+| `src/components/GameGrid.tsx`              | Modify | Pass savedConfigs + handlers                            |
+| `src/routes/$locale/_app/index.tsx`        | Modify | Use `useSavedConfigs`, sort catalog                     |
+| `src/routes/$locale/_app/game/$gameId.tsx` | Modify | Accept `configId` search param, load saved config       |
 
 ---
 
@@ -44,8 +46,8 @@
 - Modify: `src/db/schemas/index.ts`
 - Modify: `src/db/types.ts`
 - Modify: `src/db/create-database.ts`
-- Delete: `src/db/schemas/bookmarks.ts`
-- Delete: `src/db/hooks/useBookmarks.ts`
+- Delete: `src/db/schemas/custom games.ts`
+- Delete: `src/db/hooks/useCustom games.ts`
 
 - [ ] **Step 1: Create the schema file**
 
@@ -90,7 +92,7 @@
 
 - [ ] **Step 2: Update `src/db/schemas/index.ts`**
 
-  Replace all `bookmarks` references with `saved_game_configs`:
+  Replace all `custom games` references with `saved_game_configs`:
 
   ```ts
   import { appMetaSchema } from './app-meta';
@@ -141,7 +143,7 @@
 
 - [ ] **Step 3: Update `src/db/types.ts`**
 
-  Replace `bookmarks` with `saved_game_configs`:
+  Replace `custom games` with `saved_game_configs`:
 
   ```ts
   import type { AppMetaDoc } from './schemas/app-meta';
@@ -176,7 +178,7 @@
 
 - [ ] **Step 4: Update `src/db/create-database.ts`**
 
-  Replace `bookmarks` import and collection with `saved_game_configs`:
+  Replace `custom games` import and collection with `saved_game_configs`:
 
   ```ts
   import { nanoid } from 'nanoid';
@@ -297,8 +299,8 @@
 
   ```bash
   cd ./worktrees/feat-word-spell-number-match
-  rm src/db/schemas/bookmarks.ts
-  rm src/db/hooks/useBookmarks.ts
+  rm src/db/schemas/custom games.ts
+  rm src/db/hooks/useCustom games.ts
   ```
 
 - [ ] **Step 6: Run typecheck to confirm no broken references**
@@ -308,7 +310,7 @@
   yarn typecheck 2>&1 | tail -20
   ```
 
-  Expected: errors only from files that still import `useBookmarks` (will be fixed in later tasks). No errors from `create-database.ts`, `types.ts`, or `schemas/index.ts`.
+  Expected: errors only from files that still import `useCustom games` (will be fixed in later tasks). No errors from `create-database.ts`, `types.ts`, or `schemas/index.ts`.
 
 - [ ] **Step 7: Commit**
 
@@ -318,8 +320,8 @@
           src/db/schemas/index.ts \
           src/db/types.ts \
           src/db/create-database.ts
-  git rm src/db/schemas/bookmarks.ts src/db/hooks/useBookmarks.ts
-  git commit -m "feat(db): replace BookmarkDoc with SavedGameConfigDoc schema"
+  git rm src/db/schemas/custom games.ts src/db/hooks/useCustom games.ts
+  git commit -m "feat(db): replace Custom gameDoc with SavedGameConfigDoc schema"
   ```
 
 ---
@@ -664,7 +666,7 @@
   ```bash
   cd ./worktrees/feat-word-spell-number-match
   git add src/db/hooks/useSavedConfigs.ts src/db/hooks/useSavedConfigs.test.ts
-  git commit -m "feat(db): add useSavedConfigs hook (replaces useBookmarks)"
+  git commit -m "feat(db): add useSavedConfigs hook (replaces useCustom games)"
   ```
 
 ---
@@ -1087,9 +1089,9 @@
 
 The updated GameCard:
 
-- No longer receives `isBookmarked: boolean` or `onBookmarkToggle`
+- No longer receives `isCustom gameed: boolean` or `onCustom gameToggle`
 - Receives `savedConfigs: SavedGameConfigDoc[]` (pre-filtered to this game's configs)
-- Bookmark icon: filled when `savedConfigs.length > 0`; clicking opens `SaveConfigDialog`
+- Custom game icon: filled when `savedConfigs.length > 0`; clicking opens `SaveConfigDialog`
 - Config chips: one per saved config, clicking the chip calls `onPlayWithConfig(entry.id, config.id)`; an `×` button on each chip calls `onRemoveConfig(config.id)`
 
 - [ ] **Step 1: Write failing tests**
@@ -1177,7 +1179,7 @@ The updated GameCard:
       expect(onPlay).toHaveBeenCalledWith('word-spell');
     });
 
-    it('bookmark icon is not filled when savedConfigs is empty', () => {
+    it('custom game icon is not filled when savedConfigs is empty', () => {
       render(
         <GameCard
           entry={mockEntry}
@@ -1195,7 +1197,7 @@ The updated GameCard:
       expect(icon.querySelector('svg')).not.toHaveClass('fill-current');
     });
 
-    it('bookmark icon is filled when savedConfigs has entries', () => {
+    it('custom game icon is filled when savedConfigs has entries', () => {
       render(
         <GameCard
           entry={mockEntry}
@@ -1269,7 +1271,7 @@ The updated GameCard:
       expect(onRemoveConfig).toHaveBeenCalledWith('cfg-1');
     });
 
-    it('opens SaveConfigDialog when bookmark icon is clicked', async () => {
+    it('opens SaveConfigDialog when custom game icon is clicked', async () => {
       render(
         <GameCard
           entry={mockEntry}
@@ -1303,7 +1305,7 @@ The updated GameCard:
   Replace the entire content of `src/components/GameCard.tsx`:
 
   ```tsx
-  import { BookmarkIcon, XIcon } from 'lucide-react';
+  import { Custom gameIcon, XIcon } from 'lucide-react';
   import { useState } from 'react';
   import { useTranslation } from 'react-i18next';
   import type { GameCatalogEntry } from '@/games/registry';
@@ -1372,7 +1374,7 @@ The updated GameCard:
                 aria-label={tCommon('saveConfig.title')}
                 onClick={() => setDialogOpen(true)}
               >
-                <BookmarkIcon
+                <Custom gameIcon
                   size={16}
                   className={hasConfigs ? 'fill-current' : ''}
                 />
@@ -2050,9 +2052,9 @@ When the user taps a config chip, the URL becomes `/$locale/game/word-spell?conf
 - [ ] **Step 2: Manual smoke check**
 
   Start `yarn dev`, navigate to `/en`:
-  1. Game cards show empty bookmark icons — no configs yet
-  2. Click the bookmark icon on "Word Spell" — `SaveConfigDialog` opens with suggested name "Word spell"
-  3. Accept or rename, click Save — dialog closes, bookmark icon fills, a chip appears on the card
+  1. Game cards show empty custom game icons — no configs yet
+  2. Click the custom game icon on "Word Spell" — `SaveConfigDialog` opens with suggested name "Word spell"
+  3. Accept or rename, click Save — dialog closes, custom game icon fills, a chip appears on the card
   4. Click the chip — navigates to `/en/game/word-spell?configId=<id>`, game loads
-  5. Click the × on the chip — chip disappears, bookmark icon empties
-  6. Save two configs on different games — both appear at the top of the catalog (sorted above unbookmarked games)
+  5. Click the × on the chip — chip disappears, custom game icon empties
+  6. Save two configs on different games — both appear at the top of the catalog (sorted above uncustom gameed games)

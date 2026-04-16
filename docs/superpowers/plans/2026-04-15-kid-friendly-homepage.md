@@ -1,18 +1,20 @@
 # Kid-Friendly Homepage & Simple Config Implementation Plan
 
+> _Renamed 2026-04-16: "bookmark" → "custom game". See `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md`._
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship the kid-friendly homepage redesign — per-game covers, playful
-titles, simple config forms, bookmarks as first-class cards, and a per-card
+titles, simple config forms, custom games as first-class cards, and a per-card
 cog that opens the advanced config in a modal — without breaking existing
-saved bookmarks or game state.
+saved custom games or game state.
 
 **Architecture:** New shared primitives (`GameCover`, `CoverPicker`,
 `ChunkGroup`, `CellSelect`, `Stepper`, `ChipStrip`) + per-game
 `SimpleConfigForm` components + per-card `AdvancedConfigModal`. Persisted
 data model extends `SavedGameConfigDoc` with an optional `cover` field
 (schema v1 → v2 migration). Game defaults are immutable; every save
-creates or updates a bookmark.
+creates or updates a custom game.
 
 **Tech Stack:** React 18 + TypeScript + TanStack Router + RxDB + i18next +
 Radix (dialog, sheet) + Tailwind + lucide-react icons + Vitest + Playwright
@@ -53,17 +55,17 @@ Radix (dialog, sheet) + Tailwind + lucide-react icons + Vitest + Playwright
 - `src/games/number-match/types.ts` — add `NumberMatchSimpleConfig`, `configMode`.
 - `src/games/config-fields-registry.ts` — add simple-form renderers.
 - `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` — cover + cog + SimpleConfigForm.
-- `src/components/GameCard.tsx` — redesign in place: variant prop (default/bookmark), cover, chips, cog button.
+- `src/components/GameCard.tsx` — redesign in place: variant prop (default/custom game), cover, chips, cog button.
 - `src/components/GameCard.test.tsx` — rewritten for new API.
 - `src/components/GameCard.stories.tsx` — updated variants.
-- `src/routes/$locale/_app/index.tsx` — flat grid, no filters, bookmark cards.
-- `src/components/GameGrid.tsx` — responsive grid, flattened input (game + bookmark cards mixed).
+- `src/routes/$locale/_app/index.tsx` — flat grid, no filters, custom game cards.
+- `src/components/GameGrid.tsx` — responsive grid, flattened input (game + custom game cards mixed).
 - `src/lib/i18n/locales/en/games.json` — title renames, direction labels, settings keys.
 - `src/lib/i18n/locales/pt-BR/games.json` — same keys, pt-BR.
 
 **Deleted files (after refactor):**
 
-- `src/components/SavedConfigChip.tsx` — bookmark cards replace inline chips. (Only if unused after refactor; confirm with `knip` before deleting.)
+- `src/components/SavedConfigChip.tsx` — custom game cards replace inline chips. (Only if unused after refactor; confirm with `knip` before deleting.)
 - `src/games/sort-numbers/SortNumbersConfigForm/*` — replaced by `SortNumbersSimpleConfigForm` + advanced modal.
 - `src/components/LevelRow.tsx` — removed filter affordance (guard with knip).
 
@@ -660,7 +662,7 @@ git commit -m "feat(homepage): add optional cover field to SavedGameConfigDoc (v
 - [ ] **Step 1: Update English titles and direction labels**
 
 Edit `src/lib/i18n/locales/en/games.json` — replace the top three title
-values and add direction subtitles plus new bookmark-save strings:
+values and add direction subtitles plus new custom game-save strings:
 
 ```json
 {
@@ -690,8 +692,8 @@ values and add direction subtitles plus new bookmark-save strings:
     "lets-go": "Let's go!",
     "settings": "⚙️ Settings",
     "advanced": "Advanced",
-    "updateBookmark": "Update \"{{name}}\"",
-    "saveAsNew": "Save as new bookmark",
+    "updateCustom game": "Update \"{{name}}\"",
+    "saveAsNew": "Save as new custom game",
     "cancel": "Cancel"
   },
   "sort-numbers-ui": {
@@ -728,7 +730,7 @@ labels. Proposed values:
   },
   "instructions": {
     "lets-go": "Vamos lá!",
-    "updateBookmark": "Atualizar \"{{name}}\"",
+    "updateCustom game": "Atualizar \"{{name}}\"",
     "saveAsNew": "Salvar como novo favorito",
     "cancel": "Cancelar"
   },
@@ -3199,14 +3201,14 @@ import { describe, expect, it, vi } from 'vitest';
 import { AdvancedConfigModal } from './AdvancedConfigModal';
 
 describe('AdvancedConfigModal', () => {
-  it('shows "Update" and "Save as new" buttons when editing a bookmark', () => {
+  it('shows "Update" and "Save as new" buttons when editing a custom game', () => {
     render(
       <AdvancedConfigModal
         open
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={{
-          kind: 'bookmark',
+          kind: 'custom game',
           configId: 'abc',
           name: 'Skip by 2',
           color: 'amber',
@@ -3255,7 +3257,7 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={{
-          kind: 'bookmark',
+          kind: 'custom game',
           configId: 'abc',
           name: 'Skip by 2',
           color: 'amber',
@@ -3297,7 +3299,7 @@ import { useState } from 'react';
 import type { JSX } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Cover } from '@/games/cover-type';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
 import { CoverPicker } from '@/components/CoverPicker';
 import {
@@ -3311,22 +3313,22 @@ import {
   BOOKMARK_COLORS,
   BOOKMARK_COLOR_KEYS,
   DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
+} from '@/lib/custom game-colors';
 
 export type AdvancedConfigModalMode =
   | { kind: 'default' }
   | {
-      kind: 'bookmark';
+      kind: 'custom game';
       configId: string;
       name: string;
-      color: BookmarkColorKey;
+      color: Custom gameColorKey;
       cover: Cover | undefined;
     };
 
 type SavePayload = {
   configId?: string;
   name: string;
-  color: BookmarkColorKey;
+  color: Custom gameColorKey;
   cover: Cover | undefined;
   config: Record<string, unknown>;
 };
@@ -3356,19 +3358,19 @@ export const AdvancedConfigModal = ({
   const [config, setConfig] =
     useState<Record<string, unknown>>(initialConfig);
   const [cover, setCover] = useState<Cover | undefined>(
-    mode.kind === 'bookmark' ? mode.cover : undefined,
+    mode.kind === 'custom game' ? mode.cover : undefined,
   );
   const [name, setName] = useState<string>(
-    mode.kind === 'bookmark' ? mode.name : '',
+    mode.kind === 'custom game' ? mode.name : '',
   );
-  const [color, setColor] = useState<BookmarkColorKey>(
-    mode.kind === 'bookmark' ? mode.color : DEFAULT_BOOKMARK_COLOR,
+  const [color, setColor] = useState<Custom gameColorKey>(
+    mode.kind === 'custom game' ? mode.color : DEFAULT_BOOKMARK_COLOR,
   );
 
   const fields = getAdvancedConfigFields(gameId);
 
   const payload: SavePayload = {
-    configId: mode.kind === 'bookmark' ? mode.configId : undefined,
+    configId: mode.kind === 'custom game' ? mode.configId : undefined,
     name,
     color,
     cover,
@@ -3380,7 +3382,7 @@ export const AdvancedConfigModal = ({
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode.kind === 'bookmark' ? mode.name : 'Advanced settings'}
+            {mode.kind === 'custom game' ? mode.name : 'Advanced settings'}
           </DialogTitle>
         </DialogHeader>
 
@@ -3389,7 +3391,7 @@ export const AdvancedConfigModal = ({
 
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold uppercase text-muted-foreground">
-              Bookmark name
+              Custom game name
             </span>
             <input
               type="text"
@@ -3408,7 +3410,7 @@ export const AdvancedConfigModal = ({
               className="mt-1 grid gap-1"
               style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
               role="group"
-              aria-label="Bookmark color"
+              aria-label="Custom game color"
             >
               {BOOKMARK_COLOR_KEYS.map((key) => (
                 <button
@@ -3444,13 +3446,13 @@ export const AdvancedConfigModal = ({
             >
               {t('instructions.cancel', { defaultValue: 'Cancel' })}
             </button>
-            {mode.kind === 'bookmark' && onUpdate && (
+            {mode.kind === 'custom game' && onUpdate && (
               <button
                 type="button"
                 onClick={() => onUpdate(payload)}
                 className="flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
               >
-                {t('instructions.updateBookmark', {
+                {t('instructions.updateCustom game', {
                   name: mode.name,
                   defaultValue: `Update "${mode.name}"`,
                 })}
@@ -3466,7 +3468,7 @@ export const AdvancedConfigModal = ({
               }`}
             >
               {t('instructions.saveAsNew', {
-                defaultValue: 'Save as new bookmark',
+                defaultValue: 'Save as new custom game',
               })}
             </button>
           </div>
@@ -3494,7 +3496,7 @@ git commit -m "feat(homepage): AdvancedConfigModal launched from per-card cog"
 
 ---
 
-### Task 20: Redesign `GameCard` in place — cover, chips, cog, bookmark variant
+### Task 20: Redesign `GameCard` in place — cover, chips, cog, custom game variant
 
 **Files:**
 
@@ -3537,14 +3539,16 @@ describe('GameCard', () => {
     ).toBeInTheDocument();
   });
 
-  it('adds a bookmark name subtitle for bookmark variant', () => {
+  it('adds a custom game name subtitle for custom game variant', () => {
     render(
       <GameCard
-        variant="bookmark"
+        variant="custom game"
         gameId="sort-numbers"
         title="Count in Order"
-        bookmarkName="Skip by 2"
-        bookmarkColor="amber"
+        custom
+        gameName="Skip by 2"
+        custom
+        gameColor="amber"
         chips={['🚀 Up', '5 numbers', '2s']}
         onPlay={vi.fn()}
         onOpenCog={vi.fn()}
@@ -3585,16 +3589,16 @@ Expected: FAIL — props don't match (old API).
 Replace `src/components/GameCard.tsx` contents:
 
 ```tsx
-import { BookmarkIcon, SettingsIcon } from 'lucide-react';
+import { Custom gameIcon, SettingsIcon } from 'lucide-react';
 import type { JSX } from 'react';
 import type { Cover } from '@/games/cover-type';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 import { GameCover } from '@/components/GameCover';
 import { resolveDefaultCover } from '@/games/cover';
 import {
   BOOKMARK_COLORS,
   DEFAULT_BOOKMARK_COLOR,
-} from '@/lib/bookmark-colors';
+} from '@/lib/custom game-colors';
 
 type Common = {
   gameId: string;
@@ -3606,30 +3610,30 @@ type Common = {
 };
 
 type DefaultVariant = Common & { variant: 'default' };
-type BookmarkVariant = Common & {
-  variant: 'bookmark';
-  bookmarkName: string;
-  bookmarkColor: BookmarkColorKey;
+type Custom gameVariant = Common & {
+  variant: 'custom game';
+  custom gameName: string;
+  custom gameColor: Custom gameColorKey;
 };
 
-type GameCardProps = DefaultVariant | BookmarkVariant;
+type GameCardProps = DefaultVariant | Custom gameVariant;
 
 export const GameCard = (props: GameCardProps): JSX.Element => {
   const { gameId, title, chips, onPlay, onOpenCog } = props;
   const cover = props.cover ?? resolveDefaultCover(gameId);
   const colorKey =
-    props.variant === 'bookmark'
-      ? props.bookmarkColor
+    props.variant === 'custom game'
+      ? props.custom gameColor
       : DEFAULT_BOOKMARK_COLOR;
   const ribbon = BOOKMARK_COLORS[colorKey].playBg;
   const playBg =
-    props.variant === 'bookmark'
+    props.variant === 'custom game'
       ? ribbon
       : BOOKMARK_COLORS.indigo.playBg;
 
   return (
     <div className="relative flex flex-col overflow-hidden rounded-2xl bg-card shadow-sm">
-      {props.variant === 'bookmark' && (
+      {props.variant === 'custom game' && (
         <div
           aria-hidden="true"
           className="absolute inset-x-0 top-0 h-1.5"
@@ -3639,13 +3643,13 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
 
       <div className="relative p-2">
         <GameCover cover={cover} size="card" />
-        {props.variant === 'bookmark' && (
+        {props.variant === 'custom game' && (
           <span
             aria-hidden="true"
             className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-xs text-white shadow"
             style={{ background: ribbon }}
           >
-            <BookmarkIcon size={14} />
+            <Custom gameIcon size={14} />
           </span>
         )}
       </div>
@@ -3663,9 +3667,9 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
           </button>
         </div>
 
-        {props.variant === 'bookmark' && (
+        {props.variant === 'custom game' && (
           <p className="text-xs italic text-muted-foreground">
-            {props.bookmarkName}
+            {props.custom gameName}
           </p>
         )}
 
@@ -3698,7 +3702,7 @@ export const GameCard = (props: GameCardProps): JSX.Element => {
 - [ ] **Step 4: Update the Storybook stories**
 
 Rewrite `src/components/GameCard.stories.tsx` to cover the `default` and
-`bookmark` variants with realistic chips. Keep Storybook passing:
+`custom game` variants with realistic chips. Keep Storybook passing:
 
 ```bash
 yarn storybook:test
@@ -3759,7 +3763,7 @@ import {
 } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+import type { Custom gameColorKey } from '@/lib/custom game-colors';
 import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
 import { GameCard } from '@/components/GameCard';
 import { GameGrid } from '@/components/GameGrid';
@@ -3777,10 +3781,10 @@ type ModalState =
       mode:
         | { kind: 'default' }
         | {
-            kind: 'bookmark';
+            kind: 'custom game';
             configId: string;
             name: string;
-            color: BookmarkColorKey;
+            color: Custom gameColorKey;
             cover?: import('@/games/cover-type').Cover;
           };
       config: Record<string, unknown>;
@@ -3801,7 +3805,7 @@ const HomeScreen = () => {
     });
   };
 
-  const handlePlayBookmark = (gameId: string, configId: string) => {
+  const handlePlayCustom game = (gameId: string, configId: string) => {
     void navigate({
       to: '/$locale/game/$gameId',
       params: { locale, gameId },
@@ -3822,7 +3826,7 @@ const HomeScreen = () => {
     });
   };
 
-  const openBookmarkCog = (
+  const openCustom gameCog = (
     gameId: string,
     doc: import('@/db/schemas/saved_game_configs').SavedGameConfigDoc,
   ) => {
@@ -3830,10 +3834,10 @@ const HomeScreen = () => {
       kind: 'open',
       gameId,
       mode: {
-        kind: 'bookmark',
+        kind: 'custom game',
         configId: doc.id,
         name: doc.name,
-        color: doc.color as BookmarkColorKey,
+        color: doc.color as Custom gameColorKey,
         cover: doc.cover,
       },
       config: doc.config,
@@ -3856,25 +3860,25 @@ const HomeScreen = () => {
         />
       );
     });
-    const bookmarks = savedConfigs.map((doc) => {
+    const custom games = savedConfigs.map((doc) => {
       const entry = GAME_CATALOG.find((g) => g.id === doc.gameId);
       if (!entry) return null;
       return (
         <GameCard
           key={`bm-${doc.id}`}
-          variant="bookmark"
+          variant="custom game"
           gameId={doc.gameId}
           title={t(entry.titleKey)}
-          bookmarkName={doc.name}
-          bookmarkColor={doc.color as BookmarkColorKey}
+          custom gameName={doc.name}
+          custom gameColor={doc.color as Custom gameColorKey}
           cover={doc.cover}
           chips={configToChips(doc.gameId, doc.config)}
-          onPlay={() => handlePlayBookmark(doc.gameId, doc.id)}
-          onOpenCog={() => openBookmarkCog(doc.gameId, doc)}
+          onPlay={() => handlePlayCustom game(doc.gameId, doc.id)}
+          onOpenCog={() => openCustom gameCog(doc.gameId, doc)}
         />
       );
     });
-    return [...defaults, ...bookmarks.filter(Boolean)];
+    return [...defaults, ...custom games.filter(Boolean)];
   }, [savedConfigs, t]);
 
   return (
@@ -3929,7 +3933,7 @@ export const Route = createFileRoute('/$locale/_app/')({
 - [ ] **Step 3: Extend `useSavedConfigs` signatures**
 
 The new `save` call accepts `cover`, and `updateConfig` accepts a 4th
-`extras` parameter `{ cover?: Cover; color?: BookmarkColorKey }`. Open
+`extras` parameter `{ cover?: Cover; color?: Custom gameColorKey }`. Open
 `src/db/hooks/useSavedConfigs.ts` and add those parameters. Write a quick
 unit test for `save` persisting `cover` correctly — use the pattern from
 `src/db/schemas/saved_game_configs.test.ts`.
@@ -3956,7 +3960,7 @@ Expected: PASS. Fix any type holes before continuing.
 
 ```bash
 git add src/routes/$locale/_app/index.tsx src/components/GameGrid.tsx src/routes/$locale/_app/index.test.tsx src/db/hooks/useSavedConfigs.ts
-git commit -m "feat(homepage): flat grid with default + bookmark cards and cog modal"
+git commit -m "feat(homepage): flat grid with default + custom game cards and cog modal"
 ```
 
 ---
@@ -4047,12 +4051,12 @@ Key changes:
   <div className="mt-3 flex items-center justify-between gap-2">
     <div>
       <h2 className="text-xl font-extrabold">{gameTitle}</h2>
-      {bookmarkName && (
+      {custom gameName && (
         <p
           className="text-xs italic"
-          style={{ color: BOOKMARK_COLORS[bookmarkColor].playBg }}
+          style={{ color: BOOKMARK_COLORS[custom gameColor].playBg }}
         >
-          {bookmarkName}
+          {custom gameName}
         </p>
       )}
     </div>
@@ -4076,7 +4080,7 @@ const SimpleForm = getSimpleConfigFormRenderer(gameId);
 }
 
 // Remove the previous ConfigFormFields + advanced toggle block.
-// Save-bar: when `bookmarkName` present show Update + Save as new; else Save as new only.
+// Save-bar: when `custom gameName` present show Update + Save as new; else Save as new only.
 ```
 
 Add a `gameId: string` prop + `cover?: Cover` prop to the overlay so it
@@ -4205,7 +4209,7 @@ git push -u origin design/kid-friendly-homepage
 gh pr create --title "feat(homepage): kid-friendly homepage and simple config" --body "$(cat <<'EOF'
 ## Summary
 
-- Per-game covers + playful titles + simple config forms + bookmarks as first-class cards
+- Per-game covers + playful titles + simple config forms + custom games as first-class cards
 - Per-card cog opens the advanced config in a modal; game defaults are immutable
 - Spec: docs/superpowers/specs/2026-04-15-kid-friendly-homepage-design.md
 - Plan: docs/superpowers/plans/2026-04-15-kid-friendly-homepage.md
@@ -4233,7 +4237,7 @@ Watch the PR. If anything fails, fix it in a follow-up commit — never use
   (T9–T17), cover picker + advanced modal (T18–T19), cards + homepage
   (T20–T22), instructions overlay (T23), tests + VR (T24–T25), PR (T26).
 - **Deferred:** the spec's "sort by last-played" rule is not implemented
-  in this plan. The homepage today sorts defaults-first-then-bookmarks;
+  in this plan. The homepage today sorts defaults-first-then-custom games;
   wiring `session_history_index` into a `sortByLastPlayed` helper is
   left as a follow-up ticket. Reason: `session_history_index` has no
   `configId` field and inferring it from `initialState` adds scope
@@ -4243,5 +4247,5 @@ Watch the PR. If anything fails, fix it in a follow-up commit — never use
   long-press" open question is resolved in favor of **always visible**
   (already implemented in `GameCard`).
 - **Non-breaking:** the RxDB v1→v2 migration is a no-op, so existing
-  bookmarks survive. The advanced form inside the modal is the same
+  custom games survive. The advanced form inside the modal is the same
   `ConfigFormFields` component, so persisted configs stay compatible.
