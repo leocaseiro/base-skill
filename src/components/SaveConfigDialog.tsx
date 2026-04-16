@@ -41,11 +41,11 @@ export const SaveConfigDialog = ({
   const handleSave = () => {
     const trimmed = name.trim();
     if (!trimmed) {
-      setError(t('saveConfig.errorEmpty'));
+      setError(t('customGame.errorEmpty'));
       return;
     }
     if (existingNames.includes(trimmed)) {
-      setError(t('saveConfig.errorDuplicate', { name: trimmed }));
+      setError(t('customGame.errorDuplicate', { name: trimmed }));
       return;
     }
     onSave(trimmed, color);
@@ -62,7 +62,7 @@ export const SaveConfigDialog = ({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('saveConfig.title')}</DialogTitle>
+          <DialogTitle>{t('customGame.title')}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-2">
           <div className="flex flex-col gap-2">
@@ -72,8 +72,8 @@ export const SaveConfigDialog = ({
                 setName(e.target.value);
                 setError('');
               }}
-              placeholder={t('saveConfig.placeholder')}
-              aria-label={t('saveConfig.nameLabel')}
+              placeholder={t('customGame.placeholder')}
+              aria-label={t('customGame.nameLabel')}
             />
             {error && (
               <p role="alert" className="text-sm text-destructive">
@@ -84,13 +84,13 @@ export const SaveConfigDialog = ({
 
           <div className="flex flex-col gap-2">
             <span className="text-sm font-semibold">
-              {t('saveConfig.colorLabel')}
+              {t('customGame.colorLabel')}
             </span>
             <div
               className="grid gap-2"
               style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
               role="group"
-              aria-label={t('saveConfig.colorLabel')}
+              aria-label={t('customGame.colorLabel')}
             >
               {GAME_COLOR_KEYS.map((key) => (
                 <button
@@ -130,7 +130,7 @@ export const SaveConfigDialog = ({
               }
             >
               <div className="game-tag-bg game-text px-3 py-2 text-sm font-semibold">
-                {name || t('saveConfig.placeholder')}
+                {name || t('customGame.placeholder')}
               </div>
               <div
                 className="flex w-10 items-center justify-center text-sm text-white"
@@ -143,9 +143,9 @@ export const SaveConfigDialog = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>
-            {t('saveConfig.cancel')}
+            {t('customGame.cancel')}
           </Button>
-          <Button onClick={handleSave}>{t('saveConfig.save')}</Button>
+          <Button onClick={handleSave}>{t('customGame.save')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
