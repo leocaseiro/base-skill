@@ -25,22 +25,22 @@ export const GameNameChip = ({
       style={
         {
           borderColor: colors.border,
-          '--bookmark-play': colors.playBg,
+          '--game-play': colors.playBg,
         } as React.CSSProperties
       }
     >
-      <div className="bookmark-bg flex min-h-12 items-center gap-2 px-3">
-        <span className="bookmark-text text-sm font-bold">{title}</span>
+      <div className="game-bg flex min-h-12 items-center gap-2 px-3">
+        <span className="game-text text-sm font-bold">{title}</span>
         {customGameName && (
           <span
-            className="bookmark-bg bookmark-text rounded border px-2 py-0.5 text-xs font-semibold"
+            className="game-bg game-text rounded border px-2 py-0.5 text-xs font-semibold"
             style={{ borderColor: colors.border }}
           >
             {customGameName}
           </span>
         )}
         {!customGameName && subject && (
-          <span className="bookmark-bg rounded px-2 py-0.5 text-xs font-medium text-muted-foreground">
+          <span className="game-bg rounded px-2 py-0.5 text-xs font-medium text-muted-foreground">
             {subject}
           </span>
         )}

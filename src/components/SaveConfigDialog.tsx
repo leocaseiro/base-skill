@@ -125,16 +125,16 @@ export const SaveConfigDialog = ({
               style={
                 {
                   borderColor: previewColors.border,
-                  '--bookmark-play': previewColors.playBg,
+                  '--game-play': previewColors.playBg,
                 } as React.CSSProperties
               }
             >
-              <div className="bookmark-tag-bg bookmark-text px-3 py-2 text-sm font-semibold">
+              <div className="game-tag-bg game-text px-3 py-2 text-sm font-semibold">
                 {name || t('saveConfig.placeholder')}
               </div>
               <div
                 className="flex w-10 items-center justify-center text-sm text-white"
-                style={{ background: 'var(--bookmark-play)' }}
+                style={{ background: 'var(--game-play)' }}
               >
                 ▶
               </div>
