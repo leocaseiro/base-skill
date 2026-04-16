@@ -42,8 +42,9 @@ describe('GameCard', () => {
       />,
     );
     expect(screen.getByText('Skip by 2')).toBeInTheDocument();
+    expect(screen.getByText('Count in Order')).toBeInTheDocument();
     expect(
-      document.querySelector('[data-card-type="custom"]'),
+      document.querySelector('[data-card-type="customGame"]'),
     ).not.toBeNull();
   });
 
