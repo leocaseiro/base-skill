@@ -121,7 +121,7 @@ export const InstructionsOverlay = ({
             color: customGameColor,
           });
         } catch (error) {
-          console.error('Failed to save bookmark on play', error);
+          console.error('Failed to save custom game on play', error);
         }
         onStart();
       })();
@@ -170,7 +170,7 @@ export const InstructionsOverlay = ({
         });
         onStart();
       } catch (error) {
-        console.error('Failed to save bookmark on play', error);
+        console.error('Failed to save custom game on play', error);
       }
     })();
   };
@@ -272,7 +272,7 @@ export const InstructionsOverlay = ({
               });
             } catch (error) {
               // Surface duplicate-name and similar errors; keep modal open.
-              console.error('Failed to save bookmark', error);
+              console.error('Failed to save custom game', error);
             }
           })();
         }}
@@ -304,7 +304,7 @@ export const InstructionsOverlay = ({
         }
       />
 
-      {/* Save-on-play prompt for default (non-bookmarked) games */}
+      {/* Save-on-play prompt for default (non-custom-game) games */}
       <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
         <DialogContent>
           <DialogHeader>
