@@ -30,13 +30,15 @@ import {
 import { ANONYMOUS_PROFILE_ID } from '@/db/last-session-game-config';
 import { DbProvider } from '@/providers/DbProvider';
 
+const mockNavigate = vi.fn().mockResolvedValue();
+
 vi.mock('@tanstack/react-router', async (importOriginal) => {
   const actual =
     // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
     await importOriginal<typeof import('@tanstack/react-router')>();
   return {
     ...actual,
-    useNavigate: () => vi.fn(),
+    useNavigate: () => mockNavigate,
     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
   };
 });
@@ -189,5 +191,14 @@ describe('GameRoute', () => {
       const doc = await db.custom_games.findOne(customId).exec();
       expect(doc).toBeNull();
     });
+
+    // Navigation must strip configId from search params — expect.any returns
+    // AsymmetricMatcher typed as any, so we suppress the unsafe-assignment rule.
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment -- expect.any() returns AsymmetricMatcher typed as any */
+    const navigateArg = expect.objectContaining({
+      search: expect.any(Function),
+    });
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment -- end of suppress block */
+    expect(mockNavigate).toHaveBeenCalledWith(navigateArg);
   });
 });
