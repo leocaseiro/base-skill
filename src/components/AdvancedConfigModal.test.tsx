@@ -197,12 +197,10 @@ describe('AdvancedConfigModal', () => {
     expect(
       screen.getByText(/delete "skip by 2"\?/i),
     ).toBeInTheDocument();
-    await user.click(
-      screen
-        .getByRole('button', { name: /^cancel$/i })
-        .closest('button') ??
-        screen.getByRole('button', { name: /^cancel$/i }),
-    );
+    const cancels = screen.getAllByRole('button', {
+      name: /^cancel$/i,
+    });
+    await user.click(cancels.at(-1)!);
     expect(onDelete).not.toHaveBeenCalled();
   });
 
@@ -233,5 +231,6 @@ describe('AdvancedConfigModal', () => {
     // The second "Delete" is the confirmation button inside the nested dialog
     await user.click(confirms.at(-1)!);
     expect(onDelete).toHaveBeenCalledWith('abc');
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 });
