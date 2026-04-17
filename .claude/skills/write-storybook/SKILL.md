@@ -136,6 +136,10 @@ const meta: Meta<typeof MyButton> = {
 When a component takes a config-shaped object (e.g., a game `config` with mode + difficulty + counts), do NOT expose the whole object as a single JSON control. Break each meaningful field into a top-level arg and assemble the object in a custom `render` function.
 
 ```tsx
+import { type ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+import { GameConfigForm } from './GameConfigForm';
+
 type GameMode = 'easy' | 'hard';
 
 interface GameConfig {
@@ -154,8 +158,12 @@ interface StoryArgs {
   onSubmit: (config: GameConfig) => void;
 }
 
+// Double cast required: StoryArgs is a flat subset of GameConfigFormProps,
+// so TypeScript requires `as unknown as ComponentType<StoryArgs>` to bridge
+// the incompatible shapes. This is safe because the render function fully
+// controls how StoryArgs maps to props — component is only used for autodocs.
 const meta: Meta<StoryArgs> = {
-  component: GameConfigForm,
+  component: GameConfigForm as unknown as ComponentType<StoryArgs>,
   args: {
     mode: 'easy',
     rounds: 5,
