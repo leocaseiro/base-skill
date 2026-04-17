@@ -263,6 +263,61 @@ export const ClosesOnEscape: Story = {
 
 Name interaction stories after the flow, not the input: `SubmitsValidForm`, `ShowsErrorOnEmptyName`, `ClosesOnEscape`. Keep them small and single-purpose — one assertion path per story makes failures self-explanatory.
 
+## A11y Is Enforced
+
+`.storybook/preview.tsx` sets `parameters.a11y.test: 'error'` globally. Every story is axe-checked, and any violation (including color-contrast) **fails `yarn test:storybook` and CI**. You cannot opt out for a new story.
+
+To tune a story that legitimately needs a violation (e.g., demonstrating fallback rendering of broken markup), override at the story level — sparingly, with a comment explaining why:
+
+```tsx
+export const LegacyMarkup: Story = {
+  args: {
+    /* ... */
+  },
+  // Demonstrates the deprecated <table> layout we still support for
+  // in-flight content; axe correctly flags the missing <th>.
+  parameters: { a11y: { test: 'todo' } },
+};
+```
+
+The default behavior is the right one — fix the violation in the component or in the story args before reaching for `test: 'todo'`.
+
+## Themes per Story
+
+Five themes are registered as global toolbar items in `.storybook/preview.tsx`: `light` (default), `dark`, `forest-light`, `forest-dark`, `high-contrast`. The toolbar lets users switch interactively.
+
+Pin a story to a specific theme when a variant is meaningfully different in that theme (e.g., a high-contrast-only edge case):
+
+```tsx
+export const HighContrast: Story = {
+  globals: { theme: 'high-contrast' },
+};
+```
+
+Don't add a `Dark` story for every component — the toolbar already covers that. Add per-story theme pins only when the variant exercises something theme-specific.
+
+## Viewport per Story
+
+Five viewports are registered globally in `.storybook/preview.tsx`:
+
+| Name              | Size                 |
+| ----------------- | -------------------- |
+| `mobileSm`        | 360×640              |
+| `mobileLg`        | 390×844              |
+| `tabletPortrait`  | 768×1024             |
+| `tabletLandscape` | 1024×768 _(default)_ |
+| `desktop`         | 1280×800             |
+
+Pin a story when a layout meaningfully differs at a breakpoint:
+
+```tsx
+export const Mobile: Story = {
+  parameters: { viewport: { defaultViewport: 'mobileSm' } },
+};
+```
+
+The toolbar lets users switch interactively, so add per-story viewport pins only when the variant is breakpoint-specific.
+
 ## Running Storybook Tests
 
 Multiple agents may be running Storybook simultaneously (e.g. parallel worktrees). **Never assume an existing Storybook instance is yours.** Always start a fresh one.
