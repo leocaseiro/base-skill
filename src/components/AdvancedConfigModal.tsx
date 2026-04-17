@@ -113,7 +113,11 @@ export const AdvancedConfigModal = ({
     name: trimmedName,
     color,
     cover,
-    config,
+    // Saving from the advanced modal marks the config as advanced — otherwise
+    // a lingering `configMode: 'simple'` causes the route resolver to rebuild
+    // the config from simple-form fields only, wiping advanced-only choices
+    // like wrongTileBehavior on reload.
+    config: { ...config, configMode: 'advanced' },
   };
 
   const handleSaveNew = () => {
