@@ -148,7 +148,13 @@ interface GameConfigFormProps {
   onSubmit: (config: GameConfig) => void;
 }
 
-const meta: Meta<GameConfigFormProps & GameConfig> = {
+interface StoryArgs {
+  mode: GameMode;
+  rounds: number;
+  onSubmit: (config: GameConfig) => void;
+}
+
+const meta: Meta<StoryArgs> = {
   component: GameConfigForm,
   args: {
     mode: 'easy',
@@ -162,10 +168,9 @@ const meta: Meta<GameConfigFormProps & GameConfig> = {
     rounds: {
       control: { type: 'range', min: 1, max: 20, step: 1 },
     },
-    config: { control: false },
   },
-  render: ({ mode, rounds, ...rest }) => (
-    <GameConfigForm config={{ mode, rounds }} {...rest} />
+  render: ({ mode, rounds, onSubmit }) => (
+    <GameConfigForm config={{ mode, rounds }} onSubmit={onSubmit} />
   ),
 };
 ```
