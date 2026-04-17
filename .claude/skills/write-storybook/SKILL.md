@@ -177,15 +177,91 @@ const meta: Meta<StoryArgs> = {
 
 The Controls panel now shows individual `mode` and `rounds` inputs, and the rendered story reflects them. Reuse this pattern for any nested object — never let a JSON blob appear in Controls.
 
-## Required Story Variants
+## Required Variants
 
-Cover these states to give Storybook meaningful value:
+Every story file MUST cover the following, treating each as a gate. If you decide to skip one, comment why in the story file.
 
-- **Default** — happy path, all required props
-- **Empty / no data** — if component renders a list or optional content
-- **Loading / error** — if component has async states
-- **Edge case** — long text, zero items, boundary values
-- **Interaction states** — selected, bookmarked, disabled, etc.
+- **`Default`** — happy path, all required props supplied.
+- **One story per enum value** of any string-union prop, _if_ the visual differs by value. Identical pixels across values? Skip and document.
+- **State variants** — one story per distinct visible state the component can render: `Loading`, `Error`, `Empty`, `Disabled`, `Submitted`, `ReadOnly`, etc.
+- **Edge cases** — at least one for components that take user-controllable text or list props: `LongText`, `ManyItems`, `OneItem`, `MaxLength`. These catch overflow, truncation, and layout regressions.
+- **Interaction** — at least one `play()` story exercising the primary user flow (see "Rich Interaction with `play()`" below). Pure-display components (icons, labels) are exempt.
+
+Story names use PascalCase and describe the _state_, not the prop combination: prefer `LoadingWithItems` over `LoadingTrueAndItemsArray`.
+
+## Rich Interaction with `play()`
+
+Every interactive component (forms, dialogs, anything with click or keyboard handlers) MUST have at least one `play()` story exercising the primary flow. Pure-display components are exempt.
+
+Import helpers from `@storybook/test`:
+
+```tsx
+import { userEvent, within, expect } from '@storybook/test';
+```
+
+### Patterns
+
+**Form submit happy path:**
+
+```tsx
+export const SubmitsValidName: Story = {
+  args: { mode: 'create' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.type(canvas.getByLabelText('Name'), 'My Game');
+    await userEvent.click(
+      canvas.getByRole('button', { name: /save/i }),
+    );
+    await expect(canvas.getByText(/saved/i)).toBeVisible();
+  },
+};
+```
+
+**Form validation:**
+
+```tsx
+export const ShowsErrorOnEmptyName: Story = {
+  args: { mode: 'create' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole('button', { name: /save/i }),
+    );
+    await expect(canvas.getByText(/name is required/i)).toBeVisible();
+    await expect(canvas.getByLabelText('Name')).toHaveFocus();
+  },
+};
+```
+
+**Disabled-state assertion:**
+
+```tsx
+export const SubmitDisabledWhenInvalid: Story = {
+  args: { mode: 'create' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(
+      canvas.getByRole('button', { name: /save/i }),
+    ).toBeDisabled();
+  },
+};
+```
+
+**Keyboard-only flow:**
+
+```tsx
+export const ClosesOnEscape: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.keyboard('{Escape}');
+    await expect(canvas.queryByRole('dialog')).toBeNull();
+  },
+};
+```
+
+### Naming Convention
+
+Name interaction stories after the flow, not the input: `SubmitsValidForm`, `ShowsErrorOnEmptyName`, `ClosesOnEscape`. Keep them small and single-purpose — one assertion path per story makes failures self-explanatory.
 
 ## Running Storybook Tests
 
