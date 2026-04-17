@@ -193,10 +193,10 @@ Story names use PascalCase and describe the _state_, not the prop combination: p
 
 Every interactive component (forms, dialogs, anything with click or keyboard handlers) MUST have at least one `play()` story exercising the primary flow. Pure-display components are exempt.
 
-Import helpers from `@storybook/test`:
+Import helpers from `storybook/test`:
 
 ```tsx
-import { userEvent, within, expect } from '@storybook/test';
+import { userEvent, within, expect } from 'storybook/test';
 ```
 
 ### Patterns
