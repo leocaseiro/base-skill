@@ -318,6 +318,61 @@ export const Mobile: Story = {
 
 The toolbar lets users switch interactively, so add per-story viewport pins only when the variant is breakpoint-specific.
 
+## Mocking & Fixtures
+
+### Fixtures
+
+Don't inline large data blobs (word lists, configs, sample sentences) in stories. Move them to a co-located file and import:
+
+```tsx
+// MyComponent.fixtures.ts
+export const longWordList = ['antidisestablishmentarianism' /* ... */];
+
+// MyComponent.stories.tsx
+import { longWordList } from './MyComponent.fixtures';
+
+export const ManyItems: Story = {
+  args: { items: longWordList },
+};
+```
+
+There is no top-level `src/test/fixtures/` directory in the project; co-locate by default. If a fixture is reused across components, lift it to a sibling shared file when the second consumer appears, not before.
+
+### Randomness in `play()`
+
+For reproducible interaction tests, stub `Math.random` inside `play()`:
+
+```tsx
+export const PicksTheFirstOption: Story = {
+  play: async ({ canvasElement }) => {
+    globalThis.Math.random = () => 0.42;
+    // ... drive the interaction
+  },
+};
+```
+
+This mirrors the pattern in `e2e/visual.spec.ts` and `e2e/seed-math-random.ts`.
+
+### Timers
+
+Use `vi.useFakeTimers()` from Vitest if a story needs to advance time (the Storybook test-runner shares the Vitest runtime).
+
+### Network
+
+There is no MSW addon installed. If a story needs network mocking, install `msw-storybook-addon` first and document the addition; until then, prefer prop-injecting the data the component would have fetched.
+
+## Visual Regression Boundary
+
+**Stories are NOT a VR mechanism in this project.** Visual regression is hand-curated Playwright tests in `e2e/visual.spec.ts` that drive the live app routes through Docker (`yarn test:vr`). Adding a new story does not add a VR snapshot.
+
+What this means for authors:
+
+- Do **not** add `parameters: { chromatic: ... }` to stories — chromatic is not configured.
+- If a new component or visual state needs regression coverage, add a `test('@visual …', …)` block in `e2e/visual.spec.ts` that loads the relevant route (`/en/game/...`, etc.) and calls `expect(page).toHaveScreenshot(...)`.
+- Storybook covers development, manual review, a11y, and `play()` interaction tests. VR covers pixel guards on user-facing routes. The two layers don't overlap.
+
+Mounting components directly in Playwright (component testing) is not currently set up; if a future story needs an isolated VR shot, add Playwright Component Testing to the project first.
+
 ## Running Storybook Tests
 
 Multiple agents may be running Storybook simultaneously (e.g. parallel worktrees). **Never assume an existing Storybook instance is yours.** Always start a fresh one.
