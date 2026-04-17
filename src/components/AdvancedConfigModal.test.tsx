@@ -204,6 +204,75 @@ describe('AdvancedConfigModal', () => {
     expect(onDelete).not.toHaveBeenCalled();
   });
 
+  it('stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload', async () => {
+    const user = userEvent.setup();
+    const onSaveNew = vi.fn();
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="sort-numbers"
+        mode={{ kind: 'default' }}
+        // Simulates arriving from the simple form: configMode already 'simple',
+        // user tweaks wrongTileBehavior in the advanced modal.
+        config={{
+          configMode: 'simple',
+          wrongTileBehavior: 'lock-auto-eject',
+        }}
+        onCancel={() => {}}
+        onSaveNew={onSaveNew}
+      />,
+      { wrapper },
+    );
+    await user.type(
+      screen.getByPlaceholderText(/skip by 2/i),
+      'My Sort',
+    );
+    await user.click(
+      screen.getByRole('button', { name: /save as new/i }),
+    );
+    expect(onSaveNew).toHaveBeenCalledTimes(1);
+    const payload = onSaveNew.mock.calls[0]?.[0] as {
+      config: Record<string, unknown>;
+    };
+    expect(payload.config).toMatchObject({
+      configMode: 'advanced',
+      wrongTileBehavior: 'lock-auto-eject',
+    });
+  });
+
+  it('stamps configMode: "advanced" on Update payload', async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn();
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="sort-numbers"
+        mode={customGameMode}
+        config={{
+          configMode: 'simple',
+          wrongTileBehavior: 'lock-auto-eject',
+        }}
+        onCancel={() => {}}
+        onUpdate={onUpdate}
+        onSaveNew={vi.fn()}
+      />,
+      { wrapper },
+    );
+    await user.click(
+      screen.getByRole('button', { name: /update "skip by 2"/i }),
+    );
+    expect(onUpdate).toHaveBeenCalledTimes(1);
+    const payload = onUpdate.mock.calls[0]?.[0] as {
+      config: Record<string, unknown>;
+    };
+    expect(payload.config).toMatchObject({
+      configMode: 'advanced',
+      wrongTileBehavior: 'lock-auto-eject',
+    });
+  });
+
   it('calls onDelete with the configId and closes the modal on Confirm', async () => {
     const user = userEvent.setup();
     // eslint-disable-next-line unicorn/no-useless-undefined -- TypeScript requires the explicit undefined argument for mockResolvedValue<void>
