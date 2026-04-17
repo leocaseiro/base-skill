@@ -410,16 +410,36 @@ exit $TEST_EXIT
 - **Kill on green, leave on red** — a running Storybook lets you inspect failures in the browser
 - **Never use `SKIP_STORYBOOK=1` to work around a port conflict** — that skips the tests entirely; find a free port instead
 
+## Audit / Upgrade Checklist
+
+When you edit an existing story file for any reason, run this checklist before opening the PR. Each item is a yes/no gate — if any answer is "no," either fix or justify in the PR description.
+
+- [ ] All non-callback, non-JSX props have proper `argTypes` controls (no raw JSON for enums/booleans/numbers/colors)
+- [ ] No manual `{ action: '...' }` for `onFoo` handlers (global `argTypesRegex` covers it)
+- [ ] Required variants are present (Default, enum-per-value where the visual differs, state variants, edge cases — see "Required Variants")
+- [ ] At least one `play()` interaction story if the component is interactive
+- [ ] Decorators match current component dependencies (e.g., if the component started using `useSettings`, `withDb` is now required)
+- [ ] No `parameters.chromatic` (we don't use it)
+- [ ] Story file passes `yarn test:storybook --url <port>` locally
+
+If you're touching the file, leave it better than you found it.
+
 ## Common Mistakes
 
-| Mistake                                               | Fix                                                                                                                                                                              |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `import React from 'react'` at top                    | Remove — not needed                                                                                                                                                              |
-| Named export for meta (`export const meta`)           | Use `export default meta`                                                                                                                                                        |
-| Default export for stories (`export default Default`) | Use `export const Default: Story = {}`                                                                                                                                           |
-| Missing `Default` story                               | Always add one                                                                                                                                                                   |
-| Forgetting `withRouter` for routing components        | Check if component calls `useNavigate`, `Link`, or reads route params                                                                                                            |
-| Forgetting `withDb` for DB/settings hooks             | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
-| Adding `ThemeProvider` decorator                      | Already global — skip                                                                                                                                                            |
-| `SKIP_STORYBOOK=1` because port 6006 is in use        | Find a free port and start your own instance — never skip to avoid a conflict                                                                                                    |
-| Running `yarn test:storybook` without `--url`         | Without `--url` it defaults to 6006 and may hit the wrong agent's Storybook                                                                                                      |
+| Mistake                                                  | Fix                                                                                                                                                                              |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `import React from 'react'` at top                       | Remove — not needed                                                                                                                                                              |
+| Named export for meta (`export const meta`)              | Use `export default meta`                                                                                                                                                        |
+| Default export for stories (`export default Default`)    | Use `export const Default: Story = {}`                                                                                                                                           |
+| Missing `Default` story                                  | Always add one                                                                                                                                                                   |
+| Forgetting `withRouter` for routing components           | Check if component calls `useNavigate`, `Link`, or reads route params                                                                                                            |
+| Forgetting `withDb` for DB/settings hooks                | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
+| Adding `ThemeProvider` decorator                         | Already global — skip                                                                                                                                                            |
+| `SKIP_STORYBOOK=1` because port 6006 is in use           | Find a free port and start your own instance — never skip to avoid a conflict                                                                                                    |
+| Running `yarn test:storybook` without `--url`            | Without `--url` it defaults to 6006 and may hit the wrong agent's Storybook                                                                                                      |
+| Raw JSON control for an enum/union prop                  | Add `argTypes` with `select`/`radio` and explicit `options`                                                                                                                      |
+| Whole-config JSON blob as a single control               | Break into individual args + custom `render` (see "Complex Object Props")                                                                                                        |
+| Manually adding `argTypes: { onFoo: { action: 'foo' } }` | Remove — global `argTypesRegex` already covers it                                                                                                                                |
+| Adding `parameters.chromatic`                            | Remove — VR is in `e2e/visual.spec.ts`, not Storybook                                                                                                                            |
+| Trying to opt out of a11y on a new story                 | Don't — it's enforced. Fix the violation, or use `test: 'todo'` only with documented justification                                                                               |
+| Inlining `Math.random()` results in story args           | Pin via `globalThis.Math.random = () => N` inside `play()` for reproducibility                                                                                                   |
