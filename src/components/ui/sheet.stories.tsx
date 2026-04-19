@@ -1,4 +1,4 @@
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { Button } from './button';
 import {
@@ -75,8 +75,12 @@ export const OpensAndClosesOnEscape: Story = {
       canvas.getByRole('button', { name: /open sheet/i }),
     );
     const portal = within(document.body);
-    await expect(portal.getByRole('dialog')).toBeVisible();
+    await waitFor(() => {
+      expect(portal.getByRole('dialog')).toBeVisible();
+    });
     await userEvent.keyboard('{Escape}');
-    await expect(portal.queryByRole('dialog')).toBeNull();
+    await waitFor(() => {
+      expect(portal.queryByRole('dialog')).toBeNull();
+    });
   },
 };
