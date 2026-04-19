@@ -1,3 +1,5 @@
+import { expect, userEvent, within } from 'storybook/test';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,33 +13,101 @@ import {
 } from './alert-dialog';
 import { Button } from './button';
 import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
 
-const meta: Meta<typeof AlertDialog> = {
-  component: AlertDialog,
+interface StoryArgs {
+  triggerLabel: string;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  cancelLabel: string;
+}
+
+const meta: Meta<StoryArgs> = {
+  component: AlertDialog as unknown as ComponentType<StoryArgs>,
   tags: ['autodocs'],
-};
-export default meta;
-
-type Story = StoryObj<typeof AlertDialog>;
-
-export const Default: Story = {
-  render: () => (
+  args: {
+    triggerLabel: 'Delete account',
+    title: 'Are you sure?',
+    description: 'This action cannot be undone.',
+    confirmLabel: 'Delete',
+    cancelLabel: 'Cancel',
+  },
+  argTypes: {
+    triggerLabel: { control: 'text' },
+    title: { control: 'text' },
+    description: { control: 'text' },
+    confirmLabel: { control: 'text' },
+    cancelLabel: { control: 'text' },
+  },
+  render: ({
+    triggerLabel,
+    title,
+    description,
+    confirmLabel,
+    cancelLabel,
+  }) => (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive">Delete account</Button>
+        <Button variant="destructive">{triggerLabel}</Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone.
-          </AlertDialogDescription>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Delete</AlertDialogAction>
+          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogAction>{confirmLabel}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Default: Story = {};
+
+export const OpensAndConfirms: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole('button', { name: /delete account/i }),
+    );
+    const portal = within(document.body);
+    await expect(portal.getByRole('alertdialog')).toBeVisible();
+    await userEvent.click(
+      portal.getByRole('button', { name: /^delete$/i }),
+    );
+    await expect(portal.queryByRole('alertdialog')).toBeNull();
+  },
+};
+
+export const CancelsWithEscape: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole('button', { name: /delete account/i }),
+    );
+    const portal = within(document.body);
+    await expect(portal.getByRole('alertdialog')).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await expect(portal.queryByRole('alertdialog')).toBeNull();
+  },
+};
+
+export const Cancelled: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole('button', { name: /delete account/i }),
+    );
+    const portal = within(document.body);
+    await userEvent.click(
+      portal.getByRole('button', { name: /cancel/i }),
+    );
+    await expect(portal.queryByRole('alertdialog')).toBeNull();
+  },
 };
