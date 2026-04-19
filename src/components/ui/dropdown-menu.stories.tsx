@@ -1,4 +1,4 @@
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { Button } from './button';
 import {
@@ -60,11 +60,15 @@ export const OpensAndSelects: Story = {
       canvas.getByRole('button', { name: /options/i }),
     );
     const portal = within(document.body);
-    await expect(portal.getByRole('menu')).toBeVisible();
+    await waitFor(() => {
+      expect(portal.getByRole('menu')).toBeVisible();
+    });
     await userEvent.click(
-      portal.getByRole('menuitem', { name: /profile/i }),
+      await portal.findByRole('menuitem', { name: /profile/i }),
     );
-    await expect(portal.queryByRole('menu')).toBeNull();
+    await waitFor(() => {
+      expect(portal.queryByRole('menu')).toBeNull();
+    });
   },
 };
 

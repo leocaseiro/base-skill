@@ -1,6 +1,6 @@
 import { ThemeProvider } from 'next-themes';
 import { toast } from 'sonner';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Button } from './button';
 import { Toaster } from './sonner';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -78,8 +78,9 @@ export const ShowsToast: Story = {
       canvas.getByRole('button', { name: /show toast/i }),
     );
     const portal = within(document.body);
-    await expect(
-      await portal.findByText(/event registered/i),
-    ).toBeVisible();
+    await waitFor(async () => {
+      const el = await portal.findByText(/event registered/i);
+      await expect(el).toBeVisible();
+    });
   },
 };
