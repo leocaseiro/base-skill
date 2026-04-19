@@ -1,4 +1,4 @@
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import {
   AlertDialog,
@@ -77,11 +77,15 @@ export const OpensAndConfirms: Story = {
       canvas.getByRole('button', { name: /delete account/i }),
     );
     const portal = within(document.body);
-    await expect(portal.getByRole('alertdialog')).toBeVisible();
+    await waitFor(() => {
+      expect(portal.getByRole('alertdialog')).toBeVisible();
+    });
     await userEvent.click(
-      portal.getByRole('button', { name: /^delete$/i }),
+      await portal.findByRole('button', { name: /^delete$/i }),
     );
-    await expect(portal.queryByRole('alertdialog')).toBeNull();
+    await waitFor(() => {
+      expect(portal.queryByRole('alertdialog')).toBeNull();
+    });
   },
 };
 
@@ -92,9 +96,13 @@ export const CancelsWithEscape: Story = {
       canvas.getByRole('button', { name: /delete account/i }),
     );
     const portal = within(document.body);
-    await expect(portal.getByRole('alertdialog')).toBeVisible();
+    await waitFor(() => {
+      expect(portal.getByRole('alertdialog')).toBeVisible();
+    });
     await userEvent.keyboard('{Escape}');
-    await expect(portal.queryByRole('alertdialog')).toBeNull();
+    await waitFor(() => {
+      expect(portal.queryByRole('alertdialog')).toBeNull();
+    });
   },
 };
 
@@ -106,8 +114,10 @@ export const Cancelled: Story = {
     );
     const portal = within(document.body);
     await userEvent.click(
-      portal.getByRole('button', { name: /cancel/i }),
+      await portal.findByRole('button', { name: /cancel/i }),
     );
-    await expect(portal.queryByRole('alertdialog')).toBeNull();
+    await waitFor(() => {
+      expect(portal.queryByRole('alertdialog')).toBeNull();
+    });
   },
 };
