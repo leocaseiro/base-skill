@@ -1,20 +1,36 @@
 import { Input } from './input';
 import { Label } from './label';
 import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
 
-const meta: Meta<typeof Label> = {
-  component: Label,
+interface StoryArgs {
+  htmlFor: string;
+  children: string;
+  placeholder: string;
+}
+
+const meta: Meta<StoryArgs> = {
+  component: Label as unknown as ComponentType<StoryArgs>,
   tags: ['autodocs'],
-};
-export default meta;
-
-type Story = StoryObj<typeof Label>;
-
-export const Default: Story = {
-  render: () => (
+  args: {
+    htmlFor: 'name',
+    children: 'Name',
+    placeholder: 'Your name',
+  },
+  argTypes: {
+    htmlFor: { control: 'text' },
+    children: { control: 'text' },
+    placeholder: { control: 'text' },
+  },
+  render: ({ htmlFor, children, placeholder }) => (
     <div className="flex flex-col gap-2">
-      <Label htmlFor="name">Name</Label>
-      <Input id="name" placeholder="Your name" />
+      <Label htmlFor={htmlFor}>{children}</Label>
+      <Input id={htmlFor} placeholder={placeholder} />
     </div>
   ),
 };
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Default: Story = {};
