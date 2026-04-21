@@ -1,12 +1,14 @@
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { Slot } from '../Slot/Slot';
 import { SlotRow } from '../Slot/SlotRow';
+import { tileStyle } from '../styles';
 import { useAnswerGameContext } from '../useAnswerGameContext';
 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
 import { AnswerGame } from './AnswerGame';
 import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ComponentType } from 'react';
+import type { CSSProperties, ComponentType } from 'react';
+import { classicSkin } from '@/lib/skin';
 
 type InputMethod = 'drag' | 'type' | 'both';
 type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
@@ -62,7 +64,7 @@ const TapToPlaceBank = () => {
   );
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap justify-center gap-3">
       {bankTileIds.map((tileId) => {
         const tile = allTiles.find((t) => t.id === tileId);
         if (!tile) return null;
@@ -78,7 +80,8 @@ const TapToPlaceBank = () => {
                 zoneIndex: nextEmptyZoneIndex,
               });
             }}
-            className="flex size-14 items-center justify-center rounded-lg border-2 border-primary bg-background text-xl font-bold shadow-sm active:scale-95"
+            className="flex size-14 touch-none select-none cursor-pointer items-center justify-center rounded-xl text-xl font-bold text-card-foreground transition-transform active:scale-95"
+            style={tileStyle()}
           >
             {tile.label}
           </button>
@@ -104,7 +107,8 @@ const PlayableScene = () => {
             <Slot
               key={zone.id}
               index={i}
-              className="size-14 rounded-lg"
+              skin={classicSkin}
+              className="size-14"
             >
               {({ label }) => (
                 <span className="text-xl font-bold">{label ?? ''}</span>
@@ -171,9 +175,14 @@ const meta: Meta<StoryArgs> = {
       initialZones,
     };
     return (
-      <AnswerGame config={config}>
-        <PlayableScene />
-      </AnswerGame>
+      <div
+        className={`game-container skin-${classicSkin.id}`}
+        style={classicSkin.tokens as CSSProperties}
+      >
+        <AnswerGame config={config} skin={classicSkin}>
+          <PlayableScene />
+        </AnswerGame>
+      </div>
     );
   },
 };
