@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">16/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/178 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">16/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/174 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -4334,7 +4334,7 @@ src: string</code></pre>
       <div class="badges">
         <label for="c-21-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-21-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-21-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-21-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -4358,16 +4358,16 @@ src: string</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  52 | ] as const satisfies readonly GameColorKey[];
-  53 |
-&gt; 54 | const meta: Meta&lt;StoryArgs&gt; = {
+  61 | ] as const satisfies readonly PlaygroundGameId[];
+  62 |
+&gt; 63 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  55 |   component: InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
-  56 |   title: &#39;answer-game/InstructionsOverlay&#39;,
-  57 |   tags: [&#39;autodocs&#39;],
+  64 |   component: InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  65 |   title: &#39;answer-game/InstructionsOverlay&#39;,
+  66 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx:
-import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+import { fn } from &#39;storybook/test&#39;;
 
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
 import { withRouter } from &#39;../../../../.storybook/decorators/withRouter&#39;;
@@ -4377,16 +4377,17 @@ import type { GameColorKey } from &#39;@/lib/game-colors&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { ComponentType } from &#39;react&#39;;
 
+type PlaygroundGameId = &#39;sort-numbers&#39; | &#39;word-spell&#39; | &#39;number-match&#39;;
+
 interface StoryArgs {
   text: string;
   gameTitle: string;
-  gameId: string;
+  gameId: PlaygroundGameId;
+  customGameName: string;
   customGameColor: GameColorKey;
   ttsEnabled: boolean;
   isBookmarked: boolean;
   totalRounds: number;
-  customGameId: string;
-  customGameName: string;
   onStart: () =&gt; void;
   onSaveCustomGame: (input: SaveCustomGameInput) =&gt; Promise&lt;string&gt;;
   onUpdateCustomGame: (
@@ -4396,11 +4397,13 @@ interface StoryArgs {
   ) =&gt; Promise&lt;void&gt;;
   onToggleBookmark: () =&gt; void;
   onConfigChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
-  // Raw InstructionsOverlay props shadowed by StoryArgs above (config)
-  // or intentionally omitted. Declared here only to hide their
-  // react-docgen-inferred rows from the Controls panel.
+  // Raw InstructionsOverlay props intentionally hidden from the Controls
+  // panel — either shadowed above (config), derived from other controls
+  // (customGameId), or not meaningful in the playground (cover,
+  // onDeleteCustomGame, existingCustomGameNames).
   config?: never;
   cover?: never;
+  customGameId?: never;
   onDeleteCustomGame?: never;
   existingCustomGameNames?: never;
 }
@@ -4420,22 +4423,35 @@ const GAME_COLOR_OPTIONS = [
   &#39;cyan&#39;,
 ] as const satisfies readonly GameColorKey[];
 
+const GAME_ID_OPTIONS = [
+  &#39;sort-numbers&#39;,
+  &#39;word-spell&#39;,
+  &#39;number-match&#39;,
+] as const satisfies readonly PlaygroundGameId[];
+
 const meta: Meta&lt;StoryArgs&gt; = {
   component: InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
   title: &#39;answer-game/InstructionsOverlay&#39;,
   tags: [&#39;autodocs&#39;],
   decorators: [withDb, withRouter],
-  parameters: { layout: &#39;fullscreen&#39; },
+  parameters: {
+    layout: &#39;fullscreen&#39;,
+    docs: {
+      description: {
+        component:
+          &#39;Pre-game shell: cover, title, instructions, &quot;Let\&#39;s go!&quot; button, inline simple-config form, bookmark + cog affordances. The three real gameIds (`sort-numbers`, `word-spell`, `number-match`) drive the cover art and the inline SimpleConfigForm — pick one to see the actual renderer a game loads at runtime.\n\n**Custom-game mode:** type a non-empty `customGameName` to flip the shell into custom-game mode — the custom name becomes the primary heading, the original gameTitle moves to a coloured subtitle, and the save-on-play dialog is skipped on &quot;Let\&#39;s go!&quot;. Leave `customGameName` blank to preview the default game flow (save-on-play dialog prompts for a name).\n\nPlay-flow assertions (save prompt, custom start, cog opens AdvancedConfigModal, bookmark toggle) live in `InstructionsOverlay.test.tsx`; this story is visual-only.&#39;,
+      },
+    },
+  },
   args: {
     text: &#39;Listen to each number and drag it into the correct slot to sort from smallest to biggest.&#39;,
     gameTitle: &#39;Sort Numbers&#39;,
     gameId: &#39;sort-numbers&#39;,
+    customGameName: &#39;&#39;,
     customGameColor: &#39;indigo&#39; as GameColorKey,
     ttsEnabled: false,
     isBookmarked: false,
     totalRounds: 5,
-    customGameId: &#39;&#39;,
-    customGameName: &#39;&#39;,
     onStart: fn(),
     onSaveCustomGame: fn(async () =&gt; &#39;stub-id&#39;),
     onUpdateCustomGame: fn(async () =&gt; {}),
@@ -4445,18 +4461,28 @@ const meta: Meta&lt;StoryArgs&gt; = {
   argTypes: {
     text: { control: &#39;text&#39; },
     gameTitle: { control: &#39;text&#39; },
-    gameId: { control: &#39;text&#39; },
+    gameId: {
+      control: { type: &#39;select&#39; },
+      options: GAME_ID_OPTIONS,
+      description:
+        &#39;Drives the GameCover art and the inline SimpleConfigForm renderer.&#39;,
+    },
+    customGameName: {
+      control: &#39;text&#39;,
+      description:
+        &#39;Leave empty for default game flow. Non-empty value flips the shell into custom-game mode (custom name heading, gameTitle as coloured subtitle, save-on-play dialog skipped).&#39;,
+    },
     customGameColor: {
       control: { type: &#39;select&#39; },
       options: GAME_COLOR_OPTIONS,
+      description:
+        &#39;Colour applied to the custom-game heading + subtitle. Only visible when customGameName is non-empty.&#39;,
     },
     ttsEnabled: { control: &#39;boolean&#39; },
     isBookmarked: { control: &#39;boolean&#39; },
     totalRounds: {
       control: { type: &#39;range&#39;, min: 1, max: 20, step: 1 },
     },
-    customGameId: { control: &#39;text&#39; },
-    customGameName: { control: &#39;text&#39; },
     onStart: { table: { disable: true } },
     onSaveCustomGame: { table: { disable: true } },
     onUpdateCustomGame: { table: { disable: true } },
@@ -4464,6 +4490,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
     onConfigChange: { table: { disable: true } },
     config: { table: { disable: true } },
     cover: { table: { disable: true } },
+    customGameId: { table: { disable: true } },
     onDeleteCustomGame: { table: { disable: true } },
     existingCustomGameNames: { table: { disable: true } },
   },
@@ -4471,100 +4498,46 @@ const meta: Meta&lt;StoryArgs&gt; = {
     text,
     gameTitle,
     gameId,
+    customGameName,
     customGameColor,
     ttsEnabled,
     isBookmarked,
     totalRounds,
-    customGameId,
-    customGameName,
     onStart,
     onSaveCustomGame,
     onUpdateCustomGame,
     onToggleBookmark,
     onConfigChange,
-  }) =&gt; (
-    &lt;InstructionsOverlay
-      text={text}
-      gameTitle={gameTitle}
-      gameId={gameId}
-      customGameColor={customGameColor}
-      ttsEnabled={ttsEnabled}
-      isBookmarked={isBookmarked}
-      config={{ totalRounds }}
-      customGameId={customGameId || undefined}
-      customGameName={customGameName || undefined}
-      onStart={onStart}
-      onSaveCustomGame={onSaveCustomGame}
-      onUpdateCustomGame={onUpdateCustomGame}
-      onToggleBookmark={onToggleBookmark}
-      onConfigChange={onConfigChange}
-    /&gt;
-  ),
+  }) =&gt; {
+    const trimmedCustomName = customGameName.trim();
+    const derivedCustomGameId = trimmedCustomName
+      ? &#39;story-custom-id&#39;
+      : undefined;
+    return (
+      &lt;InstructionsOverlay
+        text={text}
+        gameTitle={gameTitle}
+        gameId={gameId}
+        customGameColor={customGameColor}
+        ttsEnabled={ttsEnabled}
+        isBookmarked={isBookmarked}
+        config={{ totalRounds }}
+        customGameId={derivedCustomGameId}
+        customGameName={trimmedCustomName || undefined}
+        onStart={onStart}
+        onSaveCustomGame={onSaveCustomGame}
+        onUpdateCustomGame={onUpdateCustomGame}
+        onToggleBookmark={onToggleBookmark}
+        onConfigChange={onConfigChange}
+      /&gt;
+    );
+  },
 };
 export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Default: Story = {};
-
-export const WithCustomGame: Story = {
-  args: {
-    customGameId: &#39;abc123&#39;,
-    customGameName: &#39;Easy Mode&#39;,
-    customGameColor: &#39;teal&#39; as GameColorKey,
-  },
-};
-
-export const StartsGame: Story = {
-  args: {
-    customGameId: &#39;abc123&#39;,
-    customGameName: &#39;Easy Mode&#39;,
-  },
-  play: async ({ args }) =&gt; {
-    const portal = within(document.body);
-    await userEvent.click(
-      await portal.findByRole(&#39;button&#39;, { name: /let/i }),
-    );
-    await waitFor(() =&gt; {
-      expect(args.onStart).toHaveBeenCalled();
-    });
-  },
-};
-
-export const TogglesBookmark: Story = {
-  args: { isBookmarked: false },
-  play: async ({ args }) =&gt; {
-    const portal = within(document.body);
-    const bookmarkButton = await portal.findByRole(&#39;button&#39;, {
-      name: /bookmark/i,
-    });
-    await userEvent.click(bookmarkButton);
-    await waitFor(() =&gt; {
-      expect(args.onToggleBookmark).toHaveBeenCalledTimes(1);
-    });
-  },
-};
-
-export const OpensSettings: Story = {
-  play: async () =&gt; {
-    const portal = within(document.body);
-    const settingsButton = await portal.findByRole(&#39;button&#39;, {
-      name: /configure/i,
-    });
-    await userEvent.click(settingsButton);
-    await waitFor(() =&gt; {
-      expect(
-        portal.getByRole(&#39;dialog&#39;, { name: /advanced settings/i }),
-      ).toBeVisible();
-    });
-    await userEvent.keyboard(&#39;{Escape}&#39;);
-    await waitFor(() =&gt; {
-      expect(
-        portal.queryByRole(&#39;dialog&#39;, { name: /advanced settings/i }),
-      ).toBeNull();
-    });
-  },
-};
+export const Playground: Story = {};
 </code></pre></div>
     </div>
         </div>
@@ -4592,208 +4565,49 @@ export const OpensSettings: Story = {
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = ({
+              <pre><code>const Playground = ({
   text,
   gameTitle,
   gameId,
+  customGameName,
   customGameColor,
   ttsEnabled,
   isBookmarked,
   totalRounds,
-  customGameId,
-  customGameName,
   onStart,
   onSaveCustomGame,
   onUpdateCustomGame,
   onToggleBookmark,
   onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Custom Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithCustomGame = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Starts Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const StartsGame = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Toggles Bookmark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const TogglesBookmark = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Opens Settings</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const OpensSettings = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
+}) =&gt; {
+  const trimmedCustomName = customGameName.trim();
+  const derivedCustomGameId = trimmedCustomName
+    ? &#39;story-custom-id&#39;
+    : undefined;
+  return (
+    &lt;InstructionsOverlay
+      text={text}
+      gameTitle={gameTitle}
+      gameId={gameId}
+      customGameColor={customGameColor}
+      ttsEnabled={ttsEnabled}
+      isBookmarked={isBookmarked}
+      config={{ totalRounds }}
+      customGameId={derivedCustomGameId}
+      customGameName={trimmedCustomName || undefined}
+      onStart={onStart}
+      onSaveCustomGame={onSaveCustomGame}
+      onUpdateCustomGame={onUpdateCustomGame}
+      onToggleBookmark={onToggleBookmark}
+      onConfigChange={onConfigChange}
+    /&gt;
+  );
+};</code></pre>
             </div>
         </div>
     
@@ -10758,7 +10572,7 @@ export const Playground: Story = {};
       <div class="badges">
         <label for="c-error-8-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-8-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-8-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-error-8-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -10782,16 +10596,16 @@ export const Playground: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  52 | ] as const satisfies readonly GameColorKey[];
-  53 |
-&gt; 54 | const meta: Meta&lt;StoryArgs&gt; = {
+  61 | ] as const satisfies readonly PlaygroundGameId[];
+  62 |
+&gt; 63 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  55 |   component: InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
-  56 |   title: &#39;answer-game/InstructionsOverlay&#39;,
-  57 |   tags: [&#39;autodocs&#39;],
+  64 |   component: InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  65 |   title: &#39;answer-game/InstructionsOverlay&#39;,
+  66 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx:
-import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+import { fn } from &#39;storybook/test&#39;;
 
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
 import { withRouter } from &#39;../../../../.storybook/decorators/withRouter&#39;;
@@ -10801,16 +10615,17 @@ import type { GameColorKey } from &#39;@/lib/game-colors&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { ComponentType } from &#39;react&#39;;
 
+type PlaygroundGameId = &#39;sort-numbers&#39; | &#39;word-spell&#39; | &#39;number-match&#39;;
+
 interface StoryArgs {
   text: string;
   gameTitle: string;
-  gameId: string;
+  gameId: PlaygroundGameId;
+  customGameName: string;
   customGameColor: GameColorKey;
   ttsEnabled: boolean;
   isBookmarked: boolean;
   totalRounds: number;
-  customGameId: string;
-  customGameName: string;
   onStart: () =&gt; void;
   onSaveCustomGame: (input: SaveCustomGameInput) =&gt; Promise&lt;string&gt;;
   onUpdateCustomGame: (
@@ -10820,11 +10635,13 @@ interface StoryArgs {
   ) =&gt; Promise&lt;void&gt;;
   onToggleBookmark: () =&gt; void;
   onConfigChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
-  // Raw InstructionsOverlay props shadowed by StoryArgs above (config)
-  // or intentionally omitted. Declared here only to hide their
-  // react-docgen-inferred rows from the Controls panel.
+  // Raw InstructionsOverlay props intentionally hidden from the Controls
+  // panel — either shadowed above (config), derived from other controls
+  // (customGameId), or not meaningful in the playground (cover,
+  // onDeleteCustomGame, existingCustomGameNames).
   config?: never;
   cover?: never;
+  customGameId?: never;
   onDeleteCustomGame?: never;
   existingCustomGameNames?: never;
 }
@@ -10844,22 +10661,35 @@ const GAME_COLOR_OPTIONS = [
   &#39;cyan&#39;,
 ] as const satisfies readonly GameColorKey[];
 
+const GAME_ID_OPTIONS = [
+  &#39;sort-numbers&#39;,
+  &#39;word-spell&#39;,
+  &#39;number-match&#39;,
+] as const satisfies readonly PlaygroundGameId[];
+
 const meta: Meta&lt;StoryArgs&gt; = {
   component: InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
   title: &#39;answer-game/InstructionsOverlay&#39;,
   tags: [&#39;autodocs&#39;],
   decorators: [withDb, withRouter],
-  parameters: { layout: &#39;fullscreen&#39; },
+  parameters: {
+    layout: &#39;fullscreen&#39;,
+    docs: {
+      description: {
+        component:
+          &#39;Pre-game shell: cover, title, instructions, &quot;Let\&#39;s go!&quot; button, inline simple-config form, bookmark + cog affordances. The three real gameIds (`sort-numbers`, `word-spell`, `number-match`) drive the cover art and the inline SimpleConfigForm — pick one to see the actual renderer a game loads at runtime.\n\n**Custom-game mode:** type a non-empty `customGameName` to flip the shell into custom-game mode — the custom name becomes the primary heading, the original gameTitle moves to a coloured subtitle, and the save-on-play dialog is skipped on &quot;Let\&#39;s go!&quot;. Leave `customGameName` blank to preview the default game flow (save-on-play dialog prompts for a name).\n\nPlay-flow assertions (save prompt, custom start, cog opens AdvancedConfigModal, bookmark toggle) live in `InstructionsOverlay.test.tsx`; this story is visual-only.&#39;,
+      },
+    },
+  },
   args: {
     text: &#39;Listen to each number and drag it into the correct slot to sort from smallest to biggest.&#39;,
     gameTitle: &#39;Sort Numbers&#39;,
     gameId: &#39;sort-numbers&#39;,
+    customGameName: &#39;&#39;,
     customGameColor: &#39;indigo&#39; as GameColorKey,
     ttsEnabled: false,
     isBookmarked: false,
     totalRounds: 5,
-    customGameId: &#39;&#39;,
-    customGameName: &#39;&#39;,
     onStart: fn(),
     onSaveCustomGame: fn(async () =&gt; &#39;stub-id&#39;),
     onUpdateCustomGame: fn(async () =&gt; {}),
@@ -10869,18 +10699,28 @@ const meta: Meta&lt;StoryArgs&gt; = {
   argTypes: {
     text: { control: &#39;text&#39; },
     gameTitle: { control: &#39;text&#39; },
-    gameId: { control: &#39;text&#39; },
+    gameId: {
+      control: { type: &#39;select&#39; },
+      options: GAME_ID_OPTIONS,
+      description:
+        &#39;Drives the GameCover art and the inline SimpleConfigForm renderer.&#39;,
+    },
+    customGameName: {
+      control: &#39;text&#39;,
+      description:
+        &#39;Leave empty for default game flow. Non-empty value flips the shell into custom-game mode (custom name heading, gameTitle as coloured subtitle, save-on-play dialog skipped).&#39;,
+    },
     customGameColor: {
       control: { type: &#39;select&#39; },
       options: GAME_COLOR_OPTIONS,
+      description:
+        &#39;Colour applied to the custom-game heading + subtitle. Only visible when customGameName is non-empty.&#39;,
     },
     ttsEnabled: { control: &#39;boolean&#39; },
     isBookmarked: { control: &#39;boolean&#39; },
     totalRounds: {
       control: { type: &#39;range&#39;, min: 1, max: 20, step: 1 },
     },
-    customGameId: { control: &#39;text&#39; },
-    customGameName: { control: &#39;text&#39; },
     onStart: { table: { disable: true } },
     onSaveCustomGame: { table: { disable: true } },
     onUpdateCustomGame: { table: { disable: true } },
@@ -10888,6 +10728,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
     onConfigChange: { table: { disable: true } },
     config: { table: { disable: true } },
     cover: { table: { disable: true } },
+    customGameId: { table: { disable: true } },
     onDeleteCustomGame: { table: { disable: true } },
     existingCustomGameNames: { table: { disable: true } },
   },
@@ -10895,100 +10736,46 @@ const meta: Meta&lt;StoryArgs&gt; = {
     text,
     gameTitle,
     gameId,
+    customGameName,
     customGameColor,
     ttsEnabled,
     isBookmarked,
     totalRounds,
-    customGameId,
-    customGameName,
     onStart,
     onSaveCustomGame,
     onUpdateCustomGame,
     onToggleBookmark,
     onConfigChange,
-  }) =&gt; (
-    &lt;InstructionsOverlay
-      text={text}
-      gameTitle={gameTitle}
-      gameId={gameId}
-      customGameColor={customGameColor}
-      ttsEnabled={ttsEnabled}
-      isBookmarked={isBookmarked}
-      config={{ totalRounds }}
-      customGameId={customGameId || undefined}
-      customGameName={customGameName || undefined}
-      onStart={onStart}
-      onSaveCustomGame={onSaveCustomGame}
-      onUpdateCustomGame={onUpdateCustomGame}
-      onToggleBookmark={onToggleBookmark}
-      onConfigChange={onConfigChange}
-    /&gt;
-  ),
+  }) =&gt; {
+    const trimmedCustomName = customGameName.trim();
+    const derivedCustomGameId = trimmedCustomName
+      ? &#39;story-custom-id&#39;
+      : undefined;
+    return (
+      &lt;InstructionsOverlay
+        text={text}
+        gameTitle={gameTitle}
+        gameId={gameId}
+        customGameColor={customGameColor}
+        ttsEnabled={ttsEnabled}
+        isBookmarked={isBookmarked}
+        config={{ totalRounds }}
+        customGameId={derivedCustomGameId}
+        customGameName={trimmedCustomName || undefined}
+        onStart={onStart}
+        onSaveCustomGame={onSaveCustomGame}
+        onUpdateCustomGame={onUpdateCustomGame}
+        onToggleBookmark={onToggleBookmark}
+        onConfigChange={onConfigChange}
+      /&gt;
+    );
+  },
 };
 export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Default: Story = {};
-
-export const WithCustomGame: Story = {
-  args: {
-    customGameId: &#39;abc123&#39;,
-    customGameName: &#39;Easy Mode&#39;,
-    customGameColor: &#39;teal&#39; as GameColorKey,
-  },
-};
-
-export const StartsGame: Story = {
-  args: {
-    customGameId: &#39;abc123&#39;,
-    customGameName: &#39;Easy Mode&#39;,
-  },
-  play: async ({ args }) =&gt; {
-    const portal = within(document.body);
-    await userEvent.click(
-      await portal.findByRole(&#39;button&#39;, { name: /let/i }),
-    );
-    await waitFor(() =&gt; {
-      expect(args.onStart).toHaveBeenCalled();
-    });
-  },
-};
-
-export const TogglesBookmark: Story = {
-  args: { isBookmarked: false },
-  play: async ({ args }) =&gt; {
-    const portal = within(document.body);
-    const bookmarkButton = await portal.findByRole(&#39;button&#39;, {
-      name: /bookmark/i,
-    });
-    await userEvent.click(bookmarkButton);
-    await waitFor(() =&gt; {
-      expect(args.onToggleBookmark).toHaveBeenCalledTimes(1);
-    });
-  },
-};
-
-export const OpensSettings: Story = {
-  play: async () =&gt; {
-    const portal = within(document.body);
-    const settingsButton = await portal.findByRole(&#39;button&#39;, {
-      name: /configure/i,
-    });
-    await userEvent.click(settingsButton);
-    await waitFor(() =&gt; {
-      expect(
-        portal.getByRole(&#39;dialog&#39;, { name: /advanced settings/i }),
-      ).toBeVisible();
-    });
-    await userEvent.keyboard(&#39;{Escape}&#39;);
-    await waitFor(() =&gt; {
-      expect(
-        portal.queryByRole(&#39;dialog&#39;, { name: /advanced settings/i }),
-      ).toBeNull();
-    });
-  },
-};
+export const Playground: Story = {};
 </code></pre></div>
     </div>
         </div>
@@ -11016,208 +10803,49 @@ export const OpensSettings: Story = {
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = ({
+              <pre><code>const Playground = ({
   text,
   gameTitle,
   gameId,
+  customGameName,
   customGameColor,
   ttsEnabled,
   isBookmarked,
   totalRounds,
-  customGameId,
-  customGameName,
   onStart,
   onSaveCustomGame,
   onUpdateCustomGame,
   onToggleBookmark,
   onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Custom Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithCustomGame = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Starts Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const StartsGame = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Toggles Bookmark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const TogglesBookmark = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Opens Settings</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const OpensSettings = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
+}) =&gt; {
+  const trimmedCustomName = customGameName.trim();
+  const derivedCustomGameId = trimmedCustomName
+    ? &#39;story-custom-id&#39;
+    : undefined;
+  return (
+    &lt;InstructionsOverlay
+      text={text}
+      gameTitle={gameTitle}
+      gameId={gameId}
+      customGameColor={customGameColor}
+      ttsEnabled={ttsEnabled}
+      isBookmarked={isBookmarked}
+      config={{ totalRounds }}
+      customGameId={derivedCustomGameId}
+      customGameName={trimmedCustomName || undefined}
+      onStart={onStart}
+      onSaveCustomGame={onSaveCustomGame}
+      onUpdateCustomGame={onUpdateCustomGame}
+      onToggleBookmark={onToggleBookmark}
+      onConfigChange={onConfigChange}
+    /&gt;
+  );
+};</code></pre>
             </div>
         </div>
     
