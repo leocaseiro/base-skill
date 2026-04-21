@@ -6,6 +6,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 const meta: Meta<typeof Button> = {
   component: Button,
   tags: ['autodocs'],
+  args: {
+    onClick: fn(),
+  },
   argTypes: {
     variant: {
       control: { type: 'select' },
@@ -97,7 +100,6 @@ export const ClicksButton: Story = {
   args: {
     children: 'Click me',
     variant: 'default',
-    onClick: fn(),
   },
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);

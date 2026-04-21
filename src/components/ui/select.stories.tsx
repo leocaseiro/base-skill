@@ -1,4 +1,4 @@
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 
 import {
   Select,
@@ -15,6 +15,8 @@ interface StoryArgs {
   option1: string;
   option2: string;
   option3: string;
+  onValueChange: (value: string) => void;
+  onOpenChange: (open: boolean) => void;
 }
 
 const meta: Meta<StoryArgs> = {
@@ -25,15 +27,26 @@ const meta: Meta<StoryArgs> = {
     option1: 'Apple',
     option2: 'Banana',
     option3: 'Orange',
+    onValueChange: fn(),
+    onOpenChange: fn(),
   },
   argTypes: {
     triggerLabel: { control: 'text' },
     option1: { control: 'text' },
     option2: { control: 'text' },
     option3: { control: 'text' },
+    onValueChange: { table: { disable: true } },
+    onOpenChange: { table: { disable: true } },
   },
-  render: ({ triggerLabel, option1, option2, option3 }) => (
-    <Select>
+  render: ({
+    triggerLabel,
+    option1,
+    option2,
+    option3,
+    onValueChange,
+    onOpenChange,
+  }) => (
+    <Select onValueChange={onValueChange} onOpenChange={onOpenChange}>
       <SelectTrigger className="w-48" aria-label={triggerLabel}>
         <SelectValue placeholder="Pick a fruit" />
       </SelectTrigger>
@@ -52,8 +65,19 @@ type Story = StoryObj<StoryArgs>;
 export const Default: Story = {};
 
 export const Preselected: Story = {
-  render: ({ triggerLabel, option1, option2, option3 }) => (
-    <Select defaultValue="banana">
+  render: ({
+    triggerLabel,
+    option1,
+    option2,
+    option3,
+    onValueChange,
+    onOpenChange,
+  }) => (
+    <Select
+      defaultValue="banana"
+      onValueChange={onValueChange}
+      onOpenChange={onOpenChange}
+    >
       <SelectTrigger className="w-48" aria-label={triggerLabel}>
         <SelectValue />
       </SelectTrigger>
@@ -67,8 +91,19 @@ export const Preselected: Story = {
 };
 
 export const Disabled: Story = {
-  render: ({ triggerLabel, option1, option2, option3 }) => (
-    <Select disabled>
+  render: ({
+    triggerLabel,
+    option1,
+    option2,
+    option3,
+    onValueChange,
+    onOpenChange,
+  }) => (
+    <Select
+      disabled
+      onValueChange={onValueChange}
+      onOpenChange={onOpenChange}
+    >
       <SelectTrigger className="w-48" aria-label={triggerLabel}>
         <SelectValue placeholder="Pick a fruit" />
       </SelectTrigger>

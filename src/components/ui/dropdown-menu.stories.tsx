@@ -1,4 +1,4 @@
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 
 import { Button } from './button';
 import {
@@ -16,6 +16,8 @@ interface StoryArgs {
   item1: string;
   item2: string;
   item3: string;
+  onOpenChange: (open: boolean) => void;
+  onItemSelect: (event: Event) => void;
 }
 
 const meta: Meta<StoryArgs> = {
@@ -26,23 +28,40 @@ const meta: Meta<StoryArgs> = {
     item1: 'Profile',
     item2: 'Settings',
     item3: 'Logout',
+    onOpenChange: fn(),
+    onItemSelect: fn(),
   },
   argTypes: {
     triggerLabel: { control: 'text' },
     item1: { control: 'text' },
     item2: { control: 'text' },
     item3: { control: 'text' },
+    onOpenChange: { table: { disable: true } },
+    onItemSelect: { table: { disable: true } },
   },
-  render: ({ triggerLabel, item1, item2, item3 }) => (
-    <DropdownMenu>
+  render: ({
+    triggerLabel,
+    item1,
+    item2,
+    item3,
+    onOpenChange,
+    onItemSelect,
+  }) => (
+    <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">{triggerLabel}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem>{item1}</DropdownMenuItem>
-        <DropdownMenuItem>{item2}</DropdownMenuItem>
+        <DropdownMenuItem onSelect={onItemSelect}>
+          {item1}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={onItemSelect}>
+          {item2}
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>{item3}</DropdownMenuItem>
+        <DropdownMenuItem onSelect={onItemSelect}>
+          {item3}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   ),
@@ -73,16 +92,26 @@ export const OpensAndSelects: Story = {
 };
 
 export const WithDestructiveItem: Story = {
-  render: ({ triggerLabel, item1, item2 }) => (
-    <DropdownMenu>
+  render: ({
+    triggerLabel,
+    item1,
+    item2,
+    onOpenChange,
+    onItemSelect,
+  }) => (
+    <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">{triggerLabel}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem>{item1}</DropdownMenuItem>
-        <DropdownMenuItem>{item2}</DropdownMenuItem>
+        <DropdownMenuItem onSelect={onItemSelect}>
+          {item1}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={onItemSelect}>
+          {item2}
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive">
+        <DropdownMenuItem variant="destructive" onSelect={onItemSelect}>
           Delete account
         </DropdownMenuItem>
       </DropdownMenuContent>

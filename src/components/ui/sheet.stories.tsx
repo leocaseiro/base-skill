@@ -1,4 +1,4 @@
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 
 import { Button } from './button';
 import {
@@ -20,6 +20,7 @@ interface StoryArgs {
   title: string;
   description: string;
   body: string;
+  onOpenChange: (open: boolean) => void;
 }
 
 const meta: Meta<StoryArgs> = {
@@ -31,6 +32,7 @@ const meta: Meta<StoryArgs> = {
     title: 'Sheet Title',
     description: 'Sheet description here.',
     body: 'Sheet body content.',
+    onOpenChange: fn(),
   },
   argTypes: {
     side: {
@@ -41,9 +43,17 @@ const meta: Meta<StoryArgs> = {
     title: { control: 'text' },
     description: { control: 'text' },
     body: { control: 'text' },
+    onOpenChange: { table: { disable: true } },
   },
-  render: ({ side, triggerLabel, title, description, body }) => (
-    <Sheet>
+  render: ({
+    side,
+    triggerLabel,
+    title,
+    description,
+    body,
+    onOpenChange,
+  }) => (
+    <Sheet onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
         <Button variant="outline">{triggerLabel}</Button>
       </SheetTrigger>

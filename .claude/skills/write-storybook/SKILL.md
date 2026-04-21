@@ -93,16 +93,16 @@ Every prop that isn't a callback, JSX node, or complex object MUST have an expli
 
 ### Mapping
 
-| Prop type                    | Control                                                                           |
-| ---------------------------- | --------------------------------------------------------------------------------- |
-| String union / enum          | `control: { type: 'select' }` with `options: [...]` (or `'radio'` for ≤4 options) |
-| Boolean                      | `control: 'boolean'`                                                              |
-| Bounded number               | `control: { type: 'range', min, max, step }`                                      |
-| Free-text                    | `control: 'text'`                                                                 |
-| Color                        | `control: 'color'`                                                                |
-| Multi-select array of unions | `control: 'multi-select'` with `options`                                          |
-| Callback (`onFoo`)           | `control: false` (auto-mocked by global `argTypesRegex`)                          |
-| JSX / ReactNode              | `control: false`                                                                  |
+| Prop type                    | Control                                                                                         |
+| ---------------------------- | ----------------------------------------------------------------------------------------------- |
+| String union / enum          | `control: { type: 'select' }` with `options: [...]` (or `'radio'` for ≤4 options)               |
+| Boolean                      | `control: 'boolean'`                                                                            |
+| Bounded number               | `control: { type: 'range', min, max, step }`                                                    |
+| Free-text                    | `control: 'text'`                                                                               |
+| Color                        | `control: 'color'`                                                                              |
+| Multi-select array of unions | `control: 'multi-select'` with `options`                                                        |
+| Callback (`onFoo`)           | `args: { onFoo: fn() }` from `storybook/test` (spy shows in Actions panel + usable in `play()`) |
+| JSX / ReactNode              | `control: false`                                                                                |
 
 ### Example
 
@@ -124,12 +124,16 @@ const meta: Meta<typeof MyButton> = {
       control: { type: 'range', min: 1, max: 20, step: 1 },
     },
     icon: { control: false }, // ReactNode
-    onClick: { control: false }, // auto-mocked
+  },
+  args: {
+    onClick: fn(), // from 'storybook/test' — spy shows in Actions panel + usable in play()
   },
 };
 ```
 
-> **Don't add** `argTypes: { onClick: { action: 'clicked' } }` — `.storybook/preview.tsx` sets `actions: { argTypesRegex: '^on[A-Z].*' }` globally, which already wires every `onFoo` prop to the Actions panel. Adding it manually is harmless but noisy.
+> **Why `fn()` and not `argTypes: { onClick: { action: 'clicked' } }`?** Both log to the Actions panel, but `fn()` doubles as a spy you can assert on from `play()` (`await expect(args.onClick).toHaveBeenCalled()`). Prefer `fn()` for consistency.
+>
+> **Note:** `.storybook/preview.tsx` sets `actions.argTypesRegex: '^on[A-Z].*'` globally, but it only wires props already in `argTypes`. Since this repo uses the default react-docgen (which does not expand `React.ComponentProps<'button'>` and similar DOM-extended types), most handler props never appear in inferred `argTypes` — so the regex matches nothing for them. Always wire `fn()` explicitly.
 
 ## Complex Object Props
 
@@ -423,7 +427,7 @@ exit $TEST_EXIT
 When you edit an existing story file for any reason, run this checklist before opening the PR. Each item is a yes/no gate — if any answer is "no," either fix or justify in the PR description.
 
 - [ ] All non-callback, non-JSX props have proper `argTypes` controls (no raw JSON for enums/booleans/numbers/colors)
-- [ ] No manual `{ action: '...' }` for `onFoo` handlers (global `argTypesRegex` covers it)
+- [ ] Every `onFoo` handler wired to a `fn()` spy in `args` (shows in Actions panel + usable in `play()`) — do NOT rely on the global `argTypesRegex` alone; it only covers props already in `argTypes`, which react-docgen doesn't produce for DOM-extended props
 - [ ] Required variants are present (Default, enum-per-value where the visual differs, state variants, edge cases — see "Required Variants")
 - [ ] At least one `play()` interaction story if the component is interactive
 - [ ] Decorators match current component dependencies (e.g., if the component started using `useSettings`, `withDb` is now required)
@@ -434,20 +438,20 @@ If you're touching the file, leave it better than you found it.
 
 ## Common Mistakes
 
-| Mistake                                                  | Fix                                                                                                                                                                              |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `import React from 'react'` at top                       | Remove — not needed                                                                                                                                                              |
-| Named export for meta (`export const meta`)              | Use `export default meta`                                                                                                                                                        |
-| Default export for stories (`export default Default`)    | Use `export const Default: Story = {}`                                                                                                                                           |
-| Missing `Default` story                                  | Always add one                                                                                                                                                                   |
-| Forgetting `withRouter` for routing components           | Check if component calls `useNavigate`, `Link`, or reads route params                                                                                                            |
-| Forgetting `withDb` for DB/settings hooks                | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
-| Adding `ThemeProvider` decorator                         | Already global — skip                                                                                                                                                            |
-| `SKIP_STORYBOOK=1` because port 6006 is in use           | Find a free port and start your own instance — never skip to avoid a conflict                                                                                                    |
-| Running `yarn test:storybook` without `--url`            | Without `--url` it defaults to 6006 and may hit the wrong agent's Storybook                                                                                                      |
-| Raw JSON control for an enum/union prop                  | Add `argTypes` with `select`/`radio` and explicit `options`                                                                                                                      |
-| Whole-config JSON blob as a single control               | Break into individual args + custom `render` (see "Complex Object Props")                                                                                                        |
-| Manually adding `argTypes: { onFoo: { action: 'foo' } }` | Remove — global `argTypesRegex` already covers it                                                                                                                                |
-| Adding `parameters.chromatic`                            | Remove — VR is in `e2e/visual.spec.ts`, not Storybook                                                                                                                            |
-| Trying to opt out of a11y on a new story                 | Don't — it's enforced. Fix the violation, or use `test: 'todo'` only with documented justification                                                                               |
-| Inlining `Math.random()` results in story args           | Pin via `globalThis.Math.random = () => N` inside `play()` for reproducibility                                                                                                   |
+| Mistake                                               | Fix                                                                                                                                                                              |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `import React from 'react'` at top                    | Remove — not needed                                                                                                                                                              |
+| Named export for meta (`export const meta`)           | Use `export default meta`                                                                                                                                                        |
+| Default export for stories (`export default Default`) | Use `export const Default: Story = {}`                                                                                                                                           |
+| Missing `Default` story                               | Always add one                                                                                                                                                                   |
+| Forgetting `withRouter` for routing components        | Check if component calls `useNavigate`, `Link`, or reads route params                                                                                                            |
+| Forgetting `withDb` for DB/settings hooks             | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
+| Adding `ThemeProvider` decorator                      | Already global — skip                                                                                                                                                            |
+| `SKIP_STORYBOOK=1` because port 6006 is in use        | Find a free port and start your own instance — never skip to avoid a conflict                                                                                                    |
+| Running `yarn test:storybook` without `--url`         | Without `--url` it defaults to 6006 and may hit the wrong agent's Storybook                                                                                                      |
+| Raw JSON control for an enum/union prop               | Add `argTypes` with `select`/`radio` and explicit `options`                                                                                                                      |
+| Whole-config JSON blob as a single control            | Break into individual args + custom `render` (see "Complex Object Props")                                                                                                        |
+| Relying on global `argTypesRegex` for Actions panel   | Doesn't work for DOM-extended props under react-docgen — wire `args: { onFoo: fn() }` from `storybook/test` explicitly                                                           |
+| Adding `parameters.chromatic`                         | Remove — VR is in `e2e/visual.spec.ts`, not Storybook                                                                                                                            |
+| Trying to opt out of a11y on a new story              | Don't — it's enforced. Fix the violation, or use `test: 'todo'` only with documented justification                                                                               |
+| Inlining `Math.random()` results in story args        | Pin via `globalThis.Math.random = () => N` inside `play()` for reproducibility                                                                                                   |
