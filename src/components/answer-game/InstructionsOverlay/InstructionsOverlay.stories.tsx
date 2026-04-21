@@ -46,6 +46,7 @@ const GAME_COLOR_OPTIONS = [
 
 const meta: Meta<StoryArgs> = {
   component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/InstructionsOverlay',
   tags: ['autodocs'],
   decorators: [withDb, withRouter],
   parameters: { layout: 'fullscreen' },
