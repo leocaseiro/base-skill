@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">16/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/198 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">16/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/179 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2897,7 +2897,7 @@ export const WithDestructiveItem: Story = {
       <div class="badges">
         <label for="c-10-answer-game-encouragementannouncer-err" class="badge err as-toggle">prop type error</label>
         <label for="c-10-answer-game-encouragementannouncer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-10-answer-game-encouragementannouncer-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-10-answer-game-encouragementannouncer-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -2980,7 +2980,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
   tags: [&#39;autodocs&#39;],
   args: {
     message: &#39;Keep trying!&#39;,
-    visible: false,
+    visible: true,
     onDismiss: fn(),
   },
   argTypes: {
@@ -3000,13 +3000,7 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Hidden: Story = {
-  args: { visible: false, message: &#39;Keep trying!&#39; },
-};
-
-export const Visible: Story = {
-  args: { visible: true, message: &#39;Almost! Try again.&#39; },
-};
+export const Playground: Story = {};
 
 export const ReplayTrigger: Story = {
   args: { message: &#39;Great job!&#39; },
@@ -3063,27 +3057,12 @@ export const AutoDismissesAfter2s: Story = {
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Hidden</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Hidden = ({ message, visible, onDismiss }) =&gt; (
-  &lt;EncouragementAnnouncer
-    message={message}
-    visible={visible}
-    onDismiss={onDismiss}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Visible</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Visible = ({ message, visible, onDismiss }) =&gt; (
+              <pre><code>const Playground = ({ message, visible, onDismiss }) =&gt; (
   &lt;EncouragementAnnouncer
     message={message}
     visible={visible}
@@ -3651,13 +3630,13 @@ title: string</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  22 | };
-  23 |
-&gt; 24 | const meta: Meta&lt;StoryArgs&gt; = {
+  25 | };
+  26 |
+&gt; 27 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  25 |   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
-  26 |   title: &#39;answer-game/GameOverOverlay&#39;,
-  27 |   tags: [&#39;autodocs&#39;],
+  28 |   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  29 |   title: &#39;answer-game/GameOverOverlay&#39;,
+  30 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -3670,6 +3649,9 @@ interface StoryArgs {
   stars: number;
   onPlayAgain: () =&gt; void;
   onHome: () =&gt; void;
+  // Raw GameOverOverlay prop shadowed by `stars`; declared here only
+  // to hide the react-docgen-inferred row from the Controls panel.
+  retryCount?: never;
 }
 
 // Maps the user-facing `stars` control back to the `retryCount` the
@@ -3696,6 +3678,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
     stars: { control: { type: &#39;range&#39;, min: 1, max: 5, step: 1 } },
     onPlayAgain: { table: { disable: true } },
     onHome: { table: { disable: true } },
+    retryCount: { table: { disable: true } },
   },
   render: ({ stars, onPlayAgain, onHome }) =&gt; (
     &lt;GameOverOverlay
@@ -4379,7 +4362,7 @@ src: string</code></pre>
       <div class="badges">
         <label for="c-21-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-21-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-21-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">10 stories</label>
+        <label for="c-21-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -4403,13 +4386,13 @@ src: string</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  45 | ] as const satisfies readonly GameColorKey[];
-  46 |
-&gt; 47 | const meta: Meta&lt;StoryArgs&gt; = {
+  52 | ] as const satisfies readonly GameColorKey[];
+  53 |
+&gt; 54 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  48 |   component: InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
-  49 |   title: &#39;answer-game/InstructionsOverlay&#39;,
-  50 |   tags: [&#39;autodocs&#39;],
+  55 |   component: InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  56 |   title: &#39;answer-game/InstructionsOverlay&#39;,
+  57 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx:
 import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
@@ -4441,6 +4424,13 @@ interface StoryArgs {
   ) =&gt; Promise&lt;void&gt;;
   onToggleBookmark: () =&gt; void;
   onConfigChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
+  // Raw InstructionsOverlay props shadowed by StoryArgs above (config)
+  // or intentionally omitted. Declared here only to hide their
+  // react-docgen-inferred rows from the Controls panel.
+  config?: never;
+  cover?: never;
+  onDeleteCustomGame?: never;
+  existingCustomGameNames?: never;
 }
 
 const GAME_COLOR_OPTIONS = [
@@ -4500,6 +4490,10 @@ const meta: Meta&lt;StoryArgs&gt; = {
     onUpdateCustomGame: { table: { disable: true } },
     onToggleBookmark: { table: { disable: true } },
     onConfigChange: { table: { disable: true } },
+    config: { table: { disable: true } },
+    cover: { table: { disable: true } },
+    onDeleteCustomGame: { table: { disable: true } },
+    existingCustomGameNames: { table: { disable: true } },
   },
   render: ({
     text,
@@ -4546,41 +4540,6 @@ export const WithCustomGame: Story = {
     customGameId: &#39;abc123&#39;,
     customGameName: &#39;Easy Mode&#39;,
     customGameColor: &#39;teal&#39; as GameColorKey,
-  },
-};
-
-export const WordSpellDefault: Story = {
-  args: {
-    text: &#39;Drag the letters to spell the word.&#39;,
-    gameTitle: &#39;Word Spell&#39;,
-    gameId: &#39;word-spell&#39;,
-    totalRounds: 8,
-  },
-};
-
-export const NotBookmarked: Story = {
-  args: { isBookmarked: false },
-};
-
-export const Bookmarked: Story = {
-  args: { isBookmarked: true },
-};
-
-export const NotBookmarkedCustomGame: Story = {
-  args: {
-    customGameId: &#39;abc123&#39;,
-    customGameName: &#39;Easy Mode&#39;,
-    customGameColor: &#39;teal&#39; as GameColorKey,
-    isBookmarked: false,
-  },
-};
-
-export const BookmarkedCustomGame: Story = {
-  args: {
-    customGameId: &#39;abc123&#39;,
-    customGameName: &#39;Easy Mode&#39;,
-    customGameColor: &#39;teal&#39; as GameColorKey,
-    isBookmarked: true,
   },
 };
 
@@ -4708,211 +4667,6 @@ export const OpensSettings: Story = {
               
               
               <pre><code>const WithCustomGame = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Word Spell Default</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WordSpellDefault = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Not Bookmarked</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const NotBookmarked = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Bookmarked</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Bookmarked = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Not Bookmarked Custom Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const NotBookmarkedCustomGame = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Bookmarked Custom Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const BookmarkedCustomGame = ({
   text,
   gameTitle,
   gameId,
@@ -5299,7 +5053,7 @@ export const Default: Story = {};
       <div class="badges">
         <label for="c-24-answer-game-levelcompleteoverlay-props" class="badge ok as-toggle">3 prop types</label>
         <label for="c-24-answer-game-levelcompleteoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-24-answer-game-levelcompleteoverlay-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-24-answer-game-levelcompleteoverlay-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -5357,48 +5111,12 @@ onNextLevel: () =&gt; void</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Level 1</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Level1 = () =&gt; &lt;LevelCompleteOverlay level={1} onNextLevel={fn()} onDone={fn()} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Level 3</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Level3 = () =&gt; &lt;LevelCompleteOverlay level={3} onNextLevel={fn()} onDone={fn()} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Level 10</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Level10 = () =&gt; &lt;LevelCompleteOverlay level={10} onNextLevel={fn()} onDone={fn()} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Clicks Next Level</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const ClicksNextLevel = () =&gt; &lt;LevelCompleteOverlay level={1} onNextLevel={fn()} onDone={fn()} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Clicks Done</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const ClicksDone = () =&gt; &lt;LevelCompleteOverlay level={1} onNextLevel={fn()} onDone={fn()} /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;LevelCompleteOverlay level={1} onNextLevel={fn()} onDone={fn()} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -6008,7 +5726,7 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
       <div class="badges">
         <label for="c-29-answer-game-progresshud-err" class="badge err as-toggle">prop type error</label>
         <label for="c-29-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
-        <label for="c-29-answer-game-progresshud-stories" class="badge ok as-toggle">9 stories</label>
+        <label for="c-29-answer-game-progresshud-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -6038,7 +5756,7 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
      | ^
   19 |   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
   20 |   title: &#39;answer-game/ProgressHUD&#39;,
-  21 |   parameters: { layout: &#39;centered&#39; },
+  21 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx:
 import { ProgressHUD } from &#39;./ProgressHUD&#39;;
@@ -6061,7 +5779,16 @@ interface StoryArgs {
 const meta: Meta&lt;StoryArgs&gt; = {
   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
   title: &#39;answer-game/ProgressHUD&#39;,
-  parameters: { layout: &#39;centered&#39; },
+  tags: [&#39;autodocs&#39;],
+  parameters: {
+    layout: &#39;centered&#39;,
+    docs: {
+      description: {
+        component:
+          &#39;Classic (round dots + fraction) and level (LEVEL N + cumulative dots) progress HUD. All visible output is driven by the nine controls — use them to reproduce the common presets:\n\n- **Classic last round:** roundIndex 4, totalRounds 5.\n- **Dots only:** showFraction off, showLevel off.\n- **Fraction only:** showDots off, showLevel off.\n- **Level mode (level 3):** isLevelMode on, totalRoundsIsNull on, levelIndex 2, showFraction off, showLevel on.\n- **Mixed level + fraction:** isLevelMode on, levelIndex 2, showLevel on (totalRounds stays set).\n- **Round-complete pulse:** phase round-complete.\n- **All flags off:** renders null.&#39;,
+      },
+    },
+  },
   args: {
     roundIndex: 2,
     totalRounds: 5,
@@ -6125,56 +5852,13 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Classic_Round3Of5: Story = {};
-
-export const Classic_LastRound: Story = {
-  args: { roundIndex: 4, totalRounds: 5 },
-};
-
-export const DotsOnly: Story = {
-  args: { showFraction: false, showLevel: false },
-};
-
-export const FractionOnly: Story = {
-  args: { showDots: false, showLevel: false },
-};
-
-export const LevelMode_Level3: Story = {
+export const Playground: Story = {
   args: {
+    totalRounds: 6,
+    levelIndex: 6,
     isLevelMode: true,
-    totalRoundsIsNull: true,
-    levelIndex: 2,
-    showFraction: false,
-    showLevel: true,
+    phase: &#39;round-complete&#39;,
   },
-};
-
-export const LevelMode_Level10: Story = {
-  args: {
-    isLevelMode: true,
-    totalRoundsIsNull: true,
-    levelIndex: 9,
-    showFraction: false,
-    showLevel: true,
-  },
-};
-
-export const Mixed_LevelPlusFraction: Story = {
-  args: {
-    isLevelMode: true,
-    totalRounds: 5,
-    levelIndex: 2,
-    showFraction: true,
-    showLevel: true,
-  },
-};
-
-export const RoundCompletePhase: Story = {
-  args: { phase: &#39;round-complete&#39; },
-};
-
-export const AllFlagsOff: Story = {
-  args: { showDots: false, showFraction: false, showLevel: false },
 };
 </code></pre></div>
     </div>
@@ -6203,252 +5887,12 @@ export const AllFlagsOff: Story = {
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Classic Round 3 Of 5</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Classic_Round3Of5 = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Classic Last Round</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Classic_LastRound = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Dots Only</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const DotsOnly = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Fraction Only</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const FractionOnly = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Level Mode Level 3</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const LevelMode_Level3 = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Level Mode Level 10</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const LevelMode_Level10 = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Mixed Level Plus Fraction</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Mixed_LevelPlusFraction = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Round Complete Phase</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const RoundCompletePhase = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">All Flags Off</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const AllFlagsOff = ({
+              <pre><code>const Playground = ({
   roundIndex,
   totalRounds,
   totalRoundsIsNull,
@@ -6489,7 +5933,7 @@ export const AllFlagsOff: Story = {
       <div class="badges">
         <label for="c-30-answer-game-scoreanimation-props" class="badge ok as-toggle">1 prop type</label>
         <label for="c-30-answer-game-scoreanimation-info" class="badge info as-toggle">1 info</label>
-        <label for="c-30-answer-game-scoreanimation-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-30-answer-game-scoreanimation-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -6543,21 +5987,12 @@ export const AllFlagsOff: Story = {
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Playing</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Playing = () =&gt; &lt;ScoreAnimation visible={false} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Complete</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Complete = () =&gt; &lt;ScoreAnimation visible /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;ScoreAnimation visible /&gt;;</code></pre>
             </div>
         </div>
     
@@ -7437,13 +6872,13 @@ min?: any = 0</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SlotRow as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  117 | };
-  118 |
-&gt; 119 | const meta: Meta&lt;StoryArgs&gt; = {
+  122 | };
+  123 |
+&gt; 124 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  120 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
-  121 |   title: &#39;answer-game/Slot&#39;,
-  122 |   tags: [&#39;autodocs&#39;],
+  125 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
+  126 |   title: &#39;answer-game/Slot&#39;,
+  127 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/Slot/Slot.stories.tsx:
 import { useEffect } from &#39;react&#39;;
@@ -7468,6 +6903,11 @@ interface StoryArgs {
   filled: boolean;
   isWrong: boolean;
   dragPreview: DragPreview;
+  // Raw SlotRow props (the meta `component`) that StoryArgs doesn&#39;t
+  // cover. Declared here only to hide their react-docgen-inferred rows
+  // from the Controls panel.
+  className?: never;
+  children?: never;
 }
 
 const baseConfig: AnswerGameConfig = {
@@ -7597,6 +7037,8 @@ const meta: Meta&lt;StoryArgs&gt; = {
         &#39;target-swap&#39;,
       ] satisfies DragPreview[],
     },
+    className: { table: { disable: true } },
+    children: { table: { disable: true } },
   },
   render: ({ variant, label, filled, isWrong, dragPreview }) =&gt; {
     const { slotClass, contentClass } = variantConfig[variant];
@@ -10817,7 +10259,7 @@ export const WithDestructiveItem: Story = {
       <div class="badges">
         <label for="c-error-6-answer-game-encouragementannouncer-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-6-answer-game-encouragementannouncer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-6-answer-game-encouragementannouncer-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-error-6-answer-game-encouragementannouncer-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -10900,7 +10342,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
   tags: [&#39;autodocs&#39;],
   args: {
     message: &#39;Keep trying!&#39;,
-    visible: false,
+    visible: true,
     onDismiss: fn(),
   },
   argTypes: {
@@ -10920,13 +10362,7 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Hidden: Story = {
-  args: { visible: false, message: &#39;Keep trying!&#39; },
-};
-
-export const Visible: Story = {
-  args: { visible: true, message: &#39;Almost! Try again.&#39; },
-};
+export const Playground: Story = {};
 
 export const ReplayTrigger: Story = {
   args: { message: &#39;Great job!&#39; },
@@ -10983,27 +10419,12 @@ export const AutoDismissesAfter2s: Story = {
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Hidden</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Hidden = ({ message, visible, onDismiss }) =&gt; (
-  &lt;EncouragementAnnouncer
-    message={message}
-    visible={visible}
-    onDismiss={onDismiss}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Visible</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Visible = ({ message, visible, onDismiss }) =&gt; (
+              <pre><code>const Playground = ({ message, visible, onDismiss }) =&gt; (
   &lt;EncouragementAnnouncer
     message={message}
     visible={visible}
@@ -11075,13 +10496,13 @@ export const AutoDismissesAfter2s: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  22 | };
-  23 |
-&gt; 24 | const meta: Meta&lt;StoryArgs&gt; = {
+  25 | };
+  26 |
+&gt; 27 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  25 |   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
-  26 |   title: &#39;answer-game/GameOverOverlay&#39;,
-  27 |   tags: [&#39;autodocs&#39;],
+  28 |   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  29 |   title: &#39;answer-game/GameOverOverlay&#39;,
+  30 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -11094,6 +10515,9 @@ interface StoryArgs {
   stars: number;
   onPlayAgain: () =&gt; void;
   onHome: () =&gt; void;
+  // Raw GameOverOverlay prop shadowed by `stars`; declared here only
+  // to hide the react-docgen-inferred row from the Controls panel.
+  retryCount?: never;
 }
 
 // Maps the user-facing `stars` control back to the `retryCount` the
@@ -11120,6 +10544,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
     stars: { control: { type: &#39;range&#39;, min: 1, max: 5, step: 1 } },
     onPlayAgain: { table: { disable: true } },
     onHome: { table: { disable: true } },
+    retryCount: { table: { disable: true } },
   },
   render: ({ stars, onPlayAgain, onHome }) =&gt; (
     &lt;GameOverOverlay
@@ -11192,7 +10617,7 @@ export const Playground: Story = {};
       <div class="badges">
         <label for="c-error-8-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-8-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-8-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">10 stories</label>
+        <label for="c-error-8-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -11216,13 +10641,13 @@ export const Playground: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  45 | ] as const satisfies readonly GameColorKey[];
-  46 |
-&gt; 47 | const meta: Meta&lt;StoryArgs&gt; = {
+  52 | ] as const satisfies readonly GameColorKey[];
+  53 |
+&gt; 54 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  48 |   component: InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
-  49 |   title: &#39;answer-game/InstructionsOverlay&#39;,
-  50 |   tags: [&#39;autodocs&#39;],
+  55 |   component: InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  56 |   title: &#39;answer-game/InstructionsOverlay&#39;,
+  57 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx:
 import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
@@ -11254,6 +10679,13 @@ interface StoryArgs {
   ) =&gt; Promise&lt;void&gt;;
   onToggleBookmark: () =&gt; void;
   onConfigChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
+  // Raw InstructionsOverlay props shadowed by StoryArgs above (config)
+  // or intentionally omitted. Declared here only to hide their
+  // react-docgen-inferred rows from the Controls panel.
+  config?: never;
+  cover?: never;
+  onDeleteCustomGame?: never;
+  existingCustomGameNames?: never;
 }
 
 const GAME_COLOR_OPTIONS = [
@@ -11313,6 +10745,10 @@ const meta: Meta&lt;StoryArgs&gt; = {
     onUpdateCustomGame: { table: { disable: true } },
     onToggleBookmark: { table: { disable: true } },
     onConfigChange: { table: { disable: true } },
+    config: { table: { disable: true } },
+    cover: { table: { disable: true } },
+    onDeleteCustomGame: { table: { disable: true } },
+    existingCustomGameNames: { table: { disable: true } },
   },
   render: ({
     text,
@@ -11359,41 +10795,6 @@ export const WithCustomGame: Story = {
     customGameId: &#39;abc123&#39;,
     customGameName: &#39;Easy Mode&#39;,
     customGameColor: &#39;teal&#39; as GameColorKey,
-  },
-};
-
-export const WordSpellDefault: Story = {
-  args: {
-    text: &#39;Drag the letters to spell the word.&#39;,
-    gameTitle: &#39;Word Spell&#39;,
-    gameId: &#39;word-spell&#39;,
-    totalRounds: 8,
-  },
-};
-
-export const NotBookmarked: Story = {
-  args: { isBookmarked: false },
-};
-
-export const Bookmarked: Story = {
-  args: { isBookmarked: true },
-};
-
-export const NotBookmarkedCustomGame: Story = {
-  args: {
-    customGameId: &#39;abc123&#39;,
-    customGameName: &#39;Easy Mode&#39;,
-    customGameColor: &#39;teal&#39; as GameColorKey,
-    isBookmarked: false,
-  },
-};
-
-export const BookmarkedCustomGame: Story = {
-  args: {
-    customGameId: &#39;abc123&#39;,
-    customGameName: &#39;Easy Mode&#39;,
-    customGameColor: &#39;teal&#39; as GameColorKey,
-    isBookmarked: true,
   },
 };
 
@@ -11521,211 +10922,6 @@ export const OpensSettings: Story = {
               
               
               <pre><code>const WithCustomGame = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Word Spell Default</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WordSpellDefault = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Not Bookmarked</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const NotBookmarked = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Bookmarked</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Bookmarked = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Not Bookmarked Custom Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const NotBookmarkedCustomGame = ({
-  text,
-  gameTitle,
-  gameId,
-  customGameColor,
-  ttsEnabled,
-  isBookmarked,
-  totalRounds,
-  customGameId,
-  customGameName,
-  onStart,
-  onSaveCustomGame,
-  onUpdateCustomGame,
-  onToggleBookmark,
-  onConfigChange,
-}) =&gt; (
-  &lt;InstructionsOverlay
-    text={text}
-    gameTitle={gameTitle}
-    gameId={gameId}
-    customGameColor={customGameColor}
-    ttsEnabled={ttsEnabled}
-    isBookmarked={isBookmarked}
-    config={{ totalRounds }}
-    customGameId={customGameId || undefined}
-    customGameName={customGameName || undefined}
-    onStart={onStart}
-    onSaveCustomGame={onSaveCustomGame}
-    onUpdateCustomGame={onUpdateCustomGame}
-    onToggleBookmark={onToggleBookmark}
-    onConfigChange={onConfigChange}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Bookmarked Custom Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const BookmarkedCustomGame = ({
   text,
   gameTitle,
   gameId,
@@ -12183,7 +11379,7 @@ export const Default: Story = {};
       <div class="badges">
         <label for="c-error-11-answer-game-progresshud-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-11-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-11-answer-game-progresshud-stories" class="badge ok as-toggle">9 stories</label>
+        <label for="c-error-11-answer-game-progresshud-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12213,7 +11409,7 @@ export const Default: Story = {};
      | ^
   19 |   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
   20 |   title: &#39;answer-game/ProgressHUD&#39;,
-  21 |   parameters: { layout: &#39;centered&#39; },
+  21 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx:
 import { ProgressHUD } from &#39;./ProgressHUD&#39;;
@@ -12236,7 +11432,16 @@ interface StoryArgs {
 const meta: Meta&lt;StoryArgs&gt; = {
   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
   title: &#39;answer-game/ProgressHUD&#39;,
-  parameters: { layout: &#39;centered&#39; },
+  tags: [&#39;autodocs&#39;],
+  parameters: {
+    layout: &#39;centered&#39;,
+    docs: {
+      description: {
+        component:
+          &#39;Classic (round dots + fraction) and level (LEVEL N + cumulative dots) progress HUD. All visible output is driven by the nine controls — use them to reproduce the common presets:\n\n- **Classic last round:** roundIndex 4, totalRounds 5.\n- **Dots only:** showFraction off, showLevel off.\n- **Fraction only:** showDots off, showLevel off.\n- **Level mode (level 3):** isLevelMode on, totalRoundsIsNull on, levelIndex 2, showFraction off, showLevel on.\n- **Mixed level + fraction:** isLevelMode on, levelIndex 2, showLevel on (totalRounds stays set).\n- **Round-complete pulse:** phase round-complete.\n- **All flags off:** renders null.&#39;,
+      },
+    },
+  },
   args: {
     roundIndex: 2,
     totalRounds: 5,
@@ -12300,56 +11505,13 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Classic_Round3Of5: Story = {};
-
-export const Classic_LastRound: Story = {
-  args: { roundIndex: 4, totalRounds: 5 },
-};
-
-export const DotsOnly: Story = {
-  args: { showFraction: false, showLevel: false },
-};
-
-export const FractionOnly: Story = {
-  args: { showDots: false, showLevel: false },
-};
-
-export const LevelMode_Level3: Story = {
+export const Playground: Story = {
   args: {
+    totalRounds: 6,
+    levelIndex: 6,
     isLevelMode: true,
-    totalRoundsIsNull: true,
-    levelIndex: 2,
-    showFraction: false,
-    showLevel: true,
+    phase: &#39;round-complete&#39;,
   },
-};
-
-export const LevelMode_Level10: Story = {
-  args: {
-    isLevelMode: true,
-    totalRoundsIsNull: true,
-    levelIndex: 9,
-    showFraction: false,
-    showLevel: true,
-  },
-};
-
-export const Mixed_LevelPlusFraction: Story = {
-  args: {
-    isLevelMode: true,
-    totalRounds: 5,
-    levelIndex: 2,
-    showFraction: true,
-    showLevel: true,
-  },
-};
-
-export const RoundCompletePhase: Story = {
-  args: { phase: &#39;round-complete&#39; },
-};
-
-export const AllFlagsOff: Story = {
-  args: { showDots: false, showFraction: false, showLevel: false },
 };
 </code></pre></div>
     </div>
@@ -12378,252 +11540,12 @@ export const AllFlagsOff: Story = {
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Classic Round 3 Of 5</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Classic_Round3Of5 = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Classic Last Round</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Classic_LastRound = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Dots Only</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const DotsOnly = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Fraction Only</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const FractionOnly = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Level Mode Level 3</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const LevelMode_Level3 = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Level Mode Level 10</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const LevelMode_Level10 = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Mixed Level Plus Fraction</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Mixed_LevelPlusFraction = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Round Complete Phase</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const RoundCompletePhase = ({
-  roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
-  levelIndex,
-  isLevelMode,
-  phase,
-  showDots,
-  showFraction,
-  showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">All Flags Off</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const AllFlagsOff = ({
+              <pre><code>const Playground = ({
   roundIndex,
   totalRounds,
   totalRoundsIsNull,
@@ -13367,13 +12289,13 @@ export const OpensAndClosesOnEscape: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SlotRow as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  117 | };
-  118 |
-&gt; 119 | const meta: Meta&lt;StoryArgs&gt; = {
+  122 | };
+  123 |
+&gt; 124 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  120 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
-  121 |   title: &#39;answer-game/Slot&#39;,
-  122 |   tags: [&#39;autodocs&#39;],
+  125 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
+  126 |   title: &#39;answer-game/Slot&#39;,
+  127 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/Slot/Slot.stories.tsx:
 import { useEffect } from &#39;react&#39;;
@@ -13398,6 +12320,11 @@ interface StoryArgs {
   filled: boolean;
   isWrong: boolean;
   dragPreview: DragPreview;
+  // Raw SlotRow props (the meta `component`) that StoryArgs doesn&#39;t
+  // cover. Declared here only to hide their react-docgen-inferred rows
+  // from the Controls panel.
+  className?: never;
+  children?: never;
 }
 
 const baseConfig: AnswerGameConfig = {
@@ -13527,6 +12454,8 @@ const meta: Meta&lt;StoryArgs&gt; = {
         &#39;target-swap&#39;,
       ] satisfies DragPreview[],
     },
+    className: { table: { disable: true } },
+    children: { table: { disable: true } },
   },
   render: ({ variant, label, filled, isWrong, dragPreview }) =&gt; {
     const { slotClass, contentClass } = variantConfig[variant];
