@@ -75,7 +75,8 @@ describe('hasWordSpellPersistedContent', () => {
 
   it('is false for null / undefined inputs', () => {
     expect(hasWordSpellPersistedContent(null)).toBe(false);
-    expect(hasWordSpellPersistedContent()).toBe(false);
+    // eslint-disable-next-line unicorn/no-useless-undefined -- exercising the `undefined` overload explicitly
+    expect(hasWordSpellPersistedContent(undefined)).toBe(false);
   });
 
   it('is true when wordSpellRounds and roundOrder are present', () => {
