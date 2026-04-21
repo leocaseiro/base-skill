@@ -172,7 +172,7 @@ describe('AnswerGameProvider', () => {
     expect(screen.getByTestId('bank')).toHaveTextContent('t-t');
   });
 
-  it('skips INIT_ROUND effect when initialState is provided', async () => {
+  it('prefers draft tiles over config initialTiles when resuming', async () => {
     const draft: AnswerGameDraftState = {
       allTiles: [{ id: 'x', label: 'x', value: 'x' }],
       bankTileIds: ['x'],
@@ -187,7 +187,16 @@ describe('AnswerGameProvider', () => {
     const cfgWithTiles: AnswerGameConfig = {
       ...gameConfig,
       initialTiles: [{ id: 'y', label: 'y', value: 'y' }],
-      initialZones: [],
+      initialZones: [
+        {
+          id: 'zy',
+          index: 0,
+          expectedValue: 'y',
+          placedTileId: null,
+          isWrong: false,
+          isLocked: false,
+        },
+      ],
     };
 
     const BankReader = () => {
@@ -203,7 +212,100 @@ describe('AnswerGameProvider', () => {
       </AnswerGameProvider>,
     );
 
-    // Should still show draft bankTileIds ('x'), not the config tiles ('y')
+    // Resuming dispatches RESUME_ROUND instead of INIT_ROUND, so the draft
+    // bankTileIds ('x') win over the config's initialTiles ('y').
     expect(screen.getByTestId('bank')).toHaveTextContent('x');
+  });
+
+  it('preserves draft progress counters on mount (RESUME_ROUND path)', () => {
+    // Regression guard: INIT_ROUND would reset `roundIndex`/`retryCount` to 0.
+    // The provider must dispatch `RESUME_ROUND` on resume so mid-session
+    // progress survives the mount effect.
+    const draft: AnswerGameDraftState = {
+      allTiles: [
+        { id: 'a', label: 'a', value: 'a' },
+        { id: 'b', label: 'b', value: 'b' },
+      ],
+      bankTileIds: ['b'],
+      zones: [
+        {
+          id: 'z0',
+          index: 0,
+          expectedValue: 'a',
+          placedTileId: 'a',
+          isWrong: false,
+          isLocked: false,
+        },
+      ],
+      activeSlotIndex: 0,
+      phase: 'playing',
+      roundIndex: 4,
+      retryCount: 3,
+      levelIndex: 1,
+    };
+
+    const ProgressReader = () => {
+      const state = useAnswerGameContext();
+      return (
+        <div data-testid="progress">
+          {`${state.roundIndex}/${state.retryCount}/${state.levelIndex}`}
+        </div>
+      );
+    };
+
+    render(
+      <AnswerGameProvider config={gameConfig} initialState={draft}>
+        <ProgressReader />
+      </AnswerGameProvider>,
+    );
+
+    expect(screen.getByTestId('progress')).toHaveTextContent('4/3/1');
+  });
+
+  it('applies a changed initialState via RESUME_ROUND across re-renders', () => {
+    const firstDraft: AnswerGameDraftState = {
+      allTiles: [{ id: 'first', label: 'f', value: 'f' }],
+      bankTileIds: ['first'],
+      zones: [],
+      activeSlotIndex: 0,
+      phase: 'playing',
+      roundIndex: 0,
+      retryCount: 0,
+      levelIndex: 0,
+    };
+    const secondDraft: AnswerGameDraftState = {
+      ...firstDraft,
+      allTiles: [{ id: 'second', label: 's', value: 's' }],
+      bankTileIds: ['second'],
+      roundIndex: 2,
+    };
+
+    const ProgressReader = () => {
+      const state = useAnswerGameContext();
+      return (
+        <div data-testid="info">
+          {state.bankTileIds.join(',')}|{state.roundIndex}
+        </div>
+      );
+    };
+
+    const { rerender } = render(
+      <AnswerGameProvider config={gameConfig} initialState={firstDraft}>
+        <ProgressReader />
+      </AnswerGameProvider>,
+    );
+    expect(screen.getByTestId('info')).toHaveTextContent('first|0');
+
+    rerender(
+      <AnswerGameProvider
+        config={gameConfig}
+        initialState={secondDraft}
+      >
+        <ProgressReader />
+      </AnswerGameProvider>,
+    );
+    // A changed draft must flow through — pre-hardening the provider
+    // short-circuited the effect and left the old state in place.
+    expect(screen.getByTestId('info')).toHaveTextContent('second|2');
   });
 });

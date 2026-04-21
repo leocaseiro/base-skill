@@ -53,7 +53,11 @@ const TouchKeyboardAdapter = ({
 
 interface AnswerGameProviderProps {
   config: AnswerGameConfig;
-  /** When provided, state is restored from snapshot; INIT_ROUND effect is skipped. */
+  /**
+   * When provided, state is restored from the draft snapshot and the mount
+   * effect dispatches `RESUME_ROUND` (instead of `INIT_ROUND`) so draft
+   * progress is preserved on every re-render.
+   */
   initialState?: AnswerGameDraftState;
   /** Session ID used by useAnswerGameDraftSync to find the RxDB document. */
   sessionId?: string;
@@ -87,8 +91,15 @@ export const AnswerGameProvider = ({
   useAnswerGameDraftSync(state, sessionId ?? null, dbCtx?.db ?? null);
 
   useEffect(() => {
-    // Skip INIT_ROUND when resuming from a snapshot
-    if (initialState) return;
+    // Hardened round init: route through the reducer on every mount AND
+    // whenever the resumed draft changes. `RESUME_ROUND` preserves draft
+    // progress (roundIndex, retryCount, levelIndex); `INIT_ROUND` starts
+    // fresh. Both paths keep all round-state mutation inside the reducer
+    // rather than relying on `useReducer`'s one-shot initial snapshot.
+    if (initialState) {
+      dispatch({ type: 'RESUME_ROUND', draft: initialState });
+      return;
+    }
     const tiles = config.initialTiles;
     const zones = config.initialZones;
     if (tiles?.length && zones?.length) {
