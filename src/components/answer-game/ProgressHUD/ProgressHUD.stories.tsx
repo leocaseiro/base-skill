@@ -18,7 +18,16 @@ interface StoryArgs {
 const meta: Meta<StoryArgs> = {
   component: ProgressHUD as unknown as ComponentType<StoryArgs>,
   title: 'answer-game/ProgressHUD',
-  parameters: { layout: 'centered' },
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'centered',
+    docs: {
+      description: {
+        component:
+          'Classic (round dots + fraction) and level (LEVEL N + cumulative dots) progress HUD. All visible output is driven by the nine controls — use them to reproduce the common presets:\n\n- **Classic last round:** roundIndex 4, totalRounds 5.\n- **Dots only:** showFraction off, showLevel off.\n- **Fraction only:** showDots off, showLevel off.\n- **Level mode (level 3):** isLevelMode on, totalRoundsIsNull on, levelIndex 2, showFraction off, showLevel on.\n- **Mixed level + fraction:** isLevelMode on, levelIndex 2, showLevel on (totalRounds stays set).\n- **Round-complete pulse:** phase round-complete.\n- **All flags off:** renders null.',
+      },
+    },
+  },
   args: {
     roundIndex: 2,
     totalRounds: 5,
@@ -82,54 +91,11 @@ export default meta;
 
 type Story = StoryObj<StoryArgs>;
 
-export const Classic_Round3Of5: Story = {};
-
-export const Classic_LastRound: Story = {
-  args: { roundIndex: 4, totalRounds: 5 },
-};
-
-export const DotsOnly: Story = {
-  args: { showFraction: false, showLevel: false },
-};
-
-export const FractionOnly: Story = {
-  args: { showDots: false, showLevel: false },
-};
-
-export const LevelMode_Level3: Story = {
+export const Playground: Story = {
   args: {
+    totalRounds: 6,
+    levelIndex: 6,
     isLevelMode: true,
-    totalRoundsIsNull: true,
-    levelIndex: 2,
-    showFraction: false,
-    showLevel: true,
+    phase: 'round-complete',
   },
-};
-
-export const LevelMode_Level10: Story = {
-  args: {
-    isLevelMode: true,
-    totalRoundsIsNull: true,
-    levelIndex: 9,
-    showFraction: false,
-    showLevel: true,
-  },
-};
-
-export const Mixed_LevelPlusFraction: Story = {
-  args: {
-    isLevelMode: true,
-    totalRounds: 5,
-    levelIndex: 2,
-    showFraction: true,
-    showLevel: true,
-  },
-};
-
-export const RoundCompletePhase: Story = {
-  args: { phase: 'round-complete' },
-};
-
-export const AllFlagsOff: Story = {
-  args: { showDots: false, showFraction: false, showLevel: false },
 };
