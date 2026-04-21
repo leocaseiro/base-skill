@@ -9,7 +9,8 @@ import { SlotRow } from './SlotRow';
 import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
 import type { SlotRenderProps } from './useSlotBehavior';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ComponentType } from 'react';
+import type { CSSProperties, ComponentType } from 'react';
+import { classicSkin } from '@/lib/skin';
 
 type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
 type DragPreview = 'none' | 'target-empty' | 'target-swap';
@@ -165,9 +166,9 @@ const meta: Meta<StoryArgs> = {
       variant === 'inline-gap'
         ? [makeTile('s0', label || 'cat')]
         : [
-            makeTile('t0', label || 'A'),
-            makeTile('t1', 'B'),
-            makeTile('t2', 'C'),
+            makeTile('t0', label || 'a'),
+            makeTile('t1', 'b'),
+            makeTile('t2', 'c'),
           ];
 
     const zones: AnswerZone[] =
@@ -186,21 +187,26 @@ const meta: Meta<StoryArgs> = {
             ];
 
     return (
-      <AnswerGameProvider
-        config={{
-          ...baseConfig,
-          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
-          initialTiles: tiles,
-          initialZones: zones,
-        }}
+      <div
+        className={`game-container skin-${classicSkin.id} p-4`}
+        style={classicSkin.tokens as CSSProperties}
       >
-        <PlaygroundInner
-          variant={variant}
-          dragPreview={dragPreview}
-          contentClass={contentClass}
-          slotClass={slotClass}
-        />
-      </AnswerGameProvider>
+        <AnswerGameProvider
+          config={{
+            ...baseConfig,
+            gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+            initialTiles: tiles,
+            initialZones: zones,
+          }}
+        >
+          <PlaygroundInner
+            variant={variant}
+            dragPreview={dragPreview}
+            contentClass={contentClass}
+            slotClass={slotClass}
+          />
+        </AnswerGameProvider>
+      </div>
     );
   },
 };
@@ -208,4 +214,9 @@ export default meta;
 
 type Story = StoryObj<StoryArgs>;
 
-export const Playground: Story = {};
+export const Playground: Story = {
+  args: {
+    label: 'a',
+    isWrong: false,
+  },
+};
