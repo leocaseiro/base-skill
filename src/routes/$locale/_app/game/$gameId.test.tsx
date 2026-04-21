@@ -116,6 +116,7 @@ describe('GameRoute', () => {
         customGameName={null}
         customGameColor={null}
         customGameCover={null}
+        persistedContent={null}
       />,
       { wrapper },
     );
@@ -157,6 +158,7 @@ describe('GameRoute', () => {
         customGameName="My Custom Spelling"
         customGameColor="amber"
         customGameCover={null}
+        persistedContent={null}
       />,
       { wrapper },
     );
