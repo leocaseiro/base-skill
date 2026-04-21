@@ -73,6 +73,8 @@ interface GameRouteLoaderData {
   customGameName: string | null;
   customGameColor: string | null;
   customGameCover: Cover | null;
+  /** Raw persisted `session_history_index.initialContent` for resume flows. */
+  persistedContent: Record<string, unknown> | null;
 }
 
 const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
@@ -383,6 +385,7 @@ const WordSpellGameBody = ({
   customGameName,
   customGameColor,
   customGameCover,
+  persistedContent,
 }: {
   gameId: string;
   sessionId: string;
@@ -393,6 +396,7 @@ const WordSpellGameBody = ({
   customGameName: string | null;
   customGameColor: string | null;
   customGameCover: Cover | null;
+  persistedContent: Record<string, unknown> | null;
 }): JSX.Element => {
   const { t } = useTranslation('games');
   const { save, update, remove, customGames } = useCustomGames();
@@ -478,6 +482,7 @@ const WordSpellGameBody = ({
       initialState={draftState ?? undefined}
       sessionId={sessionId}
       seed={seed}
+      persistedContent={persistedContent}
     />
   );
 };
@@ -710,6 +715,7 @@ const GameBody = ({
   customGameName,
   customGameColor,
   customGameCover,
+  persistedContent,
 }: {
   gameId: string;
   sessionId: string;
@@ -720,6 +726,7 @@ const GameBody = ({
   customGameName: string | null;
   customGameColor: string | null;
   customGameCover: Cover | null;
+  persistedContent: Record<string, unknown> | null;
 }): JSX.Element => {
   if (gameId === 'sort-numbers') {
     return (
@@ -749,6 +756,7 @@ const GameBody = ({
         customGameName={customGameName}
         customGameColor={customGameColor}
         customGameCover={customGameCover}
+        persistedContent={persistedContent}
       />
     );
   }
@@ -788,6 +796,7 @@ export const GameRoute = ({
   customGameName,
   customGameColor,
   customGameCover,
+  persistedContent,
 }: GameRouteLoaderData): JSX.Element => (
   <GameShell
     config={config}
@@ -807,6 +816,7 @@ export const GameRoute = ({
       customGameName={customGameName}
       customGameColor={customGameColor}
       customGameCover={customGameCover}
+      persistedContent={persistedContent}
     />
   </GameShell>
 );
@@ -864,6 +874,7 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
         customGameName: null,
         customGameColor: null,
         customGameCover: null,
+        persistedContent: null,
       };
     }
 
@@ -943,6 +954,12 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
       customGameName,
       customGameColor,
       customGameCover,
+      persistedContent: initialLog
+        ? (initialLog.initialContent as unknown as Record<
+            string,
+            unknown
+          >)
+        : null,
     };
   },
   component: RouteComponent,
