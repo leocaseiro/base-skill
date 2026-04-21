@@ -93,6 +93,11 @@ sequenceDiagram
 
   Note over Hook,DB: On page refresh / remount
   Provider->>Hook: mount with initialState prop from route loader
-  Hook->>Provider: dispatch INIT_ROUND with restored tiles/zones
-  Provider-->>Provider: game resumes at exact mid-round state
+  alt initialState (draft) present
+    Hook->>Provider: dispatch RESUME_ROUND { draft }
+    Provider-->>Provider: restores tiles, zones, roundIndex,\n  retryCount, levelIndex from the draft
+  else fresh session
+    Hook->>Provider: dispatch INIT_ROUND { tiles, zones }
+    Provider-->>Provider: reset round to 0
+  end
 ```
