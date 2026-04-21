@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">7/185 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">11/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">7/203 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -594,19 +594,19 @@
       
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="AlertDialog">
+  aria-label="AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> AlertDialog</h2>
+      <h2><span class="status-dot dot-err"></span> AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        
+        <label for="c-0-components-ui-alert-dialog-err" class="badge err as-toggle">prop type error</label>
         <label for="c-0-components-ui-alert-dialog-info" class="badge info as-toggle">1 info</label>
-        <label for="c-0-components-ui-alert-dialog-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-0-components-ui-alert-dialog-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -617,7 +617,7 @@
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-0-components-ui-alert-dialog-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-0-components-ui-alert-dialog-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-0-components-ui-alert-dialog-stories" class="tg tg-stories" type="checkbox" hidden />
   
@@ -625,6 +625,162 @@
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  27 | }
+  28 |
+&gt; 29 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  30 |   component: AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;,
+  31 |   tags: [&#39;autodocs&#39;],
+  32 |   args: {
+
+./src/components/ui/alert-dialog.stories.tsx:
+import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from &#39;./alert-dialog&#39;;
+import { Button } from &#39;./button&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType, MouseEventHandler } from &#39;react&#39;;
+
+interface StoryArgs {
+  triggerLabel: string;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  onOpenChange: (open: boolean) =&gt; void;
+  onConfirm: MouseEventHandler&lt;HTMLButtonElement&gt;;
+  onCancel: MouseEventHandler&lt;HTMLButtonElement&gt;;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    triggerLabel: &#39;Delete account&#39;,
+    title: &#39;Are you sure?&#39;,
+    description: &#39;This action cannot be undone.&#39;,
+    confirmLabel: &#39;Delete&#39;,
+    cancelLabel: &#39;Cancel&#39;,
+    onOpenChange: fn(),
+    onConfirm: fn(),
+    onCancel: fn(),
+  },
+  argTypes: {
+    triggerLabel: { control: &#39;text&#39; },
+    title: { control: &#39;text&#39; },
+    description: { control: &#39;text&#39; },
+    confirmLabel: { control: &#39;text&#39; },
+    cancelLabel: { control: &#39;text&#39; },
+    onOpenChange: { table: { disable: true } },
+    onConfirm: { table: { disable: true } },
+    onCancel: { table: { disable: true } },
+  },
+  render: ({
+    triggerLabel,
+    title,
+    description,
+    confirmLabel,
+    cancelLabel,
+    onOpenChange,
+    onConfirm,
+    onCancel,
+  }) =&gt; (
+    &lt;AlertDialog onOpenChange={onOpenChange}&gt;
+      &lt;AlertDialogTrigger asChild&gt;
+        &lt;Button variant=&quot;destructive&quot;&gt;{triggerLabel}&lt;/Button&gt;
+      &lt;/AlertDialogTrigger&gt;
+      &lt;AlertDialogContent&gt;
+        &lt;AlertDialogHeader&gt;
+          &lt;AlertDialogTitle&gt;{title}&lt;/AlertDialogTitle&gt;
+          &lt;AlertDialogDescription&gt;{description}&lt;/AlertDialogDescription&gt;
+        &lt;/AlertDialogHeader&gt;
+        &lt;AlertDialogFooter&gt;
+          &lt;AlertDialogCancel onClick={onCancel}&gt;
+            {cancelLabel}
+          &lt;/AlertDialogCancel&gt;
+          &lt;AlertDialogAction onClick={onConfirm}&gt;
+            {confirmLabel}
+          &lt;/AlertDialogAction&gt;
+        &lt;/AlertDialogFooter&gt;
+      &lt;/AlertDialogContent&gt;
+    &lt;/AlertDialog&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+
+export const OpensAndConfirms: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /delete account/i }),
+    );
+    const portal = within(document.body);
+    await waitFor(() =&gt; {
+      expect(portal.getByRole(&#39;alertdialog&#39;)).toBeVisible();
+    });
+    await userEvent.click(
+      await portal.findByRole(&#39;button&#39;, { name: /^delete$/i }),
+    );
+    await waitFor(() =&gt; {
+      expect(portal.queryByRole(&#39;alertdialog&#39;)).toBeNull();
+    });
+  },
+};
+
+export const CancelsWithEscape: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /delete account/i }),
+    );
+    const portal = within(document.body);
+    await waitFor(() =&gt; {
+      expect(portal.getByRole(&#39;alertdialog&#39;)).toBeVisible();
+    });
+    await userEvent.keyboard(&#39;{Escape}&#39;);
+    await waitFor(() =&gt; {
+      expect(portal.queryByRole(&#39;alertdialog&#39;)).toBeNull();
+    });
+  },
+};
+
+export const Cancelled: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /delete account/i }),
+    );
+    const portal = within(document.body);
+    await userEvent.click(
+      await portal.findByRole(&#39;button&#39;, { name: /cancel/i }),
+    );
+    await waitFor(() =&gt; {
+      expect(portal.queryByRole(&#39;alertdialog&#39;)).toBeNull();
+    });
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -665,21 +821,146 @@
               </div>
               
               
-              <pre><code>const Default = () =&gt; (
-  &lt;AlertDialog&gt;
+              <pre><code>const Default = ({
+  triggerLabel,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  onOpenChange,
+  onConfirm,
+  onCancel,
+}) =&gt; (
+  &lt;AlertDialog onOpenChange={onOpenChange}&gt;
     &lt;AlertDialogTrigger asChild&gt;
-      &lt;Button variant=&quot;destructive&quot;&gt;Delete account&lt;/Button&gt;
+      &lt;Button variant=&quot;destructive&quot;&gt;{triggerLabel}&lt;/Button&gt;
     &lt;/AlertDialogTrigger&gt;
     &lt;AlertDialogContent&gt;
       &lt;AlertDialogHeader&gt;
-        &lt;AlertDialogTitle&gt;Are you sure?&lt;/AlertDialogTitle&gt;
-        &lt;AlertDialogDescription&gt;
-          This action cannot be undone.
-        &lt;/AlertDialogDescription&gt;
+        &lt;AlertDialogTitle&gt;{title}&lt;/AlertDialogTitle&gt;
+        &lt;AlertDialogDescription&gt;{description}&lt;/AlertDialogDescription&gt;
       &lt;/AlertDialogHeader&gt;
       &lt;AlertDialogFooter&gt;
-        &lt;AlertDialogCancel&gt;Cancel&lt;/AlertDialogCancel&gt;
-        &lt;AlertDialogAction&gt;Delete&lt;/AlertDialogAction&gt;
+        &lt;AlertDialogCancel onClick={onCancel}&gt;
+          {cancelLabel}
+        &lt;/AlertDialogCancel&gt;
+        &lt;AlertDialogAction onClick={onConfirm}&gt;
+          {confirmLabel}
+        &lt;/AlertDialogAction&gt;
+      &lt;/AlertDialogFooter&gt;
+    &lt;/AlertDialogContent&gt;
+  &lt;/AlertDialog&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Opens And Confirms</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const OpensAndConfirms = ({
+  triggerLabel,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  onOpenChange,
+  onConfirm,
+  onCancel,
+}) =&gt; (
+  &lt;AlertDialog onOpenChange={onOpenChange}&gt;
+    &lt;AlertDialogTrigger asChild&gt;
+      &lt;Button variant=&quot;destructive&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/AlertDialogTrigger&gt;
+    &lt;AlertDialogContent&gt;
+      &lt;AlertDialogHeader&gt;
+        &lt;AlertDialogTitle&gt;{title}&lt;/AlertDialogTitle&gt;
+        &lt;AlertDialogDescription&gt;{description}&lt;/AlertDialogDescription&gt;
+      &lt;/AlertDialogHeader&gt;
+      &lt;AlertDialogFooter&gt;
+        &lt;AlertDialogCancel onClick={onCancel}&gt;
+          {cancelLabel}
+        &lt;/AlertDialogCancel&gt;
+        &lt;AlertDialogAction onClick={onConfirm}&gt;
+          {confirmLabel}
+        &lt;/AlertDialogAction&gt;
+      &lt;/AlertDialogFooter&gt;
+    &lt;/AlertDialogContent&gt;
+  &lt;/AlertDialog&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Cancels With Escape</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const CancelsWithEscape = ({
+  triggerLabel,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  onOpenChange,
+  onConfirm,
+  onCancel,
+}) =&gt; (
+  &lt;AlertDialog onOpenChange={onOpenChange}&gt;
+    &lt;AlertDialogTrigger asChild&gt;
+      &lt;Button variant=&quot;destructive&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/AlertDialogTrigger&gt;
+    &lt;AlertDialogContent&gt;
+      &lt;AlertDialogHeader&gt;
+        &lt;AlertDialogTitle&gt;{title}&lt;/AlertDialogTitle&gt;
+        &lt;AlertDialogDescription&gt;{description}&lt;/AlertDialogDescription&gt;
+      &lt;/AlertDialogHeader&gt;
+      &lt;AlertDialogFooter&gt;
+        &lt;AlertDialogCancel onClick={onCancel}&gt;
+          {cancelLabel}
+        &lt;/AlertDialogCancel&gt;
+        &lt;AlertDialogAction onClick={onConfirm}&gt;
+          {confirmLabel}
+        &lt;/AlertDialogAction&gt;
+      &lt;/AlertDialogFooter&gt;
+    &lt;/AlertDialogContent&gt;
+  &lt;/AlertDialog&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Cancelled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Cancelled = ({
+  triggerLabel,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  onOpenChange,
+  onConfirm,
+  onCancel,
+}) =&gt; (
+  &lt;AlertDialog onOpenChange={onOpenChange}&gt;
+    &lt;AlertDialogTrigger asChild&gt;
+      &lt;Button variant=&quot;destructive&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/AlertDialogTrigger&gt;
+    &lt;AlertDialogContent&gt;
+      &lt;AlertDialogHeader&gt;
+        &lt;AlertDialogTitle&gt;{title}&lt;/AlertDialogTitle&gt;
+        &lt;AlertDialogDescription&gt;{description}&lt;/AlertDialogDescription&gt;
+      &lt;/AlertDialogHeader&gt;
+      &lt;AlertDialogFooter&gt;
+        &lt;AlertDialogCancel onClick={onCancel}&gt;
+          {cancelLabel}
+        &lt;/AlertDialogCancel&gt;
+        &lt;AlertDialogAction onClick={onConfirm}&gt;
+          {confirmLabel}
+        &lt;/AlertDialogAction&gt;
       &lt;/AlertDialogFooter&gt;
     &lt;/AlertDialogContent&gt;
   &lt;/AlertDialog&gt;
@@ -1357,7 +1638,7 @@ export const Scenario3CorrectAndRoundComplete: Story = {
       <div class="badges">
         <label for="c-4-components-ui-button-props" class="badge ok as-toggle">3 prop types</label>
         <label for="c-4-components-ui-button-info" class="badge info as-toggle">1 info</label>
-        <label for="c-4-components-ui-button-stories" class="badge ok as-toggle">10 stories</label>
+        <label for="c-4-components-ui-button-stories" class="badge ok as-toggle">11 stories</label>
         
       </div>
     </div>
@@ -1420,7 +1701,7 @@ variant?: any = &#39;default&#39;</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;Button variant=&quot;default&quot;&gt;Button&lt;/Button&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;Button onClick={fn()} variant=&quot;default&quot;&gt;Button&lt;/Button&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1429,7 +1710,7 @@ variant?: any = &#39;default&#39;</code></pre>
               </div>
               
               
-              <pre><code>const Outline = () =&gt; &lt;Button variant=&quot;outline&quot;&gt;Outline&lt;/Button&gt;;</code></pre>
+              <pre><code>const Outline = () =&gt; &lt;Button onClick={fn()} variant=&quot;outline&quot;&gt;Outline&lt;/Button&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1438,7 +1719,7 @@ variant?: any = &#39;default&#39;</code></pre>
               </div>
               
               
-              <pre><code>const Secondary = () =&gt; &lt;Button variant=&quot;secondary&quot;&gt;Secondary&lt;/Button&gt;;</code></pre>
+              <pre><code>const Secondary = () =&gt; &lt;Button onClick={fn()} variant=&quot;secondary&quot;&gt;Secondary&lt;/Button&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1447,7 +1728,7 @@ variant?: any = &#39;default&#39;</code></pre>
               </div>
               
               
-              <pre><code>const Ghost = () =&gt; &lt;Button variant=&quot;ghost&quot;&gt;Ghost&lt;/Button&gt;;</code></pre>
+              <pre><code>const Ghost = () =&gt; &lt;Button onClick={fn()} variant=&quot;ghost&quot;&gt;Ghost&lt;/Button&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1456,7 +1737,7 @@ variant?: any = &#39;default&#39;</code></pre>
               </div>
               
               
-              <pre><code>const Destructive = () =&gt; &lt;Button variant=&quot;destructive&quot;&gt;Delete&lt;/Button&gt;;</code></pre>
+              <pre><code>const Destructive = () =&gt; &lt;Button onClick={fn()} variant=&quot;destructive&quot;&gt;Delete&lt;/Button&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1465,7 +1746,7 @@ variant?: any = &#39;default&#39;</code></pre>
               </div>
               
               
-              <pre><code>const Link = () =&gt; &lt;Button variant=&quot;link&quot;&gt;Link&lt;/Button&gt;;</code></pre>
+              <pre><code>const Link = () =&gt; &lt;Button onClick={fn()} variant=&quot;link&quot;&gt;Link&lt;/Button&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1474,7 +1755,7 @@ variant?: any = &#39;default&#39;</code></pre>
               </div>
               
               
-              <pre><code>const Small = () =&gt; &lt;Button size=&quot;sm&quot;&gt;Small&lt;/Button&gt;;</code></pre>
+              <pre><code>const Small = () =&gt; &lt;Button onClick={fn()} size=&quot;sm&quot;&gt;Small&lt;/Button&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1483,7 +1764,7 @@ variant?: any = &#39;default&#39;</code></pre>
               </div>
               
               
-              <pre><code>const Large = () =&gt; &lt;Button size=&quot;lg&quot;&gt;Large&lt;/Button&gt;;</code></pre>
+              <pre><code>const Large = () =&gt; &lt;Button onClick={fn()} size=&quot;lg&quot;&gt;Large&lt;/Button&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1492,7 +1773,7 @@ variant?: any = &#39;default&#39;</code></pre>
               </div>
               
               
-              <pre><code>const Icon = () =&gt; &lt;Button size=&quot;icon&quot; aria-label=&quot;Star&quot;&gt;★&lt;/Button&gt;;</code></pre>
+              <pre><code>const Icon = () =&gt; &lt;Button onClick={fn()} size=&quot;icon&quot; aria-label=&quot;Star&quot;&gt;★&lt;/Button&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1501,7 +1782,16 @@ variant?: any = &#39;default&#39;</code></pre>
               </div>
               
               
-              <pre><code>const Disabled = () =&gt; &lt;Button disabled&gt;Disabled&lt;/Button&gt;;</code></pre>
+              <pre><code>const Disabled = () =&gt; &lt;Button onClick={fn()} disabled&gt;Disabled&lt;/Button&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Clicks Button</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ClicksButton = () =&gt; &lt;Button onClick={fn()} variant=&quot;default&quot;&gt;Click me&lt;/Button&gt;;</code></pre>
             </div>
         </div>
     
@@ -1509,19 +1799,19 @@ variant?: any = &#39;default&#39;</code></pre>
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="Button">
+  aria-label="Button as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> Button</h2>
+      <h2><span class="status-dot dot-err"></span> Button as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-5-ui-sonner-props" class="badge ok as-toggle">3 prop types</label>
+        <label for="c-5-ui-sonner-err" class="badge err as-toggle">prop type error</label>
         <label for="c-5-ui-sonner-info" class="badge info as-toggle">1 info</label>
-        <label for="c-5-ui-sonner-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-5-ui-sonner-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -1532,14 +1822,117 @@ variant?: any = &#39;default&#39;</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-5-ui-sonner-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-5-ui-sonner-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-5-ui-sonner-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-5-ui-sonner-props" class="tg tg-props" type="checkbox" hidden />
+  
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;Button as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  28 | ];
+  29 |
+&gt; 30 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  31 |   title: &#39;UI/Sonner&#39;,
+  32 |   component: Button as unknown as ComponentType&lt;StoryArgs&gt;,
+  33 |   tags: [&#39;autodocs&#39;],
+
+./src/components/ui/sonner.stories.tsx:
+import { ThemeProvider } from &#39;next-themes&#39;;
+import { toast } from &#39;sonner&#39;;
+import { expect, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+import { Button } from &#39;./button&#39;;
+import { Toaster } from &#39;./sonner&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+type ToastVariant = &#39;default&#39; | &#39;success&#39; | &#39;error&#39;;
+
+interface StoryArgs {
+  variant: ToastVariant;
+  message: string;
+  triggerLabel: string;
+}
+
+const withToastUi: Meta[&#39;decorators&#39;] = [
+  (Story) =&gt; (
+    &lt;ThemeProvider
+      attribute=&quot;class&quot;
+      defaultTheme=&quot;light&quot;
+      enableSystem={false}
+    &gt;
+      &lt;Story /&gt;
+      &lt;Toaster /&gt;
+    &lt;/ThemeProvider&gt;
+  ),
+];
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  title: &#39;UI/Sonner&#39;,
+  component: Button as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  decorators: withToastUi,
+  args: {
+    variant: &#39;default&#39;,
+    message: &#39;Event registered!&#39;,
+    triggerLabel: &#39;Show toast&#39;,
+  },
+  argTypes: {
+    variant: {
+      control: { type: &#39;select&#39; },
+      options: [&#39;default&#39;, &#39;success&#39;, &#39;error&#39;] satisfies ToastVariant[],
+    },
+    message: { control: &#39;text&#39; },
+    triggerLabel: { control: &#39;text&#39; },
+  },
+  render: ({ variant, message, triggerLabel }) =&gt; {
+    const fire = () =&gt; {
+      if (variant === &#39;success&#39;) return toast.success(message);
+      if (variant === &#39;error&#39;) return toast.error(message);
+      return toast(message);
+    };
+    return &lt;Button onClick={fire}&gt;{triggerLabel}&lt;/Button&gt;;
+  },
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = { args: { variant: &#39;default&#39; } };
+export const Success: Story = {
+  args: { variant: &#39;success&#39;, message: &#39;Saved successfully&#39; },
+};
+export const Error: Story = {
+  args: { variant: &#39;error&#39;, message: &#39;Something went wrong&#39; },
+};
+
+export const ShowsToast: Story = {
+  args: {
+    variant: &#39;default&#39;,
+    message: &#39;Event registered!&#39;,
+    triggerLabel: &#39;Show toast&#39;,
+  },
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /show toast/i }),
+    );
+    const portal = within(document.body);
+    await waitFor(async () =&gt; {
+      const el = await portal.findByText(/event registered/i);
+      await expect(el).toBeVisible();
+    });
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -1549,21 +1942,6 @@ variant?: any = &#39;default&#39;</code></pre>
     </div>
         </div>
     
-        <div class="panel panel-props">
-          <div class="note ok">
-            <div class="row">
-              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">3 prop types</span>
-            </div>
-            <pre><code>Component: src/components/ui/button.tsx::Button</code></pre>
-            <pre><code>Props:</code></pre>
-            <pre><code>asChild?: boolean = false
-
-size?: any = &#39;default&#39;
-
-variant?: any = &#39;default&#39;</code></pre>
-          </div>
-        </div>
     
         <div class="panel panel-stories">
           
@@ -1585,11 +1963,14 @@ import { ThemeProvider } from "next-themes";</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; (
-  &lt;Button onClick={() =&gt; toast(&#39;Event registered!&#39;)}&gt;
-    Show toast
-  &lt;/Button&gt;
-);</code></pre>
+              <pre><code>const Default = ({ variant, message, triggerLabel }) =&gt; {
+  const fire = () =&gt; {
+    if (variant === &#39;success&#39;) return toast.success(message);
+    if (variant === &#39;error&#39;) return toast.error(message);
+    return toast(message);
+  };
+  return &lt;Button onClick={fire}&gt;{triggerLabel}&lt;/Button&gt;;
+};</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1598,11 +1979,14 @@ import { ThemeProvider } from "next-themes";</code></pre>
               </div>
               
               
-              <pre><code>const Success = () =&gt; (
-  &lt;Button onClick={() =&gt; toast.success(&#39;Saved successfully&#39;)}&gt;
-    Show success
-  &lt;/Button&gt;
-);</code></pre>
+              <pre><code>const Success = ({ variant, message, triggerLabel }) =&gt; {
+  const fire = () =&gt; {
+    if (variant === &#39;success&#39;) return toast.success(message);
+    if (variant === &#39;error&#39;) return toast.error(message);
+    return toast(message);
+  };
+  return &lt;Button onClick={fire}&gt;{triggerLabel}&lt;/Button&gt;;
+};</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1611,11 +1995,30 @@ import { ThemeProvider } from "next-themes";</code></pre>
               </div>
               
               
-              <pre><code>const Error = () =&gt; (
-  &lt;Button onClick={() =&gt; toast.error(&#39;Something went wrong&#39;)}&gt;
-    Show error
-  &lt;/Button&gt;
-);</code></pre>
+              <pre><code>const Error = ({ variant, message, triggerLabel }) =&gt; {
+  const fire = () =&gt; {
+    if (variant === &#39;success&#39;) return toast.success(message);
+    if (variant === &#39;error&#39;) return toast.error(message);
+    return toast(message);
+  };
+  return &lt;Button onClick={fire}&gt;{triggerLabel}&lt;/Button&gt;;
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Shows Toast</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ShowsToast = ({ variant, message, triggerLabel }) =&gt; {
+  const fire = () =&gt; {
+    if (variant === &#39;success&#39;) return toast.success(message);
+    if (variant === &#39;error&#39;) return toast.error(message);
+    return toast(message);
+  };
+  return &lt;Button onClick={fire}&gt;{triggerLabel}&lt;/Button&gt;;
+};</code></pre>
             </div>
         </div>
     
@@ -1623,17 +2026,17 @@ import { ThemeProvider } from "next-themes";</code></pre>
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="Card">
+  aria-label="Card as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> Card</h2>
+      <h2><span class="status-dot dot-err"></span> Card as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-6-components-ui-card-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-6-components-ui-card-err" class="badge err as-toggle">prop type error</label>
         <label for="c-6-components-ui-card-info" class="badge info as-toggle">1 info</label>
         <label for="c-6-components-ui-card-stories" class="badge ok as-toggle">2 stories</label>
         
@@ -1646,14 +2049,99 @@ import { ThemeProvider } from "next-themes";</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-6-components-ui-card-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-6-components-ui-card-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-6-components-ui-card-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-6-components-ui-card-props" class="tg tg-props" type="checkbox" hidden />
+  
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;Card as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  18 | }
+  19 |
+&gt; 20 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  21 |   component: Card as unknown as ComponentType&lt;StoryArgs&gt;,
+  22 |   tags: [&#39;autodocs&#39;],
+  23 |   args: {
+
+./src/components/ui/card.stories.tsx:
+import { Button } from &#39;./button&#39;;
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from &#39;./card&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  title: string;
+  description: string;
+  body: string;
+  actionLabel: string;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: Card as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    title: &#39;Card Title&#39;,
+    description: &#39;Card description goes here.&#39;,
+    body: &#39;Card body content.&#39;,
+    actionLabel: &#39;Action&#39;,
+  },
+  argTypes: {
+    title: { control: &#39;text&#39; },
+    description: { control: &#39;text&#39; },
+    body: { control: &#39;text&#39; },
+    actionLabel: { control: &#39;text&#39; },
+  },
+  render: ({ title, description, body, actionLabel }) =&gt; (
+    &lt;Card className=&quot;w-72&quot;&gt;
+      &lt;CardHeader&gt;
+        &lt;CardTitle&gt;{title}&lt;/CardTitle&gt;
+        &lt;CardDescription&gt;{description}&lt;/CardDescription&gt;
+      &lt;/CardHeader&gt;
+      &lt;CardContent&gt;
+        &lt;p&gt;{body}&lt;/p&gt;
+      &lt;/CardContent&gt;
+      &lt;CardFooter&gt;
+        &lt;Button className=&quot;w-full&quot;&gt;{actionLabel}&lt;/Button&gt;
+      &lt;/CardFooter&gt;
+    &lt;/Card&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+
+export const Small: Story = {
+  render: ({ title, body }) =&gt; (
+    &lt;Card className=&quot;w-72&quot; size=&quot;sm&quot;&gt;
+      &lt;CardHeader&gt;
+        &lt;CardTitle&gt;{title}&lt;/CardTitle&gt;
+      &lt;/CardHeader&gt;
+      &lt;CardContent&gt;
+        &lt;p&gt;{body}&lt;/p&gt;
+      &lt;/CardContent&gt;
+    &lt;/Card&gt;
+  ),
+  args: { title: &#39;Small Card&#39;, body: &#39;Compact variant.&#39; },
+};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -1663,17 +2151,6 @@ import { ThemeProvider } from "next-themes";</code></pre>
     </div>
         </div>
     
-        <div class="panel panel-props">
-          <div class="note ok">
-            <div class="row">
-              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">1 prop type</span>
-            </div>
-            <pre><code>Component: src/components/ui/card.tsx::Card</code></pre>
-            <pre><code>Props:</code></pre>
-            <pre><code>size?: &#39;default&#39; | &#39;sm&#39; = &#39;default&#39;</code></pre>
-          </div>
-        </div>
     
         <div class="panel panel-stories">
           
@@ -1702,17 +2179,17 @@ import { ThemeProvider } from "next-themes";</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; (
+              <pre><code>const Default = ({ title, description, body, actionLabel }) =&gt; (
   &lt;Card className=&quot;w-72&quot;&gt;
     &lt;CardHeader&gt;
-      &lt;CardTitle&gt;Card Title&lt;/CardTitle&gt;
-      &lt;CardDescription&gt;Card description goes here.&lt;/CardDescription&gt;
+      &lt;CardTitle&gt;{title}&lt;/CardTitle&gt;
+      &lt;CardDescription&gt;{description}&lt;/CardDescription&gt;
     &lt;/CardHeader&gt;
     &lt;CardContent&gt;
-      &lt;p&gt;Card body content.&lt;/p&gt;
+      &lt;p&gt;{body}&lt;/p&gt;
     &lt;/CardContent&gt;
     &lt;CardFooter&gt;
-      &lt;Button className=&quot;w-full&quot;&gt;Action&lt;/Button&gt;
+      &lt;Button className=&quot;w-full&quot;&gt;{actionLabel}&lt;/Button&gt;
     &lt;/CardFooter&gt;
   &lt;/Card&gt;
 );</code></pre>
@@ -1724,13 +2201,13 @@ import { ThemeProvider } from "next-themes";</code></pre>
               </div>
               
               
-              <pre><code>const Small = () =&gt; (
+              <pre><code>const Small = ({ title, body }) =&gt; (
   &lt;Card className=&quot;w-72&quot; size=&quot;sm&quot;&gt;
     &lt;CardHeader&gt;
-      &lt;CardTitle&gt;Small Card&lt;/CardTitle&gt;
+      &lt;CardTitle&gt;{title}&lt;/CardTitle&gt;
     &lt;/CardHeader&gt;
     &lt;CardContent&gt;
-      &lt;p&gt;Compact variant.&lt;/p&gt;
+      &lt;p&gt;{body}&lt;/p&gt;
     &lt;/CardContent&gt;
   &lt;/Card&gt;
 );</code></pre>
@@ -1995,19 +2472,19 @@ prompt: string</code></pre>
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="DropdownMenu">
+  aria-label="DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> DropdownMenu</h2>
+      <h2><span class="status-dot dot-err"></span> DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        
+        <label for="c-9-components-ui-dropdown-menu-err" class="badge err as-toggle">prop type error</label>
         <label for="c-9-components-ui-dropdown-menu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-9-components-ui-dropdown-menu-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-9-components-ui-dropdown-menu-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -2018,7 +2495,7 @@ prompt: string</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-9-components-ui-dropdown-menu-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-9-components-ui-dropdown-menu-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-9-components-ui-dropdown-menu-stories" class="tg tg-stories" type="checkbox" hidden />
   
@@ -2026,6 +2503,149 @@ prompt: string</code></pre>
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  21 | }
+  22 |
+&gt; 23 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  24 |   component: DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;,
+  25 |   tags: [&#39;autodocs&#39;],
+  26 |   args: {
+
+./src/components/ui/dropdown-menu.stories.tsx:
+import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+
+import { Button } from &#39;./button&#39;;
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from &#39;./dropdown-menu&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  triggerLabel: string;
+  item1: string;
+  item2: string;
+  item3: string;
+  onOpenChange: (open: boolean) =&gt; void;
+  onItemSelect: (event: Event) =&gt; void;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    triggerLabel: &#39;Options&#39;,
+    item1: &#39;Profile&#39;,
+    item2: &#39;Settings&#39;,
+    item3: &#39;Logout&#39;,
+    onOpenChange: fn(),
+    onItemSelect: fn(),
+  },
+  argTypes: {
+    triggerLabel: { control: &#39;text&#39; },
+    item1: { control: &#39;text&#39; },
+    item2: { control: &#39;text&#39; },
+    item3: { control: &#39;text&#39; },
+    onOpenChange: { table: { disable: true } },
+    onItemSelect: { table: { disable: true } },
+  },
+  render: ({
+    triggerLabel,
+    item1,
+    item2,
+    item3,
+    onOpenChange,
+    onItemSelect,
+  }) =&gt; (
+    &lt;DropdownMenu onOpenChange={onOpenChange}&gt;
+      &lt;DropdownMenuTrigger asChild&gt;
+        &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+      &lt;/DropdownMenuTrigger&gt;
+      &lt;DropdownMenuContent&gt;
+        &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+          {item1}
+        &lt;/DropdownMenuItem&gt;
+        &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+          {item2}
+        &lt;/DropdownMenuItem&gt;
+        &lt;DropdownMenuSeparator /&gt;
+        &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+          {item3}
+        &lt;/DropdownMenuItem&gt;
+      &lt;/DropdownMenuContent&gt;
+    &lt;/DropdownMenu&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+
+export const OpensAndSelects: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /options/i }),
+    );
+    const portal = within(document.body);
+    await waitFor(() =&gt; {
+      expect(portal.getByRole(&#39;menu&#39;)).toBeVisible();
+    });
+    await userEvent.click(
+      await portal.findByRole(&#39;menuitem&#39;, { name: /profile/i }),
+    );
+    await waitFor(() =&gt; {
+      expect(portal.queryByRole(&#39;menu&#39;)).toBeNull();
+    });
+  },
+};
+
+export const WithDestructiveItem: Story = {
+  render: ({
+    triggerLabel,
+    item1,
+    item2,
+    onOpenChange,
+    onItemSelect,
+  }) =&gt; (
+    &lt;DropdownMenu onOpenChange={onOpenChange}&gt;
+      &lt;DropdownMenuTrigger asChild&gt;
+        &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+      &lt;/DropdownMenuTrigger&gt;
+      &lt;DropdownMenuContent&gt;
+        &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+          {item1}
+        &lt;/DropdownMenuItem&gt;
+        &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+          {item2}
+        &lt;/DropdownMenuItem&gt;
+        &lt;DropdownMenuSeparator /&gt;
+        &lt;DropdownMenuItem variant=&quot;destructive&quot; onSelect={onItemSelect}&gt;
+          Delete account
+        &lt;/DropdownMenuItem&gt;
+      &lt;/DropdownMenuContent&gt;
+    &lt;/DropdownMenu&gt;
+  ),
+  args: {
+    triggerLabel: &#39;Account&#39;,
+    item1: &#39;Profile&#39;,
+    item2: &#39;Settings&#39;,
+    item3: &#39;&#39;,
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -2062,16 +2682,96 @@ prompt: string</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; (
-  &lt;DropdownMenu&gt;
+              <pre><code>const Default = ({
+  triggerLabel,
+  item1,
+  item2,
+  item3,
+  onOpenChange,
+  onItemSelect,
+}) =&gt; (
+  &lt;DropdownMenu onOpenChange={onOpenChange}&gt;
     &lt;DropdownMenuTrigger asChild&gt;
-      &lt;Button variant=&quot;outline&quot;&gt;Options&lt;/Button&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
     &lt;/DropdownMenuTrigger&gt;
     &lt;DropdownMenuContent&gt;
-      &lt;DropdownMenuItem&gt;Profile&lt;/DropdownMenuItem&gt;
-      &lt;DropdownMenuItem&gt;Settings&lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item1}
+      &lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item2}
+      &lt;/DropdownMenuItem&gt;
       &lt;DropdownMenuSeparator /&gt;
-      &lt;DropdownMenuItem&gt;Logout&lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item3}
+      &lt;/DropdownMenuItem&gt;
+    &lt;/DropdownMenuContent&gt;
+  &lt;/DropdownMenu&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Opens And Selects</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const OpensAndSelects = ({
+  triggerLabel,
+  item1,
+  item2,
+  item3,
+  onOpenChange,
+  onItemSelect,
+}) =&gt; (
+  &lt;DropdownMenu onOpenChange={onOpenChange}&gt;
+    &lt;DropdownMenuTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/DropdownMenuTrigger&gt;
+    &lt;DropdownMenuContent&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item1}
+      &lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item2}
+      &lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuSeparator /&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item3}
+      &lt;/DropdownMenuItem&gt;
+    &lt;/DropdownMenuContent&gt;
+  &lt;/DropdownMenu&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Destructive Item</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithDestructiveItem = ({
+  triggerLabel,
+  item1,
+  item2,
+  onOpenChange,
+  onItemSelect,
+}) =&gt; (
+  &lt;DropdownMenu onOpenChange={onOpenChange}&gt;
+    &lt;DropdownMenuTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/DropdownMenuTrigger&gt;
+    &lt;DropdownMenuContent&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item1}
+      &lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item2}
+      &lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuSeparator /&gt;
+      &lt;DropdownMenuItem variant=&quot;destructive&quot; onSelect={onItemSelect}&gt;
+        Delete account
+      &lt;/DropdownMenuItem&gt;
     &lt;/DropdownMenuContent&gt;
   &lt;/DropdownMenu&gt;
 );</code></pre>
@@ -3225,7 +3925,7 @@ src: string</code></pre>
       <div class="badges">
         
         <label for="c-20-components-ui-input-info" class="badge info as-toggle">1 info</label>
-        <label for="c-20-components-ui-input-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-20-components-ui-input-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -3273,7 +3973,7 @@ src: string</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;Input placeholder=&quot;Enter text…&quot; /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;Input onChange={fn()} onFocus={fn()} onBlur={fn()} placeholder=&quot;Enter text…&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -3282,7 +3982,12 @@ src: string</code></pre>
               </div>
               
               
-              <pre><code>const WithValue = () =&gt; &lt;Input defaultValue=&quot;Hello world&quot; placeholder=&quot;Enter text…&quot; /&gt;;</code></pre>
+              <pre><code>const WithValue = () =&gt; &lt;Input
+    onChange={fn()}
+    onFocus={fn()}
+    onBlur={fn()}
+    defaultValue=&quot;Hello world&quot;
+    placeholder=&quot;Enter text…&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -3291,7 +3996,12 @@ src: string</code></pre>
               </div>
               
               
-              <pre><code>const Password = () =&gt; &lt;Input type=&quot;password&quot; placeholder=&quot;Password&quot; /&gt;;</code></pre>
+              <pre><code>const Password = () =&gt; &lt;Input
+    onChange={fn()}
+    onFocus={fn()}
+    onBlur={fn()}
+    type=&quot;password&quot;
+    placeholder=&quot;Password&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -3300,7 +4010,12 @@ src: string</code></pre>
               </div>
               
               
-              <pre><code>const Disabled = () =&gt; &lt;Input disabled placeholder=&quot;Disabled input&quot; /&gt;;</code></pre>
+              <pre><code>const Disabled = () =&gt; &lt;Input
+    onChange={fn()}
+    onFocus={fn()}
+    onBlur={fn()}
+    disabled
+    placeholder=&quot;Disabled input&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -3309,7 +4024,57 @@ src: string</code></pre>
               </div>
               
               
-              <pre><code>const Invalid = () =&gt; &lt;Input aria-invalid defaultValue=&quot;Bad value&quot; aria-label=&quot;Example input&quot; /&gt;;</code></pre>
+              <pre><code>const Invalid = () =&gt; &lt;Input
+    onChange={fn()}
+    onFocus={fn()}
+    onBlur={fn()}
+    aria-invalid
+    defaultValue=&quot;Bad value&quot;
+    aria-label=&quot;Example input&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Types And Reflects Value</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const TypesAndReflectsValue = () =&gt; &lt;Input
+    onChange={fn()}
+    onFocus={fn()}
+    onBlur={fn()}
+    placeholder=&quot;Enter text…&quot;
+    aria-label=&quot;Example input&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Required</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Required = () =&gt; &lt;Input
+    onChange={fn()}
+    onFocus={fn()}
+    onBlur={fn()}
+    required
+    placeholder=&quot;Required field&quot;
+    aria-label=&quot;Required example&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Read Only</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ReadOnly = () =&gt; &lt;Input
+    onChange={fn()}
+    onFocus={fn()}
+    onBlur={fn()}
+    readOnly
+    defaultValue=&quot;Read-only value&quot;
+    aria-label=&quot;Read-only example&quot; /&gt;;</code></pre>
             </div>
         </div>
     
@@ -3898,17 +4663,17 @@ export const InstructionsOverlay = ({
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="Label">
+  aria-label="Label as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> Label</h2>
+      <h2><span class="status-dot dot-err"></span> Label as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        
+        <label for="c-22-components-ui-label-err" class="badge err as-toggle">prop type error</label>
         <label for="c-22-components-ui-label-info" class="badge info as-toggle">1 info</label>
         <label for="c-22-components-ui-label-stories" class="badge ok as-toggle">1 story</label>
         
@@ -3921,7 +4686,7 @@ export const InstructionsOverlay = ({
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-22-components-ui-label-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-22-components-ui-label-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-22-components-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
   
@@ -3929,6 +4694,59 @@ export const InstructionsOverlay = ({
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;Label as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  10 | }
+  11 |
+&gt; 12 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  13 |   component: Label as unknown as ComponentType&lt;StoryArgs&gt;,
+  14 |   tags: [&#39;autodocs&#39;],
+  15 |   args: {
+
+./src/components/ui/label.stories.tsx:
+import { Input } from &#39;./input&#39;;
+import { Label } from &#39;./label&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  htmlFor: string;
+  children: string;
+  placeholder: string;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: Label as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    htmlFor: &#39;name&#39;,
+    children: &#39;Name&#39;,
+    placeholder: &#39;Your name&#39;,
+  },
+  argTypes: {
+    htmlFor: { control: &#39;text&#39; },
+    children: { control: &#39;text&#39; },
+    placeholder: { control: &#39;text&#39; },
+  },
+  render: ({ htmlFor, children, placeholder }) =&gt; (
+    &lt;div className=&quot;flex flex-col gap-2&quot;&gt;
+      &lt;Label htmlFor={htmlFor}&gt;{children}&lt;/Label&gt;
+      &lt;Input id={htmlFor} placeholder={placeholder} /&gt;
+    &lt;/div&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -3958,10 +4776,10 @@ export const InstructionsOverlay = ({
               </div>
               
               
-              <pre><code>const Default = () =&gt; (
+              <pre><code>const Default = ({ htmlFor, children, placeholder }) =&gt; (
   &lt;div className=&quot;flex flex-col gap-2&quot;&gt;
-    &lt;Label htmlFor=&quot;name&quot;&gt;Name&lt;/Label&gt;
-    &lt;Input id=&quot;name&quot; placeholder=&quot;Your name&quot; /&gt;
+    &lt;Label htmlFor={htmlFor}&gt;{children}&lt;/Label&gt;
+    &lt;Input id={htmlFor} placeholder={placeholder} /&gt;
   &lt;/div&gt;
 );</code></pre>
             </div>
@@ -5094,19 +5912,19 @@ totalRounds: number | null</code></pre>
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="Select">
+  aria-label="Select as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> Select</h2>
+      <h2><span class="status-dot dot-err"></span> Select as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        
+        <label for="c-31-components-ui-select-err" class="badge err as-toggle">prop type error</label>
         <label for="c-31-components-ui-select-info" class="badge info as-toggle">1 info</label>
-        <label for="c-31-components-ui-select-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-31-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -5117,7 +5935,7 @@ totalRounds: number | null</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-31-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-31-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-31-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
   
@@ -5125,6 +5943,156 @@ totalRounds: number | null</code></pre>
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;Select as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  20 | }
+  21 |
+&gt; 22 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  23 |   component: Select as unknown as ComponentType&lt;StoryArgs&gt;,
+  24 |   tags: [&#39;autodocs&#39;],
+  25 |   args: {
+
+./src/components/ui/select.stories.tsx:
+import { expect, fn, userEvent, within } from &#39;storybook/test&#39;;
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from &#39;./select&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  triggerLabel: string;
+  option1: string;
+  option2: string;
+  option3: string;
+  onValueChange: (value: string) =&gt; void;
+  onOpenChange: (open: boolean) =&gt; void;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: Select as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    triggerLabel: &#39;Select a fruit&#39;,
+    option1: &#39;Apple&#39;,
+    option2: &#39;Banana&#39;,
+    option3: &#39;Orange&#39;,
+    onValueChange: fn(),
+    onOpenChange: fn(),
+  },
+  argTypes: {
+    triggerLabel: { control: &#39;text&#39; },
+    option1: { control: &#39;text&#39; },
+    option2: { control: &#39;text&#39; },
+    option3: { control: &#39;text&#39; },
+    onValueChange: { table: { disable: true } },
+    onOpenChange: { table: { disable: true } },
+  },
+  render: ({
+    triggerLabel,
+    option1,
+    option2,
+    option3,
+    onValueChange,
+    onOpenChange,
+  }) =&gt; (
+    &lt;Select onValueChange={onValueChange} onOpenChange={onOpenChange}&gt;
+      &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+        &lt;SelectValue placeholder=&quot;Pick a fruit&quot; /&gt;
+      &lt;/SelectTrigger&gt;
+      &lt;SelectContent&gt;
+        &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+      &lt;/SelectContent&gt;
+    &lt;/Select&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+
+export const Preselected: Story = {
+  render: ({
+    triggerLabel,
+    option1,
+    option2,
+    option3,
+    onValueChange,
+    onOpenChange,
+  }) =&gt; (
+    &lt;Select
+      defaultValue=&quot;banana&quot;
+      onValueChange={onValueChange}
+      onOpenChange={onOpenChange}
+    &gt;
+      &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+        &lt;SelectValue /&gt;
+      &lt;/SelectTrigger&gt;
+      &lt;SelectContent&gt;
+        &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+      &lt;/SelectContent&gt;
+    &lt;/Select&gt;
+  ),
+};
+
+export const Disabled: Story = {
+  render: ({
+    triggerLabel,
+    option1,
+    option2,
+    option3,
+    onValueChange,
+    onOpenChange,
+  }) =&gt; (
+    &lt;Select
+      disabled
+      onValueChange={onValueChange}
+      onOpenChange={onOpenChange}
+    &gt;
+      &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+        &lt;SelectValue placeholder=&quot;Pick a fruit&quot; /&gt;
+      &lt;/SelectTrigger&gt;
+      &lt;SelectContent&gt;
+        &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+      &lt;/SelectContent&gt;
+    &lt;/Select&gt;
+  ),
+};
+
+export const SelectsOption: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;combobox&#39;, { name: /select a fruit/i }),
+    );
+    const portal = within(document.body);
+    await userEvent.click(
+      portal.getByRole(&#39;option&#39;, { name: /banana/i }),
+    );
+    await expect(canvas.getByRole(&#39;combobox&#39;)).toHaveTextContent(
+      /banana/i,
+    );
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -5154,35 +6122,111 @@ totalRounds: number | null</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; (
-  &lt;Select&gt;
-    &lt;SelectTrigger className=&quot;w-48&quot; aria-label=&quot;Select a fruit&quot;&gt;
+              <pre><code>const Default = ({
+  triggerLabel,
+  option1,
+  option2,
+  option3,
+  onValueChange,
+  onOpenChange,
+}) =&gt; (
+  &lt;Select onValueChange={onValueChange} onOpenChange={onOpenChange}&gt;
+    &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
       &lt;SelectValue placeholder=&quot;Pick a fruit&quot; /&gt;
     &lt;/SelectTrigger&gt;
     &lt;SelectContent&gt;
-      &lt;SelectItem value=&quot;apple&quot;&gt;Apple&lt;/SelectItem&gt;
-      &lt;SelectItem value=&quot;banana&quot;&gt;Banana&lt;/SelectItem&gt;
-      &lt;SelectItem value=&quot;orange&quot;&gt;Orange&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
     &lt;/SelectContent&gt;
   &lt;/Select&gt;
 );</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">With Preselected</span>
+                <span class="ex-name">Preselected</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const WithPreselected = () =&gt; (
-  &lt;Select defaultValue=&quot;banana&quot;&gt;
-    &lt;SelectTrigger className=&quot;w-48&quot; aria-label=&quot;Select a fruit&quot;&gt;
+              <pre><code>const Preselected = ({
+  triggerLabel,
+  option1,
+  option2,
+  option3,
+  onValueChange,
+  onOpenChange,
+}) =&gt; (
+  &lt;Select
+    defaultValue=&quot;banana&quot;
+    onValueChange={onValueChange}
+    onOpenChange={onOpenChange}
+  &gt;
+    &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
       &lt;SelectValue /&gt;
     &lt;/SelectTrigger&gt;
     &lt;SelectContent&gt;
-      &lt;SelectItem value=&quot;apple&quot;&gt;Apple&lt;/SelectItem&gt;
-      &lt;SelectItem value=&quot;banana&quot;&gt;Banana&lt;/SelectItem&gt;
-      &lt;SelectItem value=&quot;orange&quot;&gt;Orange&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+    &lt;/SelectContent&gt;
+  &lt;/Select&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Disabled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Disabled = ({
+  triggerLabel,
+  option1,
+  option2,
+  option3,
+  onValueChange,
+  onOpenChange,
+}) =&gt; (
+  &lt;Select
+    disabled
+    onValueChange={onValueChange}
+    onOpenChange={onOpenChange}
+  &gt;
+    &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+      &lt;SelectValue placeholder=&quot;Pick a fruit&quot; /&gt;
+    &lt;/SelectTrigger&gt;
+    &lt;SelectContent&gt;
+      &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+    &lt;/SelectContent&gt;
+  &lt;/Select&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Selects Option</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const SelectsOption = ({
+  triggerLabel,
+  option1,
+  option2,
+  option3,
+  onValueChange,
+  onOpenChange,
+}) =&gt; (
+  &lt;Select onValueChange={onValueChange} onOpenChange={onOpenChange}&gt;
+    &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+      &lt;SelectValue placeholder=&quot;Pick a fruit&quot; /&gt;
+    &lt;/SelectTrigger&gt;
+    &lt;SelectContent&gt;
+      &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
     &lt;/SelectContent&gt;
   &lt;/Select&gt;
 );</code></pre>
@@ -5193,19 +6237,19 @@ totalRounds: number | null</code></pre>
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="Sheet">
+  aria-label="Sheet as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> Sheet</h2>
+      <h2><span class="status-dot dot-err"></span> Sheet as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        
+        <label for="c-32-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
         <label for="c-32-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
-        <label for="c-32-components-ui-sheet-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-32-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -5216,7 +6260,7 @@ totalRounds: number | null</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-32-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-32-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-32-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
   
@@ -5224,6 +6268,119 @@ totalRounds: number | null</code></pre>
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;Sheet as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  24 | }
+  25 |
+&gt; 26 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  27 |   component: Sheet as unknown as ComponentType&lt;StoryArgs&gt;,
+  28 |   tags: [&#39;autodocs&#39;],
+  29 |   args: {
+
+./src/components/ui/sheet.stories.tsx:
+import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+
+import { Button } from &#39;./button&#39;;
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from &#39;./sheet&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+type SheetSide = &#39;right&#39; | &#39;left&#39; | &#39;top&#39; | &#39;bottom&#39;;
+
+interface StoryArgs {
+  side: SheetSide;
+  triggerLabel: string;
+  title: string;
+  description: string;
+  body: string;
+  onOpenChange: (open: boolean) =&gt; void;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: Sheet as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    side: &#39;right&#39;,
+    triggerLabel: &#39;Open sheet&#39;,
+    title: &#39;Sheet Title&#39;,
+    description: &#39;Sheet description here.&#39;,
+    body: &#39;Sheet body content.&#39;,
+    onOpenChange: fn(),
+  },
+  argTypes: {
+    side: {
+      control: { type: &#39;select&#39; },
+      options: [&#39;right&#39;, &#39;left&#39;, &#39;top&#39;, &#39;bottom&#39;] satisfies SheetSide[],
+    },
+    triggerLabel: { control: &#39;text&#39; },
+    title: { control: &#39;text&#39; },
+    description: { control: &#39;text&#39; },
+    body: { control: &#39;text&#39; },
+    onOpenChange: { table: { disable: true } },
+  },
+  render: ({
+    side,
+    triggerLabel,
+    title,
+    description,
+    body,
+    onOpenChange,
+  }) =&gt; (
+    &lt;Sheet onOpenChange={onOpenChange}&gt;
+      &lt;SheetTrigger asChild&gt;
+        &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+      &lt;/SheetTrigger&gt;
+      &lt;SheetContent side={side}&gt;
+        &lt;SheetHeader&gt;
+          &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+          &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+        &lt;/SheetHeader&gt;
+        &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+      &lt;/SheetContent&gt;
+    &lt;/Sheet&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+
+export const FromRight: Story = { args: { side: &#39;right&#39; } };
+export const FromLeft: Story = { args: { side: &#39;left&#39; } };
+export const FromTop: Story = { args: { side: &#39;top&#39; } };
+export const FromBottom: Story = { args: { side: &#39;bottom&#39; } };
+
+export const OpensAndClosesOnEscape: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /open sheet/i }),
+    );
+    const portal = within(document.body);
+    await waitFor(() =&gt; {
+      expect(portal.getByRole(&#39;dialog&#39;)).toBeVisible();
+    });
+    await userEvent.keyboard(&#39;{Escape}&#39;);
+    await waitFor(() =&gt; {
+      expect(portal.queryByRole(&#39;dialog&#39;)).toBeNull();
+    });
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -5256,22 +6413,58 @@ totalRounds: number | null</code></pre>
           
             <div class="note ok">
               <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Default = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
+    &lt;SheetTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/SheetTrigger&gt;
+    &lt;SheetContent side={side}&gt;
+      &lt;SheetHeader&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+      &lt;/SheetHeader&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+    &lt;/SheetContent&gt;
+  &lt;/Sheet&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
                 <span class="ex-name">From Right</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const FromRight = () =&gt; (
-  &lt;Sheet&gt;
+              <pre><code>const FromRight = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
     &lt;SheetTrigger asChild&gt;
-      &lt;Button variant=&quot;outline&quot;&gt;Open sheet&lt;/Button&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
     &lt;/SheetTrigger&gt;
-    &lt;SheetContent side=&quot;right&quot;&gt;
+    &lt;SheetContent side={side}&gt;
       &lt;SheetHeader&gt;
-        &lt;SheetTitle&gt;Sheet Title&lt;/SheetTitle&gt;
-        &lt;SheetDescription&gt;Sheet description here.&lt;/SheetDescription&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
       &lt;/SheetHeader&gt;
-      &lt;p className=&quot;p-4 text-sm&quot;&gt;Sheet body content.&lt;/p&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
     &lt;/SheetContent&gt;
   &lt;/Sheet&gt;
 );</code></pre>
@@ -5283,15 +6476,111 @@ totalRounds: number | null</code></pre>
               </div>
               
               
-              <pre><code>const FromLeft = () =&gt; (
-  &lt;Sheet&gt;
+              <pre><code>const FromLeft = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
     &lt;SheetTrigger asChild&gt;
-      &lt;Button variant=&quot;outline&quot;&gt;Open left&lt;/Button&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
     &lt;/SheetTrigger&gt;
-    &lt;SheetContent side=&quot;left&quot;&gt;
+    &lt;SheetContent side={side}&gt;
       &lt;SheetHeader&gt;
-        &lt;SheetTitle&gt;Navigation&lt;/SheetTitle&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
       &lt;/SheetHeader&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+    &lt;/SheetContent&gt;
+  &lt;/Sheet&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">From Top</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const FromTop = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
+    &lt;SheetTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/SheetTrigger&gt;
+    &lt;SheetContent side={side}&gt;
+      &lt;SheetHeader&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+      &lt;/SheetHeader&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+    &lt;/SheetContent&gt;
+  &lt;/Sheet&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">From Bottom</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const FromBottom = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
+    &lt;SheetTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/SheetTrigger&gt;
+    &lt;SheetContent side={side}&gt;
+      &lt;SheetHeader&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+      &lt;/SheetHeader&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+    &lt;/SheetContent&gt;
+  &lt;/Sheet&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Opens And Closes On Escape</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const OpensAndClosesOnEscape = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
+    &lt;SheetTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/SheetTrigger&gt;
+    &lt;SheetContent side={side}&gt;
+      &lt;SheetHeader&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+      &lt;/SheetHeader&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
     &lt;/SheetContent&gt;
   &lt;/Sheet&gt;
 );</code></pre>
@@ -5314,7 +6603,7 @@ totalRounds: number | null</code></pre>
       <div class="badges">
         <label for="c-33-components-ui-slider-props" class="badge ok as-toggle">2 prop types</label>
         <label for="c-33-components-ui-slider-info" class="badge info as-toggle">1 info</label>
-        <label for="c-33-components-ui-slider-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-33-components-ui-slider-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -5375,7 +6664,14 @@ min?: any = 0</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;Slider defaultValue={[50]} min={0} max={100} step={1} className=&quot;w-64&quot; /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;Slider
+    onValueChange={fn()}
+    onValueCommit={fn()}
+    defaultValue={[50]}
+    min={0}
+    max={100}
+    step={1}
+    className=&quot;w-64&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -5385,6 +6681,8 @@ min?: any = 0</code></pre>
               
               
               <pre><code>const Volume = () =&gt; &lt;Slider
+    onValueChange={fn()}
+    onValueCommit={fn()}
     defaultValue={[80]}
     min={0}
     max={100}
@@ -5400,12 +6698,49 @@ min?: any = 0</code></pre>
               
               
               <pre><code>const SpeechRate = () =&gt; &lt;Slider
+    onValueChange={fn()}
+    onValueCommit={fn()}
     defaultValue={[10]}
     min={5}
     max={20}
     step={1}
     className=&quot;w-64&quot;
     aria-label=&quot;Speech rate&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Keyboard Increment</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const KeyboardIncrement = () =&gt; &lt;Slider
+    onValueChange={fn()}
+    onValueCommit={fn()}
+    defaultValue={[50]}
+    min={0}
+    max={100}
+    step={1}
+    className=&quot;w-64&quot;
+    aria-label=&quot;Keyboard-driven slider&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Disabled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Disabled = () =&gt; &lt;Slider
+    onValueChange={fn()}
+    onValueCommit={fn()}
+    defaultValue={[50]}
+    min={0}
+    max={100}
+    step={1}
+    className=&quot;w-64&quot;
+    aria-label=&quot;Disabled slider&quot;
+    disabled /&gt;;</code></pre>
             </div>
         </div>
     
@@ -7000,9 +8335,387 @@ export const HUD_Round5Of5: Story = {
           <label for="no-component-import-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component import found</span>
-            <span class="group-count">3</span>
+            <span class="group-count">10</span>
           </label>
           <div class="group-cards">
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-0-components-ui-alert-dialog-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-0-components-ui-alert-dialog-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-0-components-ui-alert-dialog-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/alert-dialog.stories.tsx">components-ui-alert-dialog · ./src/components/ui/alert-dialog.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-0-components-ui-alert-dialog-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-0-components-ui-alert-dialog-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-0-components-ui-alert-dialog-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  27 | }
+  28 |
+&gt; 29 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  30 |   component: AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;,
+  31 |   tags: [&#39;autodocs&#39;],
+  32 |   args: {
+
+./src/components/ui/alert-dialog.stories.tsx:
+import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from &#39;./alert-dialog&#39;;
+import { Button } from &#39;./button&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType, MouseEventHandler } from &#39;react&#39;;
+
+interface StoryArgs {
+  triggerLabel: string;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  onOpenChange: (open: boolean) =&gt; void;
+  onConfirm: MouseEventHandler&lt;HTMLButtonElement&gt;;
+  onCancel: MouseEventHandler&lt;HTMLButtonElement&gt;;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    triggerLabel: &#39;Delete account&#39;,
+    title: &#39;Are you sure?&#39;,
+    description: &#39;This action cannot be undone.&#39;,
+    confirmLabel: &#39;Delete&#39;,
+    cancelLabel: &#39;Cancel&#39;,
+    onOpenChange: fn(),
+    onConfirm: fn(),
+    onCancel: fn(),
+  },
+  argTypes: {
+    triggerLabel: { control: &#39;text&#39; },
+    title: { control: &#39;text&#39; },
+    description: { control: &#39;text&#39; },
+    confirmLabel: { control: &#39;text&#39; },
+    cancelLabel: { control: &#39;text&#39; },
+    onOpenChange: { table: { disable: true } },
+    onConfirm: { table: { disable: true } },
+    onCancel: { table: { disable: true } },
+  },
+  render: ({
+    triggerLabel,
+    title,
+    description,
+    confirmLabel,
+    cancelLabel,
+    onOpenChange,
+    onConfirm,
+    onCancel,
+  }) =&gt; (
+    &lt;AlertDialog onOpenChange={onOpenChange}&gt;
+      &lt;AlertDialogTrigger asChild&gt;
+        &lt;Button variant=&quot;destructive&quot;&gt;{triggerLabel}&lt;/Button&gt;
+      &lt;/AlertDialogTrigger&gt;
+      &lt;AlertDialogContent&gt;
+        &lt;AlertDialogHeader&gt;
+          &lt;AlertDialogTitle&gt;{title}&lt;/AlertDialogTitle&gt;
+          &lt;AlertDialogDescription&gt;{description}&lt;/AlertDialogDescription&gt;
+        &lt;/AlertDialogHeader&gt;
+        &lt;AlertDialogFooter&gt;
+          &lt;AlertDialogCancel onClick={onCancel}&gt;
+            {cancelLabel}
+          &lt;/AlertDialogCancel&gt;
+          &lt;AlertDialogAction onClick={onConfirm}&gt;
+            {confirmLabel}
+          &lt;/AlertDialogAction&gt;
+        &lt;/AlertDialogFooter&gt;
+      &lt;/AlertDialogContent&gt;
+    &lt;/AlertDialog&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+
+export const OpensAndConfirms: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /delete account/i }),
+    );
+    const portal = within(document.body);
+    await waitFor(() =&gt; {
+      expect(portal.getByRole(&#39;alertdialog&#39;)).toBeVisible();
+    });
+    await userEvent.click(
+      await portal.findByRole(&#39;button&#39;, { name: /^delete$/i }),
+    );
+    await waitFor(() =&gt; {
+      expect(portal.queryByRole(&#39;alertdialog&#39;)).toBeNull();
+    });
+  },
+};
+
+export const CancelsWithEscape: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /delete account/i }),
+    );
+    const portal = within(document.body);
+    await waitFor(() =&gt; {
+      expect(portal.getByRole(&#39;alertdialog&#39;)).toBeVisible();
+    });
+    await userEvent.keyboard(&#39;{Escape}&#39;);
+    await waitFor(() =&gt; {
+      expect(portal.queryByRole(&#39;alertdialog&#39;)).toBeNull();
+    });
+  },
+};
+
+export const Cancelled: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /delete account/i }),
+    );
+    const portal = within(document.body);
+    await userEvent.click(
+      await portal.findByRole(&#39;button&#39;, { name: /cancel/i }),
+    );
+    await waitFor(() =&gt; {
+      expect(portal.queryByRole(&#39;alertdialog&#39;)).toBeNull();
+    });
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+    Button,
+} from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Default = ({
+  triggerLabel,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  onOpenChange,
+  onConfirm,
+  onCancel,
+}) =&gt; (
+  &lt;AlertDialog onOpenChange={onOpenChange}&gt;
+    &lt;AlertDialogTrigger asChild&gt;
+      &lt;Button variant=&quot;destructive&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/AlertDialogTrigger&gt;
+    &lt;AlertDialogContent&gt;
+      &lt;AlertDialogHeader&gt;
+        &lt;AlertDialogTitle&gt;{title}&lt;/AlertDialogTitle&gt;
+        &lt;AlertDialogDescription&gt;{description}&lt;/AlertDialogDescription&gt;
+      &lt;/AlertDialogHeader&gt;
+      &lt;AlertDialogFooter&gt;
+        &lt;AlertDialogCancel onClick={onCancel}&gt;
+          {cancelLabel}
+        &lt;/AlertDialogCancel&gt;
+        &lt;AlertDialogAction onClick={onConfirm}&gt;
+          {confirmLabel}
+        &lt;/AlertDialogAction&gt;
+      &lt;/AlertDialogFooter&gt;
+    &lt;/AlertDialogContent&gt;
+  &lt;/AlertDialog&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Opens And Confirms</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const OpensAndConfirms = ({
+  triggerLabel,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  onOpenChange,
+  onConfirm,
+  onCancel,
+}) =&gt; (
+  &lt;AlertDialog onOpenChange={onOpenChange}&gt;
+    &lt;AlertDialogTrigger asChild&gt;
+      &lt;Button variant=&quot;destructive&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/AlertDialogTrigger&gt;
+    &lt;AlertDialogContent&gt;
+      &lt;AlertDialogHeader&gt;
+        &lt;AlertDialogTitle&gt;{title}&lt;/AlertDialogTitle&gt;
+        &lt;AlertDialogDescription&gt;{description}&lt;/AlertDialogDescription&gt;
+      &lt;/AlertDialogHeader&gt;
+      &lt;AlertDialogFooter&gt;
+        &lt;AlertDialogCancel onClick={onCancel}&gt;
+          {cancelLabel}
+        &lt;/AlertDialogCancel&gt;
+        &lt;AlertDialogAction onClick={onConfirm}&gt;
+          {confirmLabel}
+        &lt;/AlertDialogAction&gt;
+      &lt;/AlertDialogFooter&gt;
+    &lt;/AlertDialogContent&gt;
+  &lt;/AlertDialog&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Cancels With Escape</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const CancelsWithEscape = ({
+  triggerLabel,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  onOpenChange,
+  onConfirm,
+  onCancel,
+}) =&gt; (
+  &lt;AlertDialog onOpenChange={onOpenChange}&gt;
+    &lt;AlertDialogTrigger asChild&gt;
+      &lt;Button variant=&quot;destructive&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/AlertDialogTrigger&gt;
+    &lt;AlertDialogContent&gt;
+      &lt;AlertDialogHeader&gt;
+        &lt;AlertDialogTitle&gt;{title}&lt;/AlertDialogTitle&gt;
+        &lt;AlertDialogDescription&gt;{description}&lt;/AlertDialogDescription&gt;
+      &lt;/AlertDialogHeader&gt;
+      &lt;AlertDialogFooter&gt;
+        &lt;AlertDialogCancel onClick={onCancel}&gt;
+          {cancelLabel}
+        &lt;/AlertDialogCancel&gt;
+        &lt;AlertDialogAction onClick={onConfirm}&gt;
+          {confirmLabel}
+        &lt;/AlertDialogAction&gt;
+      &lt;/AlertDialogFooter&gt;
+    &lt;/AlertDialogContent&gt;
+  &lt;/AlertDialog&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Cancelled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Cancelled = ({
+  triggerLabel,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  onOpenChange,
+  onConfirm,
+  onCancel,
+}) =&gt; (
+  &lt;AlertDialog onOpenChange={onOpenChange}&gt;
+    &lt;AlertDialogTrigger asChild&gt;
+      &lt;Button variant=&quot;destructive&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/AlertDialogTrigger&gt;
+    &lt;AlertDialogContent&gt;
+      &lt;AlertDialogHeader&gt;
+        &lt;AlertDialogTitle&gt;{title}&lt;/AlertDialogTitle&gt;
+        &lt;AlertDialogDescription&gt;{description}&lt;/AlertDialogDescription&gt;
+      &lt;/AlertDialogHeader&gt;
+      &lt;AlertDialogFooter&gt;
+        &lt;AlertDialogCancel onClick={onCancel}&gt;
+          {cancelLabel}
+        &lt;/AlertDialogCancel&gt;
+        &lt;AlertDialogAction onClick={onConfirm}&gt;
+          {confirmLabel}
+        &lt;/AlertDialogAction&gt;
+      &lt;/AlertDialogFooter&gt;
+    &lt;/AlertDialogContent&gt;
+  &lt;/AlertDialog&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
 <article
   class="card 
   has-error 
@@ -7015,9 +8728,9 @@ export const HUD_Round5Of5: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> AudioFeedbackPrototype</h2>
       <div class="badges">
-        <label for="c-error-0-audio-audiofeedback-prototype-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-0-audio-audiofeedback-prototype-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-audio-audiofeedback-prototype-stories" class="badge err as-toggle">1/8 story errors</label>
+        <label for="c-error-1-audio-audiofeedback-prototype-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-1-audio-audiofeedback-prototype-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-1-audio-audiofeedback-prototype-stories" class="badge err as-toggle">1/8 story errors</label>
         
       </div>
     </div>
@@ -7028,9 +8741,9 @@ export const HUD_Round5Of5: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-0-audio-audiofeedback-prototype-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-0-audio-audiofeedback-prototype-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-0-audio-audiofeedback-prototype-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-1-audio-audiofeedback-prototype-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-1-audio-audiofeedback-prototype-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-1-audio-audiofeedback-prototype-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -7422,6 +9135,861 @@ export const Scenario3CorrectAndRoundComplete: Story = {
   class="card 
   has-error 
   has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Button as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Button as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-2-ui-sonner-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-2-ui-sonner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-2-ui-sonner-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/sonner.stories.tsx">ui-sonner · ./src/components/ui/sonner.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-2-ui-sonner-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-2-ui-sonner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-2-ui-sonner-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;Button as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  28 | ];
+  29 |
+&gt; 30 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  31 |   title: &#39;UI/Sonner&#39;,
+  32 |   component: Button as unknown as ComponentType&lt;StoryArgs&gt;,
+  33 |   tags: [&#39;autodocs&#39;],
+
+./src/components/ui/sonner.stories.tsx:
+import { ThemeProvider } from &#39;next-themes&#39;;
+import { toast } from &#39;sonner&#39;;
+import { expect, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+import { Button } from &#39;./button&#39;;
+import { Toaster } from &#39;./sonner&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+type ToastVariant = &#39;default&#39; | &#39;success&#39; | &#39;error&#39;;
+
+interface StoryArgs {
+  variant: ToastVariant;
+  message: string;
+  triggerLabel: string;
+}
+
+const withToastUi: Meta[&#39;decorators&#39;] = [
+  (Story) =&gt; (
+    &lt;ThemeProvider
+      attribute=&quot;class&quot;
+      defaultTheme=&quot;light&quot;
+      enableSystem={false}
+    &gt;
+      &lt;Story /&gt;
+      &lt;Toaster /&gt;
+    &lt;/ThemeProvider&gt;
+  ),
+];
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  title: &#39;UI/Sonner&#39;,
+  component: Button as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  decorators: withToastUi,
+  args: {
+    variant: &#39;default&#39;,
+    message: &#39;Event registered!&#39;,
+    triggerLabel: &#39;Show toast&#39;,
+  },
+  argTypes: {
+    variant: {
+      control: { type: &#39;select&#39; },
+      options: [&#39;default&#39;, &#39;success&#39;, &#39;error&#39;] satisfies ToastVariant[],
+    },
+    message: { control: &#39;text&#39; },
+    triggerLabel: { control: &#39;text&#39; },
+  },
+  render: ({ variant, message, triggerLabel }) =&gt; {
+    const fire = () =&gt; {
+      if (variant === &#39;success&#39;) return toast.success(message);
+      if (variant === &#39;error&#39;) return toast.error(message);
+      return toast(message);
+    };
+    return &lt;Button onClick={fire}&gt;{triggerLabel}&lt;/Button&gt;;
+  },
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = { args: { variant: &#39;default&#39; } };
+export const Success: Story = {
+  args: { variant: &#39;success&#39;, message: &#39;Saved successfully&#39; },
+};
+export const Error: Story = {
+  args: { variant: &#39;error&#39;, message: &#39;Something went wrong&#39; },
+};
+
+export const ShowsToast: Story = {
+  args: {
+    variant: &#39;default&#39;,
+    message: &#39;Event registered!&#39;,
+    triggerLabel: &#39;Show toast&#39;,
+  },
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /show toast/i }),
+    );
+    const portal = within(document.body);
+    await waitFor(async () =&gt; {
+      const el = await portal.findByText(/event registered/i);
+      await expect(el).toBeVisible();
+    });
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Button, Toaster } from "base-skill";
+import { ThemeProvider } from "next-themes";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Default = ({ variant, message, triggerLabel }) =&gt; {
+  const fire = () =&gt; {
+    if (variant === &#39;success&#39;) return toast.success(message);
+    if (variant === &#39;error&#39;) return toast.error(message);
+    return toast(message);
+  };
+  return &lt;Button onClick={fire}&gt;{triggerLabel}&lt;/Button&gt;;
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Success</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Success = ({ variant, message, triggerLabel }) =&gt; {
+  const fire = () =&gt; {
+    if (variant === &#39;success&#39;) return toast.success(message);
+    if (variant === &#39;error&#39;) return toast.error(message);
+    return toast(message);
+  };
+  return &lt;Button onClick={fire}&gt;{triggerLabel}&lt;/Button&gt;;
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Error</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Error = ({ variant, message, triggerLabel }) =&gt; {
+  const fire = () =&gt; {
+    if (variant === &#39;success&#39;) return toast.success(message);
+    if (variant === &#39;error&#39;) return toast.error(message);
+    return toast(message);
+  };
+  return &lt;Button onClick={fire}&gt;{triggerLabel}&lt;/Button&gt;;
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Shows Toast</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ShowsToast = ({ variant, message, triggerLabel }) =&gt; {
+  const fire = () =&gt; {
+    if (variant === &#39;success&#39;) return toast.success(message);
+    if (variant === &#39;error&#39;) return toast.error(message);
+    return toast(message);
+  };
+  return &lt;Button onClick={fire}&gt;{triggerLabel}&lt;/Button&gt;;
+};</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Card as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Card as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-3-components-ui-card-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-3-components-ui-card-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-3-components-ui-card-stories" class="badge ok as-toggle">2 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/card.stories.tsx">components-ui-card · ./src/components/ui/card.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-3-components-ui-card-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-3-components-ui-card-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-3-components-ui-card-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;Card as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  18 | }
+  19 |
+&gt; 20 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  21 |   component: Card as unknown as ComponentType&lt;StoryArgs&gt;,
+  22 |   tags: [&#39;autodocs&#39;],
+  23 |   args: {
+
+./src/components/ui/card.stories.tsx:
+import { Button } from &#39;./button&#39;;
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from &#39;./card&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  title: string;
+  description: string;
+  body: string;
+  actionLabel: string;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: Card as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    title: &#39;Card Title&#39;,
+    description: &#39;Card description goes here.&#39;,
+    body: &#39;Card body content.&#39;,
+    actionLabel: &#39;Action&#39;,
+  },
+  argTypes: {
+    title: { control: &#39;text&#39; },
+    description: { control: &#39;text&#39; },
+    body: { control: &#39;text&#39; },
+    actionLabel: { control: &#39;text&#39; },
+  },
+  render: ({ title, description, body, actionLabel }) =&gt; (
+    &lt;Card className=&quot;w-72&quot;&gt;
+      &lt;CardHeader&gt;
+        &lt;CardTitle&gt;{title}&lt;/CardTitle&gt;
+        &lt;CardDescription&gt;{description}&lt;/CardDescription&gt;
+      &lt;/CardHeader&gt;
+      &lt;CardContent&gt;
+        &lt;p&gt;{body}&lt;/p&gt;
+      &lt;/CardContent&gt;
+      &lt;CardFooter&gt;
+        &lt;Button className=&quot;w-full&quot;&gt;{actionLabel}&lt;/Button&gt;
+      &lt;/CardFooter&gt;
+    &lt;/Card&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+
+export const Small: Story = {
+  render: ({ title, body }) =&gt; (
+    &lt;Card className=&quot;w-72&quot; size=&quot;sm&quot;&gt;
+      &lt;CardHeader&gt;
+        &lt;CardTitle&gt;{title}&lt;/CardTitle&gt;
+      &lt;/CardHeader&gt;
+      &lt;CardContent&gt;
+        &lt;p&gt;{body}&lt;/p&gt;
+      &lt;/CardContent&gt;
+    &lt;/Card&gt;
+  ),
+  args: { title: &#39;Small Card&#39;, body: &#39;Compact variant.&#39; },
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import {
+    Button,
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Default = ({ title, description, body, actionLabel }) =&gt; (
+  &lt;Card className=&quot;w-72&quot;&gt;
+    &lt;CardHeader&gt;
+      &lt;CardTitle&gt;{title}&lt;/CardTitle&gt;
+      &lt;CardDescription&gt;{description}&lt;/CardDescription&gt;
+    &lt;/CardHeader&gt;
+    &lt;CardContent&gt;
+      &lt;p&gt;{body}&lt;/p&gt;
+    &lt;/CardContent&gt;
+    &lt;CardFooter&gt;
+      &lt;Button className=&quot;w-full&quot;&gt;{actionLabel}&lt;/Button&gt;
+    &lt;/CardFooter&gt;
+  &lt;/Card&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Small</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Small = ({ title, body }) =&gt; (
+  &lt;Card className=&quot;w-72&quot; size=&quot;sm&quot;&gt;
+    &lt;CardHeader&gt;
+      &lt;CardTitle&gt;{title}&lt;/CardTitle&gt;
+    &lt;/CardHeader&gt;
+    &lt;CardContent&gt;
+      &lt;p&gt;{body}&lt;/p&gt;
+    &lt;/CardContent&gt;
+  &lt;/Card&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-4-components-ui-dropdown-menu-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-4-components-ui-dropdown-menu-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-4-components-ui-dropdown-menu-stories" class="badge ok as-toggle">3 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/dropdown-menu.stories.tsx">components-ui-dropdown-menu · ./src/components/ui/dropdown-menu.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-4-components-ui-dropdown-menu-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-4-components-ui-dropdown-menu-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-4-components-ui-dropdown-menu-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  21 | }
+  22 |
+&gt; 23 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  24 |   component: DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;,
+  25 |   tags: [&#39;autodocs&#39;],
+  26 |   args: {
+
+./src/components/ui/dropdown-menu.stories.tsx:
+import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+
+import { Button } from &#39;./button&#39;;
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from &#39;./dropdown-menu&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  triggerLabel: string;
+  item1: string;
+  item2: string;
+  item3: string;
+  onOpenChange: (open: boolean) =&gt; void;
+  onItemSelect: (event: Event) =&gt; void;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    triggerLabel: &#39;Options&#39;,
+    item1: &#39;Profile&#39;,
+    item2: &#39;Settings&#39;,
+    item3: &#39;Logout&#39;,
+    onOpenChange: fn(),
+    onItemSelect: fn(),
+  },
+  argTypes: {
+    triggerLabel: { control: &#39;text&#39; },
+    item1: { control: &#39;text&#39; },
+    item2: { control: &#39;text&#39; },
+    item3: { control: &#39;text&#39; },
+    onOpenChange: { table: { disable: true } },
+    onItemSelect: { table: { disable: true } },
+  },
+  render: ({
+    triggerLabel,
+    item1,
+    item2,
+    item3,
+    onOpenChange,
+    onItemSelect,
+  }) =&gt; (
+    &lt;DropdownMenu onOpenChange={onOpenChange}&gt;
+      &lt;DropdownMenuTrigger asChild&gt;
+        &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+      &lt;/DropdownMenuTrigger&gt;
+      &lt;DropdownMenuContent&gt;
+        &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+          {item1}
+        &lt;/DropdownMenuItem&gt;
+        &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+          {item2}
+        &lt;/DropdownMenuItem&gt;
+        &lt;DropdownMenuSeparator /&gt;
+        &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+          {item3}
+        &lt;/DropdownMenuItem&gt;
+      &lt;/DropdownMenuContent&gt;
+    &lt;/DropdownMenu&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+
+export const OpensAndSelects: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /options/i }),
+    );
+    const portal = within(document.body);
+    await waitFor(() =&gt; {
+      expect(portal.getByRole(&#39;menu&#39;)).toBeVisible();
+    });
+    await userEvent.click(
+      await portal.findByRole(&#39;menuitem&#39;, { name: /profile/i }),
+    );
+    await waitFor(() =&gt; {
+      expect(portal.queryByRole(&#39;menu&#39;)).toBeNull();
+    });
+  },
+};
+
+export const WithDestructiveItem: Story = {
+  render: ({
+    triggerLabel,
+    item1,
+    item2,
+    onOpenChange,
+    onItemSelect,
+  }) =&gt; (
+    &lt;DropdownMenu onOpenChange={onOpenChange}&gt;
+      &lt;DropdownMenuTrigger asChild&gt;
+        &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+      &lt;/DropdownMenuTrigger&gt;
+      &lt;DropdownMenuContent&gt;
+        &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+          {item1}
+        &lt;/DropdownMenuItem&gt;
+        &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+          {item2}
+        &lt;/DropdownMenuItem&gt;
+        &lt;DropdownMenuSeparator /&gt;
+        &lt;DropdownMenuItem variant=&quot;destructive&quot; onSelect={onItemSelect}&gt;
+          Delete account
+        &lt;/DropdownMenuItem&gt;
+      &lt;/DropdownMenuContent&gt;
+    &lt;/DropdownMenu&gt;
+  ),
+  args: {
+    triggerLabel: &#39;Account&#39;,
+    item1: &#39;Profile&#39;,
+    item2: &#39;Settings&#39;,
+    item3: &#39;&#39;,
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import {
+    Button,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Default = ({
+  triggerLabel,
+  item1,
+  item2,
+  item3,
+  onOpenChange,
+  onItemSelect,
+}) =&gt; (
+  &lt;DropdownMenu onOpenChange={onOpenChange}&gt;
+    &lt;DropdownMenuTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/DropdownMenuTrigger&gt;
+    &lt;DropdownMenuContent&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item1}
+      &lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item2}
+      &lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuSeparator /&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item3}
+      &lt;/DropdownMenuItem&gt;
+    &lt;/DropdownMenuContent&gt;
+  &lt;/DropdownMenu&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Opens And Selects</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const OpensAndSelects = ({
+  triggerLabel,
+  item1,
+  item2,
+  item3,
+  onOpenChange,
+  onItemSelect,
+}) =&gt; (
+  &lt;DropdownMenu onOpenChange={onOpenChange}&gt;
+    &lt;DropdownMenuTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/DropdownMenuTrigger&gt;
+    &lt;DropdownMenuContent&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item1}
+      &lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item2}
+      &lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuSeparator /&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item3}
+      &lt;/DropdownMenuItem&gt;
+    &lt;/DropdownMenuContent&gt;
+  &lt;/DropdownMenu&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Destructive Item</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithDestructiveItem = ({
+  triggerLabel,
+  item1,
+  item2,
+  onOpenChange,
+  onItemSelect,
+}) =&gt; (
+  &lt;DropdownMenu onOpenChange={onOpenChange}&gt;
+    &lt;DropdownMenuTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/DropdownMenuTrigger&gt;
+    &lt;DropdownMenuContent&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item1}
+      &lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuItem onSelect={onItemSelect}&gt;
+        {item2}
+      &lt;/DropdownMenuItem&gt;
+      &lt;DropdownMenuSeparator /&gt;
+      &lt;DropdownMenuItem variant=&quot;destructive&quot; onSelect={onItemSelect}&gt;
+        Delete account
+      &lt;/DropdownMenuItem&gt;
+    &lt;/DropdownMenuContent&gt;
+  &lt;/DropdownMenu&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Label as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Label as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-5-components-ui-label-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-5-components-ui-label-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-5-components-ui-label-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/label.stories.tsx">components-ui-label · ./src/components/ui/label.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-5-components-ui-label-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-5-components-ui-label-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-5-components-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;Label as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  10 | }
+  11 |
+&gt; 12 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  13 |   component: Label as unknown as ComponentType&lt;StoryArgs&gt;,
+  14 |   tags: [&#39;autodocs&#39;],
+  15 |   args: {
+
+./src/components/ui/label.stories.tsx:
+import { Input } from &#39;./input&#39;;
+import { Label } from &#39;./label&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  htmlFor: string;
+  children: string;
+  placeholder: string;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: Label as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    htmlFor: &#39;name&#39;,
+    children: &#39;Name&#39;,
+    placeholder: &#39;Your name&#39;,
+  },
+  argTypes: {
+    htmlFor: { control: &#39;text&#39; },
+    children: { control: &#39;text&#39; },
+    placeholder: { control: &#39;text&#39; },
+  },
+  render: ({ htmlFor, children, placeholder }) =&gt; (
+    &lt;div className=&quot;flex flex-col gap-2&quot;&gt;
+      &lt;Label htmlFor={htmlFor}&gt;{children}&lt;/Label&gt;
+      &lt;Input id={htmlFor} placeholder={placeholder} /&gt;
+    &lt;/div&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Input, Label } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Default = ({ htmlFor, children, placeholder }) =&gt; (
+  &lt;div className=&quot;flex flex-col gap-2&quot;&gt;
+    &lt;Label htmlFor={htmlFor}&gt;{children}&lt;/Label&gt;
+    &lt;Input id={htmlFor} placeholder={placeholder} /&gt;
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
   has-story-error
   no-doc-error"
   role="listitem"
@@ -7430,9 +9998,9 @@ export const Scenario3CorrectAndRoundComplete: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> NumberMatchWithHarness</h2>
       <div class="badges">
-        <label for="c-error-1-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-1-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-1-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        <label for="c-error-6-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-6-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-6-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
         
       </div>
     </div>
@@ -7443,9 +10011,9 @@ export const Scenario3CorrectAndRoundComplete: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-1-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-1-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-1-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-6-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-6-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-6-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -7579,6 +10147,685 @@ export const Default: Story = {};
   class="card 
   has-error 
   has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Select as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Select as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-7-components-ui-select-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-7-components-ui-select-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-7-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/select.stories.tsx">components-ui-select · ./src/components/ui/select.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-7-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-7-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-7-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;Select as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  20 | }
+  21 |
+&gt; 22 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  23 |   component: Select as unknown as ComponentType&lt;StoryArgs&gt;,
+  24 |   tags: [&#39;autodocs&#39;],
+  25 |   args: {
+
+./src/components/ui/select.stories.tsx:
+import { expect, fn, userEvent, within } from &#39;storybook/test&#39;;
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from &#39;./select&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  triggerLabel: string;
+  option1: string;
+  option2: string;
+  option3: string;
+  onValueChange: (value: string) =&gt; void;
+  onOpenChange: (open: boolean) =&gt; void;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: Select as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    triggerLabel: &#39;Select a fruit&#39;,
+    option1: &#39;Apple&#39;,
+    option2: &#39;Banana&#39;,
+    option3: &#39;Orange&#39;,
+    onValueChange: fn(),
+    onOpenChange: fn(),
+  },
+  argTypes: {
+    triggerLabel: { control: &#39;text&#39; },
+    option1: { control: &#39;text&#39; },
+    option2: { control: &#39;text&#39; },
+    option3: { control: &#39;text&#39; },
+    onValueChange: { table: { disable: true } },
+    onOpenChange: { table: { disable: true } },
+  },
+  render: ({
+    triggerLabel,
+    option1,
+    option2,
+    option3,
+    onValueChange,
+    onOpenChange,
+  }) =&gt; (
+    &lt;Select onValueChange={onValueChange} onOpenChange={onOpenChange}&gt;
+      &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+        &lt;SelectValue placeholder=&quot;Pick a fruit&quot; /&gt;
+      &lt;/SelectTrigger&gt;
+      &lt;SelectContent&gt;
+        &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+      &lt;/SelectContent&gt;
+    &lt;/Select&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+
+export const Preselected: Story = {
+  render: ({
+    triggerLabel,
+    option1,
+    option2,
+    option3,
+    onValueChange,
+    onOpenChange,
+  }) =&gt; (
+    &lt;Select
+      defaultValue=&quot;banana&quot;
+      onValueChange={onValueChange}
+      onOpenChange={onOpenChange}
+    &gt;
+      &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+        &lt;SelectValue /&gt;
+      &lt;/SelectTrigger&gt;
+      &lt;SelectContent&gt;
+        &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+      &lt;/SelectContent&gt;
+    &lt;/Select&gt;
+  ),
+};
+
+export const Disabled: Story = {
+  render: ({
+    triggerLabel,
+    option1,
+    option2,
+    option3,
+    onValueChange,
+    onOpenChange,
+  }) =&gt; (
+    &lt;Select
+      disabled
+      onValueChange={onValueChange}
+      onOpenChange={onOpenChange}
+    &gt;
+      &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+        &lt;SelectValue placeholder=&quot;Pick a fruit&quot; /&gt;
+      &lt;/SelectTrigger&gt;
+      &lt;SelectContent&gt;
+        &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+        &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+      &lt;/SelectContent&gt;
+    &lt;/Select&gt;
+  ),
+};
+
+export const SelectsOption: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;combobox&#39;, { name: /select a fruit/i }),
+    );
+    const portal = within(document.body);
+    await userEvent.click(
+      portal.getByRole(&#39;option&#39;, { name: /banana/i }),
+    );
+    await expect(canvas.getByRole(&#39;combobox&#39;)).toHaveTextContent(
+      /banana/i,
+    );
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Default = ({
+  triggerLabel,
+  option1,
+  option2,
+  option3,
+  onValueChange,
+  onOpenChange,
+}) =&gt; (
+  &lt;Select onValueChange={onValueChange} onOpenChange={onOpenChange}&gt;
+    &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+      &lt;SelectValue placeholder=&quot;Pick a fruit&quot; /&gt;
+    &lt;/SelectTrigger&gt;
+    &lt;SelectContent&gt;
+      &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+    &lt;/SelectContent&gt;
+  &lt;/Select&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Preselected</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Preselected = ({
+  triggerLabel,
+  option1,
+  option2,
+  option3,
+  onValueChange,
+  onOpenChange,
+}) =&gt; (
+  &lt;Select
+    defaultValue=&quot;banana&quot;
+    onValueChange={onValueChange}
+    onOpenChange={onOpenChange}
+  &gt;
+    &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+      &lt;SelectValue /&gt;
+    &lt;/SelectTrigger&gt;
+    &lt;SelectContent&gt;
+      &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+    &lt;/SelectContent&gt;
+  &lt;/Select&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Disabled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Disabled = ({
+  triggerLabel,
+  option1,
+  option2,
+  option3,
+  onValueChange,
+  onOpenChange,
+}) =&gt; (
+  &lt;Select
+    disabled
+    onValueChange={onValueChange}
+    onOpenChange={onOpenChange}
+  &gt;
+    &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+      &lt;SelectValue placeholder=&quot;Pick a fruit&quot; /&gt;
+    &lt;/SelectTrigger&gt;
+    &lt;SelectContent&gt;
+      &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+    &lt;/SelectContent&gt;
+  &lt;/Select&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Selects Option</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const SelectsOption = ({
+  triggerLabel,
+  option1,
+  option2,
+  option3,
+  onValueChange,
+  onOpenChange,
+}) =&gt; (
+  &lt;Select onValueChange={onValueChange} onOpenChange={onOpenChange}&gt;
+    &lt;SelectTrigger className=&quot;w-48&quot; aria-label={triggerLabel}&gt;
+      &lt;SelectValue placeholder=&quot;Pick a fruit&quot; /&gt;
+    &lt;/SelectTrigger&gt;
+    &lt;SelectContent&gt;
+      &lt;SelectItem value=&quot;apple&quot;&gt;{option1}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;banana&quot;&gt;{option2}&lt;/SelectItem&gt;
+      &lt;SelectItem value=&quot;orange&quot;&gt;{option3}&lt;/SelectItem&gt;
+    &lt;/SelectContent&gt;
+  &lt;/Select&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Sheet as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Sheet as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-8-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-8-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-8-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/sheet.stories.tsx">components-ui-sheet · ./src/components/ui/sheet.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-8-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-8-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-8-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;Sheet as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  24 | }
+  25 |
+&gt; 26 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  27 |   component: Sheet as unknown as ComponentType&lt;StoryArgs&gt;,
+  28 |   tags: [&#39;autodocs&#39;],
+  29 |   args: {
+
+./src/components/ui/sheet.stories.tsx:
+import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+
+import { Button } from &#39;./button&#39;;
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from &#39;./sheet&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+type SheetSide = &#39;right&#39; | &#39;left&#39; | &#39;top&#39; | &#39;bottom&#39;;
+
+interface StoryArgs {
+  side: SheetSide;
+  triggerLabel: string;
+  title: string;
+  description: string;
+  body: string;
+  onOpenChange: (open: boolean) =&gt; void;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: Sheet as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    side: &#39;right&#39;,
+    triggerLabel: &#39;Open sheet&#39;,
+    title: &#39;Sheet Title&#39;,
+    description: &#39;Sheet description here.&#39;,
+    body: &#39;Sheet body content.&#39;,
+    onOpenChange: fn(),
+  },
+  argTypes: {
+    side: {
+      control: { type: &#39;select&#39; },
+      options: [&#39;right&#39;, &#39;left&#39;, &#39;top&#39;, &#39;bottom&#39;] satisfies SheetSide[],
+    },
+    triggerLabel: { control: &#39;text&#39; },
+    title: { control: &#39;text&#39; },
+    description: { control: &#39;text&#39; },
+    body: { control: &#39;text&#39; },
+    onOpenChange: { table: { disable: true } },
+  },
+  render: ({
+    side,
+    triggerLabel,
+    title,
+    description,
+    body,
+    onOpenChange,
+  }) =&gt; (
+    &lt;Sheet onOpenChange={onOpenChange}&gt;
+      &lt;SheetTrigger asChild&gt;
+        &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+      &lt;/SheetTrigger&gt;
+      &lt;SheetContent side={side}&gt;
+        &lt;SheetHeader&gt;
+          &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+          &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+        &lt;/SheetHeader&gt;
+        &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+      &lt;/SheetContent&gt;
+    &lt;/Sheet&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Default: Story = {};
+
+export const FromRight: Story = { args: { side: &#39;right&#39; } };
+export const FromLeft: Story = { args: { side: &#39;left&#39; } };
+export const FromTop: Story = { args: { side: &#39;top&#39; } };
+export const FromBottom: Story = { args: { side: &#39;bottom&#39; } };
+
+export const OpensAndClosesOnEscape: Story = {
+  play: async ({ canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole(&#39;button&#39;, { name: /open sheet/i }),
+    );
+    const portal = within(document.body);
+    await waitFor(() =&gt; {
+      expect(portal.getByRole(&#39;dialog&#39;)).toBeVisible();
+    });
+    await userEvent.keyboard(&#39;{Escape}&#39;);
+    await waitFor(() =&gt; {
+      expect(portal.queryByRole(&#39;dialog&#39;)).toBeNull();
+    });
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import {
+    Button,
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Default = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
+    &lt;SheetTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/SheetTrigger&gt;
+    &lt;SheetContent side={side}&gt;
+      &lt;SheetHeader&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+      &lt;/SheetHeader&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+    &lt;/SheetContent&gt;
+  &lt;/Sheet&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">From Right</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const FromRight = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
+    &lt;SheetTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/SheetTrigger&gt;
+    &lt;SheetContent side={side}&gt;
+      &lt;SheetHeader&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+      &lt;/SheetHeader&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+    &lt;/SheetContent&gt;
+  &lt;/Sheet&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">From Left</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const FromLeft = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
+    &lt;SheetTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/SheetTrigger&gt;
+    &lt;SheetContent side={side}&gt;
+      &lt;SheetHeader&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+      &lt;/SheetHeader&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+    &lt;/SheetContent&gt;
+  &lt;/Sheet&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">From Top</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const FromTop = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
+    &lt;SheetTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/SheetTrigger&gt;
+    &lt;SheetContent side={side}&gt;
+      &lt;SheetHeader&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+      &lt;/SheetHeader&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+    &lt;/SheetContent&gt;
+  &lt;/Sheet&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">From Bottom</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const FromBottom = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
+    &lt;SheetTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/SheetTrigger&gt;
+    &lt;SheetContent side={side}&gt;
+      &lt;SheetHeader&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+      &lt;/SheetHeader&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+    &lt;/SheetContent&gt;
+  &lt;/Sheet&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Opens And Closes On Escape</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const OpensAndClosesOnEscape = ({
+  side,
+  triggerLabel,
+  title,
+  description,
+  body,
+  onOpenChange,
+}) =&gt; (
+  &lt;Sheet onOpenChange={onOpenChange}&gt;
+    &lt;SheetTrigger asChild&gt;
+      &lt;Button variant=&quot;outline&quot;&gt;{triggerLabel}&lt;/Button&gt;
+    &lt;/SheetTrigger&gt;
+    &lt;SheetContent side={side}&gt;
+      &lt;SheetHeader&gt;
+        &lt;SheetTitle&gt;{title}&lt;/SheetTitle&gt;
+        &lt;SheetDescription&gt;{description}&lt;/SheetDescription&gt;
+      &lt;/SheetHeader&gt;
+      &lt;p className=&quot;p-4 text-sm&quot;&gt;{body}&lt;/p&gt;
+    &lt;/SheetContent&gt;
+  &lt;/Sheet&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
   has-story-error
   no-doc-error"
   role="listitem"
@@ -7587,9 +10834,9 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
       <div class="badges">
-        <label for="c-error-2-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-2-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-2-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
+        <label for="c-error-9-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-9-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-9-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
         
       </div>
     </div>
@@ -7600,9 +10847,9 @@ export const Default: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-2-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-2-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-2-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-9-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-9-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-9-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 

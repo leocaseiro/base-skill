@@ -1,1 +1,0 @@
-import{j as e}from"./main-BAXTemZR.js";const s=()=>e.jsxs("div",{className:"p-8",children:[e.jsx("h1",{className:"text-2xl font-bold",children:"TTS Voice Selector"}),e.jsx("p",{className:"mt-2 text-muted-foreground",children:"Choose text-to-speech voices for each learner."})]});export{s as component};
