@@ -1,0 +1,1 @@
+import{r as e}from"./iframe-DFY_lLYq.js";var a=e.createContext(null);function u(r){return e.useContext(a)}function s(r){const t=u();return e.useCallback(o=>t.navigate({...o,from:o.from??r?.from}),[r?.from,t])}export{s as a,a as r,u};
