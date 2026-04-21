@@ -5,6 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof LevelCompleteOverlay> = {
   component: LevelCompleteOverlay,
+  title: 'answer-game/LevelCompleteOverlay',
   tags: ['autodocs'],
   args: {
     level: 1,

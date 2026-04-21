@@ -5,6 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof GameOverOverlay> = {
   component: GameOverOverlay,
+  title: 'answer-game/GameOverOverlay',
   tags: ['autodocs'],
   args: {
     retryCount: 0,
