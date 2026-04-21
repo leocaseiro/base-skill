@@ -355,10 +355,9 @@ _**Agent (claude-opus-4-7 2026-04-21 03:48:37Z)**_
 <tool-use data-tool-type="generic" data-tool-name="Skill"><details>
 <summary>Tool use: **Skill**</summary>
 
-**Input:**
-
-- skill: `superpowers:brainstorming`
-
+```text
+Launching skill: superpowers:brainstorming
+```
 </details></tool-use>
 
 ---
@@ -4610,3 +4609,9 @@ File:
 `worktrees/storybook-audit-batch-2-answer-game/docs/superpowers/specs/2026-04-21-audit-storybook-answer-game-design.md`
 
 Please review it and let me know if you want any changes before I invoke `superpowers:writing-plans` to draft the implementation plan. Reply **LGTM** (or similar) to proceed, or point at what you want reshaped.
+
+---
+
+_**User (2026-04-21 05:30:01Z)**_
+
+LGTM
