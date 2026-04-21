@@ -20,3 +20,4 @@ storybook-static
 worktrees/
 .specstory/statistics.json
 .superpowers/
+.local-debug/
