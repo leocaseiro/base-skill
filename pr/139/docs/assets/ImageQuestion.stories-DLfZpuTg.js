@@ -1,0 +1,6 @@
+import{j as t}from"./iframe-BgR5LDev.js";import{w as e}from"./withDb-CfPJYqwa.js";import{I as a}from"./ImageQuestion-DeyhS-OH.js";import{A as s}from"./AnswerGameProvider-D6QgKPIC.js";import"./preload-helper-PPVm8Dsz.js";import"./DbProvider-D2g0dKJZ.js";import"./Subject-VZNLZCXQ.js";import"./tslib.es6--Hu8dhvm.js";import"./useGameTTS-BwbBilTw.js";import"./useSettings-CA0FIXQA.js";import"./useRxDB-BYHTapD8.js";import"./useRxQuery-C8v8SEns.js";import"./SpeechOutput-Dyw1q0Rq.js";import"./safe-get-voices-dEfMv828.js";import"./useTranslation-CBA-xvNM.js";import"./index-C5d41Tkp.js";import"./index-BW9GhOeN.js";import"./AudioFeedback-DxUgBcwr.js";import"./game-event-bus-CVIPXPct.js";import"./SkinHarness-Bd-aN5az.js";const m={gameId:"storybook",inputMethod:"drag",wrongTileBehavior:"lock-auto-eject",tileBankMode:"exact",totalRounds:1,ttsEnabled:!0},A={component:a,tags:["autodocs"],decorators:[e,r=>t.jsx(s,{config:m,children:t.jsx(r,{})})]},o={args:{src:"https://placehold.co/160",prompt:"cat"}};o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:`{
+  args: {
+    src: 'https://placehold.co/160',
+    prompt: 'cat'
+  }
+}`,...o.parameters?.docs?.source}}};const B=["Default"];export{o as Default,B as __namedExportsOrder,A as default};
