@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -6891,13 +6891,13 @@ min?: any = 0</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SlotRow as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  123 | };
-  124 |
-&gt; 125 | const meta: Meta&lt;StoryArgs&gt; = {
+  132 | };
+  133 |
+&gt; 134 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  126 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
-  127 |   title: &#39;answer-game/Slot&#39;,
-  128 |   tags: [&#39;autodocs&#39;],
+  135 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
+  136 |   title: &#39;answer-game/Slot&#39;,
+  137 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/Slot/Slot.stories.tsx:
 import { useEffect } from &#39;react&#39;;
@@ -6911,7 +6911,11 @@ import { SlotRow } from &#39;./SlotRow&#39;;
 import type { AnswerGameConfig, AnswerZone, TileItem } from &#39;../types&#39;;
 import type { SlotRenderProps } from &#39;./useSlotBehavior&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import type { CSSProperties, ComponentType, ReactNode } from &#39;react&#39;;
+import {
+  DiceFace,
+  DominoTile,
+} from &#39;@/games/number-match/NumeralTileBank/NumeralTileBank&#39;;
 import { classicSkin } from &#39;@/lib/skin&#39;;
 
 type SlotVariant = &#39;letter&#39; | &#39;dice&#39; | &#39;domino&#39; | &#39;inline-gap&#39;;
@@ -6920,6 +6924,8 @@ type DragPreview = &#39;none&#39; | &#39;target-empty&#39; | &#39;target-swap&#3
 interface StoryArgs {
   variant: SlotVariant;
   label: string;
+  diceValue: number;
+  dominoValue: number;
   filled: boolean;
   isWrong: boolean;
   dragPreview: DragPreview;
@@ -6971,7 +6977,7 @@ const variantConfig: Record&lt;
     contentClass: &#39;text-2xl font-bold&#39;,
   },
   domino: {
-    slotClass: &#39;h-[72px] w-32 rounded-xl&#39;,
+    slotClass: &#39;h-[136px] w-[72px] rounded-xl&#39;,
     contentClass: &#39;text-3xl font-bold&#39;,
   },
   &#39;inline-gap&#39;: { slotClass: &#39;&#39;, contentClass: &#39;&#39; },
@@ -6980,13 +6986,15 @@ const variantConfig: Record&lt;
 const PlaygroundInner = ({
   variant,
   dragPreview,
-  contentClass,
   slotClass,
+  renderContent,
+  renderPreview,
 }: {
   variant: SlotVariant;
   dragPreview: DragPreview;
-  contentClass: string;
   slotClass: string;
+  renderContent: (props: SlotRenderProps) =&gt; ReactNode;
+  renderPreview?: (previewLabel: string) =&gt; ReactNode;
 }) =&gt; {
   const dispatch = useAnswerGameDispatch();
 
@@ -7009,14 +7017,15 @@ const PlaygroundInner = ({
     );
   }
 
-  const renderContent = ({ label }: SlotRenderProps) =&gt; (
-    &lt;span className={contentClass}&gt;{label ?? &#39;&#39;}&lt;/span&gt;
-  );
-
   return (
     &lt;SlotRow className=&quot;gap-3&quot;&gt;
       {[0, 1, 2].map((i) =&gt; (
-        &lt;Slot key={i} index={i} className={slotClass}&gt;
+        &lt;Slot
+          key={i}
+          index={i}
+          className={slotClass}
+          renderPreview={renderPreview}
+        &gt;
           {(props) =&gt; renderContent(props)}
         &lt;/Slot&gt;
       ))}
@@ -7031,7 +7040,9 @@ const meta: Meta&lt;StoryArgs&gt; = {
   decorators: [withDb],
   args: {
     variant: &#39;letter&#39;,
-    label: &#39;A&#39;,
+    label: &#39;a&#39;,
+    diceValue: 5,
+    dominoValue: 8,
     filled: true,
     isWrong: false,
     dragPreview: &#39;none&#39;,
@@ -7046,7 +7057,21 @@ const meta: Meta&lt;StoryArgs&gt; = {
         &#39;inline-gap&#39;,
       ] satisfies SlotVariant[],
     },
-    label: { control: &#39;text&#39; },
+    label: {
+      control: &#39;text&#39;,
+      if: { arg: &#39;variant&#39;, eq: &#39;letter&#39; },
+    },
+    diceValue: {
+      control: { type: &#39;range&#39;, min: 0, max: 6, step: 1 },
+      description: &#39;Pip count (0-6) rendered as a 3×3 dice face.&#39;,
+      if: { arg: &#39;variant&#39;, eq: &#39;dice&#39; },
+    },
+    dominoValue: {
+      control: { type: &#39;range&#39;, min: 1, max: 12, step: 1 },
+      description:
+        &#39;Sum rendered as two stacked dice faces (top = smaller half).&#39;,
+      if: { arg: &#39;variant&#39;, eq: &#39;domino&#39; },
+    },
     filled: { control: &#39;boolean&#39; },
     isWrong: { control: &#39;boolean&#39; },
     dragPreview: {
@@ -7060,17 +7085,69 @@ const meta: Meta&lt;StoryArgs&gt; = {
     className: { table: { disable: true } },
     children: { table: { disable: true } },
   },
-  render: ({ variant, label, filled, isWrong, dragPreview }) =&gt; {
+  render: ({
+    variant,
+    label,
+    diceValue,
+    dominoValue,
+    filled,
+    isWrong,
+    dragPreview,
+  }) =&gt; {
     const { slotClass, contentClass } = variantConfig[variant];
+
+    // Per-variant tile label + content renderer. Tiles feed into the
+    // AnswerGameProvider so Slot sees a real placed tile; renderContent
+    // draws the face inside the Slot render-prop. renderPreview mirrors
+    // the face during drag-hover previews (otherwise Slot would fall
+    // back to a plain `&lt;span&gt;{previewLabel}&lt;/span&gt;` that shows the raw
+    // numeric label for dice/domino).
+    const tileLabel =
+      variant === &#39;letter&#39;
+        ? label || &#39;a&#39;
+        : variant === &#39;dice&#39;
+          ? String(diceValue)
+          : variant === &#39;domino&#39;
+            ? String(dominoValue)
+            : label || &#39;cat&#39;;
+
+    const renderContent = (props: SlotRenderProps) =&gt; {
+      // Only render the face when the slot has a placed tile label.
+      // Empty slots pass label=null; falling through to null keeps them
+      // empty (matches the letter branch&#39;s `props.label ?? &#39;&#39;`).
+      if (props.label === null) return null;
+      if (variant === &#39;dice&#39;) {
+        return &lt;DiceFace value={Number(props.label) || 0} /&gt;;
+      }
+      if (variant === &#39;domino&#39;) {
+        return &lt;DominoTile value={Number(props.label) || 0} /&gt;;
+      }
+      return &lt;span className={contentClass}&gt;{props.label}&lt;/span&gt;;
+    };
+
+    const renderPreview =
+      variant === &#39;dice&#39;
+        ? (previewLabel: string) =&gt; (
+            &lt;div className=&quot;opacity-50&quot;&gt;
+              &lt;DiceFace value={Number(previewLabel) || 0} /&gt;
+            &lt;/div&gt;
+          )
+        : variant === &#39;domino&#39;
+          ? (previewLabel: string) =&gt; (
+              &lt;div className=&quot;opacity-50&quot;&gt;
+                &lt;DominoTile value={Number(previewLabel) || 0} /&gt;
+              &lt;/div&gt;
+            )
+          : undefined;
 
     // Build tiles/zones depending on variant + flags.
     const tiles: TileItem[] =
       variant === &#39;inline-gap&#39;
-        ? [makeTile(&#39;s0&#39;, label || &#39;cat&#39;)]
+        ? [makeTile(&#39;s0&#39;, tileLabel)]
         : [
-            makeTile(&#39;t0&#39;, label || &#39;a&#39;),
-            makeTile(&#39;t1&#39;, &#39;b&#39;),
-            makeTile(&#39;t2&#39;, &#39;c&#39;),
+            makeTile(&#39;t0&#39;, tileLabel),
+            makeTile(&#39;t1&#39;, variant === &#39;letter&#39; ? &#39;b&#39; : &#39;2&#39;),
+            makeTile(&#39;t2&#39;, variant === &#39;letter&#39; ? &#39;c&#39; : &#39;3&#39;),
           ];
 
     const zones: AnswerZone[] =
@@ -7104,8 +7181,9 @@ const meta: Meta&lt;StoryArgs&gt; = {
           &lt;PlaygroundInner
             variant={variant}
             dragPreview={dragPreview}
-            contentClass={contentClass}
             slotClass={slotClass}
+            renderContent={renderContent}
+            renderPreview={renderPreview}
           /&gt;
         &lt;/AnswerGameProvider&gt;
       &lt;/div&gt;
@@ -7116,12 +7194,7 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Playground: Story = {
-  args: {
-    label: &#39;a&#39;,
-    isWrong: false,
-  },
-};
+export const Playground: Story = {};
 </code></pre></div>
     </div>
         </div>
@@ -7143,7 +7216,7 @@ export const Playground: Story = {
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { AnswerGameProvider, SentenceWithGaps, Slot, SlotRow } from "base-skill";</code></pre>
+                <pre><code>import { AnswerGameProvider, DiceFace, DominoTile, SentenceWithGaps, Slot, SlotRow } from "base-skill";</code></pre>
               </div>
           
           
@@ -7154,17 +7227,69 @@ export const Playground: Story = {
               </div>
               
               
-              <pre><code>const Playground = ({ variant, label, filled, isWrong, dragPreview }) =&gt; {
+              <pre><code>const Playground = ({
+  variant,
+  label,
+  diceValue,
+  dominoValue,
+  filled,
+  isWrong,
+  dragPreview,
+}) =&gt; {
   const { slotClass, contentClass } = variantConfig[variant];
+
+  // Per-variant tile label + content renderer. Tiles feed into the
+  // AnswerGameProvider so Slot sees a real placed tile; renderContent
+  // draws the face inside the Slot render-prop. renderPreview mirrors
+  // the face during drag-hover previews (otherwise Slot would fall
+  // back to a plain `&lt;span&gt;{previewLabel}&lt;/span&gt;` that shows the raw
+  // numeric label for dice/domino).
+  const tileLabel =
+    variant === &#39;letter&#39;
+      ? label || &#39;a&#39;
+      : variant === &#39;dice&#39;
+        ? String(diceValue)
+        : variant === &#39;domino&#39;
+          ? String(dominoValue)
+          : label || &#39;cat&#39;;
+
+  const renderContent = (props: SlotRenderProps) =&gt; {
+    // Only render the face when the slot has a placed tile label.
+    // Empty slots pass label=null; falling through to null keeps them
+    // empty (matches the letter branch&#39;s `props.label ?? &#39;&#39;`).
+    if (props.label === null) return null;
+    if (variant === &#39;dice&#39;) {
+      return &lt;DiceFace value={Number(props.label) || 0} /&gt;;
+    }
+    if (variant === &#39;domino&#39;) {
+      return &lt;DominoTile value={Number(props.label) || 0} /&gt;;
+    }
+    return &lt;span className={contentClass}&gt;{props.label}&lt;/span&gt;;
+  };
+
+  const renderPreview =
+    variant === &#39;dice&#39;
+      ? (previewLabel: string) =&gt; (
+          &lt;div className=&quot;opacity-50&quot;&gt;
+            &lt;DiceFace value={Number(previewLabel) || 0} /&gt;
+          &lt;/div&gt;
+        )
+      : variant === &#39;domino&#39;
+        ? (previewLabel: string) =&gt; (
+            &lt;div className=&quot;opacity-50&quot;&gt;
+              &lt;DominoTile value={Number(previewLabel) || 0} /&gt;
+            &lt;/div&gt;
+          )
+        : undefined;
 
   // Build tiles/zones depending on variant + flags.
   const tiles: TileItem[] =
     variant === &#39;inline-gap&#39;
-      ? [makeTile(&#39;s0&#39;, label || &#39;cat&#39;)]
+      ? [makeTile(&#39;s0&#39;, tileLabel)]
       : [
-          makeTile(&#39;t0&#39;, label || &#39;a&#39;),
-          makeTile(&#39;t1&#39;, &#39;b&#39;),
-          makeTile(&#39;t2&#39;, &#39;c&#39;),
+          makeTile(&#39;t0&#39;, tileLabel),
+          makeTile(&#39;t1&#39;, variant === &#39;letter&#39; ? &#39;b&#39; : &#39;2&#39;),
+          makeTile(&#39;t2&#39;, variant === &#39;letter&#39; ? &#39;c&#39; : &#39;3&#39;),
         ];
 
   const zones: AnswerZone[] =
@@ -7198,8 +7323,9 @@ export const Playground: Story = {
         &lt;PlaygroundInner
           variant={variant}
           dragPreview={dragPreview}
-          contentClass={contentClass}
           slotClass={slotClass}
+          renderContent={renderContent}
+          renderPreview={renderPreview}
         /&gt;
       &lt;/AnswerGameProvider&gt;
     &lt;/div&gt;
@@ -12351,13 +12477,13 @@ export const OpensAndClosesOnEscape: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SlotRow as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  123 | };
-  124 |
-&gt; 125 | const meta: Meta&lt;StoryArgs&gt; = {
+  132 | };
+  133 |
+&gt; 134 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  126 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
-  127 |   title: &#39;answer-game/Slot&#39;,
-  128 |   tags: [&#39;autodocs&#39;],
+  135 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
+  136 |   title: &#39;answer-game/Slot&#39;,
+  137 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/Slot/Slot.stories.tsx:
 import { useEffect } from &#39;react&#39;;
@@ -12371,7 +12497,11 @@ import { SlotRow } from &#39;./SlotRow&#39;;
 import type { AnswerGameConfig, AnswerZone, TileItem } from &#39;../types&#39;;
 import type { SlotRenderProps } from &#39;./useSlotBehavior&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import type { CSSProperties, ComponentType, ReactNode } from &#39;react&#39;;
+import {
+  DiceFace,
+  DominoTile,
+} from &#39;@/games/number-match/NumeralTileBank/NumeralTileBank&#39;;
 import { classicSkin } from &#39;@/lib/skin&#39;;
 
 type SlotVariant = &#39;letter&#39; | &#39;dice&#39; | &#39;domino&#39; | &#39;inline-gap&#39;;
@@ -12380,6 +12510,8 @@ type DragPreview = &#39;none&#39; | &#39;target-empty&#39; | &#39;target-swap&#3
 interface StoryArgs {
   variant: SlotVariant;
   label: string;
+  diceValue: number;
+  dominoValue: number;
   filled: boolean;
   isWrong: boolean;
   dragPreview: DragPreview;
@@ -12431,7 +12563,7 @@ const variantConfig: Record&lt;
     contentClass: &#39;text-2xl font-bold&#39;,
   },
   domino: {
-    slotClass: &#39;h-[72px] w-32 rounded-xl&#39;,
+    slotClass: &#39;h-[136px] w-[72px] rounded-xl&#39;,
     contentClass: &#39;text-3xl font-bold&#39;,
   },
   &#39;inline-gap&#39;: { slotClass: &#39;&#39;, contentClass: &#39;&#39; },
@@ -12440,13 +12572,15 @@ const variantConfig: Record&lt;
 const PlaygroundInner = ({
   variant,
   dragPreview,
-  contentClass,
   slotClass,
+  renderContent,
+  renderPreview,
 }: {
   variant: SlotVariant;
   dragPreview: DragPreview;
-  contentClass: string;
   slotClass: string;
+  renderContent: (props: SlotRenderProps) =&gt; ReactNode;
+  renderPreview?: (previewLabel: string) =&gt; ReactNode;
 }) =&gt; {
   const dispatch = useAnswerGameDispatch();
 
@@ -12469,14 +12603,15 @@ const PlaygroundInner = ({
     );
   }
 
-  const renderContent = ({ label }: SlotRenderProps) =&gt; (
-    &lt;span className={contentClass}&gt;{label ?? &#39;&#39;}&lt;/span&gt;
-  );
-
   return (
     &lt;SlotRow className=&quot;gap-3&quot;&gt;
       {[0, 1, 2].map((i) =&gt; (
-        &lt;Slot key={i} index={i} className={slotClass}&gt;
+        &lt;Slot
+          key={i}
+          index={i}
+          className={slotClass}
+          renderPreview={renderPreview}
+        &gt;
           {(props) =&gt; renderContent(props)}
         &lt;/Slot&gt;
       ))}
@@ -12491,7 +12626,9 @@ const meta: Meta&lt;StoryArgs&gt; = {
   decorators: [withDb],
   args: {
     variant: &#39;letter&#39;,
-    label: &#39;A&#39;,
+    label: &#39;a&#39;,
+    diceValue: 5,
+    dominoValue: 8,
     filled: true,
     isWrong: false,
     dragPreview: &#39;none&#39;,
@@ -12506,7 +12643,21 @@ const meta: Meta&lt;StoryArgs&gt; = {
         &#39;inline-gap&#39;,
       ] satisfies SlotVariant[],
     },
-    label: { control: &#39;text&#39; },
+    label: {
+      control: &#39;text&#39;,
+      if: { arg: &#39;variant&#39;, eq: &#39;letter&#39; },
+    },
+    diceValue: {
+      control: { type: &#39;range&#39;, min: 0, max: 6, step: 1 },
+      description: &#39;Pip count (0-6) rendered as a 3×3 dice face.&#39;,
+      if: { arg: &#39;variant&#39;, eq: &#39;dice&#39; },
+    },
+    dominoValue: {
+      control: { type: &#39;range&#39;, min: 1, max: 12, step: 1 },
+      description:
+        &#39;Sum rendered as two stacked dice faces (top = smaller half).&#39;,
+      if: { arg: &#39;variant&#39;, eq: &#39;domino&#39; },
+    },
     filled: { control: &#39;boolean&#39; },
     isWrong: { control: &#39;boolean&#39; },
     dragPreview: {
@@ -12520,17 +12671,69 @@ const meta: Meta&lt;StoryArgs&gt; = {
     className: { table: { disable: true } },
     children: { table: { disable: true } },
   },
-  render: ({ variant, label, filled, isWrong, dragPreview }) =&gt; {
+  render: ({
+    variant,
+    label,
+    diceValue,
+    dominoValue,
+    filled,
+    isWrong,
+    dragPreview,
+  }) =&gt; {
     const { slotClass, contentClass } = variantConfig[variant];
+
+    // Per-variant tile label + content renderer. Tiles feed into the
+    // AnswerGameProvider so Slot sees a real placed tile; renderContent
+    // draws the face inside the Slot render-prop. renderPreview mirrors
+    // the face during drag-hover previews (otherwise Slot would fall
+    // back to a plain `&lt;span&gt;{previewLabel}&lt;/span&gt;` that shows the raw
+    // numeric label for dice/domino).
+    const tileLabel =
+      variant === &#39;letter&#39;
+        ? label || &#39;a&#39;
+        : variant === &#39;dice&#39;
+          ? String(diceValue)
+          : variant === &#39;domino&#39;
+            ? String(dominoValue)
+            : label || &#39;cat&#39;;
+
+    const renderContent = (props: SlotRenderProps) =&gt; {
+      // Only render the face when the slot has a placed tile label.
+      // Empty slots pass label=null; falling through to null keeps them
+      // empty (matches the letter branch&#39;s `props.label ?? &#39;&#39;`).
+      if (props.label === null) return null;
+      if (variant === &#39;dice&#39;) {
+        return &lt;DiceFace value={Number(props.label) || 0} /&gt;;
+      }
+      if (variant === &#39;domino&#39;) {
+        return &lt;DominoTile value={Number(props.label) || 0} /&gt;;
+      }
+      return &lt;span className={contentClass}&gt;{props.label}&lt;/span&gt;;
+    };
+
+    const renderPreview =
+      variant === &#39;dice&#39;
+        ? (previewLabel: string) =&gt; (
+            &lt;div className=&quot;opacity-50&quot;&gt;
+              &lt;DiceFace value={Number(previewLabel) || 0} /&gt;
+            &lt;/div&gt;
+          )
+        : variant === &#39;domino&#39;
+          ? (previewLabel: string) =&gt; (
+              &lt;div className=&quot;opacity-50&quot;&gt;
+                &lt;DominoTile value={Number(previewLabel) || 0} /&gt;
+              &lt;/div&gt;
+            )
+          : undefined;
 
     // Build tiles/zones depending on variant + flags.
     const tiles: TileItem[] =
       variant === &#39;inline-gap&#39;
-        ? [makeTile(&#39;s0&#39;, label || &#39;cat&#39;)]
+        ? [makeTile(&#39;s0&#39;, tileLabel)]
         : [
-            makeTile(&#39;t0&#39;, label || &#39;a&#39;),
-            makeTile(&#39;t1&#39;, &#39;b&#39;),
-            makeTile(&#39;t2&#39;, &#39;c&#39;),
+            makeTile(&#39;t0&#39;, tileLabel),
+            makeTile(&#39;t1&#39;, variant === &#39;letter&#39; ? &#39;b&#39; : &#39;2&#39;),
+            makeTile(&#39;t2&#39;, variant === &#39;letter&#39; ? &#39;c&#39; : &#39;3&#39;),
           ];
 
     const zones: AnswerZone[] =
@@ -12564,8 +12767,9 @@ const meta: Meta&lt;StoryArgs&gt; = {
           &lt;PlaygroundInner
             variant={variant}
             dragPreview={dragPreview}
-            contentClass={contentClass}
             slotClass={slotClass}
+            renderContent={renderContent}
+            renderPreview={renderPreview}
           /&gt;
         &lt;/AnswerGameProvider&gt;
       &lt;/div&gt;
@@ -12576,12 +12780,7 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Playground: Story = {
-  args: {
-    label: &#39;a&#39;,
-    isWrong: false,
-  },
-};
+export const Playground: Story = {};
 </code></pre></div>
     </div>
         </div>
@@ -12603,7 +12802,7 @@ export const Playground: Story = {
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { AnswerGameProvider, SentenceWithGaps, Slot, SlotRow } from "base-skill";</code></pre>
+                <pre><code>import { AnswerGameProvider, DiceFace, DominoTile, SentenceWithGaps, Slot, SlotRow } from "base-skill";</code></pre>
               </div>
           
           
@@ -12614,17 +12813,69 @@ export const Playground: Story = {
               </div>
               
               
-              <pre><code>const Playground = ({ variant, label, filled, isWrong, dragPreview }) =&gt; {
+              <pre><code>const Playground = ({
+  variant,
+  label,
+  diceValue,
+  dominoValue,
+  filled,
+  isWrong,
+  dragPreview,
+}) =&gt; {
   const { slotClass, contentClass } = variantConfig[variant];
+
+  // Per-variant tile label + content renderer. Tiles feed into the
+  // AnswerGameProvider so Slot sees a real placed tile; renderContent
+  // draws the face inside the Slot render-prop. renderPreview mirrors
+  // the face during drag-hover previews (otherwise Slot would fall
+  // back to a plain `&lt;span&gt;{previewLabel}&lt;/span&gt;` that shows the raw
+  // numeric label for dice/domino).
+  const tileLabel =
+    variant === &#39;letter&#39;
+      ? label || &#39;a&#39;
+      : variant === &#39;dice&#39;
+        ? String(diceValue)
+        : variant === &#39;domino&#39;
+          ? String(dominoValue)
+          : label || &#39;cat&#39;;
+
+  const renderContent = (props: SlotRenderProps) =&gt; {
+    // Only render the face when the slot has a placed tile label.
+    // Empty slots pass label=null; falling through to null keeps them
+    // empty (matches the letter branch&#39;s `props.label ?? &#39;&#39;`).
+    if (props.label === null) return null;
+    if (variant === &#39;dice&#39;) {
+      return &lt;DiceFace value={Number(props.label) || 0} /&gt;;
+    }
+    if (variant === &#39;domino&#39;) {
+      return &lt;DominoTile value={Number(props.label) || 0} /&gt;;
+    }
+    return &lt;span className={contentClass}&gt;{props.label}&lt;/span&gt;;
+  };
+
+  const renderPreview =
+    variant === &#39;dice&#39;
+      ? (previewLabel: string) =&gt; (
+          &lt;div className=&quot;opacity-50&quot;&gt;
+            &lt;DiceFace value={Number(previewLabel) || 0} /&gt;
+          &lt;/div&gt;
+        )
+      : variant === &#39;domino&#39;
+        ? (previewLabel: string) =&gt; (
+            &lt;div className=&quot;opacity-50&quot;&gt;
+              &lt;DominoTile value={Number(previewLabel) || 0} /&gt;
+            &lt;/div&gt;
+          )
+        : undefined;
 
   // Build tiles/zones depending on variant + flags.
   const tiles: TileItem[] =
     variant === &#39;inline-gap&#39;
-      ? [makeTile(&#39;s0&#39;, label || &#39;cat&#39;)]
+      ? [makeTile(&#39;s0&#39;, tileLabel)]
       : [
-          makeTile(&#39;t0&#39;, label || &#39;a&#39;),
-          makeTile(&#39;t1&#39;, &#39;b&#39;),
-          makeTile(&#39;t2&#39;, &#39;c&#39;),
+          makeTile(&#39;t0&#39;, tileLabel),
+          makeTile(&#39;t1&#39;, variant === &#39;letter&#39; ? &#39;b&#39; : &#39;2&#39;),
+          makeTile(&#39;t2&#39;, variant === &#39;letter&#39; ? &#39;c&#39; : &#39;3&#39;),
         ];
 
   const zones: AnswerZone[] =
@@ -12658,8 +12909,9 @@ export const Playground: Story = {
         &lt;PlaygroundInner
           variant={variant}
           dragPreview={dragPreview}
-          contentClass={contentClass}
           slotClass={slotClass}
+          renderContent={renderContent}
+          renderPreview={renderPreview}
         /&gt;
       &lt;/AnswerGameProvider&gt;
     &lt;/div&gt;
