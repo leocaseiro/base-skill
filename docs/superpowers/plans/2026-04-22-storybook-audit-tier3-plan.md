@@ -577,8 +577,8 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 - Gate 3 — Handler wiring: `onChange` wired to `fn()` in `args`; hidden from Controls.
 - Gate 4 — No skin wrapper (theme tokens only).
 - Gate 5 — Hide shadowed rows for `fields`, `config`.
-- Gate 6 — Keep 4 scenarios (AllFieldTypes, SortNumbersFieldsExact/ByMode/Distractors) — each exercises a distinct `visibleWhen` branch that args can't reach without a preset. Drop `AllFieldTypesDark` — global theme toolbar covers dark review.
-- Gate 8 — Required Variants: Default (AllFieldTypes), plus the 3 Sort presets (state variants that surface `visibleWhen` branches).
+- Gate 6 — Collapse: the 4 scenario exports + `AllFieldTypesDark` all reduce to a single `Playground` — the `scenario` select in Controls reaches every `visibleWhen` branch in one click, and the theme toolbar reproduces dark. Drop all 5.
+- Gate 8 — Required Variants: single `Playground`. State variants (each `visibleWhen` branch) are reachable from the scenario select — no separate exports.
 - Gate 9 — Decorators: N/A (no router/DB deps).
 
 **Steps:**
@@ -772,21 +772,14 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 
   type Story = StoryObj<StoryArgs>;
 
-  export const AllFieldTypes: Story = {
-    args: { scenario: 'all-types' },
-  };
+  export const Playground: Story = {};
 
-  export const SortNumbersFieldsExact: Story = {
-    args: { scenario: 'sort-numbers-random' },
-  };
-
-  export const SortNumbersFieldsByMode: Story = {
-    args: { scenario: 'sort-numbers-by' },
-  };
-
-  export const SortNumbersFieldsDistractors: Story = {
-    args: { scenario: 'sort-numbers-distractors' },
-  };
+  // deleted-for-reference — every prior export is reachable from Playground via the `scenario` select:
+  //   AllFieldTypes                 → scenario='all-types'
+  //   SortNumbersFieldsExact        → scenario='sort-numbers-random'
+  //   SortNumbersFieldsByMode       → scenario='sort-numbers-by'
+  //   SortNumbersFieldsDistractors  → scenario='sort-numbers-distractors'
+  //   AllFieldTypesDark             → scenario='all-types' + toolbar flip to dark
   ```
 
 - [ ] **Step 3: Verify.**
@@ -811,9 +804,9 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   and hidden from Controls. Complex props (fields, config) shadowed
   via ?: never + table.disable.
 
-  Drop AllFieldTypesDark — global theme toolbar covers dark review.
-  Keep the 4 scenario stories that each surface a unique visibleWhen
-  state.
+  Collapse the 4 scenario exports + AllFieldTypesDark into a single
+  Playground — the scenario select reaches every visibleWhen branch
+  from Controls in one click; the theme toolbar reproduces dark.
 
   No skin wrapper — ConfigFormFields uses theme tokens
   (bg-background, text-foreground, border-input) only.
@@ -834,10 +827,10 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   Controls Policy + Required Variants gates
   ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md), issue #125).
 
-  - `scenario` select drives 4 presets — each surfaces a distinct `visibleWhen` branch the Controls panel cannot easily reach without a preset.
+  - `scenario` select in Controls drives 4 presets — each surfaces a distinct `visibleWhen` branch.
   - `onChange` wired to `fn()`; hidden from Controls.
   - Complex props (`fields`, `config`) shadowed via `?: never` + `table.disable`.
-  - Dropped `AllFieldTypesDark` — global theme toolbar covers that.
+  - Collapse the 4 scenario exports + `AllFieldTypesDark` into a single `Playground` — the scenario select reaches every state from Controls; theme toolbar reproduces dark.
   - No skin wrapper — `ConfigFormFields.tsx` uses theme tokens only (verified by grep).
 
   Closes part of #125.
@@ -847,7 +840,7 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   - [ ] `yarn typecheck` green
   - [ ] `yarn lint` green
   - [ ] `yarn test:storybook` green (runs in CI)
-  - [ ] scenario select drives the 4 presets; visibleWhen branches render correctly
+  - [ ] scenario select in the Playground drives all 4 `visibleWhen` branches; theme toolbar cycles dark/light
   EOF
   )"
   ```
