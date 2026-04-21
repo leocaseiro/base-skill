@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1008,24 +1008,26 @@ export const Cancelled: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  121 | };
-  122 |
-&gt; 123 | const meta: Meta&lt;StoryArgs&gt; = {
+  125 | };
+  126 |
+&gt; 127 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  124 |   component: AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;,
-  125 |   tags: [&#39;autodocs&#39;],
-  126 |   decorators: [withDb],
+  128 |   component: AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;,
+  129 |   tags: [&#39;autodocs&#39;],
+  130 |   decorators: [withDb],
 
 ./src/components/answer-game/AnswerGame/AnswerGame.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
 import { Slot } from &#39;../Slot/Slot&#39;;
 import { SlotRow } from &#39;../Slot/SlotRow&#39;;
+import { tileStyle } from &#39;../styles&#39;;
 import { useAnswerGameContext } from &#39;../useAnswerGameContext&#39;;
 import { useAnswerGameDispatch } from &#39;../useAnswerGameDispatch&#39;;
 import { AnswerGame } from &#39;./AnswerGame&#39;;
 import type { AnswerGameConfig, AnswerZone, TileItem } from &#39;../types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { ComponentType } from &#39;react&#39;;
+import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import { classicSkin } from &#39;@/lib/skin&#39;;
 
 type InputMethod = &#39;drag&#39; | &#39;type&#39; | &#39;both&#39;;
 type WrongTileBehavior = &#39;reject&#39; | &#39;lock-manual&#39; | &#39;lock-auto-eject&#39;;
@@ -1081,7 +1083,7 @@ const TapToPlaceBank = () =&gt; {
   );
 
   return (
-    &lt;div className=&quot;flex gap-2&quot;&gt;
+    &lt;div className=&quot;flex flex-wrap justify-center gap-3&quot;&gt;
       {bankTileIds.map((tileId) =&gt; {
         const tile = allTiles.find((t) =&gt; t.id === tileId);
         if (!tile) return null;
@@ -1097,7 +1099,8 @@ const TapToPlaceBank = () =&gt; {
                 zoneIndex: nextEmptyZoneIndex,
               });
             }}
-            className=&quot;flex size-14 items-center justify-center rounded-lg border-2 border-primary bg-background text-xl font-bold shadow-sm active:scale-95&quot;
+            className=&quot;flex size-14 touch-none select-none cursor-pointer items-center justify-center rounded-xl text-xl font-bold text-card-foreground transition-transform active:scale-95&quot;
+            style={tileStyle()}
           &gt;
             {tile.label}
           &lt;/button&gt;
@@ -1123,7 +1126,8 @@ const PlayableScene = () =&gt; {
             &lt;Slot
               key={zone.id}
               index={i}
-              className=&quot;size-14 rounded-lg&quot;
+              skin={classicSkin}
+              className=&quot;size-14&quot;
             &gt;
               {({ label }) =&gt; (
                 &lt;span className=&quot;text-xl font-bold&quot;&gt;{label ?? &#39;&#39;}&lt;/span&gt;
@@ -1190,9 +1194,14 @@ const meta: Meta&lt;StoryArgs&gt; = {
       initialZones,
     };
     return (
-      &lt;AnswerGame config={config}&gt;
-        &lt;PlayableScene /&gt;
-      &lt;/AnswerGame&gt;
+      &lt;div
+        className={`game-container skin-${classicSkin.id}`}
+        style={classicSkin.tokens as CSSProperties}
+      &gt;
+        &lt;AnswerGame config={config} skin={classicSkin}&gt;
+          &lt;PlayableScene /&gt;
+        &lt;/AnswerGame&gt;
+      &lt;/div&gt;
     );
   },
 };
@@ -1263,9 +1272,14 @@ export const LockManualMode: Story = {
     initialZones,
   };
   return (
-    &lt;AnswerGame config={config}&gt;
-      &lt;PlayableScene /&gt;
-    &lt;/AnswerGame&gt;
+    &lt;div
+      className={`game-container skin-${classicSkin.id}`}
+      style={classicSkin.tokens as CSSProperties}
+    &gt;
+      &lt;AnswerGame config={config} skin={classicSkin}&gt;
+        &lt;PlayableScene /&gt;
+      &lt;/AnswerGame&gt;
+    &lt;/div&gt;
   );
 };</code></pre>
             </div>
@@ -1294,9 +1308,14 @@ export const LockManualMode: Story = {
     initialZones,
   };
   return (
-    &lt;AnswerGame config={config}&gt;
-      &lt;PlayableScene /&gt;
-    &lt;/AnswerGame&gt;
+    &lt;div
+      className={`game-container skin-${classicSkin.id}`}
+      style={classicSkin.tokens as CSSProperties}
+    &gt;
+      &lt;AnswerGame config={config} skin={classicSkin}&gt;
+        &lt;PlayableScene /&gt;
+      &lt;/AnswerGame&gt;
+    &lt;/div&gt;
   );
 };</code></pre>
             </div>
@@ -1325,9 +1344,14 @@ export const LockManualMode: Story = {
     initialZones,
   };
   return (
-    &lt;AnswerGame config={config}&gt;
-      &lt;PlayableScene /&gt;
-    &lt;/AnswerGame&gt;
+    &lt;div
+      className={`game-container skin-${classicSkin.id}`}
+      style={classicSkin.tokens as CSSProperties}
+    &gt;
+      &lt;AnswerGame config={config} skin={classicSkin}&gt;
+        &lt;PlayableScene /&gt;
+      &lt;/AnswerGame&gt;
+    &lt;/div&gt;
   );
 };</code></pre>
             </div>
@@ -1356,9 +1380,14 @@ export const LockManualMode: Story = {
     initialZones,
   };
   return (
-    &lt;AnswerGame config={config}&gt;
-      &lt;PlayableScene /&gt;
-    &lt;/AnswerGame&gt;
+    &lt;div
+      className={`game-container skin-${classicSkin.id}`}
+      style={classicSkin.tokens as CSSProperties}
+    &gt;
+      &lt;AnswerGame config={config} skin={classicSkin}&gt;
+        &lt;PlayableScene /&gt;
+      &lt;/AnswerGame&gt;
+    &lt;/div&gt;
   );
 };</code></pre>
             </div>
@@ -9561,24 +9590,26 @@ export const Cancelled: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  121 | };
-  122 |
-&gt; 123 | const meta: Meta&lt;StoryArgs&gt; = {
+  125 | };
+  126 |
+&gt; 127 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  124 |   component: AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;,
-  125 |   tags: [&#39;autodocs&#39;],
-  126 |   decorators: [withDb],
+  128 |   component: AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;,
+  129 |   tags: [&#39;autodocs&#39;],
+  130 |   decorators: [withDb],
 
 ./src/components/answer-game/AnswerGame/AnswerGame.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
 import { Slot } from &#39;../Slot/Slot&#39;;
 import { SlotRow } from &#39;../Slot/SlotRow&#39;;
+import { tileStyle } from &#39;../styles&#39;;
 import { useAnswerGameContext } from &#39;../useAnswerGameContext&#39;;
 import { useAnswerGameDispatch } from &#39;../useAnswerGameDispatch&#39;;
 import { AnswerGame } from &#39;./AnswerGame&#39;;
 import type { AnswerGameConfig, AnswerZone, TileItem } from &#39;../types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { ComponentType } from &#39;react&#39;;
+import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import { classicSkin } from &#39;@/lib/skin&#39;;
 
 type InputMethod = &#39;drag&#39; | &#39;type&#39; | &#39;both&#39;;
 type WrongTileBehavior = &#39;reject&#39; | &#39;lock-manual&#39; | &#39;lock-auto-eject&#39;;
@@ -9634,7 +9665,7 @@ const TapToPlaceBank = () =&gt; {
   );
 
   return (
-    &lt;div className=&quot;flex gap-2&quot;&gt;
+    &lt;div className=&quot;flex flex-wrap justify-center gap-3&quot;&gt;
       {bankTileIds.map((tileId) =&gt; {
         const tile = allTiles.find((t) =&gt; t.id === tileId);
         if (!tile) return null;
@@ -9650,7 +9681,8 @@ const TapToPlaceBank = () =&gt; {
                 zoneIndex: nextEmptyZoneIndex,
               });
             }}
-            className=&quot;flex size-14 items-center justify-center rounded-lg border-2 border-primary bg-background text-xl font-bold shadow-sm active:scale-95&quot;
+            className=&quot;flex size-14 touch-none select-none cursor-pointer items-center justify-center rounded-xl text-xl font-bold text-card-foreground transition-transform active:scale-95&quot;
+            style={tileStyle()}
           &gt;
             {tile.label}
           &lt;/button&gt;
@@ -9676,7 +9708,8 @@ const PlayableScene = () =&gt; {
             &lt;Slot
               key={zone.id}
               index={i}
-              className=&quot;size-14 rounded-lg&quot;
+              skin={classicSkin}
+              className=&quot;size-14&quot;
             &gt;
               {({ label }) =&gt; (
                 &lt;span className=&quot;text-xl font-bold&quot;&gt;{label ?? &#39;&#39;}&lt;/span&gt;
@@ -9743,9 +9776,14 @@ const meta: Meta&lt;StoryArgs&gt; = {
       initialZones,
     };
     return (
-      &lt;AnswerGame config={config}&gt;
-        &lt;PlayableScene /&gt;
-      &lt;/AnswerGame&gt;
+      &lt;div
+        className={`game-container skin-${classicSkin.id}`}
+        style={classicSkin.tokens as CSSProperties}
+      &gt;
+        &lt;AnswerGame config={config} skin={classicSkin}&gt;
+          &lt;PlayableScene /&gt;
+        &lt;/AnswerGame&gt;
+      &lt;/div&gt;
     );
   },
 };
@@ -9816,9 +9854,14 @@ export const LockManualMode: Story = {
     initialZones,
   };
   return (
-    &lt;AnswerGame config={config}&gt;
-      &lt;PlayableScene /&gt;
-    &lt;/AnswerGame&gt;
+    &lt;div
+      className={`game-container skin-${classicSkin.id}`}
+      style={classicSkin.tokens as CSSProperties}
+    &gt;
+      &lt;AnswerGame config={config} skin={classicSkin}&gt;
+        &lt;PlayableScene /&gt;
+      &lt;/AnswerGame&gt;
+    &lt;/div&gt;
   );
 };</code></pre>
             </div>
@@ -9847,9 +9890,14 @@ export const LockManualMode: Story = {
     initialZones,
   };
   return (
-    &lt;AnswerGame config={config}&gt;
-      &lt;PlayableScene /&gt;
-    &lt;/AnswerGame&gt;
+    &lt;div
+      className={`game-container skin-${classicSkin.id}`}
+      style={classicSkin.tokens as CSSProperties}
+    &gt;
+      &lt;AnswerGame config={config} skin={classicSkin}&gt;
+        &lt;PlayableScene /&gt;
+      &lt;/AnswerGame&gt;
+    &lt;/div&gt;
   );
 };</code></pre>
             </div>
@@ -9878,9 +9926,14 @@ export const LockManualMode: Story = {
     initialZones,
   };
   return (
-    &lt;AnswerGame config={config}&gt;
-      &lt;PlayableScene /&gt;
-    &lt;/AnswerGame&gt;
+    &lt;div
+      className={`game-container skin-${classicSkin.id}`}
+      style={classicSkin.tokens as CSSProperties}
+    &gt;
+      &lt;AnswerGame config={config} skin={classicSkin}&gt;
+        &lt;PlayableScene /&gt;
+      &lt;/AnswerGame&gt;
+    &lt;/div&gt;
   );
 };</code></pre>
             </div>
@@ -9909,9 +9962,14 @@ export const LockManualMode: Story = {
     initialZones,
   };
   return (
-    &lt;AnswerGame config={config}&gt;
-      &lt;PlayableScene /&gt;
-    &lt;/AnswerGame&gt;
+    &lt;div
+      className={`game-container skin-${classicSkin.id}`}
+      style={classicSkin.tokens as CSSProperties}
+    &gt;
+      &lt;AnswerGame config={config} skin={classicSkin}&gt;
+        &lt;PlayableScene /&gt;
+      &lt;/AnswerGame&gt;
+    &lt;/div&gt;
   );
 };</code></pre>
             </div>
