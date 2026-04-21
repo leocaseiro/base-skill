@@ -1,9 +1,23 @@
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { WordSpell } from './WordSpell';
 import type { WordSpellConfig } from '../types';
+import type { AnswerGameDraftState } from '@/components/answer-game/types';
 import { createInMemorySeenWordsStore } from '@/data/words';
+
+const toastStub = vi.hoisted(() => vi.fn());
+vi.mock('sonner', () => ({
+  toast: toastStub,
+  Toaster: () => null,
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { language: 'en' },
+  }),
+}));
 
 vi.mock('@/db/hooks/useSeenWordsStore', () => ({
   useSeenWordsStore: () => createInMemorySeenWordsStore(),
@@ -68,6 +82,10 @@ const config: WordSpellConfig = {
   ],
 };
 
+beforeEach(() => {
+  toastStub.mockClear();
+});
+
 describe('WordSpell', () => {
   it('renders the game with letter tiles for the first round word', () => {
     render(<WordSpell config={config} />);
@@ -119,6 +137,60 @@ describe('WordSpell library levels recall', () => {
     // This smoke test exists only to pin the component compiles with
     // the new hook signature.
     expect(true).toBe(true);
+  });
+});
+
+describe('WordSpell stale-draft recovery toast', () => {
+  const staleInitialState: AnswerGameDraftState = {
+    allTiles: [
+      { id: 'a', label: 'X', value: 'x' },
+      { id: 'b', label: 'Y', value: 'y' },
+      { id: 'c', label: 'Z', value: 'z' },
+    ],
+    bankTileIds: ['a', 'b', 'c'],
+    zones: [],
+    activeSlotIndex: 0,
+    phase: 'playing',
+    roundIndex: 0,
+    retryCount: 0,
+    levelIndex: 0,
+  };
+
+  const alignedInitialState: AnswerGameDraftState = {
+    allTiles: [
+      { id: 'a', label: 'c', value: 'c' },
+      { id: 'b', label: 'a', value: 'a' },
+      { id: 't', label: 't', value: 't' },
+    ],
+    bankTileIds: ['a', 'b', 't'],
+    zones: [],
+    activeSlotIndex: 0,
+    phase: 'playing',
+    roundIndex: 0,
+    retryCount: 0,
+    levelIndex: 0,
+  };
+
+  it('fires toast when the resumed draft does not match the resolved round', () => {
+    render(
+      <WordSpell config={config} initialState={staleInitialState} />,
+    );
+    expect(toastStub).toHaveBeenCalledTimes(1);
+    expect(toastStub).toHaveBeenCalledWith(
+      'toasts.wordSpellStaleDraftRecovered',
+    );
+  });
+
+  it('does not fire toast when the resumed draft aligns with the round', () => {
+    render(
+      <WordSpell config={config} initialState={alignedInitialState} />,
+    );
+    expect(toastStub).not.toHaveBeenCalled();
+  });
+
+  it('does not fire toast for a fresh session (no initialState)', () => {
+    render(<WordSpell config={config} />);
+    expect(toastStub).not.toHaveBeenCalled();
   });
 });
 
