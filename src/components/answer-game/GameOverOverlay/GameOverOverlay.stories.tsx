@@ -8,6 +8,9 @@ interface StoryArgs {
   stars: number;
   onPlayAgain: () => void;
   onHome: () => void;
+  // Raw GameOverOverlay prop shadowed by `stars`; declared here only
+  // to hide the react-docgen-inferred row from the Controls panel.
+  retryCount?: never;
 }
 
 // Maps the user-facing `stars` control back to the `retryCount` the
@@ -34,6 +37,7 @@ const meta: Meta<StoryArgs> = {
     stars: { control: { type: 'range', min: 1, max: 5, step: 1 } },
     onPlayAgain: { table: { disable: true } },
     onHome: { table: { disable: true } },
+    retryCount: { table: { disable: true } },
   },
   render: ({ stars, onPlayAgain, onHome }) => (
     <GameOverOverlay
