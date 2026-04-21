@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">16/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/203 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">16/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/198 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -984,7 +984,7 @@ export const Cancelled: Story = {
       <div class="badges">
         <label for="c-1-answer-game-answergame-err" class="badge err as-toggle">prop type error</label>
         <label for="c-1-answer-game-answergame-info" class="badge info as-toggle">1 info</label>
-        <label for="c-1-answer-game-answergame-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-1-answer-game-answergame-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -1008,25 +1008,24 @@ export const Cancelled: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  125 | };
-  126 |
-&gt; 127 | const meta: Meta&lt;StoryArgs&gt; = {
+   95 | };
+   96 |
+&gt;  97 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  128 |   component: AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;,
-  129 |   title: &#39;answer-game/AnswerGame&#39;,
-  130 |   tags: [&#39;autodocs&#39;],
+   98 |   component: AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;,
+   99 |   title: &#39;answer-game/AnswerGame&#39;,
+  100 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/AnswerGame/AnswerGame.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
 import { Slot } from &#39;../Slot/Slot&#39;;
 import { SlotRow } from &#39;../Slot/SlotRow&#39;;
-import { tileStyle } from &#39;../styles&#39;;
 import { useAnswerGameContext } from &#39;../useAnswerGameContext&#39;;
-import { useAnswerGameDispatch } from &#39;../useAnswerGameDispatch&#39;;
 import { AnswerGame } from &#39;./AnswerGame&#39;;
 import type { AnswerGameConfig, AnswerZone, TileItem } from &#39;../types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import { LetterTileBank } from &#39;@/games/word-spell/LetterTileBank/LetterTileBank&#39;;
 import { classicSkin } from &#39;@/lib/skin&#39;;
 
 type InputMethod = &#39;drag&#39; | &#39;type&#39; | &#39;both&#39;;
@@ -1039,6 +1038,13 @@ interface StoryArgs {
   tileBankMode: TileBankMode;
   totalRounds: number;
   ttsEnabled: boolean;
+  // Raw AnswerGame props shadowed by StoryArgs above; declared here only
+  // so we can hide their react-docgen-inferred rows from the Controls panel.
+  config?: never;
+  initialState?: never;
+  sessionId?: never;
+  skin?: never;
+  children?: never;
 }
 
 const initialTiles: TileItem[] = [
@@ -1074,42 +1080,6 @@ const initialZones: AnswerZone[] = [
   },
 ];
 
-const TapToPlaceBank = () =&gt; {
-  const { allTiles, bankTileIds, zones } = useAnswerGameContext();
-  const dispatch = useAnswerGameDispatch();
-
-  const nextEmptyZoneIndex = zones.findIndex(
-    (z) =&gt; z.placedTileId === null,
-  );
-
-  return (
-    &lt;div className=&quot;flex flex-wrap justify-center gap-3&quot;&gt;
-      {bankTileIds.map((tileId) =&gt; {
-        const tile = allTiles.find((t) =&gt; t.id === tileId);
-        if (!tile) return null;
-        return (
-          &lt;button
-            key={tile.id}
-            type=&quot;button&quot;
-            onClick={() =&gt; {
-              if (nextEmptyZoneIndex === -1) return;
-              dispatch({
-                type: &#39;PLACE_TILE&#39;,
-                tileId: tile.id,
-                zoneIndex: nextEmptyZoneIndex,
-              });
-            }}
-            className=&quot;flex size-14 touch-none select-none cursor-pointer items-center justify-center rounded-xl text-xl font-bold text-card-foreground transition-transform active:scale-95&quot;
-            style={tileStyle()}
-          &gt;
-            {tile.label}
-          &lt;/button&gt;
-        );
-      })}
-    &lt;/div&gt;
-  );
-};
-
 const PlayableScene = () =&gt; {
   const { zones } = useAnswerGameContext();
 
@@ -1137,7 +1107,7 @@ const PlayableScene = () =&gt; {
         &lt;/SlotRow&gt;
       &lt;/AnswerGame.Answer&gt;
       &lt;AnswerGame.Choices&gt;
-        &lt;TapToPlaceBank /&gt;
+        &lt;LetterTileBank /&gt;
       &lt;/AnswerGame.Choices&gt;
     &lt;/&gt;
   );
@@ -1176,6 +1146,11 @@ const meta: Meta&lt;StoryArgs&gt; = {
       control: { type: &#39;range&#39;, min: 1, max: 20, step: 1 },
     },
     ttsEnabled: { control: &#39;boolean&#39; },
+    config: { table: { disable: true } },
+    initialState: { table: { disable: true } },
+    sessionId: { table: { disable: true } },
+    skin: { table: { disable: true } },
+    children: { table: { disable: true } },
   },
   render: ({
     inputMethod,
@@ -1210,18 +1185,11 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Default: Story = {};
-
-export const TextQuestionMode: Story = {
-  args: { inputMethod: &#39;type&#39; },
-};
-
-export const RejectMode: Story = {
-  args: { wrongTileBehavior: &#39;reject&#39; },
-};
-
-export const LockManualMode: Story = {
-  args: { wrongTileBehavior: &#39;lock-manual&#39; },
+export const Playground: Story = {
+  args: {
+    inputMethod: &#39;drag&#39;,
+    totalRounds: 9,
+  },
 };
 </code></pre></div>
     </div>
@@ -1244,126 +1212,18 @@ export const LockManualMode: Story = {
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { AnswerGame, Slot, SlotRow } from "base-skill";</code></pre>
+                <pre><code>import { AnswerGame, LetterTileBank, Slot, SlotRow } from "base-skill";</code></pre>
               </div>
           
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = ({
-  inputMethod,
-  wrongTileBehavior,
-  tileBankMode,
-  totalRounds,
-  ttsEnabled,
-}) =&gt; {
-  const config: AnswerGameConfig = {
-    gameId: &#39;storybook-answer-game&#39;,
-    inputMethod,
-    wrongTileBehavior,
-    tileBankMode,
-    totalRounds,
-    ttsEnabled,
-    initialTiles,
-    initialZones,
-  };
-  return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id}`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
-      &lt;AnswerGame config={config} skin={classicSkin}&gt;
-        &lt;PlayableScene /&gt;
-      &lt;/AnswerGame&gt;
-    &lt;/div&gt;
-  );
-};</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Text Question Mode</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const TextQuestionMode = ({
-  inputMethod,
-  wrongTileBehavior,
-  tileBankMode,
-  totalRounds,
-  ttsEnabled,
-}) =&gt; {
-  const config: AnswerGameConfig = {
-    gameId: &#39;storybook-answer-game&#39;,
-    inputMethod,
-    wrongTileBehavior,
-    tileBankMode,
-    totalRounds,
-    ttsEnabled,
-    initialTiles,
-    initialZones,
-  };
-  return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id}`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
-      &lt;AnswerGame config={config} skin={classicSkin}&gt;
-        &lt;PlayableScene /&gt;
-      &lt;/AnswerGame&gt;
-    &lt;/div&gt;
-  );
-};</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Reject Mode</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const RejectMode = ({
-  inputMethod,
-  wrongTileBehavior,
-  tileBankMode,
-  totalRounds,
-  ttsEnabled,
-}) =&gt; {
-  const config: AnswerGameConfig = {
-    gameId: &#39;storybook-answer-game&#39;,
-    inputMethod,
-    wrongTileBehavior,
-    tileBankMode,
-    totalRounds,
-    ttsEnabled,
-    initialTiles,
-    initialZones,
-  };
-  return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id}`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
-      &lt;AnswerGame config={config} skin={classicSkin}&gt;
-        &lt;PlayableScene /&gt;
-      &lt;/AnswerGame&gt;
-    &lt;/div&gt;
-  );
-};</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Lock Manual Mode</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const LockManualMode = ({
+              <pre><code>const Playground = ({
   inputMethod,
   wrongTileBehavior,
   tileBankMode,
@@ -3790,7 +3650,7 @@ title: string</code></pre>
       <div class="badges">
         <label for="c-15-answer-game-gameoveroverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-15-answer-game-gameoveroverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-15-answer-game-gameoveroverlay-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-15-answer-game-gameoveroverlay-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -3823,7 +3683,7 @@ title: string</code></pre>
   27 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx:
-import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+import { fn } from &#39;storybook/test&#39;;
 
 import { GameOverOverlay } from &#39;./GameOverOverlay&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
@@ -3873,32 +3733,6 @@ export default meta;
 type Story = StoryObj&lt;StoryArgs&gt;;
 
 export const Playground: Story = {};
-
-export const ClicksPlayAgain: Story = {
-  args: { stars: 5 },
-  play: async ({ args, canvasElement }) =&gt; {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      await canvas.findByRole(&#39;button&#39;, { name: /play again/i }),
-    );
-    await waitFor(() =&gt; {
-      expect(args.onPlayAgain).toHaveBeenCalledTimes(1);
-    });
-  },
-};
-
-export const ClicksHome: Story = {
-  args: { stars: 5 },
-  play: async ({ args, canvasElement }) =&gt; {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      await canvas.findByRole(&#39;button&#39;, { name: /home/i }),
-    );
-    await waitFor(() =&gt; {
-      expect(args.onHome).toHaveBeenCalledTimes(1);
-    });
-  },
-};
 </code></pre></div>
     </div>
         </div>
@@ -3932,36 +3766,6 @@ export const ClicksHome: Story = {
               
               
               <pre><code>const Playground = ({ stars, onPlayAgain, onHome }) =&gt; (
-  &lt;GameOverOverlay
-    retryCount={retryCountForStars(stars)}
-    onPlayAgain={onPlayAgain}
-    onHome={onHome}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Clicks Play Again</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const ClicksPlayAgain = ({ stars, onPlayAgain, onHome }) =&gt; (
-  &lt;GameOverOverlay
-    retryCount={retryCountForStars(stars)}
-    onPlayAgain={onPlayAgain}
-    onHome={onHome}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Clicks Home</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const ClicksHome = ({ stars, onPlayAgain, onHome }) =&gt; (
   &lt;GameOverOverlay
     retryCount={retryCountForStars(stars)}
     onPlayAgain={onPlayAgain}
@@ -9629,7 +9433,7 @@ export const Cancelled: Story = {
       <div class="badges">
         <label for="c-error-1-answer-game-answergame-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-1-answer-game-answergame-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-1-answer-game-answergame-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-error-1-answer-game-answergame-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -9653,25 +9457,24 @@ export const Cancelled: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  125 | };
-  126 |
-&gt; 127 | const meta: Meta&lt;StoryArgs&gt; = {
+   95 | };
+   96 |
+&gt;  97 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  128 |   component: AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;,
-  129 |   title: &#39;answer-game/AnswerGame&#39;,
-  130 |   tags: [&#39;autodocs&#39;],
+   98 |   component: AnswerGame as unknown as ComponentType&lt;StoryArgs&gt;,
+   99 |   title: &#39;answer-game/AnswerGame&#39;,
+  100 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/AnswerGame/AnswerGame.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
 import { Slot } from &#39;../Slot/Slot&#39;;
 import { SlotRow } from &#39;../Slot/SlotRow&#39;;
-import { tileStyle } from &#39;../styles&#39;;
 import { useAnswerGameContext } from &#39;../useAnswerGameContext&#39;;
-import { useAnswerGameDispatch } from &#39;../useAnswerGameDispatch&#39;;
 import { AnswerGame } from &#39;./AnswerGame&#39;;
 import type { AnswerGameConfig, AnswerZone, TileItem } from &#39;../types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import { LetterTileBank } from &#39;@/games/word-spell/LetterTileBank/LetterTileBank&#39;;
 import { classicSkin } from &#39;@/lib/skin&#39;;
 
 type InputMethod = &#39;drag&#39; | &#39;type&#39; | &#39;both&#39;;
@@ -9684,6 +9487,13 @@ interface StoryArgs {
   tileBankMode: TileBankMode;
   totalRounds: number;
   ttsEnabled: boolean;
+  // Raw AnswerGame props shadowed by StoryArgs above; declared here only
+  // so we can hide their react-docgen-inferred rows from the Controls panel.
+  config?: never;
+  initialState?: never;
+  sessionId?: never;
+  skin?: never;
+  children?: never;
 }
 
 const initialTiles: TileItem[] = [
@@ -9719,42 +9529,6 @@ const initialZones: AnswerZone[] = [
   },
 ];
 
-const TapToPlaceBank = () =&gt; {
-  const { allTiles, bankTileIds, zones } = useAnswerGameContext();
-  const dispatch = useAnswerGameDispatch();
-
-  const nextEmptyZoneIndex = zones.findIndex(
-    (z) =&gt; z.placedTileId === null,
-  );
-
-  return (
-    &lt;div className=&quot;flex flex-wrap justify-center gap-3&quot;&gt;
-      {bankTileIds.map((tileId) =&gt; {
-        const tile = allTiles.find((t) =&gt; t.id === tileId);
-        if (!tile) return null;
-        return (
-          &lt;button
-            key={tile.id}
-            type=&quot;button&quot;
-            onClick={() =&gt; {
-              if (nextEmptyZoneIndex === -1) return;
-              dispatch({
-                type: &#39;PLACE_TILE&#39;,
-                tileId: tile.id,
-                zoneIndex: nextEmptyZoneIndex,
-              });
-            }}
-            className=&quot;flex size-14 touch-none select-none cursor-pointer items-center justify-center rounded-xl text-xl font-bold text-card-foreground transition-transform active:scale-95&quot;
-            style={tileStyle()}
-          &gt;
-            {tile.label}
-          &lt;/button&gt;
-        );
-      })}
-    &lt;/div&gt;
-  );
-};
-
 const PlayableScene = () =&gt; {
   const { zones } = useAnswerGameContext();
 
@@ -9782,7 +9556,7 @@ const PlayableScene = () =&gt; {
         &lt;/SlotRow&gt;
       &lt;/AnswerGame.Answer&gt;
       &lt;AnswerGame.Choices&gt;
-        &lt;TapToPlaceBank /&gt;
+        &lt;LetterTileBank /&gt;
       &lt;/AnswerGame.Choices&gt;
     &lt;/&gt;
   );
@@ -9821,6 +9595,11 @@ const meta: Meta&lt;StoryArgs&gt; = {
       control: { type: &#39;range&#39;, min: 1, max: 20, step: 1 },
     },
     ttsEnabled: { control: &#39;boolean&#39; },
+    config: { table: { disable: true } },
+    initialState: { table: { disable: true } },
+    sessionId: { table: { disable: true } },
+    skin: { table: { disable: true } },
+    children: { table: { disable: true } },
   },
   render: ({
     inputMethod,
@@ -9855,18 +9634,11 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Default: Story = {};
-
-export const TextQuestionMode: Story = {
-  args: { inputMethod: &#39;type&#39; },
-};
-
-export const RejectMode: Story = {
-  args: { wrongTileBehavior: &#39;reject&#39; },
-};
-
-export const LockManualMode: Story = {
-  args: { wrongTileBehavior: &#39;lock-manual&#39; },
+export const Playground: Story = {
+  args: {
+    inputMethod: &#39;drag&#39;,
+    totalRounds: 9,
+  },
 };
 </code></pre></div>
     </div>
@@ -9889,126 +9661,18 @@ export const LockManualMode: Story = {
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { AnswerGame, Slot, SlotRow } from "base-skill";</code></pre>
+                <pre><code>import { AnswerGame, LetterTileBank, Slot, SlotRow } from "base-skill";</code></pre>
               </div>
           
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = ({
-  inputMethod,
-  wrongTileBehavior,
-  tileBankMode,
-  totalRounds,
-  ttsEnabled,
-}) =&gt; {
-  const config: AnswerGameConfig = {
-    gameId: &#39;storybook-answer-game&#39;,
-    inputMethod,
-    wrongTileBehavior,
-    tileBankMode,
-    totalRounds,
-    ttsEnabled,
-    initialTiles,
-    initialZones,
-  };
-  return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id}`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
-      &lt;AnswerGame config={config} skin={classicSkin}&gt;
-        &lt;PlayableScene /&gt;
-      &lt;/AnswerGame&gt;
-    &lt;/div&gt;
-  );
-};</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Text Question Mode</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const TextQuestionMode = ({
-  inputMethod,
-  wrongTileBehavior,
-  tileBankMode,
-  totalRounds,
-  ttsEnabled,
-}) =&gt; {
-  const config: AnswerGameConfig = {
-    gameId: &#39;storybook-answer-game&#39;,
-    inputMethod,
-    wrongTileBehavior,
-    tileBankMode,
-    totalRounds,
-    ttsEnabled,
-    initialTiles,
-    initialZones,
-  };
-  return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id}`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
-      &lt;AnswerGame config={config} skin={classicSkin}&gt;
-        &lt;PlayableScene /&gt;
-      &lt;/AnswerGame&gt;
-    &lt;/div&gt;
-  );
-};</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Reject Mode</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const RejectMode = ({
-  inputMethod,
-  wrongTileBehavior,
-  tileBankMode,
-  totalRounds,
-  ttsEnabled,
-}) =&gt; {
-  const config: AnswerGameConfig = {
-    gameId: &#39;storybook-answer-game&#39;,
-    inputMethod,
-    wrongTileBehavior,
-    tileBankMode,
-    totalRounds,
-    ttsEnabled,
-    initialTiles,
-    initialZones,
-  };
-  return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id}`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
-      &lt;AnswerGame config={config} skin={classicSkin}&gt;
-        &lt;PlayableScene /&gt;
-      &lt;/AnswerGame&gt;
-    &lt;/div&gt;
-  );
-};</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Lock Manual Mode</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const LockManualMode = ({
+              <pre><code>const Playground = ({
   inputMethod,
   wrongTileBehavior,
   tileBankMode,
@@ -11433,7 +11097,7 @@ export const AutoDismissesAfter2s: Story = {
       <div class="badges">
         <label for="c-error-7-answer-game-gameoveroverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-7-answer-game-gameoveroverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-7-answer-game-gameoveroverlay-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-error-7-answer-game-gameoveroverlay-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -11466,7 +11130,7 @@ export const AutoDismissesAfter2s: Story = {
   27 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx:
-import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+import { fn } from &#39;storybook/test&#39;;
 
 import { GameOverOverlay } from &#39;./GameOverOverlay&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
@@ -11516,32 +11180,6 @@ export default meta;
 type Story = StoryObj&lt;StoryArgs&gt;;
 
 export const Playground: Story = {};
-
-export const ClicksPlayAgain: Story = {
-  args: { stars: 5 },
-  play: async ({ args, canvasElement }) =&gt; {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      await canvas.findByRole(&#39;button&#39;, { name: /play again/i }),
-    );
-    await waitFor(() =&gt; {
-      expect(args.onPlayAgain).toHaveBeenCalledTimes(1);
-    });
-  },
-};
-
-export const ClicksHome: Story = {
-  args: { stars: 5 },
-  play: async ({ args, canvasElement }) =&gt; {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      await canvas.findByRole(&#39;button&#39;, { name: /home/i }),
-    );
-    await waitFor(() =&gt; {
-      expect(args.onHome).toHaveBeenCalledTimes(1);
-    });
-  },
-};
 </code></pre></div>
     </div>
         </div>
@@ -11575,36 +11213,6 @@ export const ClicksHome: Story = {
               
               
               <pre><code>const Playground = ({ stars, onPlayAgain, onHome }) =&gt; (
-  &lt;GameOverOverlay
-    retryCount={retryCountForStars(stars)}
-    onPlayAgain={onPlayAgain}
-    onHome={onHome}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Clicks Play Again</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const ClicksPlayAgain = ({ stars, onPlayAgain, onHome }) =&gt; (
-  &lt;GameOverOverlay
-    retryCount={retryCountForStars(stars)}
-    onPlayAgain={onPlayAgain}
-    onHome={onHome}
-  /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Clicks Home</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const ClicksHome = ({ stars, onPlayAgain, onHome }) =&gt; (
   &lt;GameOverOverlay
     retryCount={retryCountForStars(stars)}
     onPlayAgain={onPlayAgain}
