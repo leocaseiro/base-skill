@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">16/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/179 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">16/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/178 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -2897,7 +2897,7 @@ export const WithDestructiveItem: Story = {
       <div class="badges">
         <label for="c-10-answer-game-encouragementannouncer-err" class="badge err as-toggle">prop type error</label>
         <label for="c-10-answer-game-encouragementannouncer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-10-answer-game-encouragementannouncer-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-10-answer-game-encouragementannouncer-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -2921,17 +2921,17 @@ export const WithDestructiveItem: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;EncouragementAnnouncer as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  42 | };
-  43 |
-&gt; 44 | const meta: Meta&lt;StoryArgs&gt; = {
+  56 | };
+  57 |
+&gt; 58 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  45 |   component:
-  46 |     EncouragementAnnouncer as unknown as ComponentType&lt;StoryArgs&gt;,
-  47 |   title: &#39;answer-game/EncouragementAnnouncer&#39;,
+  59 |   component:
+  60 |     EncouragementAnnouncer as unknown as ComponentType&lt;StoryArgs&gt;,
+  61 |   title: &#39;answer-game/EncouragementAnnouncer&#39;,
 
 ./src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:
 import { useState } from &#39;react&#39;;
-import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+import { fn } from &#39;storybook/test&#39;;
 
 import { EncouragementAnnouncer } from &#39;./EncouragementAnnouncer&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
@@ -2939,20 +2939,29 @@ import type { ComponentType } from &#39;react&#39;;
 
 interface StoryArgs {
   message: string;
-  visible: boolean;
   onDismiss: () =&gt; void;
+  // Raw EncouragementAnnouncer prop controlled by the story wrapper;
+  // declared here only to hide the react-docgen-inferred row from the
+  // Controls panel.
+  visible?: never;
 }
 
 const ShowTrigger = ({
   message,
   onDismiss,
+  startVisible = false,
 }: {
   message: string;
   onDismiss: () =&gt; void;
+  startVisible?: boolean;
 }) =&gt; {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(startVisible);
+  const dismiss = () =&gt; {
+    setVisible(false);
+    onDismiss();
+  };
   return (
-    &lt;&gt;
+    &lt;div className=&quot;flex gap-2&quot;&gt;
       &lt;button
         type=&quot;button&quot;
         onClick={() =&gt; setVisible(true)}
@@ -2961,15 +2970,20 @@ const ShowTrigger = ({
       &gt;
         Show encouragement
       &lt;/button&gt;
+      &lt;button
+        type=&quot;button&quot;
+        onClick={dismiss}
+        disabled={!visible}
+        className=&quot;rounded-lg bg-muted px-4 py-2 text-foreground disabled:opacity-50&quot;
+      &gt;
+        Dismiss
+      &lt;/button&gt;
       &lt;EncouragementAnnouncer
         visible={visible}
         message={message}
-        onDismiss={() =&gt; {
-          setVisible(false);
-          onDismiss();
-        }}
+        onDismiss={dismiss}
       /&gt;
-    &lt;/&gt;
+    &lt;/div&gt;
   );
 };
 
@@ -2980,20 +2994,15 @@ const meta: Meta&lt;StoryArgs&gt; = {
   tags: [&#39;autodocs&#39;],
   args: {
     message: &#39;Keep trying!&#39;,
-    visible: true,
     onDismiss: fn(),
   },
   argTypes: {
     message: { control: &#39;text&#39; },
-    visible: { control: &#39;boolean&#39; },
     onDismiss: { table: { disable: true } },
+    visible: { table: { disable: true } },
   },
-  render: ({ message, visible, onDismiss }) =&gt; (
-    &lt;EncouragementAnnouncer
-      message={message}
-      visible={visible}
-      onDismiss={onDismiss}
-    /&gt;
+  render: ({ message, onDismiss }) =&gt; (
+    &lt;ShowTrigger message={message} onDismiss={onDismiss} startVisible /&gt;
   ),
 };
 export default meta;
@@ -3007,28 +3016,6 @@ export const ReplayTrigger: Story = {
   render: ({ message, onDismiss }) =&gt; (
     &lt;ShowTrigger message={message} onDismiss={onDismiss} /&gt;
   ),
-};
-
-export const AutoDismissesAfter2s: Story = {
-  args: { message: &#39;Keep trying!&#39; },
-  render: ({ message, onDismiss }) =&gt; (
-    &lt;ShowTrigger message={message} onDismiss={onDismiss} /&gt;
-  ),
-  play: async ({ args, canvasElement }) =&gt; {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      canvas.getByRole(&#39;button&#39;, { name: /show encouragement/i }),
-    );
-    await waitFor(() =&gt; {
-      expect(canvas.getByText(/keep trying/i)).toBeVisible();
-    });
-    await waitFor(
-      () =&gt; {
-        expect(args.onDismiss).toHaveBeenCalled();
-      },
-      { timeout: 3500 },
-    );
-  },
 };
 </code></pre></div>
     </div>
@@ -3062,12 +3049,8 @@ export const AutoDismissesAfter2s: Story = {
               </div>
               
               
-              <pre><code>const Playground = ({ message, visible, onDismiss }) =&gt; (
-  &lt;EncouragementAnnouncer
-    message={message}
-    visible={visible}
-    onDismiss={onDismiss}
-  /&gt;
+              <pre><code>const Playground = ({ message, onDismiss }) =&gt; (
+  &lt;ShowTrigger message={message} onDismiss={onDismiss} startVisible /&gt;
 );</code></pre>
             </div>
             <div class="note ok">
@@ -3078,17 +3061,6 @@ export const AutoDismissesAfter2s: Story = {
               
               
               <pre><code>const ReplayTrigger = ({ message, onDismiss }) =&gt; (
-  &lt;ShowTrigger message={message} onDismiss={onDismiss} /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Auto Dismisses After 2 S</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const AutoDismissesAfter2s = ({ message, onDismiss }) =&gt; (
   &lt;ShowTrigger message={message} onDismiss={onDismiss} /&gt;
 );</code></pre>
             </div>
@@ -5750,30 +5722,34 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  16 | }
-  17 |
-&gt; 18 | const meta: Meta&lt;StoryArgs&gt; = {
+  20 | }
+  21 |
+&gt; 22 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  19 |   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
-  20 |   title: &#39;answer-game/ProgressHUD&#39;,
-  21 |   tags: [&#39;autodocs&#39;],
+  23 |   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
+  24 |   title: &#39;answer-game/ProgressHUD&#39;,
+  25 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx:
 import { ProgressHUD } from &#39;./ProgressHUD&#39;;
 import type { AnswerGamePhase } from &#39;../types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { ComponentType } from &#39;react&#39;;
+import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import { classicSkin } from &#39;@/lib/skin&#39;;
 
 interface StoryArgs {
+  dotCount: number;
   roundIndex: number;
-  totalRounds: number;
-  totalRoundsIsNull: boolean;
   levelIndex: number;
   isLevelMode: boolean;
   phase: AnswerGamePhase;
   showDots: boolean;
   showFraction: boolean;
   showLevel: boolean;
+  // Raw ProgressHUD prop shadowed by the `dotCount` bridge control.
+  // Declared here only to hide its react-docgen-inferred row from the
+  // Controls panel.
+  totalRounds?: never;
 }
 
 const meta: Meta&lt;StoryArgs&gt; = {
@@ -5785,14 +5761,13 @@ const meta: Meta&lt;StoryArgs&gt; = {
     docs: {
       description: {
         component:
-          &#39;Classic (round dots + fraction) and level (LEVEL N + cumulative dots) progress HUD. All visible output is driven by the nine controls — use them to reproduce the common presets:\n\n- **Classic last round:** roundIndex 4, totalRounds 5.\n- **Dots only:** showFraction off, showLevel off.\n- **Fraction only:** showDots off, showLevel off.\n- **Level mode (level 3):** isLevelMode on, totalRoundsIsNull on, levelIndex 2, showFraction off, showLevel on.\n- **Mixed level + fraction:** isLevelMode on, levelIndex 2, showLevel on (totalRounds stays set).\n- **Round-complete pulse:** phase round-complete.\n- **All flags off:** renders null.&#39;,
+          &#39;Classic (round dots + fraction) and level (LEVEL N + cumulative dots) progress HUD. The dot bar renders `dotCount` circles; the one at `roundIndex` gets `data-state=&quot;current&quot;`, earlier ones are `done`, later ones are `todo`. Move `roundIndex` to `-1` to see every dot as todo, or to `dotCount` to see every dot as done.\n\n- **Classic mode:** `dotCount` drives the dot bar and `totalRounds`; `roundIndex` drives which dot is current. Fraction shows as `roundIndex + 1 / dotCount` when `showFraction` is on. `levelIndex` only affects the &quot;LEVEL N&quot; text when `showLevel` is on.\n- **Level mode:** the component derives dot count from `levelIndex + 1` and always marks the last dot current, so `dotCount`/`roundIndex` stop driving the dot bar. `dotCount` still becomes the fraction denominator (`roundIndex + 1 / dotCount`) when `showFraction` is on.\n- **Round-complete pulse:** flip `phase` to `round-complete` to see `animate-pulse` on the current dot (respects `prefers-reduced-motion`).&#39;,
       },
     },
   },
   args: {
+    dotCount: 5,
     roundIndex: 2,
-    totalRounds: 5,
-    totalRoundsIsNull: false,
     levelIndex: 0,
     isLevelMode: false,
     phase: &#39;playing&#39;,
@@ -5801,15 +5776,23 @@ const meta: Meta&lt;StoryArgs&gt; = {
     showLevel: false,
   },
   argTypes: {
-    roundIndex: {
-      control: { type: &#39;range&#39;, min: 0, max: 20, step: 1 },
-    },
-    totalRounds: {
+    dotCount: {
       control: { type: &#39;range&#39;, min: 1, max: 20, step: 1 },
+      description:
+        &#39;Number of dots shown in classic mode. In level mode the component overrides this with `levelIndex + 1`.&#39;,
+      if: { arg: &#39;isLevelMode&#39;, truthy: false },
     },
-    totalRoundsIsNull: { control: &#39;boolean&#39; },
+    roundIndex: {
+      control: { type: &#39;range&#39;, min: -1, max: 20, step: 1 },
+      description:
+        &#39;Which dot is `current` in classic mode (and the fraction numerator in both modes). `-1` = every dot `todo`; `dotCount` = every dot `done`.&#39;,
+      if: { arg: &#39;isLevelMode&#39;, truthy: false },
+    },
     levelIndex: {
       control: { type: &#39;range&#39;, min: 0, max: 20, step: 1 },
+      description:
+        &#39;Displayed as &quot;LEVEL {levelIndex + 1}&quot; when `showLevel` is on. In level mode this also drives the dot bar (count + current).&#39;,
+      if: { arg: &#39;isLevelMode&#39;, truthy: true },
     },
     isLevelMode: { control: &#39;boolean&#39; },
     phase: {
@@ -5823,30 +5806,49 @@ const meta: Meta&lt;StoryArgs&gt; = {
     },
     showDots: { control: &#39;boolean&#39; },
     showFraction: { control: &#39;boolean&#39; },
-    showLevel: { control: &#39;boolean&#39; },
+    showLevel: {
+      control: &#39;boolean&#39;,
+      if: { arg: &#39;isLevelMode&#39;, truthy: true },
+    },
+    totalRounds: { table: { disable: true } },
   },
   render: ({
+    dotCount,
     roundIndex,
-    totalRounds,
-    totalRoundsIsNull,
     levelIndex,
     isLevelMode,
     phase,
     showDots,
     showFraction,
     showLevel,
-  }) =&gt; (
-    &lt;ProgressHUD
-      roundIndex={roundIndex}
-      totalRounds={totalRoundsIsNull ? null : totalRounds}
-      levelIndex={levelIndex}
-      isLevelMode={isLevelMode}
-      phase={phase}
-      showDots={showDots}
-      showFraction={showFraction}
-      showLevel={showLevel}
-    /&gt;
-  ),
+  }) =&gt; {
+    // Storybook&#39;s `if`-gated controls keep their arg value, but guard against
+    // any corner case where the arg arrives undefined — the component uses
+    // `roundIndex + 1` and `undefined + 1 === NaN` would leak into the fraction.
+    const safeDotCount = Number.isFinite(dotCount) ? dotCount : 1;
+    const safeRoundIndex = Number.isFinite(roundIndex) ? roundIndex : 0;
+    const safeLevelIndex = Number.isFinite(levelIndex) ? levelIndex : 0;
+    return (
+      &lt;div
+        className={`game-container skin-${classicSkin.id} flex flex-col items-center gap-3 p-4`}
+        style={classicSkin.tokens as CSSProperties}
+      &gt;
+        &lt;span className=&quot;text-xs font-semibold uppercase tracking-wider text-muted-foreground&quot;&gt;
+          {isLevelMode ? &#39;Levels&#39; : &#39;Rounds&#39;}
+        &lt;/span&gt;
+        &lt;ProgressHUD
+          roundIndex={safeRoundIndex}
+          totalRounds={showFraction ? safeDotCount : null}
+          levelIndex={safeLevelIndex}
+          isLevelMode={isLevelMode}
+          phase={phase}
+          showDots={showDots}
+          showFraction={showFraction}
+          showLevel={showLevel}
+        /&gt;
+      &lt;/div&gt;
+    );
+  },
 };
 export default meta;
 
@@ -5854,9 +5856,11 @@ type Story = StoryObj&lt;StoryArgs&gt;;
 
 export const Playground: Story = {
   args: {
-    totalRounds: 6,
-    levelIndex: 6,
+    dotCount: 12,
+    roundIndex: 2,
+    levelIndex: 4,
     isLevelMode: true,
+    showLevel: true,
     phase: &#39;round-complete&#39;,
   },
 };
@@ -5893,27 +5897,42 @@ export const Playground: Story = {
               
               
               <pre><code>const Playground = ({
+  dotCount,
   roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
   levelIndex,
   isLevelMode,
   phase,
   showDots,
   showFraction,
   showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
+}) =&gt; {
+  // Storybook&#39;s `if`-gated controls keep their arg value, but guard against
+  // any corner case where the arg arrives undefined — the component uses
+  // `roundIndex + 1` and `undefined + 1 === NaN` would leak into the fraction.
+  const safeDotCount = Number.isFinite(dotCount) ? dotCount : 1;
+  const safeRoundIndex = Number.isFinite(roundIndex) ? roundIndex : 0;
+  const safeLevelIndex = Number.isFinite(levelIndex) ? levelIndex : 0;
+  return (
+    &lt;div
+      className={`game-container skin-${classicSkin.id} flex flex-col items-center gap-3 p-4`}
+      style={classicSkin.tokens as CSSProperties}
+    &gt;
+      &lt;span className=&quot;text-xs font-semibold uppercase tracking-wider text-muted-foreground&quot;&gt;
+        {isLevelMode ? &#39;Levels&#39; : &#39;Rounds&#39;}
+      &lt;/span&gt;
+      &lt;ProgressHUD
+        roundIndex={safeRoundIndex}
+        totalRounds={showFraction ? safeDotCount : null}
+        levelIndex={safeLevelIndex}
+        isLevelMode={isLevelMode}
+        phase={phase}
+        showDots={showDots}
+        showFraction={showFraction}
+        showLevel={showLevel}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
             </div>
         </div>
     
@@ -6872,13 +6891,13 @@ min?: any = 0</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SlotRow as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  122 | };
-  123 |
-&gt; 124 | const meta: Meta&lt;StoryArgs&gt; = {
+  123 | };
+  124 |
+&gt; 125 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  125 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
-  126 |   title: &#39;answer-game/Slot&#39;,
-  127 |   tags: [&#39;autodocs&#39;],
+  126 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
+  127 |   title: &#39;answer-game/Slot&#39;,
+  128 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/Slot/Slot.stories.tsx:
 import { useEffect } from &#39;react&#39;;
@@ -6892,7 +6911,8 @@ import { SlotRow } from &#39;./SlotRow&#39;;
 import type { AnswerGameConfig, AnswerZone, TileItem } from &#39;../types&#39;;
 import type { SlotRenderProps } from &#39;./useSlotBehavior&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { ComponentType } from &#39;react&#39;;
+import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import { classicSkin } from &#39;@/lib/skin&#39;;
 
 type SlotVariant = &#39;letter&#39; | &#39;dice&#39; | &#39;domino&#39; | &#39;inline-gap&#39;;
 type DragPreview = &#39;none&#39; | &#39;target-empty&#39; | &#39;target-swap&#39;;
@@ -7048,9 +7068,9 @@ const meta: Meta&lt;StoryArgs&gt; = {
       variant === &#39;inline-gap&#39;
         ? [makeTile(&#39;s0&#39;, label || &#39;cat&#39;)]
         : [
-            makeTile(&#39;t0&#39;, label || &#39;A&#39;),
-            makeTile(&#39;t1&#39;, &#39;B&#39;),
-            makeTile(&#39;t2&#39;, &#39;C&#39;),
+            makeTile(&#39;t0&#39;, label || &#39;a&#39;),
+            makeTile(&#39;t1&#39;, &#39;b&#39;),
+            makeTile(&#39;t2&#39;, &#39;c&#39;),
           ];
 
     const zones: AnswerZone[] =
@@ -7069,21 +7089,26 @@ const meta: Meta&lt;StoryArgs&gt; = {
             ];
 
     return (
-      &lt;AnswerGameProvider
-        config={{
-          ...baseConfig,
-          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
-          initialTiles: tiles,
-          initialZones: zones,
-        }}
+      &lt;div
+        className={`game-container skin-${classicSkin.id} p-4`}
+        style={classicSkin.tokens as CSSProperties}
       &gt;
-        &lt;PlaygroundInner
-          variant={variant}
-          dragPreview={dragPreview}
-          contentClass={contentClass}
-          slotClass={slotClass}
-        /&gt;
-      &lt;/AnswerGameProvider&gt;
+        &lt;AnswerGameProvider
+          config={{
+            ...baseConfig,
+            gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+            initialTiles: tiles,
+            initialZones: zones,
+          }}
+        &gt;
+          &lt;PlaygroundInner
+            variant={variant}
+            dragPreview={dragPreview}
+            contentClass={contentClass}
+            slotClass={slotClass}
+          /&gt;
+        &lt;/AnswerGameProvider&gt;
+      &lt;/div&gt;
     );
   },
 };
@@ -7091,7 +7116,12 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Playground: Story = {};
+export const Playground: Story = {
+  args: {
+    label: &#39;a&#39;,
+    isWrong: false,
+  },
+};
 </code></pre></div>
     </div>
         </div>
@@ -7132,9 +7162,9 @@ export const Playground: Story = {};
     variant === &#39;inline-gap&#39;
       ? [makeTile(&#39;s0&#39;, label || &#39;cat&#39;)]
       : [
-          makeTile(&#39;t0&#39;, label || &#39;A&#39;),
-          makeTile(&#39;t1&#39;, &#39;B&#39;),
-          makeTile(&#39;t2&#39;, &#39;C&#39;),
+          makeTile(&#39;t0&#39;, label || &#39;a&#39;),
+          makeTile(&#39;t1&#39;, &#39;b&#39;),
+          makeTile(&#39;t2&#39;, &#39;c&#39;),
         ];
 
   const zones: AnswerZone[] =
@@ -7153,21 +7183,26 @@ export const Playground: Story = {};
           ];
 
   return (
-    &lt;AnswerGameProvider
-      config={{
-        ...baseConfig,
-        gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
-        initialTiles: tiles,
-        initialZones: zones,
-      }}
+    &lt;div
+      className={`game-container skin-${classicSkin.id} p-4`}
+      style={classicSkin.tokens as CSSProperties}
     &gt;
-      &lt;PlaygroundInner
-        variant={variant}
-        dragPreview={dragPreview}
-        contentClass={contentClass}
-        slotClass={slotClass}
-      /&gt;
-    &lt;/AnswerGameProvider&gt;
+      &lt;AnswerGameProvider
+        config={{
+          ...baseConfig,
+          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+          initialTiles: tiles,
+          initialZones: zones,
+        }}
+      &gt;
+        &lt;PlaygroundInner
+          variant={variant}
+          dragPreview={dragPreview}
+          contentClass={contentClass}
+          slotClass={slotClass}
+        /&gt;
+      &lt;/AnswerGameProvider&gt;
+    &lt;/div&gt;
   );
 };</code></pre>
             </div>
@@ -10259,7 +10294,7 @@ export const WithDestructiveItem: Story = {
       <div class="badges">
         <label for="c-error-6-answer-game-encouragementannouncer-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-6-answer-game-encouragementannouncer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-6-answer-game-encouragementannouncer-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-error-6-answer-game-encouragementannouncer-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -10283,17 +10318,17 @@ export const WithDestructiveItem: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;EncouragementAnnouncer as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  42 | };
-  43 |
-&gt; 44 | const meta: Meta&lt;StoryArgs&gt; = {
+  56 | };
+  57 |
+&gt; 58 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  45 |   component:
-  46 |     EncouragementAnnouncer as unknown as ComponentType&lt;StoryArgs&gt;,
-  47 |   title: &#39;answer-game/EncouragementAnnouncer&#39;,
+  59 |   component:
+  60 |     EncouragementAnnouncer as unknown as ComponentType&lt;StoryArgs&gt;,
+  61 |   title: &#39;answer-game/EncouragementAnnouncer&#39;,
 
 ./src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:
 import { useState } from &#39;react&#39;;
-import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+import { fn } from &#39;storybook/test&#39;;
 
 import { EncouragementAnnouncer } from &#39;./EncouragementAnnouncer&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
@@ -10301,20 +10336,29 @@ import type { ComponentType } from &#39;react&#39;;
 
 interface StoryArgs {
   message: string;
-  visible: boolean;
   onDismiss: () =&gt; void;
+  // Raw EncouragementAnnouncer prop controlled by the story wrapper;
+  // declared here only to hide the react-docgen-inferred row from the
+  // Controls panel.
+  visible?: never;
 }
 
 const ShowTrigger = ({
   message,
   onDismiss,
+  startVisible = false,
 }: {
   message: string;
   onDismiss: () =&gt; void;
+  startVisible?: boolean;
 }) =&gt; {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(startVisible);
+  const dismiss = () =&gt; {
+    setVisible(false);
+    onDismiss();
+  };
   return (
-    &lt;&gt;
+    &lt;div className=&quot;flex gap-2&quot;&gt;
       &lt;button
         type=&quot;button&quot;
         onClick={() =&gt; setVisible(true)}
@@ -10323,15 +10367,20 @@ const ShowTrigger = ({
       &gt;
         Show encouragement
       &lt;/button&gt;
+      &lt;button
+        type=&quot;button&quot;
+        onClick={dismiss}
+        disabled={!visible}
+        className=&quot;rounded-lg bg-muted px-4 py-2 text-foreground disabled:opacity-50&quot;
+      &gt;
+        Dismiss
+      &lt;/button&gt;
       &lt;EncouragementAnnouncer
         visible={visible}
         message={message}
-        onDismiss={() =&gt; {
-          setVisible(false);
-          onDismiss();
-        }}
+        onDismiss={dismiss}
       /&gt;
-    &lt;/&gt;
+    &lt;/div&gt;
   );
 };
 
@@ -10342,20 +10391,15 @@ const meta: Meta&lt;StoryArgs&gt; = {
   tags: [&#39;autodocs&#39;],
   args: {
     message: &#39;Keep trying!&#39;,
-    visible: true,
     onDismiss: fn(),
   },
   argTypes: {
     message: { control: &#39;text&#39; },
-    visible: { control: &#39;boolean&#39; },
     onDismiss: { table: { disable: true } },
+    visible: { table: { disable: true } },
   },
-  render: ({ message, visible, onDismiss }) =&gt; (
-    &lt;EncouragementAnnouncer
-      message={message}
-      visible={visible}
-      onDismiss={onDismiss}
-    /&gt;
+  render: ({ message, onDismiss }) =&gt; (
+    &lt;ShowTrigger message={message} onDismiss={onDismiss} startVisible /&gt;
   ),
 };
 export default meta;
@@ -10369,28 +10413,6 @@ export const ReplayTrigger: Story = {
   render: ({ message, onDismiss }) =&gt; (
     &lt;ShowTrigger message={message} onDismiss={onDismiss} /&gt;
   ),
-};
-
-export const AutoDismissesAfter2s: Story = {
-  args: { message: &#39;Keep trying!&#39; },
-  render: ({ message, onDismiss }) =&gt; (
-    &lt;ShowTrigger message={message} onDismiss={onDismiss} /&gt;
-  ),
-  play: async ({ args, canvasElement }) =&gt; {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      canvas.getByRole(&#39;button&#39;, { name: /show encouragement/i }),
-    );
-    await waitFor(() =&gt; {
-      expect(canvas.getByText(/keep trying/i)).toBeVisible();
-    });
-    await waitFor(
-      () =&gt; {
-        expect(args.onDismiss).toHaveBeenCalled();
-      },
-      { timeout: 3500 },
-    );
-  },
 };
 </code></pre></div>
     </div>
@@ -10424,12 +10446,8 @@ export const AutoDismissesAfter2s: Story = {
               </div>
               
               
-              <pre><code>const Playground = ({ message, visible, onDismiss }) =&gt; (
-  &lt;EncouragementAnnouncer
-    message={message}
-    visible={visible}
-    onDismiss={onDismiss}
-  /&gt;
+              <pre><code>const Playground = ({ message, onDismiss }) =&gt; (
+  &lt;ShowTrigger message={message} onDismiss={onDismiss} startVisible /&gt;
 );</code></pre>
             </div>
             <div class="note ok">
@@ -10440,17 +10458,6 @@ export const AutoDismissesAfter2s: Story = {
               
               
               <pre><code>const ReplayTrigger = ({ message, onDismiss }) =&gt; (
-  &lt;ShowTrigger message={message} onDismiss={onDismiss} /&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Auto Dismisses After 2 S</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const AutoDismissesAfter2s = ({ message, onDismiss }) =&gt; (
   &lt;ShowTrigger message={message} onDismiss={onDismiss} /&gt;
 );</code></pre>
             </div>
@@ -11403,30 +11410,34 @@ export const Default: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  16 | }
-  17 |
-&gt; 18 | const meta: Meta&lt;StoryArgs&gt; = {
+  20 | }
+  21 |
+&gt; 22 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  19 |   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
-  20 |   title: &#39;answer-game/ProgressHUD&#39;,
-  21 |   tags: [&#39;autodocs&#39;],
+  23 |   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
+  24 |   title: &#39;answer-game/ProgressHUD&#39;,
+  25 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx:
 import { ProgressHUD } from &#39;./ProgressHUD&#39;;
 import type { AnswerGamePhase } from &#39;../types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { ComponentType } from &#39;react&#39;;
+import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import { classicSkin } from &#39;@/lib/skin&#39;;
 
 interface StoryArgs {
+  dotCount: number;
   roundIndex: number;
-  totalRounds: number;
-  totalRoundsIsNull: boolean;
   levelIndex: number;
   isLevelMode: boolean;
   phase: AnswerGamePhase;
   showDots: boolean;
   showFraction: boolean;
   showLevel: boolean;
+  // Raw ProgressHUD prop shadowed by the `dotCount` bridge control.
+  // Declared here only to hide its react-docgen-inferred row from the
+  // Controls panel.
+  totalRounds?: never;
 }
 
 const meta: Meta&lt;StoryArgs&gt; = {
@@ -11438,14 +11449,13 @@ const meta: Meta&lt;StoryArgs&gt; = {
     docs: {
       description: {
         component:
-          &#39;Classic (round dots + fraction) and level (LEVEL N + cumulative dots) progress HUD. All visible output is driven by the nine controls — use them to reproduce the common presets:\n\n- **Classic last round:** roundIndex 4, totalRounds 5.\n- **Dots only:** showFraction off, showLevel off.\n- **Fraction only:** showDots off, showLevel off.\n- **Level mode (level 3):** isLevelMode on, totalRoundsIsNull on, levelIndex 2, showFraction off, showLevel on.\n- **Mixed level + fraction:** isLevelMode on, levelIndex 2, showLevel on (totalRounds stays set).\n- **Round-complete pulse:** phase round-complete.\n- **All flags off:** renders null.&#39;,
+          &#39;Classic (round dots + fraction) and level (LEVEL N + cumulative dots) progress HUD. The dot bar renders `dotCount` circles; the one at `roundIndex` gets `data-state=&quot;current&quot;`, earlier ones are `done`, later ones are `todo`. Move `roundIndex` to `-1` to see every dot as todo, or to `dotCount` to see every dot as done.\n\n- **Classic mode:** `dotCount` drives the dot bar and `totalRounds`; `roundIndex` drives which dot is current. Fraction shows as `roundIndex + 1 / dotCount` when `showFraction` is on. `levelIndex` only affects the &quot;LEVEL N&quot; text when `showLevel` is on.\n- **Level mode:** the component derives dot count from `levelIndex + 1` and always marks the last dot current, so `dotCount`/`roundIndex` stop driving the dot bar. `dotCount` still becomes the fraction denominator (`roundIndex + 1 / dotCount`) when `showFraction` is on.\n- **Round-complete pulse:** flip `phase` to `round-complete` to see `animate-pulse` on the current dot (respects `prefers-reduced-motion`).&#39;,
       },
     },
   },
   args: {
+    dotCount: 5,
     roundIndex: 2,
-    totalRounds: 5,
-    totalRoundsIsNull: false,
     levelIndex: 0,
     isLevelMode: false,
     phase: &#39;playing&#39;,
@@ -11454,15 +11464,23 @@ const meta: Meta&lt;StoryArgs&gt; = {
     showLevel: false,
   },
   argTypes: {
-    roundIndex: {
-      control: { type: &#39;range&#39;, min: 0, max: 20, step: 1 },
-    },
-    totalRounds: {
+    dotCount: {
       control: { type: &#39;range&#39;, min: 1, max: 20, step: 1 },
+      description:
+        &#39;Number of dots shown in classic mode. In level mode the component overrides this with `levelIndex + 1`.&#39;,
+      if: { arg: &#39;isLevelMode&#39;, truthy: false },
     },
-    totalRoundsIsNull: { control: &#39;boolean&#39; },
+    roundIndex: {
+      control: { type: &#39;range&#39;, min: -1, max: 20, step: 1 },
+      description:
+        &#39;Which dot is `current` in classic mode (and the fraction numerator in both modes). `-1` = every dot `todo`; `dotCount` = every dot `done`.&#39;,
+      if: { arg: &#39;isLevelMode&#39;, truthy: false },
+    },
     levelIndex: {
       control: { type: &#39;range&#39;, min: 0, max: 20, step: 1 },
+      description:
+        &#39;Displayed as &quot;LEVEL {levelIndex + 1}&quot; when `showLevel` is on. In level mode this also drives the dot bar (count + current).&#39;,
+      if: { arg: &#39;isLevelMode&#39;, truthy: true },
     },
     isLevelMode: { control: &#39;boolean&#39; },
     phase: {
@@ -11476,30 +11494,49 @@ const meta: Meta&lt;StoryArgs&gt; = {
     },
     showDots: { control: &#39;boolean&#39; },
     showFraction: { control: &#39;boolean&#39; },
-    showLevel: { control: &#39;boolean&#39; },
+    showLevel: {
+      control: &#39;boolean&#39;,
+      if: { arg: &#39;isLevelMode&#39;, truthy: true },
+    },
+    totalRounds: { table: { disable: true } },
   },
   render: ({
+    dotCount,
     roundIndex,
-    totalRounds,
-    totalRoundsIsNull,
     levelIndex,
     isLevelMode,
     phase,
     showDots,
     showFraction,
     showLevel,
-  }) =&gt; (
-    &lt;ProgressHUD
-      roundIndex={roundIndex}
-      totalRounds={totalRoundsIsNull ? null : totalRounds}
-      levelIndex={levelIndex}
-      isLevelMode={isLevelMode}
-      phase={phase}
-      showDots={showDots}
-      showFraction={showFraction}
-      showLevel={showLevel}
-    /&gt;
-  ),
+  }) =&gt; {
+    // Storybook&#39;s `if`-gated controls keep their arg value, but guard against
+    // any corner case where the arg arrives undefined — the component uses
+    // `roundIndex + 1` and `undefined + 1 === NaN` would leak into the fraction.
+    const safeDotCount = Number.isFinite(dotCount) ? dotCount : 1;
+    const safeRoundIndex = Number.isFinite(roundIndex) ? roundIndex : 0;
+    const safeLevelIndex = Number.isFinite(levelIndex) ? levelIndex : 0;
+    return (
+      &lt;div
+        className={`game-container skin-${classicSkin.id} flex flex-col items-center gap-3 p-4`}
+        style={classicSkin.tokens as CSSProperties}
+      &gt;
+        &lt;span className=&quot;text-xs font-semibold uppercase tracking-wider text-muted-foreground&quot;&gt;
+          {isLevelMode ? &#39;Levels&#39; : &#39;Rounds&#39;}
+        &lt;/span&gt;
+        &lt;ProgressHUD
+          roundIndex={safeRoundIndex}
+          totalRounds={showFraction ? safeDotCount : null}
+          levelIndex={safeLevelIndex}
+          isLevelMode={isLevelMode}
+          phase={phase}
+          showDots={showDots}
+          showFraction={showFraction}
+          showLevel={showLevel}
+        /&gt;
+      &lt;/div&gt;
+    );
+  },
 };
 export default meta;
 
@@ -11507,9 +11544,11 @@ type Story = StoryObj&lt;StoryArgs&gt;;
 
 export const Playground: Story = {
   args: {
-    totalRounds: 6,
-    levelIndex: 6,
+    dotCount: 12,
+    roundIndex: 2,
+    levelIndex: 4,
     isLevelMode: true,
+    showLevel: true,
     phase: &#39;round-complete&#39;,
   },
 };
@@ -11546,27 +11585,42 @@ export const Playground: Story = {
               
               
               <pre><code>const Playground = ({
+  dotCount,
   roundIndex,
-  totalRounds,
-  totalRoundsIsNull,
   levelIndex,
   isLevelMode,
   phase,
   showDots,
   showFraction,
   showLevel,
-}) =&gt; (
-  &lt;ProgressHUD
-    roundIndex={roundIndex}
-    totalRounds={totalRoundsIsNull ? null : totalRounds}
-    levelIndex={levelIndex}
-    isLevelMode={isLevelMode}
-    phase={phase}
-    showDots={showDots}
-    showFraction={showFraction}
-    showLevel={showLevel}
-  /&gt;
-);</code></pre>
+}) =&gt; {
+  // Storybook&#39;s `if`-gated controls keep their arg value, but guard against
+  // any corner case where the arg arrives undefined — the component uses
+  // `roundIndex + 1` and `undefined + 1 === NaN` would leak into the fraction.
+  const safeDotCount = Number.isFinite(dotCount) ? dotCount : 1;
+  const safeRoundIndex = Number.isFinite(roundIndex) ? roundIndex : 0;
+  const safeLevelIndex = Number.isFinite(levelIndex) ? levelIndex : 0;
+  return (
+    &lt;div
+      className={`game-container skin-${classicSkin.id} flex flex-col items-center gap-3 p-4`}
+      style={classicSkin.tokens as CSSProperties}
+    &gt;
+      &lt;span className=&quot;text-xs font-semibold uppercase tracking-wider text-muted-foreground&quot;&gt;
+        {isLevelMode ? &#39;Levels&#39; : &#39;Rounds&#39;}
+      &lt;/span&gt;
+      &lt;ProgressHUD
+        roundIndex={safeRoundIndex}
+        totalRounds={showFraction ? safeDotCount : null}
+        levelIndex={safeLevelIndex}
+        isLevelMode={isLevelMode}
+        phase={phase}
+        showDots={showDots}
+        showFraction={showFraction}
+        showLevel={showLevel}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
             </div>
         </div>
     
@@ -12289,13 +12343,13 @@ export const OpensAndClosesOnEscape: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SlotRow as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  122 | };
-  123 |
-&gt; 124 | const meta: Meta&lt;StoryArgs&gt; = {
+  123 | };
+  124 |
+&gt; 125 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  125 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
-  126 |   title: &#39;answer-game/Slot&#39;,
-  127 |   tags: [&#39;autodocs&#39;],
+  126 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
+  127 |   title: &#39;answer-game/Slot&#39;,
+  128 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/Slot/Slot.stories.tsx:
 import { useEffect } from &#39;react&#39;;
@@ -12309,7 +12363,8 @@ import { SlotRow } from &#39;./SlotRow&#39;;
 import type { AnswerGameConfig, AnswerZone, TileItem } from &#39;../types&#39;;
 import type { SlotRenderProps } from &#39;./useSlotBehavior&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { ComponentType } from &#39;react&#39;;
+import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import { classicSkin } from &#39;@/lib/skin&#39;;
 
 type SlotVariant = &#39;letter&#39; | &#39;dice&#39; | &#39;domino&#39; | &#39;inline-gap&#39;;
 type DragPreview = &#39;none&#39; | &#39;target-empty&#39; | &#39;target-swap&#39;;
@@ -12465,9 +12520,9 @@ const meta: Meta&lt;StoryArgs&gt; = {
       variant === &#39;inline-gap&#39;
         ? [makeTile(&#39;s0&#39;, label || &#39;cat&#39;)]
         : [
-            makeTile(&#39;t0&#39;, label || &#39;A&#39;),
-            makeTile(&#39;t1&#39;, &#39;B&#39;),
-            makeTile(&#39;t2&#39;, &#39;C&#39;),
+            makeTile(&#39;t0&#39;, label || &#39;a&#39;),
+            makeTile(&#39;t1&#39;, &#39;b&#39;),
+            makeTile(&#39;t2&#39;, &#39;c&#39;),
           ];
 
     const zones: AnswerZone[] =
@@ -12486,21 +12541,26 @@ const meta: Meta&lt;StoryArgs&gt; = {
             ];
 
     return (
-      &lt;AnswerGameProvider
-        config={{
-          ...baseConfig,
-          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
-          initialTiles: tiles,
-          initialZones: zones,
-        }}
+      &lt;div
+        className={`game-container skin-${classicSkin.id} p-4`}
+        style={classicSkin.tokens as CSSProperties}
       &gt;
-        &lt;PlaygroundInner
-          variant={variant}
-          dragPreview={dragPreview}
-          contentClass={contentClass}
-          slotClass={slotClass}
-        /&gt;
-      &lt;/AnswerGameProvider&gt;
+        &lt;AnswerGameProvider
+          config={{
+            ...baseConfig,
+            gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+            initialTiles: tiles,
+            initialZones: zones,
+          }}
+        &gt;
+          &lt;PlaygroundInner
+            variant={variant}
+            dragPreview={dragPreview}
+            contentClass={contentClass}
+            slotClass={slotClass}
+          /&gt;
+        &lt;/AnswerGameProvider&gt;
+      &lt;/div&gt;
     );
   },
 };
@@ -12508,7 +12568,12 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Playground: Story = {};
+export const Playground: Story = {
+  args: {
+    label: &#39;a&#39;,
+    isWrong: false,
+  },
+};
 </code></pre></div>
     </div>
         </div>
@@ -12549,9 +12614,9 @@ export const Playground: Story = {};
     variant === &#39;inline-gap&#39;
       ? [makeTile(&#39;s0&#39;, label || &#39;cat&#39;)]
       : [
-          makeTile(&#39;t0&#39;, label || &#39;A&#39;),
-          makeTile(&#39;t1&#39;, &#39;B&#39;),
-          makeTile(&#39;t2&#39;, &#39;C&#39;),
+          makeTile(&#39;t0&#39;, label || &#39;a&#39;),
+          makeTile(&#39;t1&#39;, &#39;b&#39;),
+          makeTile(&#39;t2&#39;, &#39;c&#39;),
         ];
 
   const zones: AnswerZone[] =
@@ -12570,21 +12635,26 @@ export const Playground: Story = {};
           ];
 
   return (
-    &lt;AnswerGameProvider
-      config={{
-        ...baseConfig,
-        gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
-        initialTiles: tiles,
-        initialZones: zones,
-      }}
+    &lt;div
+      className={`game-container skin-${classicSkin.id} p-4`}
+      style={classicSkin.tokens as CSSProperties}
     &gt;
-      &lt;PlaygroundInner
-        variant={variant}
-        dragPreview={dragPreview}
-        contentClass={contentClass}
-        slotClass={slotClass}
-      /&gt;
-    &lt;/AnswerGameProvider&gt;
+      &lt;AnswerGameProvider
+        config={{
+          ...baseConfig,
+          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+          initialTiles: tiles,
+          initialZones: zones,
+        }}
+      &gt;
+        &lt;PlaygroundInner
+          variant={variant}
+          dragPreview={dragPreview}
+          contentClass={contentClass}
+          slotClass={slotClass}
+        /&gt;
+      &lt;/AnswerGameProvider&gt;
+    &lt;/div&gt;
   );
 };</code></pre>
             </div>
