@@ -6,6 +6,10 @@ import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
 import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
 import { checkVersionAndMigrate } from './migrations';
 import {
+  getMigrationFailureCollection,
+  recoverBrokenMigration,
+} from './recover-bookmarks-migration';
+import {
   appMetaSchema,
   bookmarksSchema,
   customGamesSchema,
@@ -134,14 +138,37 @@ export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
     );
   }
   productionDbPromise ??= (async () => {
-    const db = await createRxDatabase<BaseSkillDatabase>({
-      name: PRODUCTION_DB_NAME,
-      storage: getRxStorageDexie(),
-      multiInstance: false,
-    });
-    const withCols = await addBaseSkillCollections(db);
-    await checkVersionAndMigrate(withCols);
-    return withCols;
+    const open = async (): Promise<BaseSkillDatabase> => {
+      const db = await createRxDatabase<BaseSkillDatabase>({
+        name: PRODUCTION_DB_NAME,
+        storage: getRxStorageDexie(),
+        multiInstance: false,
+      });
+      try {
+        const withCols = await addBaseSkillCollections(db);
+        await checkVersionAndMigrate(withCols);
+        return withCols;
+      } catch (error) {
+        await db.close().catch(() => {});
+        throw error;
+      }
+    };
+    // RxDB's parallel migration plumbing intermittently throws DM4 with a
+    // closed-instance inner error during `addCollections` for users whose
+    // IndexedDB carries stale legacy schema versions. Recover by wiping
+    // the broken collection's old storage + meta and retrying. Loop a few
+    // times in case multiple collections trip the same race in one boot.
+    const MAX_RECOVERY_ATTEMPTS = 5;
+    for (let attempt = 0; attempt < MAX_RECOVERY_ATTEMPTS; attempt++) {
+      try {
+        return await open();
+      } catch (error) {
+        const collection = getMigrationFailureCollection(error);
+        if (!collection) throw error;
+        await recoverBrokenMigration(collection);
+      }
+    }
+    return await open();
   })();
   return productionDbPromise;
 }
