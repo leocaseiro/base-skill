@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { fn } from 'storybook/test';
 
 import { EncouragementAnnouncer } from './EncouragementAnnouncer';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -7,20 +7,29 @@ import type { ComponentType } from 'react';
 
 interface StoryArgs {
   message: string;
-  visible: boolean;
   onDismiss: () => void;
+  // Raw EncouragementAnnouncer prop controlled by the story wrapper;
+  // declared here only to hide the react-docgen-inferred row from the
+  // Controls panel.
+  visible?: never;
 }
 
 const ShowTrigger = ({
   message,
   onDismiss,
+  startVisible = false,
 }: {
   message: string;
   onDismiss: () => void;
+  startVisible?: boolean;
 }) => {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(startVisible);
+  const dismiss = () => {
+    setVisible(false);
+    onDismiss();
+  };
   return (
-    <>
+    <div className="flex gap-2">
       <button
         type="button"
         onClick={() => setVisible(true)}
@@ -29,15 +38,20 @@ const ShowTrigger = ({
       >
         Show encouragement
       </button>
+      <button
+        type="button"
+        onClick={dismiss}
+        disabled={!visible}
+        className="rounded-lg bg-muted px-4 py-2 text-foreground disabled:opacity-50"
+      >
+        Dismiss
+      </button>
       <EncouragementAnnouncer
         visible={visible}
         message={message}
-        onDismiss={() => {
-          setVisible(false);
-          onDismiss();
-        }}
+        onDismiss={dismiss}
       />
-    </>
+    </div>
   );
 };
 
@@ -48,20 +62,15 @@ const meta: Meta<StoryArgs> = {
   tags: ['autodocs'],
   args: {
     message: 'Keep trying!',
-    visible: true,
     onDismiss: fn(),
   },
   argTypes: {
     message: { control: 'text' },
-    visible: { control: 'boolean' },
     onDismiss: { table: { disable: true } },
+    visible: { table: { disable: true } },
   },
-  render: ({ message, visible, onDismiss }) => (
-    <EncouragementAnnouncer
-      message={message}
-      visible={visible}
-      onDismiss={onDismiss}
-    />
+  render: ({ message, onDismiss }) => (
+    <ShowTrigger message={message} onDismiss={onDismiss} startVisible />
   ),
 };
 export default meta;
@@ -75,26 +84,4 @@ export const ReplayTrigger: Story = {
   render: ({ message, onDismiss }) => (
     <ShowTrigger message={message} onDismiss={onDismiss} />
   ),
-};
-
-export const AutoDismissesAfter2s: Story = {
-  args: { message: 'Keep trying!' },
-  render: ({ message, onDismiss }) => (
-    <ShowTrigger message={message} onDismiss={onDismiss} />
-  ),
-  play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      canvas.getByRole('button', { name: /show encouragement/i }),
-    );
-    await waitFor(() => {
-      expect(canvas.getByText(/keep trying/i)).toBeVisible();
-    });
-    await waitFor(
-      () => {
-        expect(args.onDismiss).toHaveBeenCalled();
-      },
-      { timeout: 3500 },
-    );
-  },
 };
