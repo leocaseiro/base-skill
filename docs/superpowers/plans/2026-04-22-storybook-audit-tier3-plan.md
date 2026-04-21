@@ -861,7 +861,8 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 - Gate 3 — Handler wiring: N/A (no callbacks on `GameShell`; `ShowcaseBody`'s inline `onChange={() => {}}` stays inside the fixture).
 - Gate 4 — No skin wrapper (theme tokens only; `ThemeShowcase` is by design a theme-token showcase — this is the flagship "do NOT wrap" case).
 - Gate 5 — Hide shadowed rows for `config`, `moves`, `initialState`, `sessionId`, `meta`, `initialLog`, `children`.
-- Gate 8 — Required Variants: 4 theme-pinned VR stories (OceanLight, OceanDark, ForestLight, ForestDark) — each is a theme-specific variant the toolbar reproduces but the VR baseline captures as distinct snapshots.
+- Gate 6 — Collapse: drop 3 of the 4 theme-pinned stories (OceanDark, ForestLight, ForestDark). The theme toolbar (5 themes registered globally in `.storybook/preview.tsx`) lets the reviewer cycle through every theme from a single `Showcase` story in one tap each. VR in this project is Playwright-driven (`e2e/visual.spec.ts`) — Storybook stories do not double as VR baselines, so the "distinct snapshots" argument doesn't hold.
+- Gate 8 — Required Variants: single `Showcase` story. The toolbar provides the "different views" control per the Controls-reach rule.
 - Gate 9 — Decorators: `withDb` + `withRouter` (already present; keep).
 
 **Steps:**
@@ -993,7 +994,7 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
       docs: {
         description: {
           component:
-            'Token-only page composed from GameShell + GameNameChip + ConfigFormFields. Pinned to 4 theme variants for VR parity. No skin wrapper — renders against theme tokens only.',
+            'Token-only page composed from GameShell + GameNameChip + ConfigFormFields. Cycle through the 5 registered themes via the toolbar. No skin wrapper — renders against theme tokens only.',
         },
       },
     },
@@ -1019,23 +1020,13 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 
   type Story = StoryObj<typeof GameShell>;
 
-  // ── 4 locked-theme VR stories ─────────────────────────────────────────────
+  export const Showcase: Story = {};
 
-  export const OceanLight: Story = {
-    parameters: { globals: { theme: 'light' } },
-  };
-
-  export const OceanDark: Story = {
-    parameters: { globals: { theme: 'dark' } },
-  };
-
-  export const ForestLight: Story = {
-    parameters: { globals: { theme: 'forest-light' } },
-  };
-
-  export const ForestDark: Story = {
-    parameters: { globals: { theme: 'forest-dark' } },
-  };
+  // deleted-for-reference — the theme toolbar reproduces every prior pin in one tap:
+  //   OceanLight  → toolbar theme='light'  (default)
+  //   OceanDark   → toolbar theme='dark'
+  //   ForestLight → toolbar theme='forest-light'
+  //   ForestDark  → toolbar theme='forest-dark'
   ```
 
 - [ ] **Step 3: Verify.**
@@ -1056,8 +1047,11 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 
   Hide all 7 GameShell-prop docgen rows from the Controls panel
   (config, moves, initialState, sessionId, meta, initialLog, children)
-  via argTypes.table.disable. Keep the 4 theme-pinned VR stories
-  (OceanLight, OceanDark, ForestLight, ForestDark).
+  via argTypes.table.disable. Collapse the 4 theme-pinned exports
+  (OceanLight, OceanDark, ForestLight, ForestDark) into a single
+  Showcase story — the theme toolbar reproduces each pin in one tap.
+  VR in this project is Playwright (e2e/visual.spec.ts), not Storybook,
+  so the "distinct VR snapshots" argument doesn't hold.
 
   No skin wrapper — this file is the flagship theme-token showcase; no
   --skin-* / skin.tokens references. Explicit note in the component
@@ -1080,8 +1074,8 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md), issue #125).
 
   - Hide all 7 GameShell-prop rows from Controls (`config`, `moves`, `initialState`, `sessionId`, `meta`, `initialLog`, `children`) via `argTypes.table.disable`.
-  - Keep the 4 theme-pinned VR stories (OceanLight, OceanDark, ForestLight, ForestDark) — each produces a distinct VR snapshot the toolbar can't baseline.
-  - No skin wrapper — flagship theme-token showcase; `ThemeShowcase.tsx` / `GameShell.tsx` have no `--skin-*` / `skin.tokens` references (verified by grep). Explicit "no skin wrapper" note added to the `docs.description.component` string.
+  - Collapse the 4 theme-pinned exports into a single `Showcase` — the theme toolbar reproduces every pin in one tap. VR is Playwright (`e2e/visual.spec.ts`), not Storybook, so a distinct-snapshot-per-story argument doesn't apply.
+  - No skin wrapper — flagship theme-token showcase; `ThemeShowcase.tsx` / `GameShell.tsx` have no `--skin-*` / `skin.tokens` references (verified by grep). Explicit note added to the `docs.description.component` string.
 
   Closes part of #125.
 
@@ -1090,8 +1084,8 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   - [ ] `yarn typecheck` green
   - [ ] `yarn lint` green
   - [ ] `yarn test:storybook` green (runs in CI)
-  - [ ] Controls panel is empty for all 4 theme-pinned stories (docgen rows hidden)
-  - [ ] Theme toolbar still works for unpinned preview
+  - [ ] Controls panel is empty on the `Showcase` story (all 7 docgen rows hidden)
+  - [ ] Theme toolbar cycles through all 5 registered themes on the single `Showcase` story
   EOF
   )"
   ```
@@ -1149,5 +1143,6 @@ After all 5 PRs merge:
 - **Placeholders:** No `TBD`, `TODO`, "implement later", "appropriate error handling", or stub-only steps. Every code block is complete and runnable. ✓
 - **Type consistency:** `StoryArgs` double-cast uses `ComponentType<StoryArgs>` consistently. `GAME_COLOR_KEYS` imported from `@/lib/game-colors` in Tasks 2 and 3. `ConfigField` import path matches the existing story file in Task 4. `GameEngineState` / `ResolvedContent` / `ResolvedGameConfig` / `SessionMeta` import paths preserved from the existing ThemeShowcase file in Task 5. ✓
 - **Cross-task coupling:** None. Each task touches exactly one file and pins its own worktree. ✓
+- **Playground consistency (Controls-reach rule):** Every task collapses to a single Playground (or Playground + survey) whenever the prior scenario exports are reachable via the Controls panel or the global theme toolbar. Task 1 (GameGrid): Playground only. Task 2 (GameCard): Playground only. Task 3 (GameNameChip): Playground + AllColors survey (not reachable in one click). Task 4 (ConfigFormFields): Playground only — the `scenario` select covers every `visibleWhen` branch. Task 5 (ThemeShowcase): single `Showcase` — the theme toolbar cycles through all 5 themes. ✓
 
 Plan is ready for execution handoff.
