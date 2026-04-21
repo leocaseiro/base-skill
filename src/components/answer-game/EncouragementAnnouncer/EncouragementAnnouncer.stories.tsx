@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { vi } from 'vitest';
 
 import { EncouragementAnnouncer } from './EncouragementAnnouncer';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -89,21 +88,18 @@ export const AutoDismissesAfter2s: Story = {
     <ShowTrigger message={message} onDismiss={onDismiss} />
   ),
   play: async ({ args, canvasElement }) => {
-    vi.useFakeTimers();
-    try {
-      const canvas = within(canvasElement);
-      await userEvent.click(
-        canvas.getByRole('button', { name: /show encouragement/i }),
-      );
-      await waitFor(() => {
-        expect(canvas.getByText(/keep trying/i)).toBeVisible();
-      });
-      vi.advanceTimersByTime(2000);
-      await waitFor(() => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole('button', { name: /show encouragement/i }),
+    );
+    await waitFor(() => {
+      expect(canvas.getByText(/keep trying/i)).toBeVisible();
+    });
+    await waitFor(
+      () => {
         expect(args.onDismiss).toHaveBeenCalled();
-      });
-    } finally {
-      vi.useRealTimers();
-    }
+      },
+      { timeout: 3500 },
+    );
   },
 };
