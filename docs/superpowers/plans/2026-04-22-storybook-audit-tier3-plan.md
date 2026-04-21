@@ -201,8 +201,8 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 - Gate 3 — Handler wiring: convert `{ action: '…' }` → `fn()` in `args`; hide from Controls. Call `fn()` inside `render` for per-render spy instances (OK for Actions-only; no play() stories here).
 - Gate 4 — No skin wrapper (theme tokens only; verified by grep).
 - Gate 5 — Hide shadowed docgen rows for `chips`, `cover`, `onPlay`, `onOpenCog`, `onToggleBookmark`.
-- Gate 6 — Keep the 7 existing scenario stories (visual coverage, not play-flow duplicates) + their roles.
-- Gate 8 — Required Variants: Default, CustomGame, CustomGamePurple, NotBookmarked, Bookmarked, NotBookmarkedCustomGame, BookmarkedCustomGame.
+- Gate 6 — Collapse: 7 existing scenario exports (Default, CustomGame, CustomGamePurple, NotBookmarked, Bookmarked, NotBookmarkedCustomGame, BookmarkedCustomGame) all reduce to arg tweaks on a single `Playground` — the `variant` radio, `customGameColor` select, `bookmarkable` + `isBookmarked` booleans, and `chipsText` text control reach every state from Controls in ≤2 clicks. Drop all 7 and keep only `Playground`.
+- Gate 8 — Required Variants: single `Playground` happy path. Enum-per-value (variant), state variants (bookmark on/off), and colour variations are all reachable from the Controls panel — no separate exports.
 
 **Steps:**
 
@@ -328,52 +328,15 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 
   type Story = StoryObj<StoryArgs>;
 
-  export const Default: Story = {};
+  export const Playground: Story = {};
 
-  export const CustomGame: Story = {
-    args: {
-      variant: 'customGame',
-      customGameName: 'Skip by 2',
-      customGameColor: 'amber',
-    },
-  };
-
-  export const CustomGamePurple: Story = {
-    args: {
-      variant: 'customGame',
-      customGameName: 'Big to Small',
-      customGameColor: 'purple',
-      chipsText: '⬇️ Down, 10 numbers, 3s',
-    },
-  };
-
-  export const NotBookmarked: Story = {
-    args: { bookmarkable: true, isBookmarked: false },
-  };
-
-  export const Bookmarked: Story = {
-    args: { bookmarkable: true, isBookmarked: true },
-  };
-
-  export const NotBookmarkedCustomGame: Story = {
-    args: {
-      variant: 'customGame',
-      customGameName: 'Skip by 2',
-      customGameColor: 'amber',
-      bookmarkable: true,
-      isBookmarked: false,
-    },
-  };
-
-  export const BookmarkedCustomGame: Story = {
-    args: {
-      variant: 'customGame',
-      customGameName: 'Skip by 2',
-      customGameColor: 'amber',
-      bookmarkable: true,
-      isBookmarked: true,
-    },
-  };
+  // deleted-for-reference — every prior export is reachable from Playground:
+  //   CustomGame               → variant='customGame', customGameColor='amber'
+  //   CustomGamePurple         → variant='customGame', customGameColor='purple', chipsText='⬇️ Down, 10 numbers, 3s'
+  //   NotBookmarked            → bookmarkable=true, isBookmarked=false
+  //   Bookmarked               → bookmarkable=true, isBookmarked=true
+  //   NotBookmarkedCustomGame  → variant='customGame', customGameColor='amber', bookmarkable=true, isBookmarked=false
+  //   BookmarkedCustomGame     → variant='customGame', customGameColor='amber', bookmarkable=true, isBookmarked=true
   ```
 
 - [ ] **Step 3: Verify.**
@@ -399,9 +362,10 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   table.disable. Shadowed raw props (chips, cover, onPlay, onOpenCog,
   onToggleBookmark) hidden via ?: never + table.disable.
 
-  Keeps 7 existing scenario exports (Default, CustomGame,
-  CustomGamePurple, NotBookmarked, Bookmarked, NotBookmarkedCustomGame,
-  BookmarkedCustomGame) — they each capture a distinct visual state.
+  Collapse the 7 prior scenario exports into a single Playground —
+  variant radio, customGameColor select, bookmarkable + isBookmarked
+  booleans, and chipsText text reach every prior state from Controls
+  in ≤2 clicks.
 
   No skin wrapper — GameCard uses theme tokens (bg-card,
   text-foreground, bg-muted) only.
@@ -425,7 +389,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   - `variant` radio, `customGameColor` select from `GAME_COLOR_KEYS`, `chipsText` splits on commas.
   - `isBookmarked` + `bookmarkable` expose the full bookmark matrix via args.
   - Handlers wired via `fn()` in the render function; raw prop rows hidden from Controls.
-  - Keeps 7 scenario exports — each captures a distinct visual state, not a play-flow duplicate.
+  - Collapse 7 prior scenario exports into a single `Playground` — every prior state is reachable from Controls in ≤2 clicks.
   - No skin wrapper — `GameCard.tsx` uses theme tokens only (verified by grep).
 
   Closes part of #125.
