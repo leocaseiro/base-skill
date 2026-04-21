@@ -5,7 +5,7 @@ const meta: Meta<typeof ScoreAnimation> = {
   component: ScoreAnimation,
   title: 'answer-game/ScoreAnimation',
   tags: ['autodocs'],
-  args: { visible: false },
+  args: { visible: true },
   argTypes: {
     visible: { control: 'boolean' },
   },
@@ -14,5 +14,4 @@ export default meta;
 
 type Story = StoryObj<typeof ScoreAnimation>;
 
-export const Playing: Story = { args: { visible: false } };
-export const Complete: Story = { args: { visible: true } };
+export const Playground: Story = {};
