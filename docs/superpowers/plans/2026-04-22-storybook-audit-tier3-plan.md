@@ -66,8 +66,8 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 - Gate 3 — Handler wiring: sample cards inside the render use `fn()` spies on `onPlay` / `onOpenCog`.
 - Gate 4 — No skin wrapper (theme tokens only; `GameGrid` has no CSS of its own beyond layout classes).
 - Gate 5 — Hide shadowed docgen row for `cards`.
-- Gate 6 — Collapse: 2 existing stories (`Default`, `Empty`) become `Playground` + `Empty` + `ManyCards` for visual range (0 / 3 / 12 cards).
-- Gate 8 — Required Variants: `Playground` (Default) + `Empty` edge case. No interactive component → no `play()`.
+- Gate 6 — Collapse: 2 existing stories (`Default`, `Empty`) collapse into a single `Playground` — `cardCount` range (0–12) reaches every state from Controls in one click; no scenario exports are needed.
+- Gate 8 — Required Variants: `Playground` happy path. Edge cases (empty / many) reachable via the `cardCount` range — no separate exports. No interactive component → no `play()`.
 
 **Steps:**
 
@@ -127,14 +127,6 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   type Story = StoryObj<StoryArgs>;
 
   export const Playground: Story = {};
-
-  export const Empty: Story = {
-    args: { cardCount: 0 },
-  };
-
-  export const ManyCards: Story = {
-    args: { cardCount: 12 },
-  };
   ```
 
 - [ ] **Step 3: Verify.** Run in the worktree:
@@ -187,7 +179,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   - [ ] `yarn typecheck` green
   - [ ] `yarn lint` green
   - [ ] `yarn test:storybook` green (runs in CI)
-  - [ ] Controls panel drives the Playground (cardCount slider produces 0, 3, 12 cards visibly)
+  - [ ] Controls panel drives the single `Playground` export (cardCount slider reaches 0, 3, and 12 cards visibly)
   EOF
   )"
   ```
