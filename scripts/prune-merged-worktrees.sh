@@ -176,9 +176,25 @@ if [[ "$WRITE" != true ]]; then
   exit 0
 fi
 
+declare -a remove_errors=()
+
 for p in "${sorted_remove_paths[@]}"; do
   echo "Removing: $p"
-  git -C "$here" worktree remove "$p"
+  if ! err=$(git -C "$here" worktree remove "$p" 2>&1); then
+    remove_errors+=("$p"$'\n'"$err")
+  fi
 done
+
+if [[ ${#remove_errors[@]} -gt 0 ]]; then
+  echo >&2
+  echo "Removal failed for ${#remove_errors[@]} worktree(s):" >&2
+  for e in "${remove_errors[@]}"; do
+    echo "---" >&2
+    echo "$e" >&2
+  done
+  echo >&2
+  echo "Fix the issues above (e.g. commit, stash, or git worktree remove --force), then re-run with -w." >&2
+  exit 1
+fi
 
 echo "Done. Optional: delete merged local branches with git branch -d <name>"
