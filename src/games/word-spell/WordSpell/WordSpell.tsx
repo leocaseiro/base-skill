@@ -7,6 +7,8 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { buildSentenceGapRound } from '../build-sentence-gap-round';
 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
 import { useLibraryRounds } from '../useLibraryRounds';
@@ -306,6 +308,7 @@ export const WordSpell = ({
   seed,
   persistedContent,
 }: WordSpellProps) => {
+  const { t } = useTranslation('common');
   const skin = useGameSkin('word-spell', config.skin);
   const [sessionEpoch, setSessionEpoch] = useState(0);
   const seenWordsStore = useSeenWordsStore();
@@ -429,9 +432,8 @@ export const WordSpell = ({
   // Safety net: detect a draft whose tiles don't match the round the resumed
   // index is pointing at. This covers legacy sessions (no persisted content,
   // draft authored against a different word pool) and any future divergence.
-  // When stale, we ignore the draft and start from round 0 — a silent recovery
-  // is a strict improvement over the "stuck game" symptom. A follow-up PR can
-  // surface a toast once `Toaster` is mounted at the app root.
+  // When stale, we ignore the draft and start from round 0, and surface a toast
+  // so the player knows why their saved progress vanished.
   const staleDraft = useMemo(() => {
     if (!initialState || sessionEpoch !== 0) return false;
     if (resolvedRounds.length === 0 || isLoading) return false;
@@ -443,7 +445,7 @@ export const WordSpell = ({
     if (!draftRound?.word) return true;
     if (draftRound.gaps && draftRound.gaps.length > 0) return false;
     return !isDraftAlignedWithRound({
-      draftTileValues: initialState.allTiles.map((t) => t.value),
+      draftTileValues: initialState.allTiles.map((tile) => tile.value),
       roundWord: draftRound.word,
     });
   }, [
@@ -470,6 +472,11 @@ export const WordSpell = ({
       cancellation.isCancelled = true;
     };
   }, [staleDraft, db, sessionId]);
+
+  useEffect(() => {
+    if (!staleDraft) return;
+    toast(t('toasts.wordSpellStaleDraftRecovered'));
+  }, [staleDraft, t]);
 
   const { tiles, zones } = useMemo(() => {
     if (!roundWord)

@@ -39,6 +39,9 @@
     "add": "Add bookmark",
     "remove": "Remove bookmark"
   },
+  "toasts": {
+    "wordSpellStaleDraftRecovered": "Saved progress couldn't be restored — starting a fresh round."
+  },
   "customGame": {
     "title": "Save configuration",
     "nameLabel": "Configuration name",
