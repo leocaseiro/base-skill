@@ -202,6 +202,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 - Gate 4 — No skin wrapper (theme tokens only; verified by grep).
 - Gate 5 — Hide shadowed docgen rows for `chips`, `cover`, `onPlay`, `onOpenCog`, `onToggleBookmark`.
 - Gate 6 — Collapse: 7 existing scenario exports (Default, CustomGame, CustomGamePurple, NotBookmarked, Bookmarked, NotBookmarkedCustomGame, BookmarkedCustomGame) all reduce to arg tweaks on a single `Playground` — the `variant` radio, `customGameColor` select, `bookmarkable` + `isBookmarked` booleans, and `chipsText` text control reach every state from Controls in ≤2 clicks. Drop all 7 and keep only `Playground`.
+- Gate 7 — Real-game parity: in production, `GameCard` renders inside `GameGrid`'s responsive columns (~260–300px wide at xl/2xl breakpoints). In isolation it has no width constraint and stretches to the full canvas, so the cover image dominates. The Playground's `render` wraps the card in `<div className="w-64">` (256px) and the meta pins `parameters: { layout: 'centered' }` so the card renders at a realistic grid-cell size, centred in the preview.
 - Gate 8 — Required Variants: single `Playground` happy path. Enum-per-value (variant), state variants (bookmark on/off), and colour variations are all reachable from the Controls panel — no separate exports.
 
 **Steps:**
@@ -246,6 +247,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   const meta: Meta<StoryArgs> = {
     component: GameCard as unknown as ComponentType<StoryArgs>,
     tags: ['autodocs'],
+    parameters: { layout: 'centered' },
     args: {
       variant: 'default',
       gameId: 'sort-numbers',
@@ -296,31 +298,35 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
         ? { isBookmarked, onToggleBookmark: fn() }
         : {};
 
-      if (variant === 'customGame') {
-        return (
-          <GameCard
-            variant="customGame"
-            gameId={gameId}
-            title={title}
-            chips={chips}
-            customGameName={customGameName || 'Custom'}
-            customGameColor={customGameColor}
-            onPlay={fn()}
-            onOpenCog={fn()}
-            {...bookmarkProps}
-          />
-        );
-      }
+      // w-64 (256px) ≈ a typical GameGrid cell width at xl/2xl breakpoints.
+      // Without this wrapper GameCard stretches to the full canvas and the
+      // cover image dwarfs the card chrome.
       return (
-        <GameCard
-          variant="default"
-          gameId={gameId}
-          title={title}
-          chips={chips}
-          onPlay={fn()}
-          onOpenCog={fn()}
-          {...bookmarkProps}
-        />
+        <div className="w-64">
+          {variant === 'customGame' ? (
+            <GameCard
+              variant="customGame"
+              gameId={gameId}
+              title={title}
+              chips={chips}
+              customGameName={customGameName || 'Custom'}
+              customGameColor={customGameColor}
+              onPlay={fn()}
+              onOpenCog={fn()}
+              {...bookmarkProps}
+            />
+          ) : (
+            <GameCard
+              variant="default"
+              gameId={gameId}
+              title={title}
+              chips={chips}
+              onPlay={fn()}
+              onOpenCog={fn()}
+              {...bookmarkProps}
+            />
+          )}
+        </div>
       );
     },
   };
@@ -367,6 +373,11 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   booleans, and chipsText text reach every prior state from Controls
   in ≤2 clicks.
 
+  Render realism: wrap the card in <div className="w-64"> (256px ≈ a
+  typical GameGrid cell width at xl/2xl breakpoints) and pin
+  parameters.layout to 'centered' so the card renders at a realistic
+  size instead of stretching to the full Storybook canvas.
+
   No skin wrapper — GameCard uses theme tokens (bg-card,
   text-foreground, bg-muted) only.
 
@@ -390,6 +401,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   - `isBookmarked` + `bookmarkable` expose the full bookmark matrix via args.
   - Handlers wired via `fn()` in the render function; raw prop rows hidden from Controls.
   - Collapse 7 prior scenario exports into a single `Playground` — every prior state is reachable from Controls in ≤2 clicks.
+  - Render realism: card is wrapped in `<div className="w-64">` (~grid-cell size) and the meta pins `layout: 'centered'` so it no longer stretches to the full canvas (the pre-retrofit story rendered at ~1200px wide, dominated by the cover image).
   - No skin wrapper — `GameCard.tsx` uses theme tokens only (verified by grep).
 
   Closes part of #125.
@@ -400,6 +412,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   - [ ] `yarn lint` green
   - [ ] `yarn test:storybook` green (runs in CI)
   - [ ] Controls panel drives variant / customGameColor / bookmark combinations
+  - [ ] Card renders at realistic grid-cell width (not stretched to full canvas)
   EOF
   )"
   ```
