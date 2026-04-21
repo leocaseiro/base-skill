@@ -421,8 +421,8 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 - Gate 3 — Handler wiring: N/A (no callbacks on `GameNameChipProps`).
 - Gate 4 — No skin wrapper (theme tokens only; `--game-play` is the **game-colors palette**, not the skin system).
 - Gate 5 — N/A (no shadowed props — all props are primitive and controllable).
-- Gate 6 — Collapse: drop the 3 `*Dark` duplicates (`DefaultDark`, `WithCustomGameDark`, `WithSubjectDark`) — the global theme toolbar covers dark review. Keep `AllColors` + `AllColorsDark` as surveys (not reachable by flipping a single toggle) — use `globals: { theme: 'dark' }` instead of `withDarkMode`.
-- Gate 8 — Required Variants: Default, WithCustomGame, WithSubject, AllColors, AllColorsDark.
+- Gate 6 — Collapse: drop `Default` (redundant with `Playground`), `WithCustomGame` (reachable via `customGameName` + `customGameColor` controls), `WithSubject` (reachable via `subject` control), and the 3 `*Dark` duplicates (`DefaultDark`, `WithCustomGameDark`, `WithSubjectDark` — theme toolbar covers dark review). Drop `AllColorsDark` too — a single toolbar flip reproduces it. Keep `Playground` (default args entry point) + `AllColors` (12-colour survey is NOT reachable from Controls in one click — it would take 12 selector clicks to visualise the palette).
+- Gate 8 — Required Variants: `Playground` happy path + `AllColors` palette survey. Per-value enum (`customGameColor`) and state variants (custom-game on/off, subject on/off) are all reachable from Controls without separate exports.
 - Gate 9 — Decorators: no `withDb` / `withRouter` needed.
 
 **Steps:**
@@ -439,7 +439,6 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   ```tsx
   import { GameNameChip } from './GameNameChip';
   import { GAME_COLOR_KEYS } from '@/lib/game-colors';
-  import type { GameColorKey } from '@/lib/game-colors';
   import type { Meta, StoryObj } from '@storybook/react';
 
   const meta: Meta<typeof GameNameChip> = {
@@ -462,18 +461,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 
   type Story = StoryObj<typeof GameNameChip>;
 
-  export const Default: Story = {};
-
-  export const WithCustomGame: Story = {
-    args: {
-      customGameName: 'Easy Mode',
-      customGameColor: 'indigo' as GameColorKey,
-    },
-  };
-
-  export const WithSubject: Story = {
-    args: { subject: 'reading' },
-  };
+  export const Playground: Story = {};
 
   export const AllColors: Story = {
     render: () => (
@@ -489,11 +477,6 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
       </div>
     ),
   };
-
-  export const AllColorsDark: Story = {
-    ...AllColors,
-    globals: { theme: 'dark' },
-  };
   ```
 
 - [ ] **Step 3: Verify.**
@@ -503,7 +486,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   yarn lint
   ```
 
-  Both must exit 0. If `globals: { theme: 'dark' }` reports a type error, fall back to `parameters: { globals: { theme: 'dark' } }` — both forms are accepted by Storybook 8+; the former is the story-level shorthand, the latter is the parameters form used in `ThemeShowcase.stories.tsx`. Align with whichever the type-checker accepts.
+  Both must exit 0. If lint flags the `GameColorKey` import as unused, it's because we dropped all `customGameColor`-typed scenario args in the collapse — the cleanup is already reflected in Step 2's code block.
 
 - [ ] **Step 4: Commit.**
 
@@ -513,11 +496,12 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   stories(components/GameNameChip): retrofit per controls policy
 
   Add argTypes controls for title, customGameName, customGameColor
-  (select from GAME_COLOR_KEYS), subject. Drop 3 redundant *Dark
-  duplicates (DefaultDark, WithCustomGameDark, WithSubjectDark) — the
-  global theme toolbar covers that. Keep AllColors + AllColorsDark as
-  surveys; AllColorsDark uses globals.theme='dark' instead of the
-  legacy withDarkMode decorator.
+  (select from GAME_COLOR_KEYS), subject. Collapse to Playground +
+  AllColors — drop Default, WithCustomGame, WithSubject, DefaultDark,
+  WithCustomGameDark, WithSubjectDark, AllColorsDark. The first three
+  are reachable from Controls; the four *Dark variants are reachable
+  by a theme-toolbar flip. Keep AllColors as a 12-colour palette survey
+  (NOT reachable from Controls in one click).
 
   No skin wrapper — GameNameChip uses theme tokens + the game-colors
   palette (--game-play / game-bg / game-text utilities), not skin tokens.
@@ -539,8 +523,8 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md), issue #125).
 
   - `customGameColor` → select from `GAME_COLOR_KEYS`; `title`, `customGameName`, `subject` → text controls.
-  - Dropped 3 redundant `*Dark` duplicates (global theme toolbar covers that).
-  - Kept `AllColors` + `AllColorsDark` as palette surveys — `AllColorsDark` uses `globals: { theme: 'dark' }` instead of `withDarkMode`.
+  - Collapse to `Playground` + `AllColors` only. Drop `Default`, `WithCustomGame`, `WithSubject` (reachable from Controls) and all 4 `*Dark` variants (theme toolbar reproduces them).
+  - Kept `AllColors` — a 12-colour palette survey is NOT reachable from Controls in one click.
   - No skin wrapper — `GameNameChip` uses theme tokens + the game-colors palette (`--game-play` / `game-bg` / `game-text`), not skin tokens.
 
   Closes part of #125.
