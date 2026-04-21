@@ -48,7 +48,7 @@ const meta: Meta<StoryArgs> = {
   tags: ['autodocs'],
   args: {
     message: 'Keep trying!',
-    visible: false,
+    visible: true,
     onDismiss: fn(),
   },
   argTypes: {
@@ -68,13 +68,7 @@ export default meta;
 
 type Story = StoryObj<StoryArgs>;
 
-export const Hidden: Story = {
-  args: { visible: false, message: 'Keep trying!' },
-};
-
-export const Visible: Story = {
-  args: { visible: true, message: 'Almost! Try again.' },
-};
+export const Playground: Story = {};
 
 export const ReplayTrigger: Story = {
   args: { message: 'Great job!' },
