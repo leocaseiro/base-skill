@@ -34,8 +34,8 @@ const DOMINO_SPLIT: Record<number, [number, number]> = {
   12: [6, 6],
 };
 
-/** Renders one half of a domino (a 3x3 pip grid). Internal only. */
-const DiceFace = ({ value }: { value: number }) => {
+/** Renders one half of a domino (a 3x3 pip grid). */
+export const DiceFace = ({ value }: { value: number }) => {
   const pips = DICE_PIPS[value] ?? [];
   return (
     <div
