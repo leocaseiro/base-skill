@@ -1,4 +1,4 @@
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { Slider } from './slider';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -6,6 +6,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 const meta: Meta<typeof Slider> = {
   component: Slider,
   tags: ['autodocs'],
+  args: {
+    onValueChange: fn(),
+    onValueCommit: fn(),
+  },
   argTypes: {
     min: { control: { type: 'range', min: 0, max: 100, step: 1 } },
     max: { control: { type: 'range', min: 1, max: 200, step: 1 } },

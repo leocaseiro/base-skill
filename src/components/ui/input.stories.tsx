@@ -1,4 +1,4 @@
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { Input } from './input';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -6,6 +6,11 @@ import type { Meta, StoryObj } from '@storybook/react';
 const meta: Meta<typeof Input> = {
   component: Input,
   tags: ['autodocs'],
+  args: {
+    onChange: fn(),
+    onFocus: fn(),
+    onBlur: fn(),
+  },
   argTypes: {
     type: {
       control: { type: 'select' },

@@ -1,4 +1,4 @@
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 
 import {
   AlertDialog,
@@ -13,7 +13,7 @@ import {
 } from './alert-dialog';
 import { Button } from './button';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ComponentType } from 'react';
+import type { ComponentType, MouseEventHandler } from 'react';
 
 interface StoryArgs {
   triggerLabel: string;
@@ -21,6 +21,9 @@ interface StoryArgs {
   description: string;
   confirmLabel: string;
   cancelLabel: string;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: MouseEventHandler<HTMLButtonElement>;
+  onCancel: MouseEventHandler<HTMLButtonElement>;
 }
 
 const meta: Meta<StoryArgs> = {
@@ -32,6 +35,9 @@ const meta: Meta<StoryArgs> = {
     description: 'This action cannot be undone.',
     confirmLabel: 'Delete',
     cancelLabel: 'Cancel',
+    onOpenChange: fn(),
+    onConfirm: fn(),
+    onCancel: fn(),
   },
   argTypes: {
     triggerLabel: { control: 'text' },
@@ -39,6 +45,9 @@ const meta: Meta<StoryArgs> = {
     description: { control: 'text' },
     confirmLabel: { control: 'text' },
     cancelLabel: { control: 'text' },
+    onOpenChange: { table: { disable: true } },
+    onConfirm: { table: { disable: true } },
+    onCancel: { table: { disable: true } },
   },
   render: ({
     triggerLabel,
@@ -46,8 +55,11 @@ const meta: Meta<StoryArgs> = {
     description,
     confirmLabel,
     cancelLabel,
+    onOpenChange,
+    onConfirm,
+    onCancel,
   }) => (
-    <AlertDialog>
+    <AlertDialog onOpenChange={onOpenChange}>
       <AlertDialogTrigger asChild>
         <Button variant="destructive">{triggerLabel}</Button>
       </AlertDialogTrigger>
@@ -57,8 +69,12 @@ const meta: Meta<StoryArgs> = {
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
-          <AlertDialogAction>{confirmLabel}</AlertDialogAction>
+          <AlertDialogCancel onClick={onCancel}>
+            {cancelLabel}
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>
+            {confirmLabel}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
