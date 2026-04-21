@@ -195,9 +195,9 @@ onToggleBookmark: fn() }`.
 ### 7. `AnswerGame` (upgrade — real playground)
 
 - **Controls retrofit.** `StoryArgs` breaks `config` into individual controls:
-  - `inputMethod` select — `drag` / `type`.
+  - `inputMethod` select — `drag` / `type` / `both`.
   - `wrongTileBehavior` select — `reject` / `lock-manual` / `lock-auto-eject`.
-  - `tileBankMode` select — `exact` / `extra`.
+  - `tileBankMode` select — `exact` / `distractors`.
   - `totalRounds` range (1–20).
   - `ttsEnabled` boolean.
 - **`fn()` cleanup.** N/A — the shell has no handlers; children carry them.
