@@ -1,9 +1,32 @@
+import { expect, fn, userEvent, within } from 'storybook/test';
+
 import { Input } from './input';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Input> = {
   component: Input,
   tags: ['autodocs'],
+  args: {
+    onChange: fn(),
+    onFocus: fn(),
+    onBlur: fn(),
+  },
+  argTypes: {
+    type: {
+      control: { type: 'select' },
+      options: [
+        'text',
+        'email',
+        'password',
+        'number',
+        'search',
+        'tel',
+        'url',
+      ],
+    },
+    disabled: { control: 'boolean' },
+    'aria-invalid': { control: 'boolean' },
+  },
 };
 export default meta;
 
@@ -45,5 +68,31 @@ export const Invalid: Story = {
         ],
       },
     },
+  },
+};
+
+export const TypesAndReflectsValue: Story = {
+  args: { placeholder: 'Enter text…', 'aria-label': 'Example input' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByLabelText('Example input');
+    await userEvent.type(input, 'hello');
+    await expect(input).toHaveValue('hello');
+  },
+};
+
+export const Required: Story = {
+  args: {
+    required: true,
+    placeholder: 'Required field',
+    'aria-label': 'Required example',
+  },
+};
+
+export const ReadOnly: Story = {
+  args: {
+    readOnly: true,
+    defaultValue: 'Read-only value',
+    'aria-label': 'Read-only example',
   },
 };
