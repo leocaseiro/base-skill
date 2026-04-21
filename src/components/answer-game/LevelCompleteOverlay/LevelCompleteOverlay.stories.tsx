@@ -1,18 +1,25 @@
+import { fn } from 'storybook/test';
+
 import { LevelCompleteOverlay } from './LevelCompleteOverlay';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof LevelCompleteOverlay> = {
   component: LevelCompleteOverlay,
+  title: 'answer-game/LevelCompleteOverlay',
   tags: ['autodocs'],
+  args: {
+    level: 1,
+    onNextLevel: fn(),
+    onDone: fn(),
+  },
   argTypes: {
-    onNextLevel: { action: 'nextLevel' },
-    onDone: { action: 'done' },
+    level: { control: { type: 'range', min: 1, max: 20, step: 1 } },
+    onNextLevel: { table: { disable: true } },
+    onDone: { table: { disable: true } },
   },
 };
 export default meta;
 
 type Story = StoryObj<typeof LevelCompleteOverlay>;
 
-export const Level1: Story = { args: { level: 1 } };
-export const Level3: Story = { args: { level: 3 } };
-export const Level10: Story = { args: { level: 10 } };
+export const Playground: Story = {};

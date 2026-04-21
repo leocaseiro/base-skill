@@ -1,4 +1,5 @@
-import React from 'react';
+import { useEffect } from 'react';
+
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { AnswerGameProvider } from '../AnswerGameProvider';
 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
@@ -8,10 +9,30 @@ import { SlotRow } from './SlotRow';
 import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
 import type { SlotRenderProps } from './useSlotBehavior';
 import type { Meta, StoryObj } from '@storybook/react';
+import type { CSSProperties, ComponentType, ReactNode } from 'react';
+import {
+  DiceFace,
+  DominoTile,
+} from '@/games/number-match/NumeralTileBank/NumeralTileBank';
+import { classicSkin } from '@/lib/skin';
 
-// ---------------------------------------------------------------------------
-// Shared config & data helpers
-// ---------------------------------------------------------------------------
+type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
+type DragPreview = 'none' | 'target-empty' | 'target-swap';
+
+interface StoryArgs {
+  variant: SlotVariant;
+  label: string;
+  diceValue: number;
+  dominoValue: number;
+  filled: boolean;
+  isWrong: boolean;
+  dragPreview: DragPreview;
+  // Raw SlotRow props (the meta `component`) that StoryArgs doesn't
+  // cover. Declared here only to hide their react-docgen-inferred rows
+  // from the Controls panel.
+  className?: never;
+  children?: never;
+}
 
 const baseConfig: AnswerGameConfig = {
   gameId: 'slot-storybook',
@@ -21,6 +42,12 @@ const baseConfig: AnswerGameConfig = {
   totalRounds: 1,
   ttsEnabled: false,
 };
+
+const makeTile = (id: string, label: string): TileItem => ({
+  id,
+  label,
+  value: label,
+});
 
 const makeZone = (
   index: number,
@@ -35,312 +62,234 @@ const makeZone = (
   isLocked: false,
 });
 
-const makeTile = (id: string, label: string): TileItem => ({
-  id,
-  label,
-  value: label,
-});
-
-// ---------------------------------------------------------------------------
-// Letter-slot render child
-// ---------------------------------------------------------------------------
-
-const LetterContent = ({ label }: SlotRenderProps) => (
-  <span className="text-xl font-bold">{label ?? ''}</span>
-);
-
-// ---------------------------------------------------------------------------
-// Meta — using SlotRow as the component so Storybook shows a useful name.
-// Each story provides its own render that sets up AnswerGameProvider.
-// ---------------------------------------------------------------------------
-
-const meta: Meta<typeof SlotRow> = {
-  component: SlotRow,
-  title: 'answer-game/Slot',
-  tags: ['autodocs'],
-  decorators: [withDb],
-};
-export default meta;
-
-type Story = StoryObj<typeof SlotRow>;
-
-// ---------------------------------------------------------------------------
-// 1. EmptyLetterSlots — 3 empty letter-sized (size-14) slots in a SlotRow
-// ---------------------------------------------------------------------------
-
-export const EmptyLetterSlots: Story = {
-  render: () => (
-    <AnswerGameProvider
-      config={{
-        ...baseConfig,
-        gameId: 'slot-empty',
-        initialTiles: [
-          makeTile('t0', 'C'),
-          makeTile('t1', 'A'),
-          makeTile('t2', 'T'),
-        ],
-        initialZones: [makeZone(0), makeZone(1), makeZone(2)],
-      }}
-    >
-      <SlotRow className="gap-2">
-        <Slot index={0} className="size-14 rounded-lg">
-          {(props) => <LetterContent {...props} />}
-        </Slot>
-        <Slot index={1} className="size-14 rounded-lg">
-          {(props) => <LetterContent {...props} />}
-        </Slot>
-        <Slot index={2} className="size-14 rounded-lg">
-          {(props) => <LetterContent {...props} />}
-        </Slot>
-      </SlotRow>
-    </AnswerGameProvider>
-  ),
+const variantConfig: Record<
+  SlotVariant,
+  { slotClass: string; contentClass: string }
+> = {
+  letter: {
+    slotClass: 'size-14 rounded-lg',
+    contentClass: 'text-xl font-bold',
+  },
+  dice: {
+    slotClass: 'size-20 rounded-xl',
+    contentClass: 'text-2xl font-bold',
+  },
+  domino: {
+    slotClass: 'h-[136px] w-[72px] rounded-xl',
+    contentClass: 'text-3xl font-bold',
+  },
+  'inline-gap': { slotClass: '', contentClass: '' },
 };
 
-// ---------------------------------------------------------------------------
-// 2. FilledLetterSlots — 3 slots with letters C, A, T placed
-// ---------------------------------------------------------------------------
+const PlaygroundInner = ({
+  variant,
+  dragPreview,
+  slotClass,
+  renderContent,
+  renderPreview,
+}: {
+  variant: SlotVariant;
+  dragPreview: DragPreview;
+  slotClass: string;
+  renderContent: (props: SlotRenderProps) => ReactNode;
+  renderPreview?: (previewLabel: string) => ReactNode;
+}) => {
+  const dispatch = useAnswerGameDispatch();
 
-export const FilledLetterSlots: Story = {
-  render: () => (
-    <AnswerGameProvider
-      config={{
-        ...baseConfig,
-        gameId: 'slot-filled',
-        initialTiles: [
-          makeTile('t0', 'C'),
-          makeTile('t1', 'A'),
-          makeTile('t2', 'T'),
-        ],
-        initialZones: [
-          makeZone(0, 't0'),
-          makeZone(1, 't1'),
-          makeZone(2, 't2'),
-        ],
-      }}
-    >
-      <SlotRow className="gap-2">
-        <Slot index={0} className="size-14 rounded-lg">
-          {(props) => <LetterContent {...props} />}
-        </Slot>
-        <Slot index={1} className="size-14 rounded-lg">
-          {(props) => <LetterContent {...props} />}
-        </Slot>
-        <Slot index={2} className="size-14 rounded-lg">
-          {(props) => <LetterContent {...props} />}
-        </Slot>
-      </SlotRow>
-    </AnswerGameProvider>
-  ),
-};
+  useEffect(() => {
+    if (dragPreview === 'none') {
+      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+      dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+      return;
+    }
+    // Both previews drag tile t0 over zone 1.
+    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+  }, [dispatch, dragPreview]);
 
-// ---------------------------------------------------------------------------
-// 3. WrongPlacement — slot with a wrong tile (isWrong = true → red/shake)
-// ---------------------------------------------------------------------------
-
-export const WrongPlacement: Story = {
-  render: () => (
-    <AnswerGameProvider
-      config={{
-        ...baseConfig,
-        gameId: 'slot-wrong',
-        initialTiles: [makeTile('t0', 'X')],
-        initialZones: [makeZone(0, 't0', true)],
-      }}
-    >
-      <SlotRow className="gap-2">
-        <Slot index={0} className="size-14 rounded-lg">
-          {(props) => <LetterContent {...props} />}
-        </Slot>
-      </SlotRow>
-    </AnswerGameProvider>
-  ),
-};
-
-// ---------------------------------------------------------------------------
-// 4. DiceSlots — NumberMatch-style 80px square slots (size-20)
-// ---------------------------------------------------------------------------
-
-const DotContent = ({ label }: SlotRenderProps) => (
-  <span className="text-2xl font-bold">{label ?? ''}</span>
-);
-
-export const DiceSlots: Story = {
-  render: () => (
-    <AnswerGameProvider
-      config={{
-        ...baseConfig,
-        gameId: 'slot-dice',
-        initialTiles: [
-          makeTile('d0', '3'),
-          makeTile('d1', '5'),
-          makeTile('d2', '1'),
-        ],
-        initialZones: [
-          makeZone(0, 'd0'),
-          makeZone(1, 'd1'),
-          makeZone(2, 'd2'),
-        ],
-      }}
-    >
-      <SlotRow className="gap-3">
-        <Slot index={0} className="size-20 rounded-xl">
-          {(props) => <DotContent {...props} />}
-        </Slot>
-        <Slot index={1} className="size-20 rounded-xl">
-          {(props) => <DotContent {...props} />}
-        </Slot>
-        <Slot index={2} className="size-20 rounded-xl">
-          {(props) => <DotContent {...props} />}
-        </Slot>
-      </SlotRow>
-    </AnswerGameProvider>
-  ),
-};
-
-// ---------------------------------------------------------------------------
-// 5. DominoSlots — NumberMatch-style rectangle slots (h-[72px] w-32)
-// ---------------------------------------------------------------------------
-
-const DominoContent = ({ label }: SlotRenderProps) => (
-  <span className="text-3xl font-bold">{label ?? ''}</span>
-);
-
-export const DominoSlots: Story = {
-  render: () => (
-    <AnswerGameProvider
-      config={{
-        ...baseConfig,
-        gameId: 'slot-domino',
-        initialTiles: [makeTile('dom0', '4'), makeTile('dom1', '2')],
-        initialZones: [makeZone(0, 'dom0'), makeZone(1, 'dom1')],
-      }}
-    >
-      <SlotRow className="gap-3">
-        <Slot index={0} className="h-[72px] w-32 rounded-xl">
-          {(props) => <DominoContent {...props} />}
-        </Slot>
-        <Slot index={1} className="h-[72px] w-32 rounded-xl">
-          {(props) => <DominoContent {...props} />}
-        </Slot>
-      </SlotRow>
-    </AnswerGameProvider>
-  ),
-};
-
-// ---------------------------------------------------------------------------
-// 6. InlineSentenceGap — inline gap slot using SentenceWithGaps
-// ---------------------------------------------------------------------------
-
-export const InlineSentenceGap: Story = {
-  render: () => (
-    <AnswerGameProvider
-      config={{
-        ...baseConfig,
-        gameId: 'slot-sentence',
-        initialTiles: [makeTile('s0', 'cat')],
-        initialZones: [makeZone(0, 's0')],
-      }}
-    >
+  if (variant === 'inline-gap') {
+    return (
       <div className="p-4">
         <SentenceWithGaps sentence="The {0} sat on the mat." />
       </div>
-    </AnswerGameProvider>
-  ),
-};
-
-// ---------------------------------------------------------------------------
-// 7. PreviewTarget — slot showing drag preview (dashed border, faded label)
-// ---------------------------------------------------------------------------
-
-export const PreviewTarget: Story = {
-  render: () => (
-    <AnswerGameProvider
-      config={{
-        ...baseConfig,
-        gameId: 'slot-preview-target',
-        initialTiles: [
-          makeTile('t0', 'C'),
-          makeTile('t1', 'A'),
-          makeTile('t2', 'T'),
-        ],
-        initialZones: [makeZone(0), makeZone(1), makeZone(2)],
-      }}
-    >
-      <PreviewTargetInner />
-    </AnswerGameProvider>
-  ),
-};
-
-const PreviewTargetInner = () => {
-  const dispatch = useAnswerGameDispatch();
-  React.useEffect(() => {
-    // Simulate: tile t0 is being dragged over slot 1
-    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
-    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
-  }, [dispatch]);
+    );
+  }
 
   return (
-    <SlotRow className="gap-2">
-      <Slot index={0} className="size-14 rounded-lg">
-        {(props) => <LetterContent {...props} />}
-      </Slot>
-      <Slot index={1} className="size-14 rounded-lg">
-        {(props) => <LetterContent {...props} />}
-      </Slot>
-      <Slot index={2} className="size-14 rounded-lg">
-        {(props) => <LetterContent {...props} />}
-      </Slot>
+    <SlotRow className="gap-3">
+      {[0, 1, 2].map((i) => (
+        <Slot
+          key={i}
+          index={i}
+          className={slotClass}
+          renderPreview={renderPreview}
+        >
+          {(props) => renderContent(props)}
+        </Slot>
+      ))}
     </SlotRow>
   );
 };
 
-// ---------------------------------------------------------------------------
-// 8. PreviewSwap — slot-to-slot swap preview (source shows target's tile)
-// ---------------------------------------------------------------------------
+const meta: Meta<StoryArgs> = {
+  component: SlotRow as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/Slot',
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    variant: 'letter',
+    label: 'a',
+    diceValue: 5,
+    dominoValue: 8,
+    filled: true,
+    isWrong: false,
+    dragPreview: 'none',
+  },
+  argTypes: {
+    variant: {
+      control: { type: 'select' },
+      options: [
+        'letter',
+        'dice',
+        'domino',
+        'inline-gap',
+      ] satisfies SlotVariant[],
+    },
+    label: {
+      control: 'text',
+      if: { arg: 'variant', eq: 'letter' },
+    },
+    diceValue: {
+      control: { type: 'range', min: 0, max: 6, step: 1 },
+      description: 'Pip count (0-6) rendered as a 3×3 dice face.',
+      if: { arg: 'variant', eq: 'dice' },
+    },
+    dominoValue: {
+      control: { type: 'range', min: 1, max: 12, step: 1 },
+      description:
+        'Sum rendered as two stacked dice faces (top = smaller half).',
+      if: { arg: 'variant', eq: 'domino' },
+    },
+    filled: { control: 'boolean' },
+    isWrong: { control: 'boolean' },
+    dragPreview: {
+      control: { type: 'select' },
+      options: [
+        'none',
+        'target-empty',
+        'target-swap',
+      ] satisfies DragPreview[],
+    },
+    className: { table: { disable: true } },
+    children: { table: { disable: true } },
+  },
+  render: ({
+    variant,
+    label,
+    diceValue,
+    dominoValue,
+    filled,
+    isWrong,
+    dragPreview,
+  }) => {
+    const { slotClass, contentClass } = variantConfig[variant];
 
-export const PreviewSwap: Story = {
-  render: () => (
-    <AnswerGameProvider
-      config={{
-        ...baseConfig,
-        gameId: 'slot-preview-swap',
-        initialTiles: [
-          makeTile('t0', 'C'),
-          makeTile('t1', 'A'),
-          makeTile('t2', 'T'),
-        ],
-        initialZones: [
-          makeZone(0, 't0'),
-          makeZone(1, 't1'),
-          makeZone(2, 't2'),
-        ],
-      }}
-    >
-      <PreviewSwapInner />
-    </AnswerGameProvider>
-  ),
+    // Per-variant tile label + content renderer. Tiles feed into the
+    // AnswerGameProvider so Slot sees a real placed tile; renderContent
+    // draws the face inside the Slot render-prop. renderPreview mirrors
+    // the face during drag-hover previews (otherwise Slot would fall
+    // back to a plain `<span>{previewLabel}</span>` that shows the raw
+    // numeric label for dice/domino).
+    const tileLabel =
+      variant === 'letter'
+        ? label || 'a'
+        : variant === 'dice'
+          ? String(diceValue)
+          : variant === 'domino'
+            ? String(dominoValue)
+            : label || 'cat';
+
+    const renderContent = (props: SlotRenderProps) => {
+      // Only render the face when the slot has a placed tile label.
+      // Empty slots pass label=null; falling through to null keeps them
+      // empty (matches the letter branch's `props.label ?? ''`).
+      if (props.label === null) return null;
+      if (variant === 'dice') {
+        return <DiceFace value={Number(props.label) || 0} />;
+      }
+      if (variant === 'domino') {
+        return <DominoTile value={Number(props.label) || 0} />;
+      }
+      return <span className={contentClass}>{props.label}</span>;
+    };
+
+    const renderPreview =
+      variant === 'dice'
+        ? (previewLabel: string) => (
+            <div className="opacity-50">
+              <DiceFace value={Number(previewLabel) || 0} />
+            </div>
+          )
+        : variant === 'domino'
+          ? (previewLabel: string) => (
+              <div className="opacity-50">
+                <DominoTile value={Number(previewLabel) || 0} />
+              </div>
+            )
+          : undefined;
+
+    // Build tiles/zones depending on variant + flags.
+    const tiles: TileItem[] =
+      variant === 'inline-gap'
+        ? [makeTile('s0', tileLabel)]
+        : [
+            makeTile('t0', tileLabel),
+            makeTile('t1', variant === 'letter' ? 'b' : '2'),
+            makeTile('t2', variant === 'letter' ? 'c' : '3'),
+          ];
+
+    const zones: AnswerZone[] =
+      variant === 'inline-gap'
+        ? [makeZone(0, filled ? 's0' : null, isWrong)]
+        : dragPreview === 'target-swap'
+          ? [
+              makeZone(0, 't0'),
+              makeZone(1, 't1', isWrong),
+              makeZone(2, 't2'),
+            ]
+          : [
+              makeZone(0, filled ? 't0' : null, isWrong),
+              makeZone(1),
+              makeZone(2),
+            ];
+
+    return (
+      <div
+        className={`game-container skin-${classicSkin.id} p-4`}
+        style={classicSkin.tokens as CSSProperties}
+      >
+        <AnswerGameProvider
+          config={{
+            ...baseConfig,
+            gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+            initialTiles: tiles,
+            initialZones: zones,
+          }}
+        >
+          <PlaygroundInner
+            variant={variant}
+            dragPreview={dragPreview}
+            slotClass={slotClass}
+            renderContent={renderContent}
+            renderPreview={renderPreview}
+          />
+        </AnswerGameProvider>
+      </div>
+    );
+  },
 };
+export default meta;
 
-const PreviewSwapInner = () => {
-  const dispatch = useAnswerGameDispatch();
-  React.useEffect(() => {
-    // Simulate: tile t0 (in slot 0) is being dragged over slot 1 (has t1)
-    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
-    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
-  }, [dispatch]);
+type Story = StoryObj<StoryArgs>;
 
-  return (
-    <SlotRow className="gap-2">
-      <Slot index={0} className="size-14 rounded-lg">
-        {(props) => <LetterContent {...props} />}
-      </Slot>
-      <Slot index={1} className="size-14 rounded-lg">
-        {(props) => <LetterContent {...props} />}
-      </Slot>
-      <Slot index={2} className="size-14 rounded-lg">
-        {(props) => <LetterContent {...props} />}
-      </Slot>
-    </SlotRow>
-  );
-};
+export const Playground: Story = {};
