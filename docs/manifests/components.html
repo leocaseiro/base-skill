@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -13462,6 +13462,54 @@ sequenceDiagram
     Reducer--&gt;&gt;Reducer: phase = &#39;game-over&#39;
   end
 ```
+
+---
+
+## 9. Session Resume (fresh mount vs. draft restore)
+
+`AnswerGameProvider`&#39;s mount effect routes every lifecycle change through
+the reducer. On mount, and whenever `initialState` or `config.initialTiles/Zones`
+change, exactly one of `RESUME_ROUND` or `INIT_ROUND` is dispatched.
+
+`RESUME_ROUND` preserves draft progress (`roundIndex`, `retryCount`,
+`levelIndex`), so a resumed mid-round session never resets to round 0 —
+that was the pre-#139 failure mode the early-return guard was masking.
+
+`useAnswerGameDraftSync` runs in parallel: it writes every state change
+back to `session_history_index.draftState` (debounced 500 ms) so the
+next mount has a fresh draft to hand to `RESUME_ROUND`.
+
+```mermaid
+flowchart TD
+  Mount([AnswerGameProvider mounts or props change]) --&gt; HasDraft{initialState present?}
+
+  HasDraft -- yes --&gt; Resume[&quot;dispatch RESUME_ROUND { draft }&quot;]
+  Resume --&gt; RState[&quot;reducer: restore allTiles, bankTileIds,\nzones, activeSlotIndex, phase,\nroundIndex, retryCount, levelIndex&quot;]
+  RState --&gt; RClear[&quot;clear dragActiveTileId,\ndragHoverZoneIndex, dragHoverBankTileId&quot;]
+
+  HasDraft -- no --&gt; HasTiles{config.initialTiles\n+ initialZones set?}
+  HasTiles -- yes --&gt; Init[&quot;dispatch INIT_ROUND { tiles, zones }&quot;]
+  HasTiles -- no --&gt; Noop([no-op: state already makeInitialState])
+  Init --&gt; IState[&quot;reducer: populate round state,\nreset roundIndex/retryCount/levelIndex to 0&quot;]
+
+  RClear --&gt; Sync
+  IState --&gt; Sync
+  Sync[&quot;useAnswerGameDraftSync\n(debounce 500 ms)&quot;] --&gt; DB[(&quot;session_history_index.draftState&quot;)]
+```
+
+### When each action fires
+
+| Situation                                                         | Dispatched action | Reducer behavior                                                                                  |
+| ----------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------- |
+| First visit to a game (no persisted session)                      | `INIT_ROUND`      | Populate tiles/zones from config; reset progress counters to 0                                    |
+| Reload mid-game with an aligned draft                             | `RESUME_ROUND`    | Restore the draft snapshot wholesale; keep `config`; clear drag state                             |
+| Reload with a stale draft (WordSpell safety net drops the draft)  | `INIT_ROUND`      | `WordSpell.tsx` sets `initialState={undefined}` when `staleDraft` is true; provider sees no draft |
+| Mid-mount `initialState` change (e.g. draft written by a sibling) | `RESUME_ROUND`    | Effect re-runs; draft flows into reducer without remounting                                       |
+| Mid-mount `config.initialTiles` change (no draft)                 | `INIT_ROUND`      | Effect re-runs; new tiles populate the round                                                      |
+
+The split exists so `INIT_ROUND`&#39;s original &quot;reset progress to 0&quot; semantics
+stay intact while resumed sessions get a dedicated action that cannot
+accidentally drop `roundIndex`, `retryCount`, or `levelIndex`.
 </code></pre>
           </div>
         </div>
@@ -13556,22 +13604,23 @@ interface TileItem {
 Defined in `src/components/answer-game/types.ts` as `AnswerGameAction`.
 Handled in `src/components/answer-game/answer-game-reducer.ts`.
 
-| Action                | Payload                          | Dispatched by                                                                     | Effect                                                                                           |
-| --------------------- | -------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `INIT_ROUND`          | `{ tiles, zones }`               | `AnswerGameProvider` (mount effect)                                               | Resets round state, populates tiles and zones                                                    |
-| `PLACE_TILE`          | `{ tileId, zoneIndex }`          | `useTileEvaluation`                                                               | Places bank tile in slot; marks wrong if mismatch; sets `phase: &#39;round-complete&#39;` if all correct |
-| `TYPE_TILE`           | `{ tileId, value, zoneIndex }`   | `useTileEvaluation`                                                               | Creates a virtual typed tile (id `typed-${nanoid()}`); same evaluation as `PLACE_TILE`           |
-| `REMOVE_TILE`         | `{ zoneIndex }`                  | `useSlotBehavior`, `useSlotTileDrag`, `useKeyboardInput`, `useTouchKeyboardInput` | Removes tile from slot; returns it to bank (virtual tiles are discarded)                         |
-| `SWAP_TILES`          | `{ fromZoneIndex, toZoneIndex }` | `useSlotBehavior`, `useFreeSwap`                                                  | Exchanges tiles between two slots; re-evaluates both positions                                   |
-| `EJECT_TILE`          | `{ zoneIndex }`                  | `useSlotBehavior` (auto timer)                                                    | Removes wrong tile after lock-auto-eject animation; returns tile to bank                         |
-| `ADVANCE_ROUND`       | `{ tiles, zones }`               | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Increments `roundIndex`; replaces tiles and zones with next round data                           |
-| `ADVANCE_LEVEL`       | `{ tiles, zones }`               | `SortNumbers`                                                                     | Increments `levelIndex`; resets `roundIndex` to 0; replaces tiles and zones                      |
-| `COMPLETE_GAME`       | —                                | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Sets `phase: &#39;game-over&#39;`                                                                        |
-| `SET_DRAG_ACTIVE`     | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`, `useSlotBehavior`                          | Tracks the tile being dragged; `null` clears it on drop or cancel                                |
-| `SET_DRAG_HOVER`      | `{ zoneIndex: number \| null }`  | `useSlotBehavior`, `useDraggableTile`                                             | Tracks which zone is hovered during drag for visual feedback                                     |
-| `SET_DRAG_HOVER_BANK` | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`                                             | Tracks which bank tile hole is hovered by a dragged slot tile                                    |
-| `SWAP_SLOT_BANK`      | `{ zoneIndex, bankTileId }`      | `useSlotTileDrag`                                                                 | Exchanges a slot tile with a specific bank tile                                                  |
-| `SET_ACTIVE_SLOT`     | `{ zoneIndex }`                  | `useKeyboardInput`                                                                | Moves the keyboard cursor to a specific slot (ordered mode only)                                 |
+| Action                | Payload                          | Dispatched by                                                                     | Effect                                                                                                                                            |
+| --------------------- | -------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `INIT_ROUND`          | `{ tiles, zones }`               | `AnswerGameProvider` (mount effect — fresh session)                               | Resets round state, populates tiles and zones; resets `roundIndex`, `retryCount`, `levelIndex` to 0                                               |
+| `RESUME_ROUND`        | `{ draft }`                      | `AnswerGameProvider` (mount effect — when `initialState` is present)              | Restores tiles, zones, `activeSlotIndex`, `phase`, `roundIndex`, `retryCount`, `levelIndex` from the persisted draft; clears transient drag state |
+| `PLACE_TILE`          | `{ tileId, zoneIndex }`          | `useTileEvaluation`                                                               | Places bank tile in slot; marks wrong if mismatch; sets `phase: &#39;round-complete&#39;` if all correct                                                  |
+| `TYPE_TILE`           | `{ tileId, value, zoneIndex }`   | `useTileEvaluation`                                                               | Creates a virtual typed tile (id `typed-${nanoid()}`); same evaluation as `PLACE_TILE`                                                            |
+| `REMOVE_TILE`         | `{ zoneIndex }`                  | `useSlotBehavior`, `useSlotTileDrag`, `useKeyboardInput`, `useTouchKeyboardInput` | Removes tile from slot; returns it to bank (virtual tiles are discarded)                                                                          |
+| `SWAP_TILES`          | `{ fromZoneIndex, toZoneIndex }` | `useSlotBehavior`, `useFreeSwap`                                                  | Exchanges tiles between two slots; re-evaluates both positions                                                                                    |
+| `EJECT_TILE`          | `{ zoneIndex }`                  | `useSlotBehavior` (auto timer)                                                    | Removes wrong tile after lock-auto-eject animation; returns tile to bank                                                                          |
+| `ADVANCE_ROUND`       | `{ tiles, zones }`               | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Increments `roundIndex`; replaces tiles and zones with next round data                                                                            |
+| `ADVANCE_LEVEL`       | `{ tiles, zones }`               | `SortNumbers`                                                                     | Increments `levelIndex`; resets `roundIndex` to 0; replaces tiles and zones                                                                       |
+| `COMPLETE_GAME`       | —                                | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Sets `phase: &#39;game-over&#39;`                                                                                                                         |
+| `SET_DRAG_ACTIVE`     | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`, `useSlotBehavior`                          | Tracks the tile being dragged; `null` clears it on drop or cancel                                                                                 |
+| `SET_DRAG_HOVER`      | `{ zoneIndex: number \| null }`  | `useSlotBehavior`, `useDraggableTile`                                             | Tracks which zone is hovered during drag for visual feedback                                                                                      |
+| `SET_DRAG_HOVER_BANK` | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`                                             | Tracks which bank tile hole is hovered by a dragged slot tile                                                                                     |
+| `SWAP_SLOT_BANK`      | `{ zoneIndex, bankTileId }`      | `useSlotTileDrag`                                                                 | Exchanges a slot tile with a specific bank tile                                                                                                   |
+| `SET_ACTIVE_SLOT`     | `{ zoneIndex }`                  | `useKeyboardInput`                                                                | Moves the keyboard cursor to a specific slot (ordered mode only)                                                                                  |
 
 ---
 
@@ -14157,7 +14206,9 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
   [*] --&gt; loading : WordSpell mounts
-  loading --&gt; playing : useLibraryRounds resolves,\nINIT_ROUND dispatched
+  loading --&gt; playing : fresh session →\nINIT_ROUND dispatched
+  loading --&gt; playing : resumed session →\nRESUME_ROUND dispatched\n(preserves roundIndex,\nretryCount, levelIndex)
+  loading --&gt; playing : stale-draft safety net →\ndraft discarded,\nINIT_ROUND dispatched
 
   playing --&gt; round_complete : all zones correct
   playing --&gt; playing : wrong tile placed\n(auto-eject returns tile)
@@ -14168,6 +14219,12 @@ stateDiagram-v2
   game_over --&gt; loading : Play Again\n(sessionEpoch++)
   game_over --&gt; [*] : Home
 ```
+
+&gt; See `AnswerGame.flows.mdx` §9 for the full mount-effect decision tree
+&gt; (`RESUME_ROUND` vs `INIT_ROUND`). The stale-draft safety net lives in
+&gt; `WordSpell.tsx:435-474` — it detects a draft whose letters can&#39;t align
+&gt; with the current round and null-patches `draftState` before the provider
+&gt; sees it, so the resume path falls back to `INIT_ROUND`.
 
 ---
 
@@ -14328,8 +14385,13 @@ sequenceDiagram
 
   Note over Hook,DB: On page refresh / remount
   Provider-&gt;&gt;Hook: mount with initialState prop from route loader
-  Hook-&gt;&gt;Provider: dispatch INIT_ROUND with restored tiles/zones
-  Provider--&gt;&gt;Provider: game resumes at exact mid-round state
+  alt initialState (draft) present
+    Hook-&gt;&gt;Provider: dispatch RESUME_ROUND { draft }
+    Provider--&gt;&gt;Provider: restores tiles, zones, roundIndex,\n  retryCount, levelIndex from the draft
+  else fresh session
+    Hook-&gt;&gt;Provider: dispatch INIT_ROUND { tiles, zones }
+    Provider--&gt;&gt;Provider: reset round to 0
+  end
 ```
 </code></pre>
           </div>
@@ -14476,7 +14538,10 @@ Stored in RxDB collection `session_history_index`. Replay by passing `initialLog
 
 `useAnswerGameDraftSync` (in `src/components/answer-game/`) serialises the current
 `AnswerGameState` to RxDB&#39;s `session_history_index.draftState` field on every state
-change, and reads it back on mount when `initialState` is provided.
+change. On the next mount, `AnswerGameProvider` reads that draft back via its
+`initialState` prop and dispatches `RESUME_ROUND` — see
+`AnswerGame.reference.mdx` for the action catalog and `AnswerGame.flows.mdx` §9
+for the mount-effect decision tree.
 
 ### AnswerGameDraftState (persisted subset)
 
