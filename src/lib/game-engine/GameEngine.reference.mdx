@@ -113,7 +113,10 @@ Stored in RxDB collection `session_history_index`. Replay by passing `initialLog
 
 `useAnswerGameDraftSync` (in `src/components/answer-game/`) serialises the current
 `AnswerGameState` to RxDB's `session_history_index.draftState` field on every state
-change, and reads it back on mount when `initialState` is provided.
+change. On the next mount, `AnswerGameProvider` reads that draft back via its
+`initialState` prop and dispatches `RESUME_ROUND` — see
+`AnswerGame.reference.mdx` for the action catalog and `AnswerGame.flows.mdx` §9
+for the mount-effect decision tree.
 
 ### AnswerGameDraftState (persisted subset)
 

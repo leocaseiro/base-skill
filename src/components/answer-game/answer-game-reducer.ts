@@ -85,6 +85,24 @@ export function answerGameReducer(
       };
     }
 
+    case 'RESUME_ROUND': {
+      const { draft } = action;
+      return {
+        ...state,
+        allTiles: draft.allTiles,
+        bankTileIds: draft.bankTileIds,
+        zones: draft.zones,
+        activeSlotIndex: draft.activeSlotIndex,
+        phase: draft.phase,
+        roundIndex: draft.roundIndex,
+        retryCount: draft.retryCount,
+        levelIndex: draft.levelIndex,
+        dragActiveTileId: null,
+        dragHoverZoneIndex: null,
+        dragHoverBankTileId: null,
+      };
+    }
+
     case 'PLACE_TILE': {
       const tile = state.allTiles.find((t) => t.id === action.tileId);
       const zone = state.zones[action.zoneIndex];
