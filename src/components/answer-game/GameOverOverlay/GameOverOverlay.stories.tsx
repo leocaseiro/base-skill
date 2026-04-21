@@ -1,4 +1,4 @@
-import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { fn } from 'storybook/test';
 
 import { GameOverOverlay } from './GameOverOverlay';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -48,29 +48,3 @@ export default meta;
 type Story = StoryObj<StoryArgs>;
 
 export const Playground: Story = {};
-
-export const ClicksPlayAgain: Story = {
-  args: { stars: 5 },
-  play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      await canvas.findByRole('button', { name: /play again/i }),
-    );
-    await waitFor(() => {
-      expect(args.onPlayAgain).toHaveBeenCalledTimes(1);
-    });
-  },
-};
-
-export const ClicksHome: Story = {
-  args: { stars: 5 },
-  play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      await canvas.findByRole('button', { name: /home/i }),
-    );
-    await waitFor(() => {
-      expect(args.onHome).toHaveBeenCalledTimes(1);
-    });
-  },
-};

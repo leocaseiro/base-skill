@@ -1,13 +1,12 @@
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { Slot } from '../Slot/Slot';
 import { SlotRow } from '../Slot/SlotRow';
-import { tileStyle } from '../styles';
 import { useAnswerGameContext } from '../useAnswerGameContext';
-import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
 import { AnswerGame } from './AnswerGame';
 import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { CSSProperties, ComponentType } from 'react';
+import { LetterTileBank } from '@/games/word-spell/LetterTileBank/LetterTileBank';
 import { classicSkin } from '@/lib/skin';
 
 type InputMethod = 'drag' | 'type' | 'both';
@@ -20,6 +19,13 @@ interface StoryArgs {
   tileBankMode: TileBankMode;
   totalRounds: number;
   ttsEnabled: boolean;
+  // Raw AnswerGame props shadowed by StoryArgs above; declared here only
+  // so we can hide their react-docgen-inferred rows from the Controls panel.
+  config?: never;
+  initialState?: never;
+  sessionId?: never;
+  skin?: never;
+  children?: never;
 }
 
 const initialTiles: TileItem[] = [
@@ -55,42 +61,6 @@ const initialZones: AnswerZone[] = [
   },
 ];
 
-const TapToPlaceBank = () => {
-  const { allTiles, bankTileIds, zones } = useAnswerGameContext();
-  const dispatch = useAnswerGameDispatch();
-
-  const nextEmptyZoneIndex = zones.findIndex(
-    (z) => z.placedTileId === null,
-  );
-
-  return (
-    <div className="flex flex-wrap justify-center gap-3">
-      {bankTileIds.map((tileId) => {
-        const tile = allTiles.find((t) => t.id === tileId);
-        if (!tile) return null;
-        return (
-          <button
-            key={tile.id}
-            type="button"
-            onClick={() => {
-              if (nextEmptyZoneIndex === -1) return;
-              dispatch({
-                type: 'PLACE_TILE',
-                tileId: tile.id,
-                zoneIndex: nextEmptyZoneIndex,
-              });
-            }}
-            className="flex size-14 touch-none select-none cursor-pointer items-center justify-center rounded-xl text-xl font-bold text-card-foreground transition-transform active:scale-95"
-            style={tileStyle()}
-          >
-            {tile.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-};
-
 const PlayableScene = () => {
   const { zones } = useAnswerGameContext();
 
@@ -118,7 +88,7 @@ const PlayableScene = () => {
         </SlotRow>
       </AnswerGame.Answer>
       <AnswerGame.Choices>
-        <TapToPlaceBank />
+        <LetterTileBank />
       </AnswerGame.Choices>
     </>
   );
@@ -157,6 +127,11 @@ const meta: Meta<StoryArgs> = {
       control: { type: 'range', min: 1, max: 20, step: 1 },
     },
     ttsEnabled: { control: 'boolean' },
+    config: { table: { disable: true } },
+    initialState: { table: { disable: true } },
+    sessionId: { table: { disable: true } },
+    skin: { table: { disable: true } },
+    children: { table: { disable: true } },
   },
   render: ({
     inputMethod,
@@ -191,16 +166,9 @@ export default meta;
 
 type Story = StoryObj<StoryArgs>;
 
-export const Default: Story = {};
-
-export const TextQuestionMode: Story = {
-  args: { inputMethod: 'type' },
-};
-
-export const RejectMode: Story = {
-  args: { wrongTileBehavior: 'reject' },
-};
-
-export const LockManualMode: Story = {
-  args: { wrongTileBehavior: 'lock-manual' },
+export const Playground: Story = {
+  args: {
+    inputMethod: 'drag',
+    totalRounds: 9,
+  },
 };
