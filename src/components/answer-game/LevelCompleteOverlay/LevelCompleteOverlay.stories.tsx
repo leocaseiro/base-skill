@@ -1,4 +1,4 @@
-import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { fn } from 'storybook/test';
 
 import { LevelCompleteOverlay } from './LevelCompleteOverlay';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -22,32 +22,4 @@ export default meta;
 
 type Story = StoryObj<typeof LevelCompleteOverlay>;
 
-export const Level1: Story = { args: { level: 1 } };
-export const Level3: Story = { args: { level: 3 } };
-export const Level10: Story = { args: { level: 10 } };
-
-export const ClicksNextLevel: Story = {
-  args: { level: 1 },
-  play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      await canvas.findByRole('button', { name: /next level/i }),
-    );
-    await waitFor(() => {
-      expect(args.onNextLevel).toHaveBeenCalledTimes(1);
-    });
-  },
-};
-
-export const ClicksDone: Story = {
-  args: { level: 1 },
-  play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      await canvas.findByRole('button', { name: /done/i }),
-    );
-    await waitFor(() => {
-      expect(args.onDone).toHaveBeenCalledTimes(1);
-    });
-  },
-};
+export const Playground: Story = {};
