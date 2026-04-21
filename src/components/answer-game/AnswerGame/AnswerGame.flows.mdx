@@ -248,3 +248,51 @@ sequenceDiagram
     Reducer-->>Reducer: phase = 'game-over'
   end
 ```
+
+---
+
+## 9. Session Resume (fresh mount vs. draft restore)
+
+`AnswerGameProvider`'s mount effect routes every lifecycle change through
+the reducer. On mount, and whenever `initialState` or `config.initialTiles/Zones`
+change, exactly one of `RESUME_ROUND` or `INIT_ROUND` is dispatched.
+
+`RESUME_ROUND` preserves draft progress (`roundIndex`, `retryCount`,
+`levelIndex`), so a resumed mid-round session never resets to round 0 —
+that was the pre-#139 failure mode the early-return guard was masking.
+
+`useAnswerGameDraftSync` runs in parallel: it writes every state change
+back to `session_history_index.draftState` (debounced 500 ms) so the
+next mount has a fresh draft to hand to `RESUME_ROUND`.
+
+```mermaid
+flowchart TD
+  Mount([AnswerGameProvider mounts or props change]) --> HasDraft{initialState present?}
+
+  HasDraft -- yes --> Resume["dispatch RESUME_ROUND { draft }"]
+  Resume --> RState["reducer: restore allTiles, bankTileIds,\nzones, activeSlotIndex, phase,\nroundIndex, retryCount, levelIndex"]
+  RState --> RClear["clear dragActiveTileId,\ndragHoverZoneIndex, dragHoverBankTileId"]
+
+  HasDraft -- no --> HasTiles{config.initialTiles\n+ initialZones set?}
+  HasTiles -- yes --> Init["dispatch INIT_ROUND { tiles, zones }"]
+  HasTiles -- no --> Noop([no-op: state already makeInitialState])
+  Init --> IState["reducer: populate round state,\nreset roundIndex/retryCount/levelIndex to 0"]
+
+  RClear --> Sync
+  IState --> Sync
+  Sync["useAnswerGameDraftSync\n(debounce 500 ms)"] --> DB[("session_history_index.draftState")]
+```
+
+### When each action fires
+
+| Situation                                                         | Dispatched action | Reducer behavior                                                                                  |
+| ----------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------- |
+| First visit to a game (no persisted session)                      | `INIT_ROUND`      | Populate tiles/zones from config; reset progress counters to 0                                    |
+| Reload mid-game with an aligned draft                             | `RESUME_ROUND`    | Restore the draft snapshot wholesale; keep `config`; clear drag state                             |
+| Reload with a stale draft (WordSpell safety net drops the draft)  | `INIT_ROUND`      | `WordSpell.tsx` sets `initialState={undefined}` when `staleDraft` is true; provider sees no draft |
+| Mid-mount `initialState` change (e.g. draft written by a sibling) | `RESUME_ROUND`    | Effect re-runs; draft flows into reducer without remounting                                       |
+| Mid-mount `config.initialTiles` change (no draft)                 | `INIT_ROUND`      | Effect re-runs; new tiles populate the round                                                      |
+
+The split exists so `INIT_ROUND`'s original "reset progress to 0" semantics
+stay intact while resumed sessions get a dedicated action that cannot
+accidentally drop `roundIndex`, `retryCount`, or `levelIndex`.
