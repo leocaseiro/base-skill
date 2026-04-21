@@ -39,6 +39,9 @@
     "add": "Adicionar marcador",
     "remove": "Remover marcador"
   },
+  "toasts": {
+    "wordSpellStaleDraftRecovered": "Não foi possível restaurar seu progresso — começando uma nova rodada."
+  },
   "customGame": {
     "title": "Salvar configuração",
     "nameLabel": "Nome da configuração",
