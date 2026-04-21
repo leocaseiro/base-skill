@@ -2,36 +2,55 @@ import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 
 import { GameOverOverlay } from './GameOverOverlay';
 import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
 
-const meta: Meta<typeof GameOverOverlay> = {
-  component: GameOverOverlay,
+interface StoryArgs {
+  stars: number;
+  onPlayAgain: () => void;
+  onHome: () => void;
+}
+
+// Maps the user-facing `stars` control back to the `retryCount` the
+// component actually accepts. Mirrors the starsFromRetries() thresholds in
+// GameOverOverlay.tsx.
+const retryCountForStars = (stars: number): number => {
+  if (stars >= 5) return 0;
+  if (stars === 4) return 1;
+  if (stars === 3) return 3;
+  if (stars === 2) return 5;
+  return 7;
+};
+
+const meta: Meta<StoryArgs> = {
+  component: GameOverOverlay as unknown as ComponentType<StoryArgs>,
   title: 'answer-game/GameOverOverlay',
   tags: ['autodocs'],
   args: {
-    retryCount: 0,
+    stars: 5,
     onPlayAgain: fn(),
     onHome: fn(),
   },
   argTypes: {
-    retryCount: {
-      control: { type: 'range', min: 0, max: 10, step: 1 },
-    },
+    stars: { control: { type: 'range', min: 1, max: 5, step: 1 } },
     onPlayAgain: { table: { disable: true } },
     onHome: { table: { disable: true } },
   },
+  render: ({ stars, onPlayAgain, onHome }) => (
+    <GameOverOverlay
+      retryCount={retryCountForStars(stars)}
+      onPlayAgain={onPlayAgain}
+      onHome={onHome}
+    />
+  ),
 };
 export default meta;
 
-type Story = StoryObj<typeof GameOverOverlay>;
+type Story = StoryObj<StoryArgs>;
 
-export const FiveStars: Story = { args: { retryCount: 0 } };
-export const FourStars: Story = { args: { retryCount: 1 } };
-export const ThreeStars: Story = { args: { retryCount: 3 } };
-export const TwoStars: Story = { args: { retryCount: 5 } };
-export const OneStar: Story = { args: { retryCount: 8 } };
+export const Playground: Story = {};
 
 export const ClicksPlayAgain: Story = {
-  args: { retryCount: 0 },
+  args: { stars: 5 },
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(
@@ -44,7 +63,7 @@ export const ClicksPlayAgain: Story = {
 };
 
 export const ClicksHome: Story = {
-  args: { retryCount: 0 },
+  args: { stars: 5 },
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(
