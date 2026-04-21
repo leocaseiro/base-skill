@@ -1,24 +1,19 @@
 import { withDb } from '../../../../.storybook/decorators/withDb';
-import { Slot } from '../Slot/Slot';
-import { SlotRow } from '../Slot/SlotRow';
-import { useAnswerGameContext } from '../useAnswerGameContext';
 import { AnswerGame } from './AnswerGame';
-import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { AnswerGameConfig } from '../types';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { CSSProperties, ComponentType } from 'react';
-import { LetterTileBank } from '@/games/word-spell/LetterTileBank/LetterTileBank';
 import { classicSkin } from '@/lib/skin';
 
-type InputMethod = 'drag' | 'type' | 'both';
-type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
-type TileBankMode = 'exact' | 'distractors';
-
 interface StoryArgs {
-  inputMethod: InputMethod;
-  wrongTileBehavior: WrongTileBehavior;
-  tileBankMode: TileBankMode;
+  question: string;
+  answerPreview: string;
+  choicesPreview: string;
+  showDots: boolean;
+  showFraction: boolean;
+  showLevel: boolean;
   totalRounds: number;
-  ttsEnabled: boolean;
+  isLevelMode: boolean;
   // Raw AnswerGame props shadowed by StoryArgs above; declared here only
   // so we can hide their react-docgen-inferred rows from the Controls panel.
   config?: never;
@@ -28,105 +23,43 @@ interface StoryArgs {
   children?: never;
 }
 
-const initialTiles: TileItem[] = [
-  { id: 'c', label: 'c', value: 'c' },
-  { id: 'a', label: 'a', value: 'a' },
-  { id: 't', label: 't', value: 't' },
-];
-
-const initialZones: AnswerZone[] = [
-  {
-    id: 'z0',
-    index: 0,
-    expectedValue: 'c',
-    placedTileId: null,
-    isWrong: false,
-    isLocked: false,
-  },
-  {
-    id: 'z1',
-    index: 1,
-    expectedValue: 'a',
-    placedTileId: null,
-    isWrong: false,
-    isLocked: false,
-  },
-  {
-    id: 'z2',
-    index: 2,
-    expectedValue: 't',
-    placedTileId: null,
-    isWrong: false,
-    isLocked: false,
-  },
-];
-
-const PlayableScene = () => {
-  const { zones } = useAnswerGameContext();
-
-  return (
-    <>
-      <AnswerGame.Question>
-        <p className="text-center text-lg font-semibold text-foreground">
-          Spell CAT
-        </p>
-      </AnswerGame.Question>
-      <AnswerGame.Answer>
-        <SlotRow className="gap-2">
-          {zones.map((zone, i) => (
-            <Slot
-              key={zone.id}
-              index={i}
-              skin={classicSkin}
-              className="size-14"
-            >
-              {({ label }) => (
-                <span className="text-xl font-bold">{label ?? ''}</span>
-              )}
-            </Slot>
-          ))}
-        </SlotRow>
-      </AnswerGame.Answer>
-      <AnswerGame.Choices>
-        <LetterTileBank />
-      </AnswerGame.Choices>
-    </>
-  );
-};
-
 const meta: Meta<StoryArgs> = {
   component: AnswerGame as unknown as ComponentType<StoryArgs>,
   title: 'answer-game/AnswerGame',
   tags: ['autodocs'],
   decorators: [withDb],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Shell layout (Question / Answer / Choices slots) + ProgressHUD. Child behaviour — drag, typing, evaluation, distractor banks — is covered by the Slot, LetterTileBank, and SortNumbersTileBank stories. This playground only drives what AnswerGame itself renders: the HUD visibility flags, totalRounds, levelMode, and the three slot containers.',
+      },
+    },
+  },
   args: {
-    inputMethod: 'drag',
-    wrongTileBehavior: 'lock-auto-eject',
-    tileBankMode: 'exact',
-    totalRounds: 3,
-    ttsEnabled: false,
+    question: 'Spell CAT',
+    answerPreview: '[empty slots here]',
+    choicesPreview: '[tile placeholders here]',
+    showDots: true,
+    showFraction: true,
+    showLevel: false,
+    totalRounds: 5,
+    isLevelMode: false,
   },
   argTypes: {
-    inputMethod: {
-      control: { type: 'select' },
-      options: ['drag', 'type', 'both'] satisfies InputMethod[],
+    question: { control: 'text' },
+    answerPreview: { control: 'text' },
+    choicesPreview: { control: 'text' },
+    showDots: { control: 'boolean', name: 'Show Progress dots' },
+    showFraction: {
+      control: 'boolean',
+      name: 'Show Progress in fraction',
     },
-    wrongTileBehavior: {
-      control: { type: 'select' },
-      options: [
-        'reject',
-        'lock-manual',
-        'lock-auto-eject',
-      ] satisfies WrongTileBehavior[],
-    },
-    tileBankMode: {
-      control: { type: 'select' },
-      options: ['exact', 'distractors'] satisfies TileBankMode[],
-    },
+    showLevel: { control: 'boolean' },
     totalRounds: {
       control: { type: 'range', min: 1, max: 20, step: 1 },
     },
-    ttsEnabled: { control: 'boolean' },
+    isLevelMode: { control: 'boolean' },
     config: { table: { disable: true } },
     initialState: { table: { disable: true } },
     sessionId: { table: { disable: true } },
@@ -134,21 +67,26 @@ const meta: Meta<StoryArgs> = {
     children: { table: { disable: true } },
   },
   render: ({
-    inputMethod,
-    wrongTileBehavior,
-    tileBankMode,
+    question,
+    answerPreview,
+    choicesPreview,
+    showDots,
+    showFraction,
+    showLevel,
     totalRounds,
-    ttsEnabled,
+    isLevelMode,
   }) => {
     const config: AnswerGameConfig = {
-      gameId: 'storybook-answer-game',
-      inputMethod,
-      wrongTileBehavior,
-      tileBankMode,
+      gameId: 'storybook-answer-game-shell',
+      inputMethod: 'drag',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
       totalRounds,
-      ttsEnabled,
-      initialTiles,
-      initialZones,
+      ttsEnabled: false,
+      hud: { showDots, showFraction, showLevel },
+      ...(isLevelMode
+        ? { levelMode: { generateNextLevel: () => null } }
+        : {}),
     };
     return (
       <div
@@ -156,7 +94,21 @@ const meta: Meta<StoryArgs> = {
         style={classicSkin.tokens as CSSProperties}
       >
         <AnswerGame config={config} skin={classicSkin}>
-          <PlayableScene />
+          <AnswerGame.Question>
+            <p className="text-center text-lg font-semibold text-foreground">
+              {question}
+            </p>
+          </AnswerGame.Question>
+          <AnswerGame.Answer>
+            <p className="rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground">
+              {answerPreview}
+            </p>
+          </AnswerGame.Answer>
+          <AnswerGame.Choices>
+            <p className="rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground">
+              {choicesPreview}
+            </p>
+          </AnswerGame.Choices>
         </AnswerGame>
       </div>
     );
@@ -168,7 +120,13 @@ type Story = StoryObj<StoryArgs>;
 
 export const Playground: Story = {
   args: {
-    inputMethod: 'drag',
-    totalRounds: 9,
+    question: 'Question text here',
+    answerPreview: '[empty slots here]',
+    choicesPreview: '[tile placeholders here]',
+    showDots: true,
+    showFraction: true,
+    showLevel: true,
+    totalRounds: 4,
+    isLevelMode: false,
   },
 };
