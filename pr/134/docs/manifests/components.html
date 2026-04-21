@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">15/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/207 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">16/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/203 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1042,16 +1042,16 @@ interface StoryArgs {
 }
 
 const initialTiles: TileItem[] = [
-  { id: &#39;c&#39;, label: &#39;C&#39;, value: &#39;C&#39; },
-  { id: &#39;a&#39;, label: &#39;A&#39;, value: &#39;A&#39; },
-  { id: &#39;t&#39;, label: &#39;T&#39;, value: &#39;T&#39; },
+  { id: &#39;c&#39;, label: &#39;c&#39;, value: &#39;c&#39; },
+  { id: &#39;a&#39;, label: &#39;a&#39;, value: &#39;a&#39; },
+  { id: &#39;t&#39;, label: &#39;t&#39;, value: &#39;t&#39; },
 ];
 
 const initialZones: AnswerZone[] = [
   {
     id: &#39;z0&#39;,
     index: 0,
-    expectedValue: &#39;C&#39;,
+    expectedValue: &#39;c&#39;,
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -1059,7 +1059,7 @@ const initialZones: AnswerZone[] = [
   {
     id: &#39;z1&#39;,
     index: 1,
-    expectedValue: &#39;A&#39;,
+    expectedValue: &#39;a&#39;,
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -1067,7 +1067,7 @@ const initialZones: AnswerZone[] = [
   {
     id: &#39;z2&#39;,
     index: 2,
-    expectedValue: &#39;T&#39;,
+    expectedValue: &#39;t&#39;,
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -3778,19 +3778,19 @@ title: string</code></pre>
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="GameOverOverlay">
+  aria-label="GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> GameOverOverlay</h2>
+      <h2><span class="status-dot dot-err"></span> GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-15-answer-game-gameoveroverlay-props" class="badge ok as-toggle">3 prop types</label>
+        <label for="c-15-answer-game-gameoveroverlay-err" class="badge err as-toggle">prop type error</label>
         <label for="c-15-answer-game-gameoveroverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-15-answer-game-gameoveroverlay-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-15-answer-game-gameoveroverlay-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -3801,14 +3801,107 @@ title: string</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-15-answer-game-gameoveroverlay-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-15-answer-game-gameoveroverlay-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-15-answer-game-gameoveroverlay-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-15-answer-game-gameoveroverlay-props" class="tg tg-props" type="checkbox" hidden />
+  
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  22 | };
+  23 |
+&gt; 24 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  25 |   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  26 |   title: &#39;answer-game/GameOverOverlay&#39;,
+  27 |   tags: [&#39;autodocs&#39;],
+
+./src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx:
+import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+
+import { GameOverOverlay } from &#39;./GameOverOverlay&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  stars: number;
+  onPlayAgain: () =&gt; void;
+  onHome: () =&gt; void;
+}
+
+// Maps the user-facing `stars` control back to the `retryCount` the
+// component actually accepts. Mirrors the starsFromRetries() thresholds in
+// GameOverOverlay.tsx.
+const retryCountForStars = (stars: number): number =&gt; {
+  if (stars &gt;= 5) return 0;
+  if (stars === 4) return 1;
+  if (stars === 3) return 3;
+  if (stars === 2) return 5;
+  return 7;
+};
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;answer-game/GameOverOverlay&#39;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    stars: 5,
+    onPlayAgain: fn(),
+    onHome: fn(),
+  },
+  argTypes: {
+    stars: { control: { type: &#39;range&#39;, min: 1, max: 5, step: 1 } },
+    onPlayAgain: { table: { disable: true } },
+    onHome: { table: { disable: true } },
+  },
+  render: ({ stars, onPlayAgain, onHome }) =&gt; (
+    &lt;GameOverOverlay
+      retryCount={retryCountForStars(stars)}
+      onPlayAgain={onPlayAgain}
+      onHome={onHome}
+    /&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+
+export const ClicksPlayAgain: Story = {
+  args: { stars: 5 },
+  play: async ({ args, canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole(&#39;button&#39;, { name: /play again/i }),
+    );
+    await waitFor(() =&gt; {
+      expect(args.onPlayAgain).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const ClicksHome: Story = {
+  args: { stars: 5 },
+  play: async ({ args, canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole(&#39;button&#39;, { name: /home/i }),
+    );
+    await waitFor(() =&gt; {
+      expect(args.onHome).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -3818,21 +3911,6 @@ title: string</code></pre>
     </div>
         </div>
     
-        <div class="panel panel-props">
-          <div class="note ok">
-            <div class="row">
-              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">3 prop types</span>
-            </div>
-            <pre><code>Component: src/components/answer-game/GameOverOverlay/GameOverOverlay.tsx::GameOverOverlay</code></pre>
-            <pre><code>Props:</code></pre>
-            <pre><code>onHome: () =&gt; void
-
-onPlayAgain: () =&gt; void
-
-retryCount: number</code></pre>
-          </div>
-        </div>
     
         <div class="panel panel-stories">
           
@@ -3848,48 +3926,18 @@ retryCount: number</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Five Stars</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const FiveStars = () =&gt; &lt;GameOverOverlay retryCount={0} onPlayAgain={fn()} onHome={fn()} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Four Stars</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const FourStars = () =&gt; &lt;GameOverOverlay retryCount={1} onPlayAgain={fn()} onHome={fn()} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Three Stars</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const ThreeStars = () =&gt; &lt;GameOverOverlay retryCount={3} onPlayAgain={fn()} onHome={fn()} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Two Stars</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const TwoStars = () =&gt; &lt;GameOverOverlay retryCount={5} onPlayAgain={fn()} onHome={fn()} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">One Star</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const OneStar = () =&gt; &lt;GameOverOverlay retryCount={8} onPlayAgain={fn()} onHome={fn()} /&gt;;</code></pre>
+              <pre><code>const Playground = ({ stars, onPlayAgain, onHome }) =&gt; (
+  &lt;GameOverOverlay
+    retryCount={retryCountForStars(stars)}
+    onPlayAgain={onPlayAgain}
+    onHome={onHome}
+  /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -3898,7 +3946,13 @@ retryCount: number</code></pre>
               </div>
               
               
-              <pre><code>const ClicksPlayAgain = () =&gt; &lt;GameOverOverlay retryCount={0} onPlayAgain={fn()} onHome={fn()} /&gt;;</code></pre>
+              <pre><code>const ClicksPlayAgain = ({ stars, onPlayAgain, onHome }) =&gt; (
+  &lt;GameOverOverlay
+    retryCount={retryCountForStars(stars)}
+    onPlayAgain={onPlayAgain}
+    onHome={onHome}
+  /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -3907,7 +3961,13 @@ retryCount: number</code></pre>
               </div>
               
               
-              <pre><code>const ClicksHome = () =&gt; &lt;GameOverOverlay retryCount={0} onPlayAgain={fn()} onHome={fn()} /&gt;;</code></pre>
+              <pre><code>const ClicksHome = ({ stars, onPlayAgain, onHome }) =&gt; (
+  &lt;GameOverOverlay
+    retryCount={retryCountForStars(stars)}
+    onPlayAgain={onPlayAgain}
+    onHome={onHome}
+  /&gt;
+);</code></pre>
             </div>
         </div>
     
@@ -9174,7 +9234,7 @@ export const HUD_Round5Of5: Story = {
           <label for="no-component-import-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component import found</span>
-            <span class="group-count">15</span>
+            <span class="group-count">16</span>
           </label>
           <div class="group-cards">
 <article
@@ -9627,16 +9687,16 @@ interface StoryArgs {
 }
 
 const initialTiles: TileItem[] = [
-  { id: &#39;c&#39;, label: &#39;C&#39;, value: &#39;C&#39; },
-  { id: &#39;a&#39;, label: &#39;A&#39;, value: &#39;A&#39; },
-  { id: &#39;t&#39;, label: &#39;T&#39;, value: &#39;T&#39; },
+  { id: &#39;c&#39;, label: &#39;c&#39;, value: &#39;c&#39; },
+  { id: &#39;a&#39;, label: &#39;a&#39;, value: &#39;a&#39; },
+  { id: &#39;t&#39;, label: &#39;t&#39;, value: &#39;t&#39; },
 ];
 
 const initialZones: AnswerZone[] = [
   {
     id: &#39;z0&#39;,
     index: 0,
-    expectedValue: &#39;C&#39;,
+    expectedValue: &#39;c&#39;,
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -9644,7 +9704,7 @@ const initialZones: AnswerZone[] = [
   {
     id: &#39;z1&#39;,
     index: 1,
-    expectedValue: &#39;A&#39;,
+    expectedValue: &#39;a&#39;,
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -9652,7 +9712,7 @@ const initialZones: AnswerZone[] = [
   {
     id: &#39;z2&#39;,
     index: 2,
-    expectedValue: &#39;T&#39;,
+    expectedValue: &#39;t&#39;,
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -11366,14 +11426,211 @@ export const AutoDismissesAfter2s: Story = {
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-7-answer-game-gameoveroverlay-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-7-answer-game-gameoveroverlay-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-7-answer-game-gameoveroverlay-stories" class="badge ok as-toggle">3 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx">answer-game-gameoveroverlay · ./src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-7-answer-game-gameoveroverlay-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-7-answer-game-gameoveroverlay-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-7-answer-game-gameoveroverlay-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  22 | };
+  23 |
+&gt; 24 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  25 |   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  26 |   title: &#39;answer-game/GameOverOverlay&#39;,
+  27 |   tags: [&#39;autodocs&#39;],
+
+./src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx:
+import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
+
+import { GameOverOverlay } from &#39;./GameOverOverlay&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  stars: number;
+  onPlayAgain: () =&gt; void;
+  onHome: () =&gt; void;
+}
+
+// Maps the user-facing `stars` control back to the `retryCount` the
+// component actually accepts. Mirrors the starsFromRetries() thresholds in
+// GameOverOverlay.tsx.
+const retryCountForStars = (stars: number): number =&gt; {
+  if (stars &gt;= 5) return 0;
+  if (stars === 4) return 1;
+  if (stars === 3) return 3;
+  if (stars === 2) return 5;
+  return 7;
+};
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;answer-game/GameOverOverlay&#39;,
+  tags: [&#39;autodocs&#39;],
+  args: {
+    stars: 5,
+    onPlayAgain: fn(),
+    onHome: fn(),
+  },
+  argTypes: {
+    stars: { control: { type: &#39;range&#39;, min: 1, max: 5, step: 1 } },
+    onPlayAgain: { table: { disable: true } },
+    onHome: { table: { disable: true } },
+  },
+  render: ({ stars, onPlayAgain, onHome }) =&gt; (
+    &lt;GameOverOverlay
+      retryCount={retryCountForStars(stars)}
+      onPlayAgain={onPlayAgain}
+      onHome={onHome}
+    /&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+
+export const ClicksPlayAgain: Story = {
+  args: { stars: 5 },
+  play: async ({ args, canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole(&#39;button&#39;, { name: /play again/i }),
+    );
+    await waitFor(() =&gt; {
+      expect(args.onPlayAgain).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const ClicksHome: Story = {
+  args: { stars: 5 },
+  play: async ({ args, canvasElement }) =&gt; {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole(&#39;button&#39;, { name: /home/i }),
+    );
+    await waitFor(() =&gt; {
+      expect(args.onHome).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { GameOverOverlay } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = ({ stars, onPlayAgain, onHome }) =&gt; (
+  &lt;GameOverOverlay
+    retryCount={retryCountForStars(stars)}
+    onPlayAgain={onPlayAgain}
+    onHome={onHome}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Clicks Play Again</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ClicksPlayAgain = ({ stars, onPlayAgain, onHome }) =&gt; (
+  &lt;GameOverOverlay
+    retryCount={retryCountForStars(stars)}
+    onPlayAgain={onPlayAgain}
+    onHome={onHome}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Clicks Home</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ClicksHome = ({ stars, onPlayAgain, onHome }) =&gt; (
+  &lt;GameOverOverlay
+    retryCount={retryCountForStars(stars)}
+    onPlayAgain={onPlayAgain}
+    onHome={onHome}
+  /&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-err"></span> InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-7-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-7-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-7-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">10 stories</label>
+        <label for="c-error-8-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-8-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-8-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">10 stories</label>
         
       </div>
     </div>
@@ -11384,9 +11641,9 @@ export const AutoDismissesAfter2s: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-7-answer-game-instructionsoverlay-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-7-answer-game-instructionsoverlay-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-7-answer-game-instructionsoverlay-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-8-answer-game-instructionsoverlay-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-8-answer-game-instructionsoverlay-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-8-answer-game-instructionsoverlay-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12079,9 +12336,9 @@ export const OpensSettings: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Label as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-8-components-ui-label-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-8-components-ui-label-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-8-components-ui-label-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-9-components-ui-label-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-9-components-ui-label-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-9-components-ui-label-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12092,9 +12349,9 @@ export const OpensSettings: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-8-components-ui-label-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-8-components-ui-label-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-8-components-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-9-components-ui-label-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-9-components-ui-label-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-9-components-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12205,9 +12462,9 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> NumberMatchWithHarness</h2>
       <div class="badges">
-        <label for="c-error-9-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-9-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-9-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        <label for="c-error-10-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-10-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-10-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
         
       </div>
     </div>
@@ -12218,9 +12475,9 @@ export const Default: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-9-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-9-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-9-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-10-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-10-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-10-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12362,9 +12619,9 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-10-answer-game-progresshud-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-10-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-10-answer-game-progresshud-stories" class="badge ok as-toggle">9 stories</label>
+        <label for="c-error-11-answer-game-progresshud-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-11-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-11-answer-game-progresshud-stories" class="badge ok as-toggle">9 stories</label>
         
       </div>
     </div>
@@ -12375,9 +12632,9 @@ export const Default: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-10-answer-game-progresshud-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-10-answer-game-progresshud-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-10-answer-game-progresshud-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-11-answer-game-progresshud-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-11-answer-game-progresshud-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-11-answer-game-progresshud-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12843,9 +13100,9 @@ export const AllFlagsOff: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Select as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-11-components-ui-select-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-11-components-ui-select-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-11-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-error-12-components-ui-select-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-12-components-ui-select-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-12-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -12856,9 +13113,9 @@ export const AllFlagsOff: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-11-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-11-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-11-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-12-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-12-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-12-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13168,9 +13425,9 @@ export const SelectsOption: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Sheet as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-12-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-12-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-12-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-error-13-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-13-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-13-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -13181,9 +13438,9 @@ export const SelectsOption: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-12-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-12-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-12-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-13-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-13-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-13-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13522,9 +13779,9 @@ export const OpensAndClosesOnEscape: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SlotRow as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-13-answer-game-slot-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-13-answer-game-slot-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-13-answer-game-slot-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-14-answer-game-slot-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-14-answer-game-slot-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-14-answer-game-slot-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -13535,9 +13792,9 @@ export const OpensAndClosesOnEscape: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-13-answer-game-slot-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-13-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-13-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-14-answer-game-slot-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-14-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-14-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13856,9 +14113,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
       <div class="badges">
-        <label for="c-error-14-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-14-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-14-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
+        <label for="c-error-15-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-15-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-15-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
         
       </div>
     </div>
@@ -13869,9 +14126,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-14-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-14-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-14-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-15-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-15-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-15-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
