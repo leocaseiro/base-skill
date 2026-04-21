@@ -1,11 +1,40 @@
+import { expect, fn, userEvent, within } from 'storybook/test';
+
 import { Button } from './button';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Button> = {
   component: Button,
   tags: ['autodocs'],
+  args: {
+    onClick: fn(),
+  },
   argTypes: {
-    onClick: { action: 'clicked' },
+    variant: {
+      control: { type: 'select' },
+      options: [
+        'default',
+        'outline',
+        'secondary',
+        'ghost',
+        'destructive',
+        'link',
+      ],
+    },
+    size: {
+      control: { type: 'select' },
+      options: [
+        'default',
+        'xs',
+        'sm',
+        'lg',
+        'icon',
+        'icon-xs',
+        'icon-sm',
+        'icon-lg',
+      ],
+    },
+    disabled: { control: 'boolean' },
   },
 };
 export default meta;
@@ -65,4 +94,18 @@ export const Icon: Story = {
 
 export const Disabled: Story = {
   args: { children: 'Disabled', disabled: true },
+};
+
+export const ClicksButton: Story = {
+  args: {
+    children: 'Click me',
+    variant: 'default',
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole('button', { name: /click me/i }),
+    );
+    await expect(args.onClick).toHaveBeenCalledTimes(1);
+  },
 };
