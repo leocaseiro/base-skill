@@ -23,16 +23,16 @@ interface StoryArgs {
 }
 
 const initialTiles: TileItem[] = [
-  { id: 'c', label: 'C', value: 'C' },
-  { id: 'a', label: 'A', value: 'A' },
-  { id: 't', label: 'T', value: 'T' },
+  { id: 'c', label: 'c', value: 'c' },
+  { id: 'a', label: 'a', value: 'a' },
+  { id: 't', label: 't', value: 't' },
 ];
 
 const initialZones: AnswerZone[] = [
   {
     id: 'z0',
     index: 0,
-    expectedValue: 'C',
+    expectedValue: 'c',
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -40,7 +40,7 @@ const initialZones: AnswerZone[] = [
   {
     id: 'z1',
     index: 1,
-    expectedValue: 'A',
+    expectedValue: 'a',
     placedTileId: null,
     isWrong: false,
     isLocked: false,
@@ -48,7 +48,7 @@ const initialZones: AnswerZone[] = [
   {
     id: 'z2',
     index: 2,
-    expectedValue: 'T',
+    expectedValue: 't',
     placedTileId: null,
     isWrong: false,
     isLocked: false,
