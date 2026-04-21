@@ -355,9 +355,10 @@ _**Agent (claude-opus-4-7 2026-04-21 03:48:37Z)**_
 <tool-use data-tool-type="generic" data-tool-name="Skill"><details>
 <summary>Tool use: **Skill**</summary>
 
-```text
-Launching skill: superpowers:brainstorming
-```
+**Input:**
+
+- skill: `superpowers:brainstorming`
+
 </details></tool-use>
 
 ---
@@ -4615,3 +4616,23291 @@ Please review it and let me know if you want any changes before I invoke `superp
 _**User (2026-04-21 05:30:01Z)**_
 
 LGTM
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 05:30:04Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 05:30:04Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #6 status
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:30:04Z)**_
+
+<tool-use data-tool-type="generic" data-tool-name="Skill"><details>
+<summary>Tool use: **Skill**</summary>
+
+**Input:**
+
+- skill: `superpowers:writing-plans`
+
+</details></tool-use>
+
+---
+
+_**User (2026-04-21 05:30:04Z)**_
+
+Base directory for this skill: /Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/writing-plans
+
+# Writing Plans
+
+## Overview
+
+Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
+
+Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
+
+**Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
+
+**Context:** This should be run in a dedicated worktree (created by brainstorming skill).
+
+**Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+- (User preferences for plan location override this default)
+
+## Scope Check
+
+If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
+
+## File Structure
+
+Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
+
+- Design units with clear boundaries and well-defined interfaces. Each file should have one clear responsibility.
+- You reason best about code you can hold in context at once, and your edits are more reliable when files are focused. Prefer smaller, focused files over large ones that do too much.
+- Files that change together should live together. Split by responsibility, not by technical layer.
+- In existing codebases, follow established patterns. If the codebase uses large files, don't unilaterally restructure - but if a file you're modifying has grown unwieldy, including a split in the plan is reasonable.
+
+This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
+
+## Bite-Sized Task Granularity
+
+**Each step is one action (2-5 minutes):**
+- "Write the failing test" - step
+- "Run it to make sure it fails" - step
+- "Implement the minimal code to make the test pass" - step
+- "Run the tests and make sure they pass" - step
+- "Commit" - step
+
+## Plan Document Header
+
+**Every plan MUST start with this header:**
+
+```markdown
+# [Feature Name] Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** [One sentence describing what this builds]
+
+**Architecture:** [2-3 sentences about approach]
+
+**Tech Stack:** [Key technologies/libraries]
+
+---
+```
+
+## Task Structure
+
+````markdown
+### Task N: [Component Name]
+
+**Files:**
+- Create: `exact/path/to/file.py`
+- Modify: `exact/path/to/existing.py:123-145`
+- Test: `tests/exact/path/to/test.py`
+
+- [ ] **Step 1: Write the failing test**
+
+```python
+def test_specific_behavior():
+    result = function(input)
+    assert result == expected
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `pytest tests/path/test.py::test_name -v`
+Expected: FAIL with "function not defined"
+
+- [ ] **Step 3: Write minimal implementation**
+
+```python
+def function(input):
+    return expected
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `pytest tests/path/test.py::test_name -v`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add tests/path/test.py src/path/file.py
+git commit -m "feat: add specific feature"
+```
+````
+
+## No Placeholders
+
+Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+- "TBD", "TODO", "implement later", "fill in details"
+- "Add appropriate error handling" / "add validation" / "handle edge cases"
+- "Write tests for the above" (without actual test code)
+- "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
+- Steps that describe what to do without showing how (code blocks required for code steps)
+- References to types, functions, or methods not defined in any task
+
+## Remember
+- Exact file paths always
+- Complete code in every step — if a step changes code, show the code
+- Exact commands with expected output
+- DRY, YAGNI, TDD, frequent commits
+
+## Self-Review
+
+After writing the complete plan, look at the spec with fresh eyes and check the plan against it. This is a checklist you run yourself — not a subagent dispatch.
+
+**1. Spec coverage:** Skim each section/requirement in the spec. Can you point to a task that implements it? List any gaps.
+
+**2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
+
+**3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
+
+If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
+
+## Execution Handoff
+
+After saving the plan, offer execution choice:
+
+**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Two execution options:**
+
+**1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
+
+**2. Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints
+
+**Which approach?"**
+
+**If Subagent-Driven chosen:**
+- **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
+- Fresh subagent per task + two-stage review
+
+**If Inline Execution chosen:**
+- **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
+- Batch execution with checkpoints for review
+
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 05:30:19Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 05:30:20Z)**_
+
+I'm using the writing-plans skill to create the implementation plan.
+
+Before drafting the plan, I need to pull a few concrete code contexts so tasks can contain real code (no placeholders). Reading in parallel.
+
+_**Agent (claude-opus-4-7 2026-04-21 05:30:21Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/types.ts`
+
+```text
+1	export interface AnswerGameConfig {
+2	  gameId: string;
+3	  /** @default 'drag' */
+4	  inputMethod: 'drag' | 'type' | 'both';
+5	  /** @default 'lock-auto-eject' */
+6	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+7	  tileBankMode: 'exact' | 'distractors';
+8	  distractorCount?: number;
+9	  /** Total number of rounds in this session */
+10	  totalRounds: number;
+11	  /**
+12	   * When `true`, rounds follow the order of `rounds` in config.
+13	   * When `false` or omitted, order is shuffled once per session (again after Play again).
+14	   */
+15	  roundsInOrder?: boolean;
+16	  /** Whether TTS is enabled for this profile */
+17	  ttsEnabled: boolean;
+18	  /**
+19	   * Controls the OS keyboard type shown on touch devices in type/both mode.
+20	   * @default 'text'
+21	   */
+22	  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+23	  /** Skin ID for visual variant. Falls back to 'classic' if not registered. */
+24	  skin?: string;
+25	  /**
+26	   * Per-config timing overrides. Take precedence over the skin's own
+27	   * `timing` values and baseskill defaults.
+28	   */
+29	  timing?: {
+30	    roundAdvanceDelay?: number;
+31	    autoEjectDelay?: number;
+32	    levelCompleteDelay?: number;
+33	  };
+34	  /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
+35	  initialTiles?: TileItem[];
+36	  initialZones?: AnswerZone[];
+37	  /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
+38	  slotInteraction?: 'ordered' | 'free-swap';
+39	  /** Level progression — omit for classic rounds-only mode */
+40	  levelMode?: {
+41	    /** Max levels. Omit or set to 0 for unlimited. */
+42	    maxLevels?: number;
+43	    /**
+44	     * Called when the player completes a level to generate the next one.
+45	     * Receives the 0-based index of the just-completed level.
+46	     * Returns new tiles + zones, or null to end the game early.
+47	     */
+48	    generateNextLevel: (completedLevel: number) => {
+49	      tiles: TileItem[];
+50	      zones: AnswerZone[];
+51	    } | null;
+52	  };
+53	  /** Controls which HUD elements render. Each flag is independent. */
+54	  hud?: HudConfig;
+55	}
+56	
+57	export interface TileItem {
+58	  id: string;
+59	  /** Display label shown on the tile (e.g. "A", "cat", "3") */
+60	  label: string;
+61	  /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
+62	  value: string;
+63	}
+64	
+65	export interface AnswerZone {
+66	  id: string;
+67	  index: number;
+68	  /** Correct tile value for this slot; matched against `TileItem.value` */
+69	  expectedValue: string;
+70	  placedTileId: string | null;
+71	  isWrong: boolean;
+72	  isLocked: boolean;
+73	}
+74	
+75	export type AnswerGamePhase =
+76	  | 'playing'
+77	  | 'round-complete'
+78	  | 'level-complete'
+79	  | 'game-over';
+80	
+81	export interface AnswerGameState {
+82	  config: AnswerGameConfig;
+83	  /** Full tile list for the current round — never mutated mid-round */
+84	  allTiles: TileItem[];
+85	  /** IDs of tiles currently visible in the choice bank */
+86	  bankTileIds: string[];
+87	  zones: AnswerZone[];
+88	  /** Index of next slot to fill in auto-next-slot mode */
+89	  activeSlotIndex: number;
+90	  dragActiveTileId: string | null;
+91	  dragHoverZoneIndex: number | null;
+92	  /** ID of the bank tile hole currently hovered by a dragged slot tile. */
+93	  dragHoverBankTileId: string | null;
+94	  phase: AnswerGamePhase;
+95	  roundIndex: number;
+96	  retryCount: number;
+97	  levelIndex: number;
+98	  isLevelMode: boolean;
+99	}
+100	
+101	export type AnswerGameAction =
+102	  | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+103	  | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+104	  | {
+105	      type: 'TYPE_TILE';
+106	      tileId: string;
+107	      value: string;
+108	      zoneIndex: number;
+109	    }
+110	  | { type: 'REMOVE_TILE'; zoneIndex: number }
+111	  | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
+112	  | { type: 'EJECT_TILE'; zoneIndex: number }
+113	  | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+114	  | { type: 'ADVANCE_LEVEL'; tiles: TileItem[]; zones: AnswerZone[] }
+115	  | { type: 'COMPLETE_GAME' }
+116	  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
+117	  | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
+118	  | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
+119	  | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string }
+120	  | { type: 'SET_ACTIVE_SLOT'; zoneIndex: number };
+121	
+122	/**
+123	 * Snapshot of AnswerGameState persisted to session_history_index.draftState.
+124	 * Excludes config (reconstructable from initialContent/initialState),
+125	 * dragActiveTileId (transient), and 'game-over' phase (cleared on completion).
+126	 */
+127	export interface AnswerGameDraftState {
+128	  allTiles: TileItem[];
+129	  bankTileIds: string[];
+130	  zones: AnswerZone[];
+131	  activeSlotIndex: number;
+132	  phase: 'playing' | 'round-complete' | 'level-complete';
+133	  roundIndex: number;
+134	  retryCount: number;
+135	  levelIndex: number;
+136	}
+137	
+138	export interface HudConfig {
+139	  /** Bullet row, one dot per round (classic) or per level (level mode). */
+140	  showDots?: boolean;
+141	  /** "3/5" label; auto-hides when totalRounds is null. */
+142	  showFraction?: boolean;
+143	  /** "LEVEL N" label; most useful with level mode. */
+144	  showLevel?: boolean;
+145	}
+146	
+147	export interface ProgressHUDProps {
+148	  /** 0-based index of the current round. */
+149	  roundIndex: number;
+150	  /** Total rounds in the session; null for unbounded level mode. */
+151	  totalRounds: number | null;
+152	  /** 0-based index of the current level; 0 when levelMode is off. */
+153	  levelIndex: number;
+154	  /** Whether the game uses levelMode. */
+155	  isLevelMode: boolean;
+156	  /** Lifecycle phase — enables pop/celebration animations on transition. */
+157	  phase: AnswerGamePhase;
+158	  /** Resolved visibility flags after merging defaults + config. */
+159	  showDots: boolean;
+160	  showFraction: boolean;
+161	  showLevel: boolean;
+162	}
+163
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:30:22Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.tsx`
+
+```text
+1	import { AnswerGameProvider } from '../AnswerGameProvider';
+2	import { ProgressHUDRoot } from '../ProgressHUD/ProgressHUDRoot';
+3	import type { AnswerGameConfig, AnswerGameDraftState } from '../types';
+4	import type { GameSkin } from '@/lib/skin';
+5	import type { ReactNode } from 'react';
+6	
+7	interface AnswerGameProps {
+8	  config: AnswerGameConfig;
+9	  initialState?: AnswerGameDraftState;
+10	  sessionId?: string;
+11	  /**
+12	   * Optional skin. When provided, `skin.ProgressHUD` (if defined) replaces
+13	   * the default HUD; otherwise the default HUD renders. `skin.tokens` are
+14	   * applied by individual game components on their own game container, not
+15	   * here.
+16	   */
+17	  skin?: GameSkin;
+18	  children: ReactNode;
+19	}
+20	
+21	const AnswerGameRoot = ({
+22	  config,
+23	  initialState,
+24	  sessionId,
+25	  skin,
+26	  children,
+27	}: AnswerGameProps) => (
+28	  <AnswerGameProvider
+29	    config={config}
+30	    initialState={initialState}
+31	    sessionId={sessionId}
+32	  >
+33	    <div className="flex min-h-0 w-full flex-col items-center">
+34	      <ProgressHUDRoot skin={skin} />
+35	      {children}
+36	    </div>
+37	  </AnswerGameProvider>
+38	);
+39	
+40	const Question = ({ children }: { children?: ReactNode }) => (
+41	  <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
+42	    {children}
+43	  </div>
+44	);
+45	
+46	const Answer = ({ children }: { children?: ReactNode }) => (
+47	  <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
+48	    {children}
+49	  </div>
+50	);
+51	
+52	const Choices = ({ children }: { children?: ReactNode }) => (
+53	  <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
+54	    {children}
+55	  </div>
+56	);
+57	
+58	export const AnswerGame = Object.assign(AnswerGameRoot, {
+59	  Question,
+60	  Answer,
+61	  Choices,
+62	});
+63
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:30:23Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`
+
+```text
+1	// src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
+2	import { useNavigate, useRouter } from '@tanstack/react-router';
+3	import { Settings as SettingsIcon, Star } from 'lucide-react';
+4	import { useEffect, useRef, useState } from 'react';
+5	import { createPortal } from 'react-dom';
+6	import { useTranslation } from 'react-i18next';
+7	import type { Cover } from '@/games/cover-type';
+8	import type { GameColorKey } from '@/lib/game-colors';
+9	import type { JSX } from 'react';
+10	import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
+11	import { GameCover } from '@/components/GameCover';
+12	import {
+13	  Dialog,
+14	  DialogContent,
+15	  DialogHeader,
+16	  DialogTitle,
+17	} from '@/components/ui/dialog';
+18	import { getSimpleConfigFormRenderer } from '@/games/config-fields-registry';
+19	import { resolveCover } from '@/games/cover';
+20	import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
+21	import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
+22	import { suggestCustomGameName } from '@/lib/suggest-custom-game-name';
+23	
+24	type HeaderActionsProps = {
+25	  isBookmarked?: boolean;
+26	  onToggleBookmark?: () => void;
+27	  onOpenSettings: () => void;
+28	};
+29	
+30	const HeaderActions = ({
+31	  isBookmarked,
+32	  onToggleBookmark,
+33	  onOpenSettings,
+34	}: HeaderActionsProps): JSX.Element => {
+35	  const { t } = useTranslation(['games', 'common']);
+36	  return (
+37	    <div className="flex items-center gap-2">
+38	      {onToggleBookmark && (
+39	        <button
+40	          type="button"
+41	          aria-label={
+42	            isBookmarked
+43	              ? t('common:bookmark.remove', {
+44	                  defaultValue: 'Remove bookmark',
+45	                })
+46	              : t('common:bookmark.add', {
+47	                  defaultValue: 'Add bookmark',
+48	                })
+49	          }
+50	          aria-pressed={isBookmarked ?? false}
+51	          onClick={onToggleBookmark}
+52	          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+53	        >
+54	          <Star
+55	            size={18}
+56	            aria-hidden="true"
+57	            fill={isBookmarked ? 'currentColor' : 'none'}
+58	          />
+59	        </button>
+60	      )}
+61	      <button
+62	        type="button"
+63	        aria-label={t('instructions.configure', {
+64	          defaultValue: 'Configure',
+65	        })}
+66	        onClick={onOpenSettings}
+67	        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+68	      >
+69	        <SettingsIcon size={18} />
+70	      </button>
+71	    </div>
+72	  );
+73	};
+74	
+75	export type SaveCustomGameInput = {
+76	  name: string;
+77	  color: GameColorKey;
+78	  config: Record<string, unknown>;
+79	  cover?: Cover;
+80	};
+81	
+82	type InstructionsOverlayProps = {
+83	  text: string;
+84	  onStart: () => void;
+85	  ttsEnabled: boolean;
+86	  gameTitle: string;
+87	  gameId: string;
+88	  cover?: Cover;
+89	  customGameId?: string;
+90	  customGameName?: string;
+91	  customGameColor?: GameColorKey;
+92	  config: Record<string, unknown>;
+93	  onConfigChange: (config: Record<string, unknown>) => void;
+94	  onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
+95	  onUpdateCustomGame?: (
+96	    name: string,
+97	    config: Record<string, unknown>,
+98	    extras?: { cover?: Cover; color?: GameColorKey },
+99	  ) => Promise<void>;
+100	  onDeleteCustomGame?: (configId: string) => Promise<void>;
+101	  existingCustomGameNames?: readonly string[];
+102	  isBookmarked?: boolean;
+103	  onToggleBookmark?: () => void;
+104	};
+105	
+106	export const InstructionsOverlay = ({
+107	  text,
+108	  onStart,
+109	  ttsEnabled,
+110	  gameTitle,
+111	  gameId,
+112	  cover,
+113	  customGameId,
+114	  customGameName,
+115	  customGameColor = DEFAULT_GAME_COLOR,
+116	  config,
+117	  onConfigChange,
+118	  onSaveCustomGame,
+119	  onUpdateCustomGame,
+120	  onDeleteCustomGame,
+121	  existingCustomGameNames = [],
+122	  isBookmarked,
+123	  onToggleBookmark,
+124	}: InstructionsOverlayProps): JSX.Element => {
+125	  const { t } = useTranslation(['games', 'common']);
+126	  const navigate = useNavigate({
+127	    from: '/$locale/game/$gameId',
+128	  });
+129	  const router = useRouter();
+130	  const [modalOpen, setModalOpen] = useState(false);
+131	  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+132	  const [savingName, setSavingName] = useState('');
+133	  const [saveSubmitAttempted, setSaveSubmitAttempted] = useState(false);
+134	  const saveNameRef = useRef<HTMLInputElement>(null);
+135	
+136	  useEffect(() => {
+137	    if (saveDialogOpen) {
+138	      // Defer so the Radix Dialog finishes mounting before we grab focus.
+139	      const id = globalThis.setTimeout(
+140	        () => saveNameRef.current?.focus(),
+141	        0,
+142	      );
+143	      return () => globalThis.clearTimeout(id);
+144	    }
+145	    return;
+146	  }, [saveDialogOpen]);
+147	
+148	  useEffect(() => {
+149	    if (ttsEnabled) speak(text);
+150	    return () => {
+151	      cancelSpeech();
+152	    };
+153	    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount to speak instructions once
+154	  }, []);
+155	
+156	  const settingsColors = GAME_COLORS[customGameColor];
+157	  const resolvedCover = resolveCover({ cover }, gameId);
+158	
+159	  const SimpleForm = getSimpleConfigFormRenderer(gameId);
+160	
+161	  const modalMode =
+162	    customGameId && customGameName
+163	      ? ({
+164	          kind: 'customGame',
+165	          configId: customGameId,
+166	          name: customGameName,
+167	          color: customGameColor,
+168	          cover,
+169	        } as const)
+170	      : ({ kind: 'default' } as const);
+171	
+172	  const handlePlay = () => {
+173	    if (customGameId && customGameName && onUpdateCustomGame) {
+174	      void (async () => {
+175	        try {
+176	          await onUpdateCustomGame(customGameName, config, {
+177	            cover,
+178	            color: customGameColor,
+179	          });
+180	        } catch (error) {
+181	          console.error('Failed to save custom game on play', error);
+182	        }
+183	        onStart();
+184	      })();
+185	      return;
+186	    }
+187	    setSaveSubmitAttempted(false);
+188	    setSavingName(
+189	      suggestCustomGameName(gameTitle, existingCustomGameNames),
+190	    );
+191	    setSaveDialogOpen(true);
+192	  };
+193	
+194	  const saveOnPlayError: string | null = (() => {
+195	    const trimmed = savingName.trim();
+196	    if (trimmed === '')
+197	      return t('instructions.nameRequired', {
+198	        defaultValue: 'Please enter a custom game name.',
+199	      });
+200	    if (existingCustomGameNames.includes(trimmed))
+201	      return t('instructions.nameDuplicate', {
+202	        defaultValue: 'A custom game with that name already exists.',
+203	      });
+204	    return null;
+205	  })();
+206	  const showSaveOnPlayError =
+207	    saveSubmitAttempted && saveOnPlayError !== null;
+208	
+209	  const handleSaveAndPlay = () => {
+210	    setSaveSubmitAttempted(true);
+211	    if (saveOnPlayError !== null) {
+212	      saveNameRef.current?.focus();
+213	      return;
+214	    }
+215	    const trimmed = savingName.trim();
+216	    void (async () => {
+217	      try {
+218	        const newId = await onSaveCustomGame({
+219	          name: trimmed,
+220	          color: customGameColor,
+221	          config,
+222	          cover,
+223	        });
+224	        setSaveDialogOpen(false);
+225	        await navigate({
+226	          search: (prev) => ({ ...prev, configId: newId }),
+227	        });
+228	        onStart();
+229	      } catch (error) {
+230	        console.error('Failed to save custom game on play', error);
+231	      }
+232	    })();
+233	  };
+234	
+235	  const handlePlayWithoutSaving = () => {
+236	    setSaveDialogOpen(false);
+237	    onStart();
+238	  };
+239	
+240	  return createPortal(
+241	    <div
+242	      role="dialog"
+243	      aria-label="Game instructions"
+244	      className="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-background/95 px-5 pb-8 pt-24"
+245	    >
+246	      <div className="mx-auto flex w-full max-w-sm flex-col overflow-hidden rounded-3xl bg-card shadow-lg md:max-w-2xl">
+247	        {/* 1. Hero cover */}
+248	        <div className="flex justify-center bg-muted/40 p-4">
+249	          <GameCover cover={resolvedCover} size="hero" />
+250	        </div>
+251	
+252	        <div className="flex flex-col gap-4 p-4">
+253	          {/* 2. Title row + bookmark + cog — matches GameCard heading/subtitle order */}
+254	          <div className="flex items-center justify-between gap-2">
+255	            <div>
+256	              <h2
+257	                className="text-xl font-extrabold"
+258	                style={
+259	                  customGameName
+260	                    ? { color: settingsColors.text }
+261	                    : undefined
+262	                }
+263	              >
+264	                {customGameName ?? gameTitle}
+265	              </h2>
+266	              {customGameName && (
+267	                <p className="text-xs italic text-foreground/80">
+268	                  {gameTitle}
+269	                </p>
+270	              )}
+271	            </div>
+272	            <HeaderActions
+273	              isBookmarked={isBookmarked}
+274	              onToggleBookmark={onToggleBookmark}
+275	              onOpenSettings={() => setModalOpen(true)}
+276	            />
+277	          </div>
+278	
+279	          {/* 3. Instructions text */}
+280	          <p className="text-center text-base font-semibold text-foreground leading-relaxed">
+281	            {text}
+282	          </p>
+283	
+284	          {/* 4. Let's go button */}
+285	          <button
+286	            type="button"
+287	            onClick={handlePlay}
+288	            className="h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95"
+289	          >
+290	            {t('instructions.lets-go')}
+291	          </button>
+292	
+293	          {/* 5. Simple settings form (always expanded) */}
+294	          {SimpleForm && (
+295	            <div className="border-t border-border pt-4">
+296	              <SimpleForm config={config} onChange={onConfigChange} />
+297	            </div>
+298	          )}
+299	        </div>
+300	      </div>
+301	
+302	      {/* Advanced config modal (opened by cog button) */}
+303	      <AdvancedConfigModal
+304	        open={modalOpen}
+305	        onOpenChange={setModalOpen}
+306	        gameId={gameId}
+307	        mode={modalMode}
+308	        config={config}
+309	        existingCustomGameNames={existingCustomGameNames}
+310	        onCancel={() => setModalOpen(false)}
+311	        onDelete={
+312	          customGameId && onDeleteCustomGame
+313	            ? onDeleteCustomGame
+314	            : undefined
+315	        }
+316	        onSaveNew={(payload) => {
+317	          void (async () => {
+318	            try {
+319	              const newId = await onSaveCustomGame({
+320	                name: payload.name,
+321	                color: payload.color,
+322	                config: payload.config,
+323	                cover: payload.cover,
+324	              });
+325	              onConfigChange(payload.config);
+326	              setModalOpen(false);
+327	              await navigate({
+328	                search: (prev) => ({ ...prev, configId: newId }),
+329	              });
+330	            } catch (error) {
+331	              // Surface duplicate-name and similar errors; keep modal open.
+332	              console.error('Failed to save custom game', error);
+333	            }
+334	          })();
+335	        }}
+336	        onUpdate={
+337	          onUpdateCustomGame
+338	            ? (payload) => {
+339	                void (async () => {
+340	                  try {
+341	                    await onUpdateCustomGame(
+342	                      payload.name,
+343	                      payload.config,
+344	                      {
+345	                        cover: payload.cover,
+346	                        color: payload.color,
+347	                      },
+348	                    );
+349	                    onConfigChange(payload.config);
+350	                    setModalOpen(false);
+351	                    await router.invalidate();
+352	                  } catch (error) {
+353	                    console.error(
+354	                      'Failed to update custom game',
+355	                      error,
+356	                    );
+357	                  }
+358	                })();
+359	              }
+360	            : undefined
+361	        }
+362	      />
+363	
+364	      {/* Save-on-play prompt for default (non-custom-game) games */}
+365	      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+366	        <DialogContent>
+367	          <DialogHeader>
+368	            <DialogTitle>
+369	              {t('instructions.saveOnPlayTitle', {
+370	                defaultValue: 'Save these settings as a custom game?',
+371	              })}
+372	            </DialogTitle>
+373	          </DialogHeader>
+374	          <div className="flex flex-col gap-4">
+375	            <label className="flex flex-col gap-1">
+376	              <span className="text-xs font-semibold uppercase text-muted-foreground">
+377	                {t('instructions.saveOnPlayNameLabel', {
+378	                  defaultValue: 'Custom game name',
+379	                })}
+380	              </span>
+381	              <input
+382	                ref={saveNameRef}
+383	                type="text"
+384	                value={savingName}
+385	                onChange={(e) => setSavingName(e.target.value)}
+386	                aria-invalid={showSaveOnPlayError}
+387	                aria-describedby={
+388	                  showSaveOnPlayError ? 'save-on-play-error' : undefined
+389	                }
+390	                className={`h-10 rounded-lg border bg-background px-3 text-sm ${
+391	                  showSaveOnPlayError
+392	                    ? 'border-destructive'
+393	                    : 'border-input'
+394	                }`}
+395	              />
+396	              {showSaveOnPlayError && (
+397	                <span
+398	                  id="save-on-play-error"
+399	                  role="alert"
+400	                  className="text-xs font-semibold text-destructive"
+401	                >
+402	                  {saveOnPlayError}
+403	                </span>
+404	              )}
+405	            </label>
+406	            <div className="flex gap-2">
+407	              <button
+408	                type="button"
+409	                onClick={handlePlayWithoutSaving}
+410	                className="flex-1 rounded-lg border border-input bg-background py-2 text-sm"
+411	              >
+412	                {t('instructions.playWithoutSaving', {
+413	                  defaultValue: 'Play without saving',
+414	                })}
+415	              </button>
+416	              <button
+417	                type="button"
+418	                onClick={handleSaveAndPlay}
+419	                aria-disabled={saveOnPlayError !== null}
+420	                className="flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
+421	              >
+422	                {t('instructions.saveAndPlay', {
+423	                  defaultValue: 'Save & play',
+424	                })}
+425	              </button>
+426	            </div>
+427	          </div>
+428	        </DialogContent>
+429	      </Dialog>
+430	    </div>,
+431	    document.body,
+432	  );
+433	};
+434
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:30:24Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/ui/alert-dialog.stories.tsx`
+
+```text
+1	import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+2	
+3	import {
+4	  AlertDialog,
+5	  AlertDialogAction,
+6	  AlertDialogCancel,
+7	  AlertDialogContent,
+8	  AlertDialogDescription,
+9	  AlertDialogFooter,
+10	  AlertDialogHeader,
+11	  AlertDialogTitle,
+12	  AlertDialogTrigger,
+13	} from './alert-dialog';
+14	import { Button } from './button';
+15	import type { Meta, StoryObj } from '@storybook/react';
+16	import type { ComponentType, MouseEventHandler } from 'react';
+17	
+18	interface StoryArgs {
+19	  triggerLabel: string;
+20	  title: string;
+21	  description: string;
+22	  confirmLabel: string;
+23	  cancelLabel: string;
+24	  onOpenChange: (open: boolean) => void;
+25	  onConfirm: MouseEventHandler<HTMLButtonElement>;
+26	  onCancel: MouseEventHandler<HTMLButtonElement>;
+27	}
+28	
+29	const meta: Meta<StoryArgs> = {
+30	  component: AlertDialog as unknown as ComponentType<StoryArgs>,
+31	  tags: ['autodocs'],
+32	  args: {
+33	    triggerLabel: 'Delete account',
+34	    title: 'Are you sure?',
+35	    description: 'This action cannot be undone.',
+36	    confirmLabel: 'Delete',
+37	    cancelLabel: 'Cancel',
+38	    onOpenChange: fn(),
+39	    onConfirm: fn(),
+40	    onCancel: fn(),
+41	  },
+42	  argTypes: {
+43	    triggerLabel: { control: 'text' },
+44	    title: { control: 'text' },
+45	    description: { control: 'text' },
+46	    confirmLabel: { control: 'text' },
+47	    cancelLabel: { control: 'text' },
+48	    onOpenChange: { table: { disable: true } },
+49	    onConfirm: { table: { disable: true } },
+50	    onCancel: { table: { disable: true } },
+51	  },
+52	  render: ({
+53	    triggerLabel,
+54	    title,
+55	    description,
+56	    confirmLabel,
+57	    cancelLabel,
+58	    onOpenChange,
+59	    onConfirm,
+60	    onCancel,
+61	  }) => (
+62	    <AlertDialog onOpenChange={onOpenChange}>
+63	      <AlertDialogTrigger asChild>
+64	        <Button variant="destructive">{triggerLabel}</Button>
+65	      </AlertDialogTrigger>
+66	      <AlertDialogContent>
+67	        <AlertDialogHeader>
+68	          <AlertDialogTitle>{title}</AlertDialogTitle>
+69	          <AlertDialogDescription>{description}</AlertDialogDescription>
+70	        </AlertDialogHeader>
+71	        <AlertDialogFooter>
+72	          <AlertDialogCancel onClick={onCancel}>
+73	            {cancelLabel}
+74	          </AlertDialogCancel>
+75	          <AlertDialogAction onClick={onConfirm}>
+76	            {confirmLabel}
+77	          </AlertDialogAction>
+78	        </AlertDialogFooter>
+79	      </AlertDialogContent>
+80	    </AlertDialog>
+81	  ),
+82	};
+83	export default meta;
+84	
+85	type Story = StoryObj<StoryArgs>;
+86	
+87	export const Default: Story = {};
+88	
+89	export const OpensAndConfirms: Story = {
+90	  play: async ({ canvasElement }) => {
+91	    const canvas = within(canvasElement);
+92	    await userEvent.click(
+93	      canvas.getByRole('button', { name: /delete account/i }),
+94	    );
+95	    const portal = within(document.body);
+96	    await waitFor(() => {
+97	      expect(portal.getByRole('alertdialog')).toBeVisible();
+98	    });
+99	    await userEvent.click(
+100	      await portal.findByRole('button', { name: /^delete$/i }),
+101	    );
+102	    await waitFor(() => {
+103	      expect(portal.queryByRole('alertdialog')).toBeNull();
+104	    });
+105	  },
+106	};
+107	
+108	export const CancelsWithEscape: Story = {
+109	  play: async ({ canvasElement }) => {
+110	    const canvas = within(canvasElement);
+111	    await userEvent.click(
+112	      canvas.getByRole('button', { name: /delete account/i }),
+113	    );
+114	    const portal = within(document.body);
+115	    await waitFor(() => {
+116	      expect(portal.getByRole('alertdialog')).toBeVisible();
+117	    });
+118	    await userEvent.keyboard('{Escape}');
+119	    await waitFor(() => {
+120	      expect(portal.queryByRole('alertdialog')).toBeNull();
+121	    });
+122	  },
+123	};
+124	
+125	export const Cancelled: Story = {
+126	  play: async ({ canvasElement }) => {
+127	    const canvas = within(canvasElement);
+128	    await userEvent.click(
+129	      canvas.getByRole('button', { name: /delete account/i }),
+130	    );
+131	    const portal = within(document.body);
+132	    await userEvent.click(
+133	      await portal.findByRole('button', { name: /cancel/i }),
+134	    );
+135	    await waitFor(() => {
+136	      expect(portal.queryByRole('alertdialog')).toBeNull();
+137	    });
+138	  },
+139	};
+140
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:30:58Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 05:30:58Z)**_
+
+Spotted a type error in my spec — `tileBankMode` is `'exact' | 'distractors'`, not `'exact' | 'extra'`. Fixing that first, then writing the plan.
+
+_**Agent (claude-opus-4-7 2026-04-21 05:31:02Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/docs/superpowers/specs/2026-04-21-audit-storybook-answer-game-design.md has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:31:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit spec fix
+
+`git add docs/superpowers/specs/2026-04-21-audit-storybook-answer-game-design.md && git commit -m "docs(spec): correct tileBankMode enum values" -m "tileBankMode is 'exact' | 'distractors' per types.ts — not 'extra'." -m "Add 'both' option to inputMethod to match the type." -m "Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>" 2>&1 | tail -5`
+
+```text
+   Duration  10.52s (transform 3.33s, setup 11.39s, collect 37.17s, tests 26.24s, environment 70.39s, prepare 6.76s)
+
+Done in 11.29s.
+[audit/storybook-batch-2-answer-game 25c7caab] docs(spec): correct tileBankMode enum values
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:31:23Z)**_
+
+Now checking one more reference — how existing games compose `AnswerGame` + real `Slot` + `TileBank` — so the plan can instruct the implementer correctly.
+
+_**Agent (claude-opus-4-7 2026-04-21 05:31:25Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Glob"><details>
+<summary>Tool use: **Glob**</summary>
+ pattern `worktrees/storybook-audit-batch-2-answer-game/src/games/number-match/**/*.tsx`
+
+```text
+No files found
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:31:25Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Glob"><details>
+<summary>Tool use: **Glob**</summary>
+ pattern `worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/**/TileBank*.tsx`
+
+```text
+No files found
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:31:28Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Glob"><details>
+<summary>Tool use: **Glob**</summary>
+ pattern `worktrees/storybook-audit-batch-2-answer-game/src/games/**/*.tsx`
+
+```text
+<tool_use_error>InputValidationError: Glob failed due to the following issue:
+An unexpected parameter `head_limit` was provided</tool_use_error>
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:31:29Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ path `./worktrees/storybook-audit-batch-2-answer-game/src` pattern `TileBank|AnswerGame\.Choices`
+
+```text
+Found 10 files limit: 10
+src/games/word-spell/WordSpell/WordSpell.tsx
+src/games/word-spell/LetterTileBank/LetterTileBank.tsx
+src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx
+src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx
+src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx
+src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx
+src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx
+src/games/sort-numbers/SortNumbers/SortNumbers.tsx
+src/games/number-match/NumeralTileBank/NumeralTileBank.tsx
+src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:31:32Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
+
+```text
+1	import { useNavigate, useParams } from '@tanstack/react-router';
+2	import { useEffect, useMemo, useRef, useState } from 'react';
+3	import { useTranslation } from 'react-i18next';
+4	import { buildSortRound } from '../build-sort-round';
+5	import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+6	import type { SortNumbersConfig } from '../types';
+7	import type {
+8	  AnswerGameConfig,
+9	  AnswerGameDraftState,
+10	  AnswerZone,
+11	  TileItem,
+12	} from '@/components/answer-game/types';
+13	import type { GameSkin } from '@/lib/skin';
+14	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+15	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+16	import { LevelCompleteOverlay } from '@/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay';
+17	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+18	import { Slot } from '@/components/answer-game/Slot/Slot';
+19	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+20	import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
+21	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+22	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+23	import { useGameSounds } from '@/components/answer-game/useGameSounds';
+24	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+25	import { buildRoundOrder } from '@/games/build-round-order';
+26	import { getGameEventBus } from '@/lib/game-event-bus';
+27	import { resolveTiming, useGameSkin } from '@/lib/skin';
+28	
+29	interface SortNumbersProps {
+30	  config: SortNumbersConfig;
+31	  initialState?: AnswerGameDraftState;
+32	  sessionId?: string;
+33	  seed?: string;
+34	}
+35	
+36	const SortNumbersSession = ({
+37	  sortNumbersConfig,
+38	  roundOrder,
+39	  skin,
+40	  onRestartSession,
+41	}: {
+42	  sortNumbersConfig: SortNumbersConfig;
+43	  roundOrder: readonly number[];
+44	  skin: GameSkin;
+45	  onRestartSession: () => void;
+46	}) => {
+47	  const { t } = useTranslation('games');
+48	  const { phase, roundIndex, retryCount, zones, levelIndex } =
+49	    useAnswerGameContext();
+50	  const dispatch = useAnswerGameDispatch();
+51	  const { confettiReady, levelCompleteReady, gameOverReady } =
+52	    useGameSounds();
+53	  const navigate = useNavigate();
+54	  const { locale } = useParams({ from: '/$locale' });
+55	  const completionToken = useRef(0);
+56	
+57	  const configRoundIndex = roundOrder[roundIndex];
+58	  const round =
+59	    configRoundIndex === undefined
+60	      ? undefined
+61	      : sortNumbersConfig.rounds[configRoundIndex];
+62	
+63	  const directionLabel =
+64	    sortNumbersConfig.direction === 'ascending'
+65	      ? t('sort-numbers-ui.ascending-label')
+66	      : t('sort-numbers-ui.descending-label');
+67	
+68	  useRoundTTS(directionLabel);
+69	
+70	  const handleHome = () => {
+71	    void navigate({ to: '/$locale', params: { locale } });
+72	  };
+73	
+74	  const handlePlayAgain = () => {
+75	    onRestartSession();
+76	  };
+77	
+78	  const handleNextLevel = () => {
+79	    const generateNextLevel =
+80	      sortNumbersConfig.levelMode?.generateNextLevel;
+81	    if (!generateNextLevel) return;
+82	
+83	    const nextLevel = generateNextLevel(levelIndex);
+84	    if (nextLevel) {
+85	      dispatch({
+86	        type: 'ADVANCE_LEVEL',
+87	        tiles: nextLevel.tiles,
+88	        zones: nextLevel.zones,
+89	      });
+90	      getGameEventBus().emit({
+91	        type: 'game:level-advance',
+92	        gameId: sortNumbersConfig.gameId,
+93	        sessionId: '',
+94	        profileId: '',
+95	        timestamp: Date.now(),
+96	        roundIndex: 0,
+97	        levelIndex: levelIndex + 1,
+98	      });
+99	    } else {
+100	      dispatch({ type: 'COMPLETE_GAME' });
+101	    }
+102	  };
+103	
+104	  const handleDone = () => {
+105	    dispatch({ type: 'COMPLETE_GAME' });
+106	  };
+107	
+108	  useEffect(() => {
+109	    if (phase !== 'game-over') return;
+110	    getGameEventBus().emit({
+111	      type: 'game:end',
+112	      gameId: sortNumbersConfig.gameId,
+113	      sessionId: '',
+114	      profileId: '',
+115	      timestamp: Date.now(),
+116	      roundIndex,
+117	      finalScore: 0,
+118	      totalRounds: roundOrder.length,
+119	      correctCount: 0,
+120	      durationMs: 0,
+121	      retryCount,
+122	    });
+123	  }, [
+124	    phase,
+125	    sortNumbersConfig.gameId,
+126	    roundIndex,
+127	    roundOrder.length,
+128	    retryCount,
+129	  ]);
+130	
+131	  useEffect(() => {
+132	    if (phase !== 'round-complete' || !confettiReady) return;
+133	
+134	    const token = ++completionToken.current;
+135	    const delayMs = resolveTiming(
+136	      'roundAdvanceDelay',
+137	      skin,
+138	      sortNumbersConfig.timing,
+139	    );
+140	    const timer = globalThis.setTimeout(() => {
+141	      if (completionToken.current !== token) return;
+142	
+143	      const isLastRound = roundIndex >= roundOrder.length - 1;
+144	      if (isLastRound) {
+145	        dispatch({ type: 'COMPLETE_GAME' });
+146	        return;
+147	      }
+148	
+149	      const nextConfigIndex = roundOrder[roundIndex + 1];
+150	      const nextRound =
+151	        nextConfigIndex === undefined
+152	          ? undefined
+153	          : sortNumbersConfig.rounds[nextConfigIndex];
+154	
+155	      if (!nextRound) {
+156	        dispatch({ type: 'COMPLETE_GAME' });
+157	        return;
+158	      }
+159	
+160	      const distractor =
+161	        sortNumbersConfig.tileBankMode === 'distractors'
+162	          ? {
+163	              config: sortNumbersConfig.distractors,
+164	              range: sortNumbersConfig.range,
+165	            }
+166	          : undefined;
+167	
+168	      const { tiles: nextTiles, zones: nextZones } = buildSortRound(
+169	        nextRound.sequence,
+170	        sortNumbersConfig.direction,
+171	        distractor,
+172	      );
+173	      dispatch({
+174	        type: 'ADVANCE_ROUND',
+175	        tiles: nextTiles,
+176	        zones: nextZones,
+177	      });
+178	      getGameEventBus().emit({
+179	        type: 'game:round-advance',
+180	        gameId: sortNumbersConfig.gameId,
+181	        sessionId: '',
+182	        profileId: '',
+183	        timestamp: Date.now(),
+184	        roundIndex: roundIndex + 1,
+185	      });
+186	    }, delayMs);
+187	
+188	    return () => {
+189	      globalThis.clearTimeout(timer);
+190	    };
+191	  }, [
+192	    phase,
+193	    confettiReady,
+194	    roundIndex,
+195	    dispatch,
+196	    roundOrder,
+197	    skin,
+198	    sortNumbersConfig.gameId,
+199	    sortNumbersConfig.rounds,
+200	    sortNumbersConfig.direction,
+201	    sortNumbersConfig.tileBankMode,
+202	    sortNumbersConfig.distractors,
+203	    sortNumbersConfig.range,
+204	    sortNumbersConfig.timing,
+205	  ]);
+206	
+207	  if (!round) return null;
+208	
+209	  return (
+210	    <>
+211	      <div className="flex w-full max-w-4xl flex-col items-center justify-center gap-8 px-4 py-6">
+212	        <AnswerGame.Question>
+213	          <p className="text-center text-lg font-semibold text-foreground">
+214	            {directionLabel}
+215	          </p>
+216	        </AnswerGame.Question>
+217	        <AnswerGame.Answer>
+218	          <SlotRow className="gap-2">
+219	            {zones.map((zone, i) => (
+220	              <Slot
+221	                key={zone.id}
+222	                index={i}
+223	                skin={skin}
+224	                className="size-14 rounded-lg"
+225	              >
+226	                {({ label }) => (
+227	                  <span
+228	                    className={`${getNumericTileFontClass(label?.length ?? 0, 56)} font-bold tabular-nums`}
+229	                  >
+230	                    {label}
+231	                  </span>
+232	                )}
+233	              </Slot>
+234	            ))}
+235	          </SlotRow>
+236	        </AnswerGame.Answer>
+237	        <AnswerGame.Choices>
+238	          <SortNumbersTileBank skin={skin} />
+239	        </AnswerGame.Choices>
+240	      </div>
+241	      {skin.RoundCompleteEffect ? (
+242	        <skin.RoundCompleteEffect visible={confettiReady} />
+243	      ) : (
+244	        <ScoreAnimation visible={confettiReady} />
+245	      )}
+246	      {levelCompleteReady ? (
+247	        skin.LevelCompleteOverlay ? (
+248	          <skin.LevelCompleteOverlay
+249	            level={levelIndex + 1}
+250	            onNextLevel={handleNextLevel}
+251	            onDone={handleDone}
+252	          />
+253	        ) : (
+254	          <LevelCompleteOverlay
+255	            level={levelIndex + 1}
+256	            onNextLevel={handleNextLevel}
+257	            onDone={handleDone}
+258	          />
+259	        )
+260	      ) : null}
+261	      {gameOverReady ? (
+262	        skin.CelebrationOverlay ? (
+263	          <skin.CelebrationOverlay
+264	            retryCount={retryCount}
+265	            onPlayAgain={handlePlayAgain}
+266	            onHome={handleHome}
+267	          />
+268	        ) : (
+269	          <GameOverOverlay
+270	            retryCount={retryCount}
+271	            onPlayAgain={handlePlayAgain}
+272	            onHome={handleHome}
+273	          />
+274	        )
+275	      ) : null}
+276	    </>
+277	  );
+278	};
+279	
+280	export const SortNumbers = ({
+281	  config,
+282	  initialState,
+283	  sessionId,
+284	  seed,
+285	}: SortNumbersProps) => {
+286	  const skin = useGameSkin('sort-numbers', config.skin);
+287	  const roundsInOrder = config.roundsInOrder === true;
+288	  const [sessionEpoch, setSessionEpoch] = useState(0);
+289	
+290	  const roundOrder = useMemo(() => {
+291	    void sessionEpoch;
+292	    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+293	  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
+294	
+295	  const firstConfigIndex = roundOrder[0];
+296	  const round0 =
+297	    firstConfigIndex === undefined
+298	      ? undefined
+299	      : config.rounds[firstConfigIndex];
+300	
+301	  const { tiles, zones } = useMemo(() => {
+302	    if (!round0) {
+303	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+304	    }
+305	    const distractor =
+306	      config.tileBankMode === 'distractors'
+307	        ? { config: config.distractors, range: config.range }
+308	        : undefined;
+309	    return buildSortRound(
+310	      round0.sequence,
+311	      config.direction,
+312	      distractor,
+313	    );
+314	  }, [
+315	    round0,
+316	    config.direction,
+317	    config.tileBankMode,
+318	    config.distractors,
+319	    config.range,
+320	  ]);
+321	
+322	  const answerGameConfig = useMemo(
+323	    (): AnswerGameConfig => ({
+324	      gameId: config.gameId,
+325	      inputMethod: config.inputMethod,
+326	      wrongTileBehavior: config.wrongTileBehavior,
+327	      tileBankMode: config.tileBankMode,
+328	      totalRounds: config.rounds.length,
+329	      roundsInOrder: config.roundsInOrder,
+330	      ttsEnabled: config.ttsEnabled,
+331	      touchKeyboardInputMode: 'numeric',
+332	      initialTiles: tiles,
+333	      initialZones: zones,
+334	      slotInteraction: 'free-swap' as const,
+335	      levelMode: config.levelMode,
+336	      hud: config.hud,
+337	    }),
+338	    [
+339	      config.gameId,
+340	      config.inputMethod,
+341	      config.wrongTileBehavior,
+342	      config.tileBankMode,
+343	      config.rounds.length,
+344	      config.roundsInOrder,
+345	      config.ttsEnabled,
+346	      config.levelMode,
+347	      config.hud,
+348	      tiles,
+349	      zones,
+350	    ],
+351	  );
+352	
+353	  if (!round0) return null;
+354	
+355	  return (
+356	    <div
+357	      className={`game-container skin-${skin.id}`}
+358	      style={skin.tokens as React.CSSProperties}
+359	    >
+360	      {skin.SceneBackground ? <skin.SceneBackground /> : null}
+361	      <AnswerGame
+362	        key={sessionEpoch}
+363	        config={answerGameConfig}
+364	        initialState={sessionEpoch === 0 ? initialState : undefined}
+365	        sessionId={sessionId}
+366	        skin={skin}
+367	      >
+368	        <SortNumbersSession
+369	          sortNumbersConfig={config}
+370	          roundOrder={roundOrder}
+371	          skin={skin}
+372	          onRestartSession={() => {
+373	            setSessionEpoch((e) => e + 1);
+374	          }}
+375	        />
+376	      </AnswerGame>
+377	    </div>
+378	  );
+379	};
+380
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:31:47Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 05:31:47Z)**_
+
+I have enough context now. Writing the plan.
+
+_**Agent (claude-opus-4-7 2026-04-21 05:35:28Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```md
+# Audit `src/components/answer-game/*` Stories — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Retrofit the 8 `src/components/answer-game/*.stories.tsx` files to the Controls Policy and Required Variants gates. Three files are upgraded beyond minimal compliance into genuine interactive playgrounds (AnswerGame, InstructionsOverlay, Slot).
+
+**Architecture:** Tiered execution. Tier 1 (Slot, AnswerGame, InstructionsOverlay) runs subagent-driven with per-file two-stage review. Tier 2 (EncouragementAnnouncer, GameOverOverlay, LevelCompleteOverlay, ProgressHUD, ScoreAnimation) runs as a single consolidated implementer with one end-of-tier review. One commit per story file. After all commits land, a single end-of-PR task verifies typecheck, lint, lint:md, and the full Storybook test-runner.
+
+**Tech Stack:** Storybook 10.3.3 (`@storybook/react-vite`), `storybook/test` subpath (exposes `userEvent`, `within`, `expect`, `fn`, `waitFor`), `@storybook/addon-a11y` (global `a11y.test: 'error'`), Radix primitives (portals into `document.body` for `Dialog` / `AdvancedConfigModal`), `vitest` (`vi.useFakeTimers` is available in `play()` because the Storybook test-runner shares the Vitest runtime), `@tanstack/react-router` (InstructionsOverlay uses `useNavigate` — requires `withRouter` decorator).
+
+**Spec:** `docs/superpowers/specs/2026-04-21-audit-storybook-answer-game-design.md` — the per-file audit section is authoritative.
+
+---
+
+## Shared Conventions (applies to every task)
+
+- **Worktree:** all work happens in `worktrees/storybook-audit-batch-2-answer-game/` on branch `audit/storybook-batch-2-answer-game`. Never touch `master`.
+- **Import source for test helpers:** `import { userEvent, within, expect, fn, waitFor } from 'storybook/test';` — the subpath, NOT `@storybook/test`.
+- **Radix portal gotcha:** `InstructionsOverlay` renders its entire content through `createPortal(..., document.body)`, and its `AdvancedConfigModal` + save-on-play `Dialog` are Radix-portaled. Queries scoped to `within(canvasElement)` will miss all of it. Use `within(document.body)` for every assertion. Wrap `toBeVisible()` and `queryByRole(...).toBeNull()` in `waitFor()` to tolerate animation races.
+- **No manual action wiring:** `.storybook/preview.tsx` sets a global `actions.argTypesRegex`, but react-docgen does not expand DOM-extended prop types — so the regex matches nothing for most handler props. Always wire `args: { onFoo: fn() }` from `storybook/test` explicitly. Never use `argTypes: { onFoo: { action: 'xxx' } }`.
+- **Controls map:** enum/union → `control: { type: 'select' }` + `options`; boolean → `control: 'boolean'`; bounded number → `control: { type: 'range', min, max, step }`; free text → `control: 'text'`. Callbacks get `table: { disable: true }` in argTypes. JSX nodes get `control: false`.
+- **Story names:** PascalCase, describe state/flow: `AutoDismissesAfter2s`, `ClicksPlayAgain`, `TogglesBookmark`. No combinatorial names.
+- **Import order (ESLint `import/order` as enforced in this repo):** value imports alphabetical → relative imports → `storybook/test` → `@storybook/react` type import last → `react` type import. See `src/components/ui/alert-dialog.stories.tsx` for a canonical pilot example.
+- **`export default meta`** is the one allowed default export (framework config exception).
+- **StoryArgs-wrapper components** (Complex Object Props pattern): extend `StoryArgs` with handler fields, thread through `render`, hide from Controls with `argTypes: { onFoo: { table: { disable: true } } }`. Cast the `component` field with `as unknown as ComponentType<StoryArgs>` (see pilot alert-dialog pattern).
+- **Per-task verification** (always run before committing):
+  - `yarn typecheck` → exit 0
+  - `yarn lint` → exit 0
+  - Do NOT run `yarn test:storybook` per task — too slow. Task 9 (end-of-PR) covers it.
+- **Commit message shape:** `stories(answer-game/<name>): retrofit per controls policy` with a body listing which gates were applied. If any `play()` was dropped, explain why.
+- **Reference files when in doubt:**
+  - Pilot retrofitted example with fn() + waitFor: `src/components/ui/alert-dialog.stories.tsx`
+  - Complex Object Props pattern: `src/components/ui/card.stories.tsx`
+  - Real-game composition (AnswerGame wiring for the Tier-1 playground): `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
+  - Slot internals: `src/components/answer-game/Slot/Slot.tsx`, `src/components/answer-game/Slot/SlotRow.tsx`, `src/components/answer-game/Slot/useSlotBehavior.ts`
+  - Game colours enum: `src/lib/game-colors.ts` (exports `GAME_COLORS` and `GameColorKey`)
+
+---
+
+## Tier 1 — Complex (subagent-driven, Sonnet implementer + two-stage Haiku review per task)
+
+### Task 1: Retrofit `Slot.stories.tsx` — collapse 8 scenes into a single Playground story
+
+**Files:**
+
+- Modify: `src/components/answer-game/Slot/Slot.stories.tsx`
+- Read (for context): `src/components/answer-game/Slot/Slot.tsx`, `src/components/answer-game/Slot/SlotRow.tsx`, `src/components/answer-game/Slot/SentenceWithGaps.tsx`, `src/components/answer-game/Slot/useSlotBehavior.ts`, `src/components/answer-game/AnswerGameProvider.tsx`, `src/components/answer-game/useAnswerGameDispatch.ts`, `src/components/answer-game/types.ts`
+
+**Gates applied (from spec §8):**
+
+- Controls: `variant` select, `label` text, `filled` boolean, `isWrong` boolean, `dragPreview` select.
+- `fn()` cleanup: N/A — no handlers.
+- State variants: single `Playground` story replaces all 8 existing scenes.
+- `play()`: N/A — drag state is simulated via dispatch, not user events.
+
+**Steps:**
+
+- [ ] **Step 1: Delete the existing file contents** and replace with the new `Playground`-only structure.
+
+Full file:
+
+\```tsx
+import { useEffect } from 'react';
+
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGameProvider } from '../AnswerGameProvider';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import { SentenceWithGaps } from './SentenceWithGaps';
+import { Slot } from './Slot';
+import { SlotRow } from './SlotRow';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { SlotRenderProps } from './useSlotBehavior';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
+type DragPreview = 'none' | 'target-empty' | 'target-swap';
+
+interface StoryArgs {
+  variant: SlotVariant;
+  label: string;
+  filled: boolean;
+  isWrong: boolean;
+  dragPreview: DragPreview;
+}
+
+const baseConfig: AnswerGameConfig = {
+  gameId: 'slot-storybook',
+  inputMethod: 'drag',
+  wrongTileBehavior: 'lock-auto-eject',
+  tileBankMode: 'exact',
+  totalRounds: 1,
+  ttsEnabled: false,
+};
+
+const makeTile = (id: string, label: string): TileItem => ({
+  id,
+  label,
+  value: label,
+});
+
+const makeZone = (
+  index: number,
+  placedTileId: string | null = null,
+  isWrong = false,
+): AnswerZone => ({
+  id: `z${String(index)}`,
+  index,
+  expectedValue: String(index),
+  placedTileId,
+  isWrong,
+  isLocked: false,
+});
+
+const variantConfig: Record<
+  SlotVariant,
+  { slotClass: string; contentClass: string }
+> = {
+  letter: { slotClass: 'size-14 rounded-lg', contentClass: 'text-xl font-bold' },
+  dice: { slotClass: 'size-20 rounded-xl', contentClass: 'text-2xl font-bold' },
+  domino: {
+    slotClass: 'h-[72px] w-32 rounded-xl',
+    contentClass: 'text-3xl font-bold',
+  },
+  'inline-gap': { slotClass: '', contentClass: '' },
+};
+
+const PlaygroundInner = ({
+  variant,
+  dragPreview,
+  contentClass,
+  slotClass,
+}: {
+  variant: SlotVariant;
+  dragPreview: DragPreview;
+  contentClass: string;
+  slotClass: string;
+}) => {
+  const dispatch = useAnswerGameDispatch();
+
+  useEffect(() => {
+    if (dragPreview === 'none') {
+      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+      dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+      return;
+    }
+    // Both previews drag tile t0 over zone 1.
+    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+  }, [dispatch, dragPreview]);
+
+  if (variant === 'inline-gap') {
+    return (
+      <div className="p-4">
+        <SentenceWithGaps sentence="The {0} sat on the mat." />
+      </div>
+    );
+  }
+
+  const renderContent = ({ label }: SlotRenderProps) => (
+    <span className={contentClass}>{label ?? ''}</span>
+  );
+
+  return (
+    <SlotRow className="gap-3">
+      {[0, 1, 2].map((i) => (
+        <Slot key={i} index={i} className={slotClass}>
+          {(props) => renderContent(props)}
+        </Slot>
+      ))}
+    </SlotRow>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component: SlotRow as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/Slot',
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    variant: 'letter',
+    label: 'A',
+    filled: true,
+    isWrong: false,
+    dragPreview: 'none',
+  },
+  argTypes: {
+    variant: {
+      control: { type: 'select' },
+      options: ['letter', 'dice', 'domino', 'inline-gap'] satisfies SlotVariant[],
+    },
+    label: { control: 'text' },
+    filled: { control: 'boolean' },
+    isWrong: { control: 'boolean' },
+    dragPreview: {
+      control: { type: 'select' },
+      options: ['none', 'target-empty', 'target-swap'] satisfies DragPreview[],
+    },
+  },
+  render: ({ variant, label, filled, isWrong, dragPreview }) => {
+    const { slotClass, contentClass } = variantConfig[variant];
+
+    // Build tiles/zones depending on variant + flags.
+    const tiles: TileItem[] =
+      variant === 'inline-gap'
+        ? [makeTile('s0', label || 'cat')]
+        : dragPreview === 'target-swap'
+          ? [
+              makeTile('t0', label || 'A'),
+              makeTile('t1', 'B'),
+              makeTile('t2', 'C'),
+            ]
+          : [
+              makeTile('t0', label || 'A'),
+              makeTile('t1', 'B'),
+              makeTile('t2', 'C'),
+            ];
+
+    const zones: AnswerZone[] =
+      variant === 'inline-gap'
+        ? [makeZone(0, filled ? 's0' : null, isWrong)]
+        : dragPreview === 'target-swap'
+          ? [makeZone(0, 't0'), makeZone(1, 't1', isWrong), makeZone(2, 't2')]
+          : [
+              makeZone(0, filled ? 't0' : null, isWrong),
+              makeZone(1),
+              makeZone(2),
+            ];
+
+    return (
+      <AnswerGameProvider
+        config={{
+          ...baseConfig,
+          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+          initialTiles: tiles,
+          initialZones: zones,
+        }}
+      >
+        <PlaygroundInner
+          variant={variant}
+          dragPreview={dragPreview}
+          contentClass={contentClass}
+          slotClass={slotClass}
+        />
+      </AnswerGameProvider>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Playground: Story = {};
+\```
+
+- [ ] **Step 2: Run `yarn typecheck` — expect exit 0.**
+
+Run: `yarn typecheck`. If the `SlotRenderProps` import path or any other symbol doesn't match, fix by reading the referenced source file.
+
+- [ ] **Step 3: Run `yarn lint` — expect exit 0.**
+
+Run: `yarn lint`. Common failures: `import/order` (fix by regrouping to match the Shared Conventions rule); unused imports (remove).
+
+- [ ] **Step 4: Commit**
+
+\```bash
+git add src/components/answer-game/Slot/Slot.stories.tsx
+git commit -m "stories(answer-game/Slot): retrofit per controls policy
+
+Collapse 8 bespoke scene stories into a single Playground story with
+args-driven variant / label / filled / isWrong / dragPreview controls.
+Remove the bare 'import React from \"react\"'.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+\```
+
+---
+
+### Task 2: Retrofit `AnswerGame.stories.tsx` — real interactive playground
+
+**Files:**
+
+- Modify: `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+- Read (for context): `src/components/answer-game/AnswerGame/AnswerGame.tsx`, `src/components/answer-game/AnswerGameProvider.tsx`, `src/components/answer-game/types.ts`, `src/components/answer-game/useAnswerGameContext.ts`, `src/components/answer-game/useAnswerGameDispatch.ts`, `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` (authoritative wiring reference — the playground mirrors its shape)
+
+**Gates applied (from spec §7):**
+
+- Controls: `StoryArgs` breaks `config` into `inputMethod` select, `wrongTileBehavior` select, `tileBankMode` select, `totalRounds` range, `ttsEnabled` boolean.
+- `fn()` cleanup: N/A — AnswerGame has no direct handlers.
+- `play()`: skipped — HTML5 DnD is unreliable in jsdom.
+- State variants: `Default`, `TextQuestionMode`, `RejectMode`, `LockManualMode`.
+- Decorator: `withDb`.
+
+**Architecture note for the implementer:** `AnswerGame` itself is a shell (wraps `AnswerGameProvider`, renders `ProgressHUDRoot` + children). The playground stories render children (`AnswerGame.Question`, `AnswerGame.Answer`, `AnswerGame.Choices`) with real primitives:
+
+- `AnswerGame.Question`: a simple prompt string.
+- `AnswerGame.Answer`: real `SlotRow` + `Slot`s driven by `zones` from `useAnswerGameContext`.
+- `AnswerGame.Choices`: a minimal tap-to-place tile bank (click a bank tile → `dispatch({ type: 'PLACE_TILE', tileId, zoneIndex: <next empty zone> })`).
+
+The tap-to-place bank is a local component defined inside the story file — do not extract it. Keep all non-trivial wiring inside the file so future story edits don't need to hunt for helpers.
+
+**Steps:**
+
+- [ ] **Step 1: Read the reference wiring.** Open `src/games/sort-numbers/SortNumbers/SortNumbersSession.tsx` (the function component defined inline in `SortNumbers.tsx`) — note how it (a) reads `zones` from `useAnswerGameContext()`, (b) renders `SlotRow` + `Slot` inside `AnswerGame.Answer`, (c) renders a tile bank inside `AnswerGame.Choices`.
+
+- [ ] **Step 2: Replace `AnswerGame.stories.tsx` with the playground structure.**
+
+Full file:
+
+\```tsx
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGame } from './AnswerGame';
+import { Slot } from '../Slot/Slot';
+import { SlotRow } from '../Slot/SlotRow';
+import { useAnswerGameContext } from '../useAnswerGameContext';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+type InputMethod = 'drag' | 'type' | 'both';
+type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
+type TileBankMode = 'exact' | 'distractors';
+
+interface StoryArgs {
+  inputMethod: InputMethod;
+  wrongTileBehavior: WrongTileBehavior;
+  tileBankMode: TileBankMode;
+  totalRounds: number;
+  ttsEnabled: boolean;
+}
+
+const initialTiles: TileItem[] = [
+  { id: 'c', label: 'C', value: 'C' },
+  { id: 'a', label: 'A', value: 'A' },
+  { id: 't', label: 'T', value: 'T' },
+];
+
+const initialZones: AnswerZone[] = [
+  {
+    id: 'z0',
+    index: 0,
+    expectedValue: 'C',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+  {
+    id: 'z1',
+    index: 1,
+    expectedValue: 'A',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+  {
+    id: 'z2',
+    index: 2,
+    expectedValue: 'T',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+];
+
+const TapToPlaceBank = () => {
+  const { allTiles, bankTileIds, zones } = useAnswerGameContext();
+  const dispatch = useAnswerGameDispatch();
+
+  const nextEmptyZoneIndex = zones.findIndex((z) => z.placedTileId === null);
+
+  return (
+    <div className="flex gap-2">
+      {bankTileIds.map((tileId) => {
+        const tile = allTiles.find((t) => t.id === tileId);
+        if (!tile) return null;
+        return (
+          <button
+            key={tile.id}
+            type="button"
+            onClick={() => {
+              if (nextEmptyZoneIndex === -1) return;
+              dispatch({
+                type: 'PLACE_TILE',
+                tileId: tile.id,
+                zoneIndex: nextEmptyZoneIndex,
+              });
+            }}
+            className="flex size-14 items-center justify-center rounded-lg border-2 border-primary bg-background text-xl font-bold shadow-sm active:scale-95"
+          >
+            {tile.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const PlayableScene = () => {
+  const { zones } = useAnswerGameContext();
+
+  return (
+    <>
+      <AnswerGame.Question>
+        <p className="text-center text-lg font-semibold text-foreground">
+          Spell CAT
+        </p>
+      </AnswerGame.Question>
+      <AnswerGame.Answer>
+        <SlotRow className="gap-2">
+          {zones.map((zone, i) => (
+            <Slot key={zone.id} index={i} className="size-14 rounded-lg">
+              {({ label }) => (
+                <span className="text-xl font-bold">{label ?? ''}</span>
+              )}
+            </Slot>
+          ))}
+        </SlotRow>
+      </AnswerGame.Answer>
+      <AnswerGame.Choices>
+        <TapToPlaceBank />
+      </AnswerGame.Choices>
+    </>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component: AnswerGame as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    inputMethod: 'drag',
+    wrongTileBehavior: 'lock-auto-eject',
+    tileBankMode: 'exact',
+    totalRounds: 3,
+    ttsEnabled: false,
+  },
+  argTypes: {
+    inputMethod: {
+      control: { type: 'select' },
+      options: ['drag', 'type', 'both'] satisfies InputMethod[],
+    },
+    wrongTileBehavior: {
+      control: { type: 'select' },
+      options: [
+        'reject',
+        'lock-manual',
+        'lock-auto-eject',
+      ] satisfies WrongTileBehavior[],
+    },
+    tileBankMode: {
+      control: { type: 'select' },
+      options: ['exact', 'distractors'] satisfies TileBankMode[],
+    },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    ttsEnabled: { control: 'boolean' },
+  },
+  render: ({
+    inputMethod,
+    wrongTileBehavior,
+    tileBankMode,
+    totalRounds,
+    ttsEnabled,
+  }) => {
+    const config: AnswerGameConfig = {
+      gameId: 'storybook-answer-game',
+      inputMethod,
+      wrongTileBehavior,
+      tileBankMode,
+      totalRounds,
+      ttsEnabled,
+      initialTiles,
+      initialZones,
+    };
+    return (
+      <AnswerGame config={config}>
+        <PlayableScene />
+      </AnswerGame>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Default: Story = {};
+
+export const TextQuestionMode: Story = {
+  args: { inputMethod: 'type' },
+};
+
+export const RejectMode: Story = {
+  args: { wrongTileBehavior: 'reject' },
+};
+
+export const LockManualMode: Story = {
+  args: { wrongTileBehavior: 'lock-manual' },
+};
+\```
+
+- [ ] **Step 3: Run `yarn typecheck` — expect exit 0.**
+
+If the `useAnswerGameContext` return shape differs from what's assumed (e.g., the hook exposes fields with different names), read the hook source file and adjust. The plan assumed `{ allTiles, bankTileIds, zones }` — verify before adjusting.
+
+- [ ] **Step 4: Run `yarn lint` — expect exit 0.**
+
+- [ ] **Step 5: Commit**
+
+\```bash
+git add src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+git commit -m "stories(answer-game/AnswerGame): retrofit per controls policy
+
+Rebuild as a real interactive playground — StoryArgs breaks config into
+individual controls, render wires a real AnswerGameProvider + real Slot
+row + a minimal tap-to-place tile bank (dispatch PLACE_TILE).
+
+play() skipped: HTML5 drag-and-drop is unreliable in jsdom; interactive
+correctness of DnD is covered at the e2e layer.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+\```
+
+---
+
+### Task 3: Retrofit `InstructionsOverlay.stories.tsx` — actually clickable stories
+
+**Files:**
+
+- Modify: `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`
+- Read (for context): `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`, `src/lib/game-colors.ts`, `.storybook/decorators/withRouter.tsx`, `.storybook/decorators/withDb.tsx`, `src/components/AdvancedConfigModal.tsx` (skim — to know the dialog role/name for portal assertions)
+
+**Gates applied (from spec §6):**
+
+- Controls: `StoryArgs` exposes `text`, `gameTitle`, `gameId`, `customGameColor` select (options from `GAME_COLORS`), `ttsEnabled` boolean, `isBookmarked` boolean, `config.totalRounds` range, `customGameName` text, `customGameId` text.
+- `fn()` cleanup: replace all `{ action: '…' }` entries with `args: { onStart: fn(), onSaveCustomGame: fn(), onUpdateCustomGame: fn(), onToggleBookmark: fn(), onConfigChange: fn() }`.
+- Decorators: `withDb` + `withRouter`.
+- State variants (re-typed against `StoryArgs`): `Default`, `WithCustomGame`, `WordSpellDefault`, `NotBookmarked`, `Bookmarked`, `NotBookmarkedCustomGame`, `BookmarkedCustomGame`.
+- `play()`: `StartsGame`, `TogglesBookmark`, `OpensSettings`.
+- TTS guard: every story uses `ttsEnabled: false`.
+
+**Steps:**
+
+- [ ] **Step 1: Read `src/lib/game-colors.ts`** and record the exact set of `GameColorKey` values exported. The `options` array for the `customGameColor` control must match that set verbatim, in the same order.
+
+- [ ] **Step 2: Replace `InstructionsOverlay.stories.tsx`** with the new structure.
+
+Full file (using `<PLACEHOLDER GAME_COLOR_OPTIONS>` — replace with the actual keys read in Step 1):
+
+\```tsx
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { withRouter } from '../../../../.storybook/decorators/withRouter';
+import { InstructionsOverlay } from './InstructionsOverlay';
+import type { SaveCustomGameInput } from './InstructionsOverlay';
+import type { GameColorKey } from '@/lib/game-colors';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+interface StoryArgs {
+  text: string;
+  gameTitle: string;
+  gameId: string;
+  customGameColor: GameColorKey;
+  ttsEnabled: boolean;
+  isBookmarked: boolean;
+  totalRounds: number;
+  customGameId: string;
+  customGameName: string;
+  onStart: () => void;
+  onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
+  onUpdateCustomGame: (
+    name: string,
+    config: Record<string, unknown>,
+    extras?: { cover?: unknown; color?: GameColorKey },
+  ) => Promise<void>;
+  onToggleBookmark: () => void;
+  onConfigChange: (config: Record<string, unknown>) => void;
+}
+
+const GAME_COLOR_OPTIONS = [
+  // <PLACEHOLDER GAME_COLOR_OPTIONS>
+  // Replace this array with the exact keys exported by GAME_COLORS in
+  // src/lib/game-colors.ts, in the same order. Keep the `as const` cast.
+] as const satisfies readonly GameColorKey[];
+
+const meta: Meta<StoryArgs> = {
+  component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  decorators: [withDb, withRouter],
+  parameters: { layout: 'fullscreen' },
+  args: {
+    text: 'Listen to each number and drag it into the correct slot to sort from smallest to biggest.',
+    gameTitle: 'Sort Numbers',
+    gameId: 'sort-numbers',
+    customGameColor: 'indigo' as GameColorKey,
+    ttsEnabled: false,
+    isBookmarked: false,
+    totalRounds: 5,
+    customGameId: '',
+    customGameName: '',
+    onStart: fn(),
+    onSaveCustomGame: fn(async () => 'stub-id'),
+    onUpdateCustomGame: fn(async () => {}),
+    onToggleBookmark: fn(),
+    onConfigChange: fn(),
+  },
+  argTypes: {
+    text: { control: 'text' },
+    gameTitle: { control: 'text' },
+    gameId: { control: 'text' },
+    customGameColor: {
+      control: { type: 'select' },
+      options: GAME_COLOR_OPTIONS,
+    },
+    ttsEnabled: { control: 'boolean' },
+    isBookmarked: { control: 'boolean' },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    customGameId: { control: 'text' },
+    customGameName: { control: 'text' },
+    onStart: { table: { disable: true } },
+    onSaveCustomGame: { table: { disable: true } },
+    onUpdateCustomGame: { table: { disable: true } },
+    onToggleBookmark: { table: { disable: true } },
+    onConfigChange: { table: { disable: true } },
+  },
+  render: ({
+    text,
+    gameTitle,
+    gameId,
+    customGameColor,
+    ttsEnabled,
+    isBookmarked,
+    totalRounds,
+    customGameId,
+    customGameName,
+    onStart,
+    onSaveCustomGame,
+    onUpdateCustomGame,
+    onToggleBookmark,
+    onConfigChange,
+  }) => (
+    <InstructionsOverlay
+      text={text}
+      gameTitle={gameTitle}
+      gameId={gameId}
+      customGameColor={customGameColor}
+      ttsEnabled={ttsEnabled}
+      isBookmarked={isBookmarked}
+      config={{ totalRounds }}
+      customGameId={customGameId || undefined}
+      customGameName={customGameName || undefined}
+      onStart={onStart}
+      onSaveCustomGame={onSaveCustomGame}
+      onUpdateCustomGame={onUpdateCustomGame}
+      onToggleBookmark={onToggleBookmark}
+      onConfigChange={onConfigChange}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Default: Story = {};
+
+export const WithCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+  },
+};
+
+export const WordSpellDefault: Story = {
+  args: {
+    text: 'Drag the letters to spell the word.',
+    gameTitle: 'Word Spell',
+    gameId: 'word-spell',
+    totalRounds: 8,
+  },
+};
+
+export const NotBookmarked: Story = {
+  args: { isBookmarked: false },
+};
+
+export const Bookmarked: Story = {
+  args: { isBookmarked: true },
+};
+
+export const NotBookmarkedCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+    isBookmarked: false,
+  },
+};
+
+export const BookmarkedCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+    isBookmarked: true,
+  },
+};
+
+export const StartsGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+  },
+  play: async ({ args }) => {
+    // InstructionsOverlay renders into document.body via createPortal.
+    const portal = within(document.body);
+    await userEvent.click(
+      await portal.findByRole('button', { name: /let/i }),
+    );
+    await waitFor(() => {
+      expect(args.onStart).toHaveBeenCalled();
+    });
+  },
+};
+
+export const TogglesBookmark: Story = {
+  args: { isBookmarked: false },
+  play: async ({ args }) => {
+    const portal = within(document.body);
+    const bookmarkButton = await portal.findByRole('button', {
+      name: /bookmark/i,
+    });
+    await userEvent.click(bookmarkButton);
+    await waitFor(() => {
+      expect(args.onToggleBookmark).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const OpensSettings: Story = {
+  play: async () => {
+    const portal = within(document.body);
+    const settingsButton = await portal.findByRole('button', {
+      name: /configure/i,
+    });
+    await userEvent.click(settingsButton);
+    await waitFor(() => {
+      expect(portal.getByRole('dialog')).toBeVisible();
+    });
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(portal.queryByRole('dialog')).toBeNull();
+    });
+  },
+};
+\```
+
+- [ ] **Step 3: Fill in `GAME_COLOR_OPTIONS`** with the real keys from `src/lib/game-colors.ts` (read in Step 1).
+
+- [ ] **Step 4: Verify decorator paths.** Confirm `'../../../../.storybook/decorators/withRouter'` resolves — the same 4-level `../` depth that `withDb` uses in the pilot works here because both stories sit four levels below the repo root. If the `withRouter` decorator file doesn't exist, check the `.storybook/decorators/` directory and adjust the import.
+
+- [ ] **Step 5: Run `yarn typecheck` — expect exit 0.**
+
+If `onSaveCustomGame`/`onUpdateCustomGame` type arguments don't match (component signature tweaks or mocking the async return), import the exact `SaveCustomGameInput` type from the component and align.
+
+- [ ] **Step 6: Run `yarn lint` — expect exit 0.**
+
+- [ ] **Step 7: Verify the three `play()` stories work locally** (do NOT run `yarn test:storybook` from the plan — we save that for Task 9). If during Step 5/6 you noticed a role/name mismatch in the portal queries (e.g., the bookmark button's aria-label differs between translation keys), adjust the regex to match what the component actually renders.
+
+- [ ] **Step 8: Commit**
+
+\```bash
+git add src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+git commit -m "stories(answer-game/InstructionsOverlay): retrofit per controls policy
+
+Rebuild as an interactive story — StoryArgs exposes text, gameTitle,
+gameId, customGameColor select, ttsEnabled, isBookmarked,
+config.totalRounds range, customGameId/Name. All handlers wired to
+fn() spies. Decorators: withDb + withRouter.
+
+Three play() flows: StartsGame, TogglesBookmark, OpensSettings (portal-
+scoped, Escape-close). ttsEnabled: false throughout to avoid the TTS
+crash path.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+\```
+
+**If `OpensSettings` proves brittle** (portal animation races that `waitFor` can't tame, focus flicker, Radix version quirks), drop that specific story and add a line to the commit body: `Dropped OpensSettings: <specific reason>`. The two remaining `play()` stories still satisfy the interactive-component gate.
+
+---
+
+## Tier 2 — Simple (consolidated single implementer, one end-of-tier review)
+
+Tasks 4–8 run as a sequence in one session. The implementer writes each file, runs `yarn typecheck` + `yarn lint`, commits, then moves to the next. After Task 8, a single Haiku code-quality reviewer reviews all five commits at once.
+
+### Task 4: Retrofit `EncouragementAnnouncer.stories.tsx`
+
+**Files:**
+
+- Modify: `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+- Read (for context): `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.tsx`
+
+**Steps:**
+
+- [ ] **Step 1: Replace the file** with:
+
+\```tsx
+import { useState } from 'react';
+import { expect, fn, userEvent, vi, waitFor, within } from 'storybook/test';
+
+import { EncouragementAnnouncer } from './EncouragementAnnouncer';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+interface StoryArgs {
+  message: string;
+  visible: boolean;
+  onDismiss: () => void;
+}
+
+const ShowTrigger = ({
+  message,
+  onDismiss,
+}: {
+  message: string;
+  onDismiss: () => void;
+}) => {
+  const [visible, setVisible] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setVisible(true)}
+        disabled={visible}
+        className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+      >
+        Show encouragement
+      </button>
+      <EncouragementAnnouncer
+        visible={visible}
+        message={message}
+        onDismiss={() => {
+          setVisible(false);
+          onDismiss();
+        }}
+      />
+    </>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component: EncouragementAnnouncer as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  args: {
+    message: 'Keep trying!',
+    visible: false,
+    onDismiss: fn(),
+  },
+  argTypes: {
+    message: { control: 'text' },
+    visible: { control: 'boolean' },
+    onDismiss: { table: { disable: true } },
+  },
+  render: ({ message, visible, onDismiss }) => (
+    <EncouragementAnnouncer
+      message={message}
+      visible={visible}
+      onDismiss={onDismiss}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Hidden: Story = {
+  args: { visible: false, message: 'Keep trying!' },
+};
+
+export const Visible: Story = {
+  args: { visible: true, message: 'Almost! Try again.' },
+};
+
+export const ReplayTrigger: Story = {
+  args: { message: 'Great job!' },
+  render: ({ message, onDismiss }) => (
+    <ShowTrigger message={message} onDismiss={onDismiss} />
+  ),
+};
+
+export const AutoDismissesAfter2s: Story = {
+  args: { message: 'Keep trying!' },
+  render: ({ message, onDismiss }) => (
+    <ShowTrigger message={message} onDismiss={onDismiss} />
+  ),
+  play: async ({ args, canvasElement }) => {
+    vi.useFakeTimers();
+    try {
+      const canvas = within(canvasElement);
+      await userEvent.click(
+        canvas.getByRole('button', { name: /show encouragement/i }),
+      );
+      await waitFor(() => {
+        expect(canvas.getByText(/keep trying/i)).toBeVisible();
+      });
+      vi.advanceTimersByTime(2000);
+      await waitFor(() => {
+        expect(args.onDismiss).toHaveBeenCalled();
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  },
+};
+\```
+
+- [ ] **Step 2: `yarn typecheck` — exit 0.**
+- [ ] **Step 3: `yarn lint` — exit 0.**
+- [ ] **Step 4: Commit**
+
+\```bash
+git add src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+git commit -m "stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+
+StoryArgs: message text, visible boolean. onDismiss wired to fn() spy.
+ReplayTrigger story adds a button wrapper so the story is actually
+interactive. AutoDismissesAfter2s play() asserts the 2s auto-dismiss
+via vi.useFakeTimers / advanceTimersByTime(2000).
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+\```
+
+---
+
+### Task 5: Retrofit `GameOverOverlay.stories.tsx`
+
+**Files:**
+
+- Modify: `src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx`
+
+**Steps:**
+
+- [ ] **Step 1: Replace the file** with:
+
+\```tsx
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { GameOverOverlay } from './GameOverOverlay';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof GameOverOverlay> = {
+  component: GameOverOverlay,
+  tags: ['autodocs'],
+  args: {
+    retryCount: 0,
+    onPlayAgain: fn(),
+    onHome: fn(),
+  },
+  argTypes: {
+    retryCount: {
+      control: { type: 'range', min: 0, max: 10, step: 1 },
+    },
+    onPlayAgain: { table: { disable: true } },
+    onHome: { table: { disable: true } },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof GameOverOverlay>;
+
+export const FiveStars: Story = { args: { retryCount: 0 } };
+export const FourStars: Story = { args: { retryCount: 1 } };
+export const ThreeStars: Story = { args: { retryCount: 3 } };
+export const TwoStars: Story = { args: { retryCount: 5 } };
+export const OneStar: Story = { args: { retryCount: 8 } };
+
+export const ClicksPlayAgain: Story = {
+  args: { retryCount: 0 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /play again/i }),
+    );
+    await waitFor(() => {
+      expect(args.onPlayAgain).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const ClicksHome: Story = {
+  args: { retryCount: 0 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /home/i }),
+    );
+    await waitFor(() => {
+      expect(args.onHome).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+\```
+
+If the component uses a different accessible name for either button (e.g., i18n keys produce a different label), update the regex in the `play()` story to match what the component actually renders (read `GameOverOverlay.tsx` to confirm).
+
+- [ ] **Step 2: `yarn typecheck` — exit 0.**
+- [ ] **Step 3: `yarn lint` — exit 0.**
+- [ ] **Step 4: Commit**
+
+\```bash
+git add src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx
+git commit -m "stories(answer-game/GameOverOverlay): retrofit per controls policy
+
+StoryArgs: retryCount range. onPlayAgain/onHome wired to fn() spies.
+One story per visible star count (Five/Four/Three/Two/One).
+ClicksPlayAgain and ClicksHome play() stories assert spies.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+\```
+
+---
+
+### Task 6: Retrofit `LevelCompleteOverlay.stories.tsx`
+
+**Files:**
+
+- Modify: `src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx`
+
+**Steps:**
+
+- [ ] **Step 1: Replace the file** with:
+
+\```tsx
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { LevelCompleteOverlay } from './LevelCompleteOverlay';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof LevelCompleteOverlay> = {
+  component: LevelCompleteOverlay,
+  tags: ['autodocs'],
+  args: {
+    level: 1,
+    onNextLevel: fn(),
+    onDone: fn(),
+  },
+  argTypes: {
+    level: { control: { type: 'range', min: 1, max: 20, step: 1 } },
+    onNextLevel: { table: { disable: true } },
+    onDone: { table: { disable: true } },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof LevelCompleteOverlay>;
+
+export const Level1: Story = { args: { level: 1 } };
+export const Level3: Story = { args: { level: 3 } };
+export const Level10: Story = { args: { level: 10 } };
+
+export const ClicksNextLevel: Story = {
+  args: { level: 1 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /next level/i }),
+    );
+    await waitFor(() => {
+      expect(args.onNextLevel).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const ClicksDone: Story = {
+  args: { level: 1 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /done/i }),
+    );
+    await waitFor(() => {
+      expect(args.onDone).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+\```
+
+Same caveat as Task 5 — adjust `{ name: /.../ }` regex if the actual button labels differ.
+
+- [ ] **Step 2: `yarn typecheck` — exit 0.**
+- [ ] **Step 3: `yarn lint` — exit 0.**
+- [ ] **Step 4: Commit**
+
+\```bash
+git add src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx
+git commit -m "stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+
+StoryArgs: level range. onNextLevel/onDone wired to fn() spies.
+ClicksNextLevel and ClicksDone play() stories assert spies.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+\```
+
+---
+
+### Task 7: Retrofit `ProgressHUD.stories.tsx`
+
+**Files:**
+
+- Modify: `src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx`
+
+**Steps:**
+
+- [ ] **Step 1: Replace the file** with:
+
+\```tsx
+import { ProgressHUD } from './ProgressHUD';
+import type { AnswerGamePhase } from '../types';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+interface StoryArgs {
+  roundIndex: number;
+  totalRounds: number;
+  totalRoundsIsNull: boolean;
+  levelIndex: number;
+  isLevelMode: boolean;
+  phase: AnswerGamePhase;
+  showDots: boolean;
+  showFraction: boolean;
+  showLevel: boolean;
+}
+
+const meta: Meta<StoryArgs> = {
+  component: ProgressHUD as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/ProgressHUD',
+  parameters: { layout: 'centered' },
+  args: {
+    roundIndex: 2,
+    totalRounds: 5,
+    totalRoundsIsNull: false,
+    levelIndex: 0,
+    isLevelMode: false,
+    phase: 'playing',
+    showDots: true,
+    showFraction: true,
+    showLevel: false,
+  },
+  argTypes: {
+    roundIndex: { control: { type: 'range', min: 0, max: 20, step: 1 } },
+    totalRounds: { control: { type: 'range', min: 1, max: 20, step: 1 } },
+    totalRoundsIsNull: { control: 'boolean' },
+    levelIndex: { control: { type: 'range', min: 0, max: 20, step: 1 } },
+    isLevelMode: { control: 'boolean' },
+    phase: {
+      control: { type: 'select' },
+      options: [
+        'playing',
+        'round-complete',
+        'level-complete',
+        'game-over',
+      ] satisfies AnswerGamePhase[],
+    },
+    showDots: { control: 'boolean' },
+    showFraction: { control: 'boolean' },
+    showLevel: { control: 'boolean' },
+  },
+  render: ({
+    roundIndex,
+    totalRounds,
+    totalRoundsIsNull,
+    levelIndex,
+    isLevelMode,
+    phase,
+    showDots,
+    showFraction,
+    showLevel,
+  }) => (
+    <ProgressHUD
+      roundIndex={roundIndex}
+      totalRounds={totalRoundsIsNull ? null : totalRounds}
+      levelIndex={levelIndex}
+      isLevelMode={isLevelMode}
+      phase={phase}
+      showDots={showDots}
+      showFraction={showFraction}
+      showLevel={showLevel}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Classic_Round3Of5: Story = {};
+
+export const Classic_LastRound: Story = {
+  args: { roundIndex: 4, totalRounds: 5 },
+};
+
+export const DotsOnly: Story = {
+  args: { showFraction: false, showLevel: false },
+};
+
+export const FractionOnly: Story = {
+  args: { showDots: false, showLevel: false },
+};
+
+export const LevelMode_Level3: Story = {
+  args: {
+    isLevelMode: true,
+    totalRoundsIsNull: true,
+    levelIndex: 2,
+    showFraction: false,
+    showLevel: true,
+  },
+};
+
+export const LevelMode_Level10: Story = {
+  args: {
+    isLevelMode: true,
+    totalRoundsIsNull: true,
+    levelIndex: 9,
+    showFraction: false,
+    showLevel: true,
+  },
+};
+
+export const Mixed_LevelPlusFraction: Story = {
+  args: {
+    isLevelMode: true,
+    totalRounds: 5,
+    levelIndex: 2,
+    showFraction: true,
+    showLevel: true,
+  },
+};
+
+export const RoundCompletePhase: Story = {
+  args: { phase: 'round-complete' },
+};
+
+export const AllFlagsOff: Story = {
+  args: { showDots: false, showFraction: false, showLevel: false },
+};
+\```
+
+The import was `@storybook/react-vite` before — this task switches it to `@storybook/react` to match the project convention used everywhere else.
+
+- [ ] **Step 2: `yarn typecheck` — exit 0.**
+- [ ] **Step 3: `yarn lint` — exit 0.**
+- [ ] **Step 4: Commit**
+
+\```bash
+git add src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx
+git commit -m "stories(answer-game/ProgressHUD): retrofit per controls policy
+
+StoryArgs with explicit controls for every prop (ranges, selects,
+booleans). Preserves all 9 existing stories. Fix import from
+@storybook/react-vite → @storybook/react to match project convention.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+\```
+
+---
+
+### Task 8: Retrofit `ScoreAnimation.stories.tsx`
+
+**Files:**
+
+- Modify: `src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx`
+
+**Steps:**
+
+- [ ] **Step 1: Replace the file** with:
+
+\```tsx
+import { ScoreAnimation } from './ScoreAnimation';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof ScoreAnimation> = {
+  component: ScoreAnimation,
+  tags: ['autodocs'],
+  args: { visible: false },
+  argTypes: {
+    visible: { control: 'boolean' },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof ScoreAnimation>;
+
+export const Playing: Story = { args: { visible: false } };
+export const Complete: Story = { args: { visible: true } };
+\```
+
+- [ ] **Step 2: `yarn typecheck` — exit 0.**
+- [ ] **Step 3: `yarn lint` — exit 0.**
+- [ ] **Step 4: Commit**
+
+\```bash
+git add src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+git commit -m "stories(answer-game/ScoreAnimation): retrofit per controls policy
+
+StoryArgs: visible boolean. Pure-display component — no play() story.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+\```
+
+---
+
+## Task 9: End-of-PR verification
+
+**Goal:** Prove nothing regressed across the whole Storybook and that every in-scope file passes its gates.
+
+- [ ] **Step 1: Run typecheck, lint, and markdown lint.**
+
+\```bash
+yarn typecheck
+yarn lint
+yarn lint:md
+\```
+
+All three must exit 0.
+
+- [ ] **Step 2: Start Storybook on a free port and run the test-runner.**
+
+\```bash
+PORT=6006
+while lsof -i :$PORT > /dev/null 2>&1; do PORT=$((PORT + 1)); done
+yarn storybook --port $PORT --ci &
+STORYBOOK_PID=$!
+until curl -s http://127.0.0.1:$PORT > /dev/null 2>&1; do sleep 2; done
+
+yarn test:storybook --url http://127.0.0.1:$PORT
+TEST_EXIT=$?
+
+if [ $TEST_EXIT -eq 0 ]; then
+  kill $STORYBOOK_PID
+fi
+
+exit $TEST_EXIT
+\```
+
+Expected: every story (not just `answer-game/*`) passes a11y + `play()`.
+
+- If a non-`answer-game/*` story fails, treat it as pre-existing and out of scope — log it in the PR description; do not fix here (spec Risks row 6).
+- If an `answer-game/*` `play()` fails, fix the specific story and recommit. The most likely culprit is the `InstructionsOverlay.OpensSettings` portal flow — if it proves irreducibly flaky, delete that single story, amend the Task 3 commit's body to document the drop reason, and re-run.
+
+- [ ] **Step 3: Verify branch log**
+
+\```bash
+git log --oneline origin/master..HEAD
+\```
+
+Expected: the spec-corrective commit (`docs(spec): correct tileBankMode enum values`), the initial spec commit (`docs(spec): audit batch 2 for src/components/answer-game/* stories`), 8 `stories(answer-game/*): retrofit per controls policy` commits, plus any fix-up commits the review loop required.
+
+- [ ] **Step 4: Update issue #125.** Tick the 8 Batch 2 checkboxes in the tracking issue body.
+
+\```bash
+gh issue view 125 --json body --jq '.body'    # read current body
+# ... tick the 8 relevant lines ...
+gh issue edit 125 --body-file <(...)          # post updated body
+\```
+
+- [ ] **Step 5: Open the PR.**
+
+Title: `stories(answer-game): audit retrofit per new controls policy`.
+
+Body must include:
+
+- Link to `.claude/skills/write-storybook/SKILL.md`.
+- The per-file audit summary table from the spec (reviewer orientation).
+- List of any `play()` stories dropped and why.
+- List of any pre-existing out-of-scope test failures surfaced by the test-runner.
+- Link to issue #125.
+
+\```bash
+gh pr create --base master --title "stories(answer-game): audit retrofit per new controls policy" --body "$(cat <<'EOF'
+## Summary
+
+Batch 2 of the Storybook controls audit rollout — retrofits the 8
+`src/components/answer-game/*.stories.tsx` files to the Controls Policy
+and Required Variants gates in
+[`.claude/skills/write-storybook/SKILL.md`](../blob/master/.claude/skills/write-storybook/SKILL.md).
+
+Three files upgraded beyond minimal compliance:
+
+- `AnswerGame` — real interactive playground (live `AnswerGameProvider`
+  + real `Slot` row + tap-to-place tile bank).
+- `InstructionsOverlay` — actually clickable (three `play()` flows).
+- `Slot` — 8 scene stories collapsed to one args-driven `Playground`.
+
+Closes part of #125.
+
+## Per-file audit
+
+_(paste the summary table from `docs/superpowers/specs/2026-04-21-audit-storybook-answer-game-design.md`)_
+
+## Test plan
+
+- [ ] `yarn typecheck` green
+- [ ] `yarn lint` green
+- [ ] `yarn lint:md` green
+- [ ] `yarn test:storybook` green (all stories)
+- [ ] Storybook Controls panel actually drives the 3 upgraded stories
+EOF
+)"
+\```
+
+---
+
+## Post-plan
+
+After the PR merges:
+
+- Remove the worktree: `git worktree remove worktrees/storybook-audit-batch-2-answer-game`
+- Tick Batch 2 boxes in issue #125.
+- Next batches (on #125 tracker): `questions/*`, `games/*`, component roots.
+
+```
+
+```text
+File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:35:51Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 05:35:52Z)**_
+
+Self-review — fixing one real placeholder (`GAME_COLOR_OPTIONS`) and validating the `vi` import path by peeking at the source.
+
+_**Agent (claude-opus-4-7 2026-04-21 05:35:53Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/lib/game-colors.ts`
+
+```text
+1	// src/lib/game-colors.ts
+2	export const GAME_COLOR_KEYS = [
+3	  'indigo',
+4	  'teal',
+5	  'rose',
+6	  'amber',
+7	  'sky',
+8	  'lime',
+9	  'purple',
+10	  'orange',
+11	  'pink',
+12	  'emerald',
+13	  'slate',
+14	  'cyan',
+15	] as const;
+16	
+17	export type GameColorKey = (typeof GAME_COLOR_KEYS)[number];
+18	
+19	export type ColorTokens = {
+20	  border: string; // used for selected ring in colour picker
+21	  playBg: string; // primary colour — all other uses derived from this via CSS utility classes
+22	  text: string; // contrast-safe colour for text on light card backgrounds (≥3:1 large bold)
+23	};
+24	
+25	export const GAME_COLORS: Record<GameColorKey, ColorTokens> = {
+26	  indigo: { border: '#c7d2fe', playBg: '#6366f1', text: '#4338ca' },
+27	  teal: { border: '#99f6e4', playBg: '#14b8a6', text: '#0f766e' },
+28	  rose: { border: '#fecdd3', playBg: '#f43f5e', text: '#be123c' },
+29	  amber: { border: '#fde68a', playBg: '#f59e0b', text: '#b45309' },
+30	  sky: { border: '#bae6fd', playBg: '#0ea5e9', text: '#0369a1' },
+31	  lime: { border: '#d9f99d', playBg: '#84cc16', text: '#4d7c0f' },
+32	  purple: { border: '#e9d5ff', playBg: '#a855f7', text: '#7e22ce' },
+33	  orange: { border: '#fed7aa', playBg: '#f97316', text: '#c2410c' },
+34	  pink: { border: '#fbcfe8', playBg: '#ec4899', text: '#be185d' },
+35	  emerald: { border: '#a7f3d0', playBg: '#10b981', text: '#047857' },
+36	  slate: { border: '#cbd5e1', playBg: '#64748b', text: '#334155' },
+37	  cyan: { border: '#a5f3fc', playBg: '#06b6d4', text: '#0e7490' },
+38	};
+39	
+40	export const DEFAULT_GAME_COLOR: GameColorKey = 'indigo';
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:35:55Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Search existing vi usage in stories
+
+`grep -l "from 'storybook/test'" worktrees/storybook-audit-batch-2-answer-game/src 2>/dev/null | head -3; grep -rn "import.*vi.*from" worktrees/storybook-audit-batch-2-answer-game/src/**/*.stories.tsx 2>/dev/null | head -5`
+
+```text
+(eval):1: no matches found: worktrees/storybook-audit-batch-2-answer-game/src/**/*.stories.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:35:59Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ path `./worktrees/storybook-audit-batch-2-answer-game/src` pattern `import.*vi.*from`
+
+```text
+src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx:8:import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx:6:import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+src/components/UpdateBanner.stories.tsx:4:import { ServiceWorkerContext } from '@/lib/service-worker/ServiceWorkerContext';
+src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx:10:import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx:10:import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+
+[Showing results with pagination = limit: 5]
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:01Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ path `./worktrees/storybook-audit-batch-2-answer-game/node_modules/storybook/test` pattern `from 'storybook/test'`
+
+```text
+<tool_use_error>Path does not exist: /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/node_modules/storybook/test. Note: your current working directory is /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game.</tool_use_error>
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:05Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Check storybook/test exports
+
+`find node_modules/storybook -maxdepth 3 -name "test*" 2>/dev/null | head -5 && echo "---" && node -e "console.log(Object.keys(require('storybook/test')).sort().filter(k => /^vi|expect|fn|use/i.test(k)).join('\n'))" 2>&1 | head -20`
+
+```text
+node_modules/storybook/dist/test
+---
+expect
+fn
+uninstrumentedUserEvent
+userEvent
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:10Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+All storybook/test exports
+
+`node -e "console.log(Object.keys(require('storybook/test')).sort().join('\n'))" 2>&1 | head -20`
+
+```text
+buildQueries
+clearAllMocks
+configure
+createEvent
+expect
+findAllByAltText
+findAllByDisplayValue
+findAllByLabelText
+findAllByPlaceholderText
+findAllByRole
+findAllByTestId
+findAllByText
+findAllByTitle
+findByAltText
+findByDisplayValue
+findByLabelText
+findByPlaceholderText
+findByRole
+findByTestId
+findByText
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Check for vi/waitFor/within
+
+`node -e "console.log(Object.keys(require('storybook/test')).sort().join('\n'))" 2>&1 | grep -E "^(vi|waitFor|within|spyOn)"`
+
+```text
+spyOn
+waitFor
+waitForElementToBeRemoved
+within
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:18Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:19Z)**_
+
+Two fixes: `vi` comes from `vitest` (not `storybook/test`), and the `GAME_COLOR_OPTIONS` placeholder gets the real values.
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:22Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:29Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:33Z)**_
+
+Also removing the now-obsolete Step 1 / Step 3 instructions in Task 3 about filling in the placeholder, since I've filled it in.
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:38Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:54Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:36:57Z)**_
+
+Running `yarn fix:md` and committing the plan.
+
+_**Agent (claude-opus-4-7 2026-04-21 05:37:02Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run markdown fix on plan
+
+`yarn fix:md 2>&1 | tail -5`
+
+```text
+README.md 7ms (unchanged)
+scope.md 4ms (unchanged)
+src/data/words/tier2-aus-report.md 9ms (unchanged)
+src/lib/game-event-bus.md 1ms (unchanged)
+Done in 4.64s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:37:05Z)**_
+
+Clean lint. Committing.
+
+_**Agent (claude-opus-4-7 2026-04-21 05:37:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit plan
+
+`git add docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md && git commit -m "docs(plan): implementation plan for audit batch 2" -m "Companion plan to the batch 2 spec (answer-game/* stories)." -m "Tiered execution: subagent-driven for Slot/AnswerGame/InstructionsOverlay," -m "consolidated single-implementer for the 5 simpler files." -m "Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>" 2>&1 | tail -3`
+
+```text
+[audit/storybook-batch-2-answer-game 5d6fe217] docs(plan): implementation plan for audit batch 2
+ 1 file changed, 1462 insertions(+)
+ create mode 100644 docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 05:37:33Z)**_
+
+Plan complete and saved to `docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md` (commit `5d6fe217`).
+
+**Branch state:**
+
+```text
+5d6fe217  docs(plan): implementation plan for audit batch 2
+25c7caab  docs(spec): correct tileBankMode enum values
+e4222463  docs(spec): audit batch 2 for src/components/answer-game/* stories
+```
+
+**Self-review notes:**
+
+- Every spec requirement maps to a task (Tasks 1–8 for the eight files, Task 9 for end-of-PR verification + issue #125 update + PR open).
+- One placeholder found and filled (`GAME_COLOR_OPTIONS` now has the real 12 keys from `src/lib/game-colors.ts`).
+- One type-correctness fix during review: `vi` isn't exported from `storybook/test` in this repo's version — split the import so `vi` comes from `vitest`.
+- Type consistency checked: `AnswerGameConfig` fields, `SlotRenderProps`, `GameColorKey`, `AnswerGamePhase` all match `types.ts`. The `useAnswerGameContext` hook's return shape is hedged in Task 2 Step 3 ("if it differs, read the hook source and adjust").
+
+---
+
+**Two execution options:**
+
+1. **Subagent-Driven (recommended)** — I dispatch a fresh Sonnet implementer per Tier-1 task with per-task two-stage Haiku review, then a consolidated Tier-2 implementer with one end-of-tier review. Fast iteration, per-task reviewed.
+2. **Inline Execution** — I execute tasks in this session using `superpowers:executing-plans` with checkpoints.
+
+Which approach?
+
+---
+
+_**User (2026-04-21 05:37:36Z)**_
+
+<local-command-caveat>Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.</local-command-caveat>
+
+_**User (2026-04-21 05:37:36Z)**_
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args>with only the essential for writing the plans</command-args>
+
+_**User (2026-04-21 05:39:06Z)**_
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Summary:
+1. Primary Request and Intent:
+   User is continuing Storybook controls audit rollout — Batch 2 of 3 planned batches tracked in issue #125. The pilot (PR #124) retrofitted `src/components/ui/*` stories to a new Controls Policy in `.claude/skills/write-storybook/SKILL.md`. Batch 2 targets 8 files in `src/components/answer-game/*`. User also gave explicit upgrade directives mid-brainstorm:
+   - Collapse Slot's 8 broken scene stories into a single playground with all props as toggles
+   - Make EncouragementAnnouncer and InstructionsOverlay "nice" / actually interactive (current ones are "useless")
+   - Full interactive playground for AnswerGame (option B — real AnswerGameProvider + real tile bank + real slots)
+   - Tiered execution (option B): subagent-driven for complex files, consolidated for simple files
+
+2. Key Technical Concepts:
+   - Storybook 10.3.3 with `@storybook/react-vite`
+   - `storybook/test` subpath (exports: expect, fn, userEvent, within, waitFor, spyOn — NOT vi)
+   - `vitest` (for `vi.useFakeTimers`)
+   - Controls Policy: fn() spies in args, table: { disable: true } for handlers in argTypes
+   - Complex Object Props pattern: StoryArgs wrapper + `as unknown as ComponentType<StoryArgs>` cast
+   - Radix portal gotcha: use `within(document.body)` + `waitFor()` for portal content
+   - `withDb` / `withRouter` decorators in `.storybook/decorators/`
+   - AnswerGameProvider compound component pattern (`AnswerGame.Question/Answer/Choices`)
+   - TDD, feature branches, git worktrees (project rule: never commit to master)
+
+3. Files and Code Sections:
+
+   - `/tmp/audit-rollout-prompts/batch-2-answer-game.md` — Session handoff prompt. Listed 8 scope files, workflow (resync → worktree → brainstorm → plan → subagent), carried-forward gotchas.
+
+   - `worktrees/storybook-audit-batch-2-answer-game/docs/superpowers/specs/2026-04-21-audit-storybook-answer-game-design.md` — **Created and committed** (`e4222463`, later fix `25c7caab`). Contains: Goal, Background, In scope (8 files), Out of scope, Non-goals, Per-file audit summary table + prose detail sections per file, Workflow (tiered execution), Acceptance Criteria, Review Checkpoints, Risks table, Deliverables.
+
+   - `worktrees/storybook-audit-batch-2-answer-game/docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md` — **Created and committed** (`5d6fe217`). 1462 lines. Contains header, Shared Conventions block, 9 tasks total:
+     - Task 1 Slot (Tier 1) — single Playground story with variant/label/filled/isWrong/dragPreview controls
+     - Task 2 AnswerGame (Tier 1) — real playground with TapToPlaceBank dispatching PLACE_TILE
+     - Task 3 InstructionsOverlay (Tier 1) — interactive with StartsGame/TogglesBookmark/OpensSettings play() stories
+     - Task 4 EncouragementAnnouncer (Tier 2) — ShowTrigger wrapper + AutoDismissesAfter2s with `vi` from vitest
+     - Task 5 GameOverOverlay (Tier 2) — stars variants + ClicksPlayAgain/ClicksHome
+     - Task 6 LevelCompleteOverlay (Tier 2) — ClicksNextLevel/ClicksDone
+     - Task 7 ProgressHUD (Tier 2) — all 9 stories retyped with StoryArgs, fix `@storybook/react-vite` → `@storybook/react`
+     - Task 8 ScoreAnimation (Tier 2) — minimal (visible boolean only)
+     - Task 9 End-of-PR verification — typecheck, lint, lint:md, Storybook test-runner on free port, issue #125 update, PR body
+
+   - `src/components/answer-game/types.ts` — Read. Key types: `AnswerGameConfig.tileBankMode: 'exact' | 'distractors'` (NOT 'extra'), `inputMethod: 'drag' | 'type' | 'both'`, `AnswerGamePhase: 'playing' | 'round-complete' | 'level-complete' | 'game-over'`.
+
+   - `src/lib/game-colors.ts` — Read. Exports `GAME_COLOR_KEYS = ['indigo', 'teal', 'rose', 'amber', 'sky', 'lime', 'purple', 'orange', 'pink', 'emerald', 'slate', 'cyan']` and `DEFAULT_GAME_COLOR = 'indigo'`.
+
+   - `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` — Read. Canonical wiring reference for AnswerGame playground: shows how to use `useAnswerGameContext()` to get `{ zones }`, render real Slots inside `AnswerGame.Answer`, render a tile bank inside `AnswerGame.Choices`.
+
+   - `src/components/ui/alert-dialog.stories.tsx` — Read. Pilot-post-retrofit canonical pattern showing fn() wiring, `table: { disable: true }`, ComponentType double-cast, `waitFor()` around portal assertions.
+
+4. Errors and fixes:
+   - **MD060 table-column-style errors**: Initial mega-table in spec had 6 columns with very long cells causing prettier/markdownlint alignment failure. Fixed by replacing with compact summary table + per-file prose sections.
+   - **Prettier mangled list markup**: Line `+ real tile bank` got normalized to `- real tile bank`, becoming a nested sub-item. Fixed by rewriting continuation: `— live AnswerGameProvider, real tile bank, real slots, driven by Controls.`
+   - **"Simple"/"Complex" column misalignment**: Tier column separator was 6 chars but "Complex" is 7 chars. Fixed by widening separator to 7 chars and padding "Simple " with trailing space.
+   - **`tileBankMode` enum wrong**: I wrote `'extra'` in spec but actual type is `'distractors'`. Also `inputMethod` is 3 options not 2. Fixed in follow-up commit `25c7caab`.
+   - **`vi` import source**: Verified via `node -e` that `storybook/test` does NOT export `vi`. Fixed Task 4 to import `vi` from `vitest` directly.
+   - **`GAME_COLOR_OPTIONS` placeholder**: Writing-plans skill forbids placeholders. Fixed by reading `game-colors.ts` and inlining the 12 keys.
+
+5. Problem Solving:
+   - Resolved all markdown lint issues (MD060, prettier parsing)
+   - Verified library exports via runtime introspection
+   - Established that HTML5 DnD unreliability in jsdom justifies skipping AnswerGame play()
+   - Established that `ttsEnabled: false` guards InstructionsOverlay from the known TTS crash
+   - User explicitly resolved three judgment calls (Slot playground, interactive upgrades, full AnswerGame playground) and two micro-decisions (drop old Slot scenes, skip AnswerGame DnD play())
+
+6. All user messages:
+   - Initial paste describing batch-2 prompt saved at /tmp/audit-rollout-prompts/batch-2-answer-game.md
+   - "1" (chose pull + create worktree + start Batch 2 after resync)
+   - "Tool loaded." (acknowledged ToolSearch result)
+   - "I like each scene of the Slot, but they are broken atm. They have different tokens I think. I would prefer a single story with all the props as toggles and controls."
+   - "Current EncouragamentAnnouncer does nothing, jusr display a card, and InstructionsOverlay doesn't let me clikc in anything. The current stories are useless. make a nice one instead."
+   - "B" (chose full interactive AnswerGame playground)
+   - "1. drop / 2. skip" (drop old Slot scenes, skip AnswerGame play())
+   - "LGTM, lets dod it" (approved scope section)
+   - "B" (chose tiered execution)
+   - "LGTM" (approved execution section)
+   - "Y" (approved writing spec)
+   - "LGTM" (approved written spec, triggered writing-plans)
+
+7. Pending Tasks:
+   - **Offer execution handoff** (required by writing-plans skill terminal step): present Subagent-Driven vs Inline Execution choice to user
+   - Execute the plan (Tasks 1-9) once user chooses execution mode
+   - Open PR against master titled `stories(answer-game): audit retrofit per new controls policy`
+   - Update issue #125 checkboxes for Batch 2
+
+8. Current Work:
+   Immediately before the summary request, I committed the implementation plan as commit `5d6fe217` with the message `docs(plan): implementation plan for audit batch 2`. The plan file is 1462 lines at `worktrees/storybook-audit-batch-2-answer-game/docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md`. The `yarn fix:md` run was clean. The next action per the writing-plans skill is the Execution Handoff — offer the user the choice between Subagent-Driven (recommended, fresh subagent per task + two-stage review, uses superpowers:subagent-driven-development) and Inline Execution (batch execution with checkpoints, uses superpowers:executing-plans).
+
+9. Optional Next Step:
+   Present the execution handoff per the writing-plans skill's terminal step. Exact verbiage from the skill:
+   > "Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Two execution options:
+   > 1. Subagent-Driven (recommended) - I dispatch a fresh subagent per task, review between tasks, fast iteration
+   > 2. Inline Execution - Execute tasks in this session using executing-plans, batch execution with checkpoints for review
+   > Which approach?"
+   
+   User's most recent explicit request was "LGTM" approving the spec and triggering `superpowers:writing-plans`. The plan is now written and committed. The execution handoff prompt is the next prescribed step in the writing-plans skill flow, and it aligns with the overall task of executing Batch 2. I should offer the two options and wait for the user's choice before invoking either `superpowers:subagent-driven-development` or `superpowers:executing-plans`.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+_**User (2026-04-21 05:39:07Z)**_
+
+<local-command-stdout>[2mCompacted [22m</local-command-stdout>
+
+_**User (2026-04-21 06:00:34Z)**_
+
+1
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 06:00:38Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:00:38Z)**_
+
+<tool-use data-tool-type="generic" data-tool-name="Skill"><details>
+<summary>Tool use: **Skill**</summary>
+
+**Input:**
+
+- skill: `superpowers:subagent-driven-development`
+
+</details></tool-use>
+
+---
+
+_**User (2026-04-21 06:00:38Z)**_
+
+Base directory for this skill: /Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/subagent-driven-development
+
+# Subagent-Driven Development
+
+Execute plan by dispatching fresh subagent per task, with two-stage review after each: spec compliance review first, then code quality review.
+
+**Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
+
+**Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
+
+## When to Use
+
+```dot
+digraph when_to_use {
+    "Have implementation plan?" [shape=diamond];
+    "Tasks mostly independent?" [shape=diamond];
+    "Stay in this session?" [shape=diamond];
+    "subagent-driven-development" [shape=box];
+    "executing-plans" [shape=box];
+    "Manual execution or brainstorm first" [shape=box];
+
+    "Have implementation plan?" -> "Tasks mostly independent?" [label="yes"];
+    "Have implementation plan?" -> "Manual execution or brainstorm first" [label="no"];
+    "Tasks mostly independent?" -> "Stay in this session?" [label="yes"];
+    "Tasks mostly independent?" -> "Manual execution or brainstorm first" [label="no - tightly coupled"];
+    "Stay in this session?" -> "subagent-driven-development" [label="yes"];
+    "Stay in this session?" -> "executing-plans" [label="no - parallel session"];
+}
+```
+
+**vs. Executing Plans (parallel session):**
+- Same session (no context switch)
+- Fresh subagent per task (no context pollution)
+- Two-stage review after each task: spec compliance first, then code quality
+- Faster iteration (no human-in-loop between tasks)
+
+## The Process
+
+```dot
+digraph process {
+    rankdir=TB;
+
+    subgraph cluster_per_task {
+        label="Per Task";
+        "Dispatch implementer subagent (./implementer-prompt.md)" [shape=box];
+        "Implementer subagent asks questions?" [shape=diamond];
+        "Answer questions, provide context" [shape=box];
+        "Implementer subagent implements, tests, commits, self-reviews" [shape=box];
+        "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [shape=box];
+        "Spec reviewer subagent confirms code matches spec?" [shape=diamond];
+        "Implementer subagent fixes spec gaps" [shape=box];
+        "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [shape=box];
+        "Code quality reviewer subagent approves?" [shape=diamond];
+        "Implementer subagent fixes quality issues" [shape=box];
+        "Mark task complete in TodoWrite" [shape=box];
+    }
+
+    "Read plan, extract all tasks with full text, note context, create TodoWrite" [shape=box];
+    "More tasks remain?" [shape=diamond];
+    "Dispatch final code reviewer subagent for entire implementation" [shape=box];
+    "Use superpowers:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
+
+    "Read plan, extract all tasks with full text, note context, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
+    "Dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer subagent asks questions?";
+    "Implementer subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
+    "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md)";
+    "Implementer subagent asks questions?" -> "Implementer subagent implements, tests, commits, self-reviews" [label="no"];
+    "Implementer subagent implements, tests, commits, self-reviews" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)";
+    "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer subagent confirms code matches spec?";
+    "Spec reviewer subagent confirms code matches spec?" -> "Implementer subagent fixes spec gaps" [label="no"];
+    "Implementer subagent fixes spec gaps" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="re-review"];
+    "Spec reviewer subagent confirms code matches spec?" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="yes"];
+    "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" -> "Code quality reviewer subagent approves?";
+    "Code quality reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
+    "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="re-review"];
+    "Code quality reviewer subagent approves?" -> "Mark task complete in TodoWrite" [label="yes"];
+    "Mark task complete in TodoWrite" -> "More tasks remain?";
+    "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
+    "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
+    "Dispatch final code reviewer subagent for entire implementation" -> "Use superpowers:finishing-a-development-branch";
+}
+```
+
+## Model Selection
+
+Use the least powerful model that can handle each role to conserve cost and increase speed.
+
+**Mechanical implementation tasks** (isolated functions, clear specs, 1-2 files): use a fast, cheap model. Most implementation tasks are mechanical when the plan is well-specified.
+
+**Integration and judgment tasks** (multi-file coordination, pattern matching, debugging): use a standard model.
+
+**Architecture, design, and review tasks**: use the most capable available model.
+
+**Task complexity signals:**
+- Touches 1-2 files with a complete spec → cheap model
+- Touches multiple files with integration concerns → standard model
+- Requires design judgment or broad codebase understanding → most capable model
+
+## Handling Implementer Status
+
+Implementer subagents report one of four statuses. Handle each appropriately:
+
+**DONE:** Proceed to spec compliance review.
+
+**DONE_WITH_CONCERNS:** The implementer completed the work but flagged doubts. Read the concerns before proceeding. If the concerns are about correctness or scope, address them before review. If they're observations (e.g., "this file is getting large"), note them and proceed to review.
+
+**NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch.
+
+**BLOCKED:** The implementer cannot complete the task. Assess the blocker:
+1. If it's a context problem, provide more context and re-dispatch with the same model
+2. If the task requires more reasoning, re-dispatch with a more capable model
+3. If the task is too large, break it into smaller pieces
+4. If the plan itself is wrong, escalate to the human
+
+**Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
+
+## Prompt Templates
+
+- `./implementer-prompt.md` - Dispatch implementer subagent
+- `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
+- `./code-quality-reviewer-prompt.md` - Dispatch code quality reviewer subagent
+
+## Example Workflow
+
+```
+You: I'm using Subagent-Driven Development to execute this plan.
+
+[Read plan file once: docs/superpowers/plans/feature-plan.md]
+[Extract all 5 tasks with full text and context]
+[Create TodoWrite with all tasks]
+
+Task 1: Hook installation script
+
+[Get Task 1 text and context (already extracted)]
+[Dispatch implementation subagent with full task text + context]
+
+Implementer: "Before I begin - should the hook be installed at user or system level?"
+
+You: "User level (~/.config/superpowers/hooks/)"
+
+Implementer: "Got it. Implementing now..."
+[Later] Implementer:
+  - Implemented install-hook command
+  - Added tests, 5/5 passing
+  - Self-review: Found I missed --force flag, added it
+  - Committed
+
+[Dispatch spec compliance reviewer]
+Spec reviewer: ✅ Spec compliant - all requirements met, nothing extra
+
+[Get git SHAs, dispatch code quality reviewer]
+Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
+
+[Mark Task 1 complete]
+
+Task 2: Recovery modes
+
+[Get Task 2 text and context (already extracted)]
+[Dispatch implementation subagent with full task text + context]
+
+Implementer: [No questions, proceeds]
+Implementer:
+  - Added verify/repair modes
+  - 8/8 tests passing
+  - Self-review: All good
+  - Committed
+
+[Dispatch spec compliance reviewer]
+Spec reviewer: ❌ Issues:
+  - Missing: Progress reporting (spec says "report every 100 items")
+  - Extra: Added --json flag (not requested)
+
+[Implementer fixes issues]
+Implementer: Removed --json flag, added progress reporting
+
+[Spec reviewer reviews again]
+Spec reviewer: ✅ Spec compliant now
+
+[Dispatch code quality reviewer]
+Code reviewer: Strengths: Solid. Issues (Important): Magic number (100)
+
+[Implementer fixes]
+Implementer: Extracted PROGRESS_INTERVAL constant
+
+[Code reviewer reviews again]
+Code reviewer: ✅ Approved
+
+[Mark Task 2 complete]
+
+...
+
+[After all tasks]
+[Dispatch final code-reviewer]
+Final reviewer: All requirements met, ready to merge
+
+Done!
+```
+
+## Advantages
+
+**vs. Manual execution:**
+- Subagents follow TDD naturally
+- Fresh context per task (no confusion)
+- Parallel-safe (subagents don't interfere)
+- Subagent can ask questions (before AND during work)
+
+**vs. Executing Plans:**
+- Same session (no handoff)
+- Continuous progress (no waiting)
+- Review checkpoints automatic
+
+**Efficiency gains:**
+- No file reading overhead (controller provides full text)
+- Controller curates exactly what context is needed
+- Subagent gets complete information upfront
+- Questions surfaced before work begins (not after)
+
+**Quality gates:**
+- Self-review catches issues before handoff
+- Two-stage review: spec compliance, then code quality
+- Review loops ensure fixes actually work
+- Spec compliance prevents over/under-building
+- Code quality ensures implementation is well-built
+
+**Cost:**
+- More subagent invocations (implementer + 2 reviewers per task)
+- Controller does more prep work (extracting all tasks upfront)
+- Review loops add iterations
+- But catches issues early (cheaper than debugging later)
+
+## Red Flags
+
+**Never:**
+- Start implementation on main/master branch without explicit user consent
+- Skip reviews (spec compliance OR code quality)
+- Proceed with unfixed issues
+- Dispatch multiple implementation subagents in parallel (conflicts)
+- Make subagent read plan file (provide full text instead)
+- Skip scene-setting context (subagent needs to understand where task fits)
+- Ignore subagent questions (answer before letting them proceed)
+- Accept "close enough" on spec compliance (spec reviewer found issues = not done)
+- Skip review loops (reviewer found issues = implementer fixes = review again)
+- Let implementer self-review replace actual review (both are needed)
+- **Start code quality review before spec compliance is ✅** (wrong order)
+- Move to next task while either review has open issues
+
+**If subagent asks questions:**
+- Answer clearly and completely
+- Provide additional context if needed
+- Don't rush them into implementation
+
+**If reviewer finds issues:**
+- Implementer (same subagent) fixes them
+- Reviewer reviews again
+- Repeat until approved
+- Don't skip the re-review
+
+**If subagent fails task:**
+- Dispatch fix subagent with specific instructions
+- Don't try to fix manually (context pollution)
+
+## Integration
+
+**Required workflow skills:**
+- **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
+- **superpowers:writing-plans** - Creates the plan this skill executes
+- **superpowers:requesting-code-review** - Code review template for reviewer subagents
+- **superpowers:finishing-a-development-branch** - Complete development after all tasks
+
+**Subagents should use:**
+- **superpowers:test-driven-development** - Subagents follow TDD for each task
+
+**Alternative workflow:**
+- **superpowers:executing-plans** - Use for parallel session instead of same-session execution
+
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 06:00:41Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:00:42Z)**_
+
+I'm using Subagent-Driven Development to execute the plan. First, I need to load task-tracking tools and read the plan file.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:00:43Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ToolSearch"><details>
+<summary>Tool use: **ToolSearch**</summary>
+
+**Input:**
+
+- max_results: `5`
+- query: `select:TaskCreate,TaskList,TaskGet,TaskOutput,TaskUpdate`
+
+**Result:**
+
+```
+
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:00:45Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md`
+
+```text
+1	# Audit `src/components/answer-game/*` Stories — Implementation Plan
+2	
+3	> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+4	
+5	**Goal:** Retrofit the 8 `src/components/answer-game/*.stories.tsx` files to the Controls Policy and Required Variants gates. Three files are upgraded beyond minimal compliance into genuine interactive playgrounds (AnswerGame, InstructionsOverlay, Slot).
+6	
+7	**Architecture:** Tiered execution. Tier 1 (Slot, AnswerGame, InstructionsOverlay) runs subagent-driven with per-file two-stage review. Tier 2 (EncouragementAnnouncer, GameOverOverlay, LevelCompleteOverlay, ProgressHUD, ScoreAnimation) runs as a single consolidated implementer with one end-of-tier review. One commit per story file. After all commits land, a single end-of-PR task verifies typecheck, lint, lint:md, and the full Storybook test-runner.
+8	
+9	**Tech Stack:** Storybook 10.3.3 (`@storybook/react-vite`), `storybook/test` subpath (exposes `userEvent`, `within`, `expect`, `fn`, `waitFor`), `@storybook/addon-a11y` (global `a11y.test: 'error'`), Radix primitives (portals into `document.body` for `Dialog` / `AdvancedConfigModal`), `vitest` (`vi.useFakeTimers` is available in `play()` because the Storybook test-runner shares the Vitest runtime), `@tanstack/react-router` (InstructionsOverlay uses `useNavigate` — requires `withRouter` decorator).
+10	
+11	**Spec:** `docs/superpowers/specs/2026-04-21-audit-storybook-answer-game-design.md` — the per-file audit section is authoritative.
+12	
+13	---
+14	
+15	## Shared Conventions (applies to every task)
+16	
+17	- **Worktree:** all work happens in `worktrees/storybook-audit-batch-2-answer-game/` on branch `audit/storybook-batch-2-answer-game`. Never touch `master`.
+18	- **Import source for test helpers:** `import { userEvent, within, expect, fn, waitFor } from 'storybook/test';` — the subpath, NOT `@storybook/test`.
+19	- **Radix portal gotcha:** `InstructionsOverlay` renders its entire content through `createPortal(..., document.body)`, and its `AdvancedConfigModal` + save-on-play `Dialog` are Radix-portaled. Queries scoped to `within(canvasElement)` will miss all of it. Use `within(document.body)` for every assertion. Wrap `toBeVisible()` and `queryByRole(...).toBeNull()` in `waitFor()` to tolerate animation races.
+20	- **No manual action wiring:** `.storybook/preview.tsx` sets a global `actions.argTypesRegex`, but react-docgen does not expand DOM-extended prop types — so the regex matches nothing for most handler props. Always wire `args: { onFoo: fn() }` from `storybook/test` explicitly. Never use `argTypes: { onFoo: { action: 'xxx' } }`.
+21	- **Controls map:** enum/union → `control: { type: 'select' }` + `options`; boolean → `control: 'boolean'`; bounded number → `control: { type: 'range', min, max, step }`; free text → `control: 'text'`. Callbacks get `table: { disable: true }` in argTypes. JSX nodes get `control: false`.
+22	- **Story names:** PascalCase, describe state/flow: `AutoDismissesAfter2s`, `ClicksPlayAgain`, `TogglesBookmark`. No combinatorial names.
+23	- **Import order (ESLint `import/order` as enforced in this repo):** value imports alphabetical → relative imports → `storybook/test` → `@storybook/react` type import last → `react` type import. See `src/components/ui/alert-dialog.stories.tsx` for a canonical pilot example.
+24	- **`export default meta`** is the one allowed default export (framework config exception).
+25	- **StoryArgs-wrapper components** (Complex Object Props pattern): extend `StoryArgs` with handler fields, thread through `render`, hide from Controls with `argTypes: { onFoo: { table: { disable: true } } }`. Cast the `component` field with `as unknown as ComponentType<StoryArgs>` (see pilot alert-dialog pattern).
+26	- **Per-task verification** (always run before committing):
+27	  - `yarn typecheck` → exit 0
+28	  - `yarn lint` → exit 0
+29	  - Do NOT run `yarn test:storybook` per task — too slow. Task 9 (end-of-PR) covers it.
+30	- **Commit message shape:** `stories(answer-game/<name>): retrofit per controls policy` with a body listing which gates were applied. If any `play()` was dropped, explain why.
+31	- **Reference files when in doubt:**
+32	  - Pilot retrofitted example with fn() + waitFor: `src/components/ui/alert-dialog.stories.tsx`
+33	  - Complex Object Props pattern: `src/components/ui/card.stories.tsx`
+34	  - Real-game composition (AnswerGame wiring for the Tier-1 playground): `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
+35	  - Slot internals: `src/components/answer-game/Slot/Slot.tsx`, `src/components/answer-game/Slot/SlotRow.tsx`, `src/components/answer-game/Slot/useSlotBehavior.ts`
+36	  - Game colours enum: `src/lib/game-colors.ts` (exports `GAME_COLORS` and `GameColorKey`)
+37	
+38	---
+39	
+40	## Tier 1 — Complex (subagent-driven, Sonnet implementer + two-stage Haiku review per task)
+41	
+42	### Task 1: Retrofit `Slot.stories.tsx` — collapse 8 scenes into a single Playground story
+43	
+44	**Files:**
+45	
+46	- Modify: `src/components/answer-game/Slot/Slot.stories.tsx`
+47	- Read (for context): `src/components/answer-game/Slot/Slot.tsx`, `src/components/answer-game/Slot/SlotRow.tsx`, `src/components/answer-game/Slot/SentenceWithGaps.tsx`, `src/components/answer-game/Slot/useSlotBehavior.ts`, `src/components/answer-game/AnswerGameProvider.tsx`, `src/components/answer-game/useAnswerGameDispatch.ts`, `src/components/answer-game/types.ts`
+48	
+49	**Gates applied (from spec §8):**
+50	
+51	- Controls: `variant` select, `label` text, `filled` boolean, `isWrong` boolean, `dragPreview` select.
+52	- `fn()` cleanup: N/A — no handlers.
+53	- State variants: single `Playground` story replaces all 8 existing scenes.
+54	- `play()`: N/A — drag state is simulated via dispatch, not user events.
+55	
+56	**Steps:**
+57	
+58	- [ ] **Step 1: Delete the existing file contents** and replace with the new `Playground`-only structure.
+59	
+60	Full file:
+61	
+62	```tsx
+63	import { useEffect } from 'react';
+64	
+65	import { withDb } from '../../../../.storybook/decorators/withDb';
+66	import { AnswerGameProvider } from '../AnswerGameProvider';
+67	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+68	import { SentenceWithGaps } from './SentenceWithGaps';
+69	import { Slot } from './Slot';
+70	import { SlotRow } from './SlotRow';
+71	import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+72	import type { SlotRenderProps } from './useSlotBehavior';
+73	import type { ComponentType } from 'react';
+74	import type { Meta, StoryObj } from '@storybook/react';
+75	
+76	type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
+77	type DragPreview = 'none' | 'target-empty' | 'target-swap';
+78	
+79	interface StoryArgs {
+80	  variant: SlotVariant;
+81	  label: string;
+82	  filled: boolean;
+83	  isWrong: boolean;
+84	  dragPreview: DragPreview;
+85	}
+86	
+87	const baseConfig: AnswerGameConfig = {
+88	  gameId: 'slot-storybook',
+89	  inputMethod: 'drag',
+90	  wrongTileBehavior: 'lock-auto-eject',
+91	  tileBankMode: 'exact',
+92	  totalRounds: 1,
+93	  ttsEnabled: false,
+94	};
+95	
+96	const makeTile = (id: string, label: string): TileItem => ({
+97	  id,
+98	  label,
+99	  value: label,
+100	});
+101	
+102	const makeZone = (
+103	  index: number,
+104	  placedTileId: string | null = null,
+105	  isWrong = false,
+106	): AnswerZone => ({
+107	  id: `z${String(index)}`,
+108	  index,
+109	  expectedValue: String(index),
+110	  placedTileId,
+111	  isWrong,
+112	  isLocked: false,
+113	});
+114	
+115	const variantConfig: Record<
+116	  SlotVariant,
+117	  { slotClass: string; contentClass: string }
+118	> = {
+119	  letter: {
+120	    slotClass: 'size-14 rounded-lg',
+121	    contentClass: 'text-xl font-bold',
+122	  },
+123	  dice: {
+124	    slotClass: 'size-20 rounded-xl',
+125	    contentClass: 'text-2xl font-bold',
+126	  },
+127	  domino: {
+128	    slotClass: 'h-[72px] w-32 rounded-xl',
+129	    contentClass: 'text-3xl font-bold',
+130	  },
+131	  'inline-gap': { slotClass: '', contentClass: '' },
+132	};
+133	
+134	const PlaygroundInner = ({
+135	  variant,
+136	  dragPreview,
+137	  contentClass,
+138	  slotClass,
+139	}: {
+140	  variant: SlotVariant;
+141	  dragPreview: DragPreview;
+142	  contentClass: string;
+143	  slotClass: string;
+144	}) => {
+145	  const dispatch = useAnswerGameDispatch();
+146	
+147	  useEffect(() => {
+148	    if (dragPreview === 'none') {
+149	      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+150	      dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+151	      return;
+152	    }
+153	    // Both previews drag tile t0 over zone 1.
+154	    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+155	    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+156	  }, [dispatch, dragPreview]);
+157	
+158	  if (variant === 'inline-gap') {
+159	    return (
+160	      <div className="p-4">
+161	        <SentenceWithGaps sentence="The {0} sat on the mat." />
+162	      </div>
+163	    );
+164	  }
+165	
+166	  const renderContent = ({ label }: SlotRenderProps) => (
+167	    <span className={contentClass}>{label ?? ''}</span>
+168	  );
+169	
+170	  return (
+171	    <SlotRow className="gap-3">
+172	      {[0, 1, 2].map((i) => (
+173	        <Slot key={i} index={i} className={slotClass}>
+174	          {(props) => renderContent(props)}
+175	        </Slot>
+176	      ))}
+177	    </SlotRow>
+178	  );
+179	};
+180	
+181	const meta: Meta<StoryArgs> = {
+182	  component: SlotRow as unknown as ComponentType<StoryArgs>,
+183	  title: 'answer-game/Slot',
+184	  tags: ['autodocs'],
+185	  decorators: [withDb],
+186	  args: {
+187	    variant: 'letter',
+188	    label: 'A',
+189	    filled: true,
+190	    isWrong: false,
+191	    dragPreview: 'none',
+192	  },
+193	  argTypes: {
+194	    variant: {
+195	      control: { type: 'select' },
+196	      options: [
+197	        'letter',
+198	        'dice',
+199	        'domino',
+200	        'inline-gap',
+201	      ] satisfies SlotVariant[],
+202	    },
+203	    label: { control: 'text' },
+204	    filled: { control: 'boolean' },
+205	    isWrong: { control: 'boolean' },
+206	    dragPreview: {
+207	      control: { type: 'select' },
+208	      options: [
+209	        'none',
+210	        'target-empty',
+211	        'target-swap',
+212	      ] satisfies DragPreview[],
+213	    },
+214	  },
+215	  render: ({ variant, label, filled, isWrong, dragPreview }) => {
+216	    const { slotClass, contentClass } = variantConfig[variant];
+217	
+218	    // Build tiles/zones depending on variant + flags.
+219	    const tiles: TileItem[] =
+220	      variant === 'inline-gap'
+221	        ? [makeTile('s0', label || 'cat')]
+222	        : dragPreview === 'target-swap'
+223	          ? [
+224	              makeTile('t0', label || 'A'),
+225	              makeTile('t1', 'B'),
+226	              makeTile('t2', 'C'),
+227	            ]
+228	          : [
+229	              makeTile('t0', label || 'A'),
+230	              makeTile('t1', 'B'),
+231	              makeTile('t2', 'C'),
+232	            ];
+233	
+234	    const zones: AnswerZone[] =
+235	      variant === 'inline-gap'
+236	        ? [makeZone(0, filled ? 's0' : null, isWrong)]
+237	        : dragPreview === 'target-swap'
+238	          ? [
+239	              makeZone(0, 't0'),
+240	              makeZone(1, 't1', isWrong),
+241	              makeZone(2, 't2'),
+242	            ]
+243	          : [
+244	              makeZone(0, filled ? 't0' : null, isWrong),
+245	              makeZone(1),
+246	              makeZone(2),
+247	            ];
+248	
+249	    return (
+250	      <AnswerGameProvider
+251	        config={{
+252	          ...baseConfig,
+253	          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+254	          initialTiles: tiles,
+255	          initialZones: zones,
+256	        }}
+257	      >
+258	        <PlaygroundInner
+259	          variant={variant}
+260	          dragPreview={dragPreview}
+261	          contentClass={contentClass}
+262	          slotClass={slotClass}
+263	        />
+264	      </AnswerGameProvider>
+265	    );
+266	  },
+267	};
+268	export default meta;
+269	
+270	type Story = StoryObj<StoryArgs>;
+271	
+272	export const Playground: Story = {};
+273	```
+274	
+275	- [ ] **Step 2: Run `yarn typecheck` — expect exit 0.**
+276	
+277	Run: `yarn typecheck`. If the `SlotRenderProps` import path or any other symbol doesn't match, fix by reading the referenced source file.
+278	
+279	- [ ] **Step 3: Run `yarn lint` — expect exit 0.**
+280	
+281	Run: `yarn lint`. Common failures: `import/order` (fix by regrouping to match the Shared Conventions rule); unused imports (remove).
+282	
+283	- [ ] **Step 4: Commit**
+284	
+285	```bash
+286	git add src/components/answer-game/Slot/Slot.stories.tsx
+287	git commit -m "stories(answer-game/Slot): retrofit per controls policy
+288	
+289	Collapse 8 bespoke scene stories into a single Playground story with
+290	args-driven variant / label / filled / isWrong / dragPreview controls.
+291	Remove the bare 'import React from \"react\"'.
+292	
+293	Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+294	```
+295	
+296	---
+297	
+298	### Task 2: Retrofit `AnswerGame.stories.tsx` — real interactive playground
+299	
+300	**Files:**
+301	
+302	- Modify: `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+303	- Read (for context): `src/components/answer-game/AnswerGame/AnswerGame.tsx`, `src/components/answer-game/AnswerGameProvider.tsx`, `src/components/answer-game/types.ts`, `src/components/answer-game/useAnswerGameContext.ts`, `src/components/answer-game/useAnswerGameDispatch.ts`, `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` (authoritative wiring reference — the playground mirrors its shape)
+304	
+305	**Gates applied (from spec §7):**
+306	
+307	- Controls: `StoryArgs` breaks `config` into `inputMethod` select, `wrongTileBehavior` select, `tileBankMode` select, `totalRounds` range, `ttsEnabled` boolean.
+308	- `fn()` cleanup: N/A — AnswerGame has no direct handlers.
+309	- `play()`: skipped — HTML5 DnD is unreliable in jsdom.
+310	- State variants: `Default`, `TextQuestionMode`, `RejectMode`, `LockManualMode`.
+311	- Decorator: `withDb`.
+312	
+313	**Architecture note for the implementer:** `AnswerGame` itself is a shell (wraps `AnswerGameProvider`, renders `ProgressHUDRoot` + children). The playground stories render children (`AnswerGame.Question`, `AnswerGame.Answer`, `AnswerGame.Choices`) with real primitives:
+314	
+315	- `AnswerGame.Question`: a simple prompt string.
+316	- `AnswerGame.Answer`: real `SlotRow` + `Slot`s driven by `zones` from `useAnswerGameContext`.
+317	- `AnswerGame.Choices`: a minimal tap-to-place tile bank (click a bank tile → `dispatch({ type: 'PLACE_TILE', tileId, zoneIndex: <next empty zone> })`).
+318	
+319	The tap-to-place bank is a local component defined inside the story file — do not extract it. Keep all non-trivial wiring inside the file so future story edits don't need to hunt for helpers.
+320	
+321	**Steps:**
+322	
+323	- [ ] **Step 1: Read the reference wiring.** Open `src/games/sort-numbers/SortNumbers/SortNumbersSession.tsx` (the function component defined inline in `SortNumbers.tsx`) — note how it (a) reads `zones` from `useAnswerGameContext()`, (b) renders `SlotRow` + `Slot` inside `AnswerGame.Answer`, (c) renders a tile bank inside `AnswerGame.Choices`.
+324	
+325	- [ ] **Step 2: Replace `AnswerGame.stories.tsx` with the playground structure.**
+326	
+327	Full file:
+328	
+329	```tsx
+330	import { withDb } from '../../../../.storybook/decorators/withDb';
+331	import { AnswerGame } from './AnswerGame';
+332	import { Slot } from '../Slot/Slot';
+333	import { SlotRow } from '../Slot/SlotRow';
+334	import { useAnswerGameContext } from '../useAnswerGameContext';
+335	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+336	import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+337	import type { ComponentType } from 'react';
+338	import type { Meta, StoryObj } from '@storybook/react';
+339	
+340	type InputMethod = 'drag' | 'type' | 'both';
+341	type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
+342	type TileBankMode = 'exact' | 'distractors';
+343	
+344	interface StoryArgs {
+345	  inputMethod: InputMethod;
+346	  wrongTileBehavior: WrongTileBehavior;
+347	  tileBankMode: TileBankMode;
+348	  totalRounds: number;
+349	  ttsEnabled: boolean;
+350	}
+351	
+352	const initialTiles: TileItem[] = [
+353	  { id: 'c', label: 'C', value: 'C' },
+354	  { id: 'a', label: 'A', value: 'A' },
+355	  { id: 't', label: 'T', value: 'T' },
+356	];
+357	
+358	const initialZones: AnswerZone[] = [
+359	  {
+360	    id: 'z0',
+361	    index: 0,
+362	    expectedValue: 'C',
+363	    placedTileId: null,
+364	    isWrong: false,
+365	    isLocked: false,
+366	  },
+367	  {
+368	    id: 'z1',
+369	    index: 1,
+370	    expectedValue: 'A',
+371	    placedTileId: null,
+372	    isWrong: false,
+373	    isLocked: false,
+374	  },
+375	  {
+376	    id: 'z2',
+377	    index: 2,
+378	    expectedValue: 'T',
+379	    placedTileId: null,
+380	    isWrong: false,
+381	    isLocked: false,
+382	  },
+383	];
+384	
+385	const TapToPlaceBank = () => {
+386	  const { allTiles, bankTileIds, zones } = useAnswerGameContext();
+387	  const dispatch = useAnswerGameDispatch();
+388	
+389	  const nextEmptyZoneIndex = zones.findIndex(
+390	    (z) => z.placedTileId === null,
+391	  );
+392	
+393	  return (
+394	    <div className="flex gap-2">
+395	      {bankTileIds.map((tileId) => {
+396	        const tile = allTiles.find((t) => t.id === tileId);
+397	        if (!tile) return null;
+398	        return (
+399	          <button
+400	            key={tile.id}
+401	            type="button"
+402	            onClick={() => {
+403	              if (nextEmptyZoneIndex === -1) return;
+404	              dispatch({
+405	                type: 'PLACE_TILE',
+406	                tileId: tile.id,
+407	                zoneIndex: nextEmptyZoneIndex,
+408	              });
+409	            }}
+410	            className="flex size-14 items-center justify-center rounded-lg border-2 border-primary bg-background text-xl font-bold shadow-sm active:scale-95"
+411	          >
+412	            {tile.label}
+413	          </button>
+414	        );
+415	      })}
+416	    </div>
+417	  );
+418	};
+419	
+420	const PlayableScene = () => {
+421	  const { zones } = useAnswerGameContext();
+422	
+423	  return (
+424	    <>
+425	      <AnswerGame.Question>
+426	        <p className="text-center text-lg font-semibold text-foreground">
+427	          Spell CAT
+428	        </p>
+429	      </AnswerGame.Question>
+430	      <AnswerGame.Answer>
+431	        <SlotRow className="gap-2">
+432	          {zones.map((zone, i) => (
+433	            <Slot
+434	              key={zone.id}
+435	              index={i}
+436	              className="size-14 rounded-lg"
+437	            >
+438	              {({ label }) => (
+439	                <span className="text-xl font-bold">{label ?? ''}</span>
+440	              )}
+441	            </Slot>
+442	          ))}
+443	        </SlotRow>
+444	      </AnswerGame.Answer>
+445	      <AnswerGame.Choices>
+446	        <TapToPlaceBank />
+447	      </AnswerGame.Choices>
+448	    </>
+449	  );
+450	};
+451	
+452	const meta: Meta<StoryArgs> = {
+453	  component: AnswerGame as unknown as ComponentType<StoryArgs>,
+454	  tags: ['autodocs'],
+455	  decorators: [withDb],
+456	  args: {
+457	    inputMethod: 'drag',
+458	    wrongTileBehavior: 'lock-auto-eject',
+459	    tileBankMode: 'exact',
+460	    totalRounds: 3,
+461	    ttsEnabled: false,
+462	  },
+463	  argTypes: {
+464	    inputMethod: {
+465	      control: { type: 'select' },
+466	      options: ['drag', 'type', 'both'] satisfies InputMethod[],
+467	    },
+468	    wrongTileBehavior: {
+469	      control: { type: 'select' },
+470	      options: [
+471	        'reject',
+472	        'lock-manual',
+473	        'lock-auto-eject',
+474	      ] satisfies WrongTileBehavior[],
+475	    },
+476	    tileBankMode: {
+477	      control: { type: 'select' },
+478	      options: ['exact', 'distractors'] satisfies TileBankMode[],
+479	    },
+480	    totalRounds: {
+481	      control: { type: 'range', min: 1, max: 20, step: 1 },
+482	    },
+483	    ttsEnabled: { control: 'boolean' },
+484	  },
+485	  render: ({
+486	    inputMethod,
+487	    wrongTileBehavior,
+488	    tileBankMode,
+489	    totalRounds,
+490	    ttsEnabled,
+491	  }) => {
+492	    const config: AnswerGameConfig = {
+493	      gameId: 'storybook-answer-game',
+494	      inputMethod,
+495	      wrongTileBehavior,
+496	      tileBankMode,
+497	      totalRounds,
+498	      ttsEnabled,
+499	      initialTiles,
+500	      initialZones,
+501	    };
+502	    return (
+503	      <AnswerGame config={config}>
+504	        <PlayableScene />
+505	      </AnswerGame>
+506	    );
+507	  },
+508	};
+509	export default meta;
+510	
+511	type Story = StoryObj<StoryArgs>;
+512	
+513	export const Default: Story = {};
+514	
+515	export const TextQuestionMode: Story = {
+516	  args: { inputMethod: 'type' },
+517	};
+518	
+519	export const RejectMode: Story = {
+520	  args: { wrongTileBehavior: 'reject' },
+521	};
+522	
+523	export const LockManualMode: Story = {
+524	  args: { wrongTileBehavior: 'lock-manual' },
+525	};
+526	```
+527	
+528	- [ ] **Step 3: Run `yarn typecheck` — expect exit 0.**
+529	
+530	If the `useAnswerGameContext` return shape differs from what's assumed (e.g., the hook exposes fields with different names), read the hook source file and adjust. The plan assumed `{ allTiles, bankTileIds, zones }` — verify before adjusting.
+531	
+532	- [ ] **Step 4: Run `yarn lint` — expect exit 0.**
+533	
+534	- [ ] **Step 5: Commit**
+535	
+536	```bash
+537	git add src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+538	git commit -m "stories(answer-game/AnswerGame): retrofit per controls policy
+539	
+540	Rebuild as a real interactive playground — StoryArgs breaks config into
+541	individual controls, render wires a real AnswerGameProvider + real Slot
+542	row + a minimal tap-to-place tile bank (dispatch PLACE_TILE).
+543	
+544	play() skipped: HTML5 drag-and-drop is unreliable in jsdom; interactive
+545	correctness of DnD is covered at the e2e layer.
+546	
+547	Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+548	```
+549	
+550	---
+551	
+552	### Task 3: Retrofit `InstructionsOverlay.stories.tsx` — actually clickable stories
+553	
+554	**Files:**
+555	
+556	- Modify: `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`
+557	- Read (for context): `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`, `src/lib/game-colors.ts`, `.storybook/decorators/withRouter.tsx`, `.storybook/decorators/withDb.tsx`, `src/components/AdvancedConfigModal.tsx` (skim — to know the dialog role/name for portal assertions)
+558	
+559	**Gates applied (from spec §6):**
+560	
+561	- Controls: `StoryArgs` exposes `text`, `gameTitle`, `gameId`, `customGameColor` select (options from `GAME_COLORS`), `ttsEnabled` boolean, `isBookmarked` boolean, `config.totalRounds` range, `customGameName` text, `customGameId` text.
+562	- `fn()` cleanup: replace all `{ action: '…' }` entries with `args: { onStart: fn(), onSaveCustomGame: fn(), onUpdateCustomGame: fn(), onToggleBookmark: fn(), onConfigChange: fn() }`.
+563	- Decorators: `withDb` + `withRouter`.
+564	- State variants (re-typed against `StoryArgs`): `Default`, `WithCustomGame`, `WordSpellDefault`, `NotBookmarked`, `Bookmarked`, `NotBookmarkedCustomGame`, `BookmarkedCustomGame`.
+565	- `play()`: `StartsGame`, `TogglesBookmark`, `OpensSettings`.
+566	- TTS guard: every story uses `ttsEnabled: false`.
+567	
+568	**Steps:**
+569	
+570	- [ ] **Step 1: Replace `InstructionsOverlay.stories.tsx`** with the new structure.
+571	
+572	Full file (the `GAME_COLOR_OPTIONS` array below mirrors `GAME_COLOR_KEYS` from `src/lib/game-colors.ts` as of `origin/master`; if that file has been updated since the plan was written, align before proceeding):
+573	
+574	```tsx
+575	import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+576	
+577	import { withDb } from '../../../../.storybook/decorators/withDb';
+578	import { withRouter } from '../../../../.storybook/decorators/withRouter';
+579	import { InstructionsOverlay } from './InstructionsOverlay';
+580	import type { SaveCustomGameInput } from './InstructionsOverlay';
+581	import type { GameColorKey } from '@/lib/game-colors';
+582	import type { ComponentType } from 'react';
+583	import type { Meta, StoryObj } from '@storybook/react';
+584	
+585	interface StoryArgs {
+586	  text: string;
+587	  gameTitle: string;
+588	  gameId: string;
+589	  customGameColor: GameColorKey;
+590	  ttsEnabled: boolean;
+591	  isBookmarked: boolean;
+592	  totalRounds: number;
+593	  customGameId: string;
+594	  customGameName: string;
+595	  onStart: () => void;
+596	  onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
+597	  onUpdateCustomGame: (
+598	    name: string,
+599	    config: Record<string, unknown>,
+600	    extras?: { cover?: unknown; color?: GameColorKey },
+601	  ) => Promise<void>;
+602	  onToggleBookmark: () => void;
+603	  onConfigChange: (config: Record<string, unknown>) => void;
+604	}
+605	
+606	const GAME_COLOR_OPTIONS = [
+607	  'indigo',
+608	  'teal',
+609	  'rose',
+610	  'amber',
+611	  'sky',
+612	  'lime',
+613	  'purple',
+614	  'orange',
+615	  'pink',
+616	  'emerald',
+617	  'slate',
+618	  'cyan',
+619	] as const satisfies readonly GameColorKey[];
+620	
+621	const meta: Meta<StoryArgs> = {
+622	  component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
+623	  tags: ['autodocs'],
+624	  decorators: [withDb, withRouter],
+625	  parameters: { layout: 'fullscreen' },
+626	  args: {
+627	    text: 'Listen to each number and drag it into the correct slot to sort from smallest to biggest.',
+628	    gameTitle: 'Sort Numbers',
+629	    gameId: 'sort-numbers',
+630	    customGameColor: 'indigo' as GameColorKey,
+631	    ttsEnabled: false,
+632	    isBookmarked: false,
+633	    totalRounds: 5,
+634	    customGameId: '',
+635	    customGameName: '',
+636	    onStart: fn(),
+637	    onSaveCustomGame: fn(async () => 'stub-id'),
+638	    onUpdateCustomGame: fn(async () => {}),
+639	    onToggleBookmark: fn(),
+640	    onConfigChange: fn(),
+641	  },
+642	  argTypes: {
+643	    text: { control: 'text' },
+644	    gameTitle: { control: 'text' },
+645	    gameId: { control: 'text' },
+646	    customGameColor: {
+647	      control: { type: 'select' },
+648	      options: GAME_COLOR_OPTIONS,
+649	    },
+650	    ttsEnabled: { control: 'boolean' },
+651	    isBookmarked: { control: 'boolean' },
+652	    totalRounds: {
+653	      control: { type: 'range', min: 1, max: 20, step: 1 },
+654	    },
+655	    customGameId: { control: 'text' },
+656	    customGameName: { control: 'text' },
+657	    onStart: { table: { disable: true } },
+658	    onSaveCustomGame: { table: { disable: true } },
+659	    onUpdateCustomGame: { table: { disable: true } },
+660	    onToggleBookmark: { table: { disable: true } },
+661	    onConfigChange: { table: { disable: true } },
+662	  },
+663	  render: ({
+664	    text,
+665	    gameTitle,
+666	    gameId,
+667	    customGameColor,
+668	    ttsEnabled,
+669	    isBookmarked,
+670	    totalRounds,
+671	    customGameId,
+672	    customGameName,
+673	    onStart,
+674	    onSaveCustomGame,
+675	    onUpdateCustomGame,
+676	    onToggleBookmark,
+677	    onConfigChange,
+678	  }) => (
+679	    <InstructionsOverlay
+680	      text={text}
+681	      gameTitle={gameTitle}
+682	      gameId={gameId}
+683	      customGameColor={customGameColor}
+684	      ttsEnabled={ttsEnabled}
+685	      isBookmarked={isBookmarked}
+686	      config={{ totalRounds }}
+687	      customGameId={customGameId || undefined}
+688	      customGameName={customGameName || undefined}
+689	      onStart={onStart}
+690	      onSaveCustomGame={onSaveCustomGame}
+691	      onUpdateCustomGame={onUpdateCustomGame}
+692	      onToggleBookmark={onToggleBookmark}
+693	      onConfigChange={onConfigChange}
+694	    />
+695	  ),
+696	};
+697	export default meta;
+698	
+699	type Story = StoryObj<StoryArgs>;
+700	
+701	export const Default: Story = {};
+702	
+703	export const WithCustomGame: Story = {
+704	  args: {
+705	    customGameId: 'abc123',
+706	    customGameName: 'Easy Mode',
+707	    customGameColor: 'teal' as GameColorKey,
+708	  },
+709	};
+710	
+711	export const WordSpellDefault: Story = {
+712	  args: {
+713	    text: 'Drag the letters to spell the word.',
+714	    gameTitle: 'Word Spell',
+715	    gameId: 'word-spell',
+716	    totalRounds: 8,
+717	  },
+718	};
+719	
+720	export const NotBookmarked: Story = {
+721	  args: { isBookmarked: false },
+722	};
+723	
+724	export const Bookmarked: Story = {
+725	  args: { isBookmarked: true },
+726	};
+727	
+728	export const NotBookmarkedCustomGame: Story = {
+729	  args: {
+730	    customGameId: 'abc123',
+731	    customGameName: 'Easy Mode',
+732	    customGameColor: 'teal' as GameColorKey,
+733	    isBookmarked: false,
+734	  },
+735	};
+736	
+737	export const BookmarkedCustomGame: Story = {
+738	  args: {
+739	    customGameId: 'abc123',
+740	    customGameName: 'Easy Mode',
+741	    customGameColor: 'teal' as GameColorKey,
+742	    isBookmarked: true,
+743	  },
+744	};
+745	
+746	export const StartsGame: Story = {
+747	  args: {
+748	    customGameId: 'abc123',
+749	    customGameName: 'Easy Mode',
+750	  },
+751	  play: async ({ args }) => {
+752	    // InstructionsOverlay renders into document.body via createPortal.
+753	    const portal = within(document.body);
+754	    await userEvent.click(
+755	      await portal.findByRole('button', { name: /let/i }),
+756	    );
+757	    await waitFor(() => {
+758	      expect(args.onStart).toHaveBeenCalled();
+759	    });
+760	  },
+761	};
+762	
+763	export const TogglesBookmark: Story = {
+764	  args: { isBookmarked: false },
+765	  play: async ({ args }) => {
+766	    const portal = within(document.body);
+767	    const bookmarkButton = await portal.findByRole('button', {
+768	      name: /bookmark/i,
+769	    });
+770	    await userEvent.click(bookmarkButton);
+771	    await waitFor(() => {
+772	      expect(args.onToggleBookmark).toHaveBeenCalledTimes(1);
+773	    });
+774	  },
+775	};
+776	
+777	export const OpensSettings: Story = {
+778	  play: async () => {
+779	    const portal = within(document.body);
+780	    const settingsButton = await portal.findByRole('button', {
+781	      name: /configure/i,
+782	    });
+783	    await userEvent.click(settingsButton);
+784	    await waitFor(() => {
+785	      expect(portal.getByRole('dialog')).toBeVisible();
+786	    });
+787	    await userEvent.keyboard('{Escape}');
+788	    await waitFor(() => {
+789	      expect(portal.queryByRole('dialog')).toBeNull();
+790	    });
+791	  },
+792	};
+793	```
+794	
+795	- [ ] **Step 2: Verify decorator paths.** Confirm `'../../../../.storybook/decorators/withRouter'` resolves — the same 4-level `../` depth that `withDb` uses. If the `withRouter` decorator file doesn't exist, check `.storybook/decorators/` and adjust the import.
+796	
+797	- [ ] **Step 3: Run `yarn typecheck` — expect exit 0.**
+798	
+799	If `onSaveCustomGame`/`onUpdateCustomGame` type arguments don't match (component signature tweaks or mocking the async return), import the exact `SaveCustomGameInput` type from the component and align.
+800	
+801	- [ ] **Step 4: Run `yarn lint` — expect exit 0.**
+802	
+803	- [ ] **Step 5: Check accessible names.** If during Step 3/4 you notice a role/name mismatch in the portal queries (e.g., the bookmark button's aria-label differs between translation keys — `Remove bookmark` vs `Add bookmark` are both present in `HeaderActions`), adjust the regex to match what the component actually renders.
+804	
+805	- [ ] **Step 6: Commit**
+806	
+807	```bash
+808	git add src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+809	git commit -m "stories(answer-game/InstructionsOverlay): retrofit per controls policy
+810	
+811	Rebuild as an interactive story — StoryArgs exposes text, gameTitle,
+812	gameId, customGameColor select, ttsEnabled, isBookmarked,
+813	config.totalRounds range, customGameId/Name. All handlers wired to
+814	fn() spies. Decorators: withDb + withRouter.
+815	
+816	Three play() flows: StartsGame, TogglesBookmark, OpensSettings (portal-
+817	scoped, Escape-close). ttsEnabled: false throughout to avoid the TTS
+818	crash path.
+819	
+820	Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+821	```
+822	
+823	**If `OpensSettings` proves brittle** (portal animation races that `waitFor` can't tame, focus flicker, Radix version quirks), drop that specific story and add a line to the commit body: `Dropped OpensSettings: <specific reason>`. The two remaining `play()` stories still satisfy the interactive-component gate.
+824	
+825	---
+826	
+827	## Tier 2 — Simple (consolidated single implementer, one end-of-tier review)
+828	
+829	Tasks 4–8 run as a sequence in one session. The implementer writes each file, runs `yarn typecheck` + `yarn lint`, commits, then moves to the next. After Task 8, a single Haiku code-quality reviewer reviews all five commits at once.
+830	
+831	### Task 4: Retrofit `EncouragementAnnouncer.stories.tsx`
+832	
+833	**Files:**
+834	
+835	- Modify: `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+836	- Read (for context): `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.tsx`
+837	
+838	**Steps:**
+839	
+840	- [ ] **Step 1: Replace the file** with:
+841	
+842	```tsx
+843	import { useState } from 'react';
+844	import { vi } from 'vitest';
+845	import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+846	
+847	import { EncouragementAnnouncer } from './EncouragementAnnouncer';
+848	import type { ComponentType } from 'react';
+849	import type { Meta, StoryObj } from '@storybook/react';
+850	
+851	interface StoryArgs {
+852	  message: string;
+853	  visible: boolean;
+854	  onDismiss: () => void;
+855	}
+856	
+857	const ShowTrigger = ({
+858	  message,
+859	  onDismiss,
+860	}: {
+861	  message: string;
+862	  onDismiss: () => void;
+863	}) => {
+864	  const [visible, setVisible] = useState(false);
+865	  return (
+866	    <>
+867	      <button
+868	        type="button"
+869	        onClick={() => setVisible(true)}
+870	        disabled={visible}
+871	        className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+872	      >
+873	        Show encouragement
+874	      </button>
+875	      <EncouragementAnnouncer
+876	        visible={visible}
+877	        message={message}
+878	        onDismiss={() => {
+879	          setVisible(false);
+880	          onDismiss();
+881	        }}
+882	      />
+883	    </>
+884	  );
+885	};
+886	
+887	const meta: Meta<StoryArgs> = {
+888	  component:
+889	    EncouragementAnnouncer as unknown as ComponentType<StoryArgs>,
+890	  tags: ['autodocs'],
+891	  args: {
+892	    message: 'Keep trying!',
+893	    visible: false,
+894	    onDismiss: fn(),
+895	  },
+896	  argTypes: {
+897	    message: { control: 'text' },
+898	    visible: { control: 'boolean' },
+899	    onDismiss: { table: { disable: true } },
+900	  },
+901	  render: ({ message, visible, onDismiss }) => (
+902	    <EncouragementAnnouncer
+903	      message={message}
+904	      visible={visible}
+905	      onDismiss={onDismiss}
+906	    />
+907	  ),
+908	};
+909	export default meta;
+910	
+911	type Story = StoryObj<StoryArgs>;
+912	
+913	export const Hidden: Story = {
+914	  args: { visible: false, message: 'Keep trying!' },
+915	};
+916	
+917	export const Visible: Story = {
+918	  args: { visible: true, message: 'Almost! Try again.' },
+919	};
+920	
+921	export const ReplayTrigger: Story = {
+922	  args: { message: 'Great job!' },
+923	  render: ({ message, onDismiss }) => (
+924	    <ShowTrigger message={message} onDismiss={onDismiss} />
+925	  ),
+926	};
+927	
+928	export const AutoDismissesAfter2s: Story = {
+929	  args: { message: 'Keep trying!' },
+930	  render: ({ message, onDismiss }) => (
+931	    <ShowTrigger message={message} onDismiss={onDismiss} />
+932	  ),
+933	  play: async ({ args, canvasElement }) => {
+934	    vi.useFakeTimers();
+935	    try {
+936	      const canvas = within(canvasElement);
+937	      await userEvent.click(
+938	        canvas.getByRole('button', { name: /show encouragement/i }),
+939	      );
+940	      await waitFor(() => {
+941	        expect(canvas.getByText(/keep trying/i)).toBeVisible();
+942	      });
+943	      vi.advanceTimersByTime(2000);
+944	      await waitFor(() => {
+945	        expect(args.onDismiss).toHaveBeenCalled();
+946	      });
+947	    } finally {
+948	      vi.useRealTimers();
+949	    }
+950	  },
+951	};
+952	```
+953	
+954	- [ ] **Step 2: `yarn typecheck` — exit 0.**
+955	- [ ] **Step 3: `yarn lint` — exit 0.**
+956	- [ ] **Step 4: Commit**
+957	
+958	```bash
+959	git add src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+960	git commit -m "stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+961	
+962	StoryArgs: message text, visible boolean. onDismiss wired to fn() spy.
+963	ReplayTrigger story adds a button wrapper so the story is actually
+964	interactive. AutoDismissesAfter2s play() asserts the 2s auto-dismiss
+965	via vi.useFakeTimers / advanceTimersByTime(2000).
+966	
+967	Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+968	```
+969	
+970	---
+971	
+972	### Task 5: Retrofit `GameOverOverlay.stories.tsx`
+973	
+974	**Files:**
+975	
+976	- Modify: `src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx`
+977	
+978	**Steps:**
+979	
+980	- [ ] **Step 1: Replace the file** with:
+981	
+982	```tsx
+983	import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+984	
+985	import { GameOverOverlay } from './GameOverOverlay';
+986	import type { Meta, StoryObj } from '@storybook/react';
+987	
+988	const meta: Meta<typeof GameOverOverlay> = {
+989	  component: GameOverOverlay,
+990	  tags: ['autodocs'],
+991	  args: {
+992	    retryCount: 0,
+993	    onPlayAgain: fn(),
+994	    onHome: fn(),
+995	  },
+996	  argTypes: {
+997	    retryCount: {
+998	      control: { type: 'range', min: 0, max: 10, step: 1 },
+999	    },
+1000	    onPlayAgain: { table: { disable: true } },
+1001	    onHome: { table: { disable: true } },
+1002	  },
+1003	};
+1004	export default meta;
+1005	
+1006	type Story = StoryObj<typeof GameOverOverlay>;
+1007	
+1008	export const FiveStars: Story = { args: { retryCount: 0 } };
+1009	export const FourStars: Story = { args: { retryCount: 1 } };
+1010	export const ThreeStars: Story = { args: { retryCount: 3 } };
+1011	export const TwoStars: Story = { args: { retryCount: 5 } };
+1012	export const OneStar: Story = { args: { retryCount: 8 } };
+1013	
+1014	export const ClicksPlayAgain: Story = {
+1015	  args: { retryCount: 0 },
+1016	  play: async ({ args, canvasElement }) => {
+1017	    const canvas = within(canvasElement);
+1018	    await userEvent.click(
+1019	      await canvas.findByRole('button', { name: /play again/i }),
+1020	    );
+1021	    await waitFor(() => {
+1022	      expect(args.onPlayAgain).toHaveBeenCalledTimes(1);
+1023	    });
+1024	  },
+1025	};
+1026	
+1027	export const ClicksHome: Story = {
+1028	  args: { retryCount: 0 },
+1029	  play: async ({ args, canvasElement }) => {
+1030	    const canvas = within(canvasElement);
+1031	    await userEvent.click(
+1032	      await canvas.findByRole('button', { name: /home/i }),
+1033	    );
+1034	    await waitFor(() => {
+1035	      expect(args.onHome).toHaveBeenCalledTimes(1);
+1036	    });
+1037	  },
+1038	};
+1039	```
+1040	
+1041	If the component uses a different accessible name for either button (e.g., i18n keys produce a different label), update the regex in the `play()` story to match what the component actually renders (read `GameOverOverlay.tsx` to confirm).
+1042	
+1043	- [ ] **Step 2: `yarn typecheck` — exit 0.**
+1044	- [ ] **Step 3: `yarn lint` — exit 0.**
+1045	- [ ] **Step 4: Commit**
+1046	
+1047	```bash
+1048	git add src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx
+1049	git commit -m "stories(answer-game/GameOverOverlay): retrofit per controls policy
+1050	
+1051	StoryArgs: retryCount range. onPlayAgain/onHome wired to fn() spies.
+1052	One story per visible star count (Five/Four/Three/Two/One).
+1053	ClicksPlayAgain and ClicksHome play() stories assert spies.
+1054	
+1055	Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+1056	```
+1057	
+1058	---
+1059	
+1060	### Task 6: Retrofit `LevelCompleteOverlay.stories.tsx`
+1061	
+1062	**Files:**
+1063	
+1064	- Modify: `src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx`
+1065	
+1066	**Steps:**
+1067	
+1068	- [ ] **Step 1: Replace the file** with:
+1069	
+1070	```tsx
+1071	import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+1072	
+1073	import { LevelCompleteOverlay } from './LevelCompleteOverlay';
+1074	import type { Meta, StoryObj } from '@storybook/react';
+1075	
+1076	const meta: Meta<typeof LevelCompleteOverlay> = {
+1077	  component: LevelCompleteOverlay,
+1078	  tags: ['autodocs'],
+1079	  args: {
+1080	    level: 1,
+1081	    onNextLevel: fn(),
+1082	    onDone: fn(),
+1083	  },
+1084	  argTypes: {
+1085	    level: { control: { type: 'range', min: 1, max: 20, step: 1 } },
+1086	    onNextLevel: { table: { disable: true } },
+1087	    onDone: { table: { disable: true } },
+1088	  },
+1089	};
+1090	export default meta;
+1091	
+1092	type Story = StoryObj<typeof LevelCompleteOverlay>;
+1093	
+1094	export const Level1: Story = { args: { level: 1 } };
+1095	export const Level3: Story = { args: { level: 3 } };
+1096	export const Level10: Story = { args: { level: 10 } };
+1097	
+1098	export const ClicksNextLevel: Story = {
+1099	  args: { level: 1 },
+1100	  play: async ({ args, canvasElement }) => {
+1101	    const canvas = within(canvasElement);
+1102	    await userEvent.click(
+1103	      await canvas.findByRole('button', { name: /next level/i }),
+1104	    );
+1105	    await waitFor(() => {
+1106	      expect(args.onNextLevel).toHaveBeenCalledTimes(1);
+1107	    });
+1108	  },
+1109	};
+1110	
+1111	export const ClicksDone: Story = {
+1112	  args: { level: 1 },
+1113	  play: async ({ args, canvasElement }) => {
+1114	    const canvas = within(canvasElement);
+1115	    await userEvent.click(
+1116	      await canvas.findByRole('button', { name: /done/i }),
+1117	    );
+1118	    await waitFor(() => {
+1119	      expect(args.onDone).toHaveBeenCalledTimes(1);
+1120	    });
+1121	  },
+1122	};
+1123	```
+1124	
+1125	Same caveat as Task 5 — adjust `{ name: /.../ }` regex if the actual button labels differ.
+1126	
+1127	- [ ] **Step 2: `yarn typecheck` — exit 0.**
+1128	- [ ] **Step 3: `yarn lint` — exit 0.**
+1129	- [ ] **Step 4: Commit**
+1130	
+1131	```bash
+1132	git add src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx
+1133	git commit -m "stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+1134	
+1135	StoryArgs: level range. onNextLevel/onDone wired to fn() spies.
+1136	ClicksNextLevel and ClicksDone play() stories assert spies.
+1137	
+1138	Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+1139	```
+1140	
+1141	---
+1142	
+1143	### Task 7: Retrofit `ProgressHUD.stories.tsx`
+1144	
+1145	**Files:**
+1146	
+1147	- Modify: `src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx`
+1148	
+1149	**Steps:**
+1150	
+1151	- [ ] **Step 1: Replace the file** with:
+1152	
+1153	```tsx
+1154	import { ProgressHUD } from './ProgressHUD';
+1155	import type { AnswerGamePhase } from '../types';
+1156	import type { ComponentType } from 'react';
+1157	import type { Meta, StoryObj } from '@storybook/react';
+1158	
+1159	interface StoryArgs {
+1160	  roundIndex: number;
+1161	  totalRounds: number;
+1162	  totalRoundsIsNull: boolean;
+1163	  levelIndex: number;
+1164	  isLevelMode: boolean;
+1165	  phase: AnswerGamePhase;
+1166	  showDots: boolean;
+1167	  showFraction: boolean;
+1168	  showLevel: boolean;
+1169	}
+1170	
+1171	const meta: Meta<StoryArgs> = {
+1172	  component: ProgressHUD as unknown as ComponentType<StoryArgs>,
+1173	  title: 'answer-game/ProgressHUD',
+1174	  parameters: { layout: 'centered' },
+1175	  args: {
+1176	    roundIndex: 2,
+1177	    totalRounds: 5,
+1178	    totalRoundsIsNull: false,
+1179	    levelIndex: 0,
+1180	    isLevelMode: false,
+1181	    phase: 'playing',
+1182	    showDots: true,
+1183	    showFraction: true,
+1184	    showLevel: false,
+1185	  },
+1186	  argTypes: {
+1187	    roundIndex: {
+1188	      control: { type: 'range', min: 0, max: 20, step: 1 },
+1189	    },
+1190	    totalRounds: {
+1191	      control: { type: 'range', min: 1, max: 20, step: 1 },
+1192	    },
+1193	    totalRoundsIsNull: { control: 'boolean' },
+1194	    levelIndex: {
+1195	      control: { type: 'range', min: 0, max: 20, step: 1 },
+1196	    },
+1197	    isLevelMode: { control: 'boolean' },
+1198	    phase: {
+1199	      control: { type: 'select' },
+1200	      options: [
+1201	        'playing',
+1202	        'round-complete',
+1203	        'level-complete',
+1204	        'game-over',
+1205	      ] satisfies AnswerGamePhase[],
+1206	    },
+1207	    showDots: { control: 'boolean' },
+1208	    showFraction: { control: 'boolean' },
+1209	    showLevel: { control: 'boolean' },
+1210	  },
+1211	  render: ({
+1212	    roundIndex,
+1213	    totalRounds,
+1214	    totalRoundsIsNull,
+1215	    levelIndex,
+1216	    isLevelMode,
+1217	    phase,
+1218	    showDots,
+1219	    showFraction,
+1220	    showLevel,
+1221	  }) => (
+1222	    <ProgressHUD
+1223	      roundIndex={roundIndex}
+1224	      totalRounds={totalRoundsIsNull ? null : totalRounds}
+1225	      levelIndex={levelIndex}
+1226	      isLevelMode={isLevelMode}
+1227	      phase={phase}
+1228	      showDots={showDots}
+1229	      showFraction={showFraction}
+1230	      showLevel={showLevel}
+1231	    />
+1232	  ),
+1233	};
+1234	export default meta;
+1235	
+1236	type Story = StoryObj<StoryArgs>;
+1237	
+1238	export const Classic_Round3Of5: Story = {};
+1239	
+1240	export const Classic_LastRound: Story = {
+1241	  args: { roundIndex: 4, totalRounds: 5 },
+1242	};
+1243	
+1244	export const DotsOnly: Story = {
+1245	  args: { showFraction: false, showLevel: false },
+1246	};
+1247	
+1248	export const FractionOnly: Story = {
+1249	  args: { showDots: false, showLevel: false },
+1250	};
+1251	
+1252	export const LevelMode_Level3: Story = {
+1253	  args: {
+1254	    isLevelMode: true,
+1255	    totalRoundsIsNull: true,
+1256	    levelIndex: 2,
+1257	    showFraction: false,
+1258	    showLevel: true,
+1259	  },
+1260	};
+1261	
+1262	export const LevelMode_Level10: Story = {
+1263	  args: {
+1264	    isLevelMode: true,
+1265	    totalRoundsIsNull: true,
+1266	    levelIndex: 9,
+1267	    showFraction: false,
+1268	    showLevel: true,
+1269	  },
+1270	};
+1271	
+1272	export const Mixed_LevelPlusFraction: Story = {
+1273	  args: {
+1274	    isLevelMode: true,
+1275	    totalRounds: 5,
+1276	    levelIndex: 2,
+1277	    showFraction: true,
+1278	    showLevel: true,
+1279	  },
+1280	};
+1281	
+1282	export const RoundCompletePhase: Story = {
+1283	  args: { phase: 'round-complete' },
+1284	};
+1285	
+1286	export const AllFlagsOff: Story = {
+1287	  args: { showDots: false, showFraction: false, showLevel: false },
+1288	};
+1289	```
+1290	
+1291	The import was `@storybook/react-vite` before — this task switches it to `@storybook/react` to match the project convention used everywhere else.
+1292	
+1293	- [ ] **Step 2: `yarn typecheck` — exit 0.**
+1294	- [ ] **Step 3: `yarn lint` — exit 0.**
+1295	- [ ] **Step 4: Commit**
+1296	
+1297	```bash
+1298	git add src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx
+1299	git commit -m "stories(answer-game/ProgressHUD): retrofit per controls policy
+1300	
+1301	StoryArgs with explicit controls for every prop (ranges, selects,
+1302	booleans). Preserves all 9 existing stories. Fix import from
+1303	@storybook/react-vite → @storybook/react to match project convention.
+1304	
+1305	Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+1306	```
+1307	
+1308	---
+1309	
+1310	### Task 8: Retrofit `ScoreAnimation.stories.tsx`
+1311	
+1312	**Files:**
+1313	
+1314	- Modify: `src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx`
+1315	
+1316	**Steps:**
+1317	
+1318	- [ ] **Step 1: Replace the file** with:
+1319	
+1320	```tsx
+1321	import { ScoreAnimation } from './ScoreAnimation';
+1322	import type { Meta, StoryObj } from '@storybook/react';
+1323	
+1324	const meta: Meta<typeof ScoreAnimation> = {
+1325	  component: ScoreAnimation,
+1326	  tags: ['autodocs'],
+1327	  args: { visible: false },
+1328	  argTypes: {
+1329	    visible: { control: 'boolean' },
+1330	  },
+1331	};
+1332	export default meta;
+1333	
+1334	type Story = StoryObj<typeof ScoreAnimation>;
+1335	
+1336	export const Playing: Story = { args: { visible: false } };
+1337	export const Complete: Story = { args: { visible: true } };
+1338	```
+1339	
+1340	- [ ] **Step 2: `yarn typecheck` — exit 0.**
+1341	- [ ] **Step 3: `yarn lint` — exit 0.**
+1342	- [ ] **Step 4: Commit**
+1343	
+1344	```bash
+1345	git add src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+1346	git commit -m "stories(answer-game/ScoreAnimation): retrofit per controls policy
+1347	
+1348	StoryArgs: visible boolean. Pure-display component — no play() story.
+1349	
+1350	Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+1351	```
+1352	
+1353	---
+1354	
+1355	## Task 9: End-of-PR verification
+1356	
+1357	**Goal:** Prove nothing regressed across the whole Storybook and that every in-scope file passes its gates.
+1358	
+1359	- [ ] **Step 1: Run typecheck, lint, and markdown lint.**
+1360	
+1361	```bash
+1362	yarn typecheck
+1363	yarn lint
+1364	yarn lint:md
+1365	```
+1366	
+1367	All three must exit 0.
+1368	
+1369	- [ ] **Step 2: Start Storybook on a free port and run the test-runner.**
+1370	
+1371	```bash
+1372	PORT=6006
+1373	while lsof -i :$PORT > /dev/null 2>&1; do PORT=$((PORT + 1)); done
+1374	yarn storybook --port $PORT --ci &
+1375	STORYBOOK_PID=$!
+1376	until curl -s http://127.0.0.1:$PORT > /dev/null 2>&1; do sleep 2; done
+1377	
+1378	yarn test:storybook --url http://127.0.0.1:$PORT
+1379	TEST_EXIT=$?
+1380	
+1381	if [ $TEST_EXIT -eq 0 ]; then
+1382	  kill $STORYBOOK_PID
+1383	fi
+1384	
+1385	exit $TEST_EXIT
+1386	```
+1387	
+1388	Expected: every story (not just `answer-game/*`) passes a11y + `play()`.
+1389	
+1390	- If a non-`answer-game/*` story fails, treat it as pre-existing and out of scope — log it in the PR description; do not fix here (spec Risks row 6).
+1391	- If an `answer-game/*` `play()` fails, fix the specific story and recommit. The most likely culprit is the `InstructionsOverlay.OpensSettings` portal flow — if it proves irreducibly flaky, delete that single story, amend the Task 3 commit's body to document the drop reason, and re-run.
+1392	
+1393	- [ ] **Step 3: Verify branch log**
+1394	
+1395	```bash
+1396	git log --oneline origin/master..HEAD
+1397	```
+1398	
+1399	Expected: the spec-corrective commit (`docs(spec): correct tileBankMode enum values`), the initial spec commit (`docs(spec): audit batch 2 for src/components/answer-game/* stories`), 8 `stories(answer-game/*): retrofit per controls policy` commits, plus any fix-up commits the review loop required.
+1400	
+1401	- [ ] **Step 4: Update issue #125.** Tick the 8 Batch 2 checkboxes in the tracking issue body.
+1402	
+1403	```bash
+1404	gh issue view 125 --json body --jq '.body'    # read current body
+1405	# ... tick the 8 relevant lines ...
+1406	gh issue edit 125 --body-file <(...)          # post updated body
+1407	```
+1408	
+1409	- [ ] **Step 5: Open the PR.**
+1410	
+1411	Title: `stories(answer-game): audit retrofit per new controls policy`.
+1412	
+1413	Body must include:
+1414	
+1415	- Link to `.claude/skills/write-storybook/SKILL.md`.
+1416	- The per-file audit summary table from the spec (reviewer orientation).
+1417	- List of any `play()` stories dropped and why.
+1418	- List of any pre-existing out-of-scope test failures surfaced by the test-runner.
+1419	- Link to issue #125.
+1420	
+1421	```bash
+1422	gh pr create --base master --title "stories(answer-game): audit retrofit per new controls policy" --body "$(cat <<'EOF'
+1423	## Summary
+1424	
+1425	Batch 2 of the Storybook controls audit rollout — retrofits the 8
+1426	`src/components/answer-game/*.stories.tsx` files to the Controls Policy
+1427	and Required Variants gates in
+1428	[`.claude/skills/write-storybook/SKILL.md`](../blob/master/.claude/skills/write-storybook/SKILL.md).
+1429	
+1430	Three files upgraded beyond minimal compliance:
+1431	
+1432	- `AnswerGame` — real interactive playground (live `AnswerGameProvider`
+1433	  + real `Slot` row + tap-to-place tile bank).
+1434	- `InstructionsOverlay` — actually clickable (three `play()` flows).
+1435	- `Slot` — 8 scene stories collapsed to one args-driven `Playground`.
+1436	
+1437	Closes part of #125.
+1438	
+1439	## Per-file audit
+1440	
+1441	_(paste the summary table from `docs/superpowers/specs/2026-04-21-audit-storybook-answer-game-design.md`)_
+1442	
+1443	## Test plan
+1444	
+1445	- [ ] `yarn typecheck` green
+1446	- [ ] `yarn lint` green
+1447	- [ ] `yarn lint:md` green
+1448	- [ ] `yarn test:storybook` green (all stories)
+1449	- [ ] Storybook Controls panel actually drives the 3 upgraded stories
+1450	EOF
+1451	)"
+1452	```
+1453	
+1454	---
+1455	
+1456	## Post-plan
+1457	
+1458	After the PR merges:
+1459	
+1460	- Remove the worktree: `git worktree remove worktrees/storybook-audit-batch-2-answer-game`
+1461	- Tick Batch 2 boxes in issue #125.
+1462	- Next batches (on #125 tracker): `questions/*`, `games/*`, component roots.
+1463
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:00:54Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:00:55Z)**_
+
+Creating task tracking, then dispatching Task 1.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:00:57Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskCreate"><details>
+<summary>Tool use: **TaskCreate**</summary>
+Collapse 8 scenes into single Playground story with variant/label/filled/isWrong/dragPreview controls. Subagent implementer → spec review → code quality review.
+
+```text
+Task #7 created successfully: Task 1: Retrofit Slot.stories.tsx (Tier 1)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:00:58Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskCreate"><details>
+<summary>Tool use: **TaskCreate**</summary>
+Real interactive playground with live AnswerGameProvider + real Slot row + tap-to-place tile bank. 4 variant stories. Subagent implementer → spec review → code quality review.
+
+```text
+Task #8 created successfully: Task 2: Retrofit AnswerGame.stories.tsx (Tier 1)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:01:00Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskCreate"><details>
+<summary>Tool use: **TaskCreate**</summary>
+StoryArgs with 9 controls + 7 state variants + 3 play() flows (StartsGame, TogglesBookmark, OpensSettings). withDb + withRouter decorators. Subagent implementer → spec review → code quality review.
+
+```text
+Task #9 created successfully: Task 3: Retrofit InstructionsOverlay.stories.tsx (Tier 1)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:01:02Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskCreate"><details>
+<summary>Tool use: **TaskCreate**</summary>
+EncouragementAnnouncer + GameOverOverlay + LevelCompleteOverlay + ProgressHUD + ScoreAnimation. Single implementer, one end-of-tier review.
+
+```text
+Task #10 created successfully: Tasks 4-8: Tier 2 consolidated retrofit
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:01:03Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskCreate"><details>
+<summary>Tool use: **TaskCreate**</summary>
+yarn typecheck/lint/lint:md, storybook test-runner on free port, update issue #125, open PR against master.
+
+```text
+Task #11 created successfully: Task 9: End-of-PR verification + open PR
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:01:05Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #7 status
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:01:08Z)**_
+
+Dispatching Task 1 implementer (Sonnet — mechanical file replacement with clear spec).
+
+_**Agent (claude-opus-4-7 2026-04-21 06:04:32Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Task 1: Slot stories retrofit
+
+```text
+DONE — commit SHA `fbb61384`.
+
+The 8 scene stories in `Slot.stories.tsx` were collapsed into a single `Playground` story with `variant` (select), `label` (text), `filled` (boolean), `isWrong` (boolean), and `dragPreview` (select) controls. The bare `import React from 'react'` was removed. The `import/order` fix placed relative type imports (`../types`, `./useSlotBehavior`) before external type imports (`@storybook/react`, `react`), matching the project's lint rule. Both `yarn typecheck` and `yarn lint` exit 0.
+agentId: aec5d5bc415000cf6 (use SendMessage with to: 'aec5d5bc415000cf6' to continue this agent)
+<usage>total_tokens: 37529
+tool_uses: 18
+duration_ms: 154847</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:01:57Z)**_
+
+You are implementing Task 1 of an implementation plan for retrofitting Storybook stories to a new Controls Policy.
+
+# Scene Setting
+
+This is the BaseSkill project (children's educational games). The Storybook controls-audit rollout is being executed in batches. Batch 2 covers 8 files in `src/components/answer-game/*`. Your job is Task 1: the Slot stories file. Eight other files remain for later tasks — do NOT touch them.
+
+Worktree (your cwd): `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`
+Branch: `audit/storybook-batch-2-answer-game` (already created, commits exist)
+Never commit to master.
+
+The plan file is at `docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md`. Do NOT read it — I'm giving you Task 1's full text below so your context stays focused.
+
+# Shared Conventions (apply to this task)
+
+- Import test helpers from `storybook/test` (the subpath), NOT `@storybook/test`.
+- `export default meta` is the one allowed default export.
+- Commit message shape: `stories(answer-game/<name>): retrofit per controls policy` with a body listing which gates were applied.
+- Per-task verification: `yarn typecheck` → exit 0 AND `yarn lint` → exit 0 before committing. Do NOT run `yarn test:storybook` (handled at end-of-PR).
+
+# Task 1: Retrofit `Slot.stories.tsx` — collapse 8 scenes into a single Playground story
+
+**Files:**
+
+- Modify: `src/components/answer-game/Slot/Slot.stories.tsx`
+- Read (for context if needed): `src/components/answer-game/Slot/Slot.tsx`, `src/components/answer-game/Slot/SlotRow.tsx`, `src/components/answer-game/Slot/SentenceWithGaps.tsx`, `src/components/answer-game/Slot/useSlotBehavior.ts`, `src/components/answer-game/AnswerGameProvider.tsx`, `src/components/answer-game/useAnswerGameDispatch.ts`, `src/components/answer-game/types.ts`
+
+**Gates:**
+
+- Controls: `variant` select, `label` text, `filled` boolean, `isWrong` boolean, `dragPreview` select.
+- `fn()` cleanup: N/A (no handlers).
+- State variants: single `Playground` story replaces all 8 existing scenes.
+- `play()`: N/A (drag state is simulated via dispatch).
+
+**Steps:**
+
+### Step 1: Replace the entire file with this content
+
+```tsx
+import { useEffect } from 'react';
+
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGameProvider } from '../AnswerGameProvider';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import { SentenceWithGaps } from './SentenceWithGaps';
+import { Slot } from './Slot';
+import { SlotRow } from './SlotRow';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { SlotRenderProps } from './useSlotBehavior';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
+type DragPreview = 'none' | 'target-empty' | 'target-swap';
+
+interface StoryArgs {
+  variant: SlotVariant;
+  label: string;
+  filled: boolean;
+  isWrong: boolean;
+  dragPreview: DragPreview;
+}
+
+const baseConfig: AnswerGameConfig = {
+  gameId: 'slot-storybook',
+  inputMethod: 'drag',
+  wrongTileBehavior: 'lock-auto-eject',
+  tileBankMode: 'exact',
+  totalRounds: 1,
+  ttsEnabled: false,
+};
+
+const makeTile = (id: string, label: string): TileItem => ({
+  id,
+  label,
+  value: label,
+});
+
+const makeZone = (
+  index: number,
+  placedTileId: string | null = null,
+  isWrong = false,
+): AnswerZone => ({
+  id: `z${String(index)}`,
+  index,
+  expectedValue: String(index),
+  placedTileId,
+  isWrong,
+  isLocked: false,
+});
+
+const variantConfig: Record<
+  SlotVariant,
+  { slotClass: string; contentClass: string }
+> = {
+  letter: {
+    slotClass: 'size-14 rounded-lg',
+    contentClass: 'text-xl font-bold',
+  },
+  dice: {
+    slotClass: 'size-20 rounded-xl',
+    contentClass: 'text-2xl font-bold',
+  },
+  domino: {
+    slotClass: 'h-[72px] w-32 rounded-xl',
+    contentClass: 'text-3xl font-bold',
+  },
+  'inline-gap': { slotClass: '', contentClass: '' },
+};
+
+const PlaygroundInner = ({
+  variant,
+  dragPreview,
+  contentClass,
+  slotClass,
+}: {
+  variant: SlotVariant;
+  dragPreview: DragPreview;
+  contentClass: string;
+  slotClass: string;
+}) => {
+  const dispatch = useAnswerGameDispatch();
+
+  useEffect(() => {
+    if (dragPreview === 'none') {
+      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+      dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+      return;
+    }
+    // Both previews drag tile t0 over zone 1.
+    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+  }, [dispatch, dragPreview]);
+
+  if (variant === 'inline-gap') {
+    return (
+      <div className="p-4">
+        <SentenceWithGaps sentence="The {0} sat on the mat." />
+      </div>
+    );
+  }
+
+  const renderContent = ({ label }: SlotRenderProps) => (
+    <span className={contentClass}>{label ?? ''}</span>
+  );
+
+  return (
+    <SlotRow className="gap-3">
+      {[0, 1, 2].map((i) => (
+        <Slot key={i} index={i} className={slotClass}>
+          {(props) => renderContent(props)}
+        </Slot>
+      ))}
+    </SlotRow>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component: SlotRow as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/Slot',
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    variant: 'letter',
+    label: 'A',
+    filled: true,
+    isWrong: false,
+    dragPreview: 'none',
+  },
+  argTypes: {
+    variant: {
+      control: { type: 'select' },
+      options: [
+        'letter',
+        'dice',
+        'domino',
+        'inline-gap',
+      ] satisfies SlotVariant[],
+    },
+    label: { control: 'text' },
+    filled: { control: 'boolean' },
+    isWrong: { control: 'boolean' },
+    dragPreview: {
+      control: { type: 'select' },
+      options: [
+        'none',
+        'target-empty',
+        'target-swap',
+      ] satisfies DragPreview[],
+    },
+  },
+  render: ({ variant, label, filled, isWrong, dragPreview }) => {
+    const { slotClass, contentClass } = variantConfig[variant];
+
+    // Build tiles/zones depending on variant + flags.
+    const tiles: TileItem[] =
+      variant === 'inline-gap'
+        ? [makeTile('s0', label || 'cat')]
+        : dragPreview === 'target-swap'
+          ? [
+              makeTile('t0', label || 'A'),
+              makeTile('t1', 'B'),
+              makeTile('t2', 'C'),
+            ]
+          : [
+              makeTile('t0', label || 'A'),
+              makeTile('t1', 'B'),
+              makeTile('t2', 'C'),
+            ];
+
+    const zones: AnswerZone[] =
+      variant === 'inline-gap'
+        ? [makeZone(0, filled ? 's0' : null, isWrong)]
+        : dragPreview === 'target-swap'
+          ? [
+              makeZone(0, 't0'),
+              makeZone(1, 't1', isWrong),
+              makeZone(2, 't2'),
+            ]
+          : [
+              makeZone(0, filled ? 't0' : null, isWrong),
+              makeZone(1),
+              makeZone(2),
+            ];
+
+    return (
+      <AnswerGameProvider
+        config={{
+          ...baseConfig,
+          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+          initialTiles: tiles,
+          initialZones: zones,
+        }}
+      >
+        <PlaygroundInner
+          variant={variant}
+          dragPreview={dragPreview}
+          contentClass={contentClass}
+          slotClass={slotClass}
+        />
+      </AnswerGameProvider>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Playground: Story = {};
+```
+
+### Step 2: Run `yarn typecheck` — expect exit 0.
+
+If symbols don't match (e.g. `SlotRenderProps` import path, or `AnswerGameConfig`/`TileItem`/`AnswerZone` field names differ), read the referenced source file and adjust. Do not add placeholders. If a dispatch action type (`SET_DRAG_ACTIVE`, `SET_DRAG_HOVER`) name differs from what the reducer expects, read the reducer and use the real name — do not guess.
+
+### Step 3: Run `yarn lint` — expect exit 0.
+
+Common failures: `import/order` (regroup imports per the Shared Conventions rule — value imports alphabetical, then relative, then `storybook/test`, then `@storybook/react` type import last). Remove any unused imports.
+
+### Step 4: Self-review
+
+Look at your diff. Check:
+- No emojis (repo policy).
+- `ttsEnabled: false` in baseConfig.
+- Single `Playground` story exported (no leftover stories).
+- Imports match the conventions.
+
+### Step 5: Commit
+
+```bash
+git add src/components/answer-game/Slot/Slot.stories.tsx
+git commit -m "$(cat <<'EOF'
+stories(answer-game/Slot): retrofit per controls policy
+
+Collapse 8 bespoke scene stories into a single Playground story with
+args-driven variant / label / filled / isWrong / dragPreview controls.
+Remove the bare 'import React from "react"'.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+# Status to return
+
+End your final message with one of:
+
+- `DONE` — everything passed and the commit landed. Report the commit SHA.
+- `DONE_WITH_CONCERNS` — work completed but flag specific doubts.
+- `NEEDS_CONTEXT` — you need information I didn't provide. State what.
+- `BLOCKED` — you hit a wall. Explain the blocker.
+
+Keep the final report under 150 words. Report the commit SHA.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:00Z)**_
+
+I'll implement Task 1 by first reading the relevant source files to understand the types and dispatch actions, then applying the new story content.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:01Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx`
+
+```text
+1	import React from 'react';
+2	import { withDb } from '../../../../.storybook/decorators/withDb';
+3	import { AnswerGameProvider } from '../AnswerGameProvider';
+4	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+5	import { SentenceWithGaps } from './SentenceWithGaps';
+6	import { Slot } from './Slot';
+7	import { SlotRow } from './SlotRow';
+8	import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+9	import type { SlotRenderProps } from './useSlotBehavior';
+10	import type { Meta, StoryObj } from '@storybook/react';
+11	
+12	// ---------------------------------------------------------------------------
+13	// Shared config & data helpers
+14	// ---------------------------------------------------------------------------
+15	
+16	const baseConfig: AnswerGameConfig = {
+17	  gameId: 'slot-storybook',
+18	  inputMethod: 'drag',
+19	  wrongTileBehavior: 'lock-auto-eject',
+20	  tileBankMode: 'exact',
+21	  totalRounds: 1,
+22	  ttsEnabled: false,
+23	};
+24	
+25	const makeZone = (
+26	  index: number,
+27	  placedTileId: string | null = null,
+28	  isWrong = false,
+29	): AnswerZone => ({
+30	  id: `z${String(index)}`,
+31	  index,
+32	  expectedValue: String(index),
+33	  placedTileId,
+34	  isWrong,
+35	  isLocked: false,
+36	});
+37	
+38	const makeTile = (id: string, label: string): TileItem => ({
+39	  id,
+40	  label,
+41	  value: label,
+42	});
+43	
+44	// ---------------------------------------------------------------------------
+45	// Letter-slot render child
+46	// ---------------------------------------------------------------------------
+47	
+48	const LetterContent = ({ label }: SlotRenderProps) => (
+49	  <span className="text-xl font-bold">{label ?? ''}</span>
+50	);
+51	
+52	// ---------------------------------------------------------------------------
+53	// Meta — using SlotRow as the component so Storybook shows a useful name.
+54	// Each story provides its own render that sets up AnswerGameProvider.
+55	// ---------------------------------------------------------------------------
+56	
+57	const meta: Meta<typeof SlotRow> = {
+58	  component: SlotRow,
+59	  title: 'answer-game/Slot',
+60	  tags: ['autodocs'],
+61	  decorators: [withDb],
+62	};
+63	export default meta;
+64	
+65	type Story = StoryObj<typeof SlotRow>;
+66	
+67	// ---------------------------------------------------------------------------
+68	// 1. EmptyLetterSlots — 3 empty letter-sized (size-14) slots in a SlotRow
+69	// ---------------------------------------------------------------------------
+70	
+71	export const EmptyLetterSlots: Story = {
+72	  render: () => (
+73	    <AnswerGameProvider
+74	      config={{
+75	        ...baseConfig,
+76	        gameId: 'slot-empty',
+77	        initialTiles: [
+78	          makeTile('t0', 'C'),
+79	          makeTile('t1', 'A'),
+80	          makeTile('t2', 'T'),
+81	        ],
+82	        initialZones: [makeZone(0), makeZone(1), makeZone(2)],
+83	      }}
+84	    >
+85	      <SlotRow className="gap-2">
+86	        <Slot index={0} className="size-14 rounded-lg">
+87	          {(props) => <LetterContent {...props} />}
+88	        </Slot>
+89	        <Slot index={1} className="size-14 rounded-lg">
+90	          {(props) => <LetterContent {...props} />}
+91	        </Slot>
+92	        <Slot index={2} className="size-14 rounded-lg">
+93	          {(props) => <LetterContent {...props} />}
+94	        </Slot>
+95	      </SlotRow>
+96	    </AnswerGameProvider>
+97	  ),
+98	};
+99	
+100	// ---------------------------------------------------------------------------
+101	// 2. FilledLetterSlots — 3 slots with letters C, A, T placed
+102	// ---------------------------------------------------------------------------
+103	
+104	export const FilledLetterSlots: Story = {
+105	  render: () => (
+106	    <AnswerGameProvider
+107	      config={{
+108	        ...baseConfig,
+109	        gameId: 'slot-filled',
+110	        initialTiles: [
+111	          makeTile('t0', 'C'),
+112	          makeTile('t1', 'A'),
+113	          makeTile('t2', 'T'),
+114	        ],
+115	        initialZones: [
+116	          makeZone(0, 't0'),
+117	          makeZone(1, 't1'),
+118	          makeZone(2, 't2'),
+119	        ],
+120	      }}
+121	    >
+122	      <SlotRow className="gap-2">
+123	        <Slot index={0} className="size-14 rounded-lg">
+124	          {(props) => <LetterContent {...props} />}
+125	        </Slot>
+126	        <Slot index={1} className="size-14 rounded-lg">
+127	          {(props) => <LetterContent {...props} />}
+128	        </Slot>
+129	        <Slot index={2} className="size-14 rounded-lg">
+130	          {(props) => <LetterContent {...props} />}
+131	        </Slot>
+132	      </SlotRow>
+133	    </AnswerGameProvider>
+134	  ),
+135	};
+136	
+137	// ---------------------------------------------------------------------------
+138	// 3. WrongPlacement — slot with a wrong tile (isWrong = true → red/shake)
+139	// ---------------------------------------------------------------------------
+140	
+141	export const WrongPlacement: Story = {
+142	  render: () => (
+143	    <AnswerGameProvider
+144	      config={{
+145	        ...baseConfig,
+146	        gameId: 'slot-wrong',
+147	        initialTiles: [makeTile('t0', 'X')],
+148	        initialZones: [makeZone(0, 't0', true)],
+149	      }}
+150	    >
+151	      <SlotRow className="gap-2">
+152	        <Slot index={0} className="size-14 rounded-lg">
+153	          {(props) => <LetterContent {...props} />}
+154	        </Slot>
+155	      </SlotRow>
+156	    </AnswerGameProvider>
+157	  ),
+158	};
+159	
+160	// ---------------------------------------------------------------------------
+161	// 4. DiceSlots — NumberMatch-style 80px square slots (size-20)
+162	// ---------------------------------------------------------------------------
+163	
+164	const DotContent = ({ label }: SlotRenderProps) => (
+165	  <span className="text-2xl font-bold">{label ?? ''}</span>
+166	);
+167	
+168	export const DiceSlots: Story = {
+169	  render: () => (
+170	    <AnswerGameProvider
+171	      config={{
+172	        ...baseConfig,
+173	        gameId: 'slot-dice',
+174	        initialTiles: [
+175	          makeTile('d0', '3'),
+176	          makeTile('d1', '5'),
+177	          makeTile('d2', '1'),
+178	        ],
+179	        initialZones: [
+180	          makeZone(0, 'd0'),
+181	          makeZone(1, 'd1'),
+182	          makeZone(2, 'd2'),
+183	        ],
+184	      }}
+185	    >
+186	      <SlotRow className="gap-3">
+187	        <Slot index={0} className="size-20 rounded-xl">
+188	          {(props) => <DotContent {...props} />}
+189	        </Slot>
+190	        <Slot index={1} className="size-20 rounded-xl">
+191	          {(props) => <DotContent {...props} />}
+192	        </Slot>
+193	        <Slot index={2} className="size-20 rounded-xl">
+194	          {(props) => <DotContent {...props} />}
+195	        </Slot>
+196	      </SlotRow>
+197	    </AnswerGameProvider>
+198	  ),
+199	};
+200	
+201	// ---------------------------------------------------------------------------
+202	// 5. DominoSlots — NumberMatch-style rectangle slots (h-[72px] w-32)
+203	// ---------------------------------------------------------------------------
+204	
+205	const DominoContent = ({ label }: SlotRenderProps) => (
+206	  <span className="text-3xl font-bold">{label ?? ''}</span>
+207	);
+208	
+209	export const DominoSlots: Story = {
+210	  render: () => (
+211	    <AnswerGameProvider
+212	      config={{
+213	        ...baseConfig,
+214	        gameId: 'slot-domino',
+215	        initialTiles: [makeTile('dom0', '4'), makeTile('dom1', '2')],
+216	        initialZones: [makeZone(0, 'dom0'), makeZone(1, 'dom1')],
+217	      }}
+218	    >
+219	      <SlotRow className="gap-3">
+220	        <Slot index={0} className="h-[72px] w-32 rounded-xl">
+221	          {(props) => <DominoContent {...props} />}
+222	        </Slot>
+223	        <Slot index={1} className="h-[72px] w-32 rounded-xl">
+224	          {(props) => <DominoContent {...props} />}
+225	        </Slot>
+226	      </SlotRow>
+227	    </AnswerGameProvider>
+228	  ),
+229	};
+230	
+231	// ---------------------------------------------------------------------------
+232	// 6. InlineSentenceGap — inline gap slot using SentenceWithGaps
+233	// ---------------------------------------------------------------------------
+234	
+235	export const InlineSentenceGap: Story = {
+236	  render: () => (
+237	    <AnswerGameProvider
+238	      config={{
+239	        ...baseConfig,
+240	        gameId: 'slot-sentence',
+241	        initialTiles: [makeTile('s0', 'cat')],
+242	        initialZones: [makeZone(0, 's0')],
+243	      }}
+244	    >
+245	      <div className="p-4">
+246	        <SentenceWithGaps sentence="The {0} sat on the mat." />
+247	      </div>
+248	    </AnswerGameProvider>
+249	  ),
+250	};
+251	
+252	// ---------------------------------------------------------------------------
+253	// 7. PreviewTarget — slot showing drag preview (dashed border, faded label)
+254	// ---------------------------------------------------------------------------
+255	
+256	export const PreviewTarget: Story = {
+257	  render: () => (
+258	    <AnswerGameProvider
+259	      config={{
+260	        ...baseConfig,
+261	        gameId: 'slot-preview-target',
+262	        initialTiles: [
+263	          makeTile('t0', 'C'),
+264	          makeTile('t1', 'A'),
+265	          makeTile('t2', 'T'),
+266	        ],
+267	        initialZones: [makeZone(0), makeZone(1), makeZone(2)],
+268	      }}
+269	    >
+270	      <PreviewTargetInner />
+271	    </AnswerGameProvider>
+272	  ),
+273	};
+274	
+275	const PreviewTargetInner = () => {
+276	  const dispatch = useAnswerGameDispatch();
+277	  React.useEffect(() => {
+278	    // Simulate: tile t0 is being dragged over slot 1
+279	    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+280	    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+281	  }, [dispatch]);
+282	
+283	  return (
+284	    <SlotRow className="gap-2">
+285	      <Slot index={0} className="size-14 rounded-lg">
+286	        {(props) => <LetterContent {...props} />}
+287	      </Slot>
+288	      <Slot index={1} className="size-14 rounded-lg">
+289	        {(props) => <LetterContent {...props} />}
+290	      </Slot>
+291	      <Slot index={2} className="size-14 rounded-lg">
+292	        {(props) => <LetterContent {...props} />}
+293	      </Slot>
+294	    </SlotRow>
+295	  );
+296	};
+297	
+298	// ---------------------------------------------------------------------------
+299	// 8. PreviewSwap — slot-to-slot swap preview (source shows target's tile)
+300	// ---------------------------------------------------------------------------
+301	
+302	export const PreviewSwap: Story = {
+303	  render: () => (
+304	    <AnswerGameProvider
+305	      config={{
+306	        ...baseConfig,
+307	        gameId: 'slot-preview-swap',
+308	        initialTiles: [
+309	          makeTile('t0', 'C'),
+310	          makeTile('t1', 'A'),
+311	          makeTile('t2', 'T'),
+312	        ],
+313	        initialZones: [
+314	          makeZone(0, 't0'),
+315	          makeZone(1, 't1'),
+316	          makeZone(2, 't2'),
+317	        ],
+318	      }}
+319	    >
+320	      <PreviewSwapInner />
+321	    </AnswerGameProvider>
+322	  ),
+323	};
+324	
+325	const PreviewSwapInner = () => {
+326	  const dispatch = useAnswerGameDispatch();
+327	  React.useEffect(() => {
+328	    // Simulate: tile t0 (in slot 0) is being dragged over slot 1 (has t1)
+329	    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+330	    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+331	  }, [dispatch]);
+332	
+333	  return (
+334	    <SlotRow className="gap-2">
+335	      <Slot index={0} className="size-14 rounded-lg">
+336	        {(props) => <LetterContent {...props} />}
+337	      </Slot>
+338	      <Slot index={1} className="size-14 rounded-lg">
+339	        {(props) => <LetterContent {...props} />}
+340	      </Slot>
+341	      <Slot index={2} className="size-14 rounded-lg">
+342	        {(props) => <LetterContent {...props} />}
+343	      </Slot>
+344	    </SlotRow>
+345	  );
+346	};
+347
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:02Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/types.ts`
+
+```text
+1	export interface AnswerGameConfig {
+2	  gameId: string;
+3	  /** @default 'drag' */
+4	  inputMethod: 'drag' | 'type' | 'both';
+5	  /** @default 'lock-auto-eject' */
+6	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+7	  tileBankMode: 'exact' | 'distractors';
+8	  distractorCount?: number;
+9	  /** Total number of rounds in this session */
+10	  totalRounds: number;
+11	  /**
+12	   * When `true`, rounds follow the order of `rounds` in config.
+13	   * When `false` or omitted, order is shuffled once per session (again after Play again).
+14	   */
+15	  roundsInOrder?: boolean;
+16	  /** Whether TTS is enabled for this profile */
+17	  ttsEnabled: boolean;
+18	  /**
+19	   * Controls the OS keyboard type shown on touch devices in type/both mode.
+20	   * @default 'text'
+21	   */
+22	  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+23	  /** Skin ID for visual variant. Falls back to 'classic' if not registered. */
+24	  skin?: string;
+25	  /**
+26	   * Per-config timing overrides. Take precedence over the skin's own
+27	   * `timing` values and baseskill defaults.
+28	   */
+29	  timing?: {
+30	    roundAdvanceDelay?: number;
+31	    autoEjectDelay?: number;
+32	    levelCompleteDelay?: number;
+33	  };
+34	  /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
+35	  initialTiles?: TileItem[];
+36	  initialZones?: AnswerZone[];
+37	  /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
+38	  slotInteraction?: 'ordered' | 'free-swap';
+39	  /** Level progression — omit for classic rounds-only mode */
+40	  levelMode?: {
+41	    /** Max levels. Omit or set to 0 for unlimited. */
+42	    maxLevels?: number;
+43	    /**
+44	     * Called when the player completes a level to generate the next one.
+45	     * Receives the 0-based index of the just-completed level.
+46	     * Returns new tiles + zones, or null to end the game early.
+47	     */
+48	    generateNextLevel: (completedLevel: number) => {
+49	      tiles: TileItem[];
+50	      zones: AnswerZone[];
+51	    } | null;
+52	  };
+53	  /** Controls which HUD elements render. Each flag is independent. */
+54	  hud?: HudConfig;
+55	}
+56	
+57	export interface TileItem {
+58	  id: string;
+59	  /** Display label shown on the tile (e.g. "A", "cat", "3") */
+60	  label: string;
+61	  /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
+62	  value: string;
+63	}
+64	
+65	export interface AnswerZone {
+66	  id: string;
+67	  index: number;
+68	  /** Correct tile value for this slot; matched against `TileItem.value` */
+69	  expectedValue: string;
+70	  placedTileId: string | null;
+71	  isWrong: boolean;
+72	  isLocked: boolean;
+73	}
+74	
+75	export type AnswerGamePhase =
+76	  | 'playing'
+77	  | 'round-complete'
+78	  | 'level-complete'
+79	  | 'game-over';
+80	
+81	export interface AnswerGameState {
+82	  config: AnswerGameConfig;
+83	  /** Full tile list for the current round — never mutated mid-round */
+84	  allTiles: TileItem[];
+85	  /** IDs of tiles currently visible in the choice bank */
+86	  bankTileIds: string[];
+87	  zones: AnswerZone[];
+88	  /** Index of next slot to fill in auto-next-slot mode */
+89	  activeSlotIndex: number;
+90	  dragActiveTileId: string | null;
+91	  dragHoverZoneIndex: number | null;
+92	  /** ID of the bank tile hole currently hovered by a dragged slot tile. */
+93	  dragHoverBankTileId: string | null;
+94	  phase: AnswerGamePhase;
+95	  roundIndex: number;
+96	  retryCount: number;
+97	  levelIndex: number;
+98	  isLevelMode: boolean;
+99	}
+100	
+101	export type AnswerGameAction =
+102	  | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+103	  | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+104	  | {
+105	      type: 'TYPE_TILE';
+106	      tileId: string;
+107	      value: string;
+108	      zoneIndex: number;
+109	    }
+110	  | { type: 'REMOVE_TILE'; zoneIndex: number }
+111	  | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
+112	  | { type: 'EJECT_TILE'; zoneIndex: number }
+113	  | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+114	  | { type: 'ADVANCE_LEVEL'; tiles: TileItem[]; zones: AnswerZone[] }
+115	  | { type: 'COMPLETE_GAME' }
+116	  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
+117	  | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
+118	  | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
+119	  | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string }
+120	  | { type: 'SET_ACTIVE_SLOT'; zoneIndex: number };
+121	
+122	/**
+123	 * Snapshot of AnswerGameState persisted to session_history_index.draftState.
+124	 * Excludes config (reconstructable from initialContent/initialState),
+125	 * dragActiveTileId (transient), and 'game-over' phase (cleared on completion).
+126	 */
+127	export interface AnswerGameDraftState {
+128	  allTiles: TileItem[];
+129	  bankTileIds: string[];
+130	  zones: AnswerZone[];
+131	  activeSlotIndex: number;
+132	  phase: 'playing' | 'round-complete' | 'level-complete';
+133	  roundIndex: number;
+134	  retryCount: number;
+135	  levelIndex: number;
+136	}
+137	
+138	export interface HudConfig {
+139	  /** Bullet row, one dot per round (classic) or per level (level mode). */
+140	  showDots?: boolean;
+141	  /** "3/5" label; auto-hides when totalRounds is null. */
+142	  showFraction?: boolean;
+143	  /** "LEVEL N" label; most useful with level mode. */
+144	  showLevel?: boolean;
+145	}
+146	
+147	export interface ProgressHUDProps {
+148	  /** 0-based index of the current round. */
+149	  roundIndex: number;
+150	  /** Total rounds in the session; null for unbounded level mode. */
+151	  totalRounds: number | null;
+152	  /** 0-based index of the current level; 0 when levelMode is off. */
+153	  levelIndex: number;
+154	  /** Whether the game uses levelMode. */
+155	  isLevelMode: boolean;
+156	  /** Lifecycle phase — enables pop/celebration animations on transition. */
+157	  phase: AnswerGamePhase;
+158	  /** Resolved visibility flags after merging defaults + config. */
+159	  showDots: boolean;
+160	  showFraction: boolean;
+161	  showLevel: boolean;
+162	}
+163
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:05Z)**_
+
+Good. The types match what the plan specifies. Now let me check the `useSlotBehavior.ts` to confirm `SlotRenderProps` export path:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:06Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ path `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/useSlotBehavior.ts` pattern `SlotRenderProps`
+
+```text
+17:export interface SlotRenderProps {
+30:  renderProps: SlotRenderProps;
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:08Z)**_
+
+Good. Now I'll write the new file content:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:30Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+import { useEffect } from 'react';
+
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGameProvider } from '../AnswerGameProvider';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import { SentenceWithGaps } from './SentenceWithGaps';
+import { Slot } from './Slot';
+import { SlotRow } from './SlotRow';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { SlotRenderProps } from './useSlotBehavior';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
+type DragPreview = 'none' | 'target-empty' | 'target-swap';
+
+interface StoryArgs {
+  variant: SlotVariant;
+  label: string;
+  filled: boolean;
+  isWrong: boolean;
+  dragPreview: DragPreview;
+}
+
+const baseConfig: AnswerGameConfig = {
+  gameId: 'slot-storybook',
+  inputMethod: 'drag',
+  wrongTileBehavior: 'lock-auto-eject',
+  tileBankMode: 'exact',
+  totalRounds: 1,
+  ttsEnabled: false,
+};
+
+const makeTile = (id: string, label: string): TileItem => ({
+  id,
+  label,
+  value: label,
+});
+
+const makeZone = (
+  index: number,
+  placedTileId: string | null = null,
+  isWrong = false,
+): AnswerZone => ({
+  id: `z${String(index)}`,
+  index,
+  expectedValue: String(index),
+  placedTileId,
+  isWrong,
+  isLocked: false,
+});
+
+const variantConfig: Record<
+  SlotVariant,
+  { slotClass: string; contentClass: string }
+> = {
+  letter: {
+    slotClass: 'size-14 rounded-lg',
+    contentClass: 'text-xl font-bold',
+  },
+  dice: {
+    slotClass: 'size-20 rounded-xl',
+    contentClass: 'text-2xl font-bold',
+  },
+  domino: {
+    slotClass: 'h-[72px] w-32 rounded-xl',
+    contentClass: 'text-3xl font-bold',
+  },
+  'inline-gap': { slotClass: '', contentClass: '' },
+};
+
+const PlaygroundInner = ({
+  variant,
+  dragPreview,
+  contentClass,
+  slotClass,
+}: {
+  variant: SlotVariant;
+  dragPreview: DragPreview;
+  contentClass: string;
+  slotClass: string;
+}) => {
+  const dispatch = useAnswerGameDispatch();
+
+  useEffect(() => {
+    if (dragPreview === 'none') {
+      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+      dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+      return;
+    }
+    // Both previews drag tile t0 over zone 1.
+    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+  }, [dispatch, dragPreview]);
+
+  if (variant === 'inline-gap') {
+    return (
+      <div className="p-4">
+        <SentenceWithGaps sentence="The {0} sat on the mat." />
+      </div>
+    );
+  }
+
+  const renderContent = ({ label }: SlotRenderProps) => (
+    <span className={contentClass}>{label ?? ''}</span>
+  );
+
+  return (
+    <SlotRow className="gap-3">
+      {[0, 1, 2].map((i) => (
+        <Slot key={i} index={i} className={slotClass}>
+          {(props) => renderContent(props)}
+        </Slot>
+      ))}
+    </SlotRow>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component: SlotRow as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/Slot',
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    variant: 'letter',
+    label: 'A',
+    filled: true,
+    isWrong: false,
+    dragPreview: 'none',
+  },
+  argTypes: {
+    variant: {
+      control: { type: 'select' },
+      options: [
+        'letter',
+        'dice',
+        'domino',
+        'inline-gap',
+      ] satisfies SlotVariant[],
+    },
+    label: { control: 'text' },
+    filled: { control: 'boolean' },
+    isWrong: { control: 'boolean' },
+    dragPreview: {
+      control: { type: 'select' },
+      options: [
+        'none',
+        'target-empty',
+        'target-swap',
+      ] satisfies DragPreview[],
+    },
+  },
+  render: ({ variant, label, filled, isWrong, dragPreview }) => {
+    const { slotClass, contentClass } = variantConfig[variant];
+
+    // Build tiles/zones depending on variant + flags.
+    const tiles: TileItem[] =
+      variant === 'inline-gap'
+        ? [makeTile('s0', label || 'cat')]
+        : dragPreview === 'target-swap'
+          ? [
+              makeTile('t0', label || 'A'),
+              makeTile('t1', 'B'),
+              makeTile('t2', 'C'),
+            ]
+          : [
+              makeTile('t0', label || 'A'),
+              makeTile('t1', 'B'),
+              makeTile('t2', 'C'),
+            ];
+
+    const zones: AnswerZone[] =
+      variant === 'inline-gap'
+        ? [makeZone(0, filled ? 's0' : null, isWrong)]
+        : dragPreview === 'target-swap'
+          ? [
+              makeZone(0, 't0'),
+              makeZone(1, 't1', isWrong),
+              makeZone(2, 't2'),
+            ]
+          : [
+              makeZone(0, filled ? 't0' : null, isWrong),
+              makeZone(1),
+              makeZone(2),
+            ];
+
+    return (
+      <AnswerGameProvider
+        config={{
+          ...baseConfig,
+          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+          initialTiles: tiles,
+          initialZones: zones,
+        }}
+      >
+        <PlaygroundInner
+          variant={variant}
+          dragPreview={dragPreview}
+          contentClass={contentClass}
+          slotClass={slotClass}
+        />
+      </AnswerGameProvider>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Playground: Story = {};
+
+```
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:32Z)**_
+
+Now run typecheck and lint:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:38Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run typecheck in the worktree
+
+`yarn typecheck 2>&1`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 5.05s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:54Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run lint in the worktree
+
+`yarn lint 2>&1`
+
+```text
+Exit code 1
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx
+  12:1  error  `@storybook/react` type import should occur before type import of `react`  import/order
+
+✖ 1 problem (1 error, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:57Z)**_
+
+The `import/order` rule requires `@storybook/react` type import before `react` type import. I need to reorder the type imports — the `ComponentType` import from `react` should come after the `@storybook/react` import:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:02:59Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run lint again after import reorder
+
+`yarn lint 2>&1`
+
+```text
+Exit code 1
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx
+   9:1  error  `react` type import should occur after type import of `./useSlotBehavior`             import/order
+  10:1  error  `@storybook/react` type import should occur after type import of `./useSlotBehavior`  import/order
+
+✖ 2 problems (2 errors, 0 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:17Z)**_
+
+The `import/order` rule wants relative imports before package imports within the type imports group. Let me check what ordering rule the project uses:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:17Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/eslint.config.js`
+
+```text
+1	//  @ts-check
+2	
+3	import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
+4	import stylisticPlugin from '@stylistic/eslint-plugin';
+5	import { tanstackConfig } from '@tanstack/eslint-config';
+6	import eslintConfigPrettier from 'eslint-config-prettier/flat';
+7	import importPlugin from 'eslint-plugin-import-x';
+8	import jsxA11y from 'eslint-plugin-jsx-a11y';
+9	import reactPlugin from 'eslint-plugin-react';
+10	import reactHooks from 'eslint-plugin-react-hooks';
+11	import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+12	import tseslint from 'typescript-eslint';
+13	
+14	// Note: eslint-plugin-tailwindcss v3 is incompatible with Tailwind CSS v4
+15	// Tailwind v4 removed the `./resolveConfig` subpath export that this plugin requires.
+16	// Re-enable once eslint-plugin-tailwindcss adds Tailwind v4 support.
+17	
+18	export default [
+19	  ...tanstackConfig,
+20	  reactPlugin.configs.flat.recommended,
+21	  reactPlugin.configs.flat['jsx-runtime'],
+22	  // eslint-plugin-react-hooks v7 ships a flat config under configs.flat
+23	  // but the top-level recommended-latest still uses the legacy string array format,
+24	  // so we construct the flat config object manually here.
+25	  {
+26	    plugins: {
+27	      'react-hooks': reactHooks,
+28	      // Only `require-description`: unicorn has no equivalent for mandatory `-- <why>` on disables.
+29	      'eslint-comments': eslintComments,
+30	    },
+31	    rules: reactHooks.configs['recommended-latest'].rules,
+32	  },
+33	  jsxA11y.flatConfigs.recommended,
+34	  eslintPluginUnicorn.configs.recommended,
+35	  // Global plugin registry — makes plugins available to all subsequent config objects.
+36	  // ESLint v9 flat config requires plugins to be declared in each config object that
+37	  // uses their rules; registering here (no rules) satisfies that requirement globally.
+38	  {
+39	    plugins: {
+40	      import: importPlugin,
+41	      '@stylistic': stylisticPlugin,
+42	      '@typescript-eslint': tseslint.plugin,
+43	    },
+44	  },
+45	  {
+46	    settings: {
+47	      react: { version: 'detect' },
+48	    },
+49	    rules: {
+50	      // Unicorn `recommended` is on above; these rules clash with React (PascalCase files,
+51	      // `props`), TanStack Router (`$param` routes), and routine TS/React naming (`db`, `doc`).
+52	      // Do not rename/destructure around third-party typings (e.g. `React.ComponentProps`,
+53	      // Radix); disable rules instead of "fixing" imports or prop shapes to satisfy ESLint.
+54	      'unicorn/filename-case': 'off',
+55	      'unicorn/prevent-abbreviations': 'off',
+56	      'unicorn/no-null': 'off',
+57	      // Prefer explicit `./` in `new URL(..., import.meta.url)` (unicorn default is `never`).
+58	      'unicorn/relative-url-style': ['error', 'always'],
+59	
+60	      // Applies to every `eslint-disable-*` / `eslint-enable` line, including `unicorn/…` rules.
+61	      'eslint-comments/require-description': 'error',
+62	
+63	      'import/no-default-export': 'error',
+64	      'import/no-cycle': 'off',
+65	      'pnpm/json-enforce-catalog': 'off',
+66	
+67	      'import/order': [
+68	        'error',
+69	        {
+70	          groups: [
+71	            'builtin',
+72	            'external',
+73	            'internal',
+74	            'parent',
+75	            'sibling',
+76	            'index',
+77	            'object',
+78	            'type',
+79	          ],
+80	          alphabetize: { order: 'asc', caseInsensitive: true },
+81	        },
+82	      ],
+83	
+84	      // Layout (semicolons, quotes, commas, spacing, arrows) is handled by Prettier +
+85	      // eslint-config-prettier. Trailing commas: `trailingComma: 'all'` in prettier.config.js.
+86	      'arrow-body-style': ['error', 'as-needed'],
+87	
+88	      'react/function-component-definition': [
+89	        'error',
+90	        {
+91	          namedComponents: 'arrow-function',
+92	          unnamedComponents: 'arrow-function',
+93	        },
+94	      ],
+95	      'react/jsx-max-depth': ['warn', { max: 5 }],
+96	      'react/no-unstable-nested-components': 'error',
+97	      'react/no-array-index-key': 'warn',
+98	      // Shadcn/Radix wrappers use `{...props}` with `ComponentProps<typeof Primitive>`;
+99	      // enforcing no-spread would require per-file disables or unnatural APIs.
+100	      'react/jsx-props-no-spreading': 'off',
+101	      'react/no-unknown-property': 'error',
+102	
+103	      'no-restricted-syntax': [
+104	        'error',
+105	        {
+106	          selector:
+107	            'JSXAttribute[name.name="style"] > JSXExpressionContainer > ObjectExpression > Property[key.name=/^(color|background|backgroundColor|borderColor|outlineColor|fill|stroke)$/i] > Literal[value=/^(#|rgb|rgba|hsl|oklch)/i]',
+108	          message:
+109	            'Use a CSS variable (var(--...)) instead of a hardcoded colour in inline styles.',
+110	        },
+111	      ],
+112	    },
+113	  },
+114	  // TypeScript-specific rules scoped to TS/TSX files — these require the TypeScript
+115	  // parser (set up by tanstackConfig) and must not run on plain JS or config files.
+116	  {
+117	    files: ['**/*.{ts,tsx}'],
+118	    rules: {
+119	      '@typescript-eslint/array-type': 'off',
+120	      '@typescript-eslint/require-await': 'off',
+121	      '@typescript-eslint/no-explicit-any': 'error',
+122	      '@typescript-eslint/no-unsafe-assignment': 'error',
+123	      '@typescript-eslint/no-unused-vars': [
+124	        'error',
+125	        {
+126	          argsIgnorePattern: '^_',
+127	          varsIgnorePattern: '^_',
+128	        },
+129	      ],
+130	    },
+131	  },
+132	  {
+133	    files: ['src/**/*.ts', '!src/**/*.tsx'],
+134	    rules: {
+135	      '@typescript-eslint/explicit-module-boundary-types': 'warn',
+136	    },
+137	  },
+138	  {
+139	    // Plain JS/mjs scripts don't benefit from TS annotation rules.
+140	    files: ['scripts/**/*.{js,mjs,cjs}'],
+141	    rules: {
+142	      '@typescript-eslint/explicit-module-boundary-types': 'off',
+143	    },
+144	  },
+145	  eslintConfigPrettier,
+146	  {
+147	    // Framework config files require `export default` by convention (Vite, Vitest,
+148	    // Playwright, Knip, lint-staged); allow it only in these root-level config files.
+149	    files: [
+150	      'vite.config.ts',
+151	      'vitest.config.ts',
+152	      'playwright.config.ts',
+153	      'knip.config.ts',
+154	      '.lintstagedrc.mjs',
+155	    ],
+156	    rules: {
+157	      'import/no-default-export': 'off',
+158	    },
+159	  },
+160	  {
+161	    // Storybook CSF and preview use default exports; co-located demos are story support files.
+162	    files: [
+163	      '**/*.stories.tsx',
+164	      '.storybook/**/*.{ts,tsx}',
+165	      'src/**/*.demo.tsx',
+166	    ],
+167	    rules: {
+168	      'import/no-default-export': 'off',
+169	    },
+170	  },
+171	  {
+172	    // Ambient module shims for CJS packages without `@types/*` — these are
+173	    // type-only declarations, not runtime code, so the named-export rule
+174	    // does not apply.
+175	    files: ['**/*.d.ts'],
+176	    rules: {
+177	      'import/no-default-export': 'off',
+178	    },
+179	  },
+180	  {
+181	    // TanStack Router output; ships with undescribed blanket eslint-disable
+182	    ignores: [
+183	      'eslint.config.js',
+184	      'prettier.config.js',
+185	      '**/routeTree.gen.ts',
+186	      '.specstory/**',
+187	      '.lintstagedrc.mjs',
+188	      // Git worktrees are separate checkouts; fix/lint from repo root targets main tree only.
+189	      'worktrees/**',
+190	      '.claude/worktrees/**',
+191	      'storybook-static/**',
+192	      'playwright-report/**',
+193	    ],
+194	  },
+195	];
+196
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:23Z)**_
+
+The `import/order` rule uses groups: `builtin`, `external`, `internal`, `parent`, `sibling`, `index`, `object`, `type`. The `type` group is last, and within it all types are alphabetized. The relative imports (`../types`, `./useSlotBehavior`) should be in the `type` group after the external types (`react`, `@storybook/react`). But the error says relative type imports should come AFTER external type imports — this is the standard `import/order` behavior where within type group, the sub-groups still apply.
+
+Wait, looking at the error more carefully: it says `react` type import should occur AFTER `./useSlotBehavior`. That means relative sibling types should come BEFORE package type imports? That seems counterintuitive. Let me check an existing story file to see the pattern:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:25Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Glob"><details>
+<summary>Tool use: **Glob**</summary>
+ path `./worktrees/storybook-audit-batch-2-answer-game` pattern `src/components/answer-game/**/*.stories.tsx`
+
+```text
+src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx
+src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx
+src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx
+src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+src/components/answer-game/Slot/Slot.stories.tsx
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:27Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx`
+
+```text
+1	import { ProgressHUD } from './ProgressHUD';
+2	import type { Meta, StoryObj } from '@storybook/react-vite';
+3	
+4	const meta: Meta<typeof ProgressHUD> = {
+5	  component: ProgressHUD,
+6	  title: 'answer-game/ProgressHUD',
+7	  parameters: { layout: 'centered' },
+8	  args: {
+9	    roundIndex: 2,
+10	    totalRounds: 5,
+11	    levelIndex: 0,
+12	    isLevelMode: false,
+13	    phase: 'playing',
+14	    showDots: true,
+15	    showFraction: true,
+16	    showLevel: false,
+17	  },
+18	};
+19	
+20	export default meta;
+21	type Story = StoryObj<typeof ProgressHUD>;
+22	
+23	export const Classic_Round3Of5: Story = {};
+24	
+25	export const Classic_LastRound: Story = {
+26	  args: { roundIndex: 4, totalRounds: 5 },
+27	};
+28	
+29	export const DotsOnly: Story = {
+30	  args: { showFraction: false, showLevel: false },
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:29Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+
+```text
+1	import { EncouragementAnnouncer } from './EncouragementAnnouncer';
+2	import type { Meta, StoryObj } from '@storybook/react';
+3	
+4	const meta: Meta<typeof EncouragementAnnouncer> = {
+5	  component: EncouragementAnnouncer,
+6	  tags: ['autodocs'],
+7	  argTypes: { onDismiss: { action: 'dismissed' } },
+8	};
+9	export default meta;
+10	
+11	type Story = StoryObj<typeof EncouragementAnnouncer>;
+12	
+13	export const Hidden: Story = {
+14	  args: { visible: false, message: 'Keep trying!' },
+15	};
+16	export const Visible: Story = {
+17	  args: { visible: true, message: 'Almost! Try again.' },
+18	};
+19
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:32Z)**_
+
+Let me look at a story file that has both relative and external type imports:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:33Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx`
+
+```text
+1	import { GameOverOverlay } from './GameOverOverlay';
+2	import type { Meta, StoryObj } from '@storybook/react';
+3	
+4	const meta: Meta<typeof GameOverOverlay> = {
+5	  component: GameOverOverlay,
+6	  tags: ['autodocs'],
+7	  argTypes: {
+8	    onPlayAgain: { action: 'playAgain' },
+9	    onHome: { action: 'home' },
+10	  },
+11	};
+12	export default meta;
+13	
+14	type Story = StoryObj<typeof GameOverOverlay>;
+15	
+16	export const FiveStars: Story = { args: { retryCount: 0 } };
+17	export const ThreeStars: Story = { args: { retryCount: 3 } };
+18	export const OneStar: Story = { args: { retryCount: 10 } };
+19
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:38Z)**_
+
+The error message says `react` type import should occur AFTER `./useSlotBehavior`. This means the `import/order` plugin is treating the type group differently — within type imports, it's treating relative imports (parent/sibling) as coming before external imports? That seems inverted.
+
+Wait, actually re-reading the error: "`react` type import should occur after type import of `./useSlotBehavior`". This means `react` should come AFTER `./useSlotBehavior` — so relative/sibling types first, then external types. That's the opposite of what I'd expect.
+
+Actually, looking at the `import/order` plugin behavior with the `type` group: when `type` is last in the groups array, all type imports are grouped together at the end. Within that type group, the plugin still applies the normal subgrouping (builtin < external < internal < parent < sibling). So `react` (external) should come before `./useSlotBehavior` (sibling).
+
+But the error says the opposite! Let me try using `--fix` to see what the linter wants:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:43Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Auto-fix import order and show result
+
+`npx eslint src/components/answer-game/Slot/Slot.stories.tsx --fix 2>&1 && echo "--- AFTER FIX ---" && head -15 src/components/answer-game/Slot/Slot.stories.tsx`
+
+```text
+--- AFTER FIX ---
+import { useEffect } from 'react';
+
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGameProvider } from '../AnswerGameProvider';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import { SentenceWithGaps } from './SentenceWithGaps';
+import { Slot } from './Slot';
+import { SlotRow } from './SlotRow';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { SlotRenderProps } from './useSlotBehavior';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
+
+type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
+type DragPreview = 'none' | 'target-empty' | 'target-swap';
+[This command modified 1 file you've previously read: src/components/answer-game/Slot/Slot.stories.tsx. Call Read before editing.]
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:03:47Z)**_
+
+The auto-fix placed the type imports in this order: `../types`, `./useSlotBehavior`, `@storybook/react`, `react`. So relative types first (parent then sibling), then external types. Now let me run lint again to verify:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:04:01Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run lint after auto-fix
+
+`yarn lint 2>&1`
+
+```text
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 12.65s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:04:03Z)**_
+
+Both checks pass. Now let me also run typecheck once more to confirm the auto-fix didn't break anything:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:04:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Final typecheck after lint fix
+
+`yarn typecheck 2>&1`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 2.96s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:04:09Z)**_
+
+Both pass. Now commit:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:04:26Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit the Slot.stories.tsx retrofit
+
+```bash
+git add src/components/answer-game/Slot/Slot.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/Slot): retrofit per controls policy
+
+Collapse 8 bespoke scene stories into a single Playground story with
+args-driven variant / label / filled / isWrong / dragPreview controls.
+Remove the bare 'import React from "react"'.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+```text
+<persisted-output>
+Output too large (44.3KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bk00xh2fh.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (4b1bc49a)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+ ✓ src/components/ConfigFormFields.test.tsx (18 tests) 415ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:04:28Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Check the latest commit SHA
+
+`git log --oneline -3 2>&1`
+
+```text
+fbb61384 stories(answer-game/Slot): retrofit per controls policy
+5d6fe217 docs(plan): implementation plan for audit batch 2
+25c7caab docs(spec): correct tileBankMode enum values
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:04:32Z)**_
+
+DONE — commit SHA `fbb61384`.
+
+The 8 scene stories in `Slot.stories.tsx` were collapsed into a single `Playground` story with `variant` (select), `label` (text), `filled` (boolean), `isWrong` (boolean), and `dragPreview` (select) controls. The bare `import React from 'react'` was removed. The `import/order` fix placed relative type imports (`../types`, `./useSlotBehavior`) before external type imports (`@storybook/react`, `react`), matching the project's lint rule. Both `yarn typecheck` and `yarn lint` exit 0.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:04:35Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:04:35Z)**_
+
+Dispatching spec-compliance reviewer for Task 1.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:05:37Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Task 1 spec-compliance review
+
+```text
+Perfect. Let me create a comprehensive summary now:
+
+---
+
+**SPEC COMPLIANCE: ✅ APPROVED**
+
+**Gates met:**
+- ✅ **Controls** (Gate 1): variant (select: letter, dice, domino, inline-gap), label (text), filled (boolean), isWrong (boolean), dragPreview (select: none, target-empty, target-swap)
+- ✅ **Single Playground story** (Gate 2): Only `export const Playground` exported; no other stories
+- ✅ **fn() cleanup** (Gate 3): N/A — no handler props, correctly omitted
+- ✅ **play()** (Gate 4): N/A — correctly omitted
+- ✅ **Decorators** (Gate 5): `withDb` applied
+- ✅ **export default meta** (Gate 6): Correctly used; no other default exports
+- ✅ **Imports** (Gate 7): Type imports for Meta, StoryObj, AnswerGameConfig, AnswerZone, TileItem, SlotRenderProps, ComponentType; no storybook/test subpath; @storybook/react correctly imported as type
+- ✅ **ttsEnabled: false** (Gate 8): Explicitly set in baseConfig
+- ✅ **No emojis** (Gate 9): None present
+- ✅ **Linting & TypeScript** (Gate 10): ESLint passes; single file change only (456 ± 296 lines)
+
+**Gates missing or wrong:** None
+
+**Extras not requested:** None
+
+**APPROVED**
+agentId: a3b68ab489a919ab8 (use SendMessage with to: 'a3b68ab489a919ab8' to continue this agent)
+<usage>total_tokens: 30582
+tool_uses: 12
+duration_ms: 51540</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:04:46Z)**_
+
+You are performing a SPEC COMPLIANCE REVIEW only. You are NOT doing a code-quality review (that's a separate stage). Focus strictly on: does the committed code match what the task spec required? Flag missing requirements and unrequested extras.
+
+Worktree: `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`
+Branch: `audit/storybook-batch-2-answer-game`
+Commit under review: `fbb61384`
+
+Task 1 required retrofitting `src/components/answer-game/Slot/Slot.stories.tsx` with these gates:
+
+1. **Controls**: `variant` select (options: letter, dice, domino, inline-gap), `label` text, `filled` boolean, `isWrong` boolean, `dragPreview` select (options: none, target-empty, target-swap).
+2. **Single `Playground` story** replacing all 8 previous bespoke scene stories. No other stories exported.
+3. **fn() cleanup**: N/A (component has no handler props).
+4. **play()**: N/A.
+5. **Decorators**: `withDb`.
+6. **`export default meta`** allowed; otherwise only named exports.
+7. **Imports**: `storybook/test` subpath only if needed (not needed here); `@storybook/react` type import at end.
+8. **ttsEnabled: false** in the baseConfig.
+9. No emojis.
+10. Compiles (typecheck 0) and lints clean.
+
+Steps:
+
+1. Read the committed file: `git show fbb61384:src/components/answer-game/Slot/Slot.stories.tsx`
+2. Run `git show fbb61384 --stat` and `git show fbb61384 -- src/components/answer-game/Slot/Slot.stories.tsx` to confirm only this file was modified and no extras.
+3. Check each numbered gate above.
+
+Report format:
+
+```
+SPEC COMPLIANCE: ✅ or ❌
+
+Gates met:
+- ...
+
+Gates missing or wrong:
+- ...
+
+Extras not requested:
+- ...
+```
+
+End with `APPROVED` or `CHANGES_REQUESTED`. Under 200 words.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:04:48Z)**_
+
+I'll review the spec compliance of the committed Slot.stories.tsx file against the task requirements.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:04:48Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show fbb61384:src/components/answer-game/Slot/Slot.stories.tsx`
+
+```text
+import { useEffect } from 'react';
+
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGameProvider } from '../AnswerGameProvider';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import { SentenceWithGaps } from './SentenceWithGaps';
+import { Slot } from './Slot';
+import { SlotRow } from './SlotRow';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { SlotRenderProps } from './useSlotBehavior';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
+
+type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
+type DragPreview = 'none' | 'target-empty' | 'target-swap';
+
+interface StoryArgs {
+  variant: SlotVariant;
+  label: string;
+  filled: boolean;
+  isWrong: boolean;
+  dragPreview: DragPreview;
+}
+
+const baseConfig: AnswerGameConfig = {
+  gameId: 'slot-storybook',
+  inputMethod: 'drag',
+  wrongTileBehavior: 'lock-auto-eject',
+  tileBankMode: 'exact',
+  totalRounds: 1,
+  ttsEnabled: false,
+};
+
+const makeTile = (id: string, label: string): TileItem => ({
+  id,
+  label,
+  value: label,
+});
+
+const makeZone = (
+  index: number,
+  placedTileId: string | null = null,
+  isWrong = false,
+): AnswerZone => ({
+  id: `z${String(index)}`,
+  index,
+  expectedValue: String(index),
+  placedTileId,
+  isWrong,
+  isLocked: false,
+});
+
+const variantConfig: Record<
+  SlotVariant,
+  { slotClass: string; contentClass: string }
+> = {
+  letter: {
+    slotClass: 'size-14 rounded-lg',
+    contentClass: 'text-xl font-bold',
+  },
+  dice: {
+    slotClass: 'size-20 rounded-xl',
+    contentClass: 'text-2xl font-bold',
+  },
+  domino: {
+    slotClass: 'h-[72px] w-32 rounded-xl',
+    contentClass: 'text-3xl font-bold',
+  },
+  'inline-gap': { slotClass: '', contentClass: '' },
+};
+
+const PlaygroundInner = ({
+  variant,
+  dragPreview,
+  contentClass,
+  slotClass,
+}: {
+  variant: SlotVariant;
+  dragPreview: DragPreview;
+  contentClass: string;
+  slotClass: string;
+}) => {
+  const dispatch = useAnswerGameDispatch();
+
+  useEffect(() => {
+    if (dragPreview === 'none') {
+      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+      dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+      return;
+    }
+    // Both previews drag tile t0 over zone 1.
+    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+  }, [dispatch, dragPreview]);
+
+  if (variant === 'inline-gap') {
+    return (
+      <div className="p-4">
+        <SentenceWithGaps sentence="The {0} sat on the mat." />
+      </div>
+    );
+  }
+
+  const renderContent = ({ label }: SlotRenderProps) => (
+    <span className={contentClass}>{label ?? ''}</span>
+  );
+
+  return (
+    <SlotRow className="gap-3">
+      {[0, 1, 2].map((i) => (
+        <Slot key={i} index={i} className={slotClass}>
+          {(props) => renderContent(props)}
+        </Slot>
+      ))}
+    </SlotRow>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component: SlotRow as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/Slot',
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    variant: 'letter',
+    label: 'A',
+    filled: true,
+    isWrong: false,
+    dragPreview: 'none',
+  },
+  argTypes: {
+    variant: {
+      control: { type: 'select' },
+      options: [
+        'letter',
+        'dice',
+        'domino',
+        'inline-gap',
+      ] satisfies SlotVariant[],
+    },
+    label: { control: 'text' },
+    filled: { control: 'boolean' },
+    isWrong: { control: 'boolean' },
+    dragPreview: {
+      control: { type: 'select' },
+      options: [
+        'none',
+        'target-empty',
+        'target-swap',
+      ] satisfies DragPreview[],
+    },
+  },
+  render: ({ variant, label, filled, isWrong, dragPreview }) => {
+    const { slotClass, contentClass } = variantConfig[variant];
+
+    // Build tiles/zones depending on variant + flags.
+    const tiles: TileItem[] =
+      variant === 'inline-gap'
+        ? [makeTile('s0', label || 'cat')]
+        : dragPreview === 'target-swap'
+          ? [
+              makeTile('t0', label || 'A'),
+              makeTile('t1', 'B'),
+              makeTile('t2', 'C'),
+            ]
+          : [
+              makeTile('t0', label || 'A'),
+              makeTile('t1', 'B'),
+              makeTile('t2', 'C'),
+            ];
+
+    const zones: AnswerZone[] =
+      variant === 'inline-gap'
+        ? [makeZone(0, filled ? 's0' : null, isWrong)]
+        : dragPreview === 'target-swap'
+          ? [
+              makeZone(0, 't0'),
+              makeZone(1, 't1', isWrong),
+              makeZone(2, 't2'),
+            ]
+          : [
+              makeZone(0, filled ? 't0' : null, isWrong),
+              makeZone(1),
+              makeZone(2),
+            ];
+
+    return (
+      <AnswerGameProvider
+        config={{
+          ...baseConfig,
+          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+          initialTiles: tiles,
+          initialZones: zones,
+        }}
+      >
+        <PlaygroundInner
+          variant={variant}
+          dragPreview={dragPreview}
+          contentClass={contentClass}
+          slotClass={slotClass}
+        />
+      </AnswerGameProvider>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Playground: Story = {};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:04:50Z)**_
+
+Now let me check the commit diff to confirm only this file was modified:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:04:50Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show fbb61384 --stat`
+
+```text
+commit fbb61384be7cee0a0907dbdb476eaec078ecd8a8
+Author: leocaseiro <leobok@gmail.com>
+Date:   Tue Apr 21 16:04:12 2026 +1000
+
+    stories(answer-game/Slot): retrofit per controls policy
+    
+    Collapse 8 bespoke scene stories into a single Playground story with
+    args-driven variant / label / filled / isWrong / dragPreview controls.
+    Remove the bare 'import React from "react"'.
+    
+    Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+
+ src/components/answer-game/Slot/Slot.stories.tsx | 456 ++++++++---------------
+ 1 file changed, 160 insertions(+), 296 deletions(-)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:04:52Z)**_
+
+Perfect. Now let me verify the file compiles and lints:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:04:54Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`yarn typecheck -- src/components/answer-game/Slot/Slot.stories.tsx 2>&1 | head -50`
+
+```text
+yarn run v1.22.22
+warning From Yarn 1.0 onwards, scripts don't require "--" for options to be forwarded. In a future version, any explicit "--" will be forwarded as-is to the scripts.
+$ tsc --noEmit src/components/answer-game/Slot/Slot.stories.tsx
+node_modules/@types/mdx/types.d.ts(23,38): error TS2503: Cannot find namespace 'JSX'.
+node_modules/@types/mdx/types.d.ts(28,23): error TS2503: Cannot find namespace 'JSX'.
+node_modules/@types/mdx/types.d.ts(47,28): error TS2503: Cannot find namespace 'JSX'.
+node_modules/@types/mdx/types.d.ts(73,46): error TS2503: Cannot find namespace 'JSX'.
+src/components/answer-game/Slot/Slot.stories.tsx(3,24): error TS6142: Module '../../../../.storybook/decorators/withDb' was resolved to '/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/.storybook/decorators/withDb.tsx', but '--jsx' is not set.
+src/components/answer-game/Slot/Slot.stories.tsx(4,36): error TS6142: Module '../AnswerGameProvider' was resolved to '/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGameProvider.tsx', but '--jsx' is not set.
+src/components/answer-game/Slot/Slot.stories.tsx(6,34): error TS6142: Module './SentenceWithGaps' was resolved to '/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/SentenceWithGaps.tsx', but '--jsx' is not set.
+src/components/answer-game/Slot/Slot.stories.tsx(7,22): error TS6142: Module './Slot' was resolved to '/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.tsx', but '--jsx' is not set.
+src/components/answer-game/Slot/Slot.stories.tsx(8,25): error TS6142: Module './SlotRow' was resolved to '/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/SlotRow.tsx', but '--jsx' is not set.
+src/components/answer-game/Slot/Slot.stories.tsx(11,37): error TS2307: Cannot find module '@storybook/react' or its corresponding type declarations.
+  There are types at '/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/node_modules/@storybook/react/dist/index.d.ts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+src/components/answer-game/Slot/Slot.stories.tsx(98,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/components/answer-game/Slot/Slot.stories.tsx(99,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/components/answer-game/Slot/Slot.stories.tsx(105,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/components/answer-game/Slot/Slot.stories.tsx(109,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/components/answer-game/Slot/Slot.stories.tsx(111,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/components/answer-game/Slot/Slot.stories.tsx(188,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/components/answer-game/Slot/Slot.stories.tsx(196,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/components/answer-game/Slot/useSlotBehavior.ts(13,27): error TS2307: Cannot find module '@/lib/audio/AudioFeedback' or its corresponding type declarations.
+src/components/answer-game/Slot/useSlotBehavior.ts(14,33): error TS2307: Cannot find module '@/lib/game-event-bus' or its corresponding type declarations.
+src/components/answer-game/Slot/useSlotBehavior.ts(15,44): error TS2307: Cannot find module '@/lib/skin' or its corresponding type declarations.
+src/components/answer-game/useAnswerGameContext.ts(2,40): error TS6142: Module './AnswerGameProvider' was resolved to '/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGameProvider.tsx', but '--jsx' is not set.
+src/components/answer-game/useAnswerGameContext.ts(12,3): error TS2740: Type '{}' is missing the following properties from type 'AnswerGameState': config, allTiles, bankTileIds, zones, and 9 more.
+src/components/answer-game/useAnswerGameDispatch.ts(2,43): error TS6142: Module './AnswerGameProvider' was resolved to '/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGameProvider.tsx', but '--jsx' is not set.
+src/components/answer-game/useAnswerGameDispatch.ts(13,3): error TS2322: Type 'unknown' is not assignable to type 'Dispatch<AnswerGameAction>'.
+  Type '{}' provides no match for the signature '(value: AnswerGameAction): void'.
+src/components/answer-game/useTileEvaluation.ts(5,27): error TS2307: Cannot find module '@/lib/audio/AudioFeedback' or its corresponding type declarations.
+src/components/answer-game/useTileEvaluation.ts(6,33): error TS2307: Cannot find module '@/lib/game-event-bus' or its corresponding type declarations.
+src/components/answer-game/useTileEvaluation.ts(7,29): error TS2307: Cannot find module '@/lib/skin' or its corresponding type declarations.
+error Command failed with exit code 2.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:04:56Z)**_
+
+These are environment/config errors not specific to the file itself. Let me check the linting:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`yarn lint -- src/components/answer-game/Slot/Slot.stories.tsx 2>&1`
+
+```text
+Exit code 1
+yarn run v1.22.22
+warning From Yarn 1.0 onwards, scripts don't require "--" for options to be forwarded. In a future version, any explicit "--" will be forwarded as-is to the scripts.
+$ eslint . --max-warnings 0 && knip --no-config-hints src/components/answer-game/Slot/Slot.stories.tsx
+Unexpected argument 'src/components/answer-game/Slot/Slot.stories.tsx'. This command does not take positional arguments
+
+✂️  Find unused dependencies, exports and files in your JavaScript and TypeScript projects
+
+Usage: knip [options]
+
+Options:
+  -h, --help               Print this help text
+  -V, --version            Print version
+  -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
+  -c, --config [file]      Configuration file path
+                           (default: [.]knip.json[c], knip.(js|ts), knip.config.(js|ts) or package.json#knip)
+  --use-tsconfig-files     Use tsconfig.json to define project files (override `project` patterns)
+  -t, --tsConfig [file]    TypeScript configuration path (default: tsconfig.json)
+
+Mode
+  --cache                  Enable caching
+  --cache-location         Change cache location (default: node_modules/.cache/knip)
+  --include-entry-exports  Include entry files when reporting unused exports
+  --no-gitignore           Don't respect .gitignore
+  --production             Analyze only production source files (e.g. no test files, devDependencies)
+  --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
+  --watch                  Watch mode
+
+Scope
+  -W, --workspace [filter] Filter workspaces by name, directory, or glob (can be repeated)
+  --directory [dir]        Run process from a different directory (default: cwd)
+  --include                Report only provided issue type(s), can be comma-separated or repeated (1)
+  --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
+  --dependencies           Shortcut for --include dependencies,unlisted,binaries,unresolved,catalog
+  --exports                Shortcut for --include exports,nsExports,types,nsTypes,enumMembers,namespaceMembers,duplicates
+  --files                  Shortcut for --include files
+  --tags                   Include or exclude tagged exports
+
+Fix
+  --fix                    Fix issues (modifies files in your repo)
+  --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
+  --allow-remove-files     Allow Knip to remove files (with --fix)
+  --format                 Format modified files after --fix using the local formatter
+
+Output
+  --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
+  --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
+  --reporter               Select reporter (default: symbols), can be repeated (3)
+  --reporter-options       Pass extra options to the reporter (as JSON string, see example)
+  --no-config-hints        Suppress configuration hints
+  --treat-config-hints-as-errors    Exit with non-zero code (1) if there are any configuration hints
+  --max-issues             Maximum number of total issues before non-zero exit code (default: 0)
+  --max-show-issues        Maximum number of issues to display per type
+  --no-exit-code           Always exit with code zero (0)
+
+Troubleshooting
+  -d, --debug              Show debug output
+  --memory                 Measure memory usage and display data table
+  --memory-realtime        Log memory usage in realtime
+  --performance            Measure count and running time of key functions and display stats table
+  --performance-fn [name]  Measure only function [name]
+  --trace                  Show trace output
+  --trace-dependency [name] Show files that import the named dependency
+  --trace-export [name]    Show trace output for named export(s)
+  --trace-file [file]      Show trace output for exports in file
+
+(1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, types, nsTypes, enumMembers, namespaceMembers, duplicates, catalog
+(2) Fixable issue types: dependencies, exports, types, files, catalog
+(3) Built-in reporters: symbols (default), compact, codeowners, json, codeclimate, markdown, disclosure, github-actions
+
+Examples:
+
+$ knip
+$ knip --production
+$ knip --workspace packages/client --include files,dependencies
+$ knip --workspace @myorg/* --workspace '!@myorg/legacy'
+$ knip --workspace './apps/*' --workspace '@shared/utils'
+$ knip -c ./config/knip.json --reporter compact
+$ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
+$ knip --tags=-lintignore
+
+Website: https://knip.dev
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:09Z)**_
+
+Let me run eslint directly on the file:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:12Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`npx eslint src/components/answer-game/Slot/Slot.stories.tsx 2>&1`
+
+```text
+(Bash completed with no output)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:14Z)**_
+
+Good — no linting errors. Now let me verify all the spec gates:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:15Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show fbb61384:src/components/answer-game/Slot/Slot.stories.tsx | grep -E "control|options|dragPreview|argTypes" | head -20`
+
+```text
+  dragPreview: DragPreview;
+  dragPreview,
+  dragPreview: DragPreview;
+    if (dragPreview === 'none') {
+  }, [dispatch, dragPreview]);
+    dragPreview: 'none',
+  argTypes: {
+      control: { type: 'select' },
+      options: [
+    label: { control: 'text' },
+    filled: { control: 'boolean' },
+    isWrong: { control: 'boolean' },
+    dragPreview: {
+      control: { type: 'select' },
+      options: [
+  render: ({ variant, label, filled, isWrong, dragPreview }) => {
+        : dragPreview === 'target-swap'
+        : dragPreview === 'target-swap'
+          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+          dragPreview={dragPreview}
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:17Z)**_
+
+Let me verify the exports and check if there are any emojis:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:17Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show fbb61384:src/components/answer-game/Slot/Slot.stories.tsx | grep -E "^export |^const.*=" | tail -5`
+
+```text
+const makeZone = (
+const PlaygroundInner = ({
+const meta: Meta<StoryArgs> = {
+export default meta;
+export const Playground: Story = {};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:19Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show fbb61384:src/components/answer-game/Slot/Slot.stories.tsx | grep -i emoji`
+
+```text
+(Bash completed with no output)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:21Z)**_
+
+Perfect. Now let me verify the decorators and ttsEnabled setting:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show fbb61384:src/components/answer-game/Slot/Slot.stories.tsx | grep -E "decorators|ttsEnabled|withDb"`
+
+```text
+import { withDb } from '../../../../.storybook/decorators/withDb';
+  ttsEnabled: false,
+  decorators: [withDb],
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:24Z)**_
+
+Excellent. Let me verify the import statements at the end are type imports as required:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:24Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show fbb61384:src/components/answer-game/Slot/Slot.stories.tsx | head -15`
+
+```text
+import { useEffect } from 'react';
+
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGameProvider } from '../AnswerGameProvider';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import { SentenceWithGaps } from './SentenceWithGaps';
+import { Slot } from './Slot';
+import { SlotRow } from './SlotRow';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { SlotRenderProps } from './useSlotBehavior';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
+
+type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
+type DragPreview = 'none' | 'target-empty' | 'target-swap';
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:28Z)**_
+
+Perfect. Now let me verify that only the Playground story is exported (no 8 bespoke scene stories):
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:28Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show fbb61384:src/components/answer-game/Slot/Slot.stories.tsx | grep "^export const"`
+
+```text
+export const Playground: Story = {};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:32Z)**_
+
+Perfect. Now let me verify the controls structure in detail:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:32Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show fbb61384:src/components/answer-game/Slot/Slot.stories.tsx | sed -n '121,155p'`
+
+```text
+  title: 'answer-game/Slot',
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    variant: 'letter',
+    label: 'A',
+    filled: true,
+    isWrong: false,
+    dragPreview: 'none',
+  },
+  argTypes: {
+    variant: {
+      control: { type: 'select' },
+      options: [
+        'letter',
+        'dice',
+        'domino',
+        'inline-gap',
+      ] satisfies SlotVariant[],
+    },
+    label: { control: 'text' },
+    filled: { control: 'boolean' },
+    isWrong: { control: 'boolean' },
+    dragPreview: {
+      control: { type: 'select' },
+      options: [
+        'none',
+        'target-empty',
+        'target-swap',
+      ] satisfies DragPreview[],
+    },
+  },
+  render: ({ variant, label, filled, isWrong, dragPreview }) => {
+    const { slotClass, contentClass } = variantConfig[variant];
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:37Z)**_
+
+Perfect. Let me create a comprehensive summary now:
+
+---
+
+**SPEC COMPLIANCE: ✅ APPROVED**
+
+**Gates met:**
+- ✅ **Controls** (Gate 1): variant (select: letter, dice, domino, inline-gap), label (text), filled (boolean), isWrong (boolean), dragPreview (select: none, target-empty, target-swap)
+- ✅ **Single Playground story** (Gate 2): Only `export const Playground` exported; no other stories
+- ✅ **fn() cleanup** (Gate 3): N/A — no handler props, correctly omitted
+- ✅ **play()** (Gate 4): N/A — correctly omitted
+- ✅ **Decorators** (Gate 5): `withDb` applied
+- ✅ **export default meta** (Gate 6): Correctly used; no other default exports
+- ✅ **Imports** (Gate 7): Type imports for Meta, StoryObj, AnswerGameConfig, AnswerZone, TileItem, SlotRenderProps, ComponentType; no storybook/test subpath; @storybook/react correctly imported as type
+- ✅ **ttsEnabled: false** (Gate 8): Explicitly set in baseConfig
+- ✅ **No emojis** (Gate 9): None present
+- ✅ **Linting & TypeScript** (Gate 10): ESLint passes; single file change only (456 ± 296 lines)
+
+**Gates missing or wrong:** None
+
+**Extras not requested:** None
+
+**APPROVED**
+
+_**Agent (claude-opus-4-7 2026-04-21 06:05:40Z)**_
+
+Spec compliance approved. Dispatching code-quality reviewer.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:06:07Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Task 1 code-quality review
+
+```text
+## Review
+
+```
+Strengths:
+- Proper use of meta const with export default (allowed for Storybook config)
+- Clear argTypes with select controls (not raw JSON)
+- Type-safe args via StoryArgs interface
+- Thorough variant coverage (letter, dice, domino, inline-gap)
+- Correct use of decorators with withDb
+
+Issues (Blocker):
+None.
+
+Issues (Important):
+1. DRY violation in render(): tiles ternary has identical branches for dragPreview === 'target-swap' and default case:
+   - Both return [makeTile('t0', label || 'A'), makeTile('t1', 'B'), makeTile('t2', 'C')]
+   - Simplify to: tiles = variant === 'inline-gap' ? [...] : [makeTile(...)...]
+
+2. Unused args: `label` arg passed but only used for inline-gap variant; other variants hardcode 'A'/'B'/'C'. Either remove `label` from args or use consistently across all variants.
+
+3. PlaygroundInner is overcomplicated for its single purpose; render function could directly manage dragPreview dispatch via useEffect instead of nesting. Improves readability.
+
+Issues (Nit):
+- Comment "Build tiles/zones depending on variant + flags" is unnecessary (code is self-explanatory)
+- Comment "Both previews drag tile t0 over zone 1" is helpful context, keep it
+
+Changes will unblock approvals and reduce maintenance debt.
+```
+
+**CHANGES_REQUESTED**
+agentId: af0456703255118cd (use SendMessage with to: 'af0456703255118cd' to continue this agent)
+<usage>total_tokens: 26052
+tool_uses: 4
+duration_ms: 17159</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:05:49Z)**_
+
+You are performing a CODE QUALITY REVIEW on a Storybook retrofit. Spec compliance has already been approved — do NOT re-check it. Focus on: code smells, clarity, DRY, YAGNI, idiomatic React+TS, and project conventions.
+
+Worktree: `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`
+Commit: `fbb61384` — only changed file is `src/components/answer-game/Slot/Slot.stories.tsx`.
+
+Project conventions (enforced by eslint.config.js):
+- `react/function-component-definition`: arrow `const` components, never `function`.
+- No `export default` except in framework config (meta is allowed).
+- Named exports preferred.
+- No unused imports/variables.
+- Strict TypeScript.
+- Avoid unnecessary comments (no "what" comments, only "why" for non-obvious behavior).
+
+Steps:
+1. Read the file: `git show fbb61384:src/components/answer-game/Slot/Slot.stories.tsx`.
+2. Look for:
+   - Dead code / unused variables
+   - Unnecessarily duplicated branches (the render function has a ternary that returns the same `[makeTile('t0', ...), makeTile('t1', 'B'), makeTile('t2', 'C')]` in both branches of `dragPreview === 'target-swap'` vs default — is that intentional or a DRY miss?)
+   - Readability issues
+   - Missing or misplaced imports
+   - Idioms that don't match this repo (check pilot for reference: `src/components/ui/alert-dialog.stories.tsx` and `src/components/ui/card.stories.tsx`)
+   - Comments that explain WHAT rather than WHY
+
+Report format:
+
+```
+Strengths:
+- ...
+
+Issues (Blocker):
+- ...
+
+Issues (Important):
+- ...
+
+Issues (Nit):
+- ...
+```
+
+End with `APPROVED` or `CHANGES_REQUESTED`. Under 250 words.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:51Z)**_
+
+I'll review the Storybook retrofit for the Slot component.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show fbb61384:src/components/answer-game/Slot/Slot.stories.tsx`
+
+```text
+import { useEffect } from 'react';
+
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGameProvider } from '../AnswerGameProvider';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import { SentenceWithGaps } from './SentenceWithGaps';
+import { Slot } from './Slot';
+import { SlotRow } from './SlotRow';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { SlotRenderProps } from './useSlotBehavior';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
+
+type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
+type DragPreview = 'none' | 'target-empty' | 'target-swap';
+
+interface StoryArgs {
+  variant: SlotVariant;
+  label: string;
+  filled: boolean;
+  isWrong: boolean;
+  dragPreview: DragPreview;
+}
+
+const baseConfig: AnswerGameConfig = {
+  gameId: 'slot-storybook',
+  inputMethod: 'drag',
+  wrongTileBehavior: 'lock-auto-eject',
+  tileBankMode: 'exact',
+  totalRounds: 1,
+  ttsEnabled: false,
+};
+
+const makeTile = (id: string, label: string): TileItem => ({
+  id,
+  label,
+  value: label,
+});
+
+const makeZone = (
+  index: number,
+  placedTileId: string | null = null,
+  isWrong = false,
+): AnswerZone => ({
+  id: `z${String(index)}`,
+  index,
+  expectedValue: String(index),
+  placedTileId,
+  isWrong,
+  isLocked: false,
+});
+
+const variantConfig: Record<
+  SlotVariant,
+  { slotClass: string; contentClass: string }
+> = {
+  letter: {
+    slotClass: 'size-14 rounded-lg',
+    contentClass: 'text-xl font-bold',
+  },
+  dice: {
+    slotClass: 'size-20 rounded-xl',
+    contentClass: 'text-2xl font-bold',
+  },
+  domino: {
+    slotClass: 'h-[72px] w-32 rounded-xl',
+    contentClass: 'text-3xl font-bold',
+  },
+  'inline-gap': { slotClass: '', contentClass: '' },
+};
+
+const PlaygroundInner = ({
+  variant,
+  dragPreview,
+  contentClass,
+  slotClass,
+}: {
+  variant: SlotVariant;
+  dragPreview: DragPreview;
+  contentClass: string;
+  slotClass: string;
+}) => {
+  const dispatch = useAnswerGameDispatch();
+
+  useEffect(() => {
+    if (dragPreview === 'none') {
+      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+      dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+      return;
+    }
+    // Both previews drag tile t0 over zone 1.
+    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+  }, [dispatch, dragPreview]);
+
+  if (variant === 'inline-gap') {
+    return (
+      <div className="p-4">
+        <SentenceWithGaps sentence="The {0} sat on the mat." />
+      </div>
+    );
+  }
+
+  const renderContent = ({ label }: SlotRenderProps) => (
+    <span className={contentClass}>{label ?? ''}</span>
+  );
+
+  return (
+    <SlotRow className="gap-3">
+      {[0, 1, 2].map((i) => (
+        <Slot key={i} index={i} className={slotClass}>
+          {(props) => renderContent(props)}
+        </Slot>
+      ))}
+    </SlotRow>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component: SlotRow as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/Slot',
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    variant: 'letter',
+    label: 'A',
+    filled: true,
+    isWrong: false,
+    dragPreview: 'none',
+  },
+  argTypes: {
+    variant: {
+      control: { type: 'select' },
+      options: [
+        'letter',
+        'dice',
+        'domino',
+        'inline-gap',
+      ] satisfies SlotVariant[],
+    },
+    label: { control: 'text' },
+    filled: { control: 'boolean' },
+    isWrong: { control: 'boolean' },
+    dragPreview: {
+      control: { type: 'select' },
+      options: [
+        'none',
+        'target-empty',
+        'target-swap',
+      ] satisfies DragPreview[],
+    },
+  },
+  render: ({ variant, label, filled, isWrong, dragPreview }) => {
+    const { slotClass, contentClass } = variantConfig[variant];
+
+    // Build tiles/zones depending on variant + flags.
+    const tiles: TileItem[] =
+      variant === 'inline-gap'
+        ? [makeTile('s0', label || 'cat')]
+        : dragPreview === 'target-swap'
+          ? [
+              makeTile('t0', label || 'A'),
+              makeTile('t1', 'B'),
+              makeTile('t2', 'C'),
+            ]
+          : [
+              makeTile('t0', label || 'A'),
+              makeTile('t1', 'B'),
+              makeTile('t2', 'C'),
+            ];
+
+    const zones: AnswerZone[] =
+      variant === 'inline-gap'
+        ? [makeZone(0, filled ? 's0' : null, isWrong)]
+        : dragPreview === 'target-swap'
+          ? [
+              makeZone(0, 't0'),
+              makeZone(1, 't1', isWrong),
+              makeZone(2, 't2'),
+            ]
+          : [
+              makeZone(0, filled ? 't0' : null, isWrong),
+              makeZone(1),
+              makeZone(2),
+            ];
+
+    return (
+      <AnswerGameProvider
+        config={{
+          ...baseConfig,
+          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+          initialTiles: tiles,
+          initialZones: zones,
+        }}
+      >
+        <PlaygroundInner
+          variant={variant}
+          dragPreview={dragPreview}
+          contentClass={contentClass}
+          slotClass={slotClass}
+        />
+      </AnswerGameProvider>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Playground: Story = {};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:57Z)**_
+
+Now let me check the pilot stories for idiom reference:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:58Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./src/components/ui/alert-dialog.stories.tsx`
+
+```text
+1	import {
+2	  AlertDialog,
+3	  AlertDialogAction,
+4	  AlertDialogCancel,
+5	  AlertDialogContent,
+6	  AlertDialogDescription,
+7	  AlertDialogFooter,
+8	  AlertDialogHeader,
+9	  AlertDialogTitle,
+10	  AlertDialogTrigger,
+11	} from './alert-dialog';
+12	import { Button } from './button';
+13	import type { Meta, StoryObj } from '@storybook/react';
+14	
+15	const meta: Meta<typeof AlertDialog> = {
+16	  component: AlertDialog,
+17	  tags: ['autodocs'],
+18	};
+19	export default meta;
+20	
+21	type Story = StoryObj<typeof AlertDialog>;
+22	
+23	export const Default: Story = {
+24	  render: () => (
+25	    <AlertDialog>
+26	      <AlertDialogTrigger asChild>
+27	        <Button variant="destructive">Delete account</Button>
+28	      </AlertDialogTrigger>
+29	      <AlertDialogContent>
+30	        <AlertDialogHeader>
+31	          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+32	          <AlertDialogDescription>
+33	            This action cannot be undone.
+34	          </AlertDialogDescription>
+35	        </AlertDialogHeader>
+36	        <AlertDialogFooter>
+37	          <AlertDialogCancel>Cancel</AlertDialogCancel>
+38	          <AlertDialogAction>Delete</AlertDialogAction>
+39	        </AlertDialogFooter>
+40	      </AlertDialogContent>
+41	    </AlertDialog>
+42	  ),
+43	};
+44
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:05:58Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./src/components/ui/card.stories.tsx`
+
+```text
+1	import { Button } from './button';
+2	import {
+3	  Card,
+4	  CardContent,
+5	  CardDescription,
+6	  CardFooter,
+7	  CardHeader,
+8	  CardTitle,
+9	} from './card';
+10	import type { Meta, StoryObj } from '@storybook/react';
+11	
+12	const meta: Meta<typeof Card> = {
+13	  component: Card,
+14	  tags: ['autodocs'],
+15	};
+16	export default meta;
+17	
+18	type Story = StoryObj<typeof Card>;
+19	
+20	export const Default: Story = {
+21	  render: () => (
+22	    <Card className="w-72">
+23	      <CardHeader>
+24	        <CardTitle>Card Title</CardTitle>
+25	        <CardDescription>Card description goes here.</CardDescription>
+26	      </CardHeader>
+27	      <CardContent>
+28	        <p>Card body content.</p>
+29	      </CardContent>
+30	      <CardFooter>
+31	        <Button className="w-full">Action</Button>
+32	      </CardFooter>
+33	    </Card>
+34	  ),
+35	};
+36	
+37	export const Small: Story = {
+38	  render: () => (
+39	    <Card className="w-72" size="sm">
+40	      <CardHeader>
+41	        <CardTitle>Small Card</CardTitle>
+42	      </CardHeader>
+43	      <CardContent>
+44	        <p>Compact variant.</p>
+45	      </CardContent>
+46	    </Card>
+47	  ),
+48	};
+49
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:06:00Z)**_
+
+Now I'll check the eslint config to verify the conventions:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:06:00Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`grep -A 3 "react/function-component-definition\|export default" /Users/leocaseiro/Sites/base-skill/eslint.config.js | head -20`
+
+```text
+export default [
+  ...tanstackConfig,
+  reactPlugin.configs.flat.recommended,
+  reactPlugin.configs.flat['jsx-runtime'],
+--
+      'react/function-component-definition': [
+        'error',
+        {
+          namedComponents: 'arrow-function',
+--
+    // Framework config files require `export default` by convention (Vite, Vitest,
+    // Playwright, Knip, lint-staged); allow it only in these root-level config files.
+    files: [
+      'vite.config.ts',
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:06:07Z)**_
+
+## Review
+
+```
+Strengths:
+- Proper use of meta const with export default (allowed for Storybook config)
+- Clear argTypes with select controls (not raw JSON)
+- Type-safe args via StoryArgs interface
+- Thorough variant coverage (letter, dice, domino, inline-gap)
+- Correct use of decorators with withDb
+
+Issues (Blocker):
+None.
+
+Issues (Important):
+1. DRY violation in render(): tiles ternary has identical branches for dragPreview === 'target-swap' and default case:
+   - Both return [makeTile('t0', label || 'A'), makeTile('t1', 'B'), makeTile('t2', 'C')]
+   - Simplify to: tiles = variant === 'inline-gap' ? [...] : [makeTile(...)...]
+
+2. Unused args: `label` arg passed but only used for inline-gap variant; other variants hardcode 'A'/'B'/'C'. Either remove `label` from args or use consistently across all variants.
+
+3. PlaygroundInner is overcomplicated for its single purpose; render function could directly manage dragPreview dispatch via useEffect instead of nesting. Improves readability.
+
+Issues (Nit):
+- Comment "Build tiles/zones depending on variant + flags" is unnecessary (code is self-explanatory)
+- Comment "Both previews drag tile t0 over zone 1" is helpful context, keep it
+
+Changes will unblock approvals and reduce maintenance debt.
+```
+
+**CHANGES_REQUESTED**
+
+_**Agent (claude-opus-4-7 2026-04-21 06:06:20Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:06:21Z)**_
+
+Reviewer's issue #1 (DRY duplicate ternary branches) is valid. Issues #2 and #3 are wrong — `label` IS used for t0 in non-inline branches, and the inner component is needed because `useAnswerGameDispatch` must be called inside the provider. Continuing with the implementer to fix #1 only.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:06:21Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ToolSearch"><details>
+<summary>Tool use: **ToolSearch**</summary>
+
+```text
+No matching deferred tools found
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:07:24Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Task 1 DRY fix
+
+```text
+**DONE** `e824111f`
+
+Collapsed identical ternary branches in the `tiles` const. Typecheck ✓, lint ✓. Amended successfully.
+agentId: a1243b7340a3b13bb (use SendMessage with to: 'a1243b7340a3b13bb' to continue this agent)
+<usage>total_tokens: 28803
+tool_uses: 6
+duration_ms: 50855</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:06:33Z)**_
+
+Fix one specific code-quality nit in `src/components/answer-game/Slot/Slot.stories.tsx` inside the worktree at `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`.
+
+Current code in the `render` function has a ternary with two identical branches for the non-inline-gap case:
+
+```tsx
+const tiles: TileItem[] =
+  variant === 'inline-gap'
+    ? [makeTile('s0', label || 'cat')]
+    : dragPreview === 'target-swap'
+      ? [
+          makeTile('t0', label || 'A'),
+          makeTile('t1', 'B'),
+          makeTile('t2', 'C'),
+        ]
+      : [
+          makeTile('t0', label || 'A'),
+          makeTile('t1', 'B'),
+          makeTile('t2', 'C'),
+        ];
+```
+
+Both branches are identical. Collapse to:
+
+```tsx
+const tiles: TileItem[] =
+  variant === 'inline-gap'
+    ? [makeTile('s0', label || 'cat')]
+    : [
+        makeTile('t0', label || 'A'),
+        makeTile('t1', 'B'),
+        makeTile('t2', 'C'),
+      ];
+```
+
+Do NOT touch the `zones` ternary below it — those branches ARE different (target-swap puts t0/t1/t2 into zones 0/1/2 with t1 as isWrong target, vs default puts only t0 optionally in zone 0). Leave zones alone.
+
+Do NOT change anything else. Do NOT remove the `PlaygroundInner` inner component — it's required because `useAnswerGameDispatch` must be called inside the `AnswerGameProvider`. Do NOT remove the `label` arg — it IS used for tile t0 in non-inline-gap variants.
+
+After editing:
+
+1. Run `yarn typecheck` — expect exit 0.
+2. Run `yarn lint` — expect exit 0.
+3. Amend the previous commit: `git add src/components/answer-game/Slot/Slot.stories.tsx && git commit --amend --no-edit`.
+4. Report the new commit SHA.
+
+Return `DONE` with the new SHA, or `BLOCKED` with the reason. Under 100 words.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:06:35Z)**_
+
+I'll navigate to the worktree and fix this code-quality nit.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:06:35Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx`
+
+```text
+1	import { useEffect } from 'react';
+2	
+3	import { withDb } from '../../../../.storybook/decorators/withDb';
+4	import { AnswerGameProvider } from '../AnswerGameProvider';
+5	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+6	import { SentenceWithGaps } from './SentenceWithGaps';
+7	import { Slot } from './Slot';
+8	import { SlotRow } from './SlotRow';
+9	import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+10	import type { SlotRenderProps } from './useSlotBehavior';
+11	import type { Meta, StoryObj } from '@storybook/react';
+12	import type { ComponentType } from 'react';
+13	
+14	type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
+15	type DragPreview = 'none' | 'target-empty' | 'target-swap';
+16	
+17	interface StoryArgs {
+18	  variant: SlotVariant;
+19	  label: string;
+20	  filled: boolean;
+21	  isWrong: boolean;
+22	  dragPreview: DragPreview;
+23	}
+24	
+25	const baseConfig: AnswerGameConfig = {
+26	  gameId: 'slot-storybook',
+27	  inputMethod: 'drag',
+28	  wrongTileBehavior: 'lock-auto-eject',
+29	  tileBankMode: 'exact',
+30	  totalRounds: 1,
+31	  ttsEnabled: false,
+32	};
+33	
+34	const makeTile = (id: string, label: string): TileItem => ({
+35	  id,
+36	  label,
+37	  value: label,
+38	});
+39	
+40	const makeZone = (
+41	  index: number,
+42	  placedTileId: string | null = null,
+43	  isWrong = false,
+44	): AnswerZone => ({
+45	  id: `z${String(index)}`,
+46	  index,
+47	  expectedValue: String(index),
+48	  placedTileId,
+49	  isWrong,
+50	  isLocked: false,
+51	});
+52	
+53	const variantConfig: Record<
+54	  SlotVariant,
+55	  { slotClass: string; contentClass: string }
+56	> = {
+57	  letter: {
+58	    slotClass: 'size-14 rounded-lg',
+59	    contentClass: 'text-xl font-bold',
+60	  },
+61	  dice: {
+62	    slotClass: 'size-20 rounded-xl',
+63	    contentClass: 'text-2xl font-bold',
+64	  },
+65	  domino: {
+66	    slotClass: 'h-[72px] w-32 rounded-xl',
+67	    contentClass: 'text-3xl font-bold',
+68	  },
+69	  'inline-gap': { slotClass: '', contentClass: '' },
+70	};
+71	
+72	const PlaygroundInner = ({
+73	  variant,
+74	  dragPreview,
+75	  contentClass,
+76	  slotClass,
+77	}: {
+78	  variant: SlotVariant;
+79	  dragPreview: DragPreview;
+80	  contentClass: string;
+81	  slotClass: string;
+82	}) => {
+83	  const dispatch = useAnswerGameDispatch();
+84	
+85	  useEffect(() => {
+86	    if (dragPreview === 'none') {
+87	      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+88	      dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+89	      return;
+90	    }
+91	    // Both previews drag tile t0 over zone 1.
+92	    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't0' });
+93	    dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: 1 });
+94	  }, [dispatch, dragPreview]);
+95	
+96	  if (variant === 'inline-gap') {
+97	    return (
+98	      <div className="p-4">
+99	        <SentenceWithGaps sentence="The {0} sat on the mat." />
+100	      </div>
+101	    );
+102	  }
+103	
+104	  const renderContent = ({ label }: SlotRenderProps) => (
+105	    <span className={contentClass}>{label ?? ''}</span>
+106	  );
+107	
+108	  return (
+109	    <SlotRow className="gap-3">
+110	      {[0, 1, 2].map((i) => (
+111	        <Slot key={i} index={i} className={slotClass}>
+112	          {(props) => renderContent(props)}
+113	        </Slot>
+114	      ))}
+115	    </SlotRow>
+116	  );
+117	};
+118	
+119	const meta: Meta<StoryArgs> = {
+120	  component: SlotRow as unknown as ComponentType<StoryArgs>,
+121	  title: 'answer-game/Slot',
+122	  tags: ['autodocs'],
+123	  decorators: [withDb],
+124	  args: {
+125	    variant: 'letter',
+126	    label: 'A',
+127	    filled: true,
+128	    isWrong: false,
+129	    dragPreview: 'none',
+130	  },
+131	  argTypes: {
+132	    variant: {
+133	      control: { type: 'select' },
+134	      options: [
+135	        'letter',
+136	        'dice',
+137	        'domino',
+138	        'inline-gap',
+139	      ] satisfies SlotVariant[],
+140	    },
+141	    label: { control: 'text' },
+142	    filled: { control: 'boolean' },
+143	    isWrong: { control: 'boolean' },
+144	    dragPreview: {
+145	      control: { type: 'select' },
+146	      options: [
+147	        'none',
+148	        'target-empty',
+149	        'target-swap',
+150	      ] satisfies DragPreview[],
+151	    },
+152	  },
+153	  render: ({ variant, label, filled, isWrong, dragPreview }) => {
+154	    const { slotClass, contentClass } = variantConfig[variant];
+155	
+156	    // Build tiles/zones depending on variant + flags.
+157	    const tiles: TileItem[] =
+158	      variant === 'inline-gap'
+159	        ? [makeTile('s0', label || 'cat')]
+160	        : dragPreview === 'target-swap'
+161	          ? [
+162	              makeTile('t0', label || 'A'),
+163	              makeTile('t1', 'B'),
+164	              makeTile('t2', 'C'),
+165	            ]
+166	          : [
+167	              makeTile('t0', label || 'A'),
+168	              makeTile('t1', 'B'),
+169	              makeTile('t2', 'C'),
+170	            ];
+171	
+172	    const zones: AnswerZone[] =
+173	      variant === 'inline-gap'
+174	        ? [makeZone(0, filled ? 's0' : null, isWrong)]
+175	        : dragPreview === 'target-swap'
+176	          ? [
+177	              makeZone(0, 't0'),
+178	              makeZone(1, 't1', isWrong),
+179	              makeZone(2, 't2'),
+180	            ]
+181	          : [
+182	              makeZone(0, filled ? 't0' : null, isWrong),
+183	              makeZone(1),
+184	              makeZone(2),
+185	            ];
+186	
+187	    return (
+188	      <AnswerGameProvider
+189	        config={{
+190	          ...baseConfig,
+191	          gameId: `slot-${variant}-${String(filled)}-${dragPreview}`,
+192	          initialTiles: tiles,
+193	          initialZones: zones,
+194	        }}
+195	      >
+196	        <PlaygroundInner
+197	          variant={variant}
+198	          dragPreview={dragPreview}
+199	          contentClass={contentClass}
+200	          slotClass={slotClass}
+201	        />
+202	      </AnswerGameProvider>
+203	    );
+204	  },
+205	};
+206	export default meta;
+207	
+208	type Story = StoryObj<StoryArgs>;
+209	
+210	export const Playground: Story = {};
+211
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:06:37Z)**_
+
+Now I'll make the fix to collapse the identical ternary branches:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:06:40Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:06:42Z)**_
+
+Now I'll verify with typecheck and lint:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:06:46Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`yarn typecheck 2>&1 | head -20`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 3.98s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:07:02Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`yarn lint 2>&1 | head -30`
+
+```text
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 14.42s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:07:04Z)**_
+
+Perfect. Now I'll amend the previous commit:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:07:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git add src/components/answer-game/Slot/Slot.stories.tsx && git commit --amend --no-edit && git rev-parse HEAD`
+
+```text
+<persisted-output>
+Output too large (44.3KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/butq2lx2d.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (0b458ad2)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 272ms
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx > InstructionsOverlay > renders the game title
+Warning: useRouter must be used inside a <RouterProvider> component!
+Warning: useRouter must be used inside a <RouterProvider> component!
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx > InstructionsOverlay > renders the GameCover at the top
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:07:22Z)**_
+
+Let me get the commit SHA:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:07:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git rev-parse HEAD`
+
+```text
+e824111f19a61809f151b3263e1f9cfbf54d3345
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:07:24Z)**_
+
+**DONE** `e824111f`
+
+Collapsed identical ternary branches in the `tiles` const. Typecheck ✓, lint ✓. Amended successfully.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:07:28Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:07:28Z)**_
+
+Task 1 done (amended commit `e824111f`). Marking complete and moving to Task 2.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:07:29Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #7 status
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:07:29Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #8 status
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:07:32Z)**_
+
+Dispatching Task 2 implementer.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:10:32Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Task 2: AnswerGame stories retrofit
+
+```text
+DONE — commit `beb14675`.
+
+**Adjustments made vs. the plan template:**
+
+1. **Import order** — `import/order` lint rule required reordering: the `./AnswerGame` import had to move after the sibling `../` imports, and the `react` type import had to move after the `@storybook/react` type import. Fixed and lint passed clean.
+
+No other adjustments were needed. All types matched exactly:
+- `useAnswerGameContext()` returns `AnswerGameState` with fields `allTiles`, `bankTileIds`, `zones` exactly as used.
+- `PLACE_TILE` action shape `{ type, tileId, zoneIndex }` matched `types.ts`.
+- `AnswerGameConfig` has no required fields beyond what the plan specified — all fields used are present.
+- `skin` prop on `AnswerGame` is optional — not needed for the playground.
+agentId: a584263fac963538e (use SendMessage with to: 'a584263fac963538e' to continue this agent)
+<usage>total_tokens: 36886
+tool_uses: 14
+duration_ms: 127023</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:08:25Z)**_
+
+You are implementing Task 2 of a plan to retrofit Storybook stories to a new Controls Policy.
+
+# Scene Setting
+
+BaseSkill project. Batch 2 of a Storybook audit. Task 1 (Slot stories) is complete. Your task is Task 2: rebuild `AnswerGame.stories.tsx` as a real interactive playground. The SortNumbers game (at `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`) is the authoritative wiring reference — your playground mirrors its shape.
+
+Worktree (your cwd): `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`
+Branch: `audit/storybook-batch-2-answer-game` — never commit to master.
+
+# Shared Conventions (apply)
+
+- Import test helpers from `storybook/test` subpath (not needed in this task — no play()).
+- `export default meta` is the only allowed default export.
+- Arrow `const` components, never `function` (eslint `react/function-component-definition`).
+- Commit message shape: `stories(answer-game/<name>): retrofit per controls policy`.
+- Per-task verification: `yarn typecheck` → 0 AND `yarn lint` → 0 before committing.
+
+# Task 2: Retrofit `AnswerGame.stories.tsx` — real interactive playground
+
+**Files:**
+
+- Modify: `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+- Read (for context if a symbol is unclear): `src/components/answer-game/AnswerGame/AnswerGame.tsx`, `src/components/answer-game/useAnswerGameContext.ts`, `src/components/answer-game/useAnswerGameDispatch.ts`, `src/components/answer-game/types.ts`, `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`.
+
+**Gates:**
+
+- Controls: `StoryArgs` breaks config into `inputMethod` select, `wrongTileBehavior` select, `tileBankMode` select, `totalRounds` range, `ttsEnabled` boolean.
+- fn() cleanup: N/A (AnswerGame has no direct handler props).
+- play(): skipped — HTML5 DnD is unreliable in jsdom.
+- State variants: `Default`, `TextQuestionMode`, `RejectMode`, `LockManualMode`.
+- Decorator: `withDb`.
+
+**Architecture note:** `AnswerGame` is a shell that wraps `AnswerGameProvider` + `ProgressHUDRoot` + children. The playground stories render children (`AnswerGame.Question`, `AnswerGame.Answer`, `AnswerGame.Choices`) with real primitives:
+
+- `AnswerGame.Question`: a prompt string.
+- `AnswerGame.Answer`: real `SlotRow` + `Slot`s driven by `zones` from `useAnswerGameContext`.
+- `AnswerGame.Choices`: a minimal tap-to-place tile bank (click → `dispatch({ type: 'PLACE_TILE', tileId, zoneIndex: <next empty zone> })`).
+
+The tap-to-place bank is defined inline in the story file — do not extract it.
+
+**Steps:**
+
+### Step 1: Read the reference wiring
+
+Open `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`. Note how the inner `SortNumbersSession` component (a) reads `zones` from `useAnswerGameContext()`, (b) renders `SlotRow` + `Slot` inside `AnswerGame.Answer`, (c) renders a tile bank inside `AnswerGame.Choices`.
+
+### Step 2: Replace `AnswerGame.stories.tsx` with this content
+
+```tsx
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGame } from './AnswerGame';
+import { Slot } from '../Slot/Slot';
+import { SlotRow } from '../Slot/SlotRow';
+import { useAnswerGameContext } from '../useAnswerGameContext';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+type InputMethod = 'drag' | 'type' | 'both';
+type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
+type TileBankMode = 'exact' | 'distractors';
+
+interface StoryArgs {
+  inputMethod: InputMethod;
+  wrongTileBehavior: WrongTileBehavior;
+  tileBankMode: TileBankMode;
+  totalRounds: number;
+  ttsEnabled: boolean;
+}
+
+const initialTiles: TileItem[] = [
+  { id: 'c', label: 'C', value: 'C' },
+  { id: 'a', label: 'A', value: 'A' },
+  { id: 't', label: 'T', value: 'T' },
+];
+
+const initialZones: AnswerZone[] = [
+  {
+    id: 'z0',
+    index: 0,
+    expectedValue: 'C',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+  {
+    id: 'z1',
+    index: 1,
+    expectedValue: 'A',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+  {
+    id: 'z2',
+    index: 2,
+    expectedValue: 'T',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+];
+
+const TapToPlaceBank = () => {
+  const { allTiles, bankTileIds, zones } = useAnswerGameContext();
+  const dispatch = useAnswerGameDispatch();
+
+  const nextEmptyZoneIndex = zones.findIndex(
+    (z) => z.placedTileId === null,
+  );
+
+  return (
+    <div className="flex gap-2">
+      {bankTileIds.map((tileId) => {
+        const tile = allTiles.find((t) => t.id === tileId);
+        if (!tile) return null;
+        return (
+          <button
+            key={tile.id}
+            type="button"
+            onClick={() => {
+              if (nextEmptyZoneIndex === -1) return;
+              dispatch({
+                type: 'PLACE_TILE',
+                tileId: tile.id,
+                zoneIndex: nextEmptyZoneIndex,
+              });
+            }}
+            className="flex size-14 items-center justify-center rounded-lg border-2 border-primary bg-background text-xl font-bold shadow-sm active:scale-95"
+          >
+            {tile.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const PlayableScene = () => {
+  const { zones } = useAnswerGameContext();
+
+  return (
+    <>
+      <AnswerGame.Question>
+        <p className="text-center text-lg font-semibold text-foreground">
+          Spell CAT
+        </p>
+      </AnswerGame.Question>
+      <AnswerGame.Answer>
+        <SlotRow className="gap-2">
+          {zones.map((zone, i) => (
+            <Slot
+              key={zone.id}
+              index={i}
+              className="size-14 rounded-lg"
+            >
+              {({ label }) => (
+                <span className="text-xl font-bold">{label ?? ''}</span>
+              )}
+            </Slot>
+          ))}
+        </SlotRow>
+      </AnswerGame.Answer>
+      <AnswerGame.Choices>
+        <TapToPlaceBank />
+      </AnswerGame.Choices>
+    </>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component: AnswerGame as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    inputMethod: 'drag',
+    wrongTileBehavior: 'lock-auto-eject',
+    tileBankMode: 'exact',
+    totalRounds: 3,
+    ttsEnabled: false,
+  },
+  argTypes: {
+    inputMethod: {
+      control: { type: 'select' },
+      options: ['drag', 'type', 'both'] satisfies InputMethod[],
+    },
+    wrongTileBehavior: {
+      control: { type: 'select' },
+      options: [
+        'reject',
+        'lock-manual',
+        'lock-auto-eject',
+      ] satisfies WrongTileBehavior[],
+    },
+    tileBankMode: {
+      control: { type: 'select' },
+      options: ['exact', 'distractors'] satisfies TileBankMode[],
+    },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    ttsEnabled: { control: 'boolean' },
+  },
+  render: ({
+    inputMethod,
+    wrongTileBehavior,
+    tileBankMode,
+    totalRounds,
+    ttsEnabled,
+  }) => {
+    const config: AnswerGameConfig = {
+      gameId: 'storybook-answer-game',
+      inputMethod,
+      wrongTileBehavior,
+      tileBankMode,
+      totalRounds,
+      ttsEnabled,
+      initialTiles,
+      initialZones,
+    };
+    return (
+      <AnswerGame config={config}>
+        <PlayableScene />
+      </AnswerGame>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Default: Story = {};
+
+export const TextQuestionMode: Story = {
+  args: { inputMethod: 'type' },
+};
+
+export const RejectMode: Story = {
+  args: { wrongTileBehavior: 'reject' },
+};
+
+export const LockManualMode: Story = {
+  args: { wrongTileBehavior: 'lock-manual' },
+};
+```
+
+### Step 3: Run `yarn typecheck` — expect exit 0.
+
+**Likely issues and how to fix:**
+
+- If `useAnswerGameContext()` return shape differs (e.g. hook exposes fields with different names than `{ allTiles, bankTileIds, zones }`), read `src/components/answer-game/useAnswerGameContext.ts` and adjust. Do not guess — use the real names.
+- If `AnswerGameConfig` requires additional mandatory fields (check `src/components/answer-game/types.ts`), add them with sensible defaults matching SortNumbers' config shape.
+- If the `PLACE_TILE` action shape differs from `{ type: 'PLACE_TILE', tileId, zoneIndex }`, read the reducer/dispatch types and use the real shape.
+- If `<AnswerGame>` needs a `skin` prop or similar, pass the minimum the type requires (SortNumbers passes a skin from `useGameSkin` — if required, import and use it here with a sensible default game id).
+
+### Step 4: Run `yarn lint` — expect exit 0.
+
+### Step 5: Self-review
+
+- No emojis.
+- All four stories exported (`Default`, `TextQuestionMode`, `RejectMode`, `LockManualMode`).
+- `ttsEnabled: false` default.
+- `withDb` decorator in place.
+- `fn()` imports only if actually used (not needed here).
+
+### Step 6: Commit
+
+```bash
+git add src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+git commit -m "$(cat <<'EOF'
+stories(answer-game/AnswerGame): retrofit per controls policy
+
+Rebuild as a real interactive playground — StoryArgs breaks config into
+individual controls, render wires a real AnswerGameProvider + real Slot
+row + a minimal tap-to-place tile bank (dispatch PLACE_TILE).
+
+play() skipped: HTML5 drag-and-drop is unreliable in jsdom; interactive
+correctness of DnD is covered at the e2e layer.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+# Status to return
+
+End with `DONE` + commit SHA, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, or `BLOCKED`. Under 200 words.
+
+If you had to adjust the `useAnswerGameContext` destructure, the config shape, or action types to match reality, list those adjustments in the report.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:08:27Z)**_
+
+I'll start by reading the reference files to understand the actual types and shapes before writing the story.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:08:29Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/types.ts`
+
+```text
+1	export interface AnswerGameConfig {
+2	  gameId: string;
+3	  /** @default 'drag' */
+4	  inputMethod: 'drag' | 'type' | 'both';
+5	  /** @default 'lock-auto-eject' */
+6	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+7	  tileBankMode: 'exact' | 'distractors';
+8	  distractorCount?: number;
+9	  /** Total number of rounds in this session */
+10	  totalRounds: number;
+11	  /**
+12	   * When `true`, rounds follow the order of `rounds` in config.
+13	   * When `false` or omitted, order is shuffled once per session (again after Play again).
+14	   */
+15	  roundsInOrder?: boolean;
+16	  /** Whether TTS is enabled for this profile */
+17	  ttsEnabled: boolean;
+18	  /**
+19	   * Controls the OS keyboard type shown on touch devices in type/both mode.
+20	   * @default 'text'
+21	   */
+22	  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+23	  /** Skin ID for visual variant. Falls back to 'classic' if not registered. */
+24	  skin?: string;
+25	  /**
+26	   * Per-config timing overrides. Take precedence over the skin's own
+27	   * `timing` values and baseskill defaults.
+28	   */
+29	  timing?: {
+30	    roundAdvanceDelay?: number;
+31	    autoEjectDelay?: number;
+32	    levelCompleteDelay?: number;
+33	  };
+34	  /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
+35	  initialTiles?: TileItem[];
+36	  initialZones?: AnswerZone[];
+37	  /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
+38	  slotInteraction?: 'ordered' | 'free-swap';
+39	  /** Level progression — omit for classic rounds-only mode */
+40	  levelMode?: {
+41	    /** Max levels. Omit or set to 0 for unlimited. */
+42	    maxLevels?: number;
+43	    /**
+44	     * Called when the player completes a level to generate the next one.
+45	     * Receives the 0-based index of the just-completed level.
+46	     * Returns new tiles + zones, or null to end the game early.
+47	     */
+48	    generateNextLevel: (completedLevel: number) => {
+49	      tiles: TileItem[];
+50	      zones: AnswerZone[];
+51	    } | null;
+52	  };
+53	  /** Controls which HUD elements render. Each flag is independent. */
+54	  hud?: HudConfig;
+55	}
+56	
+57	export interface TileItem {
+58	  id: string;
+59	  /** Display label shown on the tile (e.g. "A", "cat", "3") */
+60	  label: string;
+61	  /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
+62	  value: string;
+63	}
+64	
+65	export interface AnswerZone {
+66	  id: string;
+67	  index: number;
+68	  /** Correct tile value for this slot; matched against `TileItem.value` */
+69	  expectedValue: string;
+70	  placedTileId: string | null;
+71	  isWrong: boolean;
+72	  isLocked: boolean;
+73	}
+74	
+75	export type AnswerGamePhase =
+76	  | 'playing'
+77	  | 'round-complete'
+78	  | 'level-complete'
+79	  | 'game-over';
+80	
+81	export interface AnswerGameState {
+82	  config: AnswerGameConfig;
+83	  /** Full tile list for the current round — never mutated mid-round */
+84	  allTiles: TileItem[];
+85	  /** IDs of tiles currently visible in the choice bank */
+86	  bankTileIds: string[];
+87	  zones: AnswerZone[];
+88	  /** Index of next slot to fill in auto-next-slot mode */
+89	  activeSlotIndex: number;
+90	  dragActiveTileId: string | null;
+91	  dragHoverZoneIndex: number | null;
+92	  /** ID of the bank tile hole currently hovered by a dragged slot tile. */
+93	  dragHoverBankTileId: string | null;
+94	  phase: AnswerGamePhase;
+95	  roundIndex: number;
+96	  retryCount: number;
+97	  levelIndex: number;
+98	  isLevelMode: boolean;
+99	}
+100	
+101	export type AnswerGameAction =
+102	  | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+103	  | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+104	  | {
+105	      type: 'TYPE_TILE';
+106	      tileId: string;
+107	      value: string;
+108	      zoneIndex: number;
+109	    }
+110	  | { type: 'REMOVE_TILE'; zoneIndex: number }
+111	  | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
+112	  | { type: 'EJECT_TILE'; zoneIndex: number }
+113	  | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+114	  | { type: 'ADVANCE_LEVEL'; tiles: TileItem[]; zones: AnswerZone[] }
+115	  | { type: 'COMPLETE_GAME' }
+116	  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
+117	  | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
+118	  | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
+119	  | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string }
+120	  | { type: 'SET_ACTIVE_SLOT'; zoneIndex: number };
+121	
+122	/**
+123	 * Snapshot of AnswerGameState persisted to session_history_index.draftState.
+124	 * Excludes config (reconstructable from initialContent/initialState),
+125	 * dragActiveTileId (transient), and 'game-over' phase (cleared on completion).
+126	 */
+127	export interface AnswerGameDraftState {
+128	  allTiles: TileItem[];
+129	  bankTileIds: string[];
+130	  zones: AnswerZone[];
+131	  activeSlotIndex: number;
+132	  phase: 'playing' | 'round-complete' | 'level-complete';
+133	  roundIndex: number;
+134	  retryCount: number;
+135	  levelIndex: number;
+136	}
+137	
+138	export interface HudConfig {
+139	  /** Bullet row, one dot per round (classic) or per level (level mode). */
+140	  showDots?: boolean;
+141	  /** "3/5" label; auto-hides when totalRounds is null. */
+142	  showFraction?: boolean;
+143	  /** "LEVEL N" label; most useful with level mode. */
+144	  showLevel?: boolean;
+145	}
+146	
+147	export interface ProgressHUDProps {
+148	  /** 0-based index of the current round. */
+149	  roundIndex: number;
+150	  /** Total rounds in the session; null for unbounded level mode. */
+151	  totalRounds: number | null;
+152	  /** 0-based index of the current level; 0 when levelMode is off. */
+153	  levelIndex: number;
+154	  /** Whether the game uses levelMode. */
+155	  isLevelMode: boolean;
+156	  /** Lifecycle phase — enables pop/celebration animations on transition. */
+157	  phase: AnswerGamePhase;
+158	  /** Resolved visibility flags after merging defaults + config. */
+159	  showDots: boolean;
+160	  showFraction: boolean;
+161	  showLevel: boolean;
+162	}
+163
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:08:29Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/useAnswerGameContext.ts`
+
+```text
+1	import { use } from 'react';
+2	import { AnswerGameStateContext } from './AnswerGameProvider';
+3	import type { AnswerGameState } from './types';
+4	
+5	export function useAnswerGameContext(): AnswerGameState {
+6	  const ctx = use(AnswerGameStateContext);
+7	  if (!ctx) {
+8	    throw new Error(
+9	      'useAnswerGameContext must be used inside AnswerGameProvider',
+10	    );
+11	  }
+12	  return ctx;
+13	}
+14
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:08:32Z)**_
+
+Good. Now let me read the remaining reference files.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:08:33Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/useAnswerGameDispatch.ts`
+
+```text
+1	import { use } from 'react';
+2	import { AnswerGameDispatchContext } from './AnswerGameProvider';
+3	import type { AnswerGameAction } from './types';
+4	import type { Dispatch } from 'react';
+5	
+6	export function useAnswerGameDispatch(): Dispatch<AnswerGameAction> {
+7	  const ctx = use(AnswerGameDispatchContext);
+8	  if (!ctx) {
+9	    throw new Error(
+10	      'useAnswerGameDispatch must be used inside AnswerGameProvider',
+11	    );
+12	  }
+13	  return ctx;
+14	}
+15
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:08:34Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.tsx`
+
+```text
+1	import { AnswerGameProvider } from '../AnswerGameProvider';
+2	import { ProgressHUDRoot } from '../ProgressHUD/ProgressHUDRoot';
+3	import type { AnswerGameConfig, AnswerGameDraftState } from '../types';
+4	import type { GameSkin } from '@/lib/skin';
+5	import type { ReactNode } from 'react';
+6	
+7	interface AnswerGameProps {
+8	  config: AnswerGameConfig;
+9	  initialState?: AnswerGameDraftState;
+10	  sessionId?: string;
+11	  /**
+12	   * Optional skin. When provided, `skin.ProgressHUD` (if defined) replaces
+13	   * the default HUD; otherwise the default HUD renders. `skin.tokens` are
+14	   * applied by individual game components on their own game container, not
+15	   * here.
+16	   */
+17	  skin?: GameSkin;
+18	  children: ReactNode;
+19	}
+20	
+21	const AnswerGameRoot = ({
+22	  config,
+23	  initialState,
+24	  sessionId,
+25	  skin,
+26	  children,
+27	}: AnswerGameProps) => (
+28	  <AnswerGameProvider
+29	    config={config}
+30	    initialState={initialState}
+31	    sessionId={sessionId}
+32	  >
+33	    <div className="flex min-h-0 w-full flex-col items-center">
+34	      <ProgressHUDRoot skin={skin} />
+35	      {children}
+36	    </div>
+37	  </AnswerGameProvider>
+38	);
+39	
+40	const Question = ({ children }: { children?: ReactNode }) => (
+41	  <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
+42	    {children}
+43	  </div>
+44	);
+45	
+46	const Answer = ({ children }: { children?: ReactNode }) => (
+47	  <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
+48	    {children}
+49	  </div>
+50	);
+51	
+52	const Choices = ({ children }: { children?: ReactNode }) => (
+53	  <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
+54	    {children}
+55	  </div>
+56	);
+57	
+58	export const AnswerGame = Object.assign(AnswerGameRoot, {
+59	  Question,
+60	  Answer,
+61	  Choices,
+62	});
+63
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:08:40Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
+
+```text
+1	import { useNavigate, useParams } from '@tanstack/react-router';
+2	import { useEffect, useMemo, useRef, useState } from 'react';
+3	import { useTranslation } from 'react-i18next';
+4	import { buildSortRound } from '../build-sort-round';
+5	import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+6	import type { SortNumbersConfig } from '../types';
+7	import type {
+8	  AnswerGameConfig,
+9	  AnswerGameDraftState,
+10	  AnswerZone,
+11	  TileItem,
+12	} from '@/components/answer-game/types';
+13	import type { GameSkin } from '@/lib/skin';
+14	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+15	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+16	import { LevelCompleteOverlay } from '@/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay';
+17	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+18	import { Slot } from '@/components/answer-game/Slot/Slot';
+19	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+20	import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
+21	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+22	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+23	import { useGameSounds } from '@/components/answer-game/useGameSounds';
+24	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+25	import { buildRoundOrder } from '@/games/build-round-order';
+26	import { getGameEventBus } from '@/lib/game-event-bus';
+27	import { resolveTiming, useGameSkin } from '@/lib/skin';
+28	
+29	interface SortNumbersProps {
+30	  config: SortNumbersConfig;
+31	  initialState?: AnswerGameDraftState;
+32	  sessionId?: string;
+33	  seed?: string;
+34	}
+35	
+36	const SortNumbersSession = ({
+37	  sortNumbersConfig,
+38	  roundOrder,
+39	  skin,
+40	  onRestartSession,
+41	}: {
+42	  sortNumbersConfig: SortNumbersConfig;
+43	  roundOrder: readonly number[];
+44	  skin: GameSkin;
+45	  onRestartSession: () => void;
+46	}) => {
+47	  const { t } = useTranslation('games');
+48	  const { phase, roundIndex, retryCount, zones, levelIndex } =
+49	    useAnswerGameContext();
+50	  const dispatch = useAnswerGameDispatch();
+51	  const { confettiReady, levelCompleteReady, gameOverReady } =
+52	    useGameSounds();
+53	  const navigate = useNavigate();
+54	  const { locale } = useParams({ from: '/$locale' });
+55	  const completionToken = useRef(0);
+56	
+57	  const configRoundIndex = roundOrder[roundIndex];
+58	  const round =
+59	    configRoundIndex === undefined
+60	      ? undefined
+61	      : sortNumbersConfig.rounds[configRoundIndex];
+62	
+63	  const directionLabel =
+64	    sortNumbersConfig.direction === 'ascending'
+65	      ? t('sort-numbers-ui.ascending-label')
+66	      : t('sort-numbers-ui.descending-label');
+67	
+68	  useRoundTTS(directionLabel);
+69	
+70	  const handleHome = () => {
+71	    void navigate({ to: '/$locale', params: { locale } });
+72	  };
+73	
+74	  const handlePlayAgain = () => {
+75	    onRestartSession();
+76	  };
+77	
+78	  const handleNextLevel = () => {
+79	    const generateNextLevel =
+80	      sortNumbersConfig.levelMode?.generateNextLevel;
+81	    if (!generateNextLevel) return;
+82	
+83	    const nextLevel = generateNextLevel(levelIndex);
+84	    if (nextLevel) {
+85	      dispatch({
+86	        type: 'ADVANCE_LEVEL',
+87	        tiles: nextLevel.tiles,
+88	        zones: nextLevel.zones,
+89	      });
+90	      getGameEventBus().emit({
+91	        type: 'game:level-advance',
+92	        gameId: sortNumbersConfig.gameId,
+93	        sessionId: '',
+94	        profileId: '',
+95	        timestamp: Date.now(),
+96	        roundIndex: 0,
+97	        levelIndex: levelIndex + 1,
+98	      });
+99	    } else {
+100	      dispatch({ type: 'COMPLETE_GAME' });
+101	    }
+102	  };
+103	
+104	  const handleDone = () => {
+105	    dispatch({ type: 'COMPLETE_GAME' });
+106	  };
+107	
+108	  useEffect(() => {
+109	    if (phase !== 'game-over') return;
+110	    getGameEventBus().emit({
+111	      type: 'game:end',
+112	      gameId: sortNumbersConfig.gameId,
+113	      sessionId: '',
+114	      profileId: '',
+115	      timestamp: Date.now(),
+116	      roundIndex,
+117	      finalScore: 0,
+118	      totalRounds: roundOrder.length,
+119	      correctCount: 0,
+120	      durationMs: 0,
+121	      retryCount,
+122	    });
+123	  }, [
+124	    phase,
+125	    sortNumbersConfig.gameId,
+126	    roundIndex,
+127	    roundOrder.length,
+128	    retryCount,
+129	  ]);
+130	
+131	  useEffect(() => {
+132	    if (phase !== 'round-complete' || !confettiReady) return;
+133	
+134	    const token = ++completionToken.current;
+135	    const delayMs = resolveTiming(
+136	      'roundAdvanceDelay',
+137	      skin,
+138	      sortNumbersConfig.timing,
+139	    );
+140	    const timer = globalThis.setTimeout(() => {
+141	      if (completionToken.current !== token) return;
+142	
+143	      const isLastRound = roundIndex >= roundOrder.length - 1;
+144	      if (isLastRound) {
+145	        dispatch({ type: 'COMPLETE_GAME' });
+146	        return;
+147	      }
+148	
+149	      const nextConfigIndex = roundOrder[roundIndex + 1];
+150	      const nextRound =
+151	        nextConfigIndex === undefined
+152	          ? undefined
+153	          : sortNumbersConfig.rounds[nextConfigIndex];
+154	
+155	      if (!nextRound) {
+156	        dispatch({ type: 'COMPLETE_GAME' });
+157	        return;
+158	      }
+159	
+160	      const distractor =
+161	        sortNumbersConfig.tileBankMode === 'distractors'
+162	          ? {
+163	              config: sortNumbersConfig.distractors,
+164	              range: sortNumbersConfig.range,
+165	            }
+166	          : undefined;
+167	
+168	      const { tiles: nextTiles, zones: nextZones } = buildSortRound(
+169	        nextRound.sequence,
+170	        sortNumbersConfig.direction,
+171	        distractor,
+172	      );
+173	      dispatch({
+174	        type: 'ADVANCE_ROUND',
+175	        tiles: nextTiles,
+176	        zones: nextZones,
+177	      });
+178	      getGameEventBus().emit({
+179	        type: 'game:round-advance',
+180	        gameId: sortNumbersConfig.gameId,
+181	        sessionId: '',
+182	        profileId: '',
+183	        timestamp: Date.now(),
+184	        roundIndex: roundIndex + 1,
+185	      });
+186	    }, delayMs);
+187	
+188	    return () => {
+189	      globalThis.clearTimeout(timer);
+190	    };
+191	  }, [
+192	    phase,
+193	    confettiReady,
+194	    roundIndex,
+195	    dispatch,
+196	    roundOrder,
+197	    skin,
+198	    sortNumbersConfig.gameId,
+199	    sortNumbersConfig.rounds,
+200	    sortNumbersConfig.direction,
+201	    sortNumbersConfig.tileBankMode,
+202	    sortNumbersConfig.distractors,
+203	    sortNumbersConfig.range,
+204	    sortNumbersConfig.timing,
+205	  ]);
+206	
+207	  if (!round) return null;
+208	
+209	  return (
+210	    <>
+211	      <div className="flex w-full max-w-4xl flex-col items-center justify-center gap-8 px-4 py-6">
+212	        <AnswerGame.Question>
+213	          <p className="text-center text-lg font-semibold text-foreground">
+214	            {directionLabel}
+215	          </p>
+216	        </AnswerGame.Question>
+217	        <AnswerGame.Answer>
+218	          <SlotRow className="gap-2">
+219	            {zones.map((zone, i) => (
+220	              <Slot
+221	                key={zone.id}
+222	                index={i}
+223	                skin={skin}
+224	                className="size-14 rounded-lg"
+225	              >
+226	                {({ label }) => (
+227	                  <span
+228	                    className={`${getNumericTileFontClass(label?.length ?? 0, 56)} font-bold tabular-nums`}
+229	                  >
+230	                    {label}
+231	                  </span>
+232	                )}
+233	              </Slot>
+234	            ))}
+235	          </SlotRow>
+236	        </AnswerGame.Answer>
+237	        <AnswerGame.Choices>
+238	          <SortNumbersTileBank skin={skin} />
+239	        </AnswerGame.Choices>
+240	      </div>
+241	      {skin.RoundCompleteEffect ? (
+242	        <skin.RoundCompleteEffect visible={confettiReady} />
+243	      ) : (
+244	        <ScoreAnimation visible={confettiReady} />
+245	      )}
+246	      {levelCompleteReady ? (
+247	        skin.LevelCompleteOverlay ? (
+248	          <skin.LevelCompleteOverlay
+249	            level={levelIndex + 1}
+250	            onNextLevel={handleNextLevel}
+251	            onDone={handleDone}
+252	          />
+253	        ) : (
+254	          <LevelCompleteOverlay
+255	            level={levelIndex + 1}
+256	            onNextLevel={handleNextLevel}
+257	            onDone={handleDone}
+258	          />
+259	        )
+260	      ) : null}
+261	      {gameOverReady ? (
+262	        skin.CelebrationOverlay ? (
+263	          <skin.CelebrationOverlay
+264	            retryCount={retryCount}
+265	            onPlayAgain={handlePlayAgain}
+266	            onHome={handleHome}
+267	          />
+268	        ) : (
+269	          <GameOverOverlay
+270	            retryCount={retryCount}
+271	            onPlayAgain={handlePlayAgain}
+272	            onHome={handleHome}
+273	          />
+274	        )
+275	      ) : null}
+276	    </>
+277	  );
+278	};
+279	
+280	export const SortNumbers = ({
+281	  config,
+282	  initialState,
+283	  sessionId,
+284	  seed,
+285	}: SortNumbersProps) => {
+286	  const skin = useGameSkin('sort-numbers', config.skin);
+287	  const roundsInOrder = config.roundsInOrder === true;
+288	  const [sessionEpoch, setSessionEpoch] = useState(0);
+289	
+290	  const roundOrder = useMemo(() => {
+291	    void sessionEpoch;
+292	    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+293	  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
+294	
+295	  const firstConfigIndex = roundOrder[0];
+296	  const round0 =
+297	    firstConfigIndex === undefined
+298	      ? undefined
+299	      : config.rounds[firstConfigIndex];
+300	
+301	  const { tiles, zones } = useMemo(() => {
+302	    if (!round0) {
+303	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+304	    }
+305	    const distractor =
+306	      config.tileBankMode === 'distractors'
+307	        ? { config: config.distractors, range: config.range }
+308	        : undefined;
+309	    return buildSortRound(
+310	      round0.sequence,
+311	      config.direction,
+312	      distractor,
+313	    );
+314	  }, [
+315	    round0,
+316	    config.direction,
+317	    config.tileBankMode,
+318	    config.distractors,
+319	    config.range,
+320	  ]);
+321	
+322	  const answerGameConfig = useMemo(
+323	    (): AnswerGameConfig => ({
+324	      gameId: config.gameId,
+325	      inputMethod: config.inputMethod,
+326	      wrongTileBehavior: config.wrongTileBehavior,
+327	      tileBankMode: config.tileBankMode,
+328	      totalRounds: config.rounds.length,
+329	      roundsInOrder: config.roundsInOrder,
+330	      ttsEnabled: config.ttsEnabled,
+331	      touchKeyboardInputMode: 'numeric',
+332	      initialTiles: tiles,
+333	      initialZones: zones,
+334	      slotInteraction: 'free-swap' as const,
+335	      levelMode: config.levelMode,
+336	      hud: config.hud,
+337	    }),
+338	    [
+339	      config.gameId,
+340	      config.inputMethod,
+341	      config.wrongTileBehavior,
+342	      config.tileBankMode,
+343	      config.rounds.length,
+344	      config.roundsInOrder,
+345	      config.ttsEnabled,
+346	      config.levelMode,
+347	      config.hud,
+348	      tiles,
+349	      zones,
+350	    ],
+351	  );
+352	
+353	  if (!round0) return null;
+354	
+355	  return (
+356	    <div
+357	      className={`game-container skin-${skin.id}`}
+358	      style={skin.tokens as React.CSSProperties}
+359	    >
+360	      {skin.SceneBackground ? <skin.SceneBackground /> : null}
+361	      <AnswerGame
+362	        key={sessionEpoch}
+363	        config={answerGameConfig}
+364	        initialState={sessionEpoch === 0 ? initialState : undefined}
+365	        sessionId={sessionId}
+366	        skin={skin}
+367	      >
+368	        <SortNumbersSession
+369	          sortNumbersConfig={config}
+370	          roundOrder={roundOrder}
+371	          skin={skin}
+372	          onRestartSession={() => {
+373	            setSessionEpoch((e) => e + 1);
+374	          }}
+375	        />
+376	      </AnswerGame>
+377	    </div>
+378	  );
+379	};
+380
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:08:40Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+
+```text
+1	import { withDb } from '../../../../.storybook/decorators/withDb';
+2	import { AnswerGame } from './AnswerGame';
+3	import type { AnswerGameConfig } from '../types';
+4	import type { Meta, StoryObj } from '@storybook/react';
+5	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+6	import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+7	import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
+8	
+9	const baseConfig: AnswerGameConfig = {
+10	  gameId: 'storybook',
+11	  inputMethod: 'drag',
+12	  wrongTileBehavior: 'lock-auto-eject',
+13	  tileBankMode: 'exact',
+14	  totalRounds: 3,
+15	  ttsEnabled: true,
+16	};
+17	
+18	const meta: Meta<typeof AnswerGame> = {
+19	  component: AnswerGame,
+20	  tags: ['autodocs'],
+21	  args: { config: baseConfig },
+22	  decorators: [withDb],
+23	};
+24	export default meta;
+25	
+26	type Story = StoryObj<typeof AnswerGame>;
+27	
+28	export const Default: Story = {
+29	  render: (args) => (
+30	    <AnswerGame {...args}>
+31	      <AnswerGame.Question>
+32	        <ImageQuestion src="https://placehold.co/160" prompt="cat" />
+33	        <AudioButton prompt="cat" />
+34	      </AnswerGame.Question>
+35	      <AnswerGame.Answer>
+36	        <div className="flex gap-2 rounded-lg border-2 border-dashed p-4 text-muted-foreground">
+37	          Answer slots here
+38	        </div>
+39	      </AnswerGame.Answer>
+40	      <AnswerGame.Choices>
+41	        <div className="flex gap-2 rounded-lg border-2 border-dashed p-4 text-muted-foreground">
+42	          Tile bank here
+43	        </div>
+44	      </AnswerGame.Choices>
+45	    </AnswerGame>
+46	  ),
+47	};
+48	
+49	export const TextQuestionMode: Story = {
+50	  args: { config: { ...baseConfig, inputMethod: 'type' } },
+51	  render: (args) => (
+52	    <AnswerGame {...args}>
+53	      <AnswerGame.Question>
+54	        <TextQuestion text="three" />
+55	        <AudioButton prompt="three" />
+56	      </AnswerGame.Question>
+57	      <AnswerGame.Answer>
+58	        <div className="flex gap-2 rounded-lg border-2 border-dashed p-4 text-muted-foreground">
+59	          Typed slots here
+60	        </div>
+61	      </AnswerGame.Answer>
+62	    </AnswerGame>
+63	  ),
+64	};
+65	
+66	export const RejectMode: Story = {
+67	  args: { config: { ...baseConfig, wrongTileBehavior: 'reject' } },
+68	  render: Default.render,
+69	};
+70	
+71	export const LockManualMode: Story = {
+72	  args: { config: { ...baseConfig, wrongTileBehavior: 'lock-manual' } },
+73	  render: Default.render,
+74	};
+75
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:08:46Z)**_
+
+Now I have all the context I need. Let me also check the `Slot` component signature to understand the `skin` prop requirement:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:08:47Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.tsx`
+
+```text
+1	import { tileStyle } from '../styles';
+2	import { useAnswerGameContext } from '../useAnswerGameContext';
+3	import { useSlotBehavior } from './useSlotBehavior';
+4	import type { SlotRenderProps } from './useSlotBehavior';
+5	import type { GameSkin } from '@/lib/skin';
+6	import type { ReactNode, Ref } from 'react';
+7	
+8	interface SlotProps {
+9	  index: number;
+10	  as?: 'li' | 'span' | 'div';
+11	  className?: string;
+12	  style?: React.CSSProperties;
+13	  children: (props: SlotRenderProps) => ReactNode;
+14	  /**
+15	   * Optional custom preview renderer. Invoked during drag-hover or swap
+16	   * preview when there is a `previewLabel`. Lets a game render a visual
+17	   * preview (e.g. a domino face) instead of the default bold text. Must
+18	   * apply its own opacity/styling. When omitted, the default
+19	   * `<span>{previewLabel}</span>` is used.
+20	   */
+21	  renderPreview?: (previewLabel: string) => ReactNode;
+22	  /**
+23	   * Optional skin whose `slotDecoration` renderer runs inside the slot.
+24	   * When undefined, no decoration is rendered.
+25	   */
+26	  skin?: GameSkin;
+27	}
+28	
+29	export const Slot = ({
+30	  index,
+31	  as: Tag = 'li',
+32	  className,
+33	  style,
+34	  children,
+35	  renderPreview,
+36	  skin,
+37	}: SlotProps) => {
+38	  const { zones } = useAnswerGameContext();
+39	  const zone = zones[index];
+40	  const {
+41	    renderProps,
+42	    outerRef,
+43	    slotRef,
+44	    dragRef,
+45	    handleClick,
+46	    pointerHandlers,
+47	    isBeingDragged,
+48	  } = useSlotBehavior(index);
+49	
+50	  const {
+51	    label,
+52	    isEmpty,
+53	    isWrong,
+54	    showCursor,
+55	    isPreview,
+56	    previewLabel,
+57	  } = renderProps;
+58	
+59	  // When the slot is used inline (as="span", e.g. SentenceWithGaps inside <p>),
+60	  // the inner visual element must also be a <span> to avoid invalid
+61	  // block-in-inline HTML nesting. For list/block contexts, <div> is correct.
+62	  const InnerTag = Tag === 'span' ? 'span' : 'div';
+63	
+64	  const ariaLabel = isEmpty
+65	    ? `Slot ${index + 1}, empty`
+66	    : `Slot ${index + 1}, filled with ${label}`;
+67	
+68	  const stateClasses = [
+69	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+70	    showCursor && isWrong
+71	      ? 'ring-2 ring-destructive ring-offset-2'
+72	      : showCursor
+73	        ? 'ring-2 ring-primary ring-offset-2'
+74	        : '',
+75	  ]
+76	    .filter(Boolean)
+77	    .join(' ');
+78	
+79	  const baseStyle: React.CSSProperties = {
+80	    background: 'var(--skin-slot-bg)',
+81	    borderColor: 'var(--skin-slot-border)',
+82	    borderRadius: 'var(--skin-slot-radius)',
+83	  };
+84	
+85	  const wrongStyle: React.CSSProperties = isWrong
+86	    ? {
+87	        background: 'var(--skin-wrong-bg)',
+88	        borderColor: 'var(--skin-wrong-border)',
+89	        color: 'var(--skin-wrong-color)',
+90	      }
+91	    : {};
+92	
+93	  const previewStyle: React.CSSProperties = isPreview
+94	    ? {
+95	        borderColor: 'var(--skin-hover-border-color)',
+96	        borderStyle:
+97	          'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+98	        animation: 'pulse-ring 1.5s ease-in-out infinite',
+99	      }
+100	    : {};
+101	
+102	  const correctStyle: React.CSSProperties =
+103	    !isEmpty && !isWrong && !isPreview
+104	      ? {
+105	          background: 'var(--skin-correct-bg)',
+106	          borderColor: 'var(--skin-correct-border)',
+107	          color: 'var(--skin-correct-border)',
+108	        }
+109	      : {};
+110	
+111	  const finalStyle: React.CSSProperties = {
+112	    ...baseStyle,
+113	    ...correctStyle,
+114	    ...wrongStyle,
+115	    ...previewStyle,
+116	    ...style,
+117	  };
+118	
+119	  return (
+120	    // Outer wrapper: the drop target. p-1.5 expands the hit area ~6 px beyond
+121	    // the visual slot on all sides (pragmatic-board card pattern). data-zone-index
+122	    // here ensures touch elementsFromPoint also covers the expanded region.
+123	    <Tag
+124	      ref={
+125	        outerRef as Ref<
+126	          HTMLLIElement & HTMLSpanElement & HTMLDivElement
+127	        >
+128	      }
+129	      aria-label={ariaLabel}
+130	      data-zone-index={index}
+131	      className="relative p-1.5"
+132	    >
+133	      {/* Inner visual slot: carries the state-dependent styling. */}
+134	      <InnerTag
+135	        ref={slotRef as Ref<HTMLDivElement>}
+136	        className={[stateClasses, className].filter(Boolean).join(' ')}
+137	        style={finalStyle}
+138	      >
+139	        {skin?.slotDecoration?.(
+140	          {
+141	            isLocked: zone?.isLocked ?? false,
+142	            isWrong: zone?.isWrong ?? false,
+143	            placedTileId: zone?.placedTileId ?? null,
+144	          },
+145	          index,
+146	        )}
+147	        {isEmpty ? (
+148	          <>
+149	            {isPreview && previewLabel !== null ? (
+150	              renderPreview ? (
+151	                renderPreview(previewLabel)
+152	              ) : (
+153	                <span className="text-xl font-bold opacity-50">
+154	                  {previewLabel}
+155	                </span>
+156	              )
+157	            ) : (
+158	              children(renderProps)
+159	            )}
+160	            {showCursor ? (
+161	              <span
+162	                aria-hidden="true"
+163	                className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+164	              />
+165	            ) : null}
+166	          </>
+167	        ) : (
+168	          <>
+169	            <div
+170	              className="absolute inset-0"
+171	              style={{
+172	                background: 'var(--skin-bank-hole-bg)',
+173	                boxShadow: 'var(--skin-bank-hole-shadow)',
+174	                borderRadius: 'inherit',
+175	              }}
+176	              aria-hidden="true"
+177	            />
+178	            <button
+179	              ref={dragRef}
+180	              type="button"
+181	              className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
+182	              aria-hidden={
+183	                isBeingDragged && !isPreview ? 'true' : undefined
+184	              }
+185	              style={tileStyle()}
+186	              onClick={handleClick}
+187	              onPointerDown={pointerHandlers.onPointerDown}
+188	              onPointerMove={pointerHandlers.onPointerMove}
+189	              onPointerUp={pointerHandlers.onPointerUp}
+190	              onPointerCancel={pointerHandlers.onPointerCancel}
+191	            >
+192	              {isPreview && previewLabel !== null ? (
+193	                renderPreview ? (
+194	                  renderPreview(previewLabel)
+195	                ) : (
+196	                  <span className="text-xl font-bold">
+197	                    {previewLabel}
+198	                  </span>
+199	                )
+200	              ) : (
+201	                children(renderProps)
+202	              )}
+203	            </button>
+204	            {showCursor ? (
+205	              <span
+206	                aria-hidden="true"
+207	                className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-destructive animate-blink"
+208	              />
+209	            ) : null}
+210	          </>
+211	        )}
+212	      </InnerTag>
+213	    </Tag>
+214	  );
+215	};
+216
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:08:50Z)**_
+
+Good. I have everything I need. The types match the plan almost exactly. Now let me write the new story file:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:09:08Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGame } from './AnswerGame';
+import { Slot } from '../Slot/Slot';
+import { SlotRow } from '../Slot/SlotRow';
+import { useAnswerGameContext } from '../useAnswerGameContext';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+type InputMethod = 'drag' | 'type' | 'both';
+type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
+type TileBankMode = 'exact' | 'distractors';
+
+interface StoryArgs {
+  inputMethod: InputMethod;
+  wrongTileBehavior: WrongTileBehavior;
+  tileBankMode: TileBankMode;
+  totalRounds: number;
+  ttsEnabled: boolean;
+}
+
+const initialTiles: TileItem[] = [
+  { id: 'c', label: 'C', value: 'C' },
+  { id: 'a', label: 'A', value: 'A' },
+  { id: 't', label: 'T', value: 'T' },
+];
+
+const initialZones: AnswerZone[] = [
+  {
+    id: 'z0',
+    index: 0,
+    expectedValue: 'C',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+  {
+    id: 'z1',
+    index: 1,
+    expectedValue: 'A',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+  {
+    id: 'z2',
+    index: 2,
+    expectedValue: 'T',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+];
+
+const TapToPlaceBank = () => {
+  const { allTiles, bankTileIds, zones } = useAnswerGameContext();
+  const dispatch = useAnswerGameDispatch();
+
+  const nextEmptyZoneIndex = zones.findIndex((z) => z.placedTileId === null);
+
+  return (
+    <div className="flex gap-2">
+      {bankTileIds.map((tileId) => {
+        const tile = allTiles.find((t) => t.id === tileId);
+        if (!tile) return null;
+        return (
+          <button
+            key={tile.id}
+            type="button"
+            onClick={() => {
+              if (nextEmptyZoneIndex === -1) return;
+              dispatch({
+                type: 'PLACE_TILE',
+                tileId: tile.id,
+                zoneIndex: nextEmptyZoneIndex,
+              });
+            }}
+            className="flex size-14 items-center justify-center rounded-lg border-2 border-primary bg-background text-xl font-bold shadow-sm active:scale-95"
+          >
+            {tile.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const PlayableScene = () => {
+  const { zones } = useAnswerGameContext();
+
+  return (
+    <>
+      <AnswerGame.Question>
+        <p className="text-center text-lg font-semibold text-foreground">
+          Spell CAT
+        </p>
+      </AnswerGame.Question>
+      <AnswerGame.Answer>
+        <SlotRow className="gap-2">
+          {zones.map((zone, i) => (
+            <Slot key={zone.id} index={i} className="size-14 rounded-lg">
+              {({ label }) => (
+                <span className="text-xl font-bold">{label ?? ''}</span>
+              )}
+            </Slot>
+          ))}
+        </SlotRow>
+      </AnswerGame.Answer>
+      <AnswerGame.Choices>
+        <TapToPlaceBank />
+      </AnswerGame.Choices>
+    </>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component: AnswerGame as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    inputMethod: 'drag',
+    wrongTileBehavior: 'lock-auto-eject',
+    tileBankMode: 'exact',
+    totalRounds: 3,
+    ttsEnabled: false,
+  },
+  argTypes: {
+    inputMethod: {
+      control: { type: 'select' },
+      options: ['drag', 'type', 'both'] satisfies InputMethod[],
+    },
+    wrongTileBehavior: {
+      control: { type: 'select' },
+      options: [
+        'reject',
+        'lock-manual',
+        'lock-auto-eject',
+      ] satisfies WrongTileBehavior[],
+    },
+    tileBankMode: {
+      control: { type: 'select' },
+      options: ['exact', 'distractors'] satisfies TileBankMode[],
+    },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    ttsEnabled: { control: 'boolean' },
+  },
+  render: ({
+    inputMethod,
+    wrongTileBehavior,
+    tileBankMode,
+    totalRounds,
+    ttsEnabled,
+  }) => {
+    const config: AnswerGameConfig = {
+      gameId: 'storybook-answer-game',
+      inputMethod,
+      wrongTileBehavior,
+      tileBankMode,
+      totalRounds,
+      ttsEnabled,
+      initialTiles,
+      initialZones,
+    };
+    return (
+      <AnswerGame config={config}>
+        <PlayableScene />
+      </AnswerGame>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Default: Story = {};
+
+export const TextQuestionMode: Story = {
+  args: { inputMethod: 'type' },
+};
+
+export const RejectMode: Story = {
+  args: { wrongTileBehavior: 'reject' },
+};
+
+export const LockManualMode: Story = {
+  args: { wrongTileBehavior: 'lock-manual' },
+};
+
+```
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:09:17Z)**_
+
+Now run typecheck and lint:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:09:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`yarn typecheck 2>&1`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 3.51s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:09:38Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`yarn lint 2>&1`
+
+```text
+Exit code 1
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+  2:1  error  `./AnswerGame` import should occur after import of `../useAnswerGameDispatch`  import/order
+  8:1  error  `react` type import should occur after type import of `@storybook/react`       import/order
+
+✖ 2 problems (2 errors, 0 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:09:40Z)**_
+
+Two import ordering errors. Let me fix the import order:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:09:44Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:09:59Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`yarn lint 2>&1`
+
+```text
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 12.62s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:10:01Z)**_
+
+Both checks pass. Commit now:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:10:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+```bash
+git add src/components/answer-game/AnswerGame/AnswerGame.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/AnswerGame): retrofit per controls policy
+
+Rebuild as a real interactive playground — StoryArgs breaks config into
+individual controls, render wires a real AnswerGameProvider + real Slot
+row + a minimal tap-to-place tile bank (dispatch PLACE_TILE).
+
+play() skipped: HTML5 drag-and-drop is unreliable in jsdom; interactive
+correctness of DnD is covered at the e2e layer.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+```text
+<persisted-output>
+Output too large (44.6KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bec3s07zb.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (c475edef)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx > InstructionsOverlay > renders the game title
+Warning: useRouter must be used inside a <RouterProvider> component!
+Warning: useRouter must be used inside a <RouterProvider> component!
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx > InstructionsOverlay > renders the GameCover at the top
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:10:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git log --oneline -3 2>&1`
+
+```text
+beb14675 stories(answer-game/AnswerGame): retrofit per controls policy
+e824111f stories(answer-game/Slot): retrofit per controls policy
+5d6fe217 docs(plan): implementation plan for audit batch 2
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:10:31Z)**_
+
+DONE — commit `beb14675`.
+
+**Adjustments made vs. the plan template:**
+
+1. **Import order** — `import/order` lint rule required reordering: the `./AnswerGame` import had to move after the sibling `../` imports, and the `react` type import had to move after the `@storybook/react` type import. Fixed and lint passed clean.
+
+No other adjustments were needed. All types matched exactly:
+- `useAnswerGameContext()` returns `AnswerGameState` with fields `allTiles`, `bankTileIds`, `zones` exactly as used.
+- `PLACE_TILE` action shape `{ type, tileId, zoneIndex }` matched `types.ts`.
+- `AnswerGameConfig` has no required fields beyond what the plan specified — all fields used are present.
+- `skin` prop on `AnswerGame` is optional — not needed for the playground.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:10:35Z)**_
+
+Task 2 implemented cleanly at `beb14675`. Dispatching spec-compliance reviewer.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:10:56Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Task 2 spec-compliance review
+
+```text
+SPEC COMPLIANCE: ✅
+
+Gates met:
+- Controls: `inputMethod` select (drag, type, both), `wrongTileBehavior` select (reject, lock-manual, lock-auto-eject), `tileBankMode` select (exact, distractors), `totalRounds` range (1–20), `ttsEnabled` boolean — all with proper argTypes config.
+- State variants: `Default`, `TextQuestionMode`, `RejectMode`, `LockManualMode` — exactly four named exports.
+- Interactive playground: `PlayableScene` renders `AnswerGame.Question` + `AnswerGame.Answer` with real `SlotRow`/`Slot` fed by `zones` from `useAnswerGameContext()`, plus `AnswerGame.Choices` with `TapToPlaceBank` (tap-to-place tile bank dispatching `PLACE_TILE`).
+- fn() cleanup: N/A — no handlers.
+- play(): not present (intentionally omitted).
+- Decorator: `withDb` applied.
+- Export default: `meta` exported as default; all stories named exports.
+- ttsEnabled default: `false`.
+- Imports: `@storybook/react` only; no `@storybook/test`.
+
+Extras not requested:
+- `PlayableScene` and `TapToPlaceBank` helper components — properly encapsulated, support the interactive playground requirement.
+
+APPROVED
+agentId: ad24a5baf71a856a3 (use SendMessage with to: 'ad24a5baf71a856a3' to continue this agent)
+<usage>total_tokens: 24965
+tool_uses: 2
+duration_ms: 9310</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:10:46Z)**_
+
+Spec compliance review only (no code-quality opinions).
+
+Worktree: `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`
+Commit: `beb14675`
+
+Task 2 required retrofitting `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` with these gates:
+
+1. **Controls**: `inputMethod` select (options: drag, type, both), `wrongTileBehavior` select (options: reject, lock-manual, lock-auto-eject), `tileBankMode` select (options: exact, distractors), `totalRounds` range (min 1 max 20), `ttsEnabled` boolean.
+2. **State variants exported**: `Default`, `TextQuestionMode`, `RejectMode`, `LockManualMode` — exactly those four named stories.
+3. **Interactive playground**: renders `AnswerGame.Question` + `AnswerGame.Answer` (with real `SlotRow` + `Slot` fed by `zones` from `useAnswerGameContext`) + `AnswerGame.Choices` (with a local tap-to-place tile bank that dispatches `PLACE_TILE`).
+4. **fn() cleanup**: N/A (no handlers).
+5. **play()**: must NOT be present (intentionally skipped).
+6. **Decorator**: `withDb`.
+7. **`export default meta`** allowed; otherwise only named exports.
+8. **`ttsEnabled: false`** default.
+9. **Imports**: no `@storybook/test` path (only `storybook/test` subpath is acceptable — and not needed here).
+
+Steps:
+1. `git show beb14675 --stat` — confirm only `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` changed.
+2. Read the committed file: `git show beb14675:src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`.
+3. Check each gate.
+
+Report format:
+
+```
+SPEC COMPLIANCE: ✅ or ❌
+
+Gates met:
+- ...
+
+Gates missing or wrong:
+- ...
+
+Extras not requested:
+- ...
+```
+
+End with `APPROVED` or `CHANGES_REQUESTED`. Under 200 words.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:10:48Z)**_
+
+I'll review the spec compliance for the AnswerGame.stories.tsx file at the specified commit.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:10:48Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show beb14675 --stat`
+
+```text
+commit beb14675856536e0ee40b9147dd2c0dcf2f3d062
+Author: leocaseiro <leobok@gmail.com>
+Date:   Tue Apr 21 16:10:05 2026 +1000
+
+    stories(answer-game/AnswerGame): retrofit per controls policy
+    
+    Rebuild as a real interactive playground — StoryArgs breaks config into
+    individual controls, render wires a real AnswerGameProvider + real Slot
+    row + a minimal tap-to-place tile bank (dispatch PLACE_TILE).
+    
+    play() skipped: HTML5 drag-and-drop is unreliable in jsdom; interactive
+    correctness of DnD is covered at the e2e layer.
+    
+    Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+
+ .../answer-game/AnswerGame/AnswerGame.stories.tsx  | 222 ++++++++++++++++-----
+ 1 file changed, 172 insertions(+), 50 deletions(-)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:10:50Z)**_
+
+Now let me read the committed file:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:10:51Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show beb14675:src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+
+```text
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { Slot } from '../Slot/Slot';
+import { SlotRow } from '../Slot/SlotRow';
+import { useAnswerGameContext } from '../useAnswerGameContext';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import { AnswerGame } from './AnswerGame';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
+
+type InputMethod = 'drag' | 'type' | 'both';
+type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
+type TileBankMode = 'exact' | 'distractors';
+
+interface StoryArgs {
+  inputMethod: InputMethod;
+  wrongTileBehavior: WrongTileBehavior;
+  tileBankMode: TileBankMode;
+  totalRounds: number;
+  ttsEnabled: boolean;
+}
+
+const initialTiles: TileItem[] = [
+  { id: 'c', label: 'C', value: 'C' },
+  { id: 'a', label: 'A', value: 'A' },
+  { id: 't', label: 'T', value: 'T' },
+];
+
+const initialZones: AnswerZone[] = [
+  {
+    id: 'z0',
+    index: 0,
+    expectedValue: 'C',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+  {
+    id: 'z1',
+    index: 1,
+    expectedValue: 'A',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+  {
+    id: 'z2',
+    index: 2,
+    expectedValue: 'T',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+];
+
+const TapToPlaceBank = () => {
+  const { allTiles, bankTileIds, zones } = useAnswerGameContext();
+  const dispatch = useAnswerGameDispatch();
+
+  const nextEmptyZoneIndex = zones.findIndex(
+    (z) => z.placedTileId === null,
+  );
+
+  return (
+    <div className="flex gap-2">
+      {bankTileIds.map((tileId) => {
+        const tile = allTiles.find((t) => t.id === tileId);
+        if (!tile) return null;
+        return (
+          <button
+            key={tile.id}
+            type="button"
+            onClick={() => {
+              if (nextEmptyZoneIndex === -1) return;
+              dispatch({
+                type: 'PLACE_TILE',
+                tileId: tile.id,
+                zoneIndex: nextEmptyZoneIndex,
+              });
+            }}
+            className="flex size-14 items-center justify-center rounded-lg border-2 border-primary bg-background text-xl font-bold shadow-sm active:scale-95"
+          >
+            {tile.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const PlayableScene = () => {
+  const { zones } = useAnswerGameContext();
+
+  return (
+    <>
+      <AnswerGame.Question>
+        <p className="text-center text-lg font-semibold text-foreground">
+          Spell CAT
+        </p>
+      </AnswerGame.Question>
+      <AnswerGame.Answer>
+        <SlotRow className="gap-2">
+          {zones.map((zone, i) => (
+            <Slot
+              key={zone.id}
+              index={i}
+              className="size-14 rounded-lg"
+            >
+              {({ label }) => (
+                <span className="text-xl font-bold">{label ?? ''}</span>
+              )}
+            </Slot>
+          ))}
+        </SlotRow>
+      </AnswerGame.Answer>
+      <AnswerGame.Choices>
+        <TapToPlaceBank />
+      </AnswerGame.Choices>
+    </>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component: AnswerGame as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    inputMethod: 'drag',
+    wrongTileBehavior: 'lock-auto-eject',
+    tileBankMode: 'exact',
+    totalRounds: 3,
+    ttsEnabled: false,
+  },
+  argTypes: {
+    inputMethod: {
+      control: { type: 'select' },
+      options: ['drag', 'type', 'both'] satisfies InputMethod[],
+    },
+    wrongTileBehavior: {
+      control: { type: 'select' },
+      options: [
+        'reject',
+        'lock-manual',
+        'lock-auto-eject',
+      ] satisfies WrongTileBehavior[],
+    },
+    tileBankMode: {
+      control: { type: 'select' },
+      options: ['exact', 'distractors'] satisfies TileBankMode[],
+    },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    ttsEnabled: { control: 'boolean' },
+  },
+  render: ({
+    inputMethod,
+    wrongTileBehavior,
+    tileBankMode,
+    totalRounds,
+    ttsEnabled,
+  }) => {
+    const config: AnswerGameConfig = {
+      gameId: 'storybook-answer-game',
+      inputMethod,
+      wrongTileBehavior,
+      tileBankMode,
+      totalRounds,
+      ttsEnabled,
+      initialTiles,
+      initialZones,
+    };
+    return (
+      <AnswerGame config={config}>
+        <PlayableScene />
+      </AnswerGame>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Default: Story = {};
+
+export const TextQuestionMode: Story = {
+  args: { inputMethod: 'type' },
+};
+
+export const RejectMode: Story = {
+  args: { wrongTileBehavior: 'reject' },
+};
+
+export const LockManualMode: Story = {
+  args: { wrongTileBehavior: 'lock-manual' },
+};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:10:55Z)**_
+
+SPEC COMPLIANCE: ✅
+
+Gates met:
+- Controls: `inputMethod` select (drag, type, both), `wrongTileBehavior` select (reject, lock-manual, lock-auto-eject), `tileBankMode` select (exact, distractors), `totalRounds` range (1–20), `ttsEnabled` boolean — all with proper argTypes config.
+- State variants: `Default`, `TextQuestionMode`, `RejectMode`, `LockManualMode` — exactly four named exports.
+- Interactive playground: `PlayableScene` renders `AnswerGame.Question` + `AnswerGame.Answer` with real `SlotRow`/`Slot` fed by `zones` from `useAnswerGameContext()`, plus `AnswerGame.Choices` with `TapToPlaceBank` (tap-to-place tile bank dispatching `PLACE_TILE`).
+- fn() cleanup: N/A — no handlers.
+- play(): not present (intentionally omitted).
+- Decorator: `withDb` applied.
+- Export default: `meta` exported as default; all stories named exports.
+- ttsEnabled default: `false`.
+- Imports: `@storybook/react` only; no `@storybook/test`.
+
+Extras not requested:
+- `PlayableScene` and `TapToPlaceBank` helper components — properly encapsulated, support the interactive playground requirement.
+
+APPROVED
+
+_**Agent - sidechain (2026-04-21 06:11:04Z)**_
+
+Code quality review. Spec compliance already approved — don't re-check.
+
+Worktree: `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`
+Commit: `beb14675` — only `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` changed.
+
+Project conventions:
+- Arrow `const` components (`react/function-component-definition`).
+- `export default` only for `meta` (Storybook config).
+- Named exports elsewhere.
+- No unused imports/variables.
+- Strict TS. No `any` unless justified.
+- Comments only for non-obvious WHY.
+- Tailwind OK.
+
+Steps:
+1. `git show beb14675:src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` — read.
+2. Check:
+   - Clarity & readability
+   - Dead or unused code
+   - DRY issues (the two non-drag stories both share `wrongTileBehavior` — irrelevant unless duplication shows up)
+   - Unnecessary comments
+   - Idioms vs the pilot `src/components/ui/alert-dialog.stories.tsx`
+
+Report format:
+
+```
+Strengths:
+- ...
+
+Issues (Blocker):
+- ...
+
+Issues (Important):
+- ...
+
+Issues (Nit):
+- ...
+```
+
+End with `APPROVED` or `CHANGES_REQUESTED`. Under 200 words.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:11:18Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Task 2 code-quality review
+
+```text
+## Review Summary
+
+**Strengths:**
+- Proper argTypes with `select` and `range` controls — idiomatic, type-safe
+- Clean separation: `TapToPlaceBank` and `PlayableScene` components are clear and functional
+- Good data setup: `initialTiles` and `initialZones` make scenarios self-contained
+- Correct use of `render()` to inject config — matches Storybook best practices
+- All imports used; no dead code
+- TS strict, no `any` except justified cast on line 113
+
+**Issues (Nit):**
+- Unused type import: `AnswerZone` on line 7 is imported but never used directly (only for `zones` context return type, not in story code)
+
+**Issues (Important):**
+- `ComponentType<StoryArgs>` cast is awkward. Cleaner idiom (per pilot): just `component: AnswerGame` — Storybook infers the type from the component itself, no cast needed
+
+---
+
+**CHANGES_REQUESTED**
+
+Remove unused `AnswerZone` import and drop the `ComponentType` cast on `meta.component`.
+agentId: a8c1fbe28bac14c10 (use SendMessage with to: 'a8c1fbe28bac14c10' to continue this agent)
+<usage>total_tokens: 25157
+tool_uses: 3
+duration_ms: 14172</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:11:07Z)**_
+
+I'll review the storybook file from the commit. Let me first read it.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:11:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show beb14675:src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+
+```text
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { Slot } from '../Slot/Slot';
+import { SlotRow } from '../Slot/SlotRow';
+import { useAnswerGameContext } from '../useAnswerGameContext';
+import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+import { AnswerGame } from './AnswerGame';
+import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
+
+type InputMethod = 'drag' | 'type' | 'both';
+type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
+type TileBankMode = 'exact' | 'distractors';
+
+interface StoryArgs {
+  inputMethod: InputMethod;
+  wrongTileBehavior: WrongTileBehavior;
+  tileBankMode: TileBankMode;
+  totalRounds: number;
+  ttsEnabled: boolean;
+}
+
+const initialTiles: TileItem[] = [
+  { id: 'c', label: 'C', value: 'C' },
+  { id: 'a', label: 'A', value: 'A' },
+  { id: 't', label: 'T', value: 'T' },
+];
+
+const initialZones: AnswerZone[] = [
+  {
+    id: 'z0',
+    index: 0,
+    expectedValue: 'C',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+  {
+    id: 'z1',
+    index: 1,
+    expectedValue: 'A',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+  {
+    id: 'z2',
+    index: 2,
+    expectedValue: 'T',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
+];
+
+const TapToPlaceBank = () => {
+  const { allTiles, bankTileIds, zones } = useAnswerGameContext();
+  const dispatch = useAnswerGameDispatch();
+
+  const nextEmptyZoneIndex = zones.findIndex(
+    (z) => z.placedTileId === null,
+  );
+
+  return (
+    <div className="flex gap-2">
+      {bankTileIds.map((tileId) => {
+        const tile = allTiles.find((t) => t.id === tileId);
+        if (!tile) return null;
+        return (
+          <button
+            key={tile.id}
+            type="button"
+            onClick={() => {
+              if (nextEmptyZoneIndex === -1) return;
+              dispatch({
+                type: 'PLACE_TILE',
+                tileId: tile.id,
+                zoneIndex: nextEmptyZoneIndex,
+              });
+            }}
+            className="flex size-14 items-center justify-center rounded-lg border-2 border-primary bg-background text-xl font-bold shadow-sm active:scale-95"
+          >
+            {tile.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const PlayableScene = () => {
+  const { zones } = useAnswerGameContext();
+
+  return (
+    <>
+      <AnswerGame.Question>
+        <p className="text-center text-lg font-semibold text-foreground">
+          Spell CAT
+        </p>
+      </AnswerGame.Question>
+      <AnswerGame.Answer>
+        <SlotRow className="gap-2">
+          {zones.map((zone, i) => (
+            <Slot
+              key={zone.id}
+              index={i}
+              className="size-14 rounded-lg"
+            >
+              {({ label }) => (
+                <span className="text-xl font-bold">{label ?? ''}</span>
+              )}
+            </Slot>
+          ))}
+        </SlotRow>
+      </AnswerGame.Answer>
+      <AnswerGame.Choices>
+        <TapToPlaceBank />
+      </AnswerGame.Choices>
+    </>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component: AnswerGame as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  decorators: [withDb],
+  args: {
+    inputMethod: 'drag',
+    wrongTileBehavior: 'lock-auto-eject',
+    tileBankMode: 'exact',
+    totalRounds: 3,
+    ttsEnabled: false,
+  },
+  argTypes: {
+    inputMethod: {
+      control: { type: 'select' },
+      options: ['drag', 'type', 'both'] satisfies InputMethod[],
+    },
+    wrongTileBehavior: {
+      control: { type: 'select' },
+      options: [
+        'reject',
+        'lock-manual',
+        'lock-auto-eject',
+      ] satisfies WrongTileBehavior[],
+    },
+    tileBankMode: {
+      control: { type: 'select' },
+      options: ['exact', 'distractors'] satisfies TileBankMode[],
+    },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    ttsEnabled: { control: 'boolean' },
+  },
+  render: ({
+    inputMethod,
+    wrongTileBehavior,
+    tileBankMode,
+    totalRounds,
+    ttsEnabled,
+  }) => {
+    const config: AnswerGameConfig = {
+      gameId: 'storybook-answer-game',
+      inputMethod,
+      wrongTileBehavior,
+      tileBankMode,
+      totalRounds,
+      ttsEnabled,
+      initialTiles,
+      initialZones,
+    };
+    return (
+      <AnswerGame config={config}>
+        <PlayableScene />
+      </AnswerGame>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Default: Story = {};
+
+export const TextQuestionMode: Story = {
+  args: { inputMethod: 'type' },
+};
+
+export const RejectMode: Story = {
+  args: { wrongTileBehavior: 'reject' },
+};
+
+export const LockManualMode: Story = {
+  args: { wrongTileBehavior: 'lock-manual' },
+};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:11:10Z)**_
+
+Now let me check the pilot file for comparison.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:11:11Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./src/components/ui/alert-dialog.stories.tsx`
+
+```text
+1	import {
+2	  AlertDialog,
+3	  AlertDialogAction,
+4	  AlertDialogCancel,
+5	  AlertDialogContent,
+6	  AlertDialogDescription,
+7	  AlertDialogFooter,
+8	  AlertDialogHeader,
+9	  AlertDialogTitle,
+10	  AlertDialogTrigger,
+11	} from './alert-dialog';
+12	import { Button } from './button';
+13	import type { Meta, StoryObj } from '@storybook/react';
+14	
+15	const meta: Meta<typeof AlertDialog> = {
+16	  component: AlertDialog,
+17	  tags: ['autodocs'],
+18	};
+19	export default meta;
+20	
+21	type Story = StoryObj<typeof AlertDialog>;
+22	
+23	export const Default: Story = {
+24	  render: () => (
+25	    <AlertDialog>
+26	      <AlertDialogTrigger asChild>
+27	        <Button variant="destructive">Delete account</Button>
+28	      </AlertDialogTrigger>
+29	      <AlertDialogContent>
+30	        <AlertDialogHeader>
+31	          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+32	          <AlertDialogDescription>
+33	            This action cannot be undone.
+34	          </AlertDialogDescription>
+35	        </AlertDialogHeader>
+36	        <AlertDialogFooter>
+37	          <AlertDialogCancel>Cancel</AlertDialogCancel>
+38	          <AlertDialogAction>Delete</AlertDialogAction>
+39	        </AlertDialogFooter>
+40	      </AlertDialogContent>
+41	    </AlertDialog>
+42	  ),
+43	};
+44
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:11:13Z)**_
+
+Now let me verify the imports and check for any unused code:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:11:13Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`grep -n "import" src/components/answer-game/AnswerGame/AnswerGame.stories.tsx | head -20`
+
+```text
+1:import { withDb } from '../../../../.storybook/decorators/withDb';
+2:import { Slot } from '../Slot/Slot';
+3:import { SlotRow } from '../Slot/SlotRow';
+4:import { useAnswerGameContext } from '../useAnswerGameContext';
+5:import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+6:import { AnswerGame } from './AnswerGame';
+7:import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+8:import type { Meta, StoryObj } from '@storybook/react';
+9:import type { ComponentType } from 'react';
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:11:18Z)**_
+
+## Review Summary
+
+**Strengths:**
+- Proper argTypes with `select` and `range` controls — idiomatic, type-safe
+- Clean separation: `TapToPlaceBank` and `PlayableScene` components are clear and functional
+- Good data setup: `initialTiles` and `initialZones` make scenarios self-contained
+- Correct use of `render()` to inject config — matches Storybook best practices
+- All imports used; no dead code
+- TS strict, no `any` except justified cast on line 113
+
+**Issues (Nit):**
+- Unused type import: `AnswerZone` on line 7 is imported but never used directly (only for `zones` context return type, not in story code)
+
+**Issues (Important):**
+- `ComponentType<StoryArgs>` cast is awkward. Cleaner idiom (per pilot): just `component: AnswerGame` — Storybook infers the type from the component itself, no cast needed
+
+---
+
+**CHANGES_REQUESTED**
+
+Remove unused `AnswerZone` import and drop the `ComponentType` cast on `meta.component`.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:11:29Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:11:30Z)**_
+
+Reviewer's two issues are wrong: `AnswerZone` IS used in `initialZones: AnswerZone[]`, and the `ComponentType<StoryArgs>` cast is explicitly required by the plan's "Complex Object Props pattern" (the pilot's alert-dialog pattern — StoryArgs doesn't match AnswerGame's actual `{ config }` props shape). Approving Task 2.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:11:30Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #8 status
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:11:31Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #9 status
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:11:35Z)**_
+
+Dispatching Task 3 implementer (InstructionsOverlay — most complex, interactive stories with play() flows).
+
+_**Agent (claude-opus-4-7 2026-04-21 06:15:48Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Task 3: InstructionsOverlay stories retrofit
+
+```text
+DONE — commit `3bab9e69`.
+
+**Adjustments relative to the template:**
+
+1. **Import order**: The template's import block had `type` imports interleaved with regular imports. The project's `import/order` rule puts all `import type` statements in a trailing `type` group, sorted alphabetically. Applied `eslint --fix` to produce the correct order: regular imports first (`storybook/test`, decorators, `InstructionsOverlay`), then type imports (`SaveCustomGameInput`, `GameColorKey`, `@storybook/react`, `react`).
+
+2. **No other signature changes required**: `SaveCustomGameInput` is exported from `InstructionsOverlay.tsx` directly (confirmed). `config` is `Record<string, unknown>` — `{ totalRounds }` (number) satisfies that. `onUpdateCustomGame` signature matches template exactly. `customGameColor` prop name is correct.
+
+**Concerns for `play()` flows (flag only — do not preemptively remove):**
+
+- `OpensSettings` uses `portal.queryByRole('dialog')` after `{Escape}`, but the component renders its own outermost `<div role="dialog">` via portal (the instructions overlay itself). After pressing Escape on the `AdvancedConfigModal`, the modal should close but the outer instructions div still has `role="dialog"`. The `queryByRole('dialog')` null check may fail because the outer overlay is always present. This is the most likely `play()` failure at CI time — the Escape close assertion targets the modal dialog but there will always be one `role="dialog"` in the body (the overlay itself). If this fires, the fix is to narrow the query with a more specific name matcher.
+agentId: a9f1a8a81b66c6e6e (use SendMessage with to: 'a9f1a8a81b66c6e6e' to continue this agent)
+<usage>total_tokens: 39469
+tool_uses: 19
+duration_ms: 194750</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:12:33Z)**_
+
+You are implementing Task 3 of a Storybook retrofit plan for BaseSkill.
+
+# Scene Setting
+
+Batch 2 of a Storybook audit. Tasks 1 (Slot) and 2 (AnswerGame) are complete. Your job is Task 3: `InstructionsOverlay.stories.tsx` — the most interactive retrofit in this batch, with 9 controls, 7 state variants, and 3 `play()` flows.
+
+Critical gotcha: `InstructionsOverlay` renders its content through `createPortal(..., document.body)`. Queries scoped to `within(canvasElement)` will miss everything. Use `within(document.body)` and wrap `toBeVisible()` / `queryByRole(...).toBeNull()` in `waitFor()` to tolerate Radix animation races.
+
+Also: TTS has a known crash path — always keep `ttsEnabled: false` in every story.
+
+Worktree (cwd): `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`
+Branch: `audit/storybook-batch-2-answer-game`. Never commit to master.
+
+# Shared Conventions
+
+- Import test helpers from `storybook/test` (subpath).
+- `export default meta` is the one allowed default export.
+- Arrow `const` components.
+- Commit message shape: `stories(answer-game/<name>): retrofit per controls policy`.
+- Per-task verification: `yarn typecheck` → 0 AND `yarn lint` → 0 before committing.
+
+# Task 3: Retrofit `InstructionsOverlay.stories.tsx`
+
+**Files:**
+
+- Modify: `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`
+- Read (context): `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`, `src/lib/game-colors.ts`, `.storybook/decorators/withRouter.tsx` (verify path!), `.storybook/decorators/withDb.tsx`
+
+**Gates:**
+
+- Controls: `StoryArgs` with `text`, `gameTitle`, `gameId`, `customGameColor` select, `ttsEnabled` boolean, `isBookmarked` boolean, `totalRounds` range, `customGameId` text, `customGameName` text.
+- `fn()`: every handler arg uses `fn()` from `storybook/test`. Replace any old `{ action: '…' }` argTypes.
+- Decorators: `withDb` + `withRouter`.
+- State variants: `Default`, `WithCustomGame`, `WordSpellDefault`, `NotBookmarked`, `Bookmarked`, `NotBookmarkedCustomGame`, `BookmarkedCustomGame`.
+- `play()` flows: `StartsGame`, `TogglesBookmark`, `OpensSettings`.
+- TTS: `ttsEnabled: false` across all stories.
+
+**Steps:**
+
+### Step 1: Verify decorator paths
+
+Run `ls .storybook/decorators/` from the worktree root. Confirm `withRouter` exists (as `.tsx` or `.ts`). The import path is `'../../../../.storybook/decorators/withRouter'` — same 4-level depth as `withDb`. If `withRouter` doesn't exist, STOP and report BLOCKED.
+
+### Step 2: Confirm `GAME_COLOR_KEYS` in `src/lib/game-colors.ts`
+
+Read that file. The plan assumes the 12 keys `['indigo','teal','rose','amber','sky','lime','purple','orange','pink','emerald','slate','cyan']`. If the list has changed, use the actual current list. If unchanged, proceed with the template below.
+
+### Step 3: Read `InstructionsOverlay.tsx` to confirm the prop signature
+
+Specifically check:
+- Does `onSaveCustomGame` expect `(input: SaveCustomGameInput) => Promise<string>` or a different shape? (the plan template uses `SaveCustomGameInput`.)
+- Does `onUpdateCustomGame` take `(name, config, extras?)` — confirm param signatures.
+- Confirm `customGameColor` prop name (vs `color`).
+- Confirm `config` is an object prop like `{ totalRounds: number }` vs a flat field.
+- Confirm `SaveCustomGameInput` is exported from that file — if it's exported from a different module, import from the real source.
+
+Adjust the template below only as needed to make it typecheck. Do NOT mock up types that don't exist.
+
+### Step 4: Replace the file
+
+Template (adjust imports and signatures if Step 3 revealed differences):
+
+```tsx
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { withRouter } from '../../../../.storybook/decorators/withRouter';
+import { InstructionsOverlay } from './InstructionsOverlay';
+import type { SaveCustomGameInput } from './InstructionsOverlay';
+import type { GameColorKey } from '@/lib/game-colors';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+interface StoryArgs {
+  text: string;
+  gameTitle: string;
+  gameId: string;
+  customGameColor: GameColorKey;
+  ttsEnabled: boolean;
+  isBookmarked: boolean;
+  totalRounds: number;
+  customGameId: string;
+  customGameName: string;
+  onStart: () => void;
+  onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
+  onUpdateCustomGame: (
+    name: string,
+    config: Record<string, unknown>,
+    extras?: { cover?: unknown; color?: GameColorKey },
+  ) => Promise<void>;
+  onToggleBookmark: () => void;
+  onConfigChange: (config: Record<string, unknown>) => void;
+}
+
+const GAME_COLOR_OPTIONS = [
+  'indigo',
+  'teal',
+  'rose',
+  'amber',
+  'sky',
+  'lime',
+  'purple',
+  'orange',
+  'pink',
+  'emerald',
+  'slate',
+  'cyan',
+] as const satisfies readonly GameColorKey[];
+
+const meta: Meta<StoryArgs> = {
+  component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  decorators: [withDb, withRouter],
+  parameters: { layout: 'fullscreen' },
+  args: {
+    text: 'Listen to each number and drag it into the correct slot to sort from smallest to biggest.',
+    gameTitle: 'Sort Numbers',
+    gameId: 'sort-numbers',
+    customGameColor: 'indigo' as GameColorKey,
+    ttsEnabled: false,
+    isBookmarked: false,
+    totalRounds: 5,
+    customGameId: '',
+    customGameName: '',
+    onStart: fn(),
+    onSaveCustomGame: fn(async () => 'stub-id'),
+    onUpdateCustomGame: fn(async () => {}),
+    onToggleBookmark: fn(),
+    onConfigChange: fn(),
+  },
+  argTypes: {
+    text: { control: 'text' },
+    gameTitle: { control: 'text' },
+    gameId: { control: 'text' },
+    customGameColor: {
+      control: { type: 'select' },
+      options: GAME_COLOR_OPTIONS,
+    },
+    ttsEnabled: { control: 'boolean' },
+    isBookmarked: { control: 'boolean' },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    customGameId: { control: 'text' },
+    customGameName: { control: 'text' },
+    onStart: { table: { disable: true } },
+    onSaveCustomGame: { table: { disable: true } },
+    onUpdateCustomGame: { table: { disable: true } },
+    onToggleBookmark: { table: { disable: true } },
+    onConfigChange: { table: { disable: true } },
+  },
+  render: ({
+    text,
+    gameTitle,
+    gameId,
+    customGameColor,
+    ttsEnabled,
+    isBookmarked,
+    totalRounds,
+    customGameId,
+    customGameName,
+    onStart,
+    onSaveCustomGame,
+    onUpdateCustomGame,
+    onToggleBookmark,
+    onConfigChange,
+  }) => (
+    <InstructionsOverlay
+      text={text}
+      gameTitle={gameTitle}
+      gameId={gameId}
+      customGameColor={customGameColor}
+      ttsEnabled={ttsEnabled}
+      isBookmarked={isBookmarked}
+      config={{ totalRounds }}
+      customGameId={customGameId || undefined}
+      customGameName={customGameName || undefined}
+      onStart={onStart}
+      onSaveCustomGame={onSaveCustomGame}
+      onUpdateCustomGame={onUpdateCustomGame}
+      onToggleBookmark={onToggleBookmark}
+      onConfigChange={onConfigChange}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Default: Story = {};
+
+export const WithCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+  },
+};
+
+export const WordSpellDefault: Story = {
+  args: {
+    text: 'Drag the letters to spell the word.',
+    gameTitle: 'Word Spell',
+    gameId: 'word-spell',
+    totalRounds: 8,
+  },
+};
+
+export const NotBookmarked: Story = {
+  args: { isBookmarked: false },
+};
+
+export const Bookmarked: Story = {
+  args: { isBookmarked: true },
+};
+
+export const NotBookmarkedCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+    isBookmarked: false,
+  },
+};
+
+export const BookmarkedCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+    isBookmarked: true,
+  },
+};
+
+export const StartsGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+  },
+  play: async ({ args }) => {
+    const portal = within(document.body);
+    await userEvent.click(
+      await portal.findByRole('button', { name: /let/i }),
+    );
+    await waitFor(() => {
+      expect(args.onStart).toHaveBeenCalled();
+    });
+  },
+};
+
+export const TogglesBookmark: Story = {
+  args: { isBookmarked: false },
+  play: async ({ args }) => {
+    const portal = within(document.body);
+    const bookmarkButton = await portal.findByRole('button', {
+      name: /bookmark/i,
+    });
+    await userEvent.click(bookmarkButton);
+    await waitFor(() => {
+      expect(args.onToggleBookmark).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const OpensSettings: Story = {
+  play: async () => {
+    const portal = within(document.body);
+    const settingsButton = await portal.findByRole('button', {
+      name: /configure/i,
+    });
+    await userEvent.click(settingsButton);
+    await waitFor(() => {
+      expect(portal.getByRole('dialog')).toBeVisible();
+    });
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(portal.queryByRole('dialog')).toBeNull();
+    });
+  },
+};
+```
+
+### Step 5: Run `yarn typecheck` — expect exit 0.
+
+If prop signatures or type names differ from what Step 3 surfaced, fix the imports and argument types accordingly.
+
+### Step 6: Run `yarn lint` — expect exit 0.
+
+### Step 7: Check accessible names
+
+The `play()` flows query buttons by regex name. Read the component to confirm the actual button labels render. Common issues:
+- "Let's go!" vs i18n key — if the component uses translation keys, the name matcher `/let/i` may still work but verify.
+- Bookmark button: its aria-label switches between "Remove bookmark" / "Add bookmark" — `/bookmark/i` catches both.
+- Settings button: whatever the configure/settings button's aria-label says, the regex `/configure/i` is the plan's assumption. If the component uses `/settings/i` instead, update the regex.
+
+Do NOT run the storybook test-runner (too slow). If you're uncertain a play() will pass at the end-of-PR test run, flag the specific concern in the return report — don't delete play() stories preemptively.
+
+### Step 8: Self-review
+
+- No emojis.
+- All 7 state variants + 3 play() stories exported.
+- `ttsEnabled: false` across all stories.
+- `fn()` for every handler arg; no `{ action: '...' }`.
+- Portal queries use `within(document.body)`, not `within(canvasElement)`.
+- `waitFor()` wraps visibility/queryByRole assertions.
+
+### Step 9: Commit
+
+```bash
+git add src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+git commit -m "$(cat <<'EOF'
+stories(answer-game/InstructionsOverlay): retrofit per controls policy
+
+Rebuild as an interactive story — StoryArgs exposes text, gameTitle,
+gameId, customGameColor select, ttsEnabled, isBookmarked,
+config.totalRounds range, customGameId/Name. All handlers wired to
+fn() spies. Decorators: withDb + withRouter.
+
+Three play() flows: StartsGame, TogglesBookmark, OpensSettings (portal-
+scoped, Escape-close). ttsEnabled: false throughout to avoid the TTS
+crash path.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+# Status to return
+
+Return `DONE` + commit SHA, `DONE_WITH_CONCERNS` (list concerns), `NEEDS_CONTEXT`, or `BLOCKED`.
+
+List any signature/path adjustments you made relative to the template. Under 250 words.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:12:35Z)**_
+
+I'll work through this systematically, starting with the verification steps.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:12:37Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+List decorator files to verify withRouter exists
+
+`ls /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/.storybook/decorators/`
+
+```text
+withDb.tsx
+withRouter.tsx
+withTheme.tsx
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:12:38Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/lib/game-colors.ts`
+
+```text
+1	// src/lib/game-colors.ts
+2	export const GAME_COLOR_KEYS = [
+3	  'indigo',
+4	  'teal',
+5	  'rose',
+6	  'amber',
+7	  'sky',
+8	  'lime',
+9	  'purple',
+10	  'orange',
+11	  'pink',
+12	  'emerald',
+13	  'slate',
+14	  'cyan',
+15	] as const;
+16	
+17	export type GameColorKey = (typeof GAME_COLOR_KEYS)[number];
+18	
+19	export type ColorTokens = {
+20	  border: string; // used for selected ring in colour picker
+21	  playBg: string; // primary colour — all other uses derived from this via CSS utility classes
+22	  text: string; // contrast-safe colour for text on light card backgrounds (≥3:1 large bold)
+23	};
+24	
+25	export const GAME_COLORS: Record<GameColorKey, ColorTokens> = {
+26	  indigo: { border: '#c7d2fe', playBg: '#6366f1', text: '#4338ca' },
+27	  teal: { border: '#99f6e4', playBg: '#14b8a6', text: '#0f766e' },
+28	  rose: { border: '#fecdd3', playBg: '#f43f5e', text: '#be123c' },
+29	  amber: { border: '#fde68a', playBg: '#f59e0b', text: '#b45309' },
+30	  sky: { border: '#bae6fd', playBg: '#0ea5e9', text: '#0369a1' },
+31	  lime: { border: '#d9f99d', playBg: '#84cc16', text: '#4d7c0f' },
+32	  purple: { border: '#e9d5ff', playBg: '#a855f7', text: '#7e22ce' },
+33	  orange: { border: '#fed7aa', playBg: '#f97316', text: '#c2410c' },
+34	  pink: { border: '#fbcfe8', playBg: '#ec4899', text: '#be185d' },
+35	  emerald: { border: '#a7f3d0', playBg: '#10b981', text: '#047857' },
+36	  slate: { border: '#cbd5e1', playBg: '#64748b', text: '#334155' },
+37	  cyan: { border: '#a5f3fc', playBg: '#06b6d4', text: '#0e7490' },
+38	};
+39	
+40	export const DEFAULT_GAME_COLOR: GameColorKey = 'indigo';
+41
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:12:41Z)**_
+
+Good. `withRouter.tsx` exists and game colors match the plan. Now read the `InstructionsOverlay.tsx` component to confirm prop signatures.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:12:43Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`
+
+```text
+1	// src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
+2	import { useNavigate, useRouter } from '@tanstack/react-router';
+3	import { Settings as SettingsIcon, Star } from 'lucide-react';
+4	import { useEffect, useRef, useState } from 'react';
+5	import { createPortal } from 'react-dom';
+6	import { useTranslation } from 'react-i18next';
+7	import type { Cover } from '@/games/cover-type';
+8	import type { GameColorKey } from '@/lib/game-colors';
+9	import type { JSX } from 'react';
+10	import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
+11	import { GameCover } from '@/components/GameCover';
+12	import {
+13	  Dialog,
+14	  DialogContent,
+15	  DialogHeader,
+16	  DialogTitle,
+17	} from '@/components/ui/dialog';
+18	import { getSimpleConfigFormRenderer } from '@/games/config-fields-registry';
+19	import { resolveCover } from '@/games/cover';
+20	import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
+21	import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
+22	import { suggestCustomGameName } from '@/lib/suggest-custom-game-name';
+23	
+24	type HeaderActionsProps = {
+25	  isBookmarked?: boolean;
+26	  onToggleBookmark?: () => void;
+27	  onOpenSettings: () => void;
+28	};
+29	
+30	const HeaderActions = ({
+31	  isBookmarked,
+32	  onToggleBookmark,
+33	  onOpenSettings,
+34	}: HeaderActionsProps): JSX.Element => {
+35	  const { t } = useTranslation(['games', 'common']);
+36	  return (
+37	    <div className="flex items-center gap-2">
+38	      {onToggleBookmark && (
+39	        <button
+40	          type="button"
+41	          aria-label={
+42	            isBookmarked
+43	              ? t('common:bookmark.remove', {
+44	                  defaultValue: 'Remove bookmark',
+45	                })
+46	              : t('common:bookmark.add', {
+47	                  defaultValue: 'Add bookmark',
+48	                })
+49	          }
+50	          aria-pressed={isBookmarked ?? false}
+51	          onClick={onToggleBookmark}
+52	          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+53	        >
+54	          <Star
+55	            size={18}
+56	            aria-hidden="true"
+57	            fill={isBookmarked ? 'currentColor' : 'none'}
+58	          />
+59	        </button>
+60	      )}
+61	      <button
+62	        type="button"
+63	        aria-label={t('instructions.configure', {
+64	          defaultValue: 'Configure',
+65	        })}
+66	        onClick={onOpenSettings}
+67	        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+68	      >
+69	        <SettingsIcon size={18} />
+70	      </button>
+71	    </div>
+72	  );
+73	};
+74	
+75	export type SaveCustomGameInput = {
+76	  name: string;
+77	  color: GameColorKey;
+78	  config: Record<string, unknown>;
+79	  cover?: Cover;
+80	};
+81	
+82	type InstructionsOverlayProps = {
+83	  text: string;
+84	  onStart: () => void;
+85	  ttsEnabled: boolean;
+86	  gameTitle: string;
+87	  gameId: string;
+88	  cover?: Cover;
+89	  customGameId?: string;
+90	  customGameName?: string;
+91	  customGameColor?: GameColorKey;
+92	  config: Record<string, unknown>;
+93	  onConfigChange: (config: Record<string, unknown>) => void;
+94	  onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
+95	  onUpdateCustomGame?: (
+96	    name: string,
+97	    config: Record<string, unknown>,
+98	    extras?: { cover?: Cover; color?: GameColorKey },
+99	  ) => Promise<void>;
+100	  onDeleteCustomGame?: (configId: string) => Promise<void>;
+101	  existingCustomGameNames?: readonly string[];
+102	  isBookmarked?: boolean;
+103	  onToggleBookmark?: () => void;
+104	};
+105	
+106	export const InstructionsOverlay = ({
+107	  text,
+108	  onStart,
+109	  ttsEnabled,
+110	  gameTitle,
+111	  gameId,
+112	  cover,
+113	  customGameId,
+114	  customGameName,
+115	  customGameColor = DEFAULT_GAME_COLOR,
+116	  config,
+117	  onConfigChange,
+118	  onSaveCustomGame,
+119	  onUpdateCustomGame,
+120	  onDeleteCustomGame,
+121	  existingCustomGameNames = [],
+122	  isBookmarked,
+123	  onToggleBookmark,
+124	}: InstructionsOverlayProps): JSX.Element => {
+125	  const { t } = useTranslation(['games', 'common']);
+126	  const navigate = useNavigate({
+127	    from: '/$locale/game/$gameId',
+128	  });
+129	  const router = useRouter();
+130	  const [modalOpen, setModalOpen] = useState(false);
+131	  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+132	  const [savingName, setSavingName] = useState('');
+133	  const [saveSubmitAttempted, setSaveSubmitAttempted] = useState(false);
+134	  const saveNameRef = useRef<HTMLInputElement>(null);
+135	
+136	  useEffect(() => {
+137	    if (saveDialogOpen) {
+138	      // Defer so the Radix Dialog finishes mounting before we grab focus.
+139	      const id = globalThis.setTimeout(
+140	        () => saveNameRef.current?.focus(),
+141	        0,
+142	      );
+143	      return () => globalThis.clearTimeout(id);
+144	    }
+145	    return;
+146	  }, [saveDialogOpen]);
+147	
+148	  useEffect(() => {
+149	    if (ttsEnabled) speak(text);
+150	    return () => {
+151	      cancelSpeech();
+152	    };
+153	    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount to speak instructions once
+154	  }, []);
+155	
+156	  const settingsColors = GAME_COLORS[customGameColor];
+157	  const resolvedCover = resolveCover({ cover }, gameId);
+158	
+159	  const SimpleForm = getSimpleConfigFormRenderer(gameId);
+160	
+161	  const modalMode =
+162	    customGameId && customGameName
+163	      ? ({
+164	          kind: 'customGame',
+165	          configId: customGameId,
+166	          name: customGameName,
+167	          color: customGameColor,
+168	          cover,
+169	        } as const)
+170	      : ({ kind: 'default' } as const);
+171	
+172	  const handlePlay = () => {
+173	    if (customGameId && customGameName && onUpdateCustomGame) {
+174	      void (async () => {
+175	        try {
+176	          await onUpdateCustomGame(customGameName, config, {
+177	            cover,
+178	            color: customGameColor,
+179	          });
+180	        } catch (error) {
+181	          console.error('Failed to save custom game on play', error);
+182	        }
+183	        onStart();
+184	      })();
+185	      return;
+186	    }
+187	    setSaveSubmitAttempted(false);
+188	    setSavingName(
+189	      suggestCustomGameName(gameTitle, existingCustomGameNames),
+190	    );
+191	    setSaveDialogOpen(true);
+192	  };
+193	
+194	  const saveOnPlayError: string | null = (() => {
+195	    const trimmed = savingName.trim();
+196	    if (trimmed === '')
+197	      return t('instructions.nameRequired', {
+198	        defaultValue: 'Please enter a custom game name.',
+199	      });
+200	    if (existingCustomGameNames.includes(trimmed))
+201	      return t('instructions.nameDuplicate', {
+202	        defaultValue: 'A custom game with that name already exists.',
+203	      });
+204	    return null;
+205	  })();
+206	  const showSaveOnPlayError =
+207	    saveSubmitAttempted && saveOnPlayError !== null;
+208	
+209	  const handleSaveAndPlay = () => {
+210	    setSaveSubmitAttempted(true);
+211	    if (saveOnPlayError !== null) {
+212	      saveNameRef.current?.focus();
+213	      return;
+214	    }
+215	    const trimmed = savingName.trim();
+216	    void (async () => {
+217	      try {
+218	        const newId = await onSaveCustomGame({
+219	          name: trimmed,
+220	          color: customGameColor,
+221	          config,
+222	          cover,
+223	        });
+224	        setSaveDialogOpen(false);
+225	        await navigate({
+226	          search: (prev) => ({ ...prev, configId: newId }),
+227	        });
+228	        onStart();
+229	      } catch (error) {
+230	        console.error('Failed to save custom game on play', error);
+231	      }
+232	    })();
+233	  };
+234	
+235	  const handlePlayWithoutSaving = () => {
+236	    setSaveDialogOpen(false);
+237	    onStart();
+238	  };
+239	
+240	  return createPortal(
+241	    <div
+242	      role="dialog"
+243	      aria-label="Game instructions"
+244	      className="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-background/95 px-5 pb-8 pt-24"
+245	    >
+246	      <div className="mx-auto flex w-full max-w-sm flex-col overflow-hidden rounded-3xl bg-card shadow-lg md:max-w-2xl">
+247	        {/* 1. Hero cover */}
+248	        <div className="flex justify-center bg-muted/40 p-4">
+249	          <GameCover cover={resolvedCover} size="hero" />
+250	        </div>
+251	
+252	        <div className="flex flex-col gap-4 p-4">
+253	          {/* 2. Title row + bookmark + cog — matches GameCard heading/subtitle order */}
+254	          <div className="flex items-center justify-between gap-2">
+255	            <div>
+256	              <h2
+257	                className="text-xl font-extrabold"
+258	                style={
+259	                  customGameName
+260	                    ? { color: settingsColors.text }
+261	                    : undefined
+262	                }
+263	              >
+264	                {customGameName ?? gameTitle}
+265	              </h2>
+266	              {customGameName && (
+267	                <p className="text-xs italic text-foreground/80">
+268	                  {gameTitle}
+269	                </p>
+270	              )}
+271	            </div>
+272	            <HeaderActions
+273	              isBookmarked={isBookmarked}
+274	              onToggleBookmark={onToggleBookmark}
+275	              onOpenSettings={() => setModalOpen(true)}
+276	            />
+277	          </div>
+278	
+279	          {/* 3. Instructions text */}
+280	          <p className="text-center text-base font-semibold text-foreground leading-relaxed">
+281	            {text}
+282	          </p>
+283	
+284	          {/* 4. Let's go button */}
+285	          <button
+286	            type="button"
+287	            onClick={handlePlay}
+288	            className="h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95"
+289	          >
+290	            {t('instructions.lets-go')}
+291	          </button>
+292	
+293	          {/* 5. Simple settings form (always expanded) */}
+294	          {SimpleForm && (
+295	            <div className="border-t border-border pt-4">
+296	              <SimpleForm config={config} onChange={onConfigChange} />
+297	            </div>
+298	          )}
+299	        </div>
+300	      </div>
+301	
+302	      {/* Advanced config modal (opened by cog button) */}
+303	      <AdvancedConfigModal
+304	        open={modalOpen}
+305	        onOpenChange={setModalOpen}
+306	        gameId={gameId}
+307	        mode={modalMode}
+308	        config={config}
+309	        existingCustomGameNames={existingCustomGameNames}
+310	        onCancel={() => setModalOpen(false)}
+311	        onDelete={
+312	          customGameId && onDeleteCustomGame
+313	            ? onDeleteCustomGame
+314	            : undefined
+315	        }
+316	        onSaveNew={(payload) => {
+317	          void (async () => {
+318	            try {
+319	              const newId = await onSaveCustomGame({
+320	                name: payload.name,
+321	                color: payload.color,
+322	                config: payload.config,
+323	                cover: payload.cover,
+324	              });
+325	              onConfigChange(payload.config);
+326	              setModalOpen(false);
+327	              await navigate({
+328	                search: (prev) => ({ ...prev, configId: newId }),
+329	              });
+330	            } catch (error) {
+331	              // Surface duplicate-name and similar errors; keep modal open.
+332	              console.error('Failed to save custom game', error);
+333	            }
+334	          })();
+335	        }}
+336	        onUpdate={
+337	          onUpdateCustomGame
+338	            ? (payload) => {
+339	                void (async () => {
+340	                  try {
+341	                    await onUpdateCustomGame(
+342	                      payload.name,
+343	                      payload.config,
+344	                      {
+345	                        cover: payload.cover,
+346	                        color: payload.color,
+347	                      },
+348	                    );
+349	                    onConfigChange(payload.config);
+350	                    setModalOpen(false);
+351	                    await router.invalidate();
+352	                  } catch (error) {
+353	                    console.error(
+354	                      'Failed to update custom game',
+355	                      error,
+356	                    );
+357	                  }
+358	                })();
+359	              }
+360	            : undefined
+361	        }
+362	      />
+363	
+364	      {/* Save-on-play prompt for default (non-custom-game) games */}
+365	      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+366	        <DialogContent>
+367	          <DialogHeader>
+368	            <DialogTitle>
+369	              {t('instructions.saveOnPlayTitle', {
+370	                defaultValue: 'Save these settings as a custom game?',
+371	              })}
+372	            </DialogTitle>
+373	          </DialogHeader>
+374	          <div className="flex flex-col gap-4">
+375	            <label className="flex flex-col gap-1">
+376	              <span className="text-xs font-semibold uppercase text-muted-foreground">
+377	                {t('instructions.saveOnPlayNameLabel', {
+378	                  defaultValue: 'Custom game name',
+379	                })}
+380	              </span>
+381	              <input
+382	                ref={saveNameRef}
+383	                type="text"
+384	                value={savingName}
+385	                onChange={(e) => setSavingName(e.target.value)}
+386	                aria-invalid={showSaveOnPlayError}
+387	                aria-describedby={
+388	                  showSaveOnPlayError ? 'save-on-play-error' : undefined
+389	                }
+390	                className={`h-10 rounded-lg border bg-background px-3 text-sm ${
+391	                  showSaveOnPlayError
+392	                    ? 'border-destructive'
+393	                    : 'border-input'
+394	                }`}
+395	              />
+396	              {showSaveOnPlayError && (
+397	                <span
+398	                  id="save-on-play-error"
+399	                  role="alert"
+400	                  className="text-xs font-semibold text-destructive"
+401	                >
+402	                  {saveOnPlayError}
+403	                </span>
+404	              )}
+405	            </label>
+406	            <div className="flex gap-2">
+407	              <button
+408	                type="button"
+409	                onClick={handlePlayWithoutSaving}
+410	                className="flex-1 rounded-lg border border-input bg-background py-2 text-sm"
+411	              >
+412	                {t('instructions.playWithoutSaving', {
+413	                  defaultValue: 'Play without saving',
+414	                })}
+415	              </button>
+416	              <button
+417	                type="button"
+418	                onClick={handleSaveAndPlay}
+419	                aria-disabled={saveOnPlayError !== null}
+420	                className="flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
+421	              >
+422	                {t('instructions.saveAndPlay', {
+423	                  defaultValue: 'Save & play',
+424	                })}
+425	              </button>
+426	            </div>
+427	          </div>
+428	        </DialogContent>
+429	      </Dialog>
+430	    </div>,
+431	    document.body,
+432	  );
+433	};
+434
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:12:45Z)**_
+
+Now I have all the information needed. Let me check the current state of the stories file and check how the "Let's go" button renders (it uses `t('instructions.lets-go')`).
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:12:47Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`
+
+```text
+1	import { InstructionsOverlay } from './InstructionsOverlay';
+2	import type { Meta, StoryObj } from '@storybook/react';
+3	
+4	const baseArgs = {
+5	  text: 'Listen to each number and drag it into the correct slot to sort from smallest to biggest.',
+6	  onStart: () => {},
+7	  ttsEnabled: false,
+8	  gameTitle: 'Sort Numbers',
+9	  gameId: 'sort-numbers',
+10	  customGameColor: 'indigo' as const,
+11	  config: { totalRounds: 5 },
+12	  onConfigChange: () => {},
+13	  onSaveCustomGame: async () => 'stub-id',
+14	};
+15	
+16	const meta: Meta<typeof InstructionsOverlay> = {
+17	  component: InstructionsOverlay,
+18	  tags: ['autodocs'],
+19	  args: baseArgs,
+20	  argTypes: {
+21	    onStart: { action: 'started' },
+22	    onSaveCustomGame: { action: 'customGameSaved' },
+23	    onUpdateCustomGame: { action: 'customGameUpdated' },
+24	    onToggleBookmark: { action: 'bookmarkToggled' },
+25	  },
+26	  parameters: {
+27	    layout: 'fullscreen',
+28	  },
+29	};
+30	export default meta;
+31	
+32	type Story = StoryObj<typeof InstructionsOverlay>;
+33	
+34	export const Default: Story = {};
+35	
+36	export const WithCustomGame: Story = {
+37	  args: {
+38	    ...baseArgs,
+39	    customGameId: 'abc123',
+40	    customGameName: 'Easy Mode',
+41	    customGameColor: 'teal',
+42	  },
+43	};
+44	
+45	export const WordSpellDefault: Story = {
+46	  args: {
+47	    ...baseArgs,
+48	    text: 'Drag the letters to spell the word.',
+49	    gameTitle: 'Word Spell',
+50	    gameId: 'word-spell',
+51	    config: { inputMethod: 'drag', totalRounds: 8, ttsEnabled: true },
+52	  },
+53	};
+54	
+55	export const NotBookmarked: Story = {
+56	  args: {
+57	    ...baseArgs,
+58	    isBookmarked: false,
+59	    onToggleBookmark: () => {},
+60	  },
+61	};
+62	
+63	export const Bookmarked: Story = {
+64	  args: {
+65	    ...baseArgs,
+66	    isBookmarked: true,
+67	    onToggleBookmark: () => {},
+68	  },
+69	};
+70	
+71	export const NotBookmarkedCustomGame: Story = {
+72	  args: {
+73	    ...baseArgs,
+74	    customGameId: 'abc123',
+75	    customGameName: 'Easy Mode',
+76	    customGameColor: 'teal',
+77	    isBookmarked: false,
+78	    onToggleBookmark: () => {},
+79	  },
+80	};
+81	
+82	export const BookmarkedCustomGame: Story = {
+83	  args: {
+84	    ...baseArgs,
+85	    customGameId: 'abc123',
+86	    customGameName: 'Easy Mode',
+87	    customGameColor: 'teal',
+88	    isBookmarked: true,
+89	    onToggleBookmark: () => {},
+90	  },
+91	};
+92
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:12:54Z)**_
+
+Now I have full context. Key findings from the component:
+
+1. `SaveCustomGameInput` is exported from the component itself - correct.
+2. `config` is `Record<string, unknown>` (not `{ totalRounds: number }`), so the render function needs `config={{ totalRounds }}` cast properly.
+3. The "Let's go" button uses `t('instructions.lets-go')` with no `defaultValue` - I need to check what the translation key resolves to. The plan's `/let/i` regex should work if it translates to "Let's go".
+4. Settings button aria-label uses `t('instructions.configure', { defaultValue: 'Configure' })` — `/configure/i` is correct.
+5. The `StartsGame` play() requires `customGameId` + `customGameName` so `handlePlay` calls `onUpdateCustomGame` directly then `onStart()`. But `onUpdateCustomGame` is optional — need to include it in args.
+6. Bookmark button aria-label: "Remove bookmark" / "Add bookmark" — `/bookmark/i` works.
+
+Let me check the i18n translation for "let's go":
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:12:56Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Find translation files for lets-go key
+
+`grep -r "lets-go\|let's go\|letsGo" /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src --include="*.json" --include="*.ts" -l 2>/dev/null | head -10`
+
+```text
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/lib/i18n/locales/pt-BR/games.json
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/lib/i18n/locales/en/games.json
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:12:59Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Check the English translation for lets-go key
+
+`grep -A2 -B2 "lets-go" /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/lib/i18n/locales/en/games.json`
+
+```text
+    "number-match": "Drag the tiles to match each number. Tap the number to hear it.",
+    "sort-numbers": "Put the numbers in order! Drag each number to the right place.",
+    "lets-go": "Let's go!",
+    "settings": "⚙️ Settings",
+    "advanced": "Advanced",
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:13:04Z)**_
+
+"Let's go!" — `/let/i` will match. Now I have everything needed to write the file. Let me also check the `config` prop — it's `Record<string, unknown>`, so `{ totalRounds }` needs to be passed as-is (number is a valid unknown value). The template passes `config={{ totalRounds }}` which is fine.
+
+One important issue: `StartsGame` story — when `customGameId` + `customGameName` are set and `onUpdateCustomGame` exists, clicking the button calls `onUpdateCustomGame` then `onStart`. The `onStart` call happens after the async `onUpdateCustomGame`. Since `onUpdateCustomGame` is `fn(async () => {})`, it resolves immediately, so `onStart` should get called. The `waitFor` should handle timing.
+
+Now write the file:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:13:27Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { withRouter } from '../../../../.storybook/decorators/withRouter';
+import type { GameColorKey } from '@/lib/game-colors';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+import { InstructionsOverlay } from './InstructionsOverlay';
+import type { SaveCustomGameInput } from './InstructionsOverlay';
+
+interface StoryArgs {
+  text: string;
+  gameTitle: string;
+  gameId: string;
+  customGameColor: GameColorKey;
+  ttsEnabled: boolean;
+  isBookmarked: boolean;
+  totalRounds: number;
+  customGameId: string;
+  customGameName: string;
+  onStart: () => void;
+  onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
+  onUpdateCustomGame: (
+    name: string,
+    config: Record<string, unknown>,
+    extras?: { cover?: unknown; color?: GameColorKey },
+  ) => Promise<void>;
+  onToggleBookmark: () => void;
+  onConfigChange: (config: Record<string, unknown>) => void;
+}
+
+const GAME_COLOR_OPTIONS = [
+  'indigo',
+  'teal',
+  'rose',
+  'amber',
+  'sky',
+  'lime',
+  'purple',
+  'orange',
+  'pink',
+  'emerald',
+  'slate',
+  'cyan',
+] as const satisfies readonly GameColorKey[];
+
+const meta: Meta<StoryArgs> = {
+  component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  decorators: [withDb, withRouter],
+  parameters: { layout: 'fullscreen' },
+  args: {
+    text: 'Listen to each number and drag it into the correct slot to sort from smallest to biggest.',
+    gameTitle: 'Sort Numbers',
+    gameId: 'sort-numbers',
+    customGameColor: 'indigo' as GameColorKey,
+    ttsEnabled: false,
+    isBookmarked: false,
+    totalRounds: 5,
+    customGameId: '',
+    customGameName: '',
+    onStart: fn(),
+    onSaveCustomGame: fn(async () => 'stub-id'),
+    onUpdateCustomGame: fn(async () => {}),
+    onToggleBookmark: fn(),
+    onConfigChange: fn(),
+  },
+  argTypes: {
+    text: { control: 'text' },
+    gameTitle: { control: 'text' },
+    gameId: { control: 'text' },
+    customGameColor: {
+      control: { type: 'select' },
+      options: GAME_COLOR_OPTIONS,
+    },
+    ttsEnabled: { control: 'boolean' },
+    isBookmarked: { control: 'boolean' },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    customGameId: { control: 'text' },
+    customGameName: { control: 'text' },
+    onStart: { table: { disable: true } },
+    onSaveCustomGame: { table: { disable: true } },
+    onUpdateCustomGame: { table: { disable: true } },
+    onToggleBookmark: { table: { disable: true } },
+    onConfigChange: { table: { disable: true } },
+  },
+  render: ({
+    text,
+    gameTitle,
+    gameId,
+    customGameColor,
+    ttsEnabled,
+    isBookmarked,
+    totalRounds,
+    customGameId,
+    customGameName,
+    onStart,
+    onSaveCustomGame,
+    onUpdateCustomGame,
+    onToggleBookmark,
+    onConfigChange,
+  }) => (
+    <InstructionsOverlay
+      text={text}
+      gameTitle={gameTitle}
+      gameId={gameId}
+      customGameColor={customGameColor}
+      ttsEnabled={ttsEnabled}
+      isBookmarked={isBookmarked}
+      config={{ totalRounds }}
+      customGameId={customGameId || undefined}
+      customGameName={customGameName || undefined}
+      onStart={onStart}
+      onSaveCustomGame={onSaveCustomGame}
+      onUpdateCustomGame={onUpdateCustomGame}
+      onToggleBookmark={onToggleBookmark}
+      onConfigChange={onConfigChange}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Default: Story = {};
+
+export const WithCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+  },
+};
+
+export const WordSpellDefault: Story = {
+  args: {
+    text: 'Drag the letters to spell the word.',
+    gameTitle: 'Word Spell',
+    gameId: 'word-spell',
+    totalRounds: 8,
+  },
+};
+
+export const NotBookmarked: Story = {
+  args: { isBookmarked: false },
+};
+
+export const Bookmarked: Story = {
+  args: { isBookmarked: true },
+};
+
+export const NotBookmarkedCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+    isBookmarked: false,
+  },
+};
+
+export const BookmarkedCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+    isBookmarked: true,
+  },
+};
+
+export const StartsGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+  },
+  play: async ({ args }) => {
+    const portal = within(document.body);
+    await userEvent.click(
+      await portal.findByRole('button', { name: /let/i }),
+    );
+    await waitFor(() => {
+      expect(args.onStart).toHaveBeenCalled();
+    });
+  },
+};
+
+export const TogglesBookmark: Story = {
+  args: { isBookmarked: false },
+  play: async ({ args }) => {
+    const portal = within(document.body);
+    const bookmarkButton = await portal.findByRole('button', {
+      name: /bookmark/i,
+    });
+    await userEvent.click(bookmarkButton);
+    await waitFor(() => {
+      expect(args.onToggleBookmark).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const OpensSettings: Story = {
+  play: async () => {
+    const portal = within(document.body);
+    const settingsButton = await portal.findByRole('button', {
+      name: /configure/i,
+    });
+    await userEvent.click(settingsButton);
+    await waitFor(() => {
+      expect(portal.getByRole('dialog')).toBeVisible();
+    });
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(portal.queryByRole('dialog')).toBeNull();
+    });
+  },
+};
+
+```
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:13:33Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run typecheck to verify no TypeScript errors
+
+`yarn typecheck 2>&1`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 3.35s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:13:48Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run lint to verify no lint errors
+
+`yarn lint 2>&1`
+
+```text
+Exit code 1
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+   7:1  error  `@storybook/react` type import should occur before type import of `react`                   import/order
+   9:1  error  `./InstructionsOverlay` import should occur before type import of `@/lib/game-colors`       import/order
+  10:1  error  `./InstructionsOverlay` type import should occur before type import of `@/lib/game-colors`  import/order
+
+✖ 3 problems (3 errors, 0 warnings)
+  3 errors and 0 warnings potentially fixable with the `--fix` option.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:13:50Z)**_
+
+Import order issues. Let me fix the import ordering:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:13:54Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:14:09Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run lint after import order fix
+
+`yarn lint 2>&1`
+
+```text
+Exit code 1
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+  3:1  error  `@storybook/react` type import should occur after type import of `./InstructionsOverlay`   import/order
+  4:1  error  `react` type import should occur after type import of `./InstructionsOverlay`              import/order
+  8:1  error  `@/lib/game-colors` type import should occur after type import of `./InstructionsOverlay`  import/order
+
+✖ 3 problems (3 errors, 0 warnings)
+  3 errors and 0 warnings potentially fixable with the `--fix` option.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:14:12Z)**_
+
+The linter wants relative imports (`./ `) to come before package imports. Let me check the eslint config to understand the import ordering rules:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:14:13Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Check import order rules in eslint config
+
+`cat /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/eslint.config.js 2>&1 | grep -A 50 "import/order\|importOrder\|groups" | head -80`
+
+```text
+      'import/order': [
+        'error',
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+            'object',
+            'type',
+          ],
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
+
+      // Layout (semicolons, quotes, commas, spacing, arrows) is handled by Prettier +
+      // eslint-config-prettier. Trailing commas: `trailingComma: 'all'` in prettier.config.js.
+      'arrow-body-style': ['error', 'as-needed'],
+
+      'react/function-component-definition': [
+        'error',
+        {
+          namedComponents: 'arrow-function',
+          unnamedComponents: 'arrow-function',
+        },
+      ],
+      'react/jsx-max-depth': ['warn', { max: 5 }],
+      'react/no-unstable-nested-components': 'error',
+      'react/no-array-index-key': 'warn',
+      // Shadcn/Radix wrappers use `{...props}` with `ComponentProps<typeof Primitive>`;
+      // enforcing no-spread would require per-file disables or unnatural APIs.
+      'react/jsx-props-no-spreading': 'off',
+      'react/no-unknown-property': 'error',
+
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            'JSXAttribute[name.name="style"] > JSXExpressionContainer > ObjectExpression > Property[key.name=/^(color|background|backgroundColor|borderColor|outlineColor|fill|stroke)$/i] > Literal[value=/^(#|rgb|rgba|hsl|oklch)/i]',
+          message:
+            'Use a CSS variable (var(--...)) instead of a hardcoded colour in inline styles.',
+        },
+      ],
+    },
+  },
+  // TypeScript-specific rules scoped to TS/TSX files — these require the TypeScript
+  // parser (set up by tanstackConfig) and must not run on plain JS or config files.
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/array-type': 'off',
+      '@typescript-eslint/require-await': 'off',
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:14:16Z)**_
+
+The import group order is: builtin, external, internal, parent, sibling, index, object, type. The `type` group is last. So type imports should come after regular imports. Let me look at a working story file to understand the pattern:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:14:16Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+
+```text
+1	import { withDb } from '../../../../.storybook/decorators/withDb';
+2	import { Slot } from '../Slot/Slot';
+3	import { SlotRow } from '../Slot/SlotRow';
+4	import { useAnswerGameContext } from '../useAnswerGameContext';
+5	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+6	import { AnswerGame } from './AnswerGame';
+7	import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+8	import type { Meta, StoryObj } from '@storybook/react';
+9	import type { ComponentType } from 'react';
+10	
+11	type InputMethod = 'drag' | 'type' | 'both';
+12	type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
+13	type TileBankMode = 'exact' | 'distractors';
+14	
+15	interface StoryArgs {
+16	  inputMethod: InputMethod;
+17	  wrongTileBehavior: WrongTileBehavior;
+18	  tileBankMode: TileBankMode;
+19	  totalRounds: number;
+20	  ttsEnabled: boolean;
+21	}
+22	
+23	const initialTiles: TileItem[] = [
+24	  { id: 'c', label: 'C', value: 'C' },
+25	  { id: 'a', label: 'A', value: 'A' },
+26	  { id: 't', label: 'T', value: 'T' },
+27	];
+28	
+29	const initialZones: AnswerZone[] = [
+30	  {
+31	    id: 'z0',
+32	    index: 0,
+33	    expectedValue: 'C',
+34	    placedTileId: null,
+35	    isWrong: false,
+36	    isLocked: false,
+37	  },
+38	  {
+39	    id: 'z1',
+40	    index: 1,
+41	    expectedValue: 'A',
+42	    placedTileId: null,
+43	    isWrong: false,
+44	    isLocked: false,
+45	  },
+46	  {
+47	    id: 'z2',
+48	    index: 2,
+49	    expectedValue: 'T',
+50	    placedTileId: null,
+51	    isWrong: false,
+52	    isLocked: false,
+53	  },
+54	];
+55	
+56	const TapToPlaceBank = () => {
+57	  const { allTiles, bankTileIds, zones } = useAnswerGameContext();
+58	  const dispatch = useAnswerGameDispatch();
+59	
+60	  const nextEmptyZoneIndex = zones.findIndex(
+61	    (z) => z.placedTileId === null,
+62	  );
+63	
+64	  return (
+65	    <div className="flex gap-2">
+66	      {bankTileIds.map((tileId) => {
+67	        const tile = allTiles.find((t) => t.id === tileId);
+68	        if (!tile) return null;
+69	        return (
+70	          <button
+71	            key={tile.id}
+72	            type="button"
+73	            onClick={() => {
+74	              if (nextEmptyZoneIndex === -1) return;
+75	              dispatch({
+76	                type: 'PLACE_TILE',
+77	                tileId: tile.id,
+78	                zoneIndex: nextEmptyZoneIndex,
+79	              });
+80	            }}
+81	            className="flex size-14 items-center justify-center rounded-lg border-2 border-primary bg-background text-xl font-bold shadow-sm active:scale-95"
+82	          >
+83	            {tile.label}
+84	          </button>
+85	        );
+86	      })}
+87	    </div>
+88	  );
+89	};
+90	
+91	const PlayableScene = () => {
+92	  const { zones } = useAnswerGameContext();
+93	
+94	  return (
+95	    <>
+96	      <AnswerGame.Question>
+97	        <p className="text-center text-lg font-semibold text-foreground">
+98	          Spell CAT
+99	        </p>
+100	      </AnswerGame.Question>
+101	      <AnswerGame.Answer>
+102	        <SlotRow className="gap-2">
+103	          {zones.map((zone, i) => (
+104	            <Slot
+105	              key={zone.id}
+106	              index={i}
+107	              className="size-14 rounded-lg"
+108	            >
+109	              {({ label }) => (
+110	                <span className="text-xl font-bold">{label ?? ''}</span>
+111	              )}
+112	            </Slot>
+113	          ))}
+114	        </SlotRow>
+115	      </AnswerGame.Answer>
+116	      <AnswerGame.Choices>
+117	        <TapToPlaceBank />
+118	      </AnswerGame.Choices>
+119	    </>
+120	  );
+121	};
+122	
+123	const meta: Meta<StoryArgs> = {
+124	  component: AnswerGame as unknown as ComponentType<StoryArgs>,
+125	  tags: ['autodocs'],
+126	  decorators: [withDb],
+127	  args: {
+128	    inputMethod: 'drag',
+129	    wrongTileBehavior: 'lock-auto-eject',
+130	    tileBankMode: 'exact',
+131	    totalRounds: 3,
+132	    ttsEnabled: false,
+133	  },
+134	  argTypes: {
+135	    inputMethod: {
+136	      control: { type: 'select' },
+137	      options: ['drag', 'type', 'both'] satisfies InputMethod[],
+138	    },
+139	    wrongTileBehavior: {
+140	      control: { type: 'select' },
+141	      options: [
+142	        'reject',
+143	        'lock-manual',
+144	        'lock-auto-eject',
+145	      ] satisfies WrongTileBehavior[],
+146	    },
+147	    tileBankMode: {
+148	      control: { type: 'select' },
+149	      options: ['exact', 'distractors'] satisfies TileBankMode[],
+150	    },
+151	    totalRounds: {
+152	      control: { type: 'range', min: 1, max: 20, step: 1 },
+153	    },
+154	    ttsEnabled: { control: 'boolean' },
+155	  },
+156	  render: ({
+157	    inputMethod,
+158	    wrongTileBehavior,
+159	    tileBankMode,
+160	    totalRounds,
+161	    ttsEnabled,
+162	  }) => {
+163	    const config: AnswerGameConfig = {
+164	      gameId: 'storybook-answer-game',
+165	      inputMethod,
+166	      wrongTileBehavior,
+167	      tileBankMode,
+168	      totalRounds,
+169	      ttsEnabled,
+170	      initialTiles,
+171	      initialZones,
+172	    };
+173	    return (
+174	      <AnswerGame config={config}>
+175	        <PlayableScene />
+176	      </AnswerGame>
+177	    );
+178	  },
+179	};
+180	export default meta;
+181	
+182	type Story = StoryObj<StoryArgs>;
+183	
+184	export const Default: Story = {};
+185	
+186	export const TextQuestionMode: Story = {
+187	  args: { inputMethod: 'type' },
+188	};
+189	
+190	export const RejectMode: Story = {
+191	  args: { wrongTileBehavior: 'reject' },
+192	};
+193	
+194	export const LockManualMode: Story = {
+195	  args: { wrongTileBehavior: 'lock-manual' },
+196	};
+197
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:14:19Z)**_
+
+I can see the pattern: regular imports first, then `type` imports after (all type imports grouped together at the end). The `type` group in the eslint config means all `import type` statements are grouped last. Let me reorder accordingly:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:14:24Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:14:38Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run lint after reordering imports
+
+`yarn lint 2>&1`
+
+```text
+Exit code 1
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+  8:1  error  `@/lib/game-colors` type import should occur before type import of `@storybook/react`      import/order
+  9:1  error  `./InstructionsOverlay` type import should occur before type import of `@storybook/react`  import/order
+
+✖ 2 problems (2 errors, 0 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:14:45Z)**_
+
+The alphabetize rule is also in play. Within the `type` group, the order should be alphabetical: `@storybook/react` < `@/lib/game-colors` < `./InstructionsOverlay` < `react`. Wait, looking at the AnswerGame.stories.tsx example: `type { AnswerGameConfig, ... } from '../types'`, then `type { Meta, StoryObj } from '@storybook/react'`, then `type { ComponentType } from 'react'`. That's sibling before external type imports... Actually the groups in the config end with `type` — that puts all type imports in the same `type` group at the end, sorted alphabetically. Let me check alphabetical order: `@storybook/react` → `react` → `@/lib/game-colors` → `./InstructionsOverlay`. Actually alphabetical with `@` symbols: `@/lib/game-colors` < `@storybook/react` < `./InstructionsOverlay` (`.` sorts before `@` typically) < `react`.
+
+Let me just run eslint --fix to let it sort for me:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:14:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Auto-fix import order with eslint --fix
+
+`npx eslint src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx --fix 2>&1`
+
+```text
+[This command modified 1 file you've previously read: src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx. Call Read before editing.]
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:14:52Z)**_
+
+The eslint --fix sorted the type imports. Now let me verify both checks pass:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:15:10Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run both typecheck and lint to verify clean
+
+`yarn typecheck 2>&1 && yarn lint 2>&1`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 3.38s.
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 12.82s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:15:12Z)**_
+
+Both pass. Now commit:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:15:33Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit the InstructionsOverlay stories retrofit
+
+```bash
+git add src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/InstructionsOverlay): retrofit per controls policy
+
+Rebuild as an interactive story — StoryArgs exposes text, gameTitle,
+gameId, customGameColor select, ttsEnabled, isBookmarked,
+config.totalRounds range, customGameId/Name. All handlers wired to
+fn() spies. Decorators: withDb + withRouter.
+
+Three play() flows: StartsGame, TogglesBookmark, OpensSettings (portal-
+scoped, Escape-close). ttsEnabled: false throughout to avoid the TTS
+crash path.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+```text
+<persisted-output>
+Output too large (44.4KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bcijpn2k9.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (42444ccf)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+stderr | src/components/GameCard.test.tsx > GameCard > renders a default card with chips, cog, Play, and the default type badge
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx > InstructionsOverlay > renders the game title
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:15:35Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Get the commit SHA
+
+`git log --oneline -3 2>&1`
+
+```text
+3bab9e69 stories(answer-game/InstructionsOverlay): retrofit per controls policy
+beb14675 stories(answer-game/AnswerGame): retrofit per controls policy
+e824111f stories(answer-game/Slot): retrofit per controls policy
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:15:48Z)**_
+
+DONE — commit `3bab9e69`.
+
+**Adjustments relative to the template:**
+
+1. **Import order**: The template's import block had `type` imports interleaved with regular imports. The project's `import/order` rule puts all `import type` statements in a trailing `type` group, sorted alphabetically. Applied `eslint --fix` to produce the correct order: regular imports first (`storybook/test`, decorators, `InstructionsOverlay`), then type imports (`SaveCustomGameInput`, `GameColorKey`, `@storybook/react`, `react`).
+
+2. **No other signature changes required**: `SaveCustomGameInput` is exported from `InstructionsOverlay.tsx` directly (confirmed). `config` is `Record<string, unknown>` — `{ totalRounds }` (number) satisfies that. `onUpdateCustomGame` signature matches template exactly. `customGameColor` prop name is correct.
+
+**Concerns for `play()` flows (flag only — do not preemptively remove):**
+
+- `OpensSettings` uses `portal.queryByRole('dialog')` after `{Escape}`, but the component renders its own outermost `<div role="dialog">` via portal (the instructions overlay itself). After pressing Escape on the `AdvancedConfigModal`, the modal should close but the outer instructions div still has `role="dialog"`. The `queryByRole('dialog')` null check may fail because the outer overlay is always present. This is the most likely `play()` failure at CI time — the Escape close assertion targets the modal dialog but there will always be one `role="dialog"` in the body (the overlay itself). If this fires, the fix is to narrow the query with a more specific name matcher.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:15:53Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:15:54Z)**_
+
+Implementer flagged a real issue with `OpensSettings`: the InstructionsOverlay itself renders as `role="dialog"`, so the post-Escape null check will fail. Dispatching a fix with a more specific name matcher.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:17:01Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Task 3 OpensSettings fix
+
+```text
+DONE f74eb775
+
+Modal name regex: `/advanced settings/i` (from AdvancedConfigModal DialogTitle line 161 default)
+Settings button regex: `/configure/i` (unchanged—already correct per InstructionsOverlay HeaderActions line 64)
+agentId: ad3a166077239d1c3 (use SendMessage with to: 'ad3a166077239d1c3' to continue this agent)
+<usage>total_tokens: 38338
+tool_uses: 9
+duration_ms: 54503</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:16:06Z)**_
+
+Fix the `OpensSettings` play() story in `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx` inside the worktree `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`.
+
+Background: `InstructionsOverlay` renders its wrapper as `role="dialog"` via portal. So `queryByRole('dialog')` always matches the overlay itself — the post-Escape null check in `OpensSettings` will fail because the outer dialog remains.
+
+Steps:
+
+1. Read `src/components/AdvancedConfigModal.tsx` to find the modal's accessible name (likely set via `DialogTitle` — look for the heading text or aria-label on the Dialog.Content). Whatever it is (e.g. "Advanced Settings", "Configure", "Game Settings"), extract the exact text or a stable regex.
+
+2. Also read `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` to confirm the outer overlay's accessible name (likely the `gameTitle` value), so the modal's name is definitely distinct.
+
+3. Update both assertions in `OpensSettings` to scope to the modal's specific name:
+
+```tsx
+export const OpensSettings: Story = {
+  play: async () => {
+    const portal = within(document.body);
+    const settingsButton = await portal.findByRole('button', {
+      name: /configure/i,
+    });
+    await userEvent.click(settingsButton);
+    await waitFor(() => {
+      expect(
+        portal.getByRole('dialog', { name: /MODAL_NAME_REGEX/i }),
+      ).toBeVisible();
+    });
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(
+        portal.queryByRole('dialog', { name: /MODAL_NAME_REGEX/i }),
+      ).toBeNull();
+    });
+  },
+};
+```
+
+Replace `MODAL_NAME_REGEX` with a regex matching the modal's accessible name found in step 1. If the settings button's accessible name in the InstructionsOverlay is NOT `/configure/i` (e.g. it's a translation key mapped to "Settings", "Options", etc.), also correct that regex — read `InstructionsOverlay.tsx` and `HeaderActions.tsx` or wherever the button is rendered to confirm its aria-label/text.
+
+4. Run `yarn typecheck` — expect 0.
+5. Run `yarn lint` — expect 0.
+6. `git add` the file and `git commit --amend --no-edit` to fold into commit `3bab9e69`.
+7. Return the new commit SHA with a one-line note on what regex you used for the modal name and the settings button.
+
+Return `DONE` + SHA + regexes, or `BLOCKED` with reason. Under 150 words.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:08Z)**_
+
+I'll help you fix the `OpensSettings` story. Let me start by reading the relevant files to understand the accessible names.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:08Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/AdvancedConfigModal.tsx`
+
+```text
+1	import { Trash2 } from 'lucide-react';
+2	import { useRef, useState } from 'react';
+3	import { useTranslation } from 'react-i18next';
+4	import type { Cover } from '@/games/cover-type';
+5	import type { GameColorKey } from '@/lib/game-colors';
+6	import type { JSX } from 'react';
+7	import { ConfigFormFields } from '@/components/ConfigFormFields';
+8	import { CoverPicker } from '@/components/CoverPicker';
+9	import {
+10	  Dialog,
+11	  DialogContent,
+12	  DialogHeader,
+13	  DialogTitle,
+14	} from '@/components/ui/dialog';
+15	import { getAdvancedConfigFields } from '@/games/config-fields-registry';
+16	import {
+17	  DEFAULT_GAME_COLOR,
+18	  GAME_COLORS,
+19	  GAME_COLOR_KEYS,
+20	} from '@/lib/game-colors';
+21	
+22	export type AdvancedConfigModalMode =
+23	  | { kind: 'default' }
+24	  | {
+25	      kind: 'customGame';
+26	      configId: string;
+27	      name: string;
+28	      color: GameColorKey;
+29	      cover: Cover | undefined;
+30	    };
+31	
+32	type SavePayload = {
+33	  configId?: string;
+34	  name: string;
+35	  color: GameColorKey;
+36	  cover: Cover | undefined;
+37	  config: Record<string, unknown>;
+38	};
+39	
+40	type AdvancedConfigModalProps = {
+41	  open: boolean;
+42	  onOpenChange: (next: boolean) => void;
+43	  gameId: string;
+44	  mode: AdvancedConfigModalMode;
+45	  config: Record<string, unknown>;
+46	  onCancel: () => void;
+47	  onUpdate?: (payload: SavePayload) => void;
+48	  onSaveNew: (payload: SavePayload) => void;
+49	  /** Invoked when the user confirms deletion of the current custom game. */
+50	  onDelete?: (configId: string) => Promise<void> | void;
+51	  /** Names of existing custom games for this game — used to surface duplicate-name errors inline. */
+52	  existingCustomGameNames?: readonly string[];
+53	};
+54	
+55	export const AdvancedConfigModal = ({
+56	  open,
+57	  onOpenChange,
+58	  gameId,
+59	  mode,
+60	  config: initialConfig,
+61	  onCancel,
+62	  onUpdate,
+63	  onSaveNew,
+64	  onDelete,
+65	  existingCustomGameNames = [],
+66	}: AdvancedConfigModalProps): JSX.Element => {
+67	  const { t } = useTranslation('games');
+68	  const [config, setConfig] =
+69	    useState<Record<string, unknown>>(initialConfig);
+70	  const [cover, setCover] = useState<Cover | undefined>(
+71	    mode.kind === 'customGame' ? mode.cover : undefined,
+72	  );
+73	  const [name, setName] = useState<string>(
+74	    mode.kind === 'customGame' ? mode.name : '',
+75	  );
+76	  const [color, setColor] = useState<GameColorKey>(
+77	    mode.kind === 'customGame' ? mode.color : DEFAULT_GAME_COLOR,
+78	  );
+79	  const [submitAttempted, setSubmitAttempted] = useState(false);
+80	  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+81	  const nameInputRef = useRef<HTMLInputElement>(null);
+82	
+83	  const fields = getAdvancedConfigFields(gameId);
+84	
+85	  const trimmedName = name.trim();
+86	  const currentCustomGameName =
+87	    mode.kind === 'customGame' ? mode.name : null;
+88	  const namesTaken = new Set(
+89	    existingCustomGameNames.filter((n) => n !== currentCustomGameName),
+90	  );
+91	
+92	  const nameError: string | null = (() => {
+93	    if (trimmedName === '')
+94	      return t('instructions.nameRequired', {
+95	        defaultValue: 'Please enter a custom game name.',
+96	      });
+97	    if (namesTaken.has(trimmedName))
+98	      return t('instructions.nameDuplicate', {
+99	        defaultValue: 'A custom game with that name already exists.',
+100	      });
+101	    return null;
+102	  })();
+103	
+104	  const saveNewInvalid = nameError !== null;
+105	  const updateIsRename =
+106	    currentCustomGameName !== null &&
+107	    trimmedName !== currentCustomGameName;
+108	  const updateInvalid = updateIsRename && nameError !== null;
+109	  const showNameError = submitAttempted && nameError !== null;
+110	
+111	  const payload: SavePayload = {
+112	    configId: mode.kind === 'customGame' ? mode.configId : undefined,
+113	    name: trimmedName,
+114	    color,
+115	    cover,
+116	    // Saving from the advanced modal marks the config as advanced — otherwise
+117	    // a lingering `configMode: 'simple'` causes the route resolver to rebuild
+118	    // the config from simple-form fields only, wiping advanced-only choices
+119	    // like wrongTileBehavior on reload.
+120	    config: { ...config, configMode: 'advanced' },
+121	  };
+122	
+123	  const handleSaveNew = () => {
+124	    setSubmitAttempted(true);
+125	    if (saveNewInvalid) {
+126	      nameInputRef.current?.focus();
+127	      return;
+128	    }
+129	    onSaveNew(payload);
+130	  };
+131	
+132	  const handleUpdate = () => {
+133	    if (!onUpdate) return;
+134	    setSubmitAttempted(true);
+135	    if (updateInvalid) {
+136	      nameInputRef.current?.focus();
+137	      return;
+138	    }
+139	    onUpdate(payload);
+140	  };
+141	
+142	  const handleConfirmDelete = () => {
+143	    if (mode.kind !== 'customGame' || !onDelete) return;
+144	    void (async () => {
+145	      try {
+146	        await onDelete(mode.configId);
+147	      } finally {
+148	        setConfirmDeleteOpen(false);
+149	        onOpenChange(false);
+150	      }
+151	    })();
+152	  };
+153	
+154	  return (
+155	    <Dialog open={open} onOpenChange={onOpenChange}>
+156	      <DialogContent className="max-h-[90vh] overflow-y-auto">
+157	        <DialogHeader>
+158	          <DialogTitle>
+159	            {mode.kind === 'customGame'
+160	              ? mode.name
+161	              : 'Advanced settings'}
+162	          </DialogTitle>
+163	        </DialogHeader>
+164	
+165	        <div className="flex flex-col gap-4">
+166	          <CoverPicker value={cover} onChange={setCover} />
+167	
+168	          <label className="flex flex-col gap-1">
+169	            <span className="text-xs font-semibold uppercase text-muted-foreground">
+170	              {t('instructions.customGameNameLabel', {
+171	                defaultValue: 'Custom game name',
+172	              })}
+173	            </span>
+174	            <input
+175	              ref={nameInputRef}
+176	              type="text"
+177	              value={name}
+178	              onChange={(e) => setName(e.target.value)}
+179	              placeholder="e.g. Skip by 2"
+180	              aria-invalid={showNameError}
+181	              aria-describedby={
+182	                showNameError ? 'custom-game-name-error' : undefined
+183	              }
+184	              className={`h-10 rounded-lg border bg-background px-3 text-sm ${
+185	                showNameError ? 'border-destructive' : 'border-input'
+186	              }`}
+187	            />
+188	            {showNameError && (
+189	              <span
+190	                id="custom-game-name-error"
+191	                role="alert"
+192	                className="text-xs font-semibold text-destructive"
+193	              >
+194	                {nameError}
+195	              </span>
+196	            )}
+197	          </label>
+198	
+199	          <div>
+200	            <div className="text-xs font-semibold uppercase text-muted-foreground">
+201	              Color
+202	            </div>
+203	            <div
+204	              className="mt-1 grid gap-1"
+205	              style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
+206	              role="group"
+207	              aria-label="Custom game color"
+208	            >
+209	              {GAME_COLOR_KEYS.map((key) => (
+210	                <button
+211	                  key={key}
+212	                  type="button"
+213	                  aria-label={key}
+214	                  aria-pressed={color === key}
+215	                  onClick={() => setColor(key)}
+216	                  className="h-8 w-8 rounded-full border-2 transition-transform hover:scale-110"
+217	                  style={{
+218	                    background: GAME_COLORS[key].playBg,
+219	                    borderColor:
+220	                      color === key
+221	                        ? GAME_COLORS[key].playBg
+222	                        : 'transparent',
+223	                    outline:
+224	                      color === key ? '3px solid white' : undefined,
+225	                    outlineOffset: color === key ? '-4px' : undefined,
+226	                    boxShadow:
+227	                      color === key
+228	                        ? `0 0 0 2px ${GAME_COLORS[key].playBg}`
+229	                        : undefined,
+230	                  }}
+231	                />
+232	              ))}
+233	            </div>
+234	          </div>
+235	
+236	          <ConfigFormFields
+237	            fields={fields}
+238	            config={config}
+239	            onChange={setConfig}
+240	          />
+241	
+242	          <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+243	            {mode.kind === 'customGame' && onDelete && (
+244	              <button
+245	                type="button"
+246	                onClick={() => setConfirmDeleteOpen(true)}
+247	                className="flex items-center gap-1 rounded-lg border border-destructive bg-background px-3 py-2 text-sm font-semibold text-destructive"
+248	              >
+249	                <Trash2 size={14} aria-hidden="true" />
+250	                {t('instructions.delete', { defaultValue: 'Delete' })}
+251	              </button>
+252	            )}
+253	            <button
+254	              type="button"
+255	              onClick={onCancel}
+256	              className="flex-1 rounded-lg border border-input bg-background py-2 text-sm"
+257	            >
+258	              {t('instructions.cancel', { defaultValue: 'Cancel' })}
+259	            </button>
+260	            {mode.kind === 'customGame' && onUpdate && (
+261	              <button
+262	                type="button"
+263	                onClick={handleUpdate}
+264	                aria-disabled={updateInvalid}
+265	                className="flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
+266	              >
+267	                {t('instructions.updateCustomGame', {
+268	                  name: mode.name,
+269	                  defaultValue: `Update "${mode.name}"`,
+270	                })}
+271	              </button>
+272	            )}
+273	            <button
+274	              type="button"
+275	              onClick={handleSaveNew}
+276	              aria-disabled={saveNewInvalid}
+277	              className={`flex-1 rounded-lg py-2 text-sm font-bold ${
+278	                mode.kind === 'default'
+279	                  ? 'bg-primary text-primary-foreground'
+280	                  : 'border border-input bg-background'
+281	              }`}
+282	            >
+283	              {t('instructions.saveAsNew', {
+284	                defaultValue: 'Save as new custom game',
+285	              })}
+286	            </button>
+287	          </div>
+288	        </div>
+289	      </DialogContent>
+290	
+291	      {mode.kind === 'customGame' && onDelete && (
+292	        <Dialog
+293	          open={confirmDeleteOpen}
+294	          onOpenChange={setConfirmDeleteOpen}
+295	        >
+296	          <DialogContent>
+297	            <DialogHeader>
+298	              <DialogTitle>
+299	                {t('instructions.deleteConfirmTitle', {
+300	                  name: mode.name,
+301	                  defaultValue: `Delete "${mode.name}"?`,
+302	                })}
+303	              </DialogTitle>
+304	            </DialogHeader>
+305	            <p className="text-sm text-muted-foreground">
+306	              {t('instructions.deleteConfirmBody', {
+307	                defaultValue:
+308	                  "This custom game will be removed. You can't undo this.",
+309	              })}
+310	            </p>
+311	            <div className="flex justify-end gap-2 pt-2">
+312	              <button
+313	                type="button"
+314	                onClick={() => setConfirmDeleteOpen(false)}
+315	                className="rounded-lg border border-input bg-background px-4 py-2 text-sm"
+316	              >
+317	                {t('instructions.cancel', { defaultValue: 'Cancel' })}
+318	              </button>
+319	              <button
+320	                type="button"
+321	                onClick={handleConfirmDelete}
+322	                className="rounded-lg bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground"
+323	              >
+324	                {t('instructions.delete', { defaultValue: 'Delete' })}
+325	              </button>
+326	            </div>
+327	          </DialogContent>
+328	        </Dialog>
+329	      )}
+330	    </Dialog>
+331	  );
+332	};
+333
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:09Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`
+
+```text
+1	// src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
+2	import { useNavigate, useRouter } from '@tanstack/react-router';
+3	import { Settings as SettingsIcon, Star } from 'lucide-react';
+4	import { useEffect, useRef, useState } from 'react';
+5	import { createPortal } from 'react-dom';
+6	import { useTranslation } from 'react-i18next';
+7	import type { Cover } from '@/games/cover-type';
+8	import type { GameColorKey } from '@/lib/game-colors';
+9	import type { JSX } from 'react';
+10	import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
+11	import { GameCover } from '@/components/GameCover';
+12	import {
+13	  Dialog,
+14	  DialogContent,
+15	  DialogHeader,
+16	  DialogTitle,
+17	} from '@/components/ui/dialog';
+18	import { getSimpleConfigFormRenderer } from '@/games/config-fields-registry';
+19	import { resolveCover } from '@/games/cover';
+20	import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
+21	import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
+22	import { suggestCustomGameName } from '@/lib/suggest-custom-game-name';
+23	
+24	type HeaderActionsProps = {
+25	  isBookmarked?: boolean;
+26	  onToggleBookmark?: () => void;
+27	  onOpenSettings: () => void;
+28	};
+29	
+30	const HeaderActions = ({
+31	  isBookmarked,
+32	  onToggleBookmark,
+33	  onOpenSettings,
+34	}: HeaderActionsProps): JSX.Element => {
+35	  const { t } = useTranslation(['games', 'common']);
+36	  return (
+37	    <div className="flex items-center gap-2">
+38	      {onToggleBookmark && (
+39	        <button
+40	          type="button"
+41	          aria-label={
+42	            isBookmarked
+43	              ? t('common:bookmark.remove', {
+44	                  defaultValue: 'Remove bookmark',
+45	                })
+46	              : t('common:bookmark.add', {
+47	                  defaultValue: 'Add bookmark',
+48	                })
+49	          }
+50	          aria-pressed={isBookmarked ?? false}
+51	          onClick={onToggleBookmark}
+52	          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+53	        >
+54	          <Star
+55	            size={18}
+56	            aria-hidden="true"
+57	            fill={isBookmarked ? 'currentColor' : 'none'}
+58	          />
+59	        </button>
+60	      )}
+61	      <button
+62	        type="button"
+63	        aria-label={t('instructions.configure', {
+64	          defaultValue: 'Configure',
+65	        })}
+66	        onClick={onOpenSettings}
+67	        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted"
+68	      >
+69	        <SettingsIcon size={18} />
+70	      </button>
+71	    </div>
+72	  );
+73	};
+74	
+75	export type SaveCustomGameInput = {
+76	  name: string;
+77	  color: GameColorKey;
+78	  config: Record<string, unknown>;
+79	  cover?: Cover;
+80	};
+81	
+82	type InstructionsOverlayProps = {
+83	  text: string;
+84	  onStart: () => void;
+85	  ttsEnabled: boolean;
+86	  gameTitle: string;
+87	  gameId: string;
+88	  cover?: Cover;
+89	  customGameId?: string;
+90	  customGameName?: string;
+91	  customGameColor?: GameColorKey;
+92	  config: Record<string, unknown>;
+93	  onConfigChange: (config: Record<string, unknown>) => void;
+94	  onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
+95	  onUpdateCustomGame?: (
+96	    name: string,
+97	    config: Record<string, unknown>,
+98	    extras?: { cover?: Cover; color?: GameColorKey },
+99	  ) => Promise<void>;
+100	  onDeleteCustomGame?: (configId: string) => Promise<void>;
+101	  existingCustomGameNames?: readonly string[];
+102	  isBookmarked?: boolean;
+103	  onToggleBookmark?: () => void;
+104	};
+105	
+106	export const InstructionsOverlay = ({
+107	  text,
+108	  onStart,
+109	  ttsEnabled,
+110	  gameTitle,
+111	  gameId,
+112	  cover,
+113	  customGameId,
+114	  customGameName,
+115	  customGameColor = DEFAULT_GAME_COLOR,
+116	  config,
+117	  onConfigChange,
+118	  onSaveCustomGame,
+119	  onUpdateCustomGame,
+120	  onDeleteCustomGame,
+121	  existingCustomGameNames = [],
+122	  isBookmarked,
+123	  onToggleBookmark,
+124	}: InstructionsOverlayProps): JSX.Element => {
+125	  const { t } = useTranslation(['games', 'common']);
+126	  const navigate = useNavigate({
+127	    from: '/$locale/game/$gameId',
+128	  });
+129	  const router = useRouter();
+130	  const [modalOpen, setModalOpen] = useState(false);
+131	  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+132	  const [savingName, setSavingName] = useState('');
+133	  const [saveSubmitAttempted, setSaveSubmitAttempted] = useState(false);
+134	  const saveNameRef = useRef<HTMLInputElement>(null);
+135	
+136	  useEffect(() => {
+137	    if (saveDialogOpen) {
+138	      // Defer so the Radix Dialog finishes mounting before we grab focus.
+139	      const id = globalThis.setTimeout(
+140	        () => saveNameRef.current?.focus(),
+141	        0,
+142	      );
+143	      return () => globalThis.clearTimeout(id);
+144	    }
+145	    return;
+146	  }, [saveDialogOpen]);
+147	
+148	  useEffect(() => {
+149	    if (ttsEnabled) speak(text);
+150	    return () => {
+151	      cancelSpeech();
+152	    };
+153	    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount to speak instructions once
+154	  }, []);
+155	
+156	  const settingsColors = GAME_COLORS[customGameColor];
+157	  const resolvedCover = resolveCover({ cover }, gameId);
+158	
+159	  const SimpleForm = getSimpleConfigFormRenderer(gameId);
+160	
+161	  const modalMode =
+162	    customGameId && customGameName
+163	      ? ({
+164	          kind: 'customGame',
+165	          configId: customGameId,
+166	          name: customGameName,
+167	          color: customGameColor,
+168	          cover,
+169	        } as const)
+170	      : ({ kind: 'default' } as const);
+171	
+172	  const handlePlay = () => {
+173	    if (customGameId && customGameName && onUpdateCustomGame) {
+174	      void (async () => {
+175	        try {
+176	          await onUpdateCustomGame(customGameName, config, {
+177	            cover,
+178	            color: customGameColor,
+179	          });
+180	        } catch (error) {
+181	          console.error('Failed to save custom game on play', error);
+182	        }
+183	        onStart();
+184	      })();
+185	      return;
+186	    }
+187	    setSaveSubmitAttempted(false);
+188	    setSavingName(
+189	      suggestCustomGameName(gameTitle, existingCustomGameNames),
+190	    );
+191	    setSaveDialogOpen(true);
+192	  };
+193	
+194	  const saveOnPlayError: string | null = (() => {
+195	    const trimmed = savingName.trim();
+196	    if (trimmed === '')
+197	      return t('instructions.nameRequired', {
+198	        defaultValue: 'Please enter a custom game name.',
+199	      });
+200	    if (existingCustomGameNames.includes(trimmed))
+201	      return t('instructions.nameDuplicate', {
+202	        defaultValue: 'A custom game with that name already exists.',
+203	      });
+204	    return null;
+205	  })();
+206	  const showSaveOnPlayError =
+207	    saveSubmitAttempted && saveOnPlayError !== null;
+208	
+209	  const handleSaveAndPlay = () => {
+210	    setSaveSubmitAttempted(true);
+211	    if (saveOnPlayError !== null) {
+212	      saveNameRef.current?.focus();
+213	      return;
+214	    }
+215	    const trimmed = savingName.trim();
+216	    void (async () => {
+217	      try {
+218	        const newId = await onSaveCustomGame({
+219	          name: trimmed,
+220	          color: customGameColor,
+221	          config,
+222	          cover,
+223	        });
+224	        setSaveDialogOpen(false);
+225	        await navigate({
+226	          search: (prev) => ({ ...prev, configId: newId }),
+227	        });
+228	        onStart();
+229	      } catch (error) {
+230	        console.error('Failed to save custom game on play', error);
+231	      }
+232	    })();
+233	  };
+234	
+235	  const handlePlayWithoutSaving = () => {
+236	    setSaveDialogOpen(false);
+237	    onStart();
+238	  };
+239	
+240	  return createPortal(
+241	    <div
+242	      role="dialog"
+243	      aria-label="Game instructions"
+244	      className="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-background/95 px-5 pb-8 pt-24"
+245	    >
+246	      <div className="mx-auto flex w-full max-w-sm flex-col overflow-hidden rounded-3xl bg-card shadow-lg md:max-w-2xl">
+247	        {/* 1. Hero cover */}
+248	        <div className="flex justify-center bg-muted/40 p-4">
+249	          <GameCover cover={resolvedCover} size="hero" />
+250	        </div>
+251	
+252	        <div className="flex flex-col gap-4 p-4">
+253	          {/* 2. Title row + bookmark + cog — matches GameCard heading/subtitle order */}
+254	          <div className="flex items-center justify-between gap-2">
+255	            <div>
+256	              <h2
+257	                className="text-xl font-extrabold"
+258	                style={
+259	                  customGameName
+260	                    ? { color: settingsColors.text }
+261	                    : undefined
+262	                }
+263	              >
+264	                {customGameName ?? gameTitle}
+265	              </h2>
+266	              {customGameName && (
+267	                <p className="text-xs italic text-foreground/80">
+268	                  {gameTitle}
+269	                </p>
+270	              )}
+271	            </div>
+272	            <HeaderActions
+273	              isBookmarked={isBookmarked}
+274	              onToggleBookmark={onToggleBookmark}
+275	              onOpenSettings={() => setModalOpen(true)}
+276	            />
+277	          </div>
+278	
+279	          {/* 3. Instructions text */}
+280	          <p className="text-center text-base font-semibold text-foreground leading-relaxed">
+281	            {text}
+282	          </p>
+283	
+284	          {/* 4. Let's go button */}
+285	          <button
+286	            type="button"
+287	            onClick={handlePlay}
+288	            className="h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95"
+289	          >
+290	            {t('instructions.lets-go')}
+291	          </button>
+292	
+293	          {/* 5. Simple settings form (always expanded) */}
+294	          {SimpleForm && (
+295	            <div className="border-t border-border pt-4">
+296	              <SimpleForm config={config} onChange={onConfigChange} />
+297	            </div>
+298	          )}
+299	        </div>
+300	      </div>
+301	
+302	      {/* Advanced config modal (opened by cog button) */}
+303	      <AdvancedConfigModal
+304	        open={modalOpen}
+305	        onOpenChange={setModalOpen}
+306	        gameId={gameId}
+307	        mode={modalMode}
+308	        config={config}
+309	        existingCustomGameNames={existingCustomGameNames}
+310	        onCancel={() => setModalOpen(false)}
+311	        onDelete={
+312	          customGameId && onDeleteCustomGame
+313	            ? onDeleteCustomGame
+314	            : undefined
+315	        }
+316	        onSaveNew={(payload) => {
+317	          void (async () => {
+318	            try {
+319	              const newId = await onSaveCustomGame({
+320	                name: payload.name,
+321	                color: payload.color,
+322	                config: payload.config,
+323	                cover: payload.cover,
+324	              });
+325	              onConfigChange(payload.config);
+326	              setModalOpen(false);
+327	              await navigate({
+328	                search: (prev) => ({ ...prev, configId: newId }),
+329	              });
+330	            } catch (error) {
+331	              // Surface duplicate-name and similar errors; keep modal open.
+332	              console.error('Failed to save custom game', error);
+333	            }
+334	          })();
+335	        }}
+336	        onUpdate={
+337	          onUpdateCustomGame
+338	            ? (payload) => {
+339	                void (async () => {
+340	                  try {
+341	                    await onUpdateCustomGame(
+342	                      payload.name,
+343	                      payload.config,
+344	                      {
+345	                        cover: payload.cover,
+346	                        color: payload.color,
+347	                      },
+348	                    );
+349	                    onConfigChange(payload.config);
+350	                    setModalOpen(false);
+351	                    await router.invalidate();
+352	                  } catch (error) {
+353	                    console.error(
+354	                      'Failed to update custom game',
+355	                      error,
+356	                    );
+357	                  }
+358	                })();
+359	              }
+360	            : undefined
+361	        }
+362	      />
+363	
+364	      {/* Save-on-play prompt for default (non-custom-game) games */}
+365	      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+366	        <DialogContent>
+367	          <DialogHeader>
+368	            <DialogTitle>
+369	              {t('instructions.saveOnPlayTitle', {
+370	                defaultValue: 'Save these settings as a custom game?',
+371	              })}
+372	            </DialogTitle>
+373	          </DialogHeader>
+374	          <div className="flex flex-col gap-4">
+375	            <label className="flex flex-col gap-1">
+376	              <span className="text-xs font-semibold uppercase text-muted-foreground">
+377	                {t('instructions.saveOnPlayNameLabel', {
+378	                  defaultValue: 'Custom game name',
+379	                })}
+380	              </span>
+381	              <input
+382	                ref={saveNameRef}
+383	                type="text"
+384	                value={savingName}
+385	                onChange={(e) => setSavingName(e.target.value)}
+386	                aria-invalid={showSaveOnPlayError}
+387	                aria-describedby={
+388	                  showSaveOnPlayError ? 'save-on-play-error' : undefined
+389	                }
+390	                className={`h-10 rounded-lg border bg-background px-3 text-sm ${
+391	                  showSaveOnPlayError
+392	                    ? 'border-destructive'
+393	                    : 'border-input'
+394	                }`}
+395	              />
+396	              {showSaveOnPlayError && (
+397	                <span
+398	                  id="save-on-play-error"
+399	                  role="alert"
+400	                  className="text-xs font-semibold text-destructive"
+401	                >
+402	                  {saveOnPlayError}
+403	                </span>
+404	              )}
+405	            </label>
+406	            <div className="flex gap-2">
+407	              <button
+408	                type="button"
+409	                onClick={handlePlayWithoutSaving}
+410	                className="flex-1 rounded-lg border border-input bg-background py-2 text-sm"
+411	              >
+412	                {t('instructions.playWithoutSaving', {
+413	                  defaultValue: 'Play without saving',
+414	                })}
+415	              </button>
+416	              <button
+417	                type="button"
+418	                onClick={handleSaveAndPlay}
+419	                aria-disabled={saveOnPlayError !== null}
+420	                className="flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
+421	              >
+422	                {t('instructions.saveAndPlay', {
+423	                  defaultValue: 'Save & play',
+424	                })}
+425	              </button>
+426	            </div>
+427	          </div>
+428	        </DialogContent>
+429	      </Dialog>
+430	    </div>,
+431	    document.body,
+432	  );
+433	};
+434
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:09Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`
+
+```text
+1	import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+2	
+3	import { withDb } from '../../../../.storybook/decorators/withDb';
+4	import { withRouter } from '../../../../.storybook/decorators/withRouter';
+5	import { InstructionsOverlay } from './InstructionsOverlay';
+6	import type { SaveCustomGameInput } from './InstructionsOverlay';
+7	import type { GameColorKey } from '@/lib/game-colors';
+8	import type { Meta, StoryObj } from '@storybook/react';
+9	import type { ComponentType } from 'react';
+10	
+11	interface StoryArgs {
+12	  text: string;
+13	  gameTitle: string;
+14	  gameId: string;
+15	  customGameColor: GameColorKey;
+16	  ttsEnabled: boolean;
+17	  isBookmarked: boolean;
+18	  totalRounds: number;
+19	  customGameId: string;
+20	  customGameName: string;
+21	  onStart: () => void;
+22	  onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
+23	  onUpdateCustomGame: (
+24	    name: string,
+25	    config: Record<string, unknown>,
+26	    extras?: { cover?: unknown; color?: GameColorKey },
+27	  ) => Promise<void>;
+28	  onToggleBookmark: () => void;
+29	  onConfigChange: (config: Record<string, unknown>) => void;
+30	}
+31	
+32	const GAME_COLOR_OPTIONS = [
+33	  'indigo',
+34	  'teal',
+35	  'rose',
+36	  'amber',
+37	  'sky',
+38	  'lime',
+39	  'purple',
+40	  'orange',
+41	  'pink',
+42	  'emerald',
+43	  'slate',
+44	  'cyan',
+45	] as const satisfies readonly GameColorKey[];
+46	
+47	const meta: Meta<StoryArgs> = {
+48	  component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
+49	  tags: ['autodocs'],
+50	  decorators: [withDb, withRouter],
+51	  parameters: { layout: 'fullscreen' },
+52	  args: {
+53	    text: 'Listen to each number and drag it into the correct slot to sort from smallest to biggest.',
+54	    gameTitle: 'Sort Numbers',
+55	    gameId: 'sort-numbers',
+56	    customGameColor: 'indigo' as GameColorKey,
+57	    ttsEnabled: false,
+58	    isBookmarked: false,
+59	    totalRounds: 5,
+60	    customGameId: '',
+61	    customGameName: '',
+62	    onStart: fn(),
+63	    onSaveCustomGame: fn(async () => 'stub-id'),
+64	    onUpdateCustomGame: fn(async () => {}),
+65	    onToggleBookmark: fn(),
+66	    onConfigChange: fn(),
+67	  },
+68	  argTypes: {
+69	    text: { control: 'text' },
+70	    gameTitle: { control: 'text' },
+71	    gameId: { control: 'text' },
+72	    customGameColor: {
+73	      control: { type: 'select' },
+74	      options: GAME_COLOR_OPTIONS,
+75	    },
+76	    ttsEnabled: { control: 'boolean' },
+77	    isBookmarked: { control: 'boolean' },
+78	    totalRounds: {
+79	      control: { type: 'range', min: 1, max: 20, step: 1 },
+80	    },
+81	    customGameId: { control: 'text' },
+82	    customGameName: { control: 'text' },
+83	    onStart: { table: { disable: true } },
+84	    onSaveCustomGame: { table: { disable: true } },
+85	    onUpdateCustomGame: { table: { disable: true } },
+86	    onToggleBookmark: { table: { disable: true } },
+87	    onConfigChange: { table: { disable: true } },
+88	  },
+89	  render: ({
+90	    text,
+91	    gameTitle,
+92	    gameId,
+93	    customGameColor,
+94	    ttsEnabled,
+95	    isBookmarked,
+96	    totalRounds,
+97	    customGameId,
+98	    customGameName,
+99	    onStart,
+100	    onSaveCustomGame,
+101	    onUpdateCustomGame,
+102	    onToggleBookmark,
+103	    onConfigChange,
+104	  }) => (
+105	    <InstructionsOverlay
+106	      text={text}
+107	      gameTitle={gameTitle}
+108	      gameId={gameId}
+109	      customGameColor={customGameColor}
+110	      ttsEnabled={ttsEnabled}
+111	      isBookmarked={isBookmarked}
+112	      config={{ totalRounds }}
+113	      customGameId={customGameId || undefined}
+114	      customGameName={customGameName || undefined}
+115	      onStart={onStart}
+116	      onSaveCustomGame={onSaveCustomGame}
+117	      onUpdateCustomGame={onUpdateCustomGame}
+118	      onToggleBookmark={onToggleBookmark}
+119	      onConfigChange={onConfigChange}
+120	    />
+121	  ),
+122	};
+123	export default meta;
+124	
+125	type Story = StoryObj<StoryArgs>;
+126	
+127	export const Default: Story = {};
+128	
+129	export const WithCustomGame: Story = {
+130	  args: {
+131	    customGameId: 'abc123',
+132	    customGameName: 'Easy Mode',
+133	    customGameColor: 'teal' as GameColorKey,
+134	  },
+135	};
+136	
+137	export const WordSpellDefault: Story = {
+138	  args: {
+139	    text: 'Drag the letters to spell the word.',
+140	    gameTitle: 'Word Spell',
+141	    gameId: 'word-spell',
+142	    totalRounds: 8,
+143	  },
+144	};
+145	
+146	export const NotBookmarked: Story = {
+147	  args: { isBookmarked: false },
+148	};
+149	
+150	export const Bookmarked: Story = {
+151	  args: { isBookmarked: true },
+152	};
+153	
+154	export const NotBookmarkedCustomGame: Story = {
+155	  args: {
+156	    customGameId: 'abc123',
+157	    customGameName: 'Easy Mode',
+158	    customGameColor: 'teal' as GameColorKey,
+159	    isBookmarked: false,
+160	  },
+161	};
+162	
+163	export const BookmarkedCustomGame: Story = {
+164	  args: {
+165	    customGameId: 'abc123',
+166	    customGameName: 'Easy Mode',
+167	    customGameColor: 'teal' as GameColorKey,
+168	    isBookmarked: true,
+169	  },
+170	};
+171	
+172	export const StartsGame: Story = {
+173	  args: {
+174	    customGameId: 'abc123',
+175	    customGameName: 'Easy Mode',
+176	  },
+177	  play: async ({ args }) => {
+178	    const portal = within(document.body);
+179	    await userEvent.click(
+180	      await portal.findByRole('button', { name: /let/i }),
+181	    );
+182	    await waitFor(() => {
+183	      expect(args.onStart).toHaveBeenCalled();
+184	    });
+185	  },
+186	};
+187	
+188	export const TogglesBookmark: Story = {
+189	  args: { isBookmarked: false },
+190	  play: async ({ args }) => {
+191	    const portal = within(document.body);
+192	    const bookmarkButton = await portal.findByRole('button', {
+193	      name: /bookmark/i,
+194	    });
+195	    await userEvent.click(bookmarkButton);
+196	    await waitFor(() => {
+197	      expect(args.onToggleBookmark).toHaveBeenCalledTimes(1);
+198	    });
+199	  },
+200	};
+201	
+202	export const OpensSettings: Story = {
+203	  play: async () => {
+204	    const portal = within(document.body);
+205	    const settingsButton = await portal.findByRole('button', {
+206	      name: /configure/i,
+207	    });
+208	    await userEvent.click(settingsButton);
+209	    await waitFor(() => {
+210	      expect(portal.getByRole('dialog')).toBeVisible();
+211	    });
+212	    await userEvent.keyboard('{Escape}');
+213	    await waitFor(() => {
+214	      expect(portal.queryByRole('dialog')).toBeNull();
+215	    });
+216	  },
+217	};
+218
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:14Z)**_
+
+Now I can see the issue clearly. Based on the code:
+
+1. **Modal accessible name** (AdvancedConfigModal): Line 158-162 shows `DialogTitle` renders either the custom game name or `"Advanced settings"`. When testing the default mode, the title is "Advanced settings".
+
+2. **Settings button accessible name** (InstructionsOverlay): Line 63-65 shows the button aria-label uses translation key `'instructions.configure'` with default value `"Configure"`.
+
+3. **Outer overlay accessible name** (InstructionsOverlay): Line 242-243 shows `role="dialog"` with `aria-label="Game instructions"`.
+
+The fix needs to distinguish the modal (which will have accessible name "Advanced settings") from the outer overlay ("Game instructions"). Let me update the story:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:17Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:19Z)**_
+
+Now let me verify with typecheck and lint:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`yarn typecheck 2>&1 | head -50`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 2.83s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:37Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`yarn lint 2>&1 | head -100`
+
+```text
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 13.29s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:39Z)**_
+
+Perfect. Now let me commit and amend to the specified commit:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git add src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx && git commit --amend --no-edit`
+
+```text
+<persisted-output>
+Output too large (44.2KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bw3i2mdym.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (a45ddf99)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 257ms
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 257ms
+stderr | src/components/SaveConfigDialog.test.tsx > SaveConfigDialog > renders with suggested name pre-filled
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:55Z)**_
+
+Good, the pre-commit hooks ran successfully. Let me check the new commit SHA:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:55Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git log -1 --oneline`
+
+```text
+f74eb775 stories(answer-game/InstructionsOverlay): retrofit per controls policy
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:57Z)**_
+
+Perfect. Let me verify the file one more time to confirm the changes:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:16:58Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`
+
+```text
+202	export const OpensSettings: Story = {
+203	  play: async () => {
+204	    const portal = within(document.body);
+205	    const settingsButton = await portal.findByRole('button', {
+206	      name: /configure/i,
+207	    });
+208	    await userEvent.click(settingsButton);
+209	    await waitFor(() => {
+210	      expect(
+211	        portal.getByRole('dialog', { name: /advanced settings/i }),
+212	      ).toBeVisible();
+213	    });
+214	    await userEvent.keyboard('{Escape}');
+215	    await waitFor(() => {
+216	      expect(
+217	        portal.queryByRole('dialog', { name: /advanced settings/i }),
+218	      ).toBeNull();
+219	    });
+220	  },
+221	};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:17:01Z)**_
+
+DONE f74eb775
+
+Modal name regex: `/advanced settings/i` (from AdvancedConfigModal DialogTitle line 161 default)
+Settings button regex: `/configure/i` (unchanged—already correct per InstructionsOverlay HeaderActions line 64)
+
+_**Agent (claude-opus-4-7 2026-04-21 06:17:04Z)**_
+
+Task 3 fixed at `f74eb775`. Dispatching spec-compliance reviewer.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:17:30Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Task 3 spec-compliance review
+
+```text
+Perfect. Now I'll verify each gate systematically:
+
+**SPEC COMPLIANCE: ✅**
+
+**Gates met:**
+1. ✅ Controls: text, gameTitle, gameId, customGameColor select (12 GAME_COLOR_KEYS), ttsEnabled boolean, isBookmarked boolean, totalRounds range (1–20), customGameId, customGameName
+2. ✅ fn() cleanup: All handlers (`onStart`, `onSaveCustomGame`, `onUpdateCustomGame`, `onToggleBookmark`, `onConfigChange`) use `fn()` from `storybook/test`
+3. ✅ argTypes handler disable: Each handler has `table: { disable: true }`
+4. ✅ Decorators: `withDb` AND `withRouter` present in meta
+5. ✅ State variants: `Default`, `WithCustomGame`, `WordSpellDefault`, `NotBookmarked`, `Bookmarked`, `NotBookmarkedCustomGame`, `BookmarkedCustomGame` — exactly seven named exports
+6. ✅ play() flows: `StartsGame`, `TogglesBookmark`, `OpensSettings` — exactly three named exports
+7. ✅ TTS guard: `ttsEnabled: false` in default args; all stories inherit it
+8. ✅ Portal queries: play() flows use `within(document.body)`, not `canvasElement`; assertions wrapped in `waitFor()`
+9. ✅ Export default meta: `export default meta` only; otherwise named exports
+10. ✅ Imports: `storybook/test` subpath used (not `@storybook/test`)
+
+**Gates missing or wrong:**
+None.
+
+**Extras not requested:**
+None.
+
+**APPROVED**
+agentId: abe620bf9c0c7efe9 (use SendMessage with to: 'abe620bf9c0c7efe9' to continue this agent)
+<usage>total_tokens: 25334
+tool_uses: 2
+duration_ms: 11253</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:17:19Z)**_
+
+Spec compliance review only.
+
+Worktree: `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`
+Commit: `f74eb775`
+
+Task 3 required retrofitting `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx` with these gates:
+
+1. **Controls (StoryArgs)**: `text` text, `gameTitle` text, `gameId` text, `customGameColor` select (options: 12 GAME_COLOR_KEYS), `ttsEnabled` boolean, `isBookmarked` boolean, `totalRounds` range (min 1 max 20), `customGameId` text, `customGameName` text.
+2. **fn() cleanup**: every handler in args uses `fn()` from `storybook/test`: `onStart`, `onSaveCustomGame`, `onUpdateCustomGame`, `onToggleBookmark`, `onConfigChange`. No `{ action: '...' }` entries.
+3. **argTypes handler disable**: each handler has `table: { disable: true }`.
+4. **Decorators**: `withDb` AND `withRouter`.
+5. **State variants exported**: `Default`, `WithCustomGame`, `WordSpellDefault`, `NotBookmarked`, `Bookmarked`, `NotBookmarkedCustomGame`, `BookmarkedCustomGame` — exactly those seven named.
+6. **play() flows exported**: `StartsGame`, `TogglesBookmark`, `OpensSettings` — exactly those three named.
+7. **TTS guard**: every story has `ttsEnabled: false` (default in args or explicit per-story).
+8. **Portal queries**: play() flows use `within(document.body)`, NOT `within(canvasElement)`, and wrap visibility/queryByRole assertions in `waitFor()`.
+9. **`export default meta`** allowed; otherwise only named exports.
+10. **Imports from `storybook/test`** (subpath), not `@storybook/test`.
+
+Steps:
+1. `git show f74eb775 --stat` — confirm only that one file changed.
+2. Read the file: `git show f74eb775:src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`.
+3. Verify each gate.
+
+Report format:
+
+```
+SPEC COMPLIANCE: ✅ or ❌
+
+Gates met:
+- ...
+
+Gates missing or wrong:
+- ...
+
+Extras not requested:
+- ...
+```
+
+End with `APPROVED` or `CHANGES_REQUESTED`. Under 250 words.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:17:21Z)**_
+
+I'll verify the spec compliance for the commit by examining the changes.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:17:21Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show f74eb775 --stat`
+
+```text
+commit f74eb7755f69d04cf70af7cc09b676d20c05fef5
+Author: leocaseiro <leobok@gmail.com>
+Date:   Tue Apr 21 16:15:18 2026 +1000
+
+    stories(answer-game/InstructionsOverlay): retrofit per controls policy
+    
+    Rebuild as an interactive story — StoryArgs exposes text, gameTitle,
+    gameId, customGameColor select, ttsEnabled, isBookmarked,
+    config.totalRounds range, customGameId/Name. All handlers wired to
+    fn() spies. Decorators: withDb + withRouter.
+    
+    Three play() flows: StartsGame, TogglesBookmark, OpensSettings (portal-
+    scoped, Escape-close). ttsEnabled: false throughout to avoid the TTS
+    crash path.
+    
+    Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+
+ .../InstructionsOverlay.stories.tsx                | 214 +++++++++++++++++----
+ 1 file changed, 172 insertions(+), 42 deletions(-)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:17:24Z)**_
+
+Now let me read the story file to verify each gate:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:17:24Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show f74eb775:src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`
+
+```text
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { withRouter } from '../../../../.storybook/decorators/withRouter';
+import { InstructionsOverlay } from './InstructionsOverlay';
+import type { SaveCustomGameInput } from './InstructionsOverlay';
+import type { GameColorKey } from '@/lib/game-colors';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
+
+interface StoryArgs {
+  text: string;
+  gameTitle: string;
+  gameId: string;
+  customGameColor: GameColorKey;
+  ttsEnabled: boolean;
+  isBookmarked: boolean;
+  totalRounds: number;
+  customGameId: string;
+  customGameName: string;
+  onStart: () => void;
+  onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
+  onUpdateCustomGame: (
+    name: string,
+    config: Record<string, unknown>,
+    extras?: { cover?: unknown; color?: GameColorKey },
+  ) => Promise<void>;
+  onToggleBookmark: () => void;
+  onConfigChange: (config: Record<string, unknown>) => void;
+}
+
+const GAME_COLOR_OPTIONS = [
+  'indigo',
+  'teal',
+  'rose',
+  'amber',
+  'sky',
+  'lime',
+  'purple',
+  'orange',
+  'pink',
+  'emerald',
+  'slate',
+  'cyan',
+] as const satisfies readonly GameColorKey[];
+
+const meta: Meta<StoryArgs> = {
+  component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  decorators: [withDb, withRouter],
+  parameters: { layout: 'fullscreen' },
+  args: {
+    text: 'Listen to each number and drag it into the correct slot to sort from smallest to biggest.',
+    gameTitle: 'Sort Numbers',
+    gameId: 'sort-numbers',
+    customGameColor: 'indigo' as GameColorKey,
+    ttsEnabled: false,
+    isBookmarked: false,
+    totalRounds: 5,
+    customGameId: '',
+    customGameName: '',
+    onStart: fn(),
+    onSaveCustomGame: fn(async () => 'stub-id'),
+    onUpdateCustomGame: fn(async () => {}),
+    onToggleBookmark: fn(),
+    onConfigChange: fn(),
+  },
+  argTypes: {
+    text: { control: 'text' },
+    gameTitle: { control: 'text' },
+    gameId: { control: 'text' },
+    customGameColor: {
+      control: { type: 'select' },
+      options: GAME_COLOR_OPTIONS,
+    },
+    ttsEnabled: { control: 'boolean' },
+    isBookmarked: { control: 'boolean' },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    customGameId: { control: 'text' },
+    customGameName: { control: 'text' },
+    onStart: { table: { disable: true } },
+    onSaveCustomGame: { table: { disable: true } },
+    onUpdateCustomGame: { table: { disable: true } },
+    onToggleBookmark: { table: { disable: true } },
+    onConfigChange: { table: { disable: true } },
+  },
+  render: ({
+    text,
+    gameTitle,
+    gameId,
+    customGameColor,
+    ttsEnabled,
+    isBookmarked,
+    totalRounds,
+    customGameId,
+    customGameName,
+    onStart,
+    onSaveCustomGame,
+    onUpdateCustomGame,
+    onToggleBookmark,
+    onConfigChange,
+  }) => (
+    <InstructionsOverlay
+      text={text}
+      gameTitle={gameTitle}
+      gameId={gameId}
+      customGameColor={customGameColor}
+      ttsEnabled={ttsEnabled}
+      isBookmarked={isBookmarked}
+      config={{ totalRounds }}
+      customGameId={customGameId || undefined}
+      customGameName={customGameName || undefined}
+      onStart={onStart}
+      onSaveCustomGame={onSaveCustomGame}
+      onUpdateCustomGame={onUpdateCustomGame}
+      onToggleBookmark={onToggleBookmark}
+      onConfigChange={onConfigChange}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Default: Story = {};
+
+export const WithCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+  },
+};
+
+export const WordSpellDefault: Story = {
+  args: {
+    text: 'Drag the letters to spell the word.',
+    gameTitle: 'Word Spell',
+    gameId: 'word-spell',
+    totalRounds: 8,
+  },
+};
+
+export const NotBookmarked: Story = {
+  args: { isBookmarked: false },
+};
+
+export const Bookmarked: Story = {
+  args: { isBookmarked: true },
+};
+
+export const NotBookmarkedCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+    isBookmarked: false,
+  },
+};
+
+export const BookmarkedCustomGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+    customGameColor: 'teal' as GameColorKey,
+    isBookmarked: true,
+  },
+};
+
+export const StartsGame: Story = {
+  args: {
+    customGameId: 'abc123',
+    customGameName: 'Easy Mode',
+  },
+  play: async ({ args }) => {
+    const portal = within(document.body);
+    await userEvent.click(
+      await portal.findByRole('button', { name: /let/i }),
+    );
+    await waitFor(() => {
+      expect(args.onStart).toHaveBeenCalled();
+    });
+  },
+};
+
+export const TogglesBookmark: Story = {
+  args: { isBookmarked: false },
+  play: async ({ args }) => {
+    const portal = within(document.body);
+    const bookmarkButton = await portal.findByRole('button', {
+      name: /bookmark/i,
+    });
+    await userEvent.click(bookmarkButton);
+    await waitFor(() => {
+      expect(args.onToggleBookmark).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const OpensSettings: Story = {
+  play: async () => {
+    const portal = within(document.body);
+    const settingsButton = await portal.findByRole('button', {
+      name: /configure/i,
+    });
+    await userEvent.click(settingsButton);
+    await waitFor(() => {
+      expect(
+        portal.getByRole('dialog', { name: /advanced settings/i }),
+      ).toBeVisible();
+    });
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(
+        portal.queryByRole('dialog', { name: /advanced settings/i }),
+      ).toBeNull();
+    });
+  },
+};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:17:30Z)**_
+
+Perfect. Now I'll verify each gate systematically:
+
+**SPEC COMPLIANCE: ✅**
+
+**Gates met:**
+1. ✅ Controls: text, gameTitle, gameId, customGameColor select (12 GAME_COLOR_KEYS), ttsEnabled boolean, isBookmarked boolean, totalRounds range (1–20), customGameId, customGameName
+2. ✅ fn() cleanup: All handlers (`onStart`, `onSaveCustomGame`, `onUpdateCustomGame`, `onToggleBookmark`, `onConfigChange`) use `fn()` from `storybook/test`
+3. ✅ argTypes handler disable: Each handler has `table: { disable: true }`
+4. ✅ Decorators: `withDb` AND `withRouter` present in meta
+5. ✅ State variants: `Default`, `WithCustomGame`, `WordSpellDefault`, `NotBookmarked`, `Bookmarked`, `NotBookmarkedCustomGame`, `BookmarkedCustomGame` — exactly seven named exports
+6. ✅ play() flows: `StartsGame`, `TogglesBookmark`, `OpensSettings` — exactly three named exports
+7. ✅ TTS guard: `ttsEnabled: false` in default args; all stories inherit it
+8. ✅ Portal queries: play() flows use `within(document.body)`, not `canvasElement`; assertions wrapped in `waitFor()`
+9. ✅ Export default meta: `export default meta` only; otherwise named exports
+10. ✅ Imports: `storybook/test` subpath used (not `@storybook/test`)
+
+**Gates missing or wrong:**
+None.
+
+**Extras not requested:**
+None.
+
+**APPROVED**
+
+_**Agent (claude-opus-4-7 2026-04-21 06:17:51Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Task 3 code-quality review
+
+```text
+**Strengths:**
+- Clean separation of concerns: `StoryArgs` interface, `meta` config, and variants are well-structured.
+- Proper control definitions with `select`, `boolean`, and `range` types following spec.
+- `OpensSettings` correctly targets the modal dialog with `{ name: /advanced settings/i }`, fixing the previous bug where it queried the overlay instead.
+- All function callbacks are properly mocked with `fn()`.
+- No unused imports or dead code.
+
+**Issues (DRY):**
+- `NotBookmarked` (line 146–148) is **redundant**: it duplicates `Default` since `isBookmarked: false` is already set in meta `args` (line 58). This variant adds no new coverage.
+- `NotBookmarkedCustomGame` and `BookmarkedCustomGame` both repeat `customGameColor: 'teal'` and `customGameId`/`customGameName`. Could merge into one variant that toggles `isBookmarked`.
+
+**Issues (Nit):**
+- Line 180: `/let/i` is loose — "Let's Go" matches but so would "Let" alone. Recommend `/let.*go/i` or `/let's go/i` for clarity.
+- Lines 113–114: Conditional `|| undefined` is idiomatic but could be replaced with destructuring or a helper to avoid repetition across both slots.
+
+**Recommendation:**
+Remove `NotBookmarked` as it's covered by `Default`. Consider consolidating the custom game bookmark variants into one parameterizable story or renaming for clarity. Minor: tighten the button regex in `StartsGame`.
+
+APPROVED
+agentId: afedac21100eb5134 (use SendMessage with to: 'afedac21100eb5134' to continue this agent)
+<usage>total_tokens: 27110
+tool_uses: 1
+duration_ms: 9254</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:17:42Z)**_
+
+Code quality review. Spec compliance is already approved — don't re-check it.
+
+Worktree: `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`
+Commit: `f74eb775`, only `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx` changed.
+
+Project conventions:
+- Arrow `const` components (`react/function-component-definition`).
+- `export default` only for `meta`.
+- Named exports elsewhere.
+- No unused imports/variables.
+- Strict TS.
+- Comments only for non-obvious WHY.
+
+Context: this retrofit fixes a real bug — previous Storybook `OpensSettings` play() would never have worked because `InstructionsOverlay` itself renders as `role="dialog"`. The fix narrows the query with `{ name: /advanced settings/i }` to target the modal, not the overlay. Don't flag that as an issue.
+
+Also: the `ComponentType<StoryArgs>` cast is intentional (the "Complex Object Props pattern" used across the codebase's pilot retrofits — `card.stories.tsx`, `alert-dialog.stories.tsx`). Don't flag it as awkward.
+
+Steps:
+1. Read the file.
+2. Look for:
+   - Dead / unused code
+   - DRY issues (are any of the 7 state variants redundant? e.g. `NotBookmarked` = `Default` since default args already set `isBookmarked: false`?)
+   - Unnecessary comments
+   - Brittle regex matchers in play() that could be tightened
+   - Any prop threading that could be simpler
+
+Report format:
+
+```
+Strengths:
+- ...
+
+Issues (Blocker):
+- ...
+
+Issues (Important):
+- ...
+
+Issues (Nit):
+- ...
+```
+
+End with `APPROVED` or `CHANGES_REQUESTED`. Under 250 words.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:17:44Z)**_
+
+I'll review the Storybook story file for code quality and spec compliance.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:17:44Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`
+
+```text
+1	import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+2	
+3	import { withDb } from '../../../../.storybook/decorators/withDb';
+4	import { withRouter } from '../../../../.storybook/decorators/withRouter';
+5	import { InstructionsOverlay } from './InstructionsOverlay';
+6	import type { SaveCustomGameInput } from './InstructionsOverlay';
+7	import type { GameColorKey } from '@/lib/game-colors';
+8	import type { Meta, StoryObj } from '@storybook/react';
+9	import type { ComponentType } from 'react';
+10	
+11	interface StoryArgs {
+12	  text: string;
+13	  gameTitle: string;
+14	  gameId: string;
+15	  customGameColor: GameColorKey;
+16	  ttsEnabled: boolean;
+17	  isBookmarked: boolean;
+18	  totalRounds: number;
+19	  customGameId: string;
+20	  customGameName: string;
+21	  onStart: () => void;
+22	  onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
+23	  onUpdateCustomGame: (
+24	    name: string,
+25	    config: Record<string, unknown>,
+26	    extras?: { cover?: unknown; color?: GameColorKey },
+27	  ) => Promise<void>;
+28	  onToggleBookmark: () => void;
+29	  onConfigChange: (config: Record<string, unknown>) => void;
+30	}
+31	
+32	const GAME_COLOR_OPTIONS = [
+33	  'indigo',
+34	  'teal',
+35	  'rose',
+36	  'amber',
+37	  'sky',
+38	  'lime',
+39	  'purple',
+40	  'orange',
+41	  'pink',
+42	  'emerald',
+43	  'slate',
+44	  'cyan',
+45	] as const satisfies readonly GameColorKey[];
+46	
+47	const meta: Meta<StoryArgs> = {
+48	  component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
+49	  tags: ['autodocs'],
+50	  decorators: [withDb, withRouter],
+51	  parameters: { layout: 'fullscreen' },
+52	  args: {
+53	    text: 'Listen to each number and drag it into the correct slot to sort from smallest to biggest.',
+54	    gameTitle: 'Sort Numbers',
+55	    gameId: 'sort-numbers',
+56	    customGameColor: 'indigo' as GameColorKey,
+57	    ttsEnabled: false,
+58	    isBookmarked: false,
+59	    totalRounds: 5,
+60	    customGameId: '',
+61	    customGameName: '',
+62	    onStart: fn(),
+63	    onSaveCustomGame: fn(async () => 'stub-id'),
+64	    onUpdateCustomGame: fn(async () => {}),
+65	    onToggleBookmark: fn(),
+66	    onConfigChange: fn(),
+67	  },
+68	  argTypes: {
+69	    text: { control: 'text' },
+70	    gameTitle: { control: 'text' },
+71	    gameId: { control: 'text' },
+72	    customGameColor: {
+73	      control: { type: 'select' },
+74	      options: GAME_COLOR_OPTIONS,
+75	    },
+76	    ttsEnabled: { control: 'boolean' },
+77	    isBookmarked: { control: 'boolean' },
+78	    totalRounds: {
+79	      control: { type: 'range', min: 1, max: 20, step: 1 },
+80	    },
+81	    customGameId: { control: 'text' },
+82	    customGameName: { control: 'text' },
+83	    onStart: { table: { disable: true } },
+84	    onSaveCustomGame: { table: { disable: true } },
+85	    onUpdateCustomGame: { table: { disable: true } },
+86	    onToggleBookmark: { table: { disable: true } },
+87	    onConfigChange: { table: { disable: true } },
+88	  },
+89	  render: ({
+90	    text,
+91	    gameTitle,
+92	    gameId,
+93	    customGameColor,
+94	    ttsEnabled,
+95	    isBookmarked,
+96	    totalRounds,
+97	    customGameId,
+98	    customGameName,
+99	    onStart,
+100	    onSaveCustomGame,
+101	    onUpdateCustomGame,
+102	    onToggleBookmark,
+103	    onConfigChange,
+104	  }) => (
+105	    <InstructionsOverlay
+106	      text={text}
+107	      gameTitle={gameTitle}
+108	      gameId={gameId}
+109	      customGameColor={customGameColor}
+110	      ttsEnabled={ttsEnabled}
+111	      isBookmarked={isBookmarked}
+112	      config={{ totalRounds }}
+113	      customGameId={customGameId || undefined}
+114	      customGameName={customGameName || undefined}
+115	      onStart={onStart}
+116	      onSaveCustomGame={onSaveCustomGame}
+117	      onUpdateCustomGame={onUpdateCustomGame}
+118	      onToggleBookmark={onToggleBookmark}
+119	      onConfigChange={onConfigChange}
+120	    />
+121	  ),
+122	};
+123	export default meta;
+124	
+125	type Story = StoryObj<StoryArgs>;
+126	
+127	export const Default: Story = {};
+128	
+129	export const WithCustomGame: Story = {
+130	  args: {
+131	    customGameId: 'abc123',
+132	    customGameName: 'Easy Mode',
+133	    customGameColor: 'teal' as GameColorKey,
+134	  },
+135	};
+136	
+137	export const WordSpellDefault: Story = {
+138	  args: {
+139	    text: 'Drag the letters to spell the word.',
+140	    gameTitle: 'Word Spell',
+141	    gameId: 'word-spell',
+142	    totalRounds: 8,
+143	  },
+144	};
+145	
+146	export const NotBookmarked: Story = {
+147	  args: { isBookmarked: false },
+148	};
+149	
+150	export const Bookmarked: Story = {
+151	  args: { isBookmarked: true },
+152	};
+153	
+154	export const NotBookmarkedCustomGame: Story = {
+155	  args: {
+156	    customGameId: 'abc123',
+157	    customGameName: 'Easy Mode',
+158	    customGameColor: 'teal' as GameColorKey,
+159	    isBookmarked: false,
+160	  },
+161	};
+162	
+163	export const BookmarkedCustomGame: Story = {
+164	  args: {
+165	    customGameId: 'abc123',
+166	    customGameName: 'Easy Mode',
+167	    customGameColor: 'teal' as GameColorKey,
+168	    isBookmarked: true,
+169	  },
+170	};
+171	
+172	export const StartsGame: Story = {
+173	  args: {
+174	    customGameId: 'abc123',
+175	    customGameName: 'Easy Mode',
+176	  },
+177	  play: async ({ args }) => {
+178	    const portal = within(document.body);
+179	    await userEvent.click(
+180	      await portal.findByRole('button', { name: /let/i }),
+181	    );
+182	    await waitFor(() => {
+183	      expect(args.onStart).toHaveBeenCalled();
+184	    });
+185	  },
+186	};
+187	
+188	export const TogglesBookmark: Story = {
+189	  args: { isBookmarked: false },
+190	  play: async ({ args }) => {
+191	    const portal = within(document.body);
+192	    const bookmarkButton = await portal.findByRole('button', {
+193	      name: /bookmark/i,
+194	    });
+195	    await userEvent.click(bookmarkButton);
+196	    await waitFor(() => {
+197	      expect(args.onToggleBookmark).toHaveBeenCalledTimes(1);
+198	    });
+199	  },
+200	};
+201	
+202	export const OpensSettings: Story = {
+203	  play: async () => {
+204	    const portal = within(document.body);
+205	    const settingsButton = await portal.findByRole('button', {
+206	      name: /configure/i,
+207	    });
+208	    await userEvent.click(settingsButton);
+209	    await waitFor(() => {
+210	      expect(
+211	        portal.getByRole('dialog', { name: /advanced settings/i }),
+212	      ).toBeVisible();
+213	    });
+214	    await userEvent.keyboard('{Escape}');
+215	    await waitFor(() => {
+216	      expect(
+217	        portal.queryByRole('dialog', { name: /advanced settings/i }),
+218	      ).toBeNull();
+219	    });
+220	  },
+221	};
+222
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:17:51Z)**_
+
+**Strengths:**
+- Clean separation of concerns: `StoryArgs` interface, `meta` config, and variants are well-structured.
+- Proper control definitions with `select`, `boolean`, and `range` types following spec.
+- `OpensSettings` correctly targets the modal dialog with `{ name: /advanced settings/i }`, fixing the previous bug where it queried the overlay instead.
+- All function callbacks are properly mocked with `fn()`.
+- No unused imports or dead code.
+
+**Issues (DRY):**
+- `NotBookmarked` (line 146–148) is **redundant**: it duplicates `Default` since `isBookmarked: false` is already set in meta `args` (line 58). This variant adds no new coverage.
+- `NotBookmarkedCustomGame` and `BookmarkedCustomGame` both repeat `customGameColor: 'teal'` and `customGameId`/`customGameName`. Could merge into one variant that toggles `isBookmarked`.
+
+**Issues (Nit):**
+- Line 180: `/let/i` is loose — "Let's Go" matches but so would "Let" alone. Recommend `/let.*go/i` or `/let's go/i` for clarity.
+- Lines 113–114: Conditional `|| undefined` is idiomatic but could be replaced with destructuring or a helper to avoid repetition across both slots.
+
+**Recommendation:**
+Remove `NotBookmarked` as it's covered by `Default`. Consider consolidating the custom game bookmark variants into one parameterizable story or renaming for clarity. Minor: tighten the button regex in `StartsGame`.
+
+APPROVED
+
+_**Agent (claude-opus-4-7 2026-04-21 06:18:03Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:18:03Z)**_
+
+Reviewer APPROVED with minor nits. The flagged "redundant" stories (`NotBookmarked` pairs with `Bookmarked`) are explicitly required by the spec for sidebar clarity. Marking Task 3 complete.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:18:04Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #9 status
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:18:04Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #10 status
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:18:07Z)**_
+
+Dispatching the consolidated Tier 2 implementer for Tasks 4–8.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:24:49Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Tasks 4-8: Tier 2 consolidated
+
+```text
+All five commits are clean. Here is the final report.
+
+---
+
+**Status: DONE_WITH_CONCERNS**
+
+**Commit SHAs (Tasks 4–8):**
+
+| Task | File | SHA |
+|------|------|-----|
+| 4 | EncouragementAnnouncer | `e3121973` |
+| 5 | GameOverOverlay | `483141ac` |
+| 6 | LevelCompleteOverlay | `8fa29284` |
+| 7 | ProgressHUD | `4d465568` |
+| 8 | ScoreAnimation | `830836bb` |
+
+**Signature / regex adjustments:**
+
+- **EncouragementAnnouncer**: Props matched exactly `{ visible, message, onDismiss }`. No changes needed. Import order auto-fixed by eslint (`storybook/test` before `vitest`; `@storybook/react` type before `react` type).
+- **GameOverOverlay**: Buttons render "Play again" and "Home" — regexes `/play again/i` and `/home/i` are exact matches. Component uses `fixed inset-0` div (not a React portal), so `within(canvasElement)` is correct.
+- **LevelCompleteOverlay**: Buttons render "Next Level" and "I'm Done" — `/next level/i` and `/done/i` both match. No portal.
+- **ProgressHUD**: Fixed `@storybook/react-vite` → `@storybook/react`. StoryArgs bridge `totalRoundsIsNull` boolean maps to `null | number` in render. Import order auto-fixed.
+- **ScoreAnimation**: Props are exactly `{ visible: boolean }`. No changes.
+
+**Concerns about play() stories at test-runner time:**
+
+1. `AutoDismissesAfter2s` (EncouragementAnnouncer) uses `vi.useFakeTimers()` + `advanceTimersByTime(2000)`. The Storybook test-runner runs in a real browser via Playwright, and `vi` fake timers work differently there than in Vitest. If the test-runner does not instrument the timer environment with `vi`, the `waitFor(() => expect(args.onDismiss).toHaveBeenCalled())` may time out waiting for the real 2-second timer. This is the most likely CI failure.
+2. `GameOverOverlay` and `LevelCompleteOverlay` fire `canvas-confetti` on mount (rAF loop / one-shot). This is side-effect-only and does not affect the play() assertions, but the rAF loop in GameOverOverlay could cause flakiness if the test completes before `cancelAnimationFrame` cleans up.
+agentId: af568ef48c148183b (use SendMessage with to: 'af568ef48c148183b' to continue this agent)
+<usage>total_tokens: 42191
+tool_uses: 39
+duration_ms: 331264</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:19:17Z)**_
+
+You are implementing Tier 2 of a Storybook retrofit plan for BaseSkill — five sequential file retrofits, one commit per file. Tasks 1–3 (Slot, AnswerGame, InstructionsOverlay) are already complete.
+
+# Scene Setting
+
+BaseSkill children's educational games. Storybook controls audit Batch 2.
+
+Worktree (cwd): `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`
+Branch: `audit/storybook-batch-2-answer-game`. Never commit to master.
+
+# Shared Conventions (all five tasks)
+
+- Import test helpers from `storybook/test` subpath.
+- `export default meta` is the only allowed default export.
+- Arrow `const` components.
+- Commit message shape: `stories(answer-game/<name>): retrofit per controls policy`.
+- Per-file verification: `yarn typecheck` → 0 AND `yarn lint` → 0 before committing THAT file.
+- Commit message trailer: `Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>`.
+- ESLint `import/order` rule: value imports → relative imports → `storybook/test` → `@storybook/react` type import last → `react` type import. Run eslint --fix if order is off.
+
+Do each file's steps fully before moving to the next. If one fails, STOP and report BLOCKED with the file name and error — don't proceed to later tasks.
+
+---
+
+## Task 4: `EncouragementAnnouncer.stories.tsx`
+
+**File to modify:** `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+**Context reads (only if something doesn't compile):** `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.tsx`.
+
+Replace the file with:
+
+```tsx
+import { useState } from 'react';
+import { vi } from 'vitest';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { EncouragementAnnouncer } from './EncouragementAnnouncer';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+interface StoryArgs {
+  message: string;
+  visible: boolean;
+  onDismiss: () => void;
+}
+
+const ShowTrigger = ({
+  message,
+  onDismiss,
+}: {
+  message: string;
+  onDismiss: () => void;
+}) => {
+  const [visible, setVisible] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setVisible(true)}
+        disabled={visible}
+        className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+      >
+        Show encouragement
+      </button>
+      <EncouragementAnnouncer
+        visible={visible}
+        message={message}
+        onDismiss={() => {
+          setVisible(false);
+          onDismiss();
+        }}
+      />
+    </>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component:
+    EncouragementAnnouncer as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  args: {
+    message: 'Keep trying!',
+    visible: false,
+    onDismiss: fn(),
+  },
+  argTypes: {
+    message: { control: 'text' },
+    visible: { control: 'boolean' },
+    onDismiss: { table: { disable: true } },
+  },
+  render: ({ message, visible, onDismiss }) => (
+    <EncouragementAnnouncer
+      message={message}
+      visible={visible}
+      onDismiss={onDismiss}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Hidden: Story = {
+  args: { visible: false, message: 'Keep trying!' },
+};
+
+export const Visible: Story = {
+  args: { visible: true, message: 'Almost! Try again.' },
+};
+
+export const ReplayTrigger: Story = {
+  args: { message: 'Great job!' },
+  render: ({ message, onDismiss }) => (
+    <ShowTrigger message={message} onDismiss={onDismiss} />
+  ),
+};
+
+export const AutoDismissesAfter2s: Story = {
+  args: { message: 'Keep trying!' },
+  render: ({ message, onDismiss }) => (
+    <ShowTrigger message={message} onDismiss={onDismiss} />
+  ),
+  play: async ({ args, canvasElement }) => {
+    vi.useFakeTimers();
+    try {
+      const canvas = within(canvasElement);
+      await userEvent.click(
+        canvas.getByRole('button', { name: /show encouragement/i }),
+      );
+      await waitFor(() => {
+        expect(canvas.getByText(/keep trying/i)).toBeVisible();
+      });
+      vi.advanceTimersByTime(2000);
+      await waitFor(() => {
+        expect(args.onDismiss).toHaveBeenCalled();
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  },
+};
+```
+
+Verify `EncouragementAnnouncer` really accepts the `{ visible, message, onDismiss }` shape. If its signature differs (e.g. uses `children` or a different handler name), adjust the StoryArgs, meta args, render, and ShowTrigger proxy accordingly. `vitest` should be importable — if the project blocks `vitest` imports from story files (check `.storybook/` setup if tsc complains), report `BLOCKED` so we can discuss.
+
+Then:
+- `yarn typecheck` → 0.
+- `yarn lint` → 0 (run `yarn lint:fix` first if needed).
+- Commit:
+
+```bash
+git add src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+git commit -m "$(cat <<'EOF'
+stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+
+StoryArgs: message text, visible boolean. onDismiss wired to fn() spy.
+ReplayTrigger story adds a button wrapper so the story is actually
+interactive. AutoDismissesAfter2s play() asserts the 2s auto-dismiss
+via vi.useFakeTimers / advanceTimersByTime(2000).
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+## Task 5: `GameOverOverlay.stories.tsx`
+
+**File:** `src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx`
+
+Replace the file with:
+
+```tsx
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { GameOverOverlay } from './GameOverOverlay';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof GameOverOverlay> = {
+  component: GameOverOverlay,
+  tags: ['autodocs'],
+  args: {
+    retryCount: 0,
+    onPlayAgain: fn(),
+    onHome: fn(),
+  },
+  argTypes: {
+    retryCount: {
+      control: { type: 'range', min: 0, max: 10, step: 1 },
+    },
+    onPlayAgain: { table: { disable: true } },
+    onHome: { table: { disable: true } },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof GameOverOverlay>;
+
+export const FiveStars: Story = { args: { retryCount: 0 } };
+export const FourStars: Story = { args: { retryCount: 1 } };
+export const ThreeStars: Story = { args: { retryCount: 3 } };
+export const TwoStars: Story = { args: { retryCount: 5 } };
+export const OneStar: Story = { args: { retryCount: 8 } };
+
+export const ClicksPlayAgain: Story = {
+  args: { retryCount: 0 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /play again/i }),
+    );
+    await waitFor(() => {
+      expect(args.onPlayAgain).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const ClicksHome: Story = {
+  args: { retryCount: 0 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /home/i }),
+    );
+    await waitFor(() => {
+      expect(args.onHome).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+```
+
+**Critical:** read `src/components/answer-game/GameOverOverlay/GameOverOverlay.tsx` to verify:
+- Component props really are `{ retryCount, onPlayAgain, onHome }`. If the button accessible names differ from `/play again/i` and `/home/i` (e.g. i18n keys render different labels), update those regexes to match what's rendered. If the overlay uses a portal, the play() flows must switch to `within(document.body)` and the `canvasElement` param should be omitted.
+
+Also: if GameOverOverlay uses a portal, you may need to switch both play() queries to `within(document.body)` and wrap first queries in `await ... findBy` which handles that. Check and adjust.
+
+Then typecheck + lint + commit:
+
+```bash
+git add src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx
+git commit -m "$(cat <<'EOF'
+stories(answer-game/GameOverOverlay): retrofit per controls policy
+
+StoryArgs: retryCount range. onPlayAgain/onHome wired to fn() spies.
+One story per visible star count (Five/Four/Three/Two/One).
+ClicksPlayAgain and ClicksHome play() stories assert spies.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+## Task 6: `LevelCompleteOverlay.stories.tsx`
+
+**File:** `src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx`
+
+Replace with:
+
+```tsx
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { LevelCompleteOverlay } from './LevelCompleteOverlay';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof LevelCompleteOverlay> = {
+  component: LevelCompleteOverlay,
+  tags: ['autodocs'],
+  args: {
+    level: 1,
+    onNextLevel: fn(),
+    onDone: fn(),
+  },
+  argTypes: {
+    level: { control: { type: 'range', min: 1, max: 20, step: 1 } },
+    onNextLevel: { table: { disable: true } },
+    onDone: { table: { disable: true } },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof LevelCompleteOverlay>;
+
+export const Level1: Story = { args: { level: 1 } };
+export const Level3: Story = { args: { level: 3 } };
+export const Level10: Story = { args: { level: 10 } };
+
+export const ClicksNextLevel: Story = {
+  args: { level: 1 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /next level/i }),
+    );
+    await waitFor(() => {
+      expect(args.onNextLevel).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const ClicksDone: Story = {
+  args: { level: 1 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /done/i }),
+    );
+    await waitFor(() => {
+      expect(args.onDone).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+```
+
+Read `LevelCompleteOverlay.tsx` to confirm button names; adjust regexes and portal-scope as needed (same caveat as Task 5).
+
+Typecheck + lint + commit:
+
+```bash
+git add src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx
+git commit -m "$(cat <<'EOF'
+stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+
+StoryArgs: level range. onNextLevel/onDone wired to fn() spies.
+ClicksNextLevel and ClicksDone play() stories assert spies.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+## Task 7: `ProgressHUD.stories.tsx`
+
+**File:** `src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx`
+
+Replace with:
+
+```tsx
+import { ProgressHUD } from './ProgressHUD';
+import type { AnswerGamePhase } from '../types';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+interface StoryArgs {
+  roundIndex: number;
+  totalRounds: number;
+  totalRoundsIsNull: boolean;
+  levelIndex: number;
+  isLevelMode: boolean;
+  phase: AnswerGamePhase;
+  showDots: boolean;
+  showFraction: boolean;
+  showLevel: boolean;
+}
+
+const meta: Meta<StoryArgs> = {
+  component: ProgressHUD as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/ProgressHUD',
+  parameters: { layout: 'centered' },
+  args: {
+    roundIndex: 2,
+    totalRounds: 5,
+    totalRoundsIsNull: false,
+    levelIndex: 0,
+    isLevelMode: false,
+    phase: 'playing',
+    showDots: true,
+    showFraction: true,
+    showLevel: false,
+  },
+  argTypes: {
+    roundIndex: {
+      control: { type: 'range', min: 0, max: 20, step: 1 },
+    },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    totalRoundsIsNull: { control: 'boolean' },
+    levelIndex: {
+      control: { type: 'range', min: 0, max: 20, step: 1 },
+    },
+    isLevelMode: { control: 'boolean' },
+    phase: {
+      control: { type: 'select' },
+      options: [
+        'playing',
+        'round-complete',
+        'level-complete',
+        'game-over',
+      ] satisfies AnswerGamePhase[],
+    },
+    showDots: { control: 'boolean' },
+    showFraction: { control: 'boolean' },
+    showLevel: { control: 'boolean' },
+  },
+  render: ({
+    roundIndex,
+    totalRounds,
+    totalRoundsIsNull,
+    levelIndex,
+    isLevelMode,
+    phase,
+    showDots,
+    showFraction,
+    showLevel,
+  }) => (
+    <ProgressHUD
+      roundIndex={roundIndex}
+      totalRounds={totalRoundsIsNull ? null : totalRounds}
+      levelIndex={levelIndex}
+      isLevelMode={isLevelMode}
+      phase={phase}
+      showDots={showDots}
+      showFraction={showFraction}
+      showLevel={showLevel}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Classic_Round3Of5: Story = {};
+
+export const Classic_LastRound: Story = {
+  args: { roundIndex: 4, totalRounds: 5 },
+};
+
+export const DotsOnly: Story = {
+  args: { showFraction: false, showLevel: false },
+};
+
+export const FractionOnly: Story = {
+  args: { showDots: false, showLevel: false },
+};
+
+export const LevelMode_Level3: Story = {
+  args: {
+    isLevelMode: true,
+    totalRoundsIsNull: true,
+    levelIndex: 2,
+    showFraction: false,
+    showLevel: true,
+  },
+};
+
+export const LevelMode_Level10: Story = {
+  args: {
+    isLevelMode: true,
+    totalRoundsIsNull: true,
+    levelIndex: 9,
+    showFraction: false,
+    showLevel: true,
+  },
+};
+
+export const Mixed_LevelPlusFraction: Story = {
+  args: {
+    isLevelMode: true,
+    totalRounds: 5,
+    levelIndex: 2,
+    showFraction: true,
+    showLevel: true,
+  },
+};
+
+export const RoundCompletePhase: Story = {
+  args: { phase: 'round-complete' },
+};
+
+export const AllFlagsOff: Story = {
+  args: { showDots: false, showFraction: false, showLevel: false },
+};
+```
+
+Note: this fix also switches `@storybook/react-vite` → `@storybook/react` to match project convention. Read `ProgressHUD.tsx` to confirm it really accepts the props `{ roundIndex, totalRounds: number|null, levelIndex, isLevelMode, phase, showDots, showFraction, showLevel }`. Adjust if reality differs.
+
+Typecheck + lint + commit:
+
+```bash
+git add src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx
+git commit -m "$(cat <<'EOF'
+stories(answer-game/ProgressHUD): retrofit per controls policy
+
+StoryArgs with explicit controls for every prop (ranges, selects,
+booleans). Preserves all 9 existing stories. Fix import from
+@storybook/react-vite → @storybook/react to match project convention.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+## Task 8: `ScoreAnimation.stories.tsx`
+
+**File:** `src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx`
+
+Replace with:
+
+```tsx
+import { ScoreAnimation } from './ScoreAnimation';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof ScoreAnimation> = {
+  component: ScoreAnimation,
+  tags: ['autodocs'],
+  args: { visible: false },
+  argTypes: {
+    visible: { control: 'boolean' },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof ScoreAnimation>;
+
+export const Playing: Story = { args: { visible: false } };
+export const Complete: Story = { args: { visible: true } };
+```
+
+Verify `ScoreAnimation` accepts just `visible: boolean`; adjust if it takes more.
+
+Typecheck + lint + commit:
+
+```bash
+git add src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+git commit -m "$(cat <<'EOF'
+stories(answer-game/ScoreAnimation): retrofit per controls policy
+
+StoryArgs: visible boolean. Pure-display component — no play() story.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+# Status to return
+
+After all five commits, return ONE report listing:
+- The five commit SHAs (one per file, in order).
+- Any signature/regex/portal adjustments you had to make per file.
+- Any concerns about play() stories that may fail at end-of-PR test-runner time.
+
+Status: `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, or `BLOCKED`. Under 350 words.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:20Z)**_
+
+I'll read the component files first to verify their signatures before writing the stories.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:22Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.tsx`
+
+```text
+1	import { useEffect } from 'react';
+2	
+3	interface EncouragementAnnouncerProps {
+4	  visible: boolean;
+5	  message: string;
+6	  onDismiss: () => void;
+7	}
+8	
+9	export const EncouragementAnnouncer = ({
+10	  visible,
+11	  message,
+12	  onDismiss,
+13	}: EncouragementAnnouncerProps) => {
+14	  useEffect(() => {
+15	    if (!visible) return;
+16	    const timer = setTimeout(onDismiss, 2000);
+17	    return () => clearTimeout(timer);
+18	  }, [visible, onDismiss]);
+19	
+20	  if (!visible) return null;
+21	
+22	  return (
+23	    <div
+24	      role="status"
+25	      aria-live="polite"
+26	      className="pointer-events-none fixed bottom-24 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 rounded-2xl bg-background/95 px-6 py-4 shadow-xl"
+27	    >
+28	      <span className="text-5xl" aria-hidden="true">
+29	        🐨
+30	      </span>
+31	      <p className="text-center text-lg font-semibold">{message}</p>
+32	    </div>
+33	  );
+34	};
+35
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:22Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.tsx`
+
+```text
+1	import confetti from 'canvas-confetti';
+2	import { useEffect } from 'react';
+3	
+4	interface GameOverOverlayProps {
+5	  retryCount: number;
+6	  onPlayAgain: () => void;
+7	  onHome: () => void;
+8	}
+9	
+10	const starsFromRetries = (retryCount: number): number => {
+11	  if (retryCount === 0) return 5;
+12	  if (retryCount <= 2) return 4;
+13	  if (retryCount <= 4) return 3;
+14	  if (retryCount <= 6) return 2;
+15	  return 1;
+16	};
+17	
+18	export const GameOverOverlay = ({
+19	  retryCount,
+20	  onPlayAgain,
+21	  onHome,
+22	}: GameOverOverlayProps) => {
+23	  const stars = starsFromRetries(retryCount);
+24	
+25	  useEffect(() => {
+26	    const duration = 2700;
+27	    const end = Date.now() + duration;
+28	    let rafId: number;
+29	
+30	    const frame = () => {
+31	      void confetti({
+32	        particleCount: 3,
+33	        angle: 60,
+34	        spread: 55,
+35	        origin: { x: 0 },
+36	      });
+37	      void confetti({
+38	        particleCount: 3,
+39	        angle: 120,
+40	        spread: 55,
+41	        origin: { x: 1 },
+42	      });
+43	      if (Date.now() < end) {
+44	        rafId = requestAnimationFrame(frame);
+45	      }
+46	    };
+47	
+48	    rafId = requestAnimationFrame(frame);
+49	
+50	    return () => {
+51	      cancelAnimationFrame(rafId);
+52	      confetti.reset();
+53	    };
+54	  }, []);
+55	
+56	  return (
+57	    <div
+58	      role="dialog"
+59	      aria-label="Game complete"
+60	      className="fixed inset-0 flex flex-col items-center justify-center gap-8 bg-background/95"
+61	    >
+62	      <span className="animate-bounce text-8xl" aria-hidden="true">
+63	        🐨
+64	      </span>
+65	
+66	      <div
+67	        aria-label={`You scored ${stars} out of 5 stars`}
+68	        className="flex gap-2"
+69	      >
+70	        {Array.from({ length: 5 }, (_, i) => (
+71	          <span
+72	            key={i}
+73	            className={`text-4xl ${i < stars ? 'text-yellow-400' : 'text-muted-foreground'}`}
+74	          >
+75	            ★
+76	          </span>
+77	        ))}
+78	      </div>
+79	
+80	      <div className="flex gap-4">
+81	        <button
+82	          type="button"
+83	          onClick={onPlayAgain}
+84	          className="rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-md active:scale-95"
+85	        >
+86	          Play again
+87	        </button>
+88	        <button
+89	          type="button"
+90	          onClick={onHome}
+91	          className="rounded-xl bg-muted px-8 py-4 text-lg font-bold active:scale-95"
+92	        >
+93	          Home
+94	        </button>
+95	      </div>
+96	    </div>
+97	  );
+98	};
+99
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:23Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.tsx`
+
+```text
+1	import confetti from 'canvas-confetti';
+2	import { useEffect } from 'react';
+3	
+4	interface LevelCompleteOverlayProps {
+5	  level: number;
+6	  onNextLevel: () => void;
+7	  onDone: () => void;
+8	}
+9	
+10	export const LevelCompleteOverlay = ({
+11	  level,
+12	  onNextLevel,
+13	  onDone,
+14	}: LevelCompleteOverlayProps) => {
+15	  useEffect(() => {
+16	    void confetti({
+17	      particleCount: 80,
+18	      spread: 70,
+19	      origin: { y: 0.5 },
+20	      ticks: 310,
+21	    });
+22	
+23	    return () => {
+24	      confetti.reset();
+25	    };
+26	  }, []);
+27	
+28	  return (
+29	    <div
+30	      role="dialog"
+31	      aria-label={`Level ${level} complete`}
+32	      className="fixed inset-0 flex flex-col items-center justify-center gap-8 bg-background/95"
+33	    >
+34	      <span className="animate-bounce text-8xl" aria-hidden="true">
+35	        🐨
+36	      </span>
+37	
+38	      <p className="text-4xl font-bold text-foreground">
+39	        Level {level} Complete!
+40	      </p>
+41	
+42	      <div className="flex gap-4">
+43	        <button
+44	          type="button"
+45	          onClick={onNextLevel}
+46	          className="rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-md active:scale-95"
+47	        >
+48	          Next Level
+49	        </button>
+50	        <button
+51	          type="button"
+52	          onClick={onDone}
+53	          className="rounded-xl bg-muted px-8 py-4 text-lg font-bold active:scale-95"
+54	        >
+55	          I&apos;m Done
+56	        </button>
+57	      </div>
+58	    </div>
+59	  );
+60	};
+61
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:24Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ProgressHUD/ProgressHUD.tsx`
+
+```text
+1	import type { ProgressHUDProps } from '../types';
+2	
+3	export const ProgressHUD = ({
+4	  roundIndex,
+5	  totalRounds,
+6	  levelIndex,
+7	  isLevelMode,
+8	  phase,
+9	  showDots,
+10	  showFraction,
+11	  showLevel,
+12	}: ProgressHUDProps) => {
+13	  if (!showDots && !showFraction && !showLevel) return null;
+14	
+15	  const dotCount = isLevelMode ? levelIndex + 1 : (totalRounds ?? 0);
+16	  const filledIndex = isLevelMode ? levelIndex : roundIndex;
+17	  const canShowFraction = showFraction && totalRounds !== null;
+18	
+19	  return (
+20	    <div
+21	      className="skin-hud group flex items-center gap-[var(--skin-hud-gap)] rounded-[var(--skin-hud-radius)] bg-[var(--skin-hud-bg)] px-[0.75rem] py-[0.25rem]"
+22	      data-phase={phase}
+23	    >
+24	      {showLevel ? (
+25	        <span
+26	          className="skin-hud__level font-extrabold tracking-widest text-[color:var(--skin-hud-level-color)]"
+27	          aria-live="polite"
+28	        >
+29	          LEVEL {levelIndex + 1}
+30	        </span>
+31	      ) : null}
+32	      {showDots ? (
+33	        <ol
+34	          className="skin-hud__dots flex items-center gap-[var(--skin-hud-gap)]"
+35	          aria-label="round progress"
+36	        >
+37	          {Array.from({ length: dotCount }).map((_, i) => (
+38	            <li
+39	              // eslint-disable-next-line react/no-array-index-key -- dots are positional and never reordered; index is the stable key
+40	              key={`dot-${i}`}
+41	              className="skin-hud__dot block size-[var(--skin-hud-dot-size)] rounded-full border border-[color:var(--skin-hud-dot-border)] data-[state=done]:bg-[color:var(--skin-hud-dot-fill)] data-[state=current]:border-2 data-[state=current]:border-[color:var(--skin-hud-dot-current-border)] data-[state=current]:bg-[color:var(--skin-hud-dot-fill)] data-[state=todo]:bg-[color:var(--skin-hud-dot-empty)] motion-safe:data-[state=current]:group-data-[phase=round-complete]:animate-pulse"
+42	              data-state={
+43	                i < filledIndex
+44	                  ? 'done'
+45	                  : i === filledIndex
+46	                    ? 'current'
+47	                    : 'todo'
+48	              }
+49	            />
+50	          ))}
+51	        </ol>
+52	      ) : null}
+53	      {canShowFraction ? (
+54	        <span
+55	          className="skin-hud__fraction font-extrabold text-[color:var(--skin-hud-fraction-color)]"
+56	          aria-live="polite"
+57	        >
+58	          {roundIndex + 1}
+59	          <span className="skin-hud__fraction-sep mx-0.5 text-[color:var(--skin-hud-fraction-sep-color)]">
+60	            /
+61	          </span>
+62	          {totalRounds}
+63	        </span>
+64	      ) : null}
+65	    </div>
+66	  );
+67	};
+68
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:25Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.tsx`
+
+```text
+1	import confetti from 'canvas-confetti';
+2	import { useEffect, useRef } from 'react';
+3	
+4	interface ScoreAnimationProps {
+5	  visible: boolean;
+6	}
+7	
+8	export const ScoreAnimation = ({ visible }: ScoreAnimationProps) => {
+9	  const prevRef = useRef(false);
+10	
+11	  useEffect(() => {
+12	    if (visible && !prevRef.current) {
+13	      void confetti({
+14	        particleCount: 80,
+15	        spread: 70,
+16	        origin: { y: 0.5 },
+17	        ticks: 310,
+18	      });
+19	    }
+20	    prevRef.current = visible;
+21	  }, [visible]);
+22	
+23	  if (!visible) return null;
+24	
+25	  return (
+26	    <div
+27	      role="status"
+28	      aria-label="Round complete!"
+29	      className="pointer-events-none fixed inset-0"
+30	    />
+31	  );
+32	};
+33
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:33Z)**_
+
+Now I have all component signatures. Key observations:
+- `EncouragementAnnouncer`: matches exactly `{ visible, message, onDismiss }` — no changes needed
+- `GameOverOverlay`: buttons say "Play again" and "Home" — regex `/play again/i` and `/home/i` work. No portal (uses `fixed inset-0` div, but not a React portal)
+- `LevelCompleteOverlay`: buttons say "Next Level" and "I'm Done" — need to adjust `/done/i` to `/i'm done/i` or `/done/i` (the latter will still match). No portal.
+- `ProgressHUD`: accepts `ProgressHUDProps` from `../types` — matches the story args exactly
+- `ScoreAnimation`: only `visible: boolean` — matches
+
+Let me also check the `types.ts` to confirm `AnswerGamePhase` values, and read the existing story files.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:35Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ path `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/types.ts` pattern `AnswerGamePhase`
+
+```text
+75:export type AnswerGamePhase =
+94:  phase: AnswerGamePhase;
+157:  phase: AnswerGamePhase;
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:35Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+
+```text
+1	import { EncouragementAnnouncer } from './EncouragementAnnouncer';
+2	import type { Meta, StoryObj } from '@storybook/react';
+3	
+4	const meta: Meta<typeof EncouragementAnnouncer> = {
+5	  component: EncouragementAnnouncer,
+6	  tags: ['autodocs'],
+7	  argTypes: { onDismiss: { action: 'dismissed' } },
+8	};
+9	export default meta;
+10	
+11	type Story = StoryObj<typeof EncouragementAnnouncer>;
+12	
+13	export const Hidden: Story = {
+14	  args: { visible: false, message: 'Keep trying!' },
+15	};
+16	export const Visible: Story = {
+17	  args: { visible: true, message: 'Almost! Try again.' },
+18	};
+19
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:38Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/types.ts`
+
+```text
+73	}
+74	
+75	export type AnswerGamePhase =
+76	  | 'playing'
+77	  | 'round-complete'
+78	  | 'level-complete'
+79	  | 'game-over';
+80	
+81	export interface AnswerGameState {
+82	  config: AnswerGameConfig;
+83	  /** Full tile list for the current round — never mutated mid-round */
+84	  allTiles: TileItem[];
+85	  /** IDs of tiles currently visible in the choice bank */
+86	  bankTileIds: string[];
+87	  zones: AnswerZone[];
+88	  /** Index of next slot to fill in auto-next-slot mode */
+89	  activeSlotIndex: number;
+90	  dragActiveTileId: string | null;
+91	  dragHoverZoneIndex: number | null;
+92	  /** ID of the bank tile hole currently hovered by a dragged slot tile. */
+93	  dragHoverBankTileId: string | null;
+94	  phase: AnswerGamePhase;
+95	  roundIndex: number;
+96	  retryCount: number;
+97	  levelIndex: number;
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:39Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx`
+
+```text
+1	import { GameOverOverlay } from './GameOverOverlay';
+2	import type { Meta, StoryObj } from '@storybook/react';
+3	
+4	const meta: Meta<typeof GameOverOverlay> = {
+5	  component: GameOverOverlay,
+6	  tags: ['autodocs'],
+7	  argTypes: {
+8	    onPlayAgain: { action: 'playAgain' },
+9	    onHome: { action: 'home' },
+10	  },
+11	};
+12	export default meta;
+13	
+14	type Story = StoryObj<typeof GameOverOverlay>;
+15	
+16	export const FiveStars: Story = { args: { retryCount: 0 } };
+17	export const ThreeStars: Story = { args: { retryCount: 3 } };
+18	export const OneStar: Story = { args: { retryCount: 10 } };
+19
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:42Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx`
+
+```text
+1	import { LevelCompleteOverlay } from './LevelCompleteOverlay';
+2	import type { Meta, StoryObj } from '@storybook/react';
+3	
+4	const meta: Meta<typeof LevelCompleteOverlay> = {
+5	  component: LevelCompleteOverlay,
+6	  tags: ['autodocs'],
+7	  argTypes: {
+8	    onNextLevel: { action: 'nextLevel' },
+9	    onDone: { action: 'done' },
+10	  },
+11	};
+12	export default meta;
+13	
+14	type Story = StoryObj<typeof LevelCompleteOverlay>;
+15	
+16	export const Level1: Story = { args: { level: 1 } };
+17	export const Level3: Story = { args: { level: 3 } };
+18	export const Level10: Story = { args: { level: 10 } };
+19
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:43Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx`
+
+```text
+1	import { ProgressHUD } from './ProgressHUD';
+2	import type { Meta, StoryObj } from '@storybook/react-vite';
+3	
+4	const meta: Meta<typeof ProgressHUD> = {
+5	  component: ProgressHUD,
+6	  title: 'answer-game/ProgressHUD',
+7	  parameters: { layout: 'centered' },
+8	  args: {
+9	    roundIndex: 2,
+10	    totalRounds: 5,
+11	    levelIndex: 0,
+12	    isLevelMode: false,
+13	    phase: 'playing',
+14	    showDots: true,
+15	    showFraction: true,
+16	    showLevel: false,
+17	  },
+18	};
+19	
+20	export default meta;
+21	type Story = StoryObj<typeof ProgressHUD>;
+22	
+23	export const Classic_Round3Of5: Story = {};
+24	
+25	export const Classic_LastRound: Story = {
+26	  args: { roundIndex: 4, totalRounds: 5 },
+27	};
+28	
+29	export const DotsOnly: Story = {
+30	  args: { showFraction: false, showLevel: false },
+31	};
+32	
+33	export const FractionOnly: Story = {
+34	  args: { showDots: false, showLevel: false },
+35	};
+36	
+37	export const LevelMode_Level3: Story = {
+38	  args: {
+39	    isLevelMode: true,
+40	    totalRounds: null,
+41	    levelIndex: 2,
+42	    showFraction: false,
+43	    showLevel: true,
+44	  },
+45	};
+46	
+47	export const LevelMode_Level10: Story = {
+48	  args: {
+49	    isLevelMode: true,
+50	    totalRounds: null,
+51	    levelIndex: 9,
+52	    showFraction: false,
+53	    showLevel: true,
+54	  },
+55	};
+56	
+57	export const Mixed_LevelPlusFraction: Story = {
+58	  args: {
+59	    isLevelMode: true,
+60	    totalRounds: 5,
+61	    levelIndex: 2,
+62	    showFraction: true,
+63	    showLevel: true,
+64	  },
+65	};
+66	
+67	export const RoundCompletePhase: Story = {
+68	  args: { phase: 'round-complete' },
+69	};
+70	
+71	export const AllFlagsOff: Story = {
+72	  args: { showDots: false, showFraction: false, showLevel: false },
+73	};
+74
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:43Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx`
+
+```text
+1	import { ScoreAnimation } from './ScoreAnimation';
+2	import type { Meta, StoryObj } from '@storybook/react';
+3	
+4	const meta: Meta<typeof ScoreAnimation> = {
+5	  component: ScoreAnimation,
+6	  tags: ['autodocs'],
+7	};
+8	export default meta;
+9	
+10	type Story = StoryObj<typeof ScoreAnimation>;
+11	
+12	export const Playing: Story = { args: { visible: false } };
+13	export const Complete: Story = { args: { visible: true } };
+14
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:19:49Z)**_
+
+All signatures confirmed. Notes on adjustments needed:
+- `LevelCompleteOverlay`: "I'm Done" button — `/done/i` will match since "Done" is in "I'm Done". Fine to keep.
+- `GameOverOverlay` and `LevelCompleteOverlay`: `fixed inset-0` divs, NOT React portals — `within(canvasElement)` is correct.
+- `ProgressHUD`: `@storybook/react-vite` → `@storybook/react` fix needed.
+- `LevelCompleteOverlay`: button is `/next level/i` (matches "Next Level") — fine.
+
+Now let me write all five files:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:20:00Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+import { useState } from 'react';
+import { vi } from 'vitest';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { EncouragementAnnouncer } from './EncouragementAnnouncer';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+interface StoryArgs {
+  message: string;
+  visible: boolean;
+  onDismiss: () => void;
+}
+
+const ShowTrigger = ({
+  message,
+  onDismiss,
+}: {
+  message: string;
+  onDismiss: () => void;
+}) => {
+  const [visible, setVisible] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setVisible(true)}
+        disabled={visible}
+        className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+      >
+        Show encouragement
+      </button>
+      <EncouragementAnnouncer
+        visible={visible}
+        message={message}
+        onDismiss={() => {
+          setVisible(false);
+          onDismiss();
+        }}
+      />
+    </>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component:
+    EncouragementAnnouncer as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  args: {
+    message: 'Keep trying!',
+    visible: false,
+    onDismiss: fn(),
+  },
+  argTypes: {
+    message: { control: 'text' },
+    visible: { control: 'boolean' },
+    onDismiss: { table: { disable: true } },
+  },
+  render: ({ message, visible, onDismiss }) => (
+    <EncouragementAnnouncer
+      message={message}
+      visible={visible}
+      onDismiss={onDismiss}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Hidden: Story = {
+  args: { visible: false, message: 'Keep trying!' },
+};
+
+export const Visible: Story = {
+  args: { visible: true, message: 'Almost! Try again.' },
+};
+
+export const ReplayTrigger: Story = {
+  args: { message: 'Great job!' },
+  render: ({ message, onDismiss }) => (
+    <ShowTrigger message={message} onDismiss={onDismiss} />
+  ),
+};
+
+export const AutoDismissesAfter2s: Story = {
+  args: { message: 'Keep trying!' },
+  render: ({ message, onDismiss }) => (
+    <ShowTrigger message={message} onDismiss={onDismiss} />
+  ),
+  play: async ({ args, canvasElement }) => {
+    vi.useFakeTimers();
+    try {
+      const canvas = within(canvasElement);
+      await userEvent.click(
+        canvas.getByRole('button', { name: /show encouragement/i }),
+      );
+      await waitFor(() => {
+        expect(canvas.getByText(/keep trying/i)).toBeVisible();
+      });
+      vi.advanceTimersByTime(2000);
+      await waitFor(() => {
+        expect(args.onDismiss).toHaveBeenCalled();
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  },
+};
+
+```
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:20:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run typecheck after EncouragementAnnouncer stories write
+
+`yarn typecheck 2>&1 | tail -20`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 3.04s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:20:09Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run lint:fix on EncouragementAnnouncer stories
+
+`yarn lint:fix 2>&1 | tail -20`
+
+```text
+yarn run v1.22.22
+error Command "lint:fix" not found.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:20:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run yarn lint on the worktree
+
+`yarn lint 2>&1 | tail -30`
+
+```text
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+  3:1  error  `storybook/test` import should occur before import of `vitest`             import/order
+  7:1  error  `@storybook/react` type import should occur before type import of `react`  import/order
+
+✖ 2 problems (2 errors, 0 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:20:31Z)**_
+
+Import order issues. The rule requires: value imports → relative imports → `storybook/test` → `@storybook/react` type import last → `react` type import. Wait, looking at the instructions: "value imports → relative imports → `storybook/test` → `@storybook/react` type import last → `react` type import". But the error says `storybook/test` should be before `vitest`, and `@storybook/react` type should be before `react` type. Let me fix:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:20:36Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Auto-fix import order in EncouragementAnnouncer stories
+
+`npx eslint src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx --fix 2>&1`
+
+```text
+[This command modified 1 file you've previously read: src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx. Call Read before editing.]
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:20:51Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Re-run yarn lint after auto-fix
+
+`yarn lint 2>&1 | tail -20`
+
+```text
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 12.16s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:20:53Z)**_
+
+Lint passes. Now commit Task 4:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:21:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit Task 4: EncouragementAnnouncer stories retrofit
+
+```bash
+git add src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+
+StoryArgs: message text, visible boolean. onDismiss wired to fn() spy.
+ReplayTrigger story adds a button wrapper so the story is actually
+interactive. AutoDismissesAfter2s play() asserts the 2s auto-dismiss
+via vi.useFakeTimers / advanceTimersByTime(2000).
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+```text
+<persisted-output>
+Output too large (44.6KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bar1324e0.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (64445f89)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:21:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Check recent commits to get Task 4 SHA
+
+`git log --oneline -3`
+
+```text
+e3121973 stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+f74eb775 stories(answer-game/InstructionsOverlay): retrofit per controls policy
+beb14675 stories(answer-game/AnswerGame): retrofit per controls policy
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:21:16Z)**_
+
+Task 4 committed. Now write Task 5: GameOverOverlay.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:21:23Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { GameOverOverlay } from './GameOverOverlay';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof GameOverOverlay> = {
+  component: GameOverOverlay,
+  tags: ['autodocs'],
+  args: {
+    retryCount: 0,
+    onPlayAgain: fn(),
+    onHome: fn(),
+  },
+  argTypes: {
+    retryCount: {
+      control: { type: 'range', min: 0, max: 10, step: 1 },
+    },
+    onPlayAgain: { table: { disable: true } },
+    onHome: { table: { disable: true } },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof GameOverOverlay>;
+
+export const FiveStars: Story = { args: { retryCount: 0 } };
+export const FourStars: Story = { args: { retryCount: 1 } };
+export const ThreeStars: Story = { args: { retryCount: 3 } };
+export const TwoStars: Story = { args: { retryCount: 5 } };
+export const OneStar: Story = { args: { retryCount: 8 } };
+
+export const ClicksPlayAgain: Story = {
+  args: { retryCount: 0 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /play again/i }),
+    );
+    await waitFor(() => {
+      expect(args.onPlayAgain).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const ClicksHome: Story = {
+  args: { retryCount: 0 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /home/i }),
+    );
+    await waitFor(() => {
+      expect(args.onHome).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+```
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:21:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Typecheck and lint for GameOverOverlay stories
+
+`yarn typecheck 2>&1 | tail -10 && yarn lint 2>&1 | tail -10`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 2.54s.
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 10.58s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:21:54Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit Task 5: GameOverOverlay stories retrofit
+
+```bash
+git add src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/GameOverOverlay): retrofit per controls policy
+
+StoryArgs: retryCount range. onPlayAgain/onHome wired to fn() spies.
+One story per visible star count (Five/Four/Three/Two/One).
+ClicksPlayAgain and ClicksHome play() stories assert spies.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+```text
+<persisted-output>
+Output too large (44.2KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bumd29v4u.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (2efbfd67)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 193ms
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 206ms
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx > InstructionsOverlay > renders the game title
+Warning: useRouter must be used inside a <RouterProvider> component!
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:21:56Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Get Task 5 commit SHA
+
+`git log --oneline -3`
+
+```text
+483141ac stories(answer-game/GameOverOverlay): retrofit per controls policy
+e3121973 stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+f74eb775 stories(answer-game/InstructionsOverlay): retrofit per controls policy
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:22:00Z)**_
+
+Task 5 committed. Now Task 6: LevelCompleteOverlay. Note: the "I'm Done" button — `/done/i` will match "I'm Done". Let me verify the play() will work — the component renders a dialog with `fixed inset-0`, not a React portal, so `within(canvasElement)` is correct.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:22:07Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { LevelCompleteOverlay } from './LevelCompleteOverlay';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof LevelCompleteOverlay> = {
+  component: LevelCompleteOverlay,
+  tags: ['autodocs'],
+  args: {
+    level: 1,
+    onNextLevel: fn(),
+    onDone: fn(),
+  },
+  argTypes: {
+    level: { control: { type: 'range', min: 1, max: 20, step: 1 } },
+    onNextLevel: { table: { disable: true } },
+    onDone: { table: { disable: true } },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof LevelCompleteOverlay>;
+
+export const Level1: Story = { args: { level: 1 } };
+export const Level3: Story = { args: { level: 3 } };
+export const Level10: Story = { args: { level: 10 } };
+
+export const ClicksNextLevel: Story = {
+  args: { level: 1 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /next level/i }),
+    );
+    await waitFor(() => {
+      expect(args.onNextLevel).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const ClicksDone: Story = {
+  args: { level: 1 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /done/i }),
+    );
+    await waitFor(() => {
+      expect(args.onDone).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+```
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:22:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Typecheck and lint for LevelCompleteOverlay stories
+
+`yarn typecheck 2>&1 | tail -10 && yarn lint 2>&1 | tail -10`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 2.53s.
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 10.46s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:22:38Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit Task 6: LevelCompleteOverlay stories retrofit
+
+```bash
+git add src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+
+StoryArgs: level range. onNextLevel/onDone wired to fn() spies.
+ClicksNextLevel and ClicksDone play() stories assert spies.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+```text
+<persisted-output>
+Output too large (44.2KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bkdbk18f3.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (ca1cc3b9)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:22:40Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Get Task 6 commit SHA
+
+`git log --oneline -3`
+
+```text
+8fa29284 stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+483141ac stories(answer-game/GameOverOverlay): retrofit per controls policy
+e3121973 stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:22:45Z)**_
+
+Task 6 committed. Now Task 7: ProgressHUD. The `ProgressHUDProps` has `totalRounds: number | null` but StoryArgs uses the `totalRoundsIsNull` boolean bridge. Need to confirm `ProgressHUDProps` exact shape from types.ts.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:22:49Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/types.ts`
+
+```text
+150	  /** Total rounds in the session; null for unbounded level mode. */
+151	  totalRounds: number | null;
+152	  /** 0-based index of the current level; 0 when levelMode is off. */
+153	  levelIndex: number;
+154	  /** Whether the game uses levelMode. */
+155	  isLevelMode: boolean;
+156	  /** Lifecycle phase — enables pop/celebration animations on transition. */
+157	  phase: AnswerGamePhase;
+158	  /** Resolved visibility flags after merging defaults + config. */
+159	  showDots: boolean;
+160	  showFraction: boolean;
+161	  showLevel: boolean;
+162	}
+163
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:22:50Z)**_
+
+Props match exactly. Now write the ProgressHUD stories:
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:23:04Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+import { ProgressHUD } from './ProgressHUD';
+import type { AnswerGamePhase } from '../types';
+import type { ComponentType } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+
+interface StoryArgs {
+  roundIndex: number;
+  totalRounds: number;
+  totalRoundsIsNull: boolean;
+  levelIndex: number;
+  isLevelMode: boolean;
+  phase: AnswerGamePhase;
+  showDots: boolean;
+  showFraction: boolean;
+  showLevel: boolean;
+}
+
+const meta: Meta<StoryArgs> = {
+  component: ProgressHUD as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/ProgressHUD',
+  parameters: { layout: 'centered' },
+  args: {
+    roundIndex: 2,
+    totalRounds: 5,
+    totalRoundsIsNull: false,
+    levelIndex: 0,
+    isLevelMode: false,
+    phase: 'playing',
+    showDots: true,
+    showFraction: true,
+    showLevel: false,
+  },
+  argTypes: {
+    roundIndex: {
+      control: { type: 'range', min: 0, max: 20, step: 1 },
+    },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    totalRoundsIsNull: { control: 'boolean' },
+    levelIndex: {
+      control: { type: 'range', min: 0, max: 20, step: 1 },
+    },
+    isLevelMode: { control: 'boolean' },
+    phase: {
+      control: { type: 'select' },
+      options: [
+        'playing',
+        'round-complete',
+        'level-complete',
+        'game-over',
+      ] satisfies AnswerGamePhase[],
+    },
+    showDots: { control: 'boolean' },
+    showFraction: { control: 'boolean' },
+    showLevel: { control: 'boolean' },
+  },
+  render: ({
+    roundIndex,
+    totalRounds,
+    totalRoundsIsNull,
+    levelIndex,
+    isLevelMode,
+    phase,
+    showDots,
+    showFraction,
+    showLevel,
+  }) => (
+    <ProgressHUD
+      roundIndex={roundIndex}
+      totalRounds={totalRoundsIsNull ? null : totalRounds}
+      levelIndex={levelIndex}
+      isLevelMode={isLevelMode}
+      phase={phase}
+      showDots={showDots}
+      showFraction={showFraction}
+      showLevel={showLevel}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Classic_Round3Of5: Story = {};
+
+export const Classic_LastRound: Story = {
+  args: { roundIndex: 4, totalRounds: 5 },
+};
+
+export const DotsOnly: Story = {
+  args: { showFraction: false, showLevel: false },
+};
+
+export const FractionOnly: Story = {
+  args: { showDots: false, showLevel: false },
+};
+
+export const LevelMode_Level3: Story = {
+  args: {
+    isLevelMode: true,
+    totalRoundsIsNull: true,
+    levelIndex: 2,
+    showFraction: false,
+    showLevel: true,
+  },
+};
+
+export const LevelMode_Level10: Story = {
+  args: {
+    isLevelMode: true,
+    totalRoundsIsNull: true,
+    levelIndex: 9,
+    showFraction: false,
+    showLevel: true,
+  },
+};
+
+export const Mixed_LevelPlusFraction: Story = {
+  args: {
+    isLevelMode: true,
+    totalRounds: 5,
+    levelIndex: 2,
+    showFraction: true,
+    showLevel: true,
+  },
+};
+
+export const RoundCompletePhase: Story = {
+  args: { phase: 'round-complete' },
+};
+
+export const AllFlagsOff: Story = {
+  args: { showDots: false, showFraction: false, showLevel: false },
+};
+
+```
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:23:19Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Typecheck and lint for ProgressHUD stories
+
+`yarn typecheck 2>&1 | tail -10 && yarn lint 2>&1 | tail -10`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 2.68s.
+$ eslint . --max-warnings 0 && knip --no-config-hints
+
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx
+  4:1  error  `@storybook/react` type import should occur before type import of `react`  import/order
+
+✖ 1 problem (1 error, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:23:24Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Auto-fix import order in ProgressHUD stories
+
+`npx eslint src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx --fix 2>&1`
+
+```text
+[This command modified 1 file you've previously read: src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx. Call Read before editing.]
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:23:37Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Re-run lint after auto-fix on ProgressHUD stories
+
+`yarn lint 2>&1 | tail -10`
+
+```text
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 10.97s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:23:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit Task 7: ProgressHUD stories retrofit
+
+```bash
+git add src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/ProgressHUD): retrofit per controls policy
+
+StoryArgs with explicit controls for every prop (ranges, selects,
+booleans). Preserves all 9 existing stories. Fix import from
+@storybook/react-vite → @storybook/react to match project convention.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+```text
+<persisted-output>
+Output too large (44.1KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bcgc7towc.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (10081aa8)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 247ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:23:55Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Get Task 7 commit SHA
+
+`git log --oneline -3`
+
+```text
+4d465568 stories(answer-game/ProgressHUD): retrofit per controls policy
+8fa29284 stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+483141ac stories(answer-game/GameOverOverlay): retrofit per controls policy
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:23:57Z)**_
+
+Task 7 committed. Now Task 8: ScoreAnimation.
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:24:00Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+import { ScoreAnimation } from './ScoreAnimation';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof ScoreAnimation> = {
+  component: ScoreAnimation,
+  tags: ['autodocs'],
+  args: { visible: false },
+  argTypes: {
+    visible: { control: 'boolean' },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof ScoreAnimation>;
+
+export const Playing: Story = { args: { visible: false } };
+export const Complete: Story = { args: { visible: true } };
+
+```
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:24:17Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Typecheck and lint for ScoreAnimation stories
+
+`yarn typecheck 2>&1 | tail -10 && yarn lint 2>&1 | tail -10`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 2.77s.
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 11.51s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:24:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit Task 8: ScoreAnimation stories retrofit
+
+```bash
+git add src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/ScoreAnimation): retrofit per controls policy
+
+StoryArgs: visible boolean. Pure-display component — no play() story.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+```text
+<persisted-output>
+Output too large (44.1KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bs2syxydy.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (307a26eb)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:24:35Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Get all five Task 4-8 commit SHAs
+
+`git log --oneline -5`
+
+```text
+830836bb stories(answer-game/ScoreAnimation): retrofit per controls policy
+4d465568 stories(answer-game/ProgressHUD): retrofit per controls policy
+8fa29284 stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+483141ac stories(answer-game/GameOverOverlay): retrofit per controls policy
+e3121973 stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-sonnet-4-6 2026-04-21 06:24:49Z)**_
+
+All five commits are clean. Here is the final report.
+
+---
+
+**Status: DONE_WITH_CONCERNS**
+
+**Commit SHAs (Tasks 4–8):**
+
+| Task | File | SHA |
+|------|------|-----|
+| 4 | EncouragementAnnouncer | `e3121973` |
+| 5 | GameOverOverlay | `483141ac` |
+| 6 | LevelCompleteOverlay | `8fa29284` |
+| 7 | ProgressHUD | `4d465568` |
+| 8 | ScoreAnimation | `830836bb` |
+
+**Signature / regex adjustments:**
+
+- **EncouragementAnnouncer**: Props matched exactly `{ visible, message, onDismiss }`. No changes needed. Import order auto-fixed by eslint (`storybook/test` before `vitest`; `@storybook/react` type before `react` type).
+- **GameOverOverlay**: Buttons render "Play again" and "Home" — regexes `/play again/i` and `/home/i` are exact matches. Component uses `fixed inset-0` div (not a React portal), so `within(canvasElement)` is correct.
+- **LevelCompleteOverlay**: Buttons render "Next Level" and "I'm Done" — `/next level/i` and `/done/i` both match. No portal.
+- **ProgressHUD**: Fixed `@storybook/react-vite` → `@storybook/react`. StoryArgs bridge `totalRoundsIsNull` boolean maps to `null | number` in render. Import order auto-fixed.
+- **ScoreAnimation**: Props are exactly `{ visible: boolean }`. No changes.
+
+**Concerns about play() stories at test-runner time:**
+
+1. `AutoDismissesAfter2s` (EncouragementAnnouncer) uses `vi.useFakeTimers()` + `advanceTimersByTime(2000)`. The Storybook test-runner runs in a real browser via Playwright, and `vi` fake timers work differently there than in Vitest. If the test-runner does not instrument the timer environment with `vi`, the `waitFor(() => expect(args.onDismiss).toHaveBeenCalled())` may time out waiting for the real 2-second timer. This is the most likely CI failure.
+2. `GameOverOverlay` and `LevelCompleteOverlay` fire `canvas-confetti` on mount (rAF loop / one-shot). This is side-effect-only and does not affect the play() assertions, but the rAF loop in GameOverOverlay could cause flakiness if the test completes before `cancelAnimationFrame` cleans up.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:24:53Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:24:55Z)**_
+
+All 5 Tier 2 commits done. Implementer flagged a real risk on `AutoDismissesAfter2s` (vi.useFakeTimers may not work in Storybook test-runner's Playwright env) — we'll address at end-of-PR if it fails. Dispatching end-of-tier code-quality reviewer.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:25:46Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Tier 2 end-of-tier review
+
+```text
+Excellent. Now I have all the data. Let me write the review.
+
+---
+
+## Per-Commit Summary
+
+### e3121973 (EncouragementAnnouncer)
+**Spec:** ✅ All gates met.
+- StoryArgs with message/visible/onDismiss ✓
+- onDismiss fn() with `table.disable` ✓
+- Stories: Hidden, Visible, ReplayTrigger, AutoDismissesAfter2s ✓
+- AutoDismissesAfter2s uses vi.useFakeTimers/advanceTimersByTime(2000) with finally cleanup ✓
+- ReplayTrigger adds ShowTrigger wrapper for interactivity ✓
+
+**Quality:** ✅ Clean.
+- Imports correct (storybook/test, @storybook/react, vitest/vi) ✓
+- ComponentType<StoryArgs> cast intentional/documented ✓
+- ShowTrigger is a proper internal component, not dead code ✓
+- play() properly awaits and uses waitFor ✓
+- No unused imports or trailing logic ✓
+
+---
+
+### 483141ac (GameOverOverlay)
+**Spec:** ✅ All gates met.
+- Args: retryCount range (0–10), onPlayAgain/onHome fn() with disable ✓
+- Five stars stories (retryCount 0/1/3/5/8) ✓
+- ClicksPlayAgain/ClicksHome play() assert toHaveBeenCalledTimes(1) ✓
+- No StoryArgs interface needed (component props used directly as Meta<typeof>) ✓
+
+**Quality:** ✅ Lean & idiomatic.
+- Uses direct component type (no cast) since no bridging needed ✓
+- play() stories correctly await findByRole (not getByRole) ✓
+- All stories distinct and necessary ✓
+
+---
+
+### 8fa29284 (LevelCompleteOverlay)
+**Spec:** ✅ All gates met.
+- Args: level range (1–20), onNextLevel/onDone fn() disabled ✓
+- Stories: Level1, Level3, Level10, ClicksNextLevel, ClicksDone ✓
+- play() stories call toHaveBeenCalledTimes(1) ✓
+
+**Quality:** ✅ Consistent.
+- Matches GameOverOverlay idiom (direct type, no cast) ✓
+- play() logic identical and correct ✓
+
+---
+
+### 4d465568 (ProgressHUD)
+**Spec:** ✅ All gates met.
+- 9 controls with ranges/selects/booleans, totalRoundsIsNull bridge ✓
+- All 9 existing stories preserved (Classic_Round3Of5 → AllFlagsOff) ✓
+- Import fixed @storybook/react-vite → @storybook/react ✓
+
+**Quality:** ✅ Excellent.
+- ComponentType<StoryArgs> cast is the correct pattern for bridging null/number ✓
+- render() unwraps totalRoundsIsNull back to prop ✓
+- No play() needed (pure display) ✓
+- argTypes options satisfy AnswerGamePhase[] ✓
+
+---
+
+### 830836bb (ScoreAnimation)
+**Spec:** ✅ All gates met.
+- Args: visible boolean ✓
+- Stories: Playing, Complete only ✓
+- No play() (pure display) ✓
+
+**Quality:** ✅ Minimal & correct.
+- Shortest file, appropriately so ✓
+- Imports lean ✓
+
+---
+
+**TIER 2 APPROVED**
+
+All commits pass spec compliance and code quality. No changes requested.
+agentId: a2caa6388f7add553 (use SendMessage with to: 'a2caa6388f7add553' to continue this agent)
+<usage>total_tokens: 29545
+tool_uses: 7
+duration_ms: 29098</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:25:17Z)**_
+
+End-of-tier review for five consolidated Storybook retrofits.
+
+Worktree: `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`
+
+Commits to review (one file each):
+- `e3121973` — EncouragementAnnouncer.stories.tsx
+- `483141ac` — GameOverOverlay.stories.tsx
+- `8fa29284` — LevelCompleteOverlay.stories.tsx
+- `4d465568` — ProgressHUD.stories.tsx
+- `830836bb` — ScoreAnimation.stories.tsx
+
+Project conventions:
+- Arrow `const` components (`react/function-component-definition`).
+- `export default` only for meta.
+- Named exports elsewhere.
+- No unused imports/variables.
+- Strict TS.
+- Comments only for non-obvious WHY.
+- `storybook/test` subpath (NOT `@storybook/test`).
+- `@storybook/react` type import (NOT `@storybook/react-vite`).
+- Pilot pattern reference: `src/components/ui/alert-dialog.stories.tsx`.
+
+Do BOTH spec compliance AND code quality check in one pass (we're running a consolidated review for Tier 2).
+
+Spec gates per file:
+
+### EncouragementAnnouncer (`e3121973`)
+- StoryArgs: message text, visible boolean. onDismiss wired via fn() spy with `table: { disable: true }`.
+- Stories: `Hidden`, `Visible`, `ReplayTrigger`, `AutoDismissesAfter2s`.
+- `AutoDismissesAfter2s` uses `vi.useFakeTimers()` from `vitest` + `advanceTimersByTime(2000)` + `vi.useRealTimers()` in finally.
+- ReplayTrigger provides an interactive button wrapper (ShowTrigger).
+
+### GameOverOverlay (`483141ac`)
+- Args: `retryCount` range (0–10), `onPlayAgain`/`onHome` fn() with `table.disable`.
+- Stars stories: FiveStars/FourStars/ThreeStars/TwoStars/OneStar with retryCount 0/1/3/5/8.
+- play() stories: ClicksPlayAgain, ClicksHome — assert fn() called exactly once.
+
+### LevelCompleteOverlay (`8fa29284`)
+- Args: `level` range (1–20), `onNextLevel`/`onDone` fn() disabled.
+- Stories: Level1, Level3, Level10, ClicksNextLevel, ClicksDone.
+
+### ProgressHUD (`4d465568`)
+- StoryArgs with 9 controls, `totalRoundsIsNull` boolean bridging null/number.
+- All 9 existing stories preserved (Classic_Round3Of5, Classic_LastRound, DotsOnly, FractionOnly, LevelMode_Level3, LevelMode_Level10, Mixed_LevelPlusFraction, RoundCompletePhase, AllFlagsOff).
+- Import is `@storybook/react` (NOT `-vite`).
+
+### ScoreAnimation (`830836bb`)
+- Args: `visible` boolean.
+- Stories: Playing, Complete only. No play().
+
+For each commit:
+1. `git show <SHA> --stat` — confirm only its one file changed.
+2. `git show <SHA>:<path>` — read the file.
+3. Verify the gates above.
+4. Quick code-quality pass: dead code, DRY, comments, idiom vs pilot.
+
+Context: these intentionally use `ComponentType<StoryArgs>` cast — it's the pattern for bridging StoryArgs→component. Don't flag it. Also `NotBookmarked`-like redundancy doesn't apply here; all stories have distinct args.
+
+Report format:
+
+```
+Per-commit summary:
+
+### e3121973 (EncouragementAnnouncer)
+Spec: ✅/❌ ...
+Quality: ...
+
+### 483141ac (GameOverOverlay)
+...
+```
+
+End with one overall verdict: `TIER 2 APPROVED` or `TIER 2 CHANGES_REQUESTED` (listing what to fix).
+
+Under 500 words.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:25:19Z)**_
+
+I'll review these five Storybook commits against spec and code quality. Let me start by examining each commit.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:25:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show e3121973 --stat && echo "---" && git show 483141ac --stat && echo "---" && git show 8fa29284 --stat && echo "---" && git show 4d465568 --stat && echo "---" && git show 830836bb --stat`
+
+```text
+commit e31219739a1607ea07033155e562788f90df223d
+Author: leocaseiro <leobok@gmail.com>
+Date:   Tue Apr 21 16:20:57 2026 +1000
+
+    stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+    
+    StoryArgs: message text, visible boolean. onDismiss wired to fn() spy.
+    ReplayTrigger story adds a button wrapper so the story is actually
+    interactive. AutoDismissesAfter2s play() asserts the 2s auto-dismiss
+    via vi.useFakeTimers / advanceTimersByTime(2000).
+    
+    Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+
+ .../EncouragementAnnouncer.stories.tsx             | 99 +++++++++++++++++++++-
+ 1 file changed, 95 insertions(+), 4 deletions(-)
+---
+commit 483141ac77fcb94fc9d9b54bc791db9ded88f6fc
+Author: leocaseiro <leobok@gmail.com>
+Date:   Tue Apr 21 16:21:43 2026 +1000
+
+    stories(answer-game/GameOverOverlay): retrofit per controls policy
+    
+    StoryArgs: retryCount range. onPlayAgain/onHome wired to fn() spies.
+    One story per visible star count (Five/Four/Three/Two/One).
+    ClicksPlayAgain and ClicksHome play() stories assert spies.
+    
+    Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+
+ .../GameOverOverlay/GameOverOverlay.stories.tsx    | 44 ++++++++++++++++++++--
+ 1 file changed, 41 insertions(+), 3 deletions(-)
+---
+commit 8fa292843b971a670b8cfae8f0898a0c0843c240
+Author: leocaseiro <leobok@gmail.com>
+Date:   Tue Apr 21 16:22:27 2026 +1000
+
+    stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+    
+    StoryArgs: level range. onNextLevel/onDone wired to fn() spies.
+    ClicksNextLevel and ClicksDone play() stories assert spies.
+    
+    Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+
+ .../LevelCompleteOverlay.stories.tsx               | 38 ++++++++++++++++++++--
+ 1 file changed, 36 insertions(+), 2 deletions(-)
+---
+commit 4d4655685a07b4067c773f5cdab541c9336d43d8
+Author: leocaseiro <leobok@gmail.com>
+Date:   Tue Apr 21 16:23:41 2026 +1000
+
+    stories(answer-game/ProgressHUD): retrofit per controls policy
+    
+    StoryArgs with explicit controls for every prop (ranges, selects,
+    booleans). Preserves all 9 existing stories. Fix import from
+    @storybook/react-vite → @storybook/react to match project convention.
+    
+    Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+
+ .../ProgressHUD/ProgressHUD.stories.tsx            | 76 ++++++++++++++++++++--
+ 1 file changed, 69 insertions(+), 7 deletions(-)
+---
+commit 830836bb1e5cc564a1906df31965c94f9dcd36ec
+Author: leocaseiro <leobok@gmail.com>
+Date:   Tue Apr 21 16:24:20 2026 +1000
+
+    stories(answer-game/ScoreAnimation): retrofit per controls policy
+    
+    StoryArgs: visible boolean. Pure-display component — no play() story.
+    
+    Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+
+ src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx | 4 ++++
+ 1 file changed, 4 insertions(+)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:25:22Z)**_
+
+Good, all one file per commit. Now let me read each story file.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:25:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show e3121973:src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+
+```text
+import { useState } from 'react';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { vi } from 'vitest';
+
+import { EncouragementAnnouncer } from './EncouragementAnnouncer';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
+
+interface StoryArgs {
+  message: string;
+  visible: boolean;
+  onDismiss: () => void;
+}
+
+const ShowTrigger = ({
+  message,
+  onDismiss,
+}: {
+  message: string;
+  onDismiss: () => void;
+}) => {
+  const [visible, setVisible] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setVisible(true)}
+        disabled={visible}
+        className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+      >
+        Show encouragement
+      </button>
+      <EncouragementAnnouncer
+        visible={visible}
+        message={message}
+        onDismiss={() => {
+          setVisible(false);
+          onDismiss();
+        }}
+      />
+    </>
+  );
+};
+
+const meta: Meta<StoryArgs> = {
+  component:
+    EncouragementAnnouncer as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  args: {
+    message: 'Keep trying!',
+    visible: false,
+    onDismiss: fn(),
+  },
+  argTypes: {
+    message: { control: 'text' },
+    visible: { control: 'boolean' },
+    onDismiss: { table: { disable: true } },
+  },
+  render: ({ message, visible, onDismiss }) => (
+    <EncouragementAnnouncer
+      message={message}
+      visible={visible}
+      onDismiss={onDismiss}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Hidden: Story = {
+  args: { visible: false, message: 'Keep trying!' },
+};
+
+export const Visible: Story = {
+  args: { visible: true, message: 'Almost! Try again.' },
+};
+
+export const ReplayTrigger: Story = {
+  args: { message: 'Great job!' },
+  render: ({ message, onDismiss }) => (
+    <ShowTrigger message={message} onDismiss={onDismiss} />
+  ),
+};
+
+export const AutoDismissesAfter2s: Story = {
+  args: { message: 'Keep trying!' },
+  render: ({ message, onDismiss }) => (
+    <ShowTrigger message={message} onDismiss={onDismiss} />
+  ),
+  play: async ({ args, canvasElement }) => {
+    vi.useFakeTimers();
+    try {
+      const canvas = within(canvasElement);
+      await userEvent.click(
+        canvas.getByRole('button', { name: /show encouragement/i }),
+      );
+      await waitFor(() => {
+        expect(canvas.getByText(/keep trying/i)).toBeVisible();
+      });
+      vi.advanceTimersByTime(2000);
+      await waitFor(() => {
+        expect(args.onDismiss).toHaveBeenCalled();
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  },
+};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:25:25Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show 483141ac:src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx`
+
+```text
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { GameOverOverlay } from './GameOverOverlay';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof GameOverOverlay> = {
+  component: GameOverOverlay,
+  tags: ['autodocs'],
+  args: {
+    retryCount: 0,
+    onPlayAgain: fn(),
+    onHome: fn(),
+  },
+  argTypes: {
+    retryCount: {
+      control: { type: 'range', min: 0, max: 10, step: 1 },
+    },
+    onPlayAgain: { table: { disable: true } },
+    onHome: { table: { disable: true } },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof GameOverOverlay>;
+
+export const FiveStars: Story = { args: { retryCount: 0 } };
+export const FourStars: Story = { args: { retryCount: 1 } };
+export const ThreeStars: Story = { args: { retryCount: 3 } };
+export const TwoStars: Story = { args: { retryCount: 5 } };
+export const OneStar: Story = { args: { retryCount: 8 } };
+
+export const ClicksPlayAgain: Story = {
+  args: { retryCount: 0 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /play again/i }),
+    );
+    await waitFor(() => {
+      expect(args.onPlayAgain).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const ClicksHome: Story = {
+  args: { retryCount: 0 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /home/i }),
+    );
+    await waitFor(() => {
+      expect(args.onHome).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:25:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show 8fa29284:src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx`
+
+```text
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { LevelCompleteOverlay } from './LevelCompleteOverlay';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof LevelCompleteOverlay> = {
+  component: LevelCompleteOverlay,
+  tags: ['autodocs'],
+  args: {
+    level: 1,
+    onNextLevel: fn(),
+    onDone: fn(),
+  },
+  argTypes: {
+    level: { control: { type: 'range', min: 1, max: 20, step: 1 } },
+    onNextLevel: { table: { disable: true } },
+    onDone: { table: { disable: true } },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof LevelCompleteOverlay>;
+
+export const Level1: Story = { args: { level: 1 } };
+export const Level3: Story = { args: { level: 3 } };
+export const Level10: Story = { args: { level: 10 } };
+
+export const ClicksNextLevel: Story = {
+  args: { level: 1 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /next level/i }),
+    );
+    await waitFor(() => {
+      expect(args.onNextLevel).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const ClicksDone: Story = {
+  args: { level: 1 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /done/i }),
+    );
+    await waitFor(() => {
+      expect(args.onDone).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:25:29Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show 4d465568:src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx`
+
+```text
+import { ProgressHUD } from './ProgressHUD';
+import type { AnswerGamePhase } from '../types';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
+
+interface StoryArgs {
+  roundIndex: number;
+  totalRounds: number;
+  totalRoundsIsNull: boolean;
+  levelIndex: number;
+  isLevelMode: boolean;
+  phase: AnswerGamePhase;
+  showDots: boolean;
+  showFraction: boolean;
+  showLevel: boolean;
+}
+
+const meta: Meta<StoryArgs> = {
+  component: ProgressHUD as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/ProgressHUD',
+  parameters: { layout: 'centered' },
+  args: {
+    roundIndex: 2,
+    totalRounds: 5,
+    totalRoundsIsNull: false,
+    levelIndex: 0,
+    isLevelMode: false,
+    phase: 'playing',
+    showDots: true,
+    showFraction: true,
+    showLevel: false,
+  },
+  argTypes: {
+    roundIndex: {
+      control: { type: 'range', min: 0, max: 20, step: 1 },
+    },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    totalRoundsIsNull: { control: 'boolean' },
+    levelIndex: {
+      control: { type: 'range', min: 0, max: 20, step: 1 },
+    },
+    isLevelMode: { control: 'boolean' },
+    phase: {
+      control: { type: 'select' },
+      options: [
+        'playing',
+        'round-complete',
+        'level-complete',
+        'game-over',
+      ] satisfies AnswerGamePhase[],
+    },
+    showDots: { control: 'boolean' },
+    showFraction: { control: 'boolean' },
+    showLevel: { control: 'boolean' },
+  },
+  render: ({
+    roundIndex,
+    totalRounds,
+    totalRoundsIsNull,
+    levelIndex,
+    isLevelMode,
+    phase,
+    showDots,
+    showFraction,
+    showLevel,
+  }) => (
+    <ProgressHUD
+      roundIndex={roundIndex}
+      totalRounds={totalRoundsIsNull ? null : totalRounds}
+      levelIndex={levelIndex}
+      isLevelMode={isLevelMode}
+      phase={phase}
+      showDots={showDots}
+      showFraction={showFraction}
+      showLevel={showLevel}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Classic_Round3Of5: Story = {};
+
+export const Classic_LastRound: Story = {
+  args: { roundIndex: 4, totalRounds: 5 },
+};
+
+export const DotsOnly: Story = {
+  args: { showFraction: false, showLevel: false },
+};
+
+export const FractionOnly: Story = {
+  args: { showDots: false, showLevel: false },
+};
+
+export const LevelMode_Level3: Story = {
+  args: {
+    isLevelMode: true,
+    totalRoundsIsNull: true,
+    levelIndex: 2,
+    showFraction: false,
+    showLevel: true,
+  },
+};
+
+export const LevelMode_Level10: Story = {
+  args: {
+    isLevelMode: true,
+    totalRoundsIsNull: true,
+    levelIndex: 9,
+    showFraction: false,
+    showLevel: true,
+  },
+};
+
+export const Mixed_LevelPlusFraction: Story = {
+  args: {
+    isLevelMode: true,
+    totalRounds: 5,
+    levelIndex: 2,
+    showFraction: true,
+    showLevel: true,
+  },
+};
+
+export const RoundCompletePhase: Story = {
+  args: { phase: 'round-complete' },
+};
+
+export const AllFlagsOff: Story = {
+  args: { showDots: false, showFraction: false, showLevel: false },
+};
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:25:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git show 830836bb:src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx`
+
+```text
+import { ScoreAnimation } from './ScoreAnimation';
+import type { Meta, StoryObj } from '@storybook/react';
+
+const meta: Meta<typeof ScoreAnimation> = {
+  component: ScoreAnimation,
+  tags: ['autodocs'],
+  args: { visible: false },
+  argTypes: {
+    visible: { control: 'boolean' },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof ScoreAnimation>;
+
+export const Playing: Story = { args: { visible: false } };
+export const Complete: Story = { args: { visible: true } };
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:25:34Z)**_
+
+Perfect. Now let me check the pilot reference to compare idioms.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:25:34Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./src/components/ui/alert-dialog.stories.tsx`
+
+```text
+1	import {
+2	  AlertDialog,
+3	  AlertDialogAction,
+4	  AlertDialogCancel,
+5	  AlertDialogContent,
+6	  AlertDialogDescription,
+7	  AlertDialogFooter,
+8	  AlertDialogHeader,
+9	  AlertDialogTitle,
+10	  AlertDialogTrigger,
+11	} from './alert-dialog';
+12	import { Button } from './button';
+13	import type { Meta, StoryObj } from '@storybook/react';
+14	
+15	const meta: Meta<typeof AlertDialog> = {
+16	  component: AlertDialog,
+17	  tags: ['autodocs'],
+18	};
+19	export default meta;
+20	
+21	type Story = StoryObj<typeof AlertDialog>;
+22	
+23	export const Default: Story = {
+24	  render: () => (
+25	    <AlertDialog>
+26	      <AlertDialogTrigger asChild>
+27	        <Button variant="destructive">Delete account</Button>
+28	      </AlertDialogTrigger>
+29	      <AlertDialogContent>
+30	        <AlertDialogHeader>
+31	          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+32	          <AlertDialogDescription>
+33	            This action cannot be undone.
+34	          </AlertDialogDescription>
+35	        </AlertDialogHeader>
+36	        <AlertDialogFooter>
+37	          <AlertDialogCancel>Cancel</AlertDialogCancel>
+38	          <AlertDialogAction>Delete</AlertDialogAction>
+39	        </AlertDialogFooter>
+40	      </AlertDialogContent>
+41	    </AlertDialog>
+42	  ),
+43	};
+44
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:25:46Z)**_
+
+Excellent. Now I have all the data. Let me write the review.
+
+---
+
+## Per-Commit Summary
+
+### e3121973 (EncouragementAnnouncer)
+**Spec:** ✅ All gates met.
+- StoryArgs with message/visible/onDismiss ✓
+- onDismiss fn() with `table.disable` ✓
+- Stories: Hidden, Visible, ReplayTrigger, AutoDismissesAfter2s ✓
+- AutoDismissesAfter2s uses vi.useFakeTimers/advanceTimersByTime(2000) with finally cleanup ✓
+- ReplayTrigger adds ShowTrigger wrapper for interactivity ✓
+
+**Quality:** ✅ Clean.
+- Imports correct (storybook/test, @storybook/react, vitest/vi) ✓
+- ComponentType<StoryArgs> cast intentional/documented ✓
+- ShowTrigger is a proper internal component, not dead code ✓
+- play() properly awaits and uses waitFor ✓
+- No unused imports or trailing logic ✓
+
+---
+
+### 483141ac (GameOverOverlay)
+**Spec:** ✅ All gates met.
+- Args: retryCount range (0–10), onPlayAgain/onHome fn() with disable ✓
+- Five stars stories (retryCount 0/1/3/5/8) ✓
+- ClicksPlayAgain/ClicksHome play() assert toHaveBeenCalledTimes(1) ✓
+- No StoryArgs interface needed (component props used directly as Meta<typeof>) ✓
+
+**Quality:** ✅ Lean & idiomatic.
+- Uses direct component type (no cast) since no bridging needed ✓
+- play() stories correctly await findByRole (not getByRole) ✓
+- All stories distinct and necessary ✓
+
+---
+
+### 8fa29284 (LevelCompleteOverlay)
+**Spec:** ✅ All gates met.
+- Args: level range (1–20), onNextLevel/onDone fn() disabled ✓
+- Stories: Level1, Level3, Level10, ClicksNextLevel, ClicksDone ✓
+- play() stories call toHaveBeenCalledTimes(1) ✓
+
+**Quality:** ✅ Consistent.
+- Matches GameOverOverlay idiom (direct type, no cast) ✓
+- play() logic identical and correct ✓
+
+---
+
+### 4d465568 (ProgressHUD)
+**Spec:** ✅ All gates met.
+- 9 controls with ranges/selects/booleans, totalRoundsIsNull bridge ✓
+- All 9 existing stories preserved (Classic_Round3Of5 → AllFlagsOff) ✓
+- Import fixed @storybook/react-vite → @storybook/react ✓
+
+**Quality:** ✅ Excellent.
+- ComponentType<StoryArgs> cast is the correct pattern for bridging null/number ✓
+- render() unwraps totalRoundsIsNull back to prop ✓
+- No play() needed (pure display) ✓
+- argTypes options satisfy AnswerGamePhase[] ✓
+
+---
+
+### 830836bb (ScoreAnimation)
+**Spec:** ✅ All gates met.
+- Args: visible boolean ✓
+- Stories: Playing, Complete only ✓
+- No play() (pure display) ✓
+
+**Quality:** ✅ Minimal & correct.
+- Shortest file, appropriately so ✓
+- Imports lean ✓
+
+---
+
+**TIER 2 APPROVED**
+
+All commits pass spec compliance and code quality. No changes requested.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:25:49Z)**_
+
+Tier 2 approved. Marking complete and moving to Task 9 (end-of-PR verification).
+
+_**Agent (claude-opus-4-7 2026-04-21 06:25:50Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #10 status
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:25:50Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #11 status
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:25:58Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:25:59Z)**_
+
+Running Task 9 Step 1: typecheck, lint, lint:md in parallel.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:26:03Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run typecheck
+
+`yarn typecheck`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 2.87s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:26:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run eslint
+
+`yarn lint`
+
+```text
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 10.19s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:26:15Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run markdown lint
+
+`yarn lint:md`
+
+```text
+yarn run v1.22.22
+$ markdownlint-cli2 '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees'
+markdownlint-cli2 v0.22.0 (markdownlint v0.40.0)
+Finding: **/*.md !node_modules !.specstory !.cursor !dist !worktrees
+Linting: 103 file(s)
+Summary: 0 error(s)
+Done in 1.13s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:26:15Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Show branch commits
+
+`git log --oneline origin/master..HEAD`
+
+```text
+830836bb stories(answer-game/ScoreAnimation): retrofit per controls policy
+4d465568 stories(answer-game/ProgressHUD): retrofit per controls policy
+8fa29284 stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+483141ac stories(answer-game/GameOverOverlay): retrofit per controls policy
+e3121973 stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+f74eb775 stories(answer-game/InstructionsOverlay): retrofit per controls policy
+beb14675 stories(answer-game/AnswerGame): retrofit per controls policy
+e824111f stories(answer-game/Slot): retrofit per controls policy
+5d6fe217 docs(plan): implementation plan for audit batch 2
+25c7caab docs(spec): correct tileBankMode enum values
+e4222463 docs(spec): audit batch 2 for src/components/answer-game/* stories
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:26:22Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:26:22Z)**_
+
+Typecheck, lint, lint:md all clean. 8 story commits on branch. Now starting Storybook for test-runner.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:26:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Check storybook scripts
+
+`cat package.json | grep -A 1 '"storybook"\|"test:storybook"\|"build-storybook"' | head -40`
+
+```text
+    "storybook": "storybook dev --port 6006",
+    "build-storybook": "storybook build",
+    "test:scripts": "bash scripts/determine-bump.test.sh && bash scripts/check-no-master-push.test.sh && bash scripts/check-no-master-push.sh",
+    "test:storybook": "test-storybook",
+    "typecheck": "tsc --noEmit",
+--
+    "storybook": "10.3.3",
+    "stylelint": "^17.6.0",
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:26:28Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Launch storybook on free port
+
+```bash
+PORT=6006
+while lsof -i :$PORT > /dev/null 2>&1; do PORT=$((PORT + 1)); done
+echo "Using port: $PORT"
+yarn storybook --port $PORT --ci > /tmp/storybook-$PORT.log 2>&1 &
+echo "Storybook PID: $!"
+echo $PORT > /tmp/storybook-port
+```
+
+```text
+Command running in background with ID: b0gdvr1j3. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tasks/b0gdvr1j3.output
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:26:43Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Wait for storybook to be ready
+
+`sleep 10; cat /tmp/storybook-port 2>/dev/null; echo; PORT=$(cat /tmp/storybook-port); until curl -s http://127.0.0.1:$PORT > /dev/null 2>&1; do sleep 3; if [ ! -d /proc/$(pgrep -f "storybook dev --port $PORT") ] 2>/dev/null && ! pgrep -f "storybook dev --port $PORT" > /dev/null; then echo "storybook died"; break; fi; done; echo "Ready on $PORT"`
+
+```text
+6006
+
+Ready on 6006
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:26:48Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:26:48Z)**_
+
+Storybook ready on :6006. Running test-runner.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:27:05Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Run storybook test-runner
+
+`yarn test:storybook --url http://127.0.0.1:6006 2>&1 | tail -200`
+
+```text
+** PASS **  browser: chromium  src/components/ui/****button.stories.tsx**
+** PASS **  browser: chromium  src/components/ui/****sonner.stories.tsx**
+** PASS **  browser: chromium  src/components/ui/****slider.stories.tsx**
+** PASS **  browser: chromium  src/components/answer-game/LevelCompleteOverlay/****LevelCompleteOverlay.stories.tsx**
+** PASS **  browser: chromium  src/components/****GameCard.stories.tsx**
+** PASS **  browser: chromium  src/components/answer-game/GameOverOverlay/****GameOverOverlay.stories.tsx**
+** PASS **  browser: chromium  src/components/****GameNameChip.stories.tsx**
+** PASS **  browser: chromium  src/components/****UpdateBanner.stories.tsx**
+** PASS **  browser: chromium  src/components/ui/****input.stories.tsx**
+** PASS **  browser: chromium  src/games/number-match/NumberMatch/****NumberMatch.skin.stories.tsx** (**5.088 s**)
+** PASS **  browser: chromium  src/components/questions/DotGroupQuestion/****DotGroupQuestion.stories.tsx**
+** PASS **  browser: chromium  src/data/words/****WordLibraryExplorer.stories.tsx**
+** PASS **  browser: chromium  src/components/questions/TextQuestion/****TextQuestion.stories.tsx**
+** PASS **  browser: chromium  src/games/word-spell/WordSpell/****WordSpell.stories.tsx** (**5.489 s**)
+** PASS **  browser: chromium  src/components/****GameGrid.stories.tsx**
+** PASS **  browser: chromium  src/components/questions/ImageQuestion/****ImageQuestion.stories.tsx**
+** PASS **  browser: chromium  src/components/****ThemeToggle.stories.tsx**
+** PASS **  browser: chromium  src/components/answer-game/ScoreAnimation/****ScoreAnimation.stories.tsx**
+** PASS **  browser: chromium  src/components/****OfflineIndicator.stories.tsx**
+** PASS **  browser: chromium  src/components/questions/AudioButton/****AudioButton.stories.tsx**
+** PASS **  browser: chromium  src/components/ui/****label.stories.tsx**
+** PASS **  browser: chromium  src/components/****Footer.stories.tsx**
+** PASS **  browser: chromium  src/components/****Header.stories.tsx**
+
+**Summary of all failing tests**
+** FAIL ** src/components/answer-game/EncouragementAnnouncer/****EncouragementAnnouncer.stories.tsx**
+**  **● ****components/answer-game/EncouragementAnnouncer › Hidden › smoke-test**
+
+    page.evaluate: StorybookTestRunnerError: 
+    Click to debug the error directly in Storybook:
+    http://127.0.0.1:6006/?path=/story/components-answer-game-encouragementannouncer--hidden
+
+    Message:
+     The story was missing when trying to access it.
+
+
+    --------------------------------------------------
+
+    Browser logs:
+
+    **error**: TypeError: Cannot read properties of undefined (reading 'customEqualityTesters')
+    TypeError: Cannot read properties of undefined (reading 'customEqualityTesters')
+**
+      94 |       const canvas = within(canvasElement);**
+      95 |       await userEvent.click(**
+    **>** 96 |         canvas.getByRole('button', { name: /show encouragement/i }),**
+         |                                                 **^****
+      97 |       );**
+      98 |       await waitFor(() => {**
+      99 |         expect(canvas.getByText(/keep trying/i)).toBeVisible();**
+**
+      at getCustomEqualityTesters (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9239:43)****
+      at JestChaiExpect (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:10028:25)****
+      at use (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9100:5)****
+      at **http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:15075:1****
+      at getCustomEqualityTesters (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9239:43)****
+      at JestChaiExpect (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:10028:25)****
+      at use (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9100:5)****
+      at **http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:15075:1****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:96:49****
+      at asyncGeneratorStep (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:3:28)****
+      at _next (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:21:17)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:26:13****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:18:16****
+      at testFn (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:124:23)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:126:27****
+      at asyncGeneratorStep (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:3:28)****
+      at _next (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:21:17)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:26:13****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:18:16****
+      at Object.<anonymous> (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:137:15)****
+
+**  **● ****components/answer-game/EncouragementAnnouncer › Visible › smoke-test**
+
+    page.evaluate: StorybookTestRunnerError: 
+    Click to debug the error directly in Storybook:
+    http://127.0.0.1:6006/?path=/story/components-answer-game-encouragementannouncer--visible
+
+    Message:
+     The story was missing when trying to access it.
+
+
+    --------------------------------------------------
+
+    Browser logs:
+
+    **error**: TypeError: Cannot read properties of undefined (reading 'customEqualityTesters')
+    TypeError: Cannot read properties of undefined (reading 'customEqualityTesters')
+**
+    **
+**
+      at getCustomEqualityTesters (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9239:43)****
+      at JestChaiExpect (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:10028:25)****
+      at use (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9100:5)****
+      at **http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:15075:1****
+      at getCustomEqualityTesters (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9239:43)****
+      at JestChaiExpect (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:10028:25)****
+      at use (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9100:5)****
+      at **http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:15075:1****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:152:49****
+      at asyncGeneratorStep (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:3:28)****
+      at _next (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:21:17)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:26:13****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:18:16****
+      at testFn (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:180:23)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:182:27****
+      at asyncGeneratorStep (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:3:28)****
+      at _next (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:21:17)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:26:13****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:18:16****
+      at Object.<anonymous> (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:193:15)****
+
+**  **● ****components/answer-game/EncouragementAnnouncer › ReplayTrigger › smoke-test**
+
+    page.evaluate: StorybookTestRunnerError: 
+    Click to debug the error directly in Storybook:
+    http://127.0.0.1:6006/?path=/story/components-answer-game-encouragementannouncer--replay-trigger
+
+    Message:
+     The story was missing when trying to access it.
+
+
+    --------------------------------------------------
+
+    Browser logs:
+
+    **error**: TypeError: Cannot read properties of undefined (reading 'customEqualityTesters')
+    TypeError: Cannot read properties of undefined (reading 'customEqualityTesters')
+**
+    **
+**
+      at getCustomEqualityTesters (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9239:43)****
+      at JestChaiExpect (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:10028:25)****
+      at use (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9100:5)****
+      at **http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:15075:1****
+      at getCustomEqualityTesters (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9239:43)****
+      at JestChaiExpect (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:10028:25)****
+      at use (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9100:5)****
+      at **http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:15075:1****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:208:49****
+      at asyncGeneratorStep (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:3:28)****
+      at _next (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:21:17)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:26:13****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:18:16****
+      at testFn (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:236:23)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:238:27****
+      at asyncGeneratorStep (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:3:28)****
+      at _next (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:21:17)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:26:13****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:18:16****
+      at Object.<anonymous> (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:249:15)****
+
+**  **● ****components/answer-game/EncouragementAnnouncer › AutoDismissesAfter2s › play-test**
+
+    page.evaluate: StorybookTestRunnerError: 
+    Click to debug the error directly in Storybook:
+    http://127.0.0.1:6006/?path=/story/components-answer-game-encouragementannouncer--auto-dismisses-after-2-s
+
+    Message:
+     The story was missing when trying to access it.
+
+
+    --------------------------------------------------
+
+    Browser logs:
+
+    **error**: TypeError: Cannot read properties of undefined (reading 'customEqualityTesters')
+    TypeError: Cannot read properties of undefined (reading 'customEqualityTesters')
+**
+    **
+**
+      at getCustomEqualityTesters (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9239:43)****
+      at JestChaiExpect (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:10028:25)****
+      at use (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9100:5)****
+      at **http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:15075:1****
+      at getCustomEqualityTesters (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9239:43)****
+      at JestChaiExpect (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:10028:25)****
+      at use (**http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:9100:5)****
+      at **http:/127.0.0.1:6006/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/vitest.js?v=be134902:15075:1****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:264:49****
+      at asyncGeneratorStep (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:3:28)****
+      at _next (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:21:17)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:26:13****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:18:16****
+      at testFn (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:292:23)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:294:27****
+      at asyncGeneratorStep (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:3:28)****
+      at _next (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:21:17)****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:26:13****
+      at **src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:18:16****
+      at Object.<anonymous> (**src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:305:15)****
+
+
+**Test Suites: ****1 failed**, **43 passed**, 44 total
+**Tests:       ****4 failed**, **203 passed**, 207 total
+**Snapshots:   **0 total
+**Time:**        14.148 s
+Ran all test suites**.**
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:27:22Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:27:24Z)**_
+
+43/44 test suites passed — only `EncouragementAnnouncer` fails, and ALL 4 of its stories fail because the module-level `import { vi } from 'vitest'` poisons `expect()` in the Storybook test-runner environment. Need to remove vi entirely and rewrite the 2s test with real timers.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:28:27Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Fix EncouragementAnnouncer vi incompatibility
+
+```text
+DONE. SHA: `5264ea06`
+
+Fixed by:
+1. Removed `import { vi } from 'vitest';` 
+2. Rewrote `AutoDismissesAfter2s` to use real timers with `waitFor({ timeout: 3500 })`
+3. Amended commit with typecheck and lint passing
+agentId: a44e26e551153f043 (use SendMessage with to: 'a44e26e551153f043' to continue this agent)
+<usage>total_tokens: 28360
+tool_uses: 7
+duration_ms: 51052</usage>
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-04-21 06:27:35Z)**_
+
+Fix a Storybook test-runner incompatibility in `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx` inside the worktree `/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game`.
+
+**Problem:** The file currently has `import { vi } from 'vitest';`. The Storybook test-runner uses a bundled `storybook/test` expect, and importing `vi` from `vitest` at module level poisons `expect()` globally with:
+
+```
+TypeError: Cannot read properties of undefined (reading 'customEqualityTesters')
+```
+
+This causes ALL FOUR stories in the file (Hidden, Visible, ReplayTrigger, AutoDismissesAfter2s) to fail with "story was missing when trying to access it" — not just the play() story that actually uses `vi`.
+
+**Fix:** Remove the `vi` import entirely. Rewrite `AutoDismissesAfter2s`'s play() to use real timers — just let the real 2-second auto-dismiss happen and `waitFor` with a timeout generous enough to catch it.
+
+New `AutoDismissesAfter2s` story (replace the existing version):
+
+```tsx
+export const AutoDismissesAfter2s: Story = {
+  args: { message: 'Keep trying!' },
+  render: ({ message, onDismiss }) => (
+    <ShowTrigger message={message} onDismiss={onDismiss} />
+  ),
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole('button', { name: /show encouragement/i }),
+    );
+    await waitFor(() => {
+      expect(canvas.getByText(/keep trying/i)).toBeVisible();
+    });
+    await waitFor(
+      () => {
+        expect(args.onDismiss).toHaveBeenCalled();
+      },
+      { timeout: 3500 },
+    );
+  },
+};
+```
+
+Other changes:
+- Delete `import { vi } from 'vitest';` at the top.
+- Do NOT touch any other story in the file.
+
+Then:
+1. `yarn typecheck` → exit 0.
+2. `yarn lint` → exit 0.
+3. Amend the existing commit: `git add <path> && git commit --amend --no-edit`.
+4. Report the new SHA.
+
+Return `DONE` + SHA, or `BLOCKED` with reason. Under 100 words.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:27:37Z)**_
+
+I'll fix the Storybook test-runner incompatibility in the EncouragementAnnouncer stories file.
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:27:38Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+
+```text
+1	import { useState } from 'react';
+2	import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+3	import { vi } from 'vitest';
+4	
+5	import { EncouragementAnnouncer } from './EncouragementAnnouncer';
+6	import type { Meta, StoryObj } from '@storybook/react';
+7	import type { ComponentType } from 'react';
+8	
+9	interface StoryArgs {
+10	  message: string;
+11	  visible: boolean;
+12	  onDismiss: () => void;
+13	}
+14	
+15	const ShowTrigger = ({
+16	  message,
+17	  onDismiss,
+18	}: {
+19	  message: string;
+20	  onDismiss: () => void;
+21	}) => {
+22	  const [visible, setVisible] = useState(false);
+23	  return (
+24	    <>
+25	      <button
+26	        type="button"
+27	        onClick={() => setVisible(true)}
+28	        disabled={visible}
+29	        className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+30	      >
+31	        Show encouragement
+32	      </button>
+33	      <EncouragementAnnouncer
+34	        visible={visible}
+35	        message={message}
+36	        onDismiss={() => {
+37	          setVisible(false);
+38	          onDismiss();
+39	        }}
+40	      />
+41	    </>
+42	  );
+43	};
+44	
+45	const meta: Meta<StoryArgs> = {
+46	  component:
+47	    EncouragementAnnouncer as unknown as ComponentType<StoryArgs>,
+48	  tags: ['autodocs'],
+49	  args: {
+50	    message: 'Keep trying!',
+51	    visible: false,
+52	    onDismiss: fn(),
+53	  },
+54	  argTypes: {
+55	    message: { control: 'text' },
+56	    visible: { control: 'boolean' },
+57	    onDismiss: { table: { disable: true } },
+58	  },
+59	  render: ({ message, visible, onDismiss }) => (
+60	    <EncouragementAnnouncer
+61	      message={message}
+62	      visible={visible}
+63	      onDismiss={onDismiss}
+64	    />
+65	  ),
+66	};
+67	export default meta;
+68	
+69	type Story = StoryObj<StoryArgs>;
+70	
+71	export const Hidden: Story = {
+72	  args: { visible: false, message: 'Keep trying!' },
+73	};
+74	
+75	export const Visible: Story = {
+76	  args: { visible: true, message: 'Almost! Try again.' },
+77	};
+78	
+79	export const ReplayTrigger: Story = {
+80	  args: { message: 'Great job!' },
+81	  render: ({ message, onDismiss }) => (
+82	    <ShowTrigger message={message} onDismiss={onDismiss} />
+83	  ),
+84	};
+85	
+86	export const AutoDismissesAfter2s: Story = {
+87	  args: { message: 'Keep trying!' },
+88	  render: ({ message, onDismiss }) => (
+89	    <ShowTrigger message={message} onDismiss={onDismiss} />
+90	  ),
+91	  play: async ({ args, canvasElement }) => {
+92	    vi.useFakeTimers();
+93	    try {
+94	      const canvas = within(canvasElement);
+95	      await userEvent.click(
+96	        canvas.getByRole('button', { name: /show encouragement/i }),
+97	      );
+98	      await waitFor(() => {
+99	        expect(canvas.getByText(/keep trying/i)).toBeVisible();
+100	      });
+101	      vi.advanceTimersByTime(2000);
+102	      await waitFor(() => {
+103	        expect(args.onDismiss).toHaveBeenCalled();
+104	      });
+105	    } finally {
+106	      vi.useRealTimers();
+107	    }
+108	  },
+109	};
+110
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:27:40Z)**_
+
+Now I'll edit the file to remove the vitest import and rewrite the AutoDismissesAfter2s story:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:27:42Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:27:47Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:27:48Z)**_
+
+Now I'll run typecheck and lint:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:27:51Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`yarn typecheck`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 2.85s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:28:04Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`yarn lint`
+
+```text
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 10.53s.
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:28:06Z)**_
+
+Now I'll amend the existing commit:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:28:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git add src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx && git commit --amend --no-edit && git rev-parse HEAD`
+
+```text
+<persisted-output>
+Output too large (44.2KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bxbheg6p6.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (f34f1eea)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:28:23Z)**_
+
+Let me check the SHA from the command:
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:28:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+
+`git rev-parse HEAD`
+
+```text
+5264ea0611825dbc0a2fd5ac2bb3ea42477e28f1
+```
+</details></tool-use>
+
+_**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-21 06:28:26Z)**_
+
+DONE. SHA: `5264ea06`
+
+Fixed by:
+1. Removed `import { vi } from 'vitest';` 
+2. Rewrote `AutoDismissesAfter2s` to use real timers with `waitFor({ timeout: 3500 })`
+3. Amended commit with typecheck and lint passing
+
+_**Agent (claude-opus-4-7 2026-04-21 06:28:33Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:28:33Z)**_
+
+Let me verify the branch state after the fix.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:28:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Show branch commits
+
+`git log --oneline origin/master..HEAD`
+
+```text
+5264ea06 stories(answer-game/ScoreAnimation): retrofit per controls policy
+4d465568 stories(answer-game/ProgressHUD): retrofit per controls policy
+8fa29284 stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+483141ac stories(answer-game/GameOverOverlay): retrofit per controls policy
+e3121973 stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+f74eb775 stories(answer-game/InstructionsOverlay): retrofit per controls policy
+beb14675 stories(answer-game/AnswerGame): retrofit per controls policy
+e824111f stories(answer-game/Slot): retrofit per controls policy
+5d6fe217 docs(plan): implementation plan for audit batch 2
+25c7caab docs(spec): correct tileBankMode enum values
+e4222463 docs(spec): audit batch 2 for src/components/answer-game/* stories
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:28:35Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Show fix commit stat
+
+`git show 5264ea06 --stat`
+
+```text
+commit 5264ea0611825dbc0a2fd5ac2bb3ea42477e28f1
+Author: leocaseiro <leobok@gmail.com>
+Date:   Tue Apr 21 16:24:20 2026 +1000
+
+    stories(answer-game/ScoreAnimation): retrofit per controls policy
+    
+    StoryArgs: visible boolean. Pure-display component — no play() story.
+    
+    Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+
+ .../EncouragementAnnouncer.stories.tsx             | 28 ++++++++++------------
+ .../ScoreAnimation/ScoreAnimation.stories.tsx      |  4 ++++
+ 2 files changed, 16 insertions(+), 16 deletions(-)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:28:53Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:28:54Z)**_
+
+The fix was amended into the ScoreAnimation commit by mistake — it now contains both files. Let me split them cleanly.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:28:55Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Soft reset to split mixed commit
+
+`git reset --soft HEAD~1 && git status --short`
+
+```text
+M  src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+M  src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:28:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Unstage EncouragementAnnouncer
+
+`git restore --staged src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx && git status --short`
+
+```text
+ M src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+M  src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:29:15Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Re-commit ScoreAnimation clean
+
+```bash
+git commit -m "$(cat <<'EOF'
+stories(answer-game/ScoreAnimation): retrofit per controls policy
+
+StoryArgs: visible boolean. Pure-display component — no play() story.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+```text
+<persisted-output>
+Output too large (44.2KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bfmnnvkeg.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (d76e4130)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:29:17Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Verify commit landed
+
+`git log --oneline origin/master..HEAD | head -3`
+
+```text
+5fc0b61f stories(answer-game/ScoreAnimation): retrofit per controls policy
+4d465568 stories(answer-game/ProgressHUD): retrofit per controls policy
+8fa29284 stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:29:21Z)**_
+
+ScoreAnimation clean at `5fc0b61f`. Now committing the EncouragementAnnouncer fix as its own commit.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:29:40Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit EncouragementAnnouncer fix
+
+```bash
+git add src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/EncouragementAnnouncer): drop vitest import for test-runner compat
+
+Storybook 10's test-runner uses a bundled storybook/test expect. Importing
+{ vi } from vitest at module scope poisons expect() globally with
+"Cannot read properties of undefined (reading 'customEqualityTesters')",
+causing all 4 stories to fail to mount (not just the one using vi).
+
+Remove the vi import. Rewrite AutoDismissesAfter2s to rely on real timers
+with a waitFor timeout of 3500ms, which still gates the 2s auto-dismiss
+behavior without polluting expect.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+```text
+<persisted-output>
+Output too large (44.3KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bnnnf0ja4.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (ee690d7f)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:29:43Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Verify fix commit
+
+`git log --oneline origin/master..HEAD | head -3`
+
+```text
+16d833cc stories(answer-game/EncouragementAnnouncer): drop vitest import for test-runner compat
+5fc0b61f stories(answer-game/ScoreAnimation): retrofit per controls policy
+4d465568 stories(answer-game/ProgressHUD): retrofit per controls policy
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:29:46Z)**_
+
+Fix commit landed at `16d833cc`. Re-running storybook test-runner.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:30:01Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Re-run storybook test-runner
+
+`yarn test:storybook --url http://127.0.0.1:6006 2>&1 | tail -30`
+
+```text
+** PASS **  browser: chromium  src/components/ui/****input.stories.tsx**
+** PASS **  browser: chromium  src/components/ui/****button.stories.tsx**
+** PASS **  browser: chromium  src/components/questions/DotGroupQuestion/****DotGroupQuestion.stories.tsx** (**5.026 s**)
+** PASS **  browser: chromium  src/components/ui/****slider.stories.tsx**
+** PASS **  browser: chromium  src/games/number-match/NumberMatch/****NumberMatch.skin.stories.tsx** (**5.237 s**)
+** PASS **  browser: chromium  src/games/word-spell/WordSpell/****WordSpell.stories.tsx** (**5.492 s**)
+** PASS **  browser: chromium  src/components/ui/****card.stories.tsx**
+** PASS **  browser: chromium  src/components/****GameNameChip.stories.tsx**
+** PASS **  browser: chromium  src/components/****UpdateBanner.stories.tsx**
+** PASS **  browser: chromium  src/data/words/****WordLibraryExplorer.stories.tsx**
+** PASS **  browser: chromium  src/components/questions/TextQuestion/****TextQuestion.stories.tsx**
+** PASS **  browser: chromium  src/components/answer-game/LevelCompleteOverlay/****LevelCompleteOverlay.stories.tsx**
+** PASS **  browser: chromium  src/components/ui/****sheet.stories.tsx**
+** PASS **  browser: chromium  src/components/game/****GameShell.stories.tsx** (**5.151 s**)
+** PASS **  browser: chromium  src/components/questions/AudioButton/****AudioButton.stories.tsx**
+** PASS **  browser: chromium  src/components/ui/****label.stories.tsx**
+** PASS **  browser: chromium  src/components/****OfflineIndicator.stories.tsx**
+** PASS **  browser: chromium  src/components/****GameGrid.stories.tsx**
+** PASS **  browser: chromium  src/components/****Footer.stories.tsx**
+** PASS **  browser: chromium  src/components/answer-game/ScoreAnimation/****ScoreAnimation.stories.tsx**
+** PASS **  browser: chromium  src/components/questions/ImageQuestion/****ImageQuestion.stories.tsx**
+** PASS **  browser: chromium  src/components/****Header.stories.tsx**
+** PASS **  browser: chromium  src/components/****ThemeToggle.stories.tsx**
+
+**Test Suites: ****44 passed**, 44 total
+**Tests:       ****207 passed**, 207 total
+**Snapshots:   **0 total
+**Time:**        13.716 s
+Ran all test suites**.**
+Done in 14.82s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:30:05Z)**_
+
+All 44 suites / 207 tests green. Killing the storybook dev server and moving to push + PR.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:30:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Kill storybook dev server
+
+`pkill -f "storybook dev --port 6006" 2>/dev/null; sleep 2; echo "done"`
+
+```text
+done
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:30:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Final branch log
+
+`git log --oneline origin/master..HEAD`
+
+```text
+16d833cc stories(answer-game/EncouragementAnnouncer): drop vitest import for test-runner compat
+5fc0b61f stories(answer-game/ScoreAnimation): retrofit per controls policy
+4d465568 stories(answer-game/ProgressHUD): retrofit per controls policy
+8fa29284 stories(answer-game/LevelCompleteOverlay): retrofit per controls policy
+483141ac stories(answer-game/GameOverOverlay): retrofit per controls policy
+e3121973 stories(answer-game/EncouragementAnnouncer): retrofit per controls policy
+f74eb775 stories(answer-game/InstructionsOverlay): retrofit per controls policy
+beb14675 stories(answer-game/AnswerGame): retrofit per controls policy
+e824111f stories(answer-game/Slot): retrofit per controls policy
+5d6fe217 docs(plan): implementation plan for audit batch 2
+25c7caab docs(spec): correct tileBankMode enum values
+e4222463 docs(spec): audit batch 2 for src/components/answer-game/* stories
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:30:12Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:30:13Z)**_
+
+All tests green. Pushing branch and opening PR.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:30:40Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Push branch to origin
+
+`git push -u origin audit/storybook-batch-2-answer-game 2>&1 | tail -20`
+
+```text
+-e **▶ Running: vitest related
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+No test files found, exiting with code 0
+
+include: src/**/*.test.{ts,tsx}, scripts/**/*.test.mjs
+exclude:  e2e/**, node_modules/**
+
+-e   ✓ Unit tests (vitest related)
+-e **──────────────────────────────────────────
+-e **  All pre-push checks passed.
+-e **──────────────────────────────────────────
+remote: 
+remote: Create a pull request for 'audit/storybook-batch-2-answer-game' on GitHub by visiting:        
+remote:      https://github.com/leocaseiro/base-skill/pull/new/audit/storybook-batch-2-answer-game        
+remote: 
+To github.com:leocaseiro/base-skill.git
+ * [new branch]        audit/storybook-batch-2-answer-game -> audit/storybook-batch-2-answer-game
+branch 'audit/storybook-batch-2-answer-game' set up to track 'origin/audit/storybook-batch-2-answer-game'.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:30:44Z)**_
+
+Branch pushed. Checking issue #125 to update, then opening the PR.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:30:45Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Read issue 125 body
+
+`gh issue view 125 --json body --jq '.body' 2>&1 | head -100`
+
+```text
+## Purpose
+
+Track rollout of the Storybook Controls Policy + Required Variants gates (see [`.claude/skills/write-storybook/SKILL.md`](../blob/master/.claude/skills/write-storybook/SKILL.md)) across the remaining story files. Pilot covered `src/components/ui/*` — shipped in #124. The pattern is now proven (and corrected: `fn()` in `args`, not global `argTypesRegex`).
+
+## Per-file checklist
+
+### Root components (`src/components/*`)
+
+- [ ] `ConfigFormFields.stories.tsx`
+- [ ] `Footer.stories.tsx`
+- [ ] `GameCard.stories.tsx`
+- [ ] `GameGrid.stories.tsx`
+- [ ] `GameNameChip.stories.tsx`
+- [ ] `Header.stories.tsx`
+- [ ] `OfflineIndicator.stories.tsx`
+- [ ] `ThemeToggle.stories.tsx`
+- [ ] `UpdateBanner.stories.tsx`
+
+### `answer-game/*`
+
+- [ ] `AnswerGame/AnswerGame.stories.tsx`
+- [ ] `EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+- [ ] `GameOverOverlay/GameOverOverlay.stories.tsx`
+- [ ] `InstructionsOverlay/InstructionsOverlay.stories.tsx`
+- [ ] `LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx`
+- [ ] `ProgressHUD/ProgressHUD.stories.tsx`
+- [ ] `ScoreAnimation/ScoreAnimation.stories.tsx`
+- [ ] `Slot/Slot.stories.tsx`
+
+### `questions/*`
+
+- [ ] `AudioButton/AudioButton.stories.tsx`
+- [ ] `DotGroupQuestion/DotGroupQuestion.stories.tsx`
+- [ ] `ImageQuestion/ImageQuestion.stories.tsx`
+- [ ] `TextQuestion/TextQuestion.stories.tsx`
+
+### `game/*`
+
+- [ ] `game/GameShell.stories.tsx`
+
+### `games/*`
+
+- [ ] `number-match/NumberMatch/NumberMatch.stories.tsx`
+- [ ] `number-match/NumberMatch/NumberMatch.skin.stories.tsx`
+- [ ] `number-match/NumeralTileBank/NumeralTileBank.stories.tsx`
+- [ ] `sort-numbers/SortNumbers/SortNumbers.stories.tsx`
+- [ ] `sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx`
+- [ ] `sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx`
+- [ ] `word-spell/WordSpell/WordSpell.stories.tsx`
+- [ ] `word-spell/WordSpell/WordSpell.skin.stories.tsx`
+- [ ] `word-spell/LetterTileBank/LetterTileBank.stories.tsx`
+
+### Misc
+
+- [ ] `data/words/WordLibraryExplorer.stories.tsx`
+- [ ] `lib/audio/AudioFeedback.stories.tsx`
+- [ ] `stories/ThemeShowcase.stories.tsx`
+
+## Gates per file (from SKILL.md)
+
+1. All non-callback, non-JSX props have proper `argTypes` controls — no raw JSON fallbacks.
+2. Every `on*` handler wired to `fn()` from `storybook/test` in `args` (do NOT rely on `argTypesRegex` alone — it misses DOM-extended props under react-docgen).
+3. At least one `play()` interaction story on interactive components.
+4. Required Variants present (Default, enum-per-value where visuals differ, state variants, edge cases).
+5. Decorators match current dependencies (`withDb`, `withRouter`).
+6. Typecheck, lint, lint:md, test:storybook all green.
+
+## Batching suggestion
+
+Group by directory to keep PRs reviewable. Estimated 3-5 batches:
+
+- Batch 2: `answer-game/*` (8 files) — highest complexity, lots of game state
+- Batch 3: `questions/*` + `game/*` (5 files)
+- Batch 4: `games/*` (9 files) — skin + default stories
+- Batch 5: root `components/*` (9 files)
+- Batch 6: Misc (3 files)
+
+Each batch spawns its own spec → plan → subagent-driven execution cycle.
+
+## Out of scope
+
+- Design-token contrast fix for `button`/`input` secondary variants (separate PR — requires VR baseline regen).
+- Any change to `.storybook/preview.tsx` or global config.
+
+## Related
+
+- Pilot PR: #124
+- Policy source: `.claude/skills/write-storybook/SKILL.md`
+- Pilot spec: `docs/superpowers/specs/2026-04-17-audit-storybook-ui-controls-design.md`
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:30:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Tick 8 answer-game checkboxes
+
+```bash
+gh issue view 125 --json body --jq '.body' > /tmp/issue-125-old.md
+sed 's|- \[ \] `AnswerGame/AnswerGame.stories.tsx`|- [x] `AnswerGame/AnswerGame.stories.tsx`|; s|- \[ \] `EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`|- [x] `EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`|; s|- \[ \] `GameOverOverlay/GameOverOverlay.stories.tsx`|- [x] `GameOverOverlay/GameOverOverlay.stories.tsx`|; s|- \[ \] `InstructionsOverlay/InstructionsOverlay.stories.tsx`|- [x] `InstructionsOverlay/InstructionsOverlay.stories.tsx`|; s|- \[ \] `LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx`|- [x] `LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx`|; s|- \[ \] `ProgressHUD/ProgressHUD.stories.tsx`|- [x] `ProgressHUD/ProgressHUD.stories.tsx`|; s|- \[ \] `ScoreAnimation/ScoreAnimation.stories.tsx`|- [x] `ScoreAnimation/ScoreAnimation.stories.tsx`|; s|- \[ \] `Slot/Slot.stories.tsx`|- [x] `Slot/Slot.stories.tsx`|' /tmp/issue-125-old.md > /tmp/issue-125-new.md
+diff /tmp/issue-125-old.md /tmp/issue-125-new.md
+```
+
+```text
+21,28c21,28
+< - [ ] `AnswerGame/AnswerGame.stories.tsx`
+< - [ ] `EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+< - [ ] `GameOverOverlay/GameOverOverlay.stories.tsx`
+< - [ ] `InstructionsOverlay/InstructionsOverlay.stories.tsx`
+< - [ ] `LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx`
+< - [ ] `ProgressHUD/ProgressHUD.stories.tsx`
+< - [ ] `ScoreAnimation/ScoreAnimation.stories.tsx`
+< - [ ] `Slot/Slot.stories.tsx`
+---
+> - [x] `AnswerGame/AnswerGame.stories.tsx`
+> - [x] `EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+> - [x] `GameOverOverlay/GameOverOverlay.stories.tsx`
+> - [x] `InstructionsOverlay/InstructionsOverlay.stories.tsx`
+> - [x] `LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx`
+> - [x] `ProgressHUD/ProgressHUD.stories.tsx`
+> - [x] `ScoreAnimation/ScoreAnimation.stories.tsx`
+> - [x] `Slot/Slot.stories.tsx`
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:30:56Z)**_
+
+Diff shows only the 8 answer-game checkboxes flipped. Opening the PR and updating the issue in parallel.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:31:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Open PR against master
+
+```bash
+gh pr create --base master --title "stories(answer-game): audit retrofit per new controls policy" --body "$(cat <<'EOF'
+## Summary
+
+Batch 2 of the Storybook controls audit rollout (tracking issue #125) — retrofits the 8 `src/components/answer-game/*.stories.tsx` files to the Controls Policy and Required Variants gates in [`.claude/skills/write-storybook/SKILL.md`](../blob/master/.claude/skills/write-storybook/SKILL.md).
+
+Three files upgraded beyond minimal compliance:
+
+- **`AnswerGame`** — real interactive playground: live `AnswerGameProvider` + real `Slot` row + tap-to-place tile bank (dispatches `PLACE_TILE`).
+- **`InstructionsOverlay`** — actually clickable: 9 controls, 7 state variants, 3 `play()` flows (`StartsGame`, `TogglesBookmark`, `OpensSettings`). Portal-scoped queries use `within(document.body)` + `waitFor()` for Radix animation races.
+- **`Slot`** — 8 broken bespoke scene stories collapsed to one args-driven `Playground` story (variant / label / filled / isWrong / dragPreview controls).
+
+Tier 2 (5 files) retrofitted to minimum compliance: `EncouragementAnnouncer`, `GameOverOverlay`, `LevelCompleteOverlay`, `ProgressHUD`, `ScoreAnimation`.
+
+Closes part of #125.
+
+## Per-file audit
+
+| File | Tier | Controls | fn() spies | play() | State variants |
+|------|------|----------|-----------|--------|----------------|
+| `Slot` | Complex | variant, label, filled, isWrong, dragPreview | N/A | N/A (dispatch-driven) | 1 `Playground` |
+| `AnswerGame` | Complex | inputMethod, wrongTileBehavior, tileBankMode, totalRounds, ttsEnabled | N/A | skipped (DnD jsdom unreliable) | Default, TextQuestionMode, RejectMode, LockManualMode |
+| `InstructionsOverlay` | Complex | text, gameTitle, gameId, customGameColor, ttsEnabled, isBookmarked, totalRounds, customGameId/Name | onStart, onSaveCustomGame, onUpdateCustomGame, onToggleBookmark, onConfigChange | StartsGame, TogglesBookmark, OpensSettings | Default, WithCustomGame, WordSpellDefault, Not/Bookmarked × Classic/Custom |
+| `EncouragementAnnouncer` | Simple | message, visible | onDismiss | AutoDismissesAfter2s | Hidden, Visible, ReplayTrigger |
+| `GameOverOverlay` | Simple | retryCount range | onPlayAgain, onHome | ClicksPlayAgain, ClicksHome | FiveStars...OneStar |
+| `LevelCompleteOverlay` | Simple | level range | onNextLevel, onDone | ClicksNextLevel, ClicksDone | Level1, Level3, Level10 |
+| `ProgressHUD` | Simple | 9 controls (ranges, selects, booleans) | N/A | N/A (pure display) | 9 stories preserved |
+| `ScoreAnimation` | Simple | visible | N/A | N/A | Playing, Complete |
+
+## Notable fixes
+
+- `InstructionsOverlay.OpensSettings` previously would have failed: `InstructionsOverlay` itself renders as `role="dialog"` via portal, so `queryByRole('dialog')` always matches the overlay. Play now scopes with `{ name: /advanced settings/i }` to target the modal.
+- `ProgressHUD` import switched from `@storybook/react-vite` → `@storybook/react` to match project convention.
+- `EncouragementAnnouncer` originally used `import { vi } from 'vitest'` + `vi.useFakeTimers()`. Storybook 10's test-runner uses a bundled `storybook/test` expect, and importing `vi` at module scope poisons `expect()` globally with "Cannot read properties of undefined (reading 'customEqualityTesters')", causing ALL 4 stories to fail to mount. Committed separately (`16d833cc`) as a test-runner compat fix — `AutoDismissesAfter2s` now uses real timers with a `waitFor({ timeout: 3500 })` budget.
+
+## Dropped `play()` stories
+
+- `AnswerGame` — HTML5 drag-and-drop is unreliable in jsdom/Playwright. Interactive correctness of DnD is covered at the e2e layer.
+
+## Pre-existing out-of-scope failures surfaced by test-runner
+
+- None. All 44 test suites / 207 tests pass on this branch.
+
+## Test plan
+
+- [x] `yarn typecheck` green
+- [x] `yarn lint` green
+- [x] `yarn lint:md` green
+- [x] `yarn test:storybook` green (all 44 suites, 207 tests)
+- [x] Storybook Controls panel actually drives the 3 upgraded stories (verified locally in dev)
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)" 2>&1 | tail -30
+```
+
+```text
+https://github.com/leocaseiro/base-skill/pull/134
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:31:33Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Update issue 125 checkboxes
+
+`gh issue edit 125 --body-file /tmp/issue-125-new.md`
+
+```text
+https://github.com/leocaseiro/base-skill/issues/125
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:31:39Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #11 status
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:31:49Z)**_
+
+Batch 2 shipped.
+
+**PR:** https://github.com/leocaseiro/base-skill/pull/134
+
+**Summary of what landed (10 commits on `audit/storybook-batch-2-answer-game`):**
+
+- `e824111f` Slot — 8 scenes collapsed to one Playground
+- `beb14675` AnswerGame — real interactive playground (live Provider + tap-to-place bank)
+- `f74eb775` InstructionsOverlay — 9 controls, 7 variants, 3 play() flows (portal-scoped, `/advanced settings/i` name targeting fixes a latent bug)
+- `e3121973` EncouragementAnnouncer — initial retrofit
+- `483141ac` GameOverOverlay — retry→stars + play()
+- `8fa29284` LevelCompleteOverlay — level range + play()
+- `4d465568` ProgressHUD — 9 controls, `-vite` → `react` import fix
+- `5fc0b61f` ScoreAnimation — visible boolean
+- `16d833cc` EncouragementAnnouncer vitest-import compat fix — removed `import { vi } from 'vitest'` which was poisoning `expect()` in the Storybook test-runner and causing all 4 stories in the file to fail to mount
+
+**Green:** `yarn typecheck` · `yarn lint` · `yarn lint:md` · `yarn test:storybook` (44 suites, 207 tests)
+
+**Issue #125:** 8 Batch-2 checkboxes ticked.
+
+---
+
+_**User (2026-04-21 06:53:00Z)**_
+
+Did you work on this story? https://leocaseiro.github.io/base-skill/pr/134/docs/?path=/docs/components-answer-game-answergame--docs
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 06:53:09Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:53:19Z)**_
+
+Yes — that's Task 2 of this batch, commit `beb14675` at `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`.
+
+What I built for that page:
+
+- `StoryArgs` breaks `config` into five Controls-panel inputs: `inputMethod` (select: drag/type/both), `wrongTileBehavior` (select: reject/lock-manual/lock-auto-eject), `tileBankMode` (select: exact/distractors), `totalRounds` (range 1–20), `ttsEnabled` (boolean).
+- `render()` builds a live `AnswerGameConfig` and wraps everything in a real `<AnswerGame>` so Docs mode actually shows a playable scene, not a stub.
+- Inline `TapToPlaceBank` reads `{ allTiles, bankTileIds, zones }` from `useAnswerGameContext`, finds the next empty zone, and dispatches `{ type: 'PLACE_TILE', tileId, zoneIndex }` on click.
+- Inline `PlayableScene` wires real `AnswerGame.Question` / `AnswerGame.Answer` (real `SlotRow` + `Slot`s mapped over `zones`) / `AnswerGame.Choices` (the tap-to-place bank).
+- Four named stories: `Default`, `TextQuestionMode` (`inputMethod: 'type'`), `RejectMode`, `LockManualMode`.
+- `play()` deliberately skipped — HTML5 drag-and-drop is unreliable in jsdom/Playwright; DnD correctness is covered at the e2e layer.
+- Decorator: `withDb`.
+
+If something on that Docs page doesn't look right to you, tell me what — happy to patch before review.
+
+---
+
+_**User (2026-04-21 06:53:36Z)**_
+
+Fix the tokens, the slots are squared and they should be the same as the default tokens
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 06:53:46Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:53:46Z)**_
+
+Let me find what "default tokens" means in this codebase — likely the default skin's tile/slot styling.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:53:48Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Confirm branch
+
+`git log --oneline origin/master..HEAD | head -3`
+
+```text
+16d833cc stories(answer-game/EncouragementAnnouncer): drop vitest import for test-runner compat
+5fc0b61f stories(answer-game/ScoreAnimation): retrofit per controls policy
+4d465568 stories(answer-game/ProgressHUD): retrofit per controls policy
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:53:49Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Glob"><details>
+<summary>Tool use: **Glob**</summary>
+ pattern `src/lib/skin/**/*.ts*`
+
+```text
+src/lib/skin/SkinHarness.tsx
+src/lib/skin/classic-skin.ts
+src/lib/skin/game-skin.ts
+src/lib/skin/index.ts
+src/lib/skin/registry.test.ts
+src/lib/skin/registry.ts
+src/lib/skin/resolve-timing.test.ts
+src/lib/skin/resolve-timing.ts
+src/lib/skin/useGameSkin.test.tsx
+src/lib/skin/useGameSkin.ts
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:53:49Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Glob"><details>
+<summary>Tool use: **Glob**</summary>
+ pattern `src/games/sort-numbers/SortNumbersTileBank/*.tsx`
+
+```text
+src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx
+src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx
+src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:53:53Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/lib/skin/classic-skin.ts`
+
+```text
+1	import type { GameSkin } from './game-skin';
+2	
+3	/**
+4	 * Default skin — tokens reference existing `--bs-*` app theme values so
+5	 * the engine's visual output is unchanged when no other skin is registered.
+6	 */
+7	export const classicSkin: GameSkin = {
+8	  id: 'classic',
+9	  name: 'Classic',
+10	  tokens: {
+11	    // ── Tile tokens ───────────────────────────────────────────────
+12	    '--skin-tile-bg': 'var(--bs-primary)',
+13	    '--skin-tile-text': 'var(--bs-surface)',
+14	    '--skin-tile-radius': '0.75rem',
+15	    '--skin-tile-border': 'transparent',
+16	    '--skin-tile-shadow': '0 2px 4px rgb(0 0 0 / 10%)',
+17	    '--skin-tile-font-weight': '700',
+18	
+19	    // ── Tile surface / skeuo tokens (replaces --skeuo-* / --card) ──
+20	    '--skin-tile-surface': 'var(--card, #FAFAFA)',
+21	    '--skin-tile-highlight': 'rgba(255,255,255,1)',
+22	    '--skin-tile-ring': 'rgba(0,0,0,0.08)',
+23	    '--skin-tile-inset-bottom': 'rgba(0,0,0,0.08)',
+24	    '--skin-tile-inset-top': 'rgba(255,255,255,0.5)',
+25	    '--skin-tile-text-shadow': 'rgba(0,0,0,0.12)',
+26	    '--skin-tile-active-scale': '0.95',
+27	
+28	    // ── Slot tokens ───────────────────────────────────────────────
+29	    '--skin-slot-bg': 'var(--bs-surface)',
+30	    '--skin-slot-border': 'var(--bs-accent)',
+31	    '--skin-slot-radius': '0.75rem',
+32	    '--skin-slot-active-border': 'var(--bs-primary)',
+33	
+34	    // ── State tokens (replaces Tailwind state classes) ────────────
+35	    '--skin-correct-bg': 'rgb(from var(--primary) r g b / 0.1)',
+36	    '--skin-correct-border': 'var(--bs-primary)',
+37	    '--skin-wrong-bg': 'rgb(from var(--destructive) r g b / 0.1)',
+38	    '--skin-wrong-border': 'var(--destructive)',
+39	
+40	    // ── Bank-hole tokens ──────────────────────────────────────────
+41	    '--skin-bank-hole-bg': 'rgb(from var(--muted) r g b / 0.6)',
+42	    '--skin-bank-hole-shadow': 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
+43	
+44	    // ── Hover-preview tokens ──────────────────────────────────────
+45	    '--skin-hover-border-color': 'var(--bs-primary)',
+46	    '--skin-hover-border-style': 'dashed',
+47	
+48	    // ── Feedback animations ───────────────────────────────────────
+49	    '--skin-correct-color': 'var(--bs-success)',
+50	    '--skin-wrong-color': 'var(--bs-error)',
+51	    '--skin-correct-animation': 'pop 250ms ease-out',
+52	    '--skin-wrong-animation': 'shake 300ms ease-in-out',
+53	
+54	    // ── Scene / bank container tokens ─────────────────────────────
+55	    '--skin-scene-bg': 'transparent',
+56	    '--skin-bank-bg': 'transparent',
+57	    '--skin-bank-border': 'transparent',
+58	
+59	    // ── Celebration tokens ────────────────────────────────────────
+60	    '--skin-celebration-emoji': "'🐨'",
+61	
+62	    // ── Question component tokens ─────────────────────────────────
+63	    '--skin-question-bg': 'transparent',
+64	    '--skin-question-text': 'inherit',
+65	    '--skin-question-radius': '0.75rem',
+66	    '--skin-question-audio-bg': 'var(--bs-primary)',
+67	    '--skin-question-audio-fg': 'var(--primary-foreground)',
+68	    '--skin-question-dot-bg': 'var(--bs-primary)',
+69	    '--skin-question-dot-assigned-bg': 'var(--bs-primary)',
+70	
+71	    // ── Sentence-with-gaps tokens ─────────────────────────────────
+72	    '--skin-sentence-gap-border': 'currentColor',
+73	    '--skin-sentence-gap-style': 'dashed',
+74	
+75	    // ── Domino pip tokens ─────────────────────────────────────────
+76	    '--skin-pip-color': 'currentColor',
+77	    '--skin-pip-divider-color': 'currentColor',
+78	    '--skin-pip-divider-opacity': '0.3',
+79	
+80	    // ── HUD tokens ────────────────────────────────────────────────
+81	    '--skin-hud-bg': 'transparent',
+82	    '--skin-hud-gap': '0.5rem',
+83	    '--skin-hud-padding': '0.25rem 0.75rem',
+84	    '--skin-hud-radius': '9999px',
+85	    '--skin-hud-dot-size': '0.875rem',
+86	    '--skin-hud-dot-fill': 'var(--bs-primary)',
+87	    '--skin-hud-dot-empty': 'var(--bs-surface)',
+88	    '--skin-hud-dot-border': 'var(--bs-border)',
+89	    '--skin-hud-dot-current-border': 'var(--skin-slot-border)',
+90	    '--skin-hud-fraction-color': 'var(--bs-foreground)',
+91	    '--skin-hud-fraction-sep-color': 'var(--skin-hud-dot-fill)',
+92	    '--skin-hud-level-color': 'var(--bs-primary)',
+93	  },
+94	};
+95
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:53:53Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
+
+```text
+1	import type { TileItem } from '@/components/answer-game/types';
+2	import type { GameSkin } from '@/lib/skin';
+3	import { tileStyle } from '@/components/answer-game/styles';
+4	import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
+5	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+6	import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
+7	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+8	
+9	const NumberTile = ({
+10	  tile,
+11	  skin,
+12	}: {
+13	  tile: TileItem;
+14	  skin?: GameSkin;
+15	}) => {
+16	  const {
+17	    ref,
+18	    handleClick,
+19	    onPointerDown,
+20	    onPointerMove,
+21	    onPointerUp,
+22	    onPointerCancel,
+23	  } = useDraggableTile(tile);
+24	
+25	  const isCustomSkin = skin && skin.id !== 'classic';
+26	  const resolvedTileStyle: React.CSSProperties = isCustomSkin
+27	    ? {
+28	        ...tileStyle(),
+29	        background: 'var(--skin-tile-bg)',
+30	        color: 'var(--skin-tile-text)',
+31	        borderRadius: 'var(--skin-tile-radius)',
+32	        border: 'var(--skin-tile-border)',
+33	        boxShadow: 'var(--skin-tile-shadow)',
+34	        fontWeight:
+35	          'var(--skin-tile-font-weight)' as React.CSSProperties['fontWeight'],
+36	      }
+37	    : tileStyle();
+38	
+39	  return (
+40	    <button
+41	      ref={ref}
+42	      type="button"
+43	      aria-label={`Number ${tile.label}`}
+44	      className={`flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums transition-transform active:scale-95 active:cursor-grabbing`}
+45	      style={resolvedTileStyle}
+46	      onClick={handleClick}
+47	      onPointerDown={onPointerDown}
+48	      onPointerMove={onPointerMove}
+49	      onPointerUp={onPointerUp}
+50	      onPointerCancel={onPointerCancel}
+51	    >
+52	      {tile.label}
+53	      {skin?.tileDecoration?.(tile)}
+54	    </button>
+55	  );
+56	};
+57	
+58	interface SortNumbersTileBankProps {
+59	  skin?: GameSkin;
+60	}
+61	
+62	export const SortNumbersTileBank = ({
+63	  skin,
+64	}: SortNumbersTileBankProps) => {
+65	  const {
+66	    allTiles,
+67	    bankTileIds,
+68	    dragActiveTileId,
+69	    dragHoverBankTileId,
+70	  } = useAnswerGameContext();
+71	  const { bankRef, isDragOver } = useBankDropTarget();
+72	
+73	  // Bank tile placeholders (the "hole" left when a tile is dragged out and
+74	  // the hover-target indicator) honor the skin's tile-radius so a custom
+75	  // round skin doesn't show square placeholders mid-drag.
+76	  const isCustomSkin = skin && skin.id !== 'classic';
+77	  const holeRadiusStyle: React.CSSProperties | undefined = isCustomSkin
+78	    ? { borderRadius: 'var(--skin-tile-radius)' }
+79	    : undefined;
+80	
+81	  return (
+82	    <div
+83	      ref={bankRef}
+84	      data-tile-bank=""
+85	      className="flex flex-wrap justify-center gap-3"
+86	    >
+87	      {allTiles
+88	        .filter((t) => !t.id.startsWith('typed-'))
+89	        .map((tile) => {
+90	          const inBank = bankTileIds.includes(tile.id);
+91	          const isDragging = tile.id === dragActiveTileId;
+92	          const isHoverTarget =
+93	            tile.id === dragHoverBankTileId ||
+94	            (!dragHoverBankTileId &&
+95	              isDragOver &&
+96	              !inBank &&
+97	              tile.id === dragActiveTileId);
+98	
+99	          if (inBank) {
+100	            return (
+101	              <div
+102	                key={tile.id}
+103	                className="relative size-14 rounded-xl transition-all"
+104	                style={holeRadiusStyle}
+105	              >
+106	                <div
+107	                  data-tile-bank-hole={tile.id}
+108	                  className="size-14 rounded-xl"
+109	                  aria-hidden="true"
+110	                  style={{
+111	                    background: 'var(--skin-bank-hole-bg)',
+112	                    boxShadow: 'var(--skin-bank-hole-shadow)',
+113	                    ...holeRadiusStyle,
+114	                  }}
+115	                />
+116	                <div
+117	                  className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
+118	                  aria-hidden={isDragging || undefined}
+119	                >
+120	                  <NumberTile tile={tile} skin={skin} />
+121	                </div>
+122	                {isHoverTarget && (
+123	                  <div
+124	                    className="pointer-events-none absolute inset-0 rounded-xl border-2"
+125	                    aria-hidden="true"
+126	                    style={{
+127	                      borderColor: 'var(--skin-hover-border-color)',
+128	                      borderStyle:
+129	                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+130	                      ...holeRadiusStyle,
+131	                    }}
+132	                  />
+133	                )}
+134	              </div>
+135	            );
+136	          }
+137	
+138	          return (
+139	            <div
+140	              key={tile.id}
+141	              data-tile-bank-hole={tile.id}
+142	              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' border-2' : ''}`}
+143	              aria-hidden="true"
+144	              style={{
+145	                background: 'var(--skin-bank-hole-bg)',
+146	                boxShadow: 'var(--skin-bank-hole-shadow)',
+147	                ...(isHoverTarget
+148	                  ? {
+149	                      borderColor: 'var(--skin-hover-border-color)',
+150	                      borderStyle:
+151	                        'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+152	                    }
+153	                  : {}),
+154	                ...holeRadiusStyle,
+155	              }}
+156	            >
+157	              {isHoverTarget && (
+158	                <span
+159	                  className={`absolute inset-0 flex items-center justify-center ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums opacity-50`}
+160	                >
+161	                  {tile.label}
+162	                </span>
+163	              )}
+164	            </div>
+165	          );
+166	        })}
+167	    </div>
+168	  );
+169	};
+170
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:00Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:02Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/Slot/Slot.tsx`
+
+```text
+1	import { tileStyle } from '../styles';
+2	import { useAnswerGameContext } from '../useAnswerGameContext';
+3	import { useSlotBehavior } from './useSlotBehavior';
+4	import type { SlotRenderProps } from './useSlotBehavior';
+5	import type { GameSkin } from '@/lib/skin';
+6	import type { ReactNode, Ref } from 'react';
+7	
+8	interface SlotProps {
+9	  index: number;
+10	  as?: 'li' | 'span' | 'div';
+11	  className?: string;
+12	  style?: React.CSSProperties;
+13	  children: (props: SlotRenderProps) => ReactNode;
+14	  /**
+15	   * Optional custom preview renderer. Invoked during drag-hover or swap
+16	   * preview when there is a `previewLabel`. Lets a game render a visual
+17	   * preview (e.g. a domino face) instead of the default bold text. Must
+18	   * apply its own opacity/styling. When omitted, the default
+19	   * `<span>{previewLabel}</span>` is used.
+20	   */
+21	  renderPreview?: (previewLabel: string) => ReactNode;
+22	  /**
+23	   * Optional skin whose `slotDecoration` renderer runs inside the slot.
+24	   * When undefined, no decoration is rendered.
+25	   */
+26	  skin?: GameSkin;
+27	}
+28	
+29	export const Slot = ({
+30	  index,
+31	  as: Tag = 'li',
+32	  className,
+33	  style,
+34	  children,
+35	  renderPreview,
+36	  skin,
+37	}: SlotProps) => {
+38	  const { zones } = useAnswerGameContext();
+39	  const zone = zones[index];
+40	  const {
+41	    renderProps,
+42	    outerRef,
+43	    slotRef,
+44	    dragRef,
+45	    handleClick,
+46	    pointerHandlers,
+47	    isBeingDragged,
+48	  } = useSlotBehavior(index);
+49	
+50	  const {
+51	    label,
+52	    isEmpty,
+53	    isWrong,
+54	    showCursor,
+55	    isPreview,
+56	    previewLabel,
+57	  } = renderProps;
+58	
+59	  // When the slot is used inline (as="span", e.g. SentenceWithGaps inside <p>),
+60	  // the inner visual element must also be a <span> to avoid invalid
+61	  // block-in-inline HTML nesting. For list/block contexts, <div> is correct.
+62	  const InnerTag = Tag === 'span' ? 'span' : 'div';
+63	
+64	  const ariaLabel = isEmpty
+65	    ? `Slot ${index + 1}, empty`
+66	    : `Slot ${index + 1}, filled with ${label}`;
+67	
+68	  const stateClasses = [
+69	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+70	    showCursor && isWrong
+71	      ? 'ring-2 ring-destructive ring-offset-2'
+72	      : showCursor
+73	        ? 'ring-2 ring-primary ring-offset-2'
+74	        : '',
+75	  ]
+76	    .filter(Boolean)
+77	    .join(' ');
+78	
+79	  const baseStyle: React.CSSProperties = {
+80	    background: 'var(--skin-slot-bg)',
+81	    borderColor: 'var(--skin-slot-border)',
+82	    borderRadius: 'var(--skin-slot-radius)',
+83	  };
+84	
+85	  const wrongStyle: React.CSSProperties = isWrong
+86	    ? {
+87	        background: 'var(--skin-wrong-bg)',
+88	        borderColor: 'var(--skin-wrong-border)',
+89	        color: 'var(--skin-wrong-color)',
+90	      }
+91	    : {};
+92	
+93	  const previewStyle: React.CSSProperties = isPreview
+94	    ? {
+95	        borderColor: 'var(--skin-hover-border-color)',
+96	        borderStyle:
+97	          'var(--skin-hover-border-style)' as React.CSSProperties['borderStyle'],
+98	        animation: 'pulse-ring 1.5s ease-in-out infinite',
+99	      }
+100	    : {};
+101	
+102	  const correctStyle: React.CSSProperties =
+103	    !isEmpty && !isWrong && !isPreview
+104	      ? {
+105	          background: 'var(--skin-correct-bg)',
+106	          borderColor: 'var(--skin-correct-border)',
+107	          color: 'var(--skin-correct-border)',
+108	        }
+109	      : {};
+110	
+111	  const finalStyle: React.CSSProperties = {
+112	    ...baseStyle,
+113	    ...correctStyle,
+114	    ...wrongStyle,
+115	    ...previewStyle,
+116	    ...style,
+117	  };
+118	
+119	  return (
+120	    // Outer wrapper: the drop target. p-1.5 expands the hit area ~6 px beyond
+121	    // the visual slot on all sides (pragmatic-board card pattern). data-zone-index
+122	    // here ensures touch elementsFromPoint also covers the expanded region.
+123	    <Tag
+124	      ref={
+125	        outerRef as Ref<
+126	          HTMLLIElement & HTMLSpanElement & HTMLDivElement
+127	        >
+128	      }
+129	      aria-label={ariaLabel}
+130	      data-zone-index={index}
+131	      className="relative p-1.5"
+132	    >
+133	      {/* Inner visual slot: carries the state-dependent styling. */}
+134	      <InnerTag
+135	        ref={slotRef as Ref<HTMLDivElement>}
+136	        className={[stateClasses, className].filter(Boolean).join(' ')}
+137	        style={finalStyle}
+138	      >
+139	        {skin?.slotDecoration?.(
+140	          {
+141	            isLocked: zone?.isLocked ?? false,
+142	            isWrong: zone?.isWrong ?? false,
+143	            placedTileId: zone?.placedTileId ?? null,
+144	          },
+145	          index,
+146	        )}
+147	        {isEmpty ? (
+148	          <>
+149	            {isPreview && previewLabel !== null ? (
+150	              renderPreview ? (
+151	                renderPreview(previewLabel)
+152	              ) : (
+153	                <span className="text-xl font-bold opacity-50">
+154	                  {previewLabel}
+155	                </span>
+156	              )
+157	            ) : (
+158	              children(renderProps)
+159	            )}
+160	            {showCursor ? (
+161	              <span
+162	                aria-hidden="true"
+163	                className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+164	              />
+165	            ) : null}
+166	          </>
+167	        ) : (
+168	          <>
+169	            <div
+170	              className="absolute inset-0"
+171	              style={{
+172	                background: 'var(--skin-bank-hole-bg)',
+173	                boxShadow: 'var(--skin-bank-hole-shadow)',
+174	                borderRadius: 'inherit',
+175	              }}
+176	              aria-hidden="true"
+177	            />
+178	            <button
+179	              ref={dragRef}
+180	              type="button"
+181	              className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
+182	              aria-hidden={
+183	                isBeingDragged && !isPreview ? 'true' : undefined
+184	              }
+185	              style={tileStyle()}
+186	              onClick={handleClick}
+187	              onPointerDown={pointerHandlers.onPointerDown}
+188	              onPointerMove={pointerHandlers.onPointerMove}
+189	              onPointerUp={pointerHandlers.onPointerUp}
+190	              onPointerCancel={pointerHandlers.onPointerCancel}
+191	            >
+192	              {isPreview && previewLabel !== null ? (
+193	                renderPreview ? (
+194	                  renderPreview(previewLabel)
+195	                ) : (
+196	                  <span className="text-xl font-bold">
+197	                    {previewLabel}
+198	                  </span>
+199	                )
+200	              ) : (
+201	                children(renderProps)
+202	              )}
+203	            </button>
+204	            {showCursor ? (
+205	              <span
+206	                aria-hidden="true"
+207	                className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-destructive animate-blink"
+208	              />
+209	            ) : null}
+210	          </>
+211	        )}
+212	      </InnerTag>
+213	    </Tag>
+214	  );
+215	};
+216
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:02Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Glob"><details>
+<summary>Tool use: **Glob**</summary>
+ pattern `src/components/answer-game/styles*`
+
+```text
+src/components/answer-game/styles.test.ts
+src/components/answer-game/styles.ts
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:07Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/styles.ts`
+
+```text
+1	import type { CSSProperties } from 'react';
+2	
+3	export function tileStyle(): CSSProperties {
+4	  return {
+5	    background:
+6	      'linear-gradient(180deg, transparent 70.48%, var(--skin-tile-highlight, rgba(255,255,255,1)) 93.62%, transparent 100%), var(--skin-tile-surface, #FAFAFA)',
+7	    boxShadow:
+8	      'var(--skin-tile-ring, rgba(0,0,0,0.08)) 0 0 0 1px, var(--skin-tile-inset-bottom, rgba(0,0,0,0.08)) 0 -2px 1px 0 inset, var(--skin-tile-inset-top, rgba(255,255,255,0.5)) 0 2px 1px 0 inset, 0 2px 5px -1px rgba(0,0,0,0.05), 0 1px 3px -1px rgba(0,0,0,0.3)',
+9	    textShadow:
+10	      '0px 1px 1px var(--skin-tile-text-shadow, rgba(0,0,0,0.12))',
+11	  };
+12	}
+13
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:23Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:24Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.tsx`
+
+```text
+1	import { AnswerGameProvider } from '../AnswerGameProvider';
+2	import { ProgressHUDRoot } from '../ProgressHUD/ProgressHUDRoot';
+3	import type { AnswerGameConfig, AnswerGameDraftState } from '../types';
+4	import type { GameSkin } from '@/lib/skin';
+5	import type { ReactNode } from 'react';
+6	
+7	interface AnswerGameProps {
+8	  config: AnswerGameConfig;
+9	  initialState?: AnswerGameDraftState;
+10	  sessionId?: string;
+11	  /**
+12	   * Optional skin. When provided, `skin.ProgressHUD` (if defined) replaces
+13	   * the default HUD; otherwise the default HUD renders. `skin.tokens` are
+14	   * applied by individual game components on their own game container, not
+15	   * here.
+16	   */
+17	  skin?: GameSkin;
+18	  children: ReactNode;
+19	}
+20	
+21	const AnswerGameRoot = ({
+22	  config,
+23	  initialState,
+24	  sessionId,
+25	  skin,
+26	  children,
+27	}: AnswerGameProps) => (
+28	  <AnswerGameProvider
+29	    config={config}
+30	    initialState={initialState}
+31	    sessionId={sessionId}
+32	  >
+33	    <div className="flex min-h-0 w-full flex-col items-center">
+34	      <ProgressHUDRoot skin={skin} />
+35	      {children}
+36	    </div>
+37	  </AnswerGameProvider>
+38	);
+39	
+40	const Question = ({ children }: { children?: ReactNode }) => (
+41	  <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
+42	    {children}
+43	  </div>
+44	);
+45	
+46	const Answer = ({ children }: { children?: ReactNode }) => (
+47	  <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
+48	    {children}
+49	  </div>
+50	);
+51	
+52	const Choices = ({ children }: { children?: ReactNode }) => (
+53	  <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
+54	    {children}
+55	  </div>
+56	);
+57	
+58	export const AnswerGame = Object.assign(AnswerGameRoot, {
+59	  Question,
+60	  Answer,
+61	  Choices,
+62	});
+63
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:33Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:34Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/lib/skin/index.ts`
+
+```text
+1	export { classicSkin } from './classic-skin';
+2	export { SkinHarness } from './SkinHarness';
+3	export type { SkinHarnessProps } from './SkinHarness';
+4	export type {
+5	  GameSkin,
+6	  GameSkinCelebrationOverlayProps,
+7	  GameSkinLevelCompleteOverlayProps,
+8	  GameSkinTileSnapshot,
+9	  GameSkinTiming,
+10	  GameSkinZoneSnapshot,
+11	} from './game-skin';
+12	export {
+13	  __resetSkinRegistryForTests,
+14	  getRegisteredSkins,
+15	  registerSkin,
+16	  resolveSkin,
+17	} from './registry';
+18	export { DEFAULT_SKIN_TIMING, resolveTiming } from './resolve-timing';
+19	export { useGameSkin } from './useGameSkin';
+20
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:34Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+
+```text
+1	import { withDb } from '../../../../.storybook/decorators/withDb';
+2	import { Slot } from '../Slot/Slot';
+3	import { SlotRow } from '../Slot/SlotRow';
+4	import { useAnswerGameContext } from '../useAnswerGameContext';
+5	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+6	import { AnswerGame } from './AnswerGame';
+7	import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+8	import type { Meta, StoryObj } from '@storybook/react';
+9	import type { ComponentType } from 'react';
+10	
+11	type InputMethod = 'drag' | 'type' | 'both';
+12	type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
+13	type TileBankMode = 'exact' | 'distractors';
+14	
+15	interface StoryArgs {
+16	  inputMethod: InputMethod;
+17	  wrongTileBehavior: WrongTileBehavior;
+18	  tileBankMode: TileBankMode;
+19	  totalRounds: number;
+20	  ttsEnabled: boolean;
+21	}
+22	
+23	const initialTiles: TileItem[] = [
+24	  { id: 'c', label: 'C', value: 'C' },
+25	  { id: 'a', label: 'A', value: 'A' },
+26	  { id: 't', label: 'T', value: 'T' },
+27	];
+28	
+29	const initialZones: AnswerZone[] = [
+30	  {
+31	    id: 'z0',
+32	    index: 0,
+33	    expectedValue: 'C',
+34	    placedTileId: null,
+35	    isWrong: false,
+36	    isLocked: false,
+37	  },
+38	  {
+39	    id: 'z1',
+40	    index: 1,
+41	    expectedValue: 'A',
+42	    placedTileId: null,
+43	    isWrong: false,
+44	    isLocked: false,
+45	  },
+46	  {
+47	    id: 'z2',
+48	    index: 2,
+49	    expectedValue: 'T',
+50	    placedTileId: null,
+51	    isWrong: false,
+52	    isLocked: false,
+53	  },
+54	];
+55	
+56	const TapToPlaceBank = () => {
+57	  const { allTiles, bankTileIds, zones } = useAnswerGameContext();
+58	  const dispatch = useAnswerGameDispatch();
+59	
+60	  const nextEmptyZoneIndex = zones.findIndex(
+61	    (z) => z.placedTileId === null,
+62	  );
+63	
+64	  return (
+65	    <div className="flex gap-2">
+66	      {bankTileIds.map((tileId) => {
+67	        const tile = allTiles.find((t) => t.id === tileId);
+68	        if (!tile) return null;
+69	        return (
+70	          <button
+71	            key={tile.id}
+72	            type="button"
+73	            onClick={() => {
+74	              if (nextEmptyZoneIndex === -1) return;
+75	              dispatch({
+76	                type: 'PLACE_TILE',
+77	                tileId: tile.id,
+78	                zoneIndex: nextEmptyZoneIndex,
+79	              });
+80	            }}
+81	            className="flex size-14 items-center justify-center rounded-lg border-2 border-primary bg-background text-xl font-bold shadow-sm active:scale-95"
+82	          >
+83	            {tile.label}
+84	          </button>
+85	        );
+86	      })}
+87	    </div>
+88	  );
+89	};
+90	
+91	const PlayableScene = () => {
+92	  const { zones } = useAnswerGameContext();
+93	
+94	  return (
+95	    <>
+96	      <AnswerGame.Question>
+97	        <p className="text-center text-lg font-semibold text-foreground">
+98	          Spell CAT
+99	        </p>
+100	      </AnswerGame.Question>
+101	      <AnswerGame.Answer>
+102	        <SlotRow className="gap-2">
+103	          {zones.map((zone, i) => (
+104	            <Slot
+105	              key={zone.id}
+106	              index={i}
+107	              className="size-14 rounded-lg"
+108	            >
+109	              {({ label }) => (
+110	                <span className="text-xl font-bold">{label ?? ''}</span>
+111	              )}
+112	            </Slot>
+113	          ))}
+114	        </SlotRow>
+115	      </AnswerGame.Answer>
+116	      <AnswerGame.Choices>
+117	        <TapToPlaceBank />
+118	      </AnswerGame.Choices>
+119	    </>
+120	  );
+121	};
+122	
+123	const meta: Meta<StoryArgs> = {
+124	  component: AnswerGame as unknown as ComponentType<StoryArgs>,
+125	  tags: ['autodocs'],
+126	  decorators: [withDb],
+127	  args: {
+128	    inputMethod: 'drag',
+129	    wrongTileBehavior: 'lock-auto-eject',
+130	    tileBankMode: 'exact',
+131	    totalRounds: 3,
+132	    ttsEnabled: false,
+133	  },
+134	  argTypes: {
+135	    inputMethod: {
+136	      control: { type: 'select' },
+137	      options: ['drag', 'type', 'both'] satisfies InputMethod[],
+138	    },
+139	    wrongTileBehavior: {
+140	      control: { type: 'select' },
+141	      options: [
+142	        'reject',
+143	        'lock-manual',
+144	        'lock-auto-eject',
+145	      ] satisfies WrongTileBehavior[],
+146	    },
+147	    tileBankMode: {
+148	      control: { type: 'select' },
+149	      options: ['exact', 'distractors'] satisfies TileBankMode[],
+150	    },
+151	    totalRounds: {
+152	      control: { type: 'range', min: 1, max: 20, step: 1 },
+153	    },
+154	    ttsEnabled: { control: 'boolean' },
+155	  },
+156	  render: ({
+157	    inputMethod,
+158	    wrongTileBehavior,
+159	    tileBankMode,
+160	    totalRounds,
+161	    ttsEnabled,
+162	  }) => {
+163	    const config: AnswerGameConfig = {
+164	      gameId: 'storybook-answer-game',
+165	      inputMethod,
+166	      wrongTileBehavior,
+167	      tileBankMode,
+168	      totalRounds,
+169	      ttsEnabled,
+170	      initialTiles,
+171	      initialZones,
+172	    };
+173	    return (
+174	      <AnswerGame config={config}>
+175	        <PlayableScene />
+176	      </AnswerGame>
+177	    );
+178	  },
+179	};
+180	export default meta;
+181	
+182	type Story = StoryObj<StoryArgs>;
+183	
+184	export const Default: Story = {};
+185	
+186	export const TextQuestionMode: Story = {
+187	  args: { inputMethod: 'type' },
+188	};
+189	
+190	export const RejectMode: Story = {
+191	  args: { wrongTileBehavior: 'reject' },
+192	};
+193	
+194	export const LockManualMode: Story = {
+195	  args: { wrongTileBehavior: 'lock-manual' },
+196	};
+197
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:46Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:48Z)**_
+
+The slots look squared because the skin CSS tokens aren't being applied to the story container — without them, `var(--skin-slot-radius)` resolves to nothing. Fix: wrap the scene in a container that applies `classicSkin.tokens`, pass the skin through to `<AnswerGame>` and `<Slot>`, and rebuild the tile-bank buttons with the shared `tileStyle()` skeuo look.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:54:54Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:55:02Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:55:08Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:55:14Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:55:17Z)**_
+
+Now verifying typecheck, lint, and that the test-runner still passes.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:55:22Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Verify typecheck
+
+`yarn typecheck 2>&1 | tail -10`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 3.23s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:55:32Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Verify lint
+
+`yarn lint 2>&1 | tail -10`
+
+```text
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+   8:1   error  `@/lib/skin` import should occur after type import of `react`                     import/order
+  11:30  error  Member 'CSSProperties' of the import declaration should be sorted alphabetically  sort-imports
+
+✖ 2 problems (2 errors, 0 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:55:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+eslint fix import order
+
+`yarn eslint --fix src/components/answer-game/AnswerGame/AnswerGame.stories.tsx 2>&1 | tail -5`
+
+```text
+yarn run v1.22.22
+$ /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/node_modules/.bin/eslint --fix src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+Done in 2.73s.
+[This command modified 1 file you've previously read: src/components/answer-game/AnswerGame/AnswerGame.stories.tsx. Call Read before editing.]
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:55:54Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Re-verify lint after fix
+
+`yarn lint 2>&1 | tail -5`
+
+```text
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 11.42s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:55:57Z)**_
+
+Clean. Committing and pushing to update PR #134.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:56:14Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit skin-tokens fix
+
+```bash
+git add src/components/answer-game/AnswerGame/AnswerGame.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/AnswerGame): apply classicSkin tokens in playground
+
+The Slot component pulls its border-radius, border-color, and background
+from --skin-slot-* CSS vars via inline style. Without a wrapping
+container that defines those vars, var() resolves to empty and the slots
+render visually squared.
+
+Wrap the scene in a `game-container skin-classic` div that applies
+classicSkin.tokens, pass skin={classicSkin} through to <AnswerGame> and
+<Slot>, and rebuild TapToPlaceBank buttons with the shared tileStyle()
+skeuo look so the bank matches the default tile treatment from
+SortNumbersTileBank.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)"
+```
+
+```text
+<persisted-output>
+Output too large (43.9KB). Full output saved to: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/bc5323af-9282-4988-bbfe-73c842214a36/tool-results/bse1xb9jq.txt
+
+Preview (first 2KB):
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (b8e36cc9)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:56:42Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Verify commit and push
+
+`git log --oneline -1 && git push 2>&1 | tail -5`
+
+```text
+70634668 stories(answer-game/AnswerGame): apply classicSkin tokens in playground
+-e **──────────────────────────────────────────
+-e **  All pre-push checks passed.
+-e **──────────────────────────────────────────
+To github.com:leocaseiro/base-skill.git
+   16d833cc..70634668  audit/storybook-batch-2-answer-game -> audit/storybook-batch-2-answer-game
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:56:53Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:56:53Z)**_
+
+Skin fix pushed to PR. Now checking the screenshot and auditing story titles for the sidebar grouping.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:56:54Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `/Users/leocaseiro/Desktop/Screenshot 2026-04-21 at 4.55.28 pm.png`
+
+```text
+File does not exist. Note: your current working directory is /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:56:54Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `title:`
+
+```text
+src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx:20:  title: 'answer-game/ProgressHUD',
+src/components/answer-game/Slot/Slot.stories.tsx:121:  title: 'answer-game/Slot',
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:02Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:03Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Find screenshot file
+
+`ls -1 /Users/leocaseiro/Desktop/ | grep -i "screenshot.*4.55" | head -3`
+
+```text
+Screenshot 2026-04-21 at 4.55.28 pm.png
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:07Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `/Users/leocaseiro/Desktop/Screenshot 2026-04-21 at 4.55.28 pm.png`
+
+```text
+File does not exist. Note: your current working directory is /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:11Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Copy screenshot to tmp
+
+`cp "/Users/leocaseiro/Desktop/Screenshot 2026-04-21 at 4.55.28 pm.png" /tmp/screenshot.png && ls -la /tmp/screenshot.png`
+
+```text
+Exit code 1
+cp: /Users/leocaseiro/Desktop/Screenshot 2026-04-21 at 4.55.28 pm.png: No such file or directory
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:18Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:20Z)**_
+
+Can't open the screenshot (filename encoding glitch), but the Grep already shows the problem: only `Slot` and `ProgressHUD` have an explicit `title: 'answer-game/<Name>'` — the other 6 fall back to a path-derived title, landing in a separate sidebar group. Let me check the Storybook config and then unify all 8.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:21Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+List storybook config files
+
+`ls .storybook/`
+
+```text
+decorators
+decorators.tsx
+main.ts
+preview.tsx
+vite.config.ts
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:22Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `title|stories:`
+
+```text
+.storybook/main.ts:20:  stories: ['../src/**/*.stories.tsx', '../src/**/*.mdx'],
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:32Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:33Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `^\s*title:`
+
+```text
+src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx:130:  title: 'Games/WordSpell/Skin Harness',
+src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx:115:  title: 'Games/SortNumbers/Skin Harness',
+src/games/number-match/NumberMatch/NumberMatch.skin.stories.tsx:61:  title: 'Games/NumberMatch/Skin Harness',
+src/stories/ThemeShowcase.stories.tsx:29:  title: { en: 'Theme Showcase' },
+src/stories/ThemeShowcase.stories.tsx:106:  title: 'Pages/ThemeShowcase',
+src/data/words/WordLibraryExplorer.stories.tsx:5:  title: 'Data/WordLibraryExplorer',
+src/components/game/GameShell.stories.tsx:38:  title: { en: 'Word Builder' },
+src/components/game/GameShell.stories.tsx:69:  title: 'Game/GameShell',
+src/components/GameNameChip.stories.tsx:9:    title: 'Word Spell',
+src/components/GameCard.stories.tsx:9:    title: 'Count in Order',
+src/lib/audio/AudioFeedback.stories.tsx:173:  title: 'Audio/AudioFeedback Prototype',
+src/components/ui/alert-dialog.stories.tsx:20:  title: string;
+src/components/ui/alert-dialog.stories.tsx:34:    title: 'Are you sure?',
+src/components/ui/alert-dialog.stories.tsx:44:    title: { control: 'text' },
+src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx:20:  title: 'answer-game/ProgressHUD',
+src/components/ui/sonner.stories.tsx:31:  title: 'UI/Sonner',
+src/components/ui/card.stories.tsx:14:  title: string;
+src/components/ui/card.stories.tsx:24:    title: 'Card Title',
+src/components/ui/card.stories.tsx:30:    title: { control: 'text' },
+src/components/ui/sheet.stories.tsx:20:  title: string;
+src/components/ui/sheet.stories.tsx:32:    title: 'Sheet Title',
+src/components/ui/sheet.stories.tsx:43:    title: { control: 'text' },
+src/components/answer-game/Slot/Slot.stories.tsx:121:  title: 'answer-game/Slot',
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:45Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:46Z)**_
+
+The existing 2 titled files use `'answer-game/<Name>'` (lowercase-hyphenated). I'll match that convention and add explicit titles to the other 6.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:48Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:52Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+
+```text
+45	  component:
+46	    EncouragementAnnouncer as unknown as ComponentType<StoryArgs>,
+47	  tags: ['autodocs'],
+48	  args: {
+49	    message: 'Keep trying!',
+50	    visible: false,
+51	    onDismiss: fn(),
+52	  },
+53	  argTypes: {
+54	    message: { control: 'text' },
+55	    visible: { control: 'boolean' },
+56	    onDismiss: { table: { disable: true } },
+57	  },
+58	  render: ({ message, visible, onDismiss }) => (
+59	    <EncouragementAnnouncer
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:57:57Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:00Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx`
+
+```text
+1	import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+2	
+3	import { GameOverOverlay } from './GameOverOverlay';
+4	import type { Meta, StoryObj } from '@storybook/react';
+5	
+6	const meta: Meta<typeof GameOverOverlay> = {
+7	  component: GameOverOverlay,
+8	  tags: ['autodocs'],
+9	  args: {
+10	    retryCount: 0,
+11	    onPlayAgain: fn(),
+12	    onHome: fn(),
+13	  },
+14	  argTypes: {
+15	    retryCount: {
+16	      control: { type: 'range', min: 0, max: 10, step: 1 },
+17	    },
+18	    onPlayAgain: { table: { disable: true } },
+19	    onHome: { table: { disable: true } },
+20	  },
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:01Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`
+
+```text
+35	  'rose',
+36	  'amber',
+37	  'sky',
+38	  'lime',
+39	  'purple',
+40	  'orange',
+41	  'pink',
+42	  'emerald',
+43	  'slate',
+44	  'cyan',
+45	] as const satisfies readonly GameColorKey[];
+46
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:02Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx`
+
+```text
+1	import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+2	
+3	import { LevelCompleteOverlay } from './LevelCompleteOverlay';
+4	import type { Meta, StoryObj } from '@storybook/react';
+5	
+6	const meta: Meta<typeof LevelCompleteOverlay> = {
+7	  component: LevelCompleteOverlay,
+8	  tags: ['autodocs'],
+9	  args: {
+10	    level: 1,
+11	    onNextLevel: fn(),
+12	    onDone: fn(),
+13	  },
+14	  argTypes: {
+15	    level: { control: { type: 'range', min: 1, max: 20, step: 1 } },
+16	    onNextLevel: { table: { disable: true } },
+17	    onDone: { table: { disable: true } },
+18	  },
+19	};
+20	export default meta;
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:03Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx`
+
+```text
+1	import { ScoreAnimation } from './ScoreAnimation';
+2	import type { Meta, StoryObj } from '@storybook/react';
+3	
+4	const meta: Meta<typeof ScoreAnimation> = {
+5	  component: ScoreAnimation,
+6	  tags: ['autodocs'],
+7	  args: { visible: false },
+8	  argTypes: {
+9	    visible: { control: 'boolean' },
+10	  },
+11	};
+12	export default meta;
+13	
+14	type Story = StoryObj<typeof ScoreAnimation>;
+15	
+16	export const Playing: Story = { args: { visible: false } };
+17	export const Complete: Story = { args: { visible: true } };
+18
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:09Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:15Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:19Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:24Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `component:\s*InstructionsOverlay`
+
+```text
+src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx:48:  component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
+src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx-49-  tags: ['autodocs'],
+src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx-50-  decorators: [withDb, withRouter],
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:29Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:34Z)**_
+
+All 8 now share the `answer-game/*` prefix. Verifying, committing, and pushing.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:47Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Verify typecheck and lint
+
+`yarn typecheck 2>&1 | tail -5 && yarn lint 2>&1 | tail -5`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 2.71s.
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 9.78s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:55Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `^\s*title:\s*'answer-game`
+
+```text
+src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx:8:  title: 'answer-game/GameOverOverlay',
+src/components/answer-game/AnswerGame/AnswerGame.stories.tsx:129:  title: 'answer-game/AnswerGame',
+src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx:20:  title: 'answer-game/ProgressHUD',
+src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx:49:  title: 'answer-game/InstructionsOverlay',
+src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx:6:  title: 'answer-game/ScoreAnimation',
+src/components/answer-game/Slot/Slot.stories.tsx:121:  title: 'answer-game/Slot',
+src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx:8:  title: 'answer-game/LevelCompleteOverlay',
+src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx:47:  title: 'answer-game/EncouragementAnnouncer',
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:57Z)**_
+
+All 8 explicit titles in place. Committing and pushing.
+
+_**Agent (claude-opus-4-7 2026-04-21 06:58:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Stage title additions
+
+`git add src/components/answer-game/*/  -A && git status --short`
+
+```text
+M  src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+M  src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+M  src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx
+M  src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+M  src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx
+M  src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:59:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit title additions
+
+```bash
+git commit -m "$(cat <<'EOF'
+stories(answer-game): add explicit title to collapse sidebar under one group
+
+Six of the eight answer-game stories had no meta.title, so Storybook
+auto-generated a path-derived title under components/answer-game/*,
+splitting them from Slot and ProgressHUD which already specified
+title: 'answer-game/<Name>'. Align the remaining six to the same
+lowercase-hyphenated prefix so the sidebar collapses to a single
+answer-game group.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)" 2>&1 | tail -5
+```
+
+```text
+   Duration  8.01s (transform 2.63s, setup 8.63s, collect 26.12s, tests 19.92s, environment 52.28s, prepare 5.54s)
+
+Done in 8.65s.
+[audit/storybook-batch-2-answer-game 49506762] stories(answer-game): add explicit title to collapse sidebar under one group
+ 6 files changed, 6 insertions(+)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:59:47Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Push sidebar-grouping commit
+
+`git push 2>&1 | tail -5`
+
+```text
+-e **──────────────────────────────────────────
+-e **  All pre-push checks passed.
+-e **──────────────────────────────────────────
+To github.com:leocaseiro/base-skill.git
+   70634668..49506762  audit/storybook-batch-2-answer-game -> audit/storybook-batch-2-answer-game
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 06:59:55Z)**_
+
+Pushed. Two new commits landed on PR #134:
+
+- `70634668` — skin tokens: wrap playground in `game-container skin-classic`, pass `classicSkin` through to `<AnswerGame>` and `<Slot>`, rebuild `TapToPlaceBank` with `tileStyle()` so the tiles match the default skeuo look and the slots get the proper `--skin-slot-radius: 0.75rem` (no longer visually squared).
+- `49506762` — added explicit `title: 'answer-game/<Name>'` to the remaining six files (`AnswerGame`, `EncouragementAnnouncer`, `GameOverOverlay`, `InstructionsOverlay`, `LevelCompleteOverlay`, `ScoreAnimation`). `Slot` and `ProgressHUD` already had it; now all 8 collapse under a single `answer-game/*` sidebar group.
+
+Typecheck + lint green; pre-push unit tests passed.
+
+---
+
+_**User (2026-04-21 07:02:17Z)**_
+
+why do we have the tiles in capital letters instead of lowercase?
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 07:02:23Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:02:24Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `label:\s*['"][a-zA-Z]`
+
+```text
+src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.tsx:130:          { value: 'drag', emoji: '✋', label: 'Drag' },
+src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.tsx:131:          { value: 'type', emoji: '⌨️', label: 'Type' },
+src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.tsx:132:          { value: 'both', emoji: '✨', label: 'Both' },
+src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx:56:    { id: 'tile-d', label: 'd', value: 'd' },
+src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx:57:    { id: 'tile-g', label: 'g', value: 'g' },
+src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx:58:    { id: 'tile-o', label: 'o', value: 'o' },
+src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx:23:  { id: 't1', label: 'c', value: 'c' },
+src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx:24:  { id: 't2', label: 'a', value: 'a' },
+src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx:25:  { id: 't3', label: 'a', value: 't' },
+src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx:72:  { id: 'td1', label: 'X', value: 'X' },
+src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx:73:  { id: 'td2', label: 'Z', value: 'Z' },
+src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx:60:  { id: 't1', label: 'c', value: 'c' },
+src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx:61:  { id: 't2', label: 'a', value: 'a' },
+src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx:62:  { id: 't3', label: 't', value: 't' },
+src/games/word-spell/types.ts:51:    label: 'Input method',
+src/games/word-spell/types.ts:53:      { value: 'drag', label: 'drag' },
+src/games/word-spell/types.ts:54:      { value: 'type', label: 'type' },
+src/games/word-spell/types.ts:55:      { value: 'both', label: 'both' },
+src/games/word-spell/types.ts:61:    label: 'Wrong tile behaviour',
+src/games/word-spell/types.ts:63:      { value: 'reject', label: 'reject' },
+
+[Showing results with pagination = limit: 20]
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:02:25Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `toLowerCase|toLocaleLowerCase|case:`
+
+```text
+src/games/word-spell/WordSpell/WordSpell.tsx:43:  return [...trimmed.toLowerCase()];
+src/games/word-spell/WordSpell/WordSpell.tsx:55:    tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:02:31Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:02:32Z)**_
+
+You're right — Word Spell uses lowercase letter tiles throughout (`WordSpell.tsx:43` does `trimmed.toLowerCase()` on the target word before splitting into tiles). My playground was inconsistent with the real game. Fixing.
+
+_**Agent (claude-opus-4-7 2026-04-21 07:02:39Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:02:59Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Verify typecheck and lint
+
+`yarn typecheck 2>&1 | tail -3 && yarn lint 2>&1 | tail -3`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 3.58s.
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 12.68s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:03:45Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit and push lowercase tile fix
+
+```bash
+git add src/components/answer-game/AnswerGame/AnswerGame.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/AnswerGame): lowercase letter tiles to match WordSpell
+
+Word Spell canonicalises target words with .toLowerCase() before
+splitting into letter tiles (src/games/word-spell/WordSpell/WordSpell.tsx:43),
+so every real spelling game renders tiles like 'c' 'a' 't', not 'C' 'A' 'T'.
+The playground was using uppercase by mistake. Lowercase the tile labels
+and the zone expectedValue to mirror the real game.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)" 2>&1 | tail -3 && git push 2>&1 | tail -3
+```
+
+```text
+Done in 10.76s.
+[audit/storybook-batch-2-answer-game a03c2eac] stories(answer-game/AnswerGame): lowercase letter tiles to match WordSpell
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+-e **──────────────────────────────────────────
+To github.com:leocaseiro/base-skill.git
+   49506762..a03c2eac  audit/storybook-batch-2-answer-game -> audit/storybook-batch-2-answer-game
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:03:50Z)**_
+
+Pushed `a03c2eac`. The playground tiles were uppercase because I hand-authored them that way — `WordSpell.tsx:43` calls `.toLowerCase()` on the target word before splitting into tiles, so every real spelling game shows lowercase letter tiles. Now fixed: `c` / `a` / `t` on both the tiles and the zones' `expectedValue`.
+
+---
+
+_**User (2026-04-21 07:03:53Z)**_
+
+Did we work on the GameOverlay? We should have just a control to change the number of stars.
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 07:03:59Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:04:00Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.tsx`
+
+```text
+1	import confetti from 'canvas-confetti';
+2	import { useEffect } from 'react';
+3	
+4	interface GameOverOverlayProps {
+5	  retryCount: number;
+6	  onPlayAgain: () => void;
+7	  onHome: () => void;
+8	}
+9	
+10	const starsFromRetries = (retryCount: number): number => {
+11	  if (retryCount === 0) return 5;
+12	  if (retryCount <= 2) return 4;
+13	  if (retryCount <= 4) return 3;
+14	  if (retryCount <= 6) return 2;
+15	  return 1;
+16	};
+17	
+18	export const GameOverOverlay = ({
+19	  retryCount,
+20	  onPlayAgain,
+21	  onHome,
+22	}: GameOverOverlayProps) => {
+23	  const stars = starsFromRetries(retryCount);
+24	
+25	  useEffect(() => {
+26	    const duration = 2700;
+27	    const end = Date.now() + duration;
+28	    let rafId: number;
+29	
+30	    const frame = () => {
+31	      void confetti({
+32	        particleCount: 3,
+33	        angle: 60,
+34	        spread: 55,
+35	        origin: { x: 0 },
+36	      });
+37	      void confetti({
+38	        particleCount: 3,
+39	        angle: 120,
+40	        spread: 55,
+41	        origin: { x: 1 },
+42	      });
+43	      if (Date.now() < end) {
+44	        rafId = requestAnimationFrame(frame);
+45	      }
+46	    };
+47	
+48	    rafId = requestAnimationFrame(frame);
+49	
+50	    return () => {
+51	      cancelAnimationFrame(rafId);
+52	      confetti.reset();
+53	    };
+54	  }, []);
+55	
+56	  return (
+57	    <div
+58	      role="dialog"
+59	      aria-label="Game complete"
+60	      className="fixed inset-0 flex flex-col items-center justify-center gap-8 bg-background/95"
+61	    >
+62	      <span className="animate-bounce text-8xl" aria-hidden="true">
+63	        🐨
+64	      </span>
+65	
+66	      <div
+67	        aria-label={`You scored ${stars} out of 5 stars`}
+68	        className="flex gap-2"
+69	      >
+70	        {Array.from({ length: 5 }, (_, i) => (
+71	          <span
+72	            key={i}
+73	            className={`text-4xl ${i < stars ? 'text-yellow-400' : 'text-muted-foreground'}`}
+74	          >
+75	            ★
+76	          </span>
+77	        ))}
+78	      </div>
+79	
+80	      <div className="flex gap-4">
+81	        <button
+82	          type="button"
+83	          onClick={onPlayAgain}
+84	          className="rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-md active:scale-95"
+85	        >
+86	          Play again
+87	        </button>
+88	        <button
+89	          type="button"
+90	          onClick={onHome}
+91	          className="rounded-xl bg-muted px-8 py-4 text-lg font-bold active:scale-95"
+92	        >
+93	          Home
+94	        </button>
+95	      </div>
+96	    </div>
+97	  );
+98	};
+99
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:04:10Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:04:11Z)**_
+
+The component only takes `retryCount` and derives stars internally. I'll add a StoryArgs bridge that exposes `stars` (1–5) as the control and maps to a representative `retryCount`, then collapse the 5 per-star stories into one `Playground`.
+
+_**Agent (claude-opus-4-7 2026-04-21 07:04:20Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+
+import { GameOverOverlay } from './GameOverOverlay';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
+
+interface StoryArgs {
+  stars: number;
+  onPlayAgain: () => void;
+  onHome: () => void;
+}
+
+// Maps the user-facing `stars` control back to the `retryCount` the
+// component actually accepts. Mirrors the starsFromRetries() thresholds in
+// GameOverOverlay.tsx.
+const retryCountForStars = (stars: number): number => {
+  if (stars >= 5) return 0;
+  if (stars === 4) return 1;
+  if (stars === 3) return 3;
+  if (stars === 2) return 5;
+  return 7;
+};
+
+const meta: Meta<StoryArgs> = {
+  component: GameOverOverlay as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/GameOverOverlay',
+  tags: ['autodocs'],
+  args: {
+    stars: 5,
+    onPlayAgain: fn(),
+    onHome: fn(),
+  },
+  argTypes: {
+    stars: { control: { type: 'range', min: 1, max: 5, step: 1 } },
+    onPlayAgain: { table: { disable: true } },
+    onHome: { table: { disable: true } },
+  },
+  render: ({ stars, onPlayAgain, onHome }) => (
+    <GameOverOverlay
+      retryCount={retryCountForStars(stars)}
+      onPlayAgain={onPlayAgain}
+      onHome={onHome}
+    />
+  ),
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Playground: Story = {};
+
+export const ClicksPlayAgain: Story = {
+  args: { stars: 5 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /play again/i }),
+    );
+    await waitFor(() => {
+      expect(args.onPlayAgain).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+export const ClicksHome: Story = {
+  args: { stars: 5 },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: /home/i }),
+    );
+    await waitFor(() => {
+      expect(args.onHome).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+```
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:04:41Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Verify typecheck and lint
+
+`yarn typecheck 2>&1 | tail -3 && yarn lint 2>&1 | tail -3`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 3.52s.
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 13.68s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:05:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit and push GameOverOverlay stars control
+
+```bash
+git add src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/GameOverOverlay): expose stars as direct control
+
+The component only accepts retryCount and derives the visible star count
+internally. Exposing retryCount in the Controls panel pushes the mapping
+onto the reader. Bridge via StoryArgs: a stars range (1-5) maps to a
+representative retryCount in render(), collapsing the five
+FiveStars/FourStars/ThreeStars/TwoStars/OneStar stories into one
+Playground driven by the control. ClicksPlayAgain and ClicksHome play()
+flows retained.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)" 2>&1 | tail -3 && git push 2>&1 | tail -3
+```
+
+```text
+Done in 10.92s.
+[audit/storybook-batch-2-answer-game e06d4f96] stories(answer-game/GameOverOverlay): expose stars as direct control
+ 1 file changed, 33 insertions(+), 14 deletions(-)
+-e **──────────────────────────────────────────
+To github.com:leocaseiro/base-skill.git
+   a03c2eac..e06d4f96  audit/storybook-batch-2-answer-game -> audit/storybook-batch-2-answer-game
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:05:50Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:05:57Z)**_
+
+Short answer: probably not. I added two stories to get per-handler play() coverage (one of the Controls Policy's "at least one play() on interactive components" gates), but for an overlay with just two buttons that's overkill — one play() can click both and assert both spies fired, or we can drop them entirely and rely on the Controls panel / Actions addon for manual verification in the `Playground`.
+
+Three options:
+
+1. **Drop both play() stories** — the `Playground` already shows the buttons; Storybook's Actions tab will show `onPlayAgain`/`onHome` firing when clicked manually. Click-wiring is trivial and better covered by a unit test if we want automation.
+2. **Collapse into one** — e.g. `ClicksButtons` play() that clicks both and asserts both fn()s called.
+3. **Keep as-is** — two stories, one per handler.
+
+My recommendation: option 1. The click-wiring is a one-liner on the component (`onClick={onPlayAgain}` / `onClick={onHome}`); if it breaks, a unit test will catch it faster and more legibly than a play() story. The story file's job is to demo state + visuals (stars), which the `Playground` already does.
+
+Want me to drop them?
+
+---
+
+_**User (2026-04-21 07:06:00Z)**_
+
+Same for answergame, the stories should be a single one with a choice to select what mode.
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 07:06:10Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:06:10Z)**_
+
+Applying both changes.
+
+_**Agent (claude-opus-4-7 2026-04-21 07:06:11Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+
+```text
+185	        </AnswerGame>
+186	      </div>
+187	    );
+188	  },
+189	};
+190	export default meta;
+191	
+192	type Story = StoryObj<StoryArgs>;
+193	
+194	export const Default: Story = {};
+195	
+196	export const TextQuestionMode: Story = {
+197	  args: { inputMethod: 'type' },
+198	};
+199	
+200	export const RejectMode: Story = {
+201	  args: { wrongTileBehavior: 'reject' },
+202	};
+203	
+204	export const LockManualMode: Story = {
+205	  args: { wrongTileBehavior: 'lock-manual' },
+206	};
+207
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:06:18Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:06:26Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:06:39Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:07:04Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:07:06Z)**_
+
+Addressing both. The `-` rows you're seeing are raw component props auto-inferred by react-docgen — since `StoryArgs` already decomposes `config` into the 5 meaningful controls, the raw `config`/`initialState`/`sessionId`/`skin`/`children` rows should be hidden from the table, not left as empty controls.
+
+_**Agent (claude-opus-4-7 2026-04-21 07:07:07Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+
+```text
+138	  },
+139	  argTypes: {
+140	    inputMethod: {
+141	      control: { type: 'select' },
+142	      options: ['drag', 'type', 'both'] satisfies InputMethod[],
+143	    },
+144	    wrongTileBehavior: {
+145	      control: { type: 'select' },
+146	      options: [
+147	        'reject',
+148	        'lock-manual',
+149	        'lock-auto-eject',
+150	      ] satisfies WrongTileBehavior[],
+151	    },
+152	    tileBankMode: {
+153	      control: { type: 'select' },
+154	      options: ['exact', 'distractors'] satisfies TileBankMode[],
+155	    },
+156	    totalRounds: {
+157	      control: { type: 'range', min: 1, max: 20, step: 1 },
+158	    },
+159	    ttsEnabled: { control: 'boolean' },
+160	  },
+161	  render: ({
+162	    inputMethod,
+163	    wrongTileBehavior,
+164	    tileBankMode,
+165	    totalRounds,
+166	    ttsEnabled,
+167	  }) => {
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:07:13Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:07:32Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Verify typecheck and lint
+
+`yarn typecheck 2>&1 | tail -3 && yarn lint 2>&1 | tail -3`
+
+```text
+src/components/answer-game/AnswerGame/AnswerGame.stories.tsx(160,5): error TS2353: Object literal may only specify known properties, and 'config' does not exist in type 'Partial<ArgTypes<StoryArgs>>'.
+error Command failed with exit code 2.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 12.53s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:07:47Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:07:48Z)**_
+
+Typecheck caught it — `StoryArgs` doesn't know about the raw component props. Let me add them as optional/unknown to `StoryArgs` so the argTypes entries typecheck.
+
+_**Agent (claude-opus-4-7 2026-04-21 07:07:52Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:08:01Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Re-verify typecheck
+
+`yarn typecheck 2>&1 | tail -5`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 4.03s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:08:05Z)**_
+
+Typecheck green. Now addressing the drag question — yes, this is a real limitation.
+
+_**Agent (claude-opus-4-7 2026-04-21 07:08:06Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `pragmatic-drag-and-drop|PointerSensor|onDragStart|pointerHandlers|useDraggableTile`
+
+```text
+Found 10 files limit: 10
+src/components/answer-game/useTouchDrag.ts
+src/components/answer-game/useSlotTileDrag.ts
+src/components/answer-game/useSlotTileDrag.test.tsx
+src/components/answer-game/useDraggableTile.ts
+src/components/answer-game/useDraggableTile.test.tsx
+src/components/answer-game/useBankDropTarget.ts
+src/components/answer-game/useBankDropTarget.test.tsx
+src/components/answer-game/Slot/useSlotBehavior.ts
+src/components/answer-game/Slot/useSlotBehavior.test.tsx
+src/components/answer-game/Slot/Slot.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:08:10Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/useDraggableTile.ts`
+
+```text
+1	import {
+2	  draggable,
+3	  dropTargetForElements,
+4	} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+5	import { useEffect, useRef } from 'react';
+6	import { useAnswerGameContext } from './useAnswerGameContext';
+7	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+8	import { useAutoNextSlot } from './useAutoNextSlot';
+9	import { useGameTTS } from './useGameTTS';
+10	import { useTileEvaluation } from './useTileEvaluation';
+11	import { useTouchDrag } from './useTouchDrag';
+12	import type { TileItem } from './types';
+13	import type { TouchDragHandlers } from './useTouchDrag';
+14	import type { RefObject } from 'react';
+15	import { getGameEventBus } from '@/lib/game-event-bus';
+16	
+17	export interface DraggableTile extends TouchDragHandlers {
+18	  ref: RefObject<HTMLButtonElement | null>;
+19	  handleClick: () => void;
+20	}
+21	
+22	export const useDraggableTile = (tile: TileItem): DraggableTile => {
+23	  const ref = useRef<HTMLButtonElement>(null);
+24	  const dispatch = useAnswerGameDispatch();
+25	  const state = useAnswerGameContext();
+26	  // Mirror state in a ref so onDragStart can read current gameId/roundIndex
+27	  // without adding `state` to the draggable() effect's deps (which would
+28	  // re-subscribe pragmatic-drag-and-drop on every game-state change).
+29	  const stateRef = useRef(state);
+30	  const { placeInNextSlot } = useAutoNextSlot();
+31	  const { speakTile } = useGameTTS();
+32	  const speakTileRef = useRef(speakTile);
+33	  const { placeTile } = useTileEvaluation();
+34	
+35	  useEffect(() => {
+36	    speakTileRef.current = speakTile;
+37	  }, [speakTile]);
+38	
+39	  useEffect(() => {
+40	    stateRef.current = state;
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:08:25Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:08:26Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
+
+```text
+1	import type { TileItem } from '@/components/answer-game/types';
+2	import { tileStyle } from '@/components/answer-game/styles';
+3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4	import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
+5	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+6	
+7	const LetterTile = ({ tile }: { tile: TileItem }) => {
+8	  const {
+9	    ref,
+10	    handleClick,
+11	    onPointerDown,
+12	    onPointerMove,
+13	    onPointerUp,
+14	    onPointerCancel,
+15	  } = useDraggableTile(tile);
+16	
+17	  return (
+18	    <button
+19	      ref={ref}
+20	      type="button"
+21	      aria-label={`Letter ${tile.label}`}
+22	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+23	      style={tileStyle()}
+24	      onClick={handleClick}
+25	      onPointerDown={onPointerDown}
+26	      onPointerMove={onPointerMove}
+27	      onPointerUp={onPointerUp}
+28	      onPointerCancel={onPointerCancel}
+29	    >
+30	      {tile.label}
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:08:38Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:08:39Z)**_
+
+Committing the Playground-only collapse + dropped play stories + hidden raw props, then answering the drag question.
+
+_**Agent (claude-opus-4-7 2026-04-21 07:08:52Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Re-verify lint
+
+`yarn lint 2>&1 | tail -3`
+
+```text
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 11.90s.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:08:59Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:09:01Z)**_
+
+Now swapping `TapToPlaceBank` → `LetterTileBank` so drag actually works (the real game's bank is wired via `@atlaskit/pragmatic-drag-and-drop`, which runs in browsers just fine — my plain `<button onClick>` bank was tap-only).
+
+_**Agent (claude-opus-4-7 2026-04-21 07:09:08Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:09:55Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:10:00Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
+
+```text
+30	      {tile.label}
+31	    </button>
+32	  );
+33	};
+34	
+35	export const LetterTileBank = () => {
+36	  const {
+37	    allTiles,
+38	    bankTileIds,
+39	    config,
+40	    dragActiveTileId,
+41	    dragHoverBankTileId,
+42	  } = useAnswerGameContext();
+43	  const { bankRef, isDragOver } = useBankDropTarget();
+44	
+45	  if (config.inputMethod === 'type') {
+46	    const isTouch = navigator.maxTouchPoints > 0;
+47	    return (
+48	      <p className="text-sm text-muted-foreground" aria-live="polite">
+49	        {isTouch
+50	          ? 'Tap a slot to type'
+51	          : '⌨️ Type the letters on your keyboard'}
+52	      </p>
+53	    );
+54	  }
+55	
+56	  return (
+57	    <div
+58	      ref={bankRef}
+59	      data-tile-bank=""
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:10:04Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:10:06Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:10:27Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Verify typecheck and lint
+
+`yarn typecheck 2>&1 | tail -5 && yarn lint 2>&1 | tail -5`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 3.26s.
+✖ 2 problems (2 errors, 0 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:10:49Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Auto-fix and re-verify lint
+
+`yarn eslint --fix src/components/answer-game/AnswerGame/AnswerGame.stories.tsx 2>&1 | tail -5 && yarn lint 2>&1 | tail -3`
+
+```text
+yarn run v1.22.22
+$ /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/node_modules/.bin/eslint --fix src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+Done in 3.20s.
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 13.84s.
+[This command modified 1 file you've previously read: src/components/answer-game/AnswerGame/AnswerGame.stories.tsx. Call Read before editing.]
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:10:54Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:12:53Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit and push consolidation
+
+```bash
+git add -A && git commit -m "$(cat <<'EOF'
+stories(answer-game): collapse to Playground-only + enable real drag
+
+Three changes across two files:
+
+1. AnswerGame: four variant stories (Default, TextQuestionMode,
+   RejectMode, LockManualMode) collapse to a single Playground. The
+   Controls panel already toggles those presets via inputMethod and
+   wrongTileBehavior, so the extra named stories were sidebar noise.
+
+2. AnswerGame: swap the tap-to-place bank for the real LetterTileBank
+   used by Word Spell. That bank wires @atlaskit/pragmatic-drag-and-drop
+   via useDraggableTile, so drag actually works in the Storybook
+   playground — matching the real game's behaviour.
+
+3. AnswerGame: hide raw react-docgen-inferred rows (config, initialState,
+   sessionId, skin, children) from the Controls table since StoryArgs
+   already decomposes config into the 5 meaningful fields.
+
+4. GameOverOverlay: drop ClicksPlayAgain / ClicksHome play() stories.
+   Click-wiring is a one-line onClick that belongs in a unit test; the
+   Playground + Actions addon cover manual verification.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)" 2>&1 | tail -3 && git push 2>&1 | tail -3
+```
+
+```text
+Done in 11.65s.
+[audit/storybook-batch-2-answer-game 3a19bc10] stories(answer-game): collapse to Playground-only + enable real drag
+ 2 files changed, 20 insertions(+), 78 deletions(-)
+-e **──────────────────────────────────────────
+To github.com:leocaseiro/base-skill.git
+   e06d4f96..3a19bc10  audit/storybook-batch-2-answer-game -> audit/storybook-batch-2-answer-game
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:13:05Z)**_
+
+Pushed `3a19bc10`. Summary of what shipped and the drag answer:
+
+**AnswerGame changes:**
+
+- Collapsed the four mode-variant stories (Default / TextQuestionMode / RejectMode / LockManualMode) into a single `Playground`. Mode selection is driven entirely by the Controls panel (`inputMethod`, `wrongTileBehavior`, `tileBankMode`, `totalRounds`, `ttsEnabled`) — same as your feedback on GameOverOverlay.
+- **Drag now works.** Your question: no, drag is not a Storybook limitation — the real game uses `@atlaskit/pragmatic-drag-and-drop` via `useDraggableTile`, which runs perfectly fine in a browser. My original `TapToPlaceBank` was a plain `<button onClick>` that didn't register as a drag source at all. Swapped it for the real `LetterTileBank` from Word Spell, which wires all the DnD hooks. You can now drag tiles from the bank into the slots in the Playground.
+- Hid the `-` rows you saw (`config`, `initialState`, `sessionId`, `skin`, `children`) from the Controls table — those are raw component props auto-inferred by react-docgen, but `StoryArgs` already decomposes `config` into the 5 meaningful fields so showing them as empty rows was confusing.
+
+**GameOverOverlay:** dropped `ClicksPlayAgain` and `ClicksHome` play() stories. One-line onClick wiring belongs in a unit test; the `Playground` + Actions addon are enough for manual verification.
+
+Typecheck + lint green; pre-push unit tests passed.
+
+---
+
+_**User (2026-04-21 07:27:59Z)**_
+
+Don't commit yet. I am working on the AnswerGame, and I wanted to test eveything that component does. I believe that currently we are replicating the whole game, but we probably dont need that.
+
+What are the props that really influence the AnswerGame? (note that I made some changes, don't loose them, please)
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 07:28:06Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:28:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Check for user's uncommitted changes
+
+`git status --short && git diff --stat`
+
+```text
+M  src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:28:23Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+See user's uncommitted edits
+
+`git diff HEAD src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+
+```text
+diff --git a/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx b/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+index 9e4ea0ee..5669ffa1 100644
+--- a/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
++++ b/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+@@ -1,3 +1,4 @@
++import { nanoid } from 'nanoid';
+ import { withDb } from '../../../../.storybook/decorators/withDb';
+ import { Slot } from '../Slot/Slot';
+ import { SlotRow } from '../Slot/SlotRow';
+@@ -14,9 +15,12 @@ type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
+ type TileBankMode = 'exact' | 'distractors';
+ 
+ interface StoryArgs {
++  question: string;
+   inputMethod: InputMethod;
+   wrongTileBehavior: WrongTileBehavior;
+   tileBankMode: TileBankMode;
++  /** Extra letter tiles in the bank when `tileBankMode` is `distractors`. */
++  distractorCount: number;
+   totalRounds: number;
+   ttsEnabled: boolean;
+   // Raw AnswerGame props shadowed by StoryArgs above; declared here only
+@@ -61,14 +65,47 @@ const initialZones: AnswerZone[] = [
+   },
+ ];
+ 
+-const PlayableScene = () => {
++const LATIN_LOWER = [...'abcdefghijklmnopqrstuvwxyz'];
++
++/** Appends tiles not required by `zones` so distractor mode matches real games (bank lists every tile). */
++function withLetterDistractors(
++  baseTiles: TileItem[],
++  zones: AnswerZone[],
++  count: number,
++): TileItem[] {
++  if (count <= 0) return baseTiles;
++  const forbidden = new Set(
++    zones.map((z) => z.expectedValue.toLowerCase()),
++  );
++  const pool = LATIN_LOWER.filter((ch) => !forbidden.has(ch));
++  const extras: TileItem[] = [];
++  for (let i = 0; i < count; i++) {
++    const ch = pool[i % Math.max(pool.length, 1)];
++    if (ch) {
++      extras.push({
++        id: `distractor-${i}-${ch}`,
++        label: ch,
++        value: ch,
++      });
++    } else {
++      extras.push({
++        id: `distractor-${nanoid(8)}`,
++        label: '·',
++        value: `extra-${i}`,
++      });
++    }
++  }
++  return [...baseTiles, ...extras];
++}
++
++const PlayableScene = ({ question }: { question: string }) => {
+   const { zones } = useAnswerGameContext();
+ 
+   return (
+     <>
+       <AnswerGame.Question>
+         <p className="text-center text-lg font-semibold text-foreground">
+-          Spell CAT
++          {question}
+         </p>
+       </AnswerGame.Question>
+       <AnswerGame.Answer>
+@@ -100,13 +137,16 @@ const meta: Meta<StoryArgs> = {
+   tags: ['autodocs'],
+   decorators: [withDb],
+   args: {
++    question: 'Spell CAT',
+     inputMethod: 'drag',
+     wrongTileBehavior: 'lock-auto-eject',
+     tileBankMode: 'exact',
++    distractorCount: 2,
+     totalRounds: 3,
+     ttsEnabled: false,
+   },
+   argTypes: {
++    question: { control: 'text' },
+     inputMethod: {
+       control: { type: 'select' },
+       options: ['drag', 'type', 'both'] satisfies InputMethod[],
+@@ -123,6 +163,10 @@ const meta: Meta<StoryArgs> = {
+       control: { type: 'select' },
+       options: ['exact', 'distractors'] satisfies TileBankMode[],
+     },
++    distractorCount: {
++      control: { type: 'range', min: 0, max: 12, step: 1 },
++      if: { arg: 'tileBankMode', eq: 'distractors' },
++    },
+     totalRounds: {
+       control: { type: 'range', min: 1, max: 20, step: 1 },
+     },
+@@ -134,20 +178,29 @@ const meta: Meta<StoryArgs> = {
+     children: { table: { disable: true } },
+   },
+   render: ({
++    question,
+     inputMethod,
+     wrongTileBehavior,
+     tileBankMode,
++    distractorCount,
+     totalRounds,
+     ttsEnabled,
+   }) => {
++    const roundTiles =
++      tileBankMode === 'distractors'
++        ? withLetterDistractors(initialTiles, initialZones, distractorCount)
++        : initialTiles;
+     const config: AnswerGameConfig = {
+       gameId: 'storybook-answer-game',
+       inputMethod,
+       wrongTileBehavior,
+       tileBankMode,
++      ...(tileBankMode === 'distractors'
++        ? { distractorCount }
++        : {}),
+       totalRounds,
+       ttsEnabled,
+-      initialTiles,
++      initialTiles: roundTiles,
+       initialZones,
+     };
+     return (
+@@ -156,7 +209,7 @@ const meta: Meta<StoryArgs> = {
+         style={classicSkin.tokens as CSSProperties}
+       >
+         <AnswerGame config={config} skin={classicSkin}>
+-          <PlayableScene />
++          <PlayableScene question={question} />
+         </AnswerGame>
+       </div>
+     );
+@@ -168,7 +221,12 @@ type Story = StoryObj<StoryArgs>;
+ 
+ export const Playground: Story = {
+   args: {
++    question: 'Leo Caseiro',
+     inputMethod: 'drag',
+-    totalRounds: 9,
++    totalRounds: 11,
++    wrongTileBehavior: 'lock-auto-eject',
++    tileBankMode: 'distractors',
++    distractorCount: 4,
++    ttsEnabled: false,
+   },
+ };
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:28:55Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:28:55Z)**_
+
+Won't commit. Let me read the relevant sources to give a precise answer.
+
+_**Agent (claude-opus-4-7 2026-04-21 07:28:56Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/types.ts`
+
+```text
+1	export interface AnswerGameConfig {
+2	  gameId: string;
+3	  /** @default 'drag' */
+4	  inputMethod: 'drag' | 'type' | 'both';
+5	  /** @default 'lock-auto-eject' */
+6	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+7	  tileBankMode: 'exact' | 'distractors';
+8	  distractorCount?: number;
+9	  /** Total number of rounds in this session */
+10	  totalRounds: number;
+11	  /**
+12	   * When `true`, rounds follow the order of `rounds` in config.
+13	   * When `false` or omitted, order is shuffled once per session (again after Play again).
+14	   */
+15	  roundsInOrder?: boolean;
+16	  /** Whether TTS is enabled for this profile */
+17	  ttsEnabled: boolean;
+18	  /**
+19	   * Controls the OS keyboard type shown on touch devices in type/both mode.
+20	   * @default 'text'
+21	   */
+22	  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+23	  /** Skin ID for visual variant. Falls back to 'classic' if not registered. */
+24	  skin?: string;
+25	  /**
+26	   * Per-config timing overrides. Take precedence over the skin's own
+27	   * `timing` values and baseskill defaults.
+28	   */
+29	  timing?: {
+30	    roundAdvanceDelay?: number;
+31	    autoEjectDelay?: number;
+32	    levelCompleteDelay?: number;
+33	  };
+34	  /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
+35	  initialTiles?: TileItem[];
+36	  initialZones?: AnswerZone[];
+37	  /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
+38	  slotInteraction?: 'ordered' | 'free-swap';
+39	  /** Level progression — omit for classic rounds-only mode */
+40	  levelMode?: {
+41	    /** Max levels. Omit or set to 0 for unlimited. */
+42	    maxLevels?: number;
+43	    /**
+44	     * Called when the player completes a level to generate the next one.
+45	     * Receives the 0-based index of the just-completed level.
+46	     * Returns new tiles + zones, or null to end the game early.
+47	     */
+48	    generateNextLevel: (completedLevel: number) => {
+49	      tiles: TileItem[];
+50	      zones: AnswerZone[];
+51	    } | null;
+52	  };
+53	  /** Controls which HUD elements render. Each flag is independent. */
+54	  hud?: HudConfig;
+55	}
+56	
+57	export interface TileItem {
+58	  id: string;
+59	  /** Display label shown on the tile (e.g. "A", "cat", "3") */
+60	  label: string;
+61	  /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
+62	  value: string;
+63	}
+64	
+65	export interface AnswerZone {
+66	  id: string;
+67	  index: number;
+68	  /** Correct tile value for this slot; matched against `TileItem.value` */
+69	  expectedValue: string;
+70	  placedTileId: string | null;
+71	  isWrong: boolean;
+72	  isLocked: boolean;
+73	}
+74	
+75	export type AnswerGamePhase =
+76	  | 'playing'
+77	  | 'round-complete'
+78	  | 'level-complete'
+79	  | 'game-over';
+80	
+81	export interface AnswerGameState {
+82	  config: AnswerGameConfig;
+83	  /** Full tile list for the current round — never mutated mid-round */
+84	  allTiles: TileItem[];
+85	  /** IDs of tiles currently visible in the choice bank */
+86	  bankTileIds: string[];
+87	  zones: AnswerZone[];
+88	  /** Index of next slot to fill in auto-next-slot mode */
+89	  activeSlotIndex: number;
+90	  dragActiveTileId: string | null;
+91	  dragHoverZoneIndex: number | null;
+92	  /** ID of the bank tile hole currently hovered by a dragged slot tile. */
+93	  dragHoverBankTileId: string | null;
+94	  phase: AnswerGamePhase;
+95	  roundIndex: number;
+96	  retryCount: number;
+97	  levelIndex: number;
+98	  isLevelMode: boolean;
+99	}
+100	
+101	export type AnswerGameAction =
+102	  | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+103	  | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+104	  | {
+105	      type: 'TYPE_TILE';
+106	      tileId: string;
+107	      value: string;
+108	      zoneIndex: number;
+109	    }
+110	  | { type: 'REMOVE_TILE'; zoneIndex: number }
+111	  | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
+112	  | { type: 'EJECT_TILE'; zoneIndex: number }
+113	  | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+114	  | { type: 'ADVANCE_LEVEL'; tiles: TileItem[]; zones: AnswerZone[] }
+115	  | { type: 'COMPLETE_GAME' }
+116	  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
+117	  | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
+118	  | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
+119	  | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string }
+120	  | { type: 'SET_ACTIVE_SLOT'; zoneIndex: number };
+121	
+122	/**
+123	 * Snapshot of AnswerGameState persisted to session_history_index.draftState.
+124	 * Excludes config (reconstructable from initialContent/initialState),
+125	 * dragActiveTileId (transient), and 'game-over' phase (cleared on completion).
+126	 */
+127	export interface AnswerGameDraftState {
+128	  allTiles: TileItem[];
+129	  bankTileIds: string[];
+130	  zones: AnswerZone[];
+131	  activeSlotIndex: number;
+132	  phase: 'playing' | 'round-complete' | 'level-complete';
+133	  roundIndex: number;
+134	  retryCount: number;
+135	  levelIndex: number;
+136	}
+137	
+138	export interface HudConfig {
+139	  /** Bullet row, one dot per round (classic) or per level (level mode). */
+140	  showDots?: boolean;
+141	  /** "3/5" label; auto-hides when totalRounds is null. */
+142	  showFraction?: boolean;
+143	  /** "LEVEL N" label; most useful with level mode. */
+144	  showLevel?: boolean;
+145	}
+146	
+147	export interface ProgressHUDProps {
+148	  /** 0-based index of the current round. */
+149	  roundIndex: number;
+150	  /** Total rounds in the session; null for unbounded level mode. */
+151	  totalRounds: number | null;
+152	  /** 0-based index of the current level; 0 when levelMode is off. */
+153	  levelIndex: number;
+154	  /** Whether the game uses levelMode. */
+155	  isLevelMode: boolean;
+156	  /** Lifecycle phase — enables pop/celebration animations on transition. */
+157	  phase: AnswerGamePhase;
+158	  /** Resolved visibility flags after merging defaults + config. */
+159	  showDots: boolean;
+160	  showFraction: boolean;
+161	  showLevel: boolean;
+162	}
+163
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:28:57Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/ProgressHUD/ProgressHUDRoot.tsx`
+
+```text
+1	import { useAnswerGameContext } from '../useAnswerGameContext';
+2	import { ProgressHUD } from './ProgressHUD';
+3	import { resolveHudFlags } from './resolve-hud-flags';
+4	import type { ProgressHUDProps } from '../types';
+5	import type { GameSkin } from '@/lib/skin';
+6	
+7	interface ProgressHUDRootProps {
+8	  skin?: GameSkin;
+9	}
+10	
+11	export const ProgressHUDRoot = ({ skin }: ProgressHUDRootProps) => {
+12	  const { config, phase, roundIndex, levelIndex, isLevelMode } =
+13	    useAnswerGameContext();
+14	
+15	  const flags = resolveHudFlags(config.hud, isLevelMode);
+16	
+17	  const props: ProgressHUDProps = {
+18	    roundIndex,
+19	    totalRounds: isLevelMode ? null : config.totalRounds,
+20	    levelIndex,
+21	    isLevelMode,
+22	    phase,
+23	    ...flags,
+24	  };
+25	
+26	  if (skin?.ProgressHUD) {
+27	    const SkinHud = skin.ProgressHUD;
+28	    return <SkinHud {...props} />;
+29	  }
+30	
+31	  return <ProgressHUD {...props} />;
+32	};
+33
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:29:23Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:29:41Z)**_
+
+Your changes are safe — uncommitted in working tree (question text, distractorCount, withLetterDistractors helper, Playground.args overrides). Not touching them.
+
+## What AnswerGame actually does
+
+Reading `AnswerGame.tsx` + `ProgressHUDRoot.tsx` + `types.ts`:
+
+`AnswerGame` is a thin shell with three jobs:
+
+1. Wraps children in `AnswerGameProvider` (gives them state/config/dispatch via context).
+2. Renders `ProgressHUDRoot` above the children.
+3. Provides `Question` / `Answer` / `Choices` — each is just a styled `<div>` slot.
+
+## Props that actually influence AnswerGame itself
+
+Ranked by what changes on the screen when you flip them, **without touching the children**:
+
+| Prop | What changes in AnswerGame |
+|------|----------------------------|
+| **`config.hud.showDots`** | Toggles the dot row in HUD |
+| **`config.hud.showFraction`** | Toggles the "3/5" chip in HUD |
+| **`config.hud.showLevel`** | Toggles the "LEVEL N" chip in HUD |
+| **`config.totalRounds`** | Denominator in the fraction chip (hidden when levelMode is on) |
+| **`config.levelMode`** (present/absent) | Flips `isLevelMode` → hides totalRounds, shows level chip |
+| **`skin`** (with `ProgressHUD` defined) | Replaces the default HUD with the skin's custom one |
+
+## Props that *look* like they influence AnswerGame but actually only affect children
+
+All of these flow through the provider and are read by `Slot` / `LetterTileBank` / evaluation hooks — the `AnswerGame` shell itself never branches on them:
+
+- `config.inputMethod` — read by `LetterTileBank` (`drag`/`type` swap), `useDraggableTile`
+- `config.wrongTileBehavior` — read by `useTileEvaluation`
+- `config.tileBankMode` + `config.distractorCount` — shape `initialTiles`/`bankTileIds`, consumed by bank
+- `config.slotInteraction` — read by `useSlotBehavior`
+- `config.ttsEnabled` / `config.touchKeyboardInputMode` / `config.timing` — read by `useGameTTS`, `useSlotBehavior`
+- `config.initialTiles` / `config.initialZones` — set provider state, rendered by `Slot` + bank
+- `initialState` / `sessionId` — provider concerns, not shell
+
+## So what should the playground test?
+
+Two coherent options:
+
+1. **Slim / shell-focused** — keep only the controls that actually change what `AnswerGame` renders: `hud.showDots`, `hud.showFraction`, `hud.showLevel`, `totalRounds`, a `levelMode` toggle, a `skin` select. The Question/Answer/Choices get minimal static content (no real drag). Slot/TileBank behaviour gets tested in their own stories.
+2. **Keep as-is (full game dogfood)** — useful as a "does the whole stack still work end-to-end" smoke test, but honestly most of the Controls panel tests the children, not `AnswerGame`.
+
+My recommendation: **option 1** here, since `Slot`, `SortNumbersTileBank`, `LetterTileBank`, etc. already have (or will have) their own stories that cover the child-side props. The AnswerGame story then has a clear, narrow job: "does the shell layout + HUD respond to config/skin changes."
+
+Want me to sketch option 1 on top of your current file (preserving the distractor work as a reference we could move to the TileBank story later)?
+
+---
+
+_**User (2026-04-21 07:30:40Z)**_
+
+yes. lets do that. 1 and keep for ref
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 07:31:29Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:31:30Z)**_
+
+Saving the distractor helper for reference, then rewriting the playground.
+
+_**Agent (claude-opus-4-7 2026-04-21 07:31:43Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+// Reference snapshot from AnswerGame.stories.tsx
+// Preserved so we can move it into the LetterTileBank / WordSpell bank story later.
+//
+// What this does: appends distractor letter tiles to `initialTiles` when
+// `tileBankMode === 'distractors'`, using the Latin lowercase alphabet minus
+// any letters already required by `zones`. A nanoid fallback handles the
+// case where the alphabet is exhausted.
+//
+// Expected destination: src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx
+// (or wherever the Word Spell TileBank story lives when Batch 3 ships).
+
+import { nanoid } from 'nanoid';
+import type { AnswerZone, TileItem } from '@/components/answer-game/types';
+
+const LATIN_LOWER = [...'abcdefghijklmnopqrstuvwxyz'];
+
+/** Appends tiles not required by `zones` so distractor mode matches real games (bank lists every tile). */
+export function withLetterDistractors(
+  baseTiles: TileItem[],
+  zones: AnswerZone[],
+  count: number,
+): TileItem[] {
+  if (count <= 0) return baseTiles;
+  const forbidden = new Set(zones.map((z) => z.expectedValue.toLowerCase()));
+  const pool = LATIN_LOWER.filter((ch) => !forbidden.has(ch));
+  const extras: TileItem[] = [];
+  for (let i = 0; i < count; i++) {
+    const ch = pool[i % Math.max(pool.length, 1)];
+    if (ch) {
+      extras.push({ id: `distractor-${i}-${ch}`, label: ch, value: ch });
+    } else {
+      extras.push({
+        id: `distractor-${nanoid(8)}`,
+        label: '·',
+        value: `extra-${i}`,
+      });
+    }
+  }
+  return [...baseTiles, ...extras];
+}
+
+// StoryArgs fields that went with it:
+//   distractorCount: number;          // range control
+//
+// argTypes entry:
+//   distractorCount: {
+//     control: { type: 'range', min: 0, max: 12, step: 1 },
+//     if: { arg: 'tileBankMode', eq: 'distractors' },
+//   },
+//
+// render usage:
+//   const roundTiles =
+//     tileBankMode === 'distractors'
+//       ? withLetterDistractors(initialTiles, initialZones, distractorCount)
+//       : initialTiles;
+
+```
+
+```text
+File created successfully at: /tmp/answergame-distractor-bank-ref.tsx (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:32:13Z)**_
+
+Now replacing the playground with a shell-focused version.
+
+_**Agent (claude-opus-4-7 2026-04-21 07:32:33Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGame } from './AnswerGame';
+import { classicSkin } from '@/lib/skin';
+import type { AnswerGameConfig } from '../types';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { CSSProperties, ComponentType } from 'react';
+
+interface StoryArgs {
+  question: string;
+  answerPreview: string;
+  choicesPreview: string;
+  showDots: boolean;
+  showFraction: boolean;
+  showLevel: boolean;
+  totalRounds: number;
+  isLevelMode: boolean;
+  // Raw AnswerGame props shadowed by StoryArgs above; declared here only
+  // so we can hide their react-docgen-inferred rows from the Controls panel.
+  config?: never;
+  initialState?: never;
+  sessionId?: never;
+  skin?: never;
+  children?: never;
+}
+
+const meta: Meta<StoryArgs> = {
+  component: AnswerGame as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/AnswerGame',
+  tags: ['autodocs'],
+  decorators: [withDb],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Shell layout (Question / Answer / Choices slots) + ProgressHUD. Child behaviour — drag, typing, evaluation, distractor banks — is covered by the Slot, LetterTileBank, and SortNumbersTileBank stories. This playground intentionally only drives what AnswerGame itself renders: the HUD visibility flags, totalRounds, levelMode, and the three slot containers.',
+      },
+    },
+  },
+  args: {
+    question: 'Spell CAT',
+    answerPreview: '3 empty slots',
+    choicesPreview: '3 tile placeholders',
+    showDots: true,
+    showFraction: true,
+    showLevel: false,
+    totalRounds: 5,
+    isLevelMode: false,
+  },
+  argTypes: {
+    question: { control: 'text' },
+    answerPreview: { control: 'text' },
+    choicesPreview: { control: 'text' },
+    showDots: { control: 'boolean' },
+    showFraction: { control: 'boolean' },
+    showLevel: { control: 'boolean' },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    isLevelMode: { control: 'boolean' },
+    config: { table: { disable: true } },
+    initialState: { table: { disable: true } },
+    sessionId: { table: { disable: true } },
+    skin: { table: { disable: true } },
+    children: { table: { disable: true } },
+  },
+  render: ({
+    question,
+    answerPreview,
+    choicesPreview,
+    showDots,
+    showFraction,
+    showLevel,
+    totalRounds,
+    isLevelMode,
+  }) => {
+    const config: AnswerGameConfig = {
+      gameId: 'storybook-answer-game-shell',
+      inputMethod: 'drag',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      totalRounds,
+      ttsEnabled: false,
+      hud: { showDots, showFraction, showLevel },
+      ...(isLevelMode
+        ? { levelMode: { generateNextLevel: () => null } }
+        : {}),
+    };
+    return (
+      <div
+        className={`game-container skin-${classicSkin.id}`}
+        style={classicSkin.tokens as CSSProperties}
+      >
+        <AnswerGame config={config} skin={classicSkin}>
+          <AnswerGame.Question>
+            <p className="text-center text-lg font-semibold text-foreground">
+              {question}
+            </p>
+          </AnswerGame.Question>
+          <AnswerGame.Answer>
+            <p className="rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground">
+              {answerPreview}
+            </p>
+          </AnswerGame.Answer>
+          <AnswerGame.Choices>
+            <p className="rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground">
+              {choicesPreview}
+            </p>
+          </AnswerGame.Choices>
+        </AnswerGame>
+      </div>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Playground: Story = {};
+
+```
+
+```text
+<tool_use_error>File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.</tool_use_error>
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:32:39Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+
+```text
+1	import { nanoid } from 'nanoid';
+2	import { withDb } from '../../../../.storybook/decorators/withDb';
+3	import { Slot } from '../Slot/Slot';
+4	import { SlotRow } from '../Slot/SlotRow';
+5	import { useAnswerGameContext } from '../useAnswerGameContext';
+6	import { AnswerGame } from './AnswerGame';
+7	import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+8	import type { Meta, StoryObj } from '@storybook/react';
+9	import type { CSSProperties, ComponentType } from 'react';
+10	import { LetterTileBank } from '@/games/word-spell/LetterTileBank/LetterTileBank';
+11	import { classicSkin } from '@/lib/skin';
+12	
+13	type InputMethod = 'drag' | 'type' | 'both';
+14	type WrongTileBehavior = 'reject' | 'lock-manual' | 'lock-auto-eject';
+15	type TileBankMode = 'exact' | 'distractors';
+16	
+17	interface StoryArgs {
+18	  question: string;
+19	  inputMethod: InputMethod;
+20	  wrongTileBehavior: WrongTileBehavior;
+21	  tileBankMode: TileBankMode;
+22	  /** Extra letter tiles in the bank when `tileBankMode` is `distractors`. */
+23	  distractorCount: number;
+24	  totalRounds: number;
+25	  ttsEnabled: boolean;
+26	  // Raw AnswerGame props shadowed by StoryArgs above; declared here only
+27	  // so we can hide their react-docgen-inferred rows from the Controls panel.
+28	  config?: never;
+29	  initialState?: never;
+30	  sessionId?: never;
+31	  skin?: never;
+32	  children?: never;
+33	}
+34	
+35	const initialTiles: TileItem[] = [
+36	  { id: 'c', label: 'c', value: 'c' },
+37	  { id: 'a', label: 'a', value: 'a' },
+38	  { id: 't', label: 't', value: 't' },
+39	];
+40	
+41	const initialZones: AnswerZone[] = [
+42	  {
+43	    id: 'z0',
+44	    index: 0,
+45	    expectedValue: 'c',
+46	    placedTileId: null,
+47	    isWrong: false,
+48	    isLocked: false,
+49	  },
+50	  {
+51	    id: 'z1',
+52	    index: 1,
+53	    expectedValue: 'a',
+54	    placedTileId: null,
+55	    isWrong: false,
+56	    isLocked: false,
+57	  },
+58	  {
+59	    id: 'z2',
+60	    index: 2,
+61	    expectedValue: 't',
+62	    placedTileId: null,
+63	    isWrong: false,
+64	    isLocked: false,
+65	  },
+66	];
+67	
+68	const LATIN_LOWER = [...'abcdefghijklmnopqrstuvwxyz'];
+69	
+70	/** Appends tiles not required by `zones` so distractor mode matches real games (bank lists every tile). */
+71	function withLetterDistractors(
+72	  baseTiles: TileItem[],
+73	  zones: AnswerZone[],
+74	  count: number,
+75	): TileItem[] {
+76	  if (count <= 0) return baseTiles;
+77	  const forbidden = new Set(
+78	    zones.map((z) => z.expectedValue.toLowerCase()),
+79	  );
+80	  const pool = LATIN_LOWER.filter((ch) => !forbidden.has(ch));
+81	  const extras: TileItem[] = [];
+82	  for (let i = 0; i < count; i++) {
+83	    const ch = pool[i % Math.max(pool.length, 1)];
+84	    if (ch) {
+85	      extras.push({
+86	        id: `distractor-${i}-${ch}`,
+87	        label: ch,
+88	        value: ch,
+89	      });
+90	    } else {
+91	      extras.push({
+92	        id: `distractor-${nanoid(8)}`,
+93	        label: '·',
+94	        value: `extra-${i}`,
+95	      });
+96	    }
+97	  }
+98	  return [...baseTiles, ...extras];
+99	}
+100	
+101	const PlayableScene = ({ question }: { question: string }) => {
+102	  const { zones } = useAnswerGameContext();
+103	
+104	  return (
+105	    <>
+106	      <AnswerGame.Question>
+107	        <p className="text-center text-lg font-semibold text-foreground">
+108	          {question}
+109	        </p>
+110	      </AnswerGame.Question>
+111	      <AnswerGame.Answer>
+112	        <SlotRow className="gap-2">
+113	          {zones.map((zone, i) => (
+114	            <Slot
+115	              key={zone.id}
+116	              index={i}
+117	              skin={classicSkin}
+118	              className="size-14"
+119	            >
+120	              {({ label }) => (
+121	                <span className="text-xl font-bold">{label ?? ''}</span>
+122	              )}
+123	            </Slot>
+124	          ))}
+125	        </SlotRow>
+126	      </AnswerGame.Answer>
+127	      <AnswerGame.Choices>
+128	        <LetterTileBank />
+129	      </AnswerGame.Choices>
+130	    </>
+131	  );
+132	};
+133	
+134	const meta: Meta<StoryArgs> = {
+135	  component: AnswerGame as unknown as ComponentType<StoryArgs>,
+136	  title: 'answer-game/AnswerGame',
+137	  tags: ['autodocs'],
+138	  decorators: [withDb],
+139	  args: {
+140	    question: 'Spell CAT',
+141	    inputMethod: 'drag',
+142	    wrongTileBehavior: 'lock-auto-eject',
+143	    tileBankMode: 'exact',
+144	    distractorCount: 2,
+145	    totalRounds: 3,
+146	    ttsEnabled: false,
+147	  },
+148	  argTypes: {
+149	    question: { control: 'text' },
+150	    inputMethod: {
+151	      control: { type: 'select' },
+152	      options: ['drag', 'type', 'both'] satisfies InputMethod[],
+153	    },
+154	    wrongTileBehavior: {
+155	      control: { type: 'select' },
+156	      options: [
+157	        'reject',
+158	        'lock-manual',
+159	        'lock-auto-eject',
+160	      ] satisfies WrongTileBehavior[],
+161	    },
+162	    tileBankMode: {
+163	      control: { type: 'select' },
+164	      options: ['exact', 'distractors'] satisfies TileBankMode[],
+165	    },
+166	    distractorCount: {
+167	      control: { type: 'range', min: 0, max: 12, step: 1 },
+168	      if: { arg: 'tileBankMode', eq: 'distractors' },
+169	    },
+170	    totalRounds: {
+171	      control: { type: 'range', min: 1, max: 20, step: 1 },
+172	    },
+173	    ttsEnabled: { control: 'boolean' },
+174	    config: { table: { disable: true } },
+175	    initialState: { table: { disable: true } },
+176	    sessionId: { table: { disable: true } },
+177	    skin: { table: { disable: true } },
+178	    children: { table: { disable: true } },
+179	  },
+180	  render: ({
+181	    question,
+182	    inputMethod,
+183	    wrongTileBehavior,
+184	    tileBankMode,
+185	    distractorCount,
+186	    totalRounds,
+187	    ttsEnabled,
+188	  }) => {
+189	    const roundTiles =
+190	      tileBankMode === 'distractors'
+191	        ? withLetterDistractors(initialTiles, initialZones, distractorCount)
+192	        : initialTiles;
+193	    const config: AnswerGameConfig = {
+194	      gameId: 'storybook-answer-game',
+195	      inputMethod,
+196	      wrongTileBehavior,
+197	      tileBankMode,
+198	      ...(tileBankMode === 'distractors'
+199	        ? { distractorCount }
+200	        : {}),
+201	      totalRounds,
+202	      ttsEnabled,
+203	      initialTiles: roundTiles,
+204	      initialZones,
+205	    };
+206	    return (
+207	      <div
+208	        className={`game-container skin-${classicSkin.id}`}
+209	        style={classicSkin.tokens as CSSProperties}
+210	      >
+211	        <AnswerGame config={config} skin={classicSkin}>
+212	          <PlayableScene question={question} />
+213	        </AnswerGame>
+214	      </div>
+215	    );
+216	  },
+217	};
+218	export default meta;
+219	
+220	type Story = StoryObj<StoryArgs>;
+221	
+222	export const Playground: Story = {
+223	  args: {
+224	    question: 'Leo Caseiro',
+225	    inputMethod: 'drag',
+226	    totalRounds: 11,
+227	    wrongTileBehavior: 'lock-auto-eject',
+228	    tileBankMode: 'distractors',
+229	    distractorCount: 4,
+230	    ttsEnabled: false,
+231	  },
+232	};
+233
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:32:45Z)**_
+
+Now writing the slim shell-focused playground.
+
+_**Agent (claude-opus-4-7 2026-04-21 07:33:03Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```tsx
+import { withDb } from '../../../../.storybook/decorators/withDb';
+import { AnswerGame } from './AnswerGame';
+import { classicSkin } from '@/lib/skin';
+import type { AnswerGameConfig } from '../types';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { CSSProperties, ComponentType } from 'react';
+
+interface StoryArgs {
+  question: string;
+  answerPreview: string;
+  choicesPreview: string;
+  showDots: boolean;
+  showFraction: boolean;
+  showLevel: boolean;
+  totalRounds: number;
+  isLevelMode: boolean;
+  // Raw AnswerGame props shadowed by StoryArgs above; declared here only
+  // so we can hide their react-docgen-inferred rows from the Controls panel.
+  config?: never;
+  initialState?: never;
+  sessionId?: never;
+  skin?: never;
+  children?: never;
+}
+
+const meta: Meta<StoryArgs> = {
+  component: AnswerGame as unknown as ComponentType<StoryArgs>,
+  title: 'answer-game/AnswerGame',
+  tags: ['autodocs'],
+  decorators: [withDb],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Shell layout (Question / Answer / Choices slots) + ProgressHUD. Child behaviour — drag, typing, evaluation, distractor banks — is covered by the Slot, LetterTileBank, and SortNumbersTileBank stories. This playground only drives what AnswerGame itself renders: the HUD visibility flags, totalRounds, levelMode, and the three slot containers.',
+      },
+    },
+  },
+  args: {
+    question: 'Spell CAT',
+    answerPreview: '3 empty slots',
+    choicesPreview: '3 tile placeholders',
+    showDots: true,
+    showFraction: true,
+    showLevel: false,
+    totalRounds: 5,
+    isLevelMode: false,
+  },
+  argTypes: {
+    question: { control: 'text' },
+    answerPreview: { control: 'text' },
+    choicesPreview: { control: 'text' },
+    showDots: { control: 'boolean' },
+    showFraction: { control: 'boolean' },
+    showLevel: { control: 'boolean' },
+    totalRounds: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+    },
+    isLevelMode: { control: 'boolean' },
+    config: { table: { disable: true } },
+    initialState: { table: { disable: true } },
+    sessionId: { table: { disable: true } },
+    skin: { table: { disable: true } },
+    children: { table: { disable: true } },
+  },
+  render: ({
+    question,
+    answerPreview,
+    choicesPreview,
+    showDots,
+    showFraction,
+    showLevel,
+    totalRounds,
+    isLevelMode,
+  }) => {
+    const config: AnswerGameConfig = {
+      gameId: 'storybook-answer-game-shell',
+      inputMethod: 'drag',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      totalRounds,
+      ttsEnabled: false,
+      hud: { showDots, showFraction, showLevel },
+      ...(isLevelMode
+        ? { levelMode: { generateNextLevel: () => null } }
+        : {}),
+    };
+    return (
+      <div
+        className={`game-container skin-${classicSkin.id}`}
+        style={classicSkin.tokens as CSSProperties}
+      >
+        <AnswerGame config={config} skin={classicSkin}>
+          <AnswerGame.Question>
+            <p className="text-center text-lg font-semibold text-foreground">
+              {question}
+            </p>
+          </AnswerGame.Question>
+          <AnswerGame.Answer>
+            <p className="rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground">
+              {answerPreview}
+            </p>
+          </AnswerGame.Answer>
+          <AnswerGame.Choices>
+            <p className="rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground">
+              {choicesPreview}
+            </p>
+          </AnswerGame.Choices>
+        </AnswerGame>
+      </div>
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
+
+export const Playground: Story = {};
+
+```
+
+```text
+The file /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:33:20Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Verify typecheck and lint
+
+`yarn typecheck 2>&1 | tail -5 && yarn lint 2>&1 | tail -5`
+
+```text
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 2.67s.
+✖ 1 problem (1 error, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:33:37Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Auto-fix and verify
+
+`yarn eslint --fix src/components/answer-game/AnswerGame/AnswerGame.stories.tsx 2>&1 | tail -3 && yarn lint 2>&1 | tail -3`
+
+```text
+yarn run v1.22.22
+$ /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game/node_modules/.bin/eslint --fix src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+Done in 2.35s.
+yarn run v1.22.22
+$ eslint . --max-warnings 0 && knip --no-config-hints
+Done in 10.51s.
+[This command modified 1 file you've previously read: src/components/answer-game/AnswerGame/AnswerGame.stories.tsx. Call Read before editing.]
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:33:50Z)**_
+
+Green, both checks. Not committing — yours to take for a spin.
+
+**Slim Playground controls (only what `AnswerGame` itself renders):**
+
+- `question` — text you drop into `AnswerGame.Question`
+- `answerPreview` / `choicesPreview` — placeholder text in the other two slots (so you can see the layout without loading a real Slot row or TileBank)
+- `showDots` / `showFraction` / `showLevel` — the three independent HUD flags from `HudConfig`
+- `totalRounds` — drives the fraction chip
+- `isLevelMode` — flips `config.levelMode` on (with a no-op `generateNextLevel`) so the HUD switches from "3/5" → "LEVEL 1"
+
+Hidden from the Controls table: `config`, `initialState`, `sessionId`, `skin`, `children` (all the raw-prop noise).
+
+**Distractor reference saved to** `/tmp/answergame-distractor-bank-ref.tsx` — contains `withLetterDistractors`, the `distractorCount` control definition, and the render wiring, with a comment pointing at its eventual home (the `LetterTileBank` story in Batch 3). Move it to a more permanent location whenever you want; `/tmp` is ephemeral across reboots.
+
+Try the playground — flip the HUD flags and `isLevelMode` to see exactly what `AnswerGame` is responsible for. When you're happy, tell me and I'll commit.
+
+---
+
+_**User (2026-04-21 07:56:42Z)**_
+
+Great, let's push those changes, and work the same approach on the remaining stories. Provide me a prompt to start a new session for the remaining work
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 07:57:03Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 07:57:04Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Check pending changes
+
+`git status --short && git diff --stat HEAD`
+
+```text
+MM src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
+ .../answer-game/AnswerGame/AnswerGame.stories.tsx  | 186 ++++++++-------------
+ 1 file changed, 72 insertions(+), 114 deletions(-)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:58:04Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Commit and push slim playground
+
+```bash
+git add src/components/answer-game/AnswerGame/AnswerGame.stories.tsx && git commit -m "$(cat <<'EOF'
+stories(answer-game/AnswerGame): slim playground to shell concerns
+
+AnswerGame is a thin shell: it wraps children in AnswerGameProvider,
+renders a ProgressHUDRoot, and exposes three slot subcomponents
+(Question / Answer / Choices). Most of the previous playground's
+controls (inputMethod, wrongTileBehavior, tileBankMode, distractorCount,
+ttsEnabled) only influenced Slot / LetterTileBank behaviour via context —
+they didn't change what AnswerGame itself rendered.
+
+Trim StoryArgs to the props that actually drive the shell:
+- question / answerPreview / choicesPreview — text the slots receive
+- showDots / showFraction / showLevel — HudConfig flags
+- totalRounds — fraction denominator
+- isLevelMode — flips config.levelMode on with a no-op generateNextLevel
+  so the HUD switches from fraction to level chip
+
+Child-interaction coverage (drag, typing, evaluation, distractors) moves
+to the Slot / LetterTileBank / SortNumbersTileBank stories where it
+belongs. The withLetterDistractors helper that powered the previous
+distractor control is preserved at /tmp/answergame-distractor-bank-ref.tsx
+for whoever writes the LetterTileBank story in Batch 3.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+EOF
+)" 2>&1 | tail -3 && git push 2>&1 | tail -3
+```
+
+```text
+Done in 9.72s.
+[audit/storybook-batch-2-answer-game 5514b022] stories(answer-game/AnswerGame): slim playground to shell concerns
+ 1 file changed, 72 insertions(+), 114 deletions(-)
+-e **──────────────────────────────────────────
+To github.com:leocaseiro/base-skill.git
+   3a19bc10..5514b022  audit/storybook-batch-2-answer-game -> audit/storybook-batch-2-answer-game
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 07:59:04Z)**_
+
+Pushed `5514b022`. Here's a self-contained handoff prompt for the new session:
+
+---
+
+```text
+Continue the Storybook controls audit on PR #134 (branch
+audit/storybook-batch-2-answer-game) by applying the "slim, shell-focused"
+approach we just used on AnswerGame.stories.tsx to the remaining 7 files in
+src/components/answer-game/*.
+
+# Context you need
+
+- PR: https://github.com/leocaseiro/base-skill/pull/134 — 14 commits landed
+  so far, covering all 8 answer-game stories. The latest commit (5514b022,
+  "slim playground to shell concerns") is the canonical example for the
+  approach you're applying.
+- Policy source: .claude/skills/write-storybook/SKILL.md
+- Tracking issue: #125 (Batch 2 files already ticked)
+- Worktree: worktrees/storybook-audit-batch-2-answer-game on branch
+  audit/storybook-batch-2-answer-game. Never commit to master.
+- Run /resync at the start, then keep going on the same branch.
+
+# The approach (applies to every file)
+
+For each story, answer: "What does THIS component itself render, and which
+props change that output?" Then keep controls only for those props.
+Everything else is noise.
+
+Mechanical rules:
+
+1. StoryArgs should only expose props that visibly change what the
+   component renders. Props that flow to children via context or only
+   affect child behaviour go away.
+2. Every raw component prop that StoryArgs shadows (or doesn't cover) must
+   be declared `?: never` in StoryArgs AND given
+   `{ table: { disable: true } }` in argTypes. This hides the
+   react-docgen-inferred "-" rows from the Controls panel. AnswerGame.stories.tsx
+   is the canonical example.
+3. Collapse variant stories into a single Playground when the Controls
+   panel can reproduce them. Keep a named story ONLY if its args
+   materially differ in a way the control can't express (e.g. an a11y
+   variant, or a flow you want the sidebar to advertise). Never keep a
+   story whose args are identical to meta.args defaults.
+4. Drop play() stories whose assertion is trivial onClick wiring (e.g.
+   "clicking Play Again fires onPlayAgain"). That's a unit test, not a
+   story. Keep play() only when it demonstrates a non-trivial flow the
+   reader should see animated (e.g. InstructionsOverlay opens a modal and
+   closes it with Escape — that one stays).
+5. Hidden handlers still get fn() spies in args + table.disable in
+   argTypes so the Actions addon shows them firing.
+6. No emojis in files.
+7. Commit message shape (unchanged):
+   stories(answer-game/<name>): <imperative description>
+
+Per-file verification before each commit:
+  - yarn typecheck → 0
+  - yarn lint → 0
+
+End-of-session verification:
+  - yarn typecheck
+  - yarn lint
+  - yarn lint:md
+  - Launch storybook on a free port (the plan file has the snippet), then
+    yarn test:storybook --url http://127.0.0.1:<port> — all 44 suites
+    must stay green. Kill storybook when done.
+
+# The remaining 7 files
+
+For each, do the "what does this component actually render vs what flows
+through children" analysis BEFORE touching the story. Read the component
+source first. Then slim.
+
+1. Slot.stories.tsx
+   - Already a single Playground. Audit: are variant/label/filled/isWrong/
+     dragPreview all still load-bearing? The `dragPreview` control writes
+     to context via dispatch(SET_DRAG_ACTIVE/SET_DRAG_HOVER) — that's
+     fine because Slot itself reads drag state to render its preview
+     border. Keep unless you find something redundant.
+
+2. InstructionsOverlay.stories.tsx (most complex)
+   - 7 named variants + 3 play() flows. Audit:
+     - Do Bookmarked/NotBookmarked pairs really need four variants when
+       isBookmarked is a control? Likely reduce to 2: Default and
+       WithCustomGame (since custom-game mode changes the header actions
+       visible). The bookmark state is just a boolean control.
+     - Keep all 3 play() flows — StartsGame, TogglesBookmark, OpensSettings
+       are real interactive flows, not trivial onClick wiring. OpensSettings
+       especially demonstrates the Radix portal + Escape-close dance.
+   - Decorators: withDb + withRouter stay.
+   - TTS: ttsEnabled: false must stay in meta.args (avoids the known
+     TTS crash path).
+
+3. EncouragementAnnouncer.stories.tsx
+   - Currently 4 stories: Hidden, Visible, ReplayTrigger, AutoDismissesAfter2s.
+   - Hidden is redundant (visible: false is the default). Drop.
+   - Visible is just `visible: true` — replace with a single Playground.
+   - ReplayTrigger (the ShowTrigger wrapper) adds real interactivity —
+     keep as a named story OR fold its wrapper into the main render.
+     Judgement call.
+   - AutoDismissesAfter2s — play() asserts the 2s auto-dismiss. This is
+     non-trivial behaviour (it exercises the timer), so keep.
+   - CRITICAL: vitest was removed from this file for test-runner compat
+     (see commit 16d833cc). Do NOT re-import `vi`. AutoDismissesAfter2s
+     uses a real 2s timer + waitFor({ timeout: 3500 }).
+
+4. GameOverOverlay.stories.tsx
+   - Already slimmed: one Playground with `stars` range (1-5), no play()
+     stories. Audit: confirm the stars-to-retryCount bridge still maps
+     cleanly. Likely no further work.
+
+5. LevelCompleteOverlay.stories.tsx
+   - Currently 3 level variants + 2 play() stories (ClicksNextLevel,
+     ClicksDone). Apply same logic as GameOverOverlay:
+     - Collapse Level1/Level3/Level10 into one Playground (level is
+       already a range control).
+     - Drop the 2 play() stories — onClick wiring is trivial.
+
+6. ProgressHUD.stories.tsx
+   - Currently 9 variants. Audit each:
+     - Classic_Round3Of5 IS the default — drop if it just uses meta.args.
+     - Classic_LastRound, DotsOnly, FractionOnly, AllFlagsOff, RoundCompletePhase
+       — all reproducible from the Controls panel. Probably collapse to
+       one Playground.
+     - LevelMode_Level3, LevelMode_Level10, Mixed_LevelPlusFraction —
+       these combine multiple flags (isLevelMode + totalRoundsIsNull +
+       showLevel etc.). Judgement call on whether they're worth keeping
+       as presets. Lean toward dropping and documenting the preset combos
+       in meta.parameters.docs.description instead.
+   - Controls: 9 flags are a lot but they're all load-bearing. Keep them.
+
+7. ScoreAnimation.stories.tsx
+   - Currently Playing (visible: false) + Complete (visible: true). Since
+     `visible` is a boolean control with two values, Playing/Complete
+     are sidebar noise. Collapse to one Playground.
+
+# Deliverables per file
+
+- One commit per file with the shape:
+  stories(answer-game/<name>): <one-line summary of what changed>
+- If you drop stories, the commit body must list which ones and why.
+- If you collapse variants, the commit body must name the control(s)
+  that now drive the variants.
+
+# When everything is done
+
+- Run the end-of-session verification above.
+- Push to origin. No new PR — same branch keeps updating PR #134.
+- Post a comment on PR #134 summarizing what landed in this session
+  (file list + rationale). Do NOT close the PR; I'll review it.
+
+# Skill to invoke at start of the new session
+
+superpowers:using-git-worktrees (we're already in a worktree, just confirm)
+then proceed task-by-task. No writing-plans needed — this is direct
+execution of the established pattern.
+
+Start with /resync to confirm branch state, then tackle the 7 files in
+any order you like. Prefer Slot and Simple-Tier files first so you can
+build muscle memory before touching InstructionsOverlay.
+```
+
+---
+
+Current PR state as of push:
+
+- **15 commits** on `audit/storybook-batch-2-answer-game` (all 8 answer-game stories retrofitted, plus the skin-tokens, lowercase-tiles, sidebar-grouping, Playground-collapse, and shell-slim follow-ups)
+- **`/tmp/answergame-distractor-bank-ref.tsx`** holds the distractor helper for the future LetterTileBank story
+- CI will re-run on push; the Batch 2 checkboxes in issue #125 are already ticked
+
+Paste the block above into the new session and it should pick up cleanly.
+
+---
+
+_**User (2026-04-21 07:59:11Z)**_
+
+<local-command-caveat>Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.</local-command-caveat>
+
+_**User (2026-04-21 07:59:11Z)**_
+
+<command-name>/exit</command-name>
+            <command-message>exit</command-message>
+            <command-args></command-args>
+
+_**User (2026-04-21 07:59:11Z)**_
+
+<local-command-stdout>Bye!</local-command-stdout>
