@@ -27,6 +27,13 @@ interface StoryArgs {
   ) => Promise<void>;
   onToggleBookmark: () => void;
   onConfigChange: (config: Record<string, unknown>) => void;
+  // Raw InstructionsOverlay props shadowed by StoryArgs above (config)
+  // or intentionally omitted. Declared here only to hide their
+  // react-docgen-inferred rows from the Controls panel.
+  config?: never;
+  cover?: never;
+  onDeleteCustomGame?: never;
+  existingCustomGameNames?: never;
 }
 
 const GAME_COLOR_OPTIONS = [
@@ -86,6 +93,10 @@ const meta: Meta<StoryArgs> = {
     onUpdateCustomGame: { table: { disable: true } },
     onToggleBookmark: { table: { disable: true } },
     onConfigChange: { table: { disable: true } },
+    config: { table: { disable: true } },
+    cover: { table: { disable: true } },
+    onDeleteCustomGame: { table: { disable: true } },
+    existingCustomGameNames: { table: { disable: true } },
   },
   render: ({
     text,
@@ -132,41 +143,6 @@ export const WithCustomGame: Story = {
     customGameId: 'abc123',
     customGameName: 'Easy Mode',
     customGameColor: 'teal' as GameColorKey,
-  },
-};
-
-export const WordSpellDefault: Story = {
-  args: {
-    text: 'Drag the letters to spell the word.',
-    gameTitle: 'Word Spell',
-    gameId: 'word-spell',
-    totalRounds: 8,
-  },
-};
-
-export const NotBookmarked: Story = {
-  args: { isBookmarked: false },
-};
-
-export const Bookmarked: Story = {
-  args: { isBookmarked: true },
-};
-
-export const NotBookmarkedCustomGame: Story = {
-  args: {
-    customGameId: 'abc123',
-    customGameName: 'Easy Mode',
-    customGameColor: 'teal' as GameColorKey,
-    isBookmarked: false,
-  },
-};
-
-export const BookmarkedCustomGame: Story = {
-  args: {
-    customGameId: 'abc123',
-    customGameName: 'Easy Mode',
-    customGameColor: 'teal' as GameColorKey,
-    isBookmarked: true,
   },
 };
 
