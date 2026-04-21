@@ -186,7 +186,9 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
   [*] --> loading : WordSpell mounts
-  loading --> playing : useLibraryRounds resolves,\nINIT_ROUND dispatched
+  loading --> playing : fresh session →\nINIT_ROUND dispatched
+  loading --> playing : resumed session →\nRESUME_ROUND dispatched\n(preserves roundIndex,\nretryCount, levelIndex)
+  loading --> playing : stale-draft safety net →\ndraft discarded,\nINIT_ROUND dispatched
 
   playing --> round_complete : all zones correct
   playing --> playing : wrong tile placed\n(auto-eject returns tile)
@@ -197,6 +199,12 @@ stateDiagram-v2
   game_over --> loading : Play Again\n(sessionEpoch++)
   game_over --> [*] : Home
 ```
+
+> See `AnswerGame.flows.mdx` §9 for the full mount-effect decision tree
+> (`RESUME_ROUND` vs `INIT_ROUND`). The stale-draft safety net lives in
+> `WordSpell.tsx:435-474` — it detects a draft whose letters can't align
+> with the current round and null-patches `draftState` before the provider
+> sees it, so the resume path falls back to `INIT_ROUND`.
 
 ---
 

@@ -766,4 +766,89 @@ describe('answerGameReducer', () => {
       expect(state.bankTileIds).not.toContain('typed-ej');
     });
   });
+
+  describe('RESUME_ROUND', () => {
+    const midRoundDraft = {
+      allTiles: [
+        { id: 't-c', label: 'C', value: 'C' },
+        { id: 't-a', label: 'A', value: 'A' },
+        { id: 't-t', label: 'T', value: 'T' },
+      ],
+      bankTileIds: ['t-t'],
+      zones: [
+        {
+          id: 'z0',
+          index: 0,
+          expectedValue: 'C',
+          placedTileId: 't-c',
+          isWrong: false,
+          isLocked: false,
+        },
+        {
+          id: 'z1',
+          index: 1,
+          expectedValue: 'A',
+          placedTileId: 't-a',
+          isWrong: false,
+          isLocked: false,
+        },
+        {
+          id: 'z2',
+          index: 2,
+          expectedValue: 'T',
+          placedTileId: null,
+          isWrong: false,
+          isLocked: false,
+        },
+      ],
+      activeSlotIndex: 2,
+      phase: 'playing' as const,
+      roundIndex: 3,
+      retryCount: 2,
+      levelIndex: 1,
+    };
+
+    it('replaces round state from the draft snapshot', () => {
+      const state = makeInitialState(config);
+      const next = answerGameReducer(state, {
+        type: 'RESUME_ROUND',
+        draft: midRoundDraft,
+      });
+      expect(next.allTiles).toEqual(midRoundDraft.allTiles);
+      expect(next.bankTileIds).toEqual(midRoundDraft.bankTileIds);
+      expect(next.zones).toEqual(midRoundDraft.zones);
+      expect(next.activeSlotIndex).toBe(2);
+      expect(next.phase).toBe('playing');
+    });
+
+    it('preserves progress counters that INIT_ROUND would reset', () => {
+      // This is the whole point of the new action — a resumed session must
+      // not drop `roundIndex`, `retryCount`, or `levelIndex` on re-dispatch.
+      const state = makeInitialState(config);
+      const next = answerGameReducer(state, {
+        type: 'RESUME_ROUND',
+        draft: midRoundDraft,
+      });
+      expect(next.roundIndex).toBe(3);
+      expect(next.retryCount).toBe(2);
+      expect(next.levelIndex).toBe(1);
+    });
+
+    it('keeps the existing config and clears transient drag state', () => {
+      const state: AnswerGameState = {
+        ...makeInitialState(config),
+        dragActiveTileId: 't-dragging',
+        dragHoverZoneIndex: 1,
+        dragHoverBankTileId: 't-hover',
+      };
+      const next = answerGameReducer(state, {
+        type: 'RESUME_ROUND',
+        draft: midRoundDraft,
+      });
+      expect(next.config).toBe(config);
+      expect(next.dragActiveTileId).toBeNull();
+      expect(next.dragHoverZoneIndex).toBeNull();
+      expect(next.dragHoverBankTileId).toBeNull();
+    });
+  });
 });

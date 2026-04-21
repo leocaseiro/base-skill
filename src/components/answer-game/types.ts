@@ -100,6 +100,7 @@ export interface AnswerGameState {
 
 export type AnswerGameAction =
   | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+  | { type: 'RESUME_ROUND'; draft: AnswerGameDraftState }
   | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
   | {
       type: 'TYPE_TILE';
