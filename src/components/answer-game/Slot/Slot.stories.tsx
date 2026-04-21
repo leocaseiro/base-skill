@@ -20,6 +20,11 @@ interface StoryArgs {
   filled: boolean;
   isWrong: boolean;
   dragPreview: DragPreview;
+  // Raw SlotRow props (the meta `component`) that StoryArgs doesn't
+  // cover. Declared here only to hide their react-docgen-inferred rows
+  // from the Controls panel.
+  className?: never;
+  children?: never;
 }
 
 const baseConfig: AnswerGameConfig = {
@@ -149,6 +154,8 @@ const meta: Meta<StoryArgs> = {
         'target-swap',
       ] satisfies DragPreview[],
     },
+    className: { table: { disable: true } },
+    children: { table: { disable: true } },
   },
   render: ({ variant, label, filled, isWrong, dragPreview }) => {
     const { slotClass, contentClass } = variantConfig[variant];
