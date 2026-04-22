@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1021,7 +1021,7 @@ import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
 import { AnswerGame } from &#39;./AnswerGame&#39;;
 import type { AnswerGameConfig } from &#39;../types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import type { ComponentType } from &#39;react&#39;;
 import { classicSkin } from &#39;@/lib/skin&#39;;
 
 interface StoryArgs {
@@ -1108,28 +1108,23 @@ const meta: Meta&lt;StoryArgs&gt; = {
         : {}),
     };
     return (
-      &lt;div
-        className={`game-container skin-${classicSkin.id}`}
-        style={classicSkin.tokens as CSSProperties}
-      &gt;
-        &lt;AnswerGame config={config} skin={classicSkin}&gt;
-          &lt;AnswerGame.Question&gt;
-            &lt;p className=&quot;text-center text-lg font-semibold text-foreground&quot;&gt;
-              {question}
-            &lt;/p&gt;
-          &lt;/AnswerGame.Question&gt;
-          &lt;AnswerGame.Answer&gt;
-            &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
-              {answerPreview}
-            &lt;/p&gt;
-          &lt;/AnswerGame.Answer&gt;
-          &lt;AnswerGame.Choices&gt;
-            &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
-              {choicesPreview}
-            &lt;/p&gt;
-          &lt;/AnswerGame.Choices&gt;
-        &lt;/AnswerGame&gt;
-      &lt;/div&gt;
+      &lt;AnswerGame config={config} skin={classicSkin}&gt;
+        &lt;AnswerGame.Question&gt;
+          &lt;p className=&quot;text-center text-lg font-semibold text-foreground&quot;&gt;
+            {question}
+          &lt;/p&gt;
+        &lt;/AnswerGame.Question&gt;
+        &lt;AnswerGame.Answer&gt;
+          &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
+            {answerPreview}
+          &lt;/p&gt;
+        &lt;/AnswerGame.Answer&gt;
+        &lt;AnswerGame.Choices&gt;
+          &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
+            {choicesPreview}
+          &lt;/p&gt;
+        &lt;/AnswerGame.Choices&gt;
+      &lt;/AnswerGame&gt;
     );
   },
 };
@@ -1204,28 +1199,23 @@ export const Playground: Story = {
       : {}),
   };
   return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id}`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
-      &lt;AnswerGame config={config} skin={classicSkin}&gt;
-        &lt;AnswerGame.Question&gt;
-          &lt;p className=&quot;text-center text-lg font-semibold text-foreground&quot;&gt;
-            {question}
-          &lt;/p&gt;
-        &lt;/AnswerGame.Question&gt;
-        &lt;AnswerGame.Answer&gt;
-          &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
-            {answerPreview}
-          &lt;/p&gt;
-        &lt;/AnswerGame.Answer&gt;
-        &lt;AnswerGame.Choices&gt;
-          &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
-            {choicesPreview}
-          &lt;/p&gt;
-        &lt;/AnswerGame.Choices&gt;
-      &lt;/AnswerGame&gt;
-    &lt;/div&gt;
+    &lt;AnswerGame config={config} skin={classicSkin}&gt;
+      &lt;AnswerGame.Question&gt;
+        &lt;p className=&quot;text-center text-lg font-semibold text-foreground&quot;&gt;
+          {question}
+        &lt;/p&gt;
+      &lt;/AnswerGame.Question&gt;
+      &lt;AnswerGame.Answer&gt;
+        &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
+          {answerPreview}
+        &lt;/p&gt;
+      &lt;/AnswerGame.Answer&gt;
+      &lt;AnswerGame.Choices&gt;
+        &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
+          {choicesPreview}
+        &lt;/p&gt;
+      &lt;/AnswerGame.Choices&gt;
+    &lt;/AnswerGame&gt;
   );
 };</code></pre>
             </div>
@@ -5536,20 +5526,19 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  20 | }
-  21 |
-&gt; 22 | const meta: Meta&lt;StoryArgs&gt; = {
+  19 | }
+  20 |
+&gt; 21 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  23 |   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
-  24 |   title: &#39;answer-game/ProgressHUD&#39;,
-  25 |   tags: [&#39;autodocs&#39;],
+  22 |   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
+  23 |   title: &#39;answer-game/ProgressHUD&#39;,
+  24 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx:
 import { ProgressHUD } from &#39;./ProgressHUD&#39;;
 import type { AnswerGamePhase } from &#39;../types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { CSSProperties, ComponentType } from &#39;react&#39;;
-import { classicSkin } from &#39;@/lib/skin&#39;;
+import type { ComponentType } from &#39;react&#39;;
 
 interface StoryArgs {
   dotCount: number;
@@ -5643,10 +5632,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
     const safeRoundIndex = Number.isFinite(roundIndex) ? roundIndex : 0;
     const safeLevelIndex = Number.isFinite(levelIndex) ? levelIndex : 0;
     return (
-      &lt;div
-        className={`game-container skin-${classicSkin.id} flex flex-col items-center gap-3 p-4`}
-        style={classicSkin.tokens as CSSProperties}
-      &gt;
+      &lt;div className=&quot;flex flex-col items-center gap-3 p-4&quot;&gt;
         &lt;span className=&quot;text-xs font-semibold uppercase tracking-wider text-muted-foreground&quot;&gt;
           {isLevelMode ? &#39;Levels&#39; : &#39;Rounds&#39;}
         &lt;/span&gt;
@@ -5727,10 +5713,7 @@ export const Playground: Story = {
   const safeRoundIndex = Number.isFinite(roundIndex) ? roundIndex : 0;
   const safeLevelIndex = Number.isFinite(levelIndex) ? levelIndex : 0;
   return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id} flex flex-col items-center gap-3 p-4`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
+    &lt;div className=&quot;flex flex-col items-center gap-3 p-4&quot;&gt;
       &lt;span className=&quot;text-xs font-semibold uppercase tracking-wider text-muted-foreground&quot;&gt;
         {isLevelMode ? &#39;Levels&#39; : &#39;Rounds&#39;}
       &lt;/span&gt;
@@ -6705,13 +6688,13 @@ min?: any = 0</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SlotRow as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  132 | };
-  133 |
-&gt; 134 | const meta: Meta&lt;StoryArgs&gt; = {
+  131 | };
+  132 |
+&gt; 133 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  135 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
-  136 |   title: &#39;answer-game/Slot&#39;,
-  137 |   tags: [&#39;autodocs&#39;],
+  134 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
+  135 |   title: &#39;answer-game/Slot&#39;,
+  136 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/Slot/Slot.stories.tsx:
 import { useEffect } from &#39;react&#39;;
@@ -6725,12 +6708,11 @@ import { SlotRow } from &#39;./SlotRow&#39;;
 import type { AnswerGameConfig, AnswerZone, TileItem } from &#39;../types&#39;;
 import type { SlotRenderProps } from &#39;./useSlotBehavior&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { CSSProperties, ComponentType, ReactNode } from &#39;react&#39;;
+import type { ComponentType, ReactNode } from &#39;react&#39;;
 import {
   DiceFace,
   DominoTile,
 } from &#39;@/games/number-match/NumeralTileBank/NumeralTileBank&#39;;
-import { classicSkin } from &#39;@/lib/skin&#39;;
 
 type SlotVariant = &#39;letter&#39; | &#39;dice&#39; | &#39;domino&#39; | &#39;inline-gap&#39;;
 type DragPreview = &#39;none&#39; | &#39;target-empty&#39; | &#39;target-swap&#39;;
@@ -6980,10 +6962,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
             ];
 
     return (
-      &lt;div
-        className={`game-container skin-${classicSkin.id} p-4`}
-        style={classicSkin.tokens as CSSProperties}
-      &gt;
+      &lt;div className=&quot;p-4&quot;&gt;
         &lt;AnswerGameProvider
           config={{
             ...baseConfig,
@@ -7122,10 +7101,7 @@ export const Playground: Story = {};
           ];
 
   return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id} p-4`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
+    &lt;div className=&quot;p-4&quot;&gt;
       &lt;AnswerGameProvider
         config={{
           ...baseConfig,
@@ -8872,7 +8848,7 @@ import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
 import { AnswerGame } from &#39;./AnswerGame&#39;;
 import type { AnswerGameConfig } from &#39;../types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { CSSProperties, ComponentType } from &#39;react&#39;;
+import type { ComponentType } from &#39;react&#39;;
 import { classicSkin } from &#39;@/lib/skin&#39;;
 
 interface StoryArgs {
@@ -8959,28 +8935,23 @@ const meta: Meta&lt;StoryArgs&gt; = {
         : {}),
     };
     return (
-      &lt;div
-        className={`game-container skin-${classicSkin.id}`}
-        style={classicSkin.tokens as CSSProperties}
-      &gt;
-        &lt;AnswerGame config={config} skin={classicSkin}&gt;
-          &lt;AnswerGame.Question&gt;
-            &lt;p className=&quot;text-center text-lg font-semibold text-foreground&quot;&gt;
-              {question}
-            &lt;/p&gt;
-          &lt;/AnswerGame.Question&gt;
-          &lt;AnswerGame.Answer&gt;
-            &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
-              {answerPreview}
-            &lt;/p&gt;
-          &lt;/AnswerGame.Answer&gt;
-          &lt;AnswerGame.Choices&gt;
-            &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
-              {choicesPreview}
-            &lt;/p&gt;
-          &lt;/AnswerGame.Choices&gt;
-        &lt;/AnswerGame&gt;
-      &lt;/div&gt;
+      &lt;AnswerGame config={config} skin={classicSkin}&gt;
+        &lt;AnswerGame.Question&gt;
+          &lt;p className=&quot;text-center text-lg font-semibold text-foreground&quot;&gt;
+            {question}
+          &lt;/p&gt;
+        &lt;/AnswerGame.Question&gt;
+        &lt;AnswerGame.Answer&gt;
+          &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
+            {answerPreview}
+          &lt;/p&gt;
+        &lt;/AnswerGame.Answer&gt;
+        &lt;AnswerGame.Choices&gt;
+          &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
+            {choicesPreview}
+          &lt;/p&gt;
+        &lt;/AnswerGame.Choices&gt;
+      &lt;/AnswerGame&gt;
     );
   },
 };
@@ -9055,28 +9026,23 @@ export const Playground: Story = {
       : {}),
   };
   return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id}`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
-      &lt;AnswerGame config={config} skin={classicSkin}&gt;
-        &lt;AnswerGame.Question&gt;
-          &lt;p className=&quot;text-center text-lg font-semibold text-foreground&quot;&gt;
-            {question}
-          &lt;/p&gt;
-        &lt;/AnswerGame.Question&gt;
-        &lt;AnswerGame.Answer&gt;
-          &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
-            {answerPreview}
-          &lt;/p&gt;
-        &lt;/AnswerGame.Answer&gt;
-        &lt;AnswerGame.Choices&gt;
-          &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
-            {choicesPreview}
-          &lt;/p&gt;
-        &lt;/AnswerGame.Choices&gt;
-      &lt;/AnswerGame&gt;
-    &lt;/div&gt;
+    &lt;AnswerGame config={config} skin={classicSkin}&gt;
+      &lt;AnswerGame.Question&gt;
+        &lt;p className=&quot;text-center text-lg font-semibold text-foreground&quot;&gt;
+          {question}
+        &lt;/p&gt;
+      &lt;/AnswerGame.Question&gt;
+      &lt;AnswerGame.Answer&gt;
+        &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
+          {answerPreview}
+        &lt;/p&gt;
+      &lt;/AnswerGame.Answer&gt;
+      &lt;AnswerGame.Choices&gt;
+        &lt;p className=&quot;rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground&quot;&gt;
+          {choicesPreview}
+        &lt;/p&gt;
+      &lt;/AnswerGame.Choices&gt;
+    &lt;/AnswerGame&gt;
   );
 };</code></pre>
             </div>
@@ -11172,20 +11138,19 @@ export const Default: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  20 | }
-  21 |
-&gt; 22 | const meta: Meta&lt;StoryArgs&gt; = {
+  19 | }
+  20 |
+&gt; 21 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  23 |   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
-  24 |   title: &#39;answer-game/ProgressHUD&#39;,
-  25 |   tags: [&#39;autodocs&#39;],
+  22 |   component: ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;,
+  23 |   title: &#39;answer-game/ProgressHUD&#39;,
+  24 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx:
 import { ProgressHUD } from &#39;./ProgressHUD&#39;;
 import type { AnswerGamePhase } from &#39;../types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { CSSProperties, ComponentType } from &#39;react&#39;;
-import { classicSkin } from &#39;@/lib/skin&#39;;
+import type { ComponentType } from &#39;react&#39;;
 
 interface StoryArgs {
   dotCount: number;
@@ -11279,10 +11244,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
     const safeRoundIndex = Number.isFinite(roundIndex) ? roundIndex : 0;
     const safeLevelIndex = Number.isFinite(levelIndex) ? levelIndex : 0;
     return (
-      &lt;div
-        className={`game-container skin-${classicSkin.id} flex flex-col items-center gap-3 p-4`}
-        style={classicSkin.tokens as CSSProperties}
-      &gt;
+      &lt;div className=&quot;flex flex-col items-center gap-3 p-4&quot;&gt;
         &lt;span className=&quot;text-xs font-semibold uppercase tracking-wider text-muted-foreground&quot;&gt;
           {isLevelMode ? &#39;Levels&#39; : &#39;Rounds&#39;}
         &lt;/span&gt;
@@ -11363,10 +11325,7 @@ export const Playground: Story = {
   const safeRoundIndex = Number.isFinite(roundIndex) ? roundIndex : 0;
   const safeLevelIndex = Number.isFinite(levelIndex) ? levelIndex : 0;
   return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id} flex flex-col items-center gap-3 p-4`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
+    &lt;div className=&quot;flex flex-col items-center gap-3 p-4&quot;&gt;
       &lt;span className=&quot;text-xs font-semibold uppercase tracking-wider text-muted-foreground&quot;&gt;
         {isLevelMode ? &#39;Levels&#39; : &#39;Rounds&#39;}
       &lt;/span&gt;
@@ -12105,13 +12064,13 @@ export const OpensAndClosesOnEscape: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SlotRow as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  132 | };
-  133 |
-&gt; 134 | const meta: Meta&lt;StoryArgs&gt; = {
+  131 | };
+  132 |
+&gt; 133 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
-  135 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
-  136 |   title: &#39;answer-game/Slot&#39;,
-  137 |   tags: [&#39;autodocs&#39;],
+  134 |   component: SlotRow as unknown as ComponentType&lt;StoryArgs&gt;,
+  135 |   title: &#39;answer-game/Slot&#39;,
+  136 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/Slot/Slot.stories.tsx:
 import { useEffect } from &#39;react&#39;;
@@ -12125,12 +12084,11 @@ import { SlotRow } from &#39;./SlotRow&#39;;
 import type { AnswerGameConfig, AnswerZone, TileItem } from &#39;../types&#39;;
 import type { SlotRenderProps } from &#39;./useSlotBehavior&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { CSSProperties, ComponentType, ReactNode } from &#39;react&#39;;
+import type { ComponentType, ReactNode } from &#39;react&#39;;
 import {
   DiceFace,
   DominoTile,
 } from &#39;@/games/number-match/NumeralTileBank/NumeralTileBank&#39;;
-import { classicSkin } from &#39;@/lib/skin&#39;;
 
 type SlotVariant = &#39;letter&#39; | &#39;dice&#39; | &#39;domino&#39; | &#39;inline-gap&#39;;
 type DragPreview = &#39;none&#39; | &#39;target-empty&#39; | &#39;target-swap&#39;;
@@ -12380,10 +12338,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
             ];
 
     return (
-      &lt;div
-        className={`game-container skin-${classicSkin.id} p-4`}
-        style={classicSkin.tokens as CSSProperties}
-      &gt;
+      &lt;div className=&quot;p-4&quot;&gt;
         &lt;AnswerGameProvider
           config={{
             ...baseConfig,
@@ -12522,10 +12477,7 @@ export const Playground: Story = {};
           ];
 
   return (
-    &lt;div
-      className={`game-container skin-${classicSkin.id} p-4`}
-      style={classicSkin.tokens as CSSProperties}
-    &gt;
+    &lt;div className=&quot;p-4&quot;&gt;
       &lt;AnswerGameProvider
         config={{
           ...baseConfig,
