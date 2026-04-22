@@ -2,7 +2,7 @@ import { withDb } from '../../../../.storybook/decorators/withDb';
 import { AnswerGame } from './AnswerGame';
 import type { AnswerGameConfig } from '../types';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { CSSProperties, ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import { classicSkin } from '@/lib/skin';
 
 interface StoryArgs {
@@ -89,28 +89,23 @@ const meta: Meta<StoryArgs> = {
         : {}),
     };
     return (
-      <div
-        className={`game-container skin-${classicSkin.id}`}
-        style={classicSkin.tokens as CSSProperties}
-      >
-        <AnswerGame config={config} skin={classicSkin}>
-          <AnswerGame.Question>
-            <p className="text-center text-lg font-semibold text-foreground">
-              {question}
-            </p>
-          </AnswerGame.Question>
-          <AnswerGame.Answer>
-            <p className="rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground">
-              {answerPreview}
-            </p>
-          </AnswerGame.Answer>
-          <AnswerGame.Choices>
-            <p className="rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground">
-              {choicesPreview}
-            </p>
-          </AnswerGame.Choices>
-        </AnswerGame>
-      </div>
+      <AnswerGame config={config} skin={classicSkin}>
+        <AnswerGame.Question>
+          <p className="text-center text-lg font-semibold text-foreground">
+            {question}
+          </p>
+        </AnswerGame.Question>
+        <AnswerGame.Answer>
+          <p className="rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground">
+            {answerPreview}
+          </p>
+        </AnswerGame.Answer>
+        <AnswerGame.Choices>
+          <p className="rounded-md border border-dashed border-muted-foreground/40 px-4 py-3 text-sm text-muted-foreground">
+            {choicesPreview}
+          </p>
+        </AnswerGame.Choices>
+      </AnswerGame>
     );
   },
 };

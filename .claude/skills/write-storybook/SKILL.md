@@ -60,6 +60,7 @@ Use decorators when the component depends on context providers:
 | Database / RxDB (`useSettings`, `useRxDB`, any DB hook) | `withDb` from `../../.storybook/decorators/withDb`         |
 | Theme toggle                                            | `withTheme` — already applied globally via `preview.tsx`   |
 | ThemeProvider                                           | Already applied globally — do NOT add again                |
+| Classic skin tokens (`--skin-*`)                        | Applied globally via `preview.tsx` — do NOT add again      |
 
 When both are needed, put `withDb` first (outermost), then `withRouter`:
 
@@ -275,6 +276,34 @@ export const ClosesOnEscape: Story = {
 
 Name interaction stories after the flow, not the input: `SubmitsValidForm`, `ShowsErrorOnEmptyName`, `ClosesOnEscape`. Keep them small and single-purpose — one assertion path per story makes failures self-explanatory.
 
+## Default Skin Is Applied Globally
+
+`.storybook/preview.tsx` registers a `withDefaultSkin` decorator that wraps every
+story in:
+
+```tsx
+<div className="game-container skin-classic" style={classicSkin.tokens}>
+  <Story />
+</div>
+```
+
+Components that consume `--skin-*` tokens (tiles, slots, HUD, question bar,
+celebration overlays) render with sensible defaults **without any per-file
+wrapper**. Do not add your own classic-skin wrapper — it's redundant.
+
+### Overriding the default skin
+
+Alt-skin test files (`*.skin.stories.tsx` — see
+`src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx`) register a
+different skin with `registerSkin('<gameId>', demoSkin)` and let the game
+component mount its own inner `skin-${skin.id}` wrapper. CSS custom-property
+cascade on the inner wrapper overrides the outer classic defaults — no opt-out
+parameter or `decorators: []` override is needed.
+
+If a future story needs to visually preview alt-skin tokens **without mounting
+a game component** (e.g. a bare token-swatch preview), add an opt-out parameter
+to `withDefaultSkin` at that time. Until then, YAGNI.
+
 ## A11y Is Enforced
 
 `.storybook/preview.tsx` sets `parameters.a11y.test: 'error'` globally. Every story is axe-checked, and any violation (including color-contrast) **fails `yarn test:storybook` and CI**. You cannot opt out for a new story.
@@ -431,6 +460,7 @@ When you edit an existing story file for any reason, run this checklist before o
 - [ ] Required variants are present (Default, enum-per-value where the visual differs, state variants, edge cases — see "Required Variants")
 - [ ] At least one `play()` interaction story if the component is interactive
 - [ ] Decorators match current component dependencies (e.g., if the component started using `useSettings`, `withDb` is now required)
+- [ ] No per-file classic-skin wrapper (`<div className="game-container skin-classic" style={classicSkin.tokens}>`) — the global `withDefaultSkin` decorator already applies this. Remove inline wrappers; keep `classicSkin` imports only if passed as a component prop.
 - [ ] No `parameters.chromatic` (we don't use it)
 - [ ] Story file passes `yarn test:storybook --url <port>` locally
 

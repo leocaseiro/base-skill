@@ -2,6 +2,7 @@ import '../src/styles.css';
 import '../src/lib/i18n/i18n';
 import { ThemeProvider } from 'next-themes';
 import { Mermaid } from '../src/components/ui/Mermaid';
+import { withDefaultSkin } from './decorators';
 import { withTheme } from './decorators/withTheme';
 import type { Decorator, Preview } from '@storybook/react';
 import type { ReactNode } from 'react';
@@ -51,7 +52,7 @@ const preview: Preview = {
   initialGlobals: {
     theme: 'light',
   },
-  decorators: [withAppThemeProvider, withTheme],
+  decorators: [withAppThemeProvider, withTheme, withDefaultSkin],
   parameters: {
     viewport: {
       viewports: {

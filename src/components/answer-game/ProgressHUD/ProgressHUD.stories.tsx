@@ -1,8 +1,7 @@
 import { ProgressHUD } from './ProgressHUD';
 import type { AnswerGamePhase } from '../types';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { CSSProperties, ComponentType } from 'react';
-import { classicSkin } from '@/lib/skin';
+import type { ComponentType } from 'react';
 
 interface StoryArgs {
   dotCount: number;
@@ -96,10 +95,7 @@ const meta: Meta<StoryArgs> = {
     const safeRoundIndex = Number.isFinite(roundIndex) ? roundIndex : 0;
     const safeLevelIndex = Number.isFinite(levelIndex) ? levelIndex : 0;
     return (
-      <div
-        className={`game-container skin-${classicSkin.id} flex flex-col items-center gap-3 p-4`}
-        style={classicSkin.tokens as CSSProperties}
-      >
+      <div className="flex flex-col items-center gap-3 p-4">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {isLevelMode ? 'Levels' : 'Rounds'}
         </span>
