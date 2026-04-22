@@ -3,7 +3,13 @@ import { withRouter } from '../../../../.storybook/decorators/withRouter';
 import { DotGroupQuestion } from './DotGroupQuestion';
 import type { AnswerGameConfig } from '@/components/answer-game/types';
 import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+
+interface StoryArgs {
+  count: number;
+  prompt: string;
+}
 
 const storyConfig: AnswerGameConfig = {
   gameId: 'storybook',
@@ -14,8 +20,8 @@ const storyConfig: AnswerGameConfig = {
   ttsEnabled: true,
 };
 
-const meta: Meta<typeof DotGroupQuestion> = {
-  component: DotGroupQuestion,
+const meta: Meta<StoryArgs> = {
+  component: DotGroupQuestion as unknown as ComponentType<StoryArgs>,
   tags: ['autodocs'],
   decorators: [
     withDb,
@@ -30,16 +36,31 @@ const meta: Meta<typeof DotGroupQuestion> = {
     docs: {
       description: {
         component:
-          'Renders a group of individually tappable dots. Tapping a dot assigns it the next sequential count (1, 2, 3…), overlays the number on the dot, and speaks the cardinal word aloud. Resets when `count` changes.',
+          'Renders a group of individually tappable dots. Tapping a dot assigns it the next sequential count (1, 2, 3…), overlays the number on the dot, and speaks the cardinal word aloud. Resets when `count` changes.\n\nTap-assignment, re-speak on an already-numbered dot, and reset-on-count-change flows live in `DotGroupQuestion.test.tsx`; this story is visual-only.',
       },
     },
   },
+  args: {
+    count: 3,
+    prompt: 'three',
+  },
+  argTypes: {
+    count: {
+      control: { type: 'range', min: 1, max: 20, step: 1 },
+      description:
+        'Number of dots in the group. Changing this resets all dot assignments.',
+    },
+    prompt: {
+      control: 'text',
+      description: 'Accessible label for the dot group container.',
+    },
+  },
+  render: ({ count, prompt }) => (
+    <DotGroupQuestion count={count} prompt={prompt} />
+  ),
 };
 export default meta;
 
-type Story = StoryObj<typeof DotGroupQuestion>;
+type Story = StoryObj<StoryArgs>;
 
-export const OneDot: Story = { args: { count: 1, prompt: 'one' } };
-export const ThreeDots: Story = { args: { count: 3, prompt: 'three' } };
-export const FiveDots: Story = { args: { count: 5, prompt: 'five' } };
-export const NineDots: Story = { args: { count: 9, prompt: 'nine' } };
+export const Playground: Story = {};
