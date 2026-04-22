@@ -584,12 +584,12 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 **Gates applied:**
 
 - Gate 1 — Controls map: `fields` and `config` are complex objects → hidden from Controls, driven by a `scenario` select.
-- Gate 2 — Structured inputs: `scenario` → select with 4 presets.
+- Gate 2 — Structured inputs: `scenario` → select with 5 generic presets (one per rendering branch of `ConfigFormFields.tsx`: primitive field types, nested types, dual select-or-number, visibleWhen-hidden, visibleWhen-shown). No game-specific vocabulary in this generic story file — per-game fixtures are an additive follow-up in #153.
 - Gate 3 — Handler wiring: `onChange` wired to `fn()` in `args`; hidden from Controls.
 - Gate 4 — Global skin (PR #154) — no per-file wrapper.
 - Gate 5 — Hide shadowed rows for `fields`, `config`.
-- Gate 6 — Collapse: the 4 scenario exports + `AllFieldTypesDark` all reduce to a single `Default` Playground — the `scenario` select in Controls reaches every `visibleWhen` branch in one click, and the theme toolbar reproduces dark. Drop all 5.
-- Gate 8 — Single-Default pattern (PR #155): one `Default` story. State variants (each `visibleWhen` branch) are reachable from the scenario select — no separate exports.
+- Gate 6 — Collapse + genericise: the 4 SortNumbers-flavoured scenario exports + `AllFieldTypesDark` all reduce to a single `Default` Playground. Simultaneously, the SortNumbers-specific `sortFields` fixture is REPLACED by 4 small generic fixtures (one per rendering branch of `ConfigFormFields.tsx`), each selectable via the `scenario` control. Per-game fixtures (SortNumbers, NumberMatch, etc.) live in their own co-located stories under `src/games/<game>/` — added additively in #153.
+- Gate 8 — Single-Default pattern (PR #155): one `Default` story. Every rendering branch (primitive / nested / select-or-number / visibleWhen hidden / visibleWhen shown) is reachable from the scenario select — no separate exports.
 - Gate 9 — Decorators: N/A (no router/DB deps).
 
 **Steps:**
@@ -612,10 +612,11 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   import type { Meta, StoryObj } from '@storybook/react';
 
   type Scenario =
-    | 'all-types'
-    | 'sort-numbers-random'
-    | 'sort-numbers-by'
-    | 'sort-numbers-distractors';
+    | 'primitive-types'
+    | 'nested-types'
+    | 'nested-select-or-number'
+    | 'visible-when-hidden'
+    | 'visible-when-shown';
 
   interface StoryArgs {
     scenario: Scenario;
@@ -625,91 +626,85 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
     config?: never;
   }
 
-  const allFields: ConfigField[] = [
+  // Generic fixtures — one per rendering branch of ConfigFormFields.tsx.
+  // Per-game fixtures (SortNumbers etc.) live in co-located game stories
+  // under src/games/<game>/ (see #153), not here.
+
+  const primitiveFields: ConfigField[] = [
     {
       type: 'select',
-      key: 'mode',
-      label: 'Mode',
+      key: 'size',
+      label: 'Size',
       options: [
-        { value: 'picture', label: 'Picture' },
-        { value: 'text', label: 'Text' },
+        { value: 'small', label: 'Small' },
+        { value: 'medium', label: 'Medium' },
+        { value: 'large', label: 'Large' },
       ],
     },
     {
       type: 'number',
-      key: 'totalRounds',
-      label: 'Total rounds',
+      key: 'count',
+      label: 'Count',
       min: 1,
       max: 20,
     },
     {
       type: 'checkbox',
-      key: 'ttsEnabled',
-      label: 'Text-to-speech',
+      key: 'enabled',
+      label: 'Enabled',
     },
   ];
 
-  const sortFields: ConfigField[] = [
+  const nestedFields: ConfigField[] = [
     {
       type: 'nested-select',
-      key: 'skip',
+      key: 'group',
       subKey: 'mode',
-      label: 'Skip mode',
+      label: 'Group mode',
       options: [
-        { value: 'random', label: 'random' },
-        { value: 'consecutive', label: 'consecutive' },
-        { value: 'by', label: 'by' },
+        { value: 'auto', label: 'Auto' },
+        { value: 'manual', label: 'Manual' },
       ],
     },
     {
       type: 'nested-number',
-      key: 'skip',
-      subKey: 'step',
-      label: 'Skip step',
-      min: 2,
-      max: 100,
-      visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
+      key: 'group',
+      subKey: 'size',
+      label: 'Group size',
+      min: 1,
+      max: 10,
     },
-    {
-      type: 'nested-select',
-      key: 'skip',
-      subKey: 'start',
-      label: 'Skip start',
-      options: [
-        { value: 'range-min', label: 'range-min' },
-        { value: 'random', label: 'random' },
-      ],
-      visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
-    },
-    {
-      type: 'select',
-      key: 'tileBankMode',
-      label: 'Tile bank mode',
-      options: [
-        { value: 'exact', label: 'exact' },
-        { value: 'distractors', label: 'distractors' },
-      ],
-    },
-    {
-      type: 'nested-select',
-      key: 'distractors',
-      subKey: 'source',
-      label: 'Distractor source',
-      options: [
-        { value: 'random', label: 'random' },
-        { value: 'gaps-only', label: 'gaps-only' },
-        { value: 'full-range', label: 'full-range' },
-      ],
-      visibleWhen: { key: 'tileBankMode', value: 'distractors' },
-    },
+  ];
+
+  const selectOrNumberFields: ConfigField[] = [
     {
       type: 'nested-select-or-number',
-      key: 'distractors',
-      subKey: 'count',
-      label: 'Distractor count',
+      key: 'range',
+      subKey: 'max',
+      label: 'Max range',
       min: 1,
-      max: 20,
-      visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+      max: 100,
+    },
+  ];
+
+  const visibleWhenFields: ConfigField[] = [
+    {
+      type: 'select',
+      key: 'mode',
+      label: 'Mode',
+      options: [
+        { value: 'simple', label: 'Simple' },
+        { value: 'advanced', label: 'Advanced' },
+      ],
+    },
+    {
+      type: 'nested-number',
+      key: 'advanced',
+      subKey: 'threshold',
+      label: 'Threshold',
+      min: 1,
+      max: 100,
+      visibleWhen: { key: 'mode', value: 'advanced' },
     },
   ];
 
@@ -717,33 +712,25 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
     Scenario,
     { fields: ConfigField[]; config: Record<string, unknown> }
   > = {
-    'all-types': {
-      fields: allFields,
-      config: { mode: 'picture', totalRounds: 8, ttsEnabled: true },
+    'primitive-types': {
+      fields: primitiveFields,
+      config: { size: 'medium', count: 5, enabled: true },
     },
-    'sort-numbers-random': {
-      fields: sortFields,
-      config: {
-        skip: { mode: 'random' },
-        tileBankMode: 'exact',
-        distractors: { source: 'random', count: 2 },
-      },
+    'nested-types': {
+      fields: nestedFields,
+      config: { group: { mode: 'auto', size: 4 } },
     },
-    'sort-numbers-by': {
-      fields: sortFields,
-      config: {
-        skip: { mode: 'by', step: 5, start: 'range-min' },
-        tileBankMode: 'exact',
-        distractors: { source: 'random', count: 2 },
-      },
+    'nested-select-or-number': {
+      fields: selectOrNumberFields,
+      config: { range: { max: 10 } },
     },
-    'sort-numbers-distractors': {
-      fields: sortFields,
-      config: {
-        skip: { mode: 'random' },
-        tileBankMode: 'distractors',
-        distractors: { source: 'gaps-only', count: 3 },
-      },
+    'visible-when-hidden': {
+      fields: visibleWhenFields,
+      config: { mode: 'simple', advanced: { threshold: 50 } },
+    },
+    'visible-when-shown': {
+      fields: visibleWhenFields,
+      config: { mode: 'advanced', advanced: { threshold: 50 } },
     },
   };
 
@@ -751,17 +738,18 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
     component: ConfigFormFields as unknown as ComponentType<StoryArgs>,
     tags: ['autodocs'],
     args: {
-      scenario: 'all-types',
+      scenario: 'primitive-types',
       onChange: fn(),
     },
     argTypes: {
       scenario: {
         control: { type: 'select' },
         options: [
-          'all-types',
-          'sort-numbers-random',
-          'sort-numbers-by',
-          'sort-numbers-distractors',
+          'primitive-types',
+          'nested-types',
+          'nested-select-or-number',
+          'visible-when-hidden',
+          'visible-when-shown',
         ] satisfies Scenario[],
       },
       onChange: { table: { disable: true } },
@@ -785,12 +773,12 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 
   export const Default: Story = {};
 
-  // deleted-for-reference — every prior export is reachable from Default via the `scenario` select:
-  //   AllFieldTypes                 → scenario='all-types'
-  //   SortNumbersFieldsExact        → scenario='sort-numbers-random'
-  //   SortNumbersFieldsByMode       → scenario='sort-numbers-by'
-  //   SortNumbersFieldsDistractors  → scenario='sort-numbers-distractors'
-  //   AllFieldTypesDark             → scenario='all-types' + toolbar flip to dark
+  // The prior 4 scenario exports (AllFieldTypes + 3 SortNumbers presets) and
+  // AllFieldTypesDark are all removed. The `scenario` select in Controls
+  // reaches every rendering branch of ConfigFormFields generically. Per-game
+  // form previews (SortNumbers' real fixtures, NumberMatch, WordSpell, etc.)
+  // live as co-located stories in each game's src/games/<game>/ directory —
+  // see issue #153 for the additive follow-up.
   ```
 
 - [ ] **Step 3: Verify.**
@@ -809,19 +797,21 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   git commit -m "$(cat <<'EOF'
   stories(components/ConfigFormFields): retrofit per single-Default Playground
 
-  StoryArgs with scenario select (all-types / sort-numbers-random /
-  sort-numbers-by / sort-numbers-distractors) — each scenario preset
-  exercises a distinct visibleWhen branch. onChange wired to fn() spy
-  and hidden from Controls. Complex props (fields, config) shadowed
-  via ?: never + table.disable.
+  StoryArgs with scenario select (primitive-types / nested-types /
+  nested-select-or-number / visible-when-hidden / visible-when-shown)
+  — each preset exercises one rendering branch of ConfigFormFields.tsx
+  with generic field fixtures. onChange wired to fn() spy and hidden
+  from Controls. Complex props (fields, config) shadowed via ?: never
+  + table.disable.
 
-  Collapse the 4 scenario exports + AllFieldTypesDark into a single
-  Default story — the scenario select reaches every visibleWhen branch
-  from Controls in one click; the theme toolbar reproduces dark.
-  Matches the single-Default Playground pattern in the skill
-  (added in PR #155). Note: the SortNumbers-specific fixtures inside
-  the file will move to a co-located game story in a follow-up
-  (tracked in #153).
+  Collapse the 4 prior SortNumbers-flavoured scenario exports +
+  AllFieldTypesDark into a single Default story — the scenario select
+  reaches every rendering branch from Controls in one click; the theme
+  toolbar reproduces dark. Simultaneously replace the SortNumbers-
+  specific sortFields fixture with 4 generic fixtures; the SortNumbers
+  fixtures now only belong in their own co-located game story (added
+  additively in #153). Matches the single-Default Playground pattern
+  in the skill (added in PR #155).
 
   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
   EOF
@@ -838,12 +828,12 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   Tier 3, file 4 of 5 — retrofits `src/components/ConfigFormFields.stories.tsx` to the single-Default Playground pattern
   ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
 
-  - `scenario` select in Controls drives 4 presets — each surfaces a distinct `visibleWhen` branch.
+  - `scenario` select in Controls drives 5 generic presets — one per rendering branch of `ConfigFormFields.tsx` (primitive / nested / select-or-number / visibleWhen hidden / visibleWhen shown). No game-specific vocabulary.
   - `onChange` wired to `fn()`; hidden from Controls.
   - Complex props (`fields`, `config`) shadowed via `?: never` + `table.disable`.
-  - Collapse the 4 scenario exports + `AllFieldTypesDark` into a single `Default` story — the scenario select reaches every state from Controls; theme toolbar reproduces dark.
+  - Collapse the 4 prior SortNumbers-flavoured scenario exports + `AllFieldTypesDark` into a single `Default` story, and replace the SortNumbers-specific `sortFields` fixture with 5 generic fixtures. Theme toolbar reproduces dark.
   - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
-  - Follow-up tracked in #153: move the SortNumbers-specific fixtures (`sortFields`) out of this generic file and into a co-located game story (mirroring PR #143's `InstructionsOverlay` pattern).
+  - Follow-up tracked in #153 is now additive: add per-game `*.config-form.stories.tsx` files (SortNumbers, NumberMatch, etc.) using each game's real fixtures, mirroring PR #143's `InstructionsOverlay` per-game pattern. No further edits to this generic story are required by #153.
 
   Closes part of #125.
 
@@ -852,7 +842,7 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   - [ ] `yarn typecheck` green
   - [ ] `yarn lint` green
   - [ ] `yarn test:storybook` green (runs in CI)
-  - [ ] scenario select on the `Default` story drives all 4 `visibleWhen` branches; theme toolbar cycles dark/light
+  - [ ] scenario select on the `Default` story cycles through all 5 generic branches (primitive / nested / select-or-number / visibleWhen hidden / visibleWhen shown); theme toolbar cycles dark/light
   EOF
   )"
   ```
@@ -1145,7 +1135,7 @@ After all 5 PRs merge:
 - Any `.md` / docs edits outside this plan file.
 - Any changes to `.storybook/preview.tsx`, `.storybook/decorators.tsx`, or global Storybook config.
 - Retrofitting the remaining 4 root-components files (`Footer`, `Header`, `OfflineIndicator`, `ThemeToggle`, `UpdateBanner`) — they are still in the Tier 5 / Batch 5 bucket on #125 and should get their own plan.
-- Moving Task 4's SortNumbers-specific scenarios (`sortFields` fixture, the 3 sort presets) out of `ConfigFormFields.stories.tsx` and into a co-located `src/games/sort-numbers/SortNumbers.config-form.stories.tsx` — tracked in #153. Task 4 as written ships the SortNumbers fixtures inside the generic Playground and the relocation is a post-#150 follow-up, mirroring #143's per-game `InstructionsOverlay` move.
+- Adding per-game `*.config-form.stories.tsx` files (e.g. `src/games/sort-numbers/SortNumbers.config-form.stories.tsx`) using each game's real `ConfigField[]` fixtures — tracked in #153 as an additive follow-up, mirroring #143's per-game `InstructionsOverlay` pattern. Task 4 ships the generic `ConfigFormFields` story with 5 generic fixtures only; no SortNumbers vocabulary — so #153 adds new files without needing to remove anything from the generic story.
 
 ---
 
