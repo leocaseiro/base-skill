@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">19/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/166 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">20/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/164 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7743,19 +7743,19 @@ sessionId?: string</code></pre>
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="TextQuestion">
+  aria-label="TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> TextQuestion</h2>
+      <h2><span class="status-dot dot-err"></span> TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-38-components-questions-textquestion-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-38-components-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
         <label for="c-38-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-38-components-questions-textquestion-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-38-components-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -7766,14 +7766,87 @@ sessionId?: string</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-38-components-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-38-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-38-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-38-components-questions-textquestion-props" class="tg tg-props" type="checkbox" hidden />
+  
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  19 | };
+  20 |
+&gt; 21 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  22 |   component: TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
+  23 |   tags: [&#39;autodocs&#39;],
+  24 |   decorators: [
+
+./src/components/questions/TextQuestion/TextQuestion.stories.tsx:
+import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
+import { TextQuestion } from &#39;./TextQuestion&#39;;
+import type { AnswerGameConfig } from &#39;@/components/answer-game/types&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+import { AnswerGameProvider } from &#39;@/components/answer-game/AnswerGameProvider&#39;;
+
+interface StoryArgs {
+  text: string;
+}
+
+const storyConfig: AnswerGameConfig = {
+  gameId: &#39;storybook&#39;,
+  inputMethod: &#39;drag&#39;,
+  wrongTileBehavior: &#39;lock-auto-eject&#39;,
+  tileBankMode: &#39;exact&#39;,
+  totalRounds: 1,
+  ttsEnabled: true,
+};
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  decorators: [
+    withDb,
+    (Story) =&gt; (
+      &lt;AnswerGameProvider config={storyConfig}&gt;
+        &lt;Story /&gt;
+      &lt;/AnswerGameProvider&gt;
+    ),
+  ],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Single-prop prompt button: renders `text` as a tappable label and plays TTS via `useGameTTS` on click. Use the `text` control to preview single words, long words, or sentence prompts with gap markers (e.g. `The ___ sat on the mat.`). Click/TTS + aria-label behaviour is covered by `TextQuestion.test.tsx`.&#39;,
+      },
+    },
+  },
+  args: {
+    text: &#39;three&#39;,
+  },
+  argTypes: {
+    text: {
+      control: &#39;text&#39;,
+      description:
+        &#39;The prompt text rendered inside the button and spoken via TTS on click.&#39;,
+    },
+  },
+  render: ({ text }) =&gt; &lt;TextQuestion text={text} /&gt;,
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -7783,17 +7856,6 @@ sessionId?: string</code></pre>
     </div>
         </div>
     
-        <div class="panel panel-props">
-          <div class="note ok">
-            <div class="row">
-              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">1 prop type</span>
-            </div>
-            <pre><code>Component: src/components/questions/TextQuestion/TextQuestion.tsx::TextQuestion</code></pre>
-            <pre><code>Props:</code></pre>
-            <pre><code>text: string</code></pre>
-          </div>
-        </div>
     
         <div class="panel panel-stories">
           
@@ -7809,30 +7871,12 @@ sessionId?: string</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;TextQuestion text=&quot;three&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Long Word</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const LongWord = () =&gt; &lt;TextQuestion text=&quot;elephant&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Sentence Gap</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const SentenceGap = () =&gt; &lt;TextQuestion text=&quot;The ___ sat on the mat.&quot; /&gt;;</code></pre>
+              <pre><code>const Playground = ({ text }) =&gt; &lt;TextQuestion text={text} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -8587,7 +8631,7 @@ export const HUD_Round5Of5: Story = {
           <label for="no-component-import-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component import found</span>
-            <span class="group-count">19</span>
+            <span class="group-count">20</span>
           </label>
           <div class="group-cards">
 <article
@@ -12984,14 +13028,155 @@ export const Playground: Story = {};
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-17-components-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-17-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-17-components-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/questions/TextQuestion/TextQuestion.stories.tsx">components-questions-textquestion · ./src/components/questions/TextQuestion/TextQuestion.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-17-components-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-17-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-17-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  19 | };
+  20 |
+&gt; 21 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  22 |   component: TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
+  23 |   tags: [&#39;autodocs&#39;],
+  24 |   decorators: [
+
+./src/components/questions/TextQuestion/TextQuestion.stories.tsx:
+import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
+import { TextQuestion } from &#39;./TextQuestion&#39;;
+import type { AnswerGameConfig } from &#39;@/components/answer-game/types&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+import { AnswerGameProvider } from &#39;@/components/answer-game/AnswerGameProvider&#39;;
+
+interface StoryArgs {
+  text: string;
+}
+
+const storyConfig: AnswerGameConfig = {
+  gameId: &#39;storybook&#39;,
+  inputMethod: &#39;drag&#39;,
+  wrongTileBehavior: &#39;lock-auto-eject&#39;,
+  tileBankMode: &#39;exact&#39;,
+  totalRounds: 1,
+  ttsEnabled: true,
+};
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  decorators: [
+    withDb,
+    (Story) =&gt; (
+      &lt;AnswerGameProvider config={storyConfig}&gt;
+        &lt;Story /&gt;
+      &lt;/AnswerGameProvider&gt;
+    ),
+  ],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Single-prop prompt button: renders `text` as a tappable label and plays TTS via `useGameTTS` on click. Use the `text` control to preview single words, long words, or sentence prompts with gap markers (e.g. `The ___ sat on the mat.`). Click/TTS + aria-label behaviour is covered by `TextQuestion.test.tsx`.&#39;,
+      },
+    },
+  },
+  args: {
+    text: &#39;three&#39;,
+  },
+  argTypes: {
+    text: {
+      control: &#39;text&#39;,
+      description:
+        &#39;The prompt text rendered inside the button and spoken via TTS on click.&#39;,
+    },
+  },
+  render: ({ text }) =&gt; &lt;TextQuestion text={text} /&gt;,
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { AnswerGameProvider, TextQuestion } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = ({ text }) =&gt; &lt;TextQuestion text={text} /&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-err"></span> UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-17-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-17-components-updatebanner-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-17-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-18-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-18-components-updatebanner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-18-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -13002,9 +13187,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-17-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-17-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-17-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-18-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-18-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-18-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13145,9 +13330,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
       <div class="badges">
-        <label for="c-error-18-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-18-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-18-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
+        <label for="c-error-19-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-19-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-19-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
         
       </div>
     </div>
@@ -13158,9 +13343,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-18-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-18-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-18-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-19-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-19-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-19-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
