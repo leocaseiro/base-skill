@@ -1,5 +1,7 @@
 # Claude Code Rules for BaseSkill
 
+Agents using Cursor or other tools: read [AGENTS.md](./AGENTS.md) first for the mandatory worktree gate; this file is the full project handbook.
+
 ## React Best Practices
 
 Analyse the [eslint.config.js](./eslint.config.js) to decide what approach to write the code. For example we don't use functions, but const(react/function-component-definition)
