@@ -33,11 +33,27 @@ test-runner, `gh` CLI, git worktrees, `yarn`.
 - **Controls policy:** `.claude/skills/write-storybook/SKILL.md`
 - **Shell-slim canonical:** `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
 - **Playground-collapse canonical:** `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`
+- **Trigger-button canonical (one-shot callbacks):** `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
 - **Precedent PRs:** `#124` (pilot), `#134` (batch 2 retrofit), `#141` (Playground collapse),
-  `#143` (per-game wrapper refactor).
+  `#143` (per-game wrapper refactor), `#154` (global `withDefaultSkin` decorator — merged
+  `eada2163`, makes the per-file classic-skin wrapper obsolete).
+- **In-flight PR `#155`** rewrites the SKILL.md to formalise the single-Playground discipline
+  (auxiliary stories only for scenarios controls can't express) and demotes `play()` to
+  optional. The amendments below fold in its policy direction; the only unresolved detail is
+  the export name (`Playground` vs `Default`) — **see "Open question" below**.
 
 Any deviation from the spec's scope (ten target files, worktree/branch/port table, two-wave
 orchestration, flag-on-surprise contract) is a plan defect — fix the plan first.
+
+### Open question: `Playground` vs `Default` naming
+
+Spec `#149` and every existing canonical file (`AnswerGame`, `InstructionsOverlay`,
+`EncouragementAnnouncer`, `ProgressHUD`, `Slot`, `GameOverOverlay`, `LevelCompleteOverlay`,
+`ScoreAnimation`) export the main Controls-driven story as `Playground`. PR `#155`'s new
+Minimal Template calls it `Default`, but `#155`'s own reference implementations all still use
+`Playground`. **This plan standardises on `Playground`** (matches spec and existing code). If
+you'd rather have subagents emit `Default`, call it out before approving the plan PR — it's a
+single-word swap in the template below and the allocation table's PR titles.
 
 ## Allocation
 
@@ -90,11 +106,20 @@ TARGET FILES (scope is strict — do not edit anything else):
 {{TARGET_FILES}}
 
 Reference material (read before editing):
+
 - Spec: docs/superpowers/specs/2026-04-22-stories-tier1-2-audit-design.md
-- Controls policy: .claude/skills/write-storybook/SKILL.md
+- Controls policy: .claude/skills/write-storybook/SKILL.md (note: the global
+  `withDefaultSkin` decorator in `.storybook/preview.tsx` now applies
+  `game-container skin-classic` with `classicSkin.tokens` to every story — per-file
+  wrappers are redundant and must be removed, see PR #154 merge commit `eada2163`).
 - Shell-slim canonical: src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
 - Playground-collapse canonical (audit pattern): src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx
+- Trigger-button canonical (stateful one-shot callbacks): src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
 - Tracker issue: #125 (contains the 10 gates reproduced below)
+
+If PR #155 (`docs(skill): adopt single-Default Playground pattern for storybook`) has
+merged by the time you dispatch, the SKILL.md you read reflects the updated policy
+verbatim. Either way the gates below are authoritative for this audit.
 
 ## Step 1 — Environment
 
@@ -128,57 +153,71 @@ For each file in TARGET FILES, converge on the Playground pattern:
    No raw JSON controls.
 4. `meta.render` destructures `StoryArgs`, derives any internal values (e.g., an id from a non-empty
    name — precedent: `InstructionsOverlay` derives `customGameId` from `customGameName`), and renders
-   the component. If the component reads `--skin-*` or `skin.tokens`, wrap the render in:
-   ```tsx
-   <div
-     className={`game-container skin-${classicSkin.id}`}
-     style={classicSkin.tokens as CSSProperties}
-   >
-     <Component ... />
-   </div>
-   ```
-   Otherwise, do not wrap.
+   the component. **Do NOT add a per-file classic-skin wrapper.** The global `withDefaultSkin`
+   decorator in `.storybook/preview.tsx` already wraps every story in
+   `<div className="game-container skin-classic" style={classicSkin.tokens}>` (PR #154). If the
+   file you're editing currently has an inline wrapper, remove it along with the
+   `classicSkin`/`CSSProperties` imports that only existed for the wrapper. Keep `classicSkin`
+   imports only if the component receives it as a prop (precedent: `AnswerGame.stories.tsx`
+   passes `skin={classicSkin}`). Alt-skin previews for the same component must go in a sibling
+   `*.skin.stories.tsx` file — none of the ten target files qualify.
 5. `parameters.docs.description.component` documents what the Playground drives and points at
-   `<Component>.test.tsx` for play-flow coverage.
+   `<Component>.test.tsx` for play-flow coverage (if such a test file exists).
 6. Export a single `Playground` story: `export const Playground: Story = {}` (with minimal arg
-   overrides only when a non-default seed aids first-load visuals). Add additional named exports
-   only when they capture per-variant/per-skin/edge-case visuals the Controls panel cannot express
-   from the Playground seed.
+   overrides only when a non-default seed aids first-load visuals). **Auxiliary named exports
+   are justified only when a scenario truly cannot be expressed by toggling Playground
+   controls** — specifically: a stateful one-shot sequence that needs replay (precedent:
+   `EncouragementAnnouncer`'s `ReplayTrigger` with a `ShowTrigger` wrapper + `useState`), a
+   pinned theme/viewport with meaningfully different visuals, or a `play()` assertion that
+   Playwright e2e doesn't already cover. Do NOT add per-enum-value / per-state-reachable-via-prop /
+   edge-case-text (`LongText`, `ManyItems`) named stories — those belong in controls.
 
 ### Collapse rule
 
-If existing named stories in the file duplicate `*.test.tsx` interaction coverage, delete them and
-collapse into `Playground`. Keep a scenario story only when it captures a visual state the Controls
-panel can't express.
+If existing named stories in the file duplicate what a Playground control would toggle (per-enum
+variants, per-state when the state is reachable via a prop, long-text/many-items scenarios) OR
+duplicate `*.test.tsx` interaction coverage, delete them and fold into `Playground`. Keep an
+auxiliary story only when it captures a scenario the Controls panel genuinely can't express
+(see item 6 above).
 
-### Skin wrapper decision
+## The 10 gates — every target file must pass
 
-Grep the component source (not the story) for `--skin-` or `skin.tokens`. If present → wrap using the
-`classicSkin` div. If absent → do not wrap. Document the decision in the PR body under a
-`## Skin decision` heading.
+Reproduced from issue `#125`, updated to reflect the merged global skin decorator (PR `#154`)
+and the in-flight single-Playground policy tightening (PR `#155`).
 
-## The 10 gates (from issue #125) — every target file must pass
-
-1. Controls map to something visible. Drop text controls for invisible values (ids, internal keys).
-   If a value toggles behaviour, derive it from a visible control (precedent: `InstructionsOverlay`
-   — `customGameId` derived from non-empty `customGameName`).
-2. Prefer structured inputs. `select` / `radio` / `boolean` / `range` over raw text whenever the
-   domain is enumerable. No raw JSON fallbacks.
-3. Every `on*` prop wired to `fn()` from `storybook/test` in `args`. Do NOT rely on
-   `argTypesRegex` alone.
-4. Skin-token wrapper (conditional). Wrap only when the component reads `--skin-*` / `skin.tokens`;
-   otherwise no wrapper. Flag the decision in the PR body.
-5. Hide shadowed/derived docgen rows via `?: never` on `StoryArgs` AND
-   `{ table: { disable: true } }` in `argTypes`.
-6. Collapse redundant stories. If play-flow stories duplicate `*.test.tsx`, collapse to a single
-   Playground. Keep scenario stories only when they add visual coverage not captured elsewhere.
-7. Real-game parity. Compare the Storybook render to how the feature mounts at runtime
-   (`src/routes/…` or `src/games/…`). Any visual drift → flag in the PR body.
-8. Required Variants present — Default (Playground), one story per enum value where visuals differ,
-   state variants, edge cases (long text, many items, etc.) per SKILL.md.
-9. Decorators match current dependencies — `withDb`, `withRouter` as the component requires.
-10. At least one `play()` interaction story on interactive components. Pure-display components
-    (icons, labels) are exempt.
+1. **Controls map to something visible.** Drop text controls for invisible values (ids, internal
+   keys). If a value toggles behaviour, derive it from a visible control (precedent:
+   `InstructionsOverlay` — `customGameId` derived from non-empty `customGameName`).
+2. **Prefer structured inputs.** `select` / `radio` / `boolean` / `range` over raw text whenever
+   the domain is enumerable. No raw JSON fallbacks.
+3. **Every `on*` prop wired to `fn()`** from `storybook/test` in `args`. Do NOT rely on
+   `argTypesRegex` alone — react-docgen misses DOM-extended props. Callbacks fire into the
+   Actions panel by default; only add a UI trigger button in `render` if the callback requires a
+   replayable one-shot sequence that controls alone can't invoke (precedent:
+   `EncouragementAnnouncer`'s `ShowTrigger` helper).
+4. **No per-file classic-skin wrapper.** The global `withDefaultSkin` decorator applies
+   `game-container skin-classic` + `classicSkin.tokens` to every story. If the file has an
+   existing inline wrapper, REMOVE it (and the now-orphaned `classicSkin`/`CSSProperties`
+   imports). Keep `classicSkin` imports only if the component receives it as a prop.
+5. **Hide shadowed/derived docgen rows** via `?: never` on `StoryArgs` AND
+   `{ table: { disable: true } }` in `argTypes` for each hidden row.
+6. **Collapse redundant named stories.** Delete per-enum-value / per-state-reachable-via-prop /
+   edge-case-text stories that a control toggle would show. Also delete play-flow stories that
+   duplicate `*.test.tsx` coverage. Keep only auxiliary stories the Controls panel genuinely
+   can't express (stateful one-shot flow, pinned theme/viewport, `play()` assertion not covered
+   by Playwright e2e).
+7. **Real-game parity.** Compare the Storybook Playground render to how the component mounts at
+   runtime (`src/routes/…` or `src/games/…`). The global `withDefaultSkin` decorator should make
+   parity automatic for components that read `--skin-*`; any drift → flag in the PR body.
+8. **Auxiliary-story discipline.** Auxiliary stories (if any) are justified only by the three
+   reasons in gate #6. No required Default/per-enum/per-state/edge-case variant set — the
+   Playground IS the Default, and every UI-affecting prop is a control on it.
+9. **Decorators match current dependencies** — `withDb`, `withRouter` as the component
+   requires. Do not add `classicSkin`-wrapping or `ThemeProvider` decorators — both are global.
+10. **`play()` is OPTIONAL in this project.** Playwright e2e (`e2e/visual.spec.ts` and friends)
+    already covers VR and flow assertions on live routes. Add a `play()` only when it asserts
+    something Playwright doesn't (keyboard-only flow, focus management, validation-error
+    visibility) and the assertion adds genuine value. Pure-display components never need one.
 
 ## Step 3 — Verification gate (run BEFORE pushing)
 
@@ -199,7 +238,9 @@ exit $TEST_EXIT
 
 Then perform the real-game parity visual check: open the Storybook Playground for each target file
 AND the live runtime mount of the same component (under `src/routes/…` or `src/games/…`), compare
-visually, and record the result for the PR body.
+visually, and record the result for the PR body. The global `withDefaultSkin` decorator should make
+parity automatic for `--skin-*` consumers — any residual drift (beyond a single-pixel wrapper-div
+shift) is a flag-on-surprise trigger.
 
 Finally, if any markdown was edited: `yarn fix:md`.
 
@@ -213,13 +254,17 @@ Stop and report to the orchestrator (do not push) if any of these apply:
 
 - Prop type is opaque (function-returning-JSX, complex branded type, render-prop) that can't be
   demoed via a primitive control.
-- Component reads BOTH `--skin-*` AND theme tokens — ambiguous wrap decision.
 - Real-game mount uses providers beyond `withDb` / `withRouter`.
 - A `*.test.*` file imports from the story file — collapse would break tests.
 - Verification gate fails with a root cause outside the audit scope (`.storybook/*`, component
   source, decorators, `yarn.lock`).
-- Visual drift between Storybook Playground and real-game mount.
-- The Wave 1 worktree path is already present, or the allocated port is in use.
+- Visual drift between Storybook Playground and real-game mount that exceeds a single-pixel
+  wrapper offset (i.e., token / layout / theme drift, not the expected noise from the global
+  `withDefaultSkin` wrapper).
+- A callback prop requires a replayable one-shot sequence whose trigger-button wrapper would
+  exceed a trivial `ShowTrigger`-style helper (e.g., it needs real providers beyond the allowed
+  decorators).
+- The allocated worktree path, branch name, or port is already in use.
 
 Report format: target file(s), trigger category, one-paragraph diagnosis, proposed fix (if any),
 state left on disk (branch created? commits? worktree left in place?).
@@ -249,10 +294,16 @@ gh pr create --base master --title "{{PR_TITLE}}" --body "$(cat <<'EOF'
 
 <one-paragraph narrative; list each target file and what changed>
 
-## Skin decision
+## Playground shape
 
-<per target file: "wrap" / "no-wrap" + one-sentence reason based on whether the component source
-references `--skin-*` or `skin.tokens`>
+<per target file: list the controls exposed on Playground, any auxiliary stories kept and why,
+any named stories deleted because a control now covers them>
+
+## Skin wrapper cleanup
+
+<per target file: "no inline wrapper found" OR "removed inline `game-container skin-classic`
+wrapper and orphaned `classicSkin`/`CSSProperties` imports — global `withDefaultSkin` decorator
+applies classic skin, PR #154">
 
 ## Real-game parity
 
@@ -279,7 +330,8 @@ Respond to the orchestrator with a short summary (≤ 200 words):
 
 - PR number + URL (or "flagged" + trigger).
 - Target file(s) changed.
-- Skin decision per file (wrap / no-wrap).
+- Skin wrapper cleanup per file (none found / removed inline wrapper + orphaned imports).
+- Auxiliary stories kept or deleted per file (and why).
 - Real-game parity result per file.
 - Any surprises, even if not blocking.
 
@@ -287,7 +339,9 @@ Respond to the orchestrator with a short summary (≤ 200 words):
 
 - **Named exports only** — `export default meta` is the single exception (framework config file).
 - **Do not modify** `.storybook/*`, decorators, the component source, `yarn.lock`, or any file
-  outside TARGET FILES. Any such need is a flag-on-surprise trigger.
+  outside TARGET FILES. Any such need is a flag-on-surprise trigger. In particular, do NOT
+  re-introduce or preserve a per-file classic-skin wrapper — the global `withDefaultSkin`
+  decorator owns that.
 - **Never commit directly to `master`.** Your work lives on `{{BRANCH}}`.
 - **Never force-push.** If rebase creates conflicts, flag and stop.
 - **Skip markdown `fix:md` unless you edited markdown** — this batch should not.
@@ -501,7 +555,7 @@ verified). Disjoint directories guarantee no merge conflicts between branches.
 
   One concise message to the user containing:
   - All 6 PR URLs (or 5 if Wave 1 was flagged; fewer if Wave 2 had flags too).
-  - Per-PR: skin decision summary (wrap / no-wrap) lifted from the PR body.
+  - Per-PR: Skin wrapper cleanup line (none / removed) and auxiliary-stories kept/deleted summary, both lifted from the PR body.
   - Any flag-on-surprise summaries with the proposed follow-up.
   - Issue #125 checkbox state — number newly ticked vs. remaining.
 
@@ -521,8 +575,8 @@ The plan is considered successfully executed when:
 - Issue #125 has ten new `[x]` checkboxes (or fewer, with flag reasons documented per skipped file).
 - No direct commits on `master`.
 - No edits outside the ten target story files across all six branches.
-- Each PR body contains the Summary, Skin decision, Real-game parity, and Verification sections
-  specified in the shared subagent prompt template.
+- Each PR body contains the Summary, Playground shape, Skin wrapper cleanup, Real-game parity,
+  and Verification sections specified in the shared subagent prompt template.
 
 ## Out of scope (from the spec — do not expand)
 
