@@ -29,7 +29,49 @@ import { speak } from '#/lib/speech/SpeechOutput';
 import { cn } from '#/lib/utils';
 
 const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
-const SHOW_LIMIT = 100;
+const PAGE_SIZES = [25, 50, 100] as const;
+const DEFAULT_PAGE_SIZE = 50;
+
+type PageSize = (typeof PAGE_SIZES)[number];
+
+export const matchesWordPrefix = (
+  hit: WordHit,
+  prefix: string,
+): boolean => {
+  const q = prefix.trim().toLowerCase();
+  if (q === '') return true;
+  return hit.word.toLowerCase().startsWith(q);
+};
+
+export const paginate = <T,>(
+  items: readonly T[],
+  page: number,
+  pageSize: number,
+): T[] => {
+  if (pageSize <= 0) return [];
+  const start = Math.max(0, (page - 1) * pageSize);
+  return items.slice(start, start + pageSize);
+};
+
+export type PageToken = number | 'ellipsis-left' | 'ellipsis-right';
+
+export const pageRange = (
+  current: number,
+  total: number,
+): PageToken[] => {
+  if (total <= 1) return [1];
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const windowStart = Math.max(2, current - 1);
+  const windowEnd = Math.min(total - 1, current + 1);
+  const tokens: PageToken[] = [1];
+  if (windowStart > 2) tokens.push('ellipsis-left');
+  for (let p = windowStart; p <= windowEnd; p += 1) tokens.push(p);
+  if (windowEnd < total - 1) tokens.push('ellipsis-right');
+  tokens.push(total);
+  return tokens;
+};
 
 interface GraphemePair {
   g: string;
@@ -374,6 +416,9 @@ export const WordLibraryExplorer = () => {
   const [graphemePairs, setGraphemePairs] = useState<GraphemePair[]>(
     [],
   );
+  const [wordPrefix, setWordPrefix] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<PageSize>(DEFAULT_PAGE_SIZE);
 
   useEffect(() => {
     let cancelled = false;
@@ -398,19 +443,41 @@ export const WordLibraryExplorer = () => {
     [result.hits],
   );
 
-  // graphemePairs is a client-only post-filter; the WordFilter API does not
-  // support (g,p) tuples yet, so we apply it after filterWords resolves.
-  const postFiltered = useMemo(() => {
-    if (graphemePairs.length === 0) return result.hits;
-    return result.hits.filter((hit) =>
-      hitContainsAllPairs(hit, graphemePairs),
-    );
-  }, [result.hits, graphemePairs]);
+  // graphemePairs and wordPrefix are client-only post-filters; the WordFilter
+  // API does not support (g,p) tuples or word-text filtering yet, so we apply
+  // them after filterWords resolves.
+  const postFiltered = useMemo(
+    () =>
+      result.hits.filter(
+        (hit) =>
+          matchesWordPrefix(hit, wordPrefix) &&
+          (graphemePairs.length === 0 ||
+            hitContainsAllPairs(hit, graphemePairs)),
+      ),
+    [result.hits, graphemePairs, wordPrefix],
+  );
 
   const totalBeforeFilters = result.hits.length;
   const matched = postFiltered.length;
-  const shown = Math.min(matched, SHOW_LIMIT);
-  const visible = postFiltered.slice(0, SHOW_LIMIT);
+  const totalPages = Math.max(1, Math.ceil(matched / pageSize));
+
+  // Reset to page 1 when any pagination input changes. Using React's
+  // "adjust state during render" pattern instead of an effect to avoid
+  // cascading re-renders (react-hooks/set-state-in-effect).
+  const resetKey = `${filter.region}|${(filter.levels ?? []).join(',')}|${(filter.levelRange ?? []).join('-')}|${filter.syllableCountEq ?? ''}|${(filter.syllableCountRange ?? []).join('-')}|${filter.fallbackToAus}|${(filter.graphemesAllowed ?? []).join(',')}|${(filter.graphemesRequired ?? []).join(',')}|${(filter.phonemesAllowed ?? []).join(',')}|${(filter.phonemesRequired ?? []).join(',')}|${graphemePairs.map((p) => p.label).join(',')}|${wordPrefix.trim().toLowerCase()}|${pageSize}`;
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
+  if (resetKey !== prevResetKey) {
+    setPrevResetKey(resetKey);
+    setPage(1);
+  }
+
+  // Clamp during render so a stale page past the new bounds shows a valid
+  // slice instead of an empty grid.
+  const effectivePage = Math.min(Math.max(1, page), totalPages);
+  const visible = paginate(postFiltered, effectivePage, pageSize);
+  const rangeStart =
+    matched === 0 ? 0 : (effectivePage - 1) * pageSize + 1;
+  const rangeEnd = Math.min(matched, effectivePage * pageSize);
 
   const setLevels = (levels: number[]) => {
     setFilter((f) => ({
@@ -436,6 +503,10 @@ export const WordLibraryExplorer = () => {
             <CardTitle>Filters</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
+            <WordSearchField
+              value={wordPrefix}
+              onChange={setWordPrefix}
+            />
             <RegionField />
             <LevelsField
               selected={filter.levels}
@@ -513,19 +584,17 @@ export const WordLibraryExplorer = () => {
             </CardContent>
           </Card>
         ) : null}
-        <div className="flex items-baseline gap-2 text-sm">
-          <span className="font-medium">
-            Showing {shown} of {matched}
-          </span>
-          <span className="text-muted-foreground">
-            (filtered from {totalBeforeFilters})
-          </span>
-          {matched > SHOW_LIMIT ? (
-            <span className="text-muted-foreground">
-              (first {SHOW_LIMIT})
-            </span>
-          ) : null}
-        </div>
+        <Pagination
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          matched={matched}
+          totalBeforeFilters={totalBeforeFilters}
+          page={effectivePage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visible.map((hit) => (
             <ResultCard key={`${hit.region}-${hit.word}`} hit={hit} />
@@ -610,6 +679,134 @@ const AdvancedSection = ({
     </div>
   </details>
 );
+
+interface WordSearchFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+const WordSearchField = ({ value, onChange }: WordSearchFieldProps) => {
+  const id = useId();
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id}>Word search</Label>
+      <Input
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Starts with…"
+        autoComplete="off"
+      />
+    </div>
+  );
+};
+
+interface PaginationProps {
+  rangeStart: number;
+  rangeEnd: number;
+  matched: number;
+  totalBeforeFilters: number;
+  page: number;
+  totalPages: number;
+  pageSize: PageSize;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: PageSize) => void;
+}
+
+const Pagination = ({
+  rangeStart,
+  rangeEnd,
+  matched,
+  totalBeforeFilters,
+  page,
+  totalPages,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+}: PaginationProps) => {
+  const tokens = pageRange(page, totalPages);
+  return (
+    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+      <div className="flex items-baseline gap-2 text-sm">
+        <span className="font-medium">
+          Showing {rangeStart}–{rangeEnd} of {matched}
+        </span>
+        <span className="text-muted-foreground">
+          (filtered from {totalBeforeFilters})
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={page <= 1 || matched === 0}
+          onClick={() => onPageChange(page - 1)}
+          aria-label="Previous page"
+        >
+          Prev
+        </Button>
+        <div className="flex flex-wrap items-center gap-1">
+          {tokens.map((token) =>
+            token === 'ellipsis-left' || token === 'ellipsis-right' ? (
+              <span
+                key={token}
+                aria-hidden="true"
+                className="px-1 text-xs text-muted-foreground"
+              >
+                …
+              </span>
+            ) : (
+              <button
+                key={token}
+                type="button"
+                aria-current={token === page ? 'page' : undefined}
+                aria-label={`Page ${token}`}
+                onClick={() => onPageChange(token)}
+                className={cn(
+                  'rounded-md border border-input px-2 py-1 text-xs transition-colors',
+                  token === page
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-transparent hover:bg-muted',
+                )}
+              >
+                {token}
+              </button>
+            ),
+          )}
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={page >= totalPages || matched === 0}
+          onClick={() => onPageChange(page + 1)}
+          aria-label="Next page"
+        >
+          Next
+        </Button>
+        <Select
+          value={String(pageSize)}
+          onValueChange={(v) => onPageSizeChange(Number(v) as PageSize)}
+        >
+          <SelectTrigger
+            className="w-[6.5rem]"
+            aria-label="Results per page"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {PAGE_SIZES.map((size) => (
+              <SelectItem key={size} value={String(size)}>
+                {size}/page
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+};
 
 const RegionField = () => (
   <div className="flex flex-col gap-1.5">
