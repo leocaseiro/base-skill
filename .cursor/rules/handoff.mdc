@@ -1,0 +1,15 @@
+---
+description: >-
+  Create a session handoff document so work can continue in a new session or
+  with another agent. Use when just saved a plan or spec, just raised or
+  merged a PR, ending a session, context-switching, or told to hand off /
+  continue later.
+globs: []
+alwaysApply: false
+---
+
+# Handoff (Cursor mirror)
+
+Follow the handoff workflow defined in [`.claude/skills/handoff/SKILL.md`](../../.claude/skills/handoff/SKILL.md). Same document template, same commit policy, same worktree rule.
+
+This file exists so Cursor picks up the same cues as Claude Code — the canonical instructions live in the `.claude/skills/handoff/SKILL.md` file referenced above. See [`AGENTS.md`](../../AGENTS.md) for the cross-agent entrypoint.
