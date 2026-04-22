@@ -1,21 +1,37 @@
 ---
 name: write-storybook
-description: Use when adding or writing Storybook stories for React components in this project — covers file structure, meta config, named exports, decorators, and required variants
+description: Use when adding, writing, or refactoring Storybook stories for React components in this project — enforces the single-Default Playground pattern, controls policy, decorators, and a11y rules
 ---
 
 # Write Storybook
 
 ## Overview
 
-Stories live co-located with their component (`ComponentName.stories.tsx`). Each story file exports a `default` meta object and named `Story` exports for each variant. This project uses `@storybook/react` with TanStack Router and `next-themes`.
+Stories live co-located with their component (`ComponentName.stories.tsx`). This project uses `@storybook/react` with TanStack Router and `next-themes`.
+
+**The standard pattern is the "Playground"**: every component gets a **single `Default` story** driven by proper interactive controls (selects, booleans, ranges, color pickers, text inputs). The control surface is the playground — designers, QA, and developers explore every UI behaviour by tweaking controls, not by clicking between a dozen named stories.
+
+This pattern applies when:
+
+1. Creating a new story file.
+2. Auditing or refactoring an existing story file.
+3. Making changes to a component whose UI/API surface affects its story.
+
+Additional named stories are only added when a scenario genuinely **cannot** be expressed through the Playground's controls (see "When to Add Auxiliary Stories" below). Reference implementations:
+
+- [AnswerGame.stories.tsx](../../../src/components/answer-game/AnswerGame/AnswerGame.stories.tsx)
+- [InstructionsOverlay.stories.tsx](../../../src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx)
+- [ProgressHUD.stories.tsx](../../../src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx)
+- [EncouragementAnnouncer.stories.tsx](../../../src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx) (shows the trigger-button pattern for callbacks that can't be reached by controls alone)
 
 ## Rules
 
 - **Always use `export default meta`** for the meta object (framework config file — the one exception to the named-export rule)
 - **All story variants use named exports**: `export const Default: Story = {}`
-- Every story file **must include a `Default` story**
+- Every story file **must include a `Default` story** — this is the Playground; every prop that affects UI must be driveable from its controls
 - Use `tags: ['autodocs']` in meta unless there's a reason not to
 - Do NOT import `React` — JSX transform handles it
+- Auxiliary named stories are allowed only when a scenario can't be expressed by toggling controls on `Default` (see "When to Add Auxiliary Stories")
 
 ## File Structure
 
@@ -25,7 +41,10 @@ src/components/MyComponent.stories.tsx
 
 ## Minimal Template
 
+The Playground pattern: a single `Default` story, with every UI-affecting prop wired as a control on `meta`. Props are set once in `meta.args` so they serve as the Playground's baseline.
+
 ```tsx
+import { fn } from 'storybook/test';
 import { MyComponent } from './MyComponent';
 import type { Meta, StoryObj } from '@storybook/react';
 
@@ -33,22 +52,23 @@ const meta: Meta<typeof MyComponent> = {
   component: MyComponent,
   tags: ['autodocs'],
   args: {
-    // shared default props
+    // Baseline values for the Playground — one place, drives Default.
+    onClick: fn(), // Actions panel logs every invocation (see "Callbacks & Listeners")
   },
   argTypes: {
-    // Add a control for every non-callback, non-JSX prop. See "Controls Policy" below.
+    // A control for every non-callback, non-JSX prop. See "Controls Policy" below.
   },
 };
 export default meta;
 
 type Story = StoryObj<typeof MyComponent>;
 
+// The Playground. Empty body — it inherits meta.args and renders the
+// interactive control surface.
 export const Default: Story = {};
-
-export const SomeVariant: Story = {
-  args: { propName: value },
-};
 ```
+
+Extra named stories are only added when a scenario can't be expressed by flipping controls on `Default` — see "When to Add Auxiliary Stories".
 
 ## Decorators
 
@@ -190,21 +210,74 @@ const meta: Meta<StoryArgs> = {
 
 The Controls panel now shows individual `mode` and `rounds` inputs, and the rendered story reflects them. Reuse this pattern for any nested object — never let a JSON blob appear in Controls.
 
-## Required Variants
+## Playground Pattern
 
-Every story file MUST cover the following, treating each as a gate. If you decide to skip one, comment why in the story file.
+The goal: one `Default` story where **every** UI behaviour is reachable by flipping controls. Designers and QA get a single URL to explore the full component surface.
 
-- **`Default`** — happy path, all required props supplied.
-- **One story per enum value** of any string-union prop, _if_ the visual differs by value. Identical pixels across values? Skip and document.
-- **State variants** — one story per distinct visible state the component can render: `Loading`, `Error`, `Empty`, `Disabled`, `Submitted`, `ReadOnly`, etc.
-- **Edge cases** — at least one for components that take user-controllable text or list props: `LongText`, `ManyItems`, `OneItem`, `MaxLength`. These catch overflow, truncation, and layout regressions.
-- **Interaction** — at least one `play()` story exercising the primary user flow (see "Rich Interaction with `play()`" below). Pure-display components (icons, labels) are exempt.
+### What belongs in `Default`
 
-Story names use PascalCase and describe the _state_, not the prop combination: prefer `LoadingWithItems` over `LoadingTrueAndItemsArray`.
+- Every string-union / enum prop → `select` or `radio` control, so switching values swaps the visual in place.
+- Every boolean prop → `boolean` control.
+- Every bounded numeric prop → `range` control.
+- Every text / list / color prop → appropriate control.
+- Every callback → `fn()` spy in `args` (logs to [Actions panel](https://storybook.js.org/docs/essentials/actions)).
+- Nested config objects → flattened into top-level args and reassembled in a `render` function (see "Complex Object Props").
 
-## Rich Interaction with `play()`
+If a UI behaviour isn't reachable through the Playground, the Playground is incomplete — add the control before adding a new story.
 
-Every interactive component (forms, dialogs, anything with click or keyboard handlers) MUST have at least one `play()` story exercising the primary flow. Pure-display components are exempt.
+### When to Add Auxiliary Stories
+
+Only add a named story beyond `Default` when the scenario **cannot** be expressed by the Playground's control surface. Typical reasons:
+
+- **Stateful wrappers that can't be modeled as a prop.** Example: `EncouragementAnnouncer` has a `ReplayTrigger` story because the component's `visible` prop is toggled by a local `useState` wrapper — the Playground shows the "start visible" state; `ReplayTrigger` shows the "user must click to show it" flow. Both are useful; neither is expressible purely through controls.
+- **Pinned theme or viewport** that's meaningfully different (e.g., a high-contrast-only edge case). See "Themes per Story" and "Viewport per Story".
+- **`play()` assertions** that drive a specific interaction sequence (see "Optional: Interaction Tests with `play()`").
+
+Do **not** add auxiliary stories for:
+
+- Per-enum-value snapshots (the `variant` select control already covers these).
+- State variants like `Loading` / `Error` / `Empty` when those states are reachable by toggling a prop.
+- Edge cases like `LongText` / `ManyItems` — change the value in the control; if it's a common demo input, add it as a preset via `argTypes: { foo: { options: [...], mapping: {...} } }` rather than a new story.
+- **Alt-skin previews.** The classic skin is already applied globally (see "Default Skin Is Applied Globally"). If you need to preview a different skin, put it in a sibling `*.skin.stories.tsx` file — not as a named story in the main file.
+
+Auxiliary story names use PascalCase and describe what they uniquely add: `ReplayTrigger`, `HighContrast`, `SubmitsValidForm`.
+
+## Callbacks & Listeners
+
+### Default: rely on the Actions panel
+
+Wire every callback prop to a [`fn()` spy](https://storybook.js.org/docs/essentials/actions) from `storybook/test`:
+
+```tsx
+import { fn } from 'storybook/test';
+
+const meta: Meta<typeof MyComponent> = {
+  args: {
+    onClick: fn(),
+    onSubmit: fn(),
+    onDismiss: fn(),
+  },
+};
+```
+
+The Actions panel logs every invocation with arguments — enough for most components to verify callbacks fire. The same spy is assertable from `play()` if you later add interaction tests.
+
+> **Note:** `.storybook/preview.tsx` sets `actions.argTypesRegex: '^on[A-Z].*'` globally, but it only wires props already in `argTypes`. Since this repo uses the default react-docgen (which does not expand `React.ComponentProps<'button'>` and similar DOM-extended types), most handler props never appear in inferred `argTypes` — so the regex matches nothing for them. Always wire `fn()` explicitly.
+
+### Add trigger buttons only when a callback can't be reached through controls
+
+If a component subscribes to something, runs an effect, or fires a callback that the Playground's controls alone can't invoke, add a UI trigger button in the `render` function. Example: [EncouragementAnnouncer](../../../src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx) wraps the component in a `ShowTrigger` helper with "Show" + "Dismiss" buttons because the component's visibility is driven by a one-shot state transition that no single control can replay.
+
+Rule of thumb: if you can observe the callback by toggling a control, use controls. If you need to replay a one-shot sequence (show → dismiss → show again) to see the effect run, add a trigger button.
+
+## Optional: Interaction Tests with `play()`
+
+`play()` is **optional** in this project. Visual regression and end-to-end coverage live in Playwright (`e2e/visual.spec.ts`, `e2e/*.spec.ts`) against live app routes — see "Visual Regression Boundary". `play()` remains useful as supplementary in-Storybook interaction assertions when:
+
+- The component's primary flow is non-trivial and not already covered by an e2e test.
+- You want an assertion (keyboard-only flow, validation error appearing, focus management) that the Actions panel can't express.
+
+Add a `play()` to `Default` when the interaction is central, or create a dedicated named story per flow. Skip `play()` for pure-display components or when e2e coverage already asserts the same behaviour.
 
 Import helpers from `storybook/test`:
 
@@ -455,10 +528,12 @@ exit $TEST_EXIT
 
 When you edit an existing story file for any reason, run this checklist before opening the PR. Each item is a yes/no gate — if any answer is "no," either fix or justify in the PR description.
 
+- [ ] A single `Default` story exists and every UI-affecting prop is reachable from its controls (the Playground)
 - [ ] All non-callback, non-JSX props have proper `argTypes` controls (no raw JSON for enums/booleans/numbers/colors)
-- [ ] Every `onFoo` handler wired to a `fn()` spy in `args` (shows in Actions panel + usable in `play()`) — do NOT rely on the global `argTypesRegex` alone; it only covers props already in `argTypes`, which react-docgen doesn't produce for DOM-extended props
-- [ ] Required variants are present (Default, enum-per-value where the visual differs, state variants, edge cases — see "Required Variants")
-- [ ] At least one `play()` interaction story if the component is interactive
+- [ ] Every `onFoo` handler wired to a `fn()` spy in `args` (shows in [Actions panel](https://storybook.js.org/docs/essentials/actions); usable in `play()` if needed) — do NOT rely on the global `argTypesRegex` alone; it only covers props already in `argTypes`, which react-docgen doesn't produce for DOM-extended props
+- [ ] Auxiliary named stories (if any) exist only for scenarios the Playground's controls can't express — see "When to Add Auxiliary Stories". Remove named stories that duplicate what a control toggle would show.
+- [ ] Callbacks that can't be triggered via controls have a UI trigger button in `render` (see "Callbacks & Listeners"); otherwise Actions panel is enough
+- [ ] `play()` is used only where it adds assertion value not covered by Playwright e2e — it's optional, not required
 - [ ] Decorators match current component dependencies (e.g., if the component started using `useSettings`, `withDb` is now required)
 - [ ] No per-file classic-skin wrapper (`<div className="game-container skin-classic" style={classicSkin.tokens}>`) — the global `withDefaultSkin` decorator already applies this. Remove inline wrappers; keep `classicSkin` imports only if passed as a component prop.
 - [ ] No `parameters.chromatic` (we don't use it)
@@ -468,20 +543,23 @@ If you're touching the file, leave it better than you found it.
 
 ## Common Mistakes
 
-| Mistake                                               | Fix                                                                                                                                                                              |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `import React from 'react'` at top                    | Remove — not needed                                                                                                                                                              |
-| Named export for meta (`export const meta`)           | Use `export default meta`                                                                                                                                                        |
-| Default export for stories (`export default Default`) | Use `export const Default: Story = {}`                                                                                                                                           |
-| Missing `Default` story                               | Always add one                                                                                                                                                                   |
-| Forgetting `withRouter` for routing components        | Check if component calls `useNavigate`, `Link`, or reads route params                                                                                                            |
-| Forgetting `withDb` for DB/settings hooks             | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
-| Adding `ThemeProvider` decorator                      | Already global — skip                                                                                                                                                            |
-| `SKIP_STORYBOOK=1` because port 6006 is in use        | Find a free port and start your own instance — never skip to avoid a conflict                                                                                                    |
-| Running `yarn test:storybook` without `--url`         | Without `--url` it defaults to 6006 and may hit the wrong agent's Storybook                                                                                                      |
-| Raw JSON control for an enum/union prop               | Add `argTypes` with `select`/`radio` and explicit `options`                                                                                                                      |
-| Whole-config JSON blob as a single control            | Break into individual args + custom `render` (see "Complex Object Props")                                                                                                        |
-| Relying on global `argTypesRegex` for Actions panel   | Doesn't work for DOM-extended props under react-docgen — wire `args: { onFoo: fn() }` from `storybook/test` explicitly                                                           |
-| Adding `parameters.chromatic`                         | Remove — VR is in `e2e/visual.spec.ts`, not Storybook                                                                                                                            |
-| Trying to opt out of a11y on a new story              | Don't — it's enforced. Fix the violation, or use `test: 'todo'` only with documented justification                                                                               |
-| Inlining `Math.random()` results in story args        | Pin via `globalThis.Math.random = () => N` inside `play()` for reproducibility                                                                                                   |
+| Mistake                                                  | Fix                                                                                                                                                                              |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `import React from 'react'` at top                       | Remove — not needed                                                                                                                                                              |
+| Named export for meta (`export const meta`)              | Use `export default meta`                                                                                                                                                        |
+| Default export for stories (`export default Default`)    | Use `export const Default: Story = {}`                                                                                                                                           |
+| Missing `Default` story                                  | Always add one — it is the Playground                                                                                                                                            |
+| Multiple stories duplicating what a control would toggle | Delete them; wire the prop as a control on `Default` instead (see "Playground Pattern")                                                                                          |
+| Named story for every enum value                         | Use a `select`/`radio` control; enum-per-value stories are only justified for pinned-theme/viewport or `play()` assertions                                                       |
+| Callback only reachable by a one-shot interaction        | Add a trigger button in `render` (see EncouragementAnnouncer) — don't rely on a static prop                                                                                      |
+| Forgetting `withRouter` for routing components           | Check if component calls `useNavigate`, `Link`, or reads route params                                                                                                            |
+| Forgetting `withDb` for DB/settings hooks                | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
+| Adding `ThemeProvider` decorator                         | Already global — skip                                                                                                                                                            |
+| `SKIP_STORYBOOK=1` because port 6006 is in use           | Find a free port and start your own instance — never skip to avoid a conflict                                                                                                    |
+| Running `yarn test:storybook` without `--url`            | Without `--url` it defaults to 6006 and may hit the wrong agent's Storybook                                                                                                      |
+| Raw JSON control for an enum/union prop                  | Add `argTypes` with `select`/`radio` and explicit `options`                                                                                                                      |
+| Whole-config JSON blob as a single control               | Break into individual args + custom `render` (see "Complex Object Props")                                                                                                        |
+| Relying on global `argTypesRegex` for Actions panel      | Doesn't work for DOM-extended props under react-docgen — wire `args: { onFoo: fn() }` from `storybook/test` explicitly                                                           |
+| Adding `parameters.chromatic`                            | Remove — VR is in `e2e/visual.spec.ts`, not Storybook                                                                                                                            |
+| Trying to opt out of a11y on a new story                 | Don't — it's enforced. Fix the violation, or use `test: 'todo'` only with documented justification                                                                               |
+| Inlining `Math.random()` results in story args           | Pin via `globalThis.Math.random = () => N` inside `play()` for reproducibility                                                                                                   |
