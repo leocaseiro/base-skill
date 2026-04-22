@@ -43,8 +43,11 @@ const cwd = process.cwd();
 console.log(
   '\u001B[36m\u25B6 Building app on host for Docker VR (APP_BASE_URL=/)\u001B[0m',
 );
+// `VITE_APP_VERSION=VR-TEST` keeps the header version string stable across
+// releases — without this, every `chore(release)` bump invalidates VR
+// baselines in the header strip.
 execSync(
-  'APP_BASE_URL=/ yarn build && cp dist/client/_shell.html dist/client/index.html',
+  'VITE_APP_VERSION=VR-TEST APP_BASE_URL=/ yarn build && cp dist/client/_shell.html dist/client/index.html',
   { stdio: 'inherit', cwd },
 );
 
