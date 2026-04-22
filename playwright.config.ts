@@ -12,6 +12,11 @@ const includeVisualSpecs =
 const visualExclusion = includeVisualSpecs
   ? {}
   : { testIgnore: '**/visual.spec.ts' };
+// Pin the header version string during VR runs so `chore(release)` bumps
+// don't invalidate baselines. Mirrored in scripts/vr-docker.mjs for Docker.
+const vrEnvPrefix = includeVisualSpecs
+  ? 'VITE_APP_VERSION=VR-TEST '
+  : '';
 
 export default defineConfig({
   testDir: './e2e',
@@ -46,7 +51,7 @@ export default defineConfig({
   webServer: {
     command: vrDocker
       ? `npx serve dist/client -p ${e2ePort} -s`
-      : `APP_BASE_URL=/ yarn build && cp dist/client/_shell.html dist/client/index.html && npx serve dist/client -p ${e2ePort} -s`,
+      : `${vrEnvPrefix}APP_BASE_URL=/ yarn build && cp dist/client/_shell.html dist/client/index.html && npx serve dist/client -p ${e2ePort} -s`,
     url: e2eOrigin,
     reuseExistingServer: !process.env['CI'],
     timeout: 120 * 1000,
