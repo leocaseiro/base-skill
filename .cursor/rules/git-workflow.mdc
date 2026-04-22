@@ -1,14 +1,57 @@
 ---
-description: Git workflow rules — enforce branch-based development via worktrees
+description: >-
+  Git workflow — mandatory worktrees; block edits from main repo checkout unless
+  user explicitly opts out
 globs: ["**/*"]
 alwaysApply: true
 ---
 
-# Git Workflow
+# Git workflow (all agents and models)
 
-See [CLAUDE.md](../../CLAUDE.md) for the full rules. Summary:
+Full policy: [CLAUDE.md](../../CLAUDE.md). This file repeats the **non-negotiable steps** so Cursor and other tools behave the same as Claude Code.
 
-- **Never commit directly to `master`**
-- All work must happen in a worktree: `git worktree add ./worktrees/<branch-name> -b <branch-name>`
-- Run `yarn install` inside the new worktree before starting work
-- PRs merge into `master`; remove the worktree after merge
+## Hard gate before editing tracked files
+
+Do **not** create, modify, delete, or run formatters against project source from the **main repository checkout** (the clone whose workspace root is `.../base-skill` and **not** under `.../base-skill/worktrees/<name>/`).
+
+**Before your first edit in a session:**
+
+1. Run: `pwd` (or infer workspace root from the environment).
+2. Confirm the working directory for edits is **inside** `./worktrees/<something>/` relative to the repo root (path should contain `/worktrees/` followed by a worktree directory name).
+3. If you are on the main tree and the user did **not** explicitly say to work in the root checkout (e.g. “hotfix on main”, “skip worktree”): **stop and create a worktree first** — do not patch `src/`, config, or docs in the root.
+
+## Starting work (mandatory sequence)
+
+From the **repository root** (main checkout), not from inside an existing worktree:
+
+```bash
+git fetch origin master
+git worktree add ./worktrees/<short-name> -b <branch-name> origin/master
+cd ./worktrees/<short-name>
+yarn install
+```
+
+Use a concrete branch name (e.g. `feat/game-no-menu`, `fix/login`). Match worktree folder to the task (`./worktrees/game-no-menu`).
+
+Verify the directory is ignored before relying on `./worktrees/`:
+
+```bash
+git check-ignore -q worktrees || git check-ignore -q .worktrees
+```
+
+## Rules
+
+- **Never commit directly to `master`.**
+- **Every task** (code, tests, Storybook, **plans, specs, markdown docs**) goes through a branch in a worktree unless the user opts out in the message.
+- Open **Cursor’s workspace folder** as `./worktrees/<name>` when possible so tools default to the correct tree.
+- After merge to `master`, remove the worktree: `git worktree remove ./worktrees/<name>`.
+
+## Commits (baby steps)
+
+- When a logical unit of work is **done and good** (tests pass, lint clean for touched files), **commit** before starting the next unit.
+- **One PR may contain many commits** — that is fine. Smaller commits make review, `git cherry-pick`, and targeted `git revert` easier.
+- If the user says “baby steps” (or similar), default to **frequent small commits** on the current branch unless they opt out.
+
+## Relationship to AGENTS.md
+
+[AGENTS.md](../../AGENTS.md) is the project-level agent entrypoint; keep it in sync with this workflow for models that read `AGENTS.md` first.
