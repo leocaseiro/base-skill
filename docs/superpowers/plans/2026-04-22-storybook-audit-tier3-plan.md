@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Retrofit the 5 Tier-3 Storybook files (4 root `src/components/*` + 1 `src/stories/ThemeShowcase.stories.tsx`) to the Controls Policy + Required Variants gates defined in [`.claude/skills/write-storybook/SKILL.md`](../../../.claude/skills/write-storybook/SKILL.md) and the 10 rollout gates in issue #125.
+**Goal:** Retrofit the 5 Tier-3 Storybook files (4 root `src/components/*` + 1 `src/stories/ThemeShowcase.stories.tsx`) to the single-Default Playground pattern and Controls Policy defined in [`.claude/skills/write-storybook/SKILL.md`](../../../.claude/skills/write-storybook/SKILL.md) (as updated in PR #155) and the 10 rollout gates in issue #125.
 
 **Architecture:** Two waves of independent subagents, one worktree/branch/PR per file. No shared files are touched across tasks — each task is fully self-contained, so the 5 tasks are safe to run in parallel in principle. Serialising into two waves (3 files → review checkpoint → 2 files) limits review load and catches pattern drift before Wave 2 starts. Each task writes exactly one `.stories.tsx` file, runs `yarn typecheck` + `yarn lint`, commits, pushes, and opens a PR against `master`.
 
@@ -11,8 +11,10 @@
 **Canonical references:**
 
 - Controls policy: `.claude/skills/write-storybook/SKILL.md`
-- Shell-slim `Playground` (no skin): `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
-- Skin-wrapped canonical (NOT used in Tier 3): `src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx`
+- Playground pattern spec: `.claude/skills/write-storybook/SKILL.md` — "Playground Pattern" + "When to Add Auxiliary Stories" sections (added in PR #155)
+- Global skin decorator: `.storybook/decorators.tsx` `withDefaultSkin` (added in PR #154) — already applied to every story; Tier 3 stories inherit it automatically and must NOT add a per-file skin wrapper
+- Shell-slim Default reference: `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` (post-#154; per-file skin wrapper removed)
+- Trigger-button pattern reference (for callbacks the Controls panel can't invoke): `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
 - Batch 2 retrofit precedent: `docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md`
 - Colour keys: `src/lib/game-colors.ts` exports `GAME_COLOR_KEYS` and `GameColorKey`
 - Tracking issue: #125
@@ -30,16 +32,16 @@
 
   Slugs: `game-grid`, `game-card`, `game-name-chip`, `config-form-fields`, `theme-showcase`.
 
-- **No skin wrapper in Tier 3.** All 5 target components read theme tokens (`bg-background`, `text-foreground`, etc.) only — none reference `--skin-*` or `skin.tokens`. Verified by `grep -rn 'skin\|--skin-\|game-container\|skin\.tokens'` on each source file. Each PR body must include an explicit line: _"No skin wrapper — `<Component>` uses theme tokens only, verified by grep."_
+- **Skin wrapping is global (PR #154).** The `withDefaultSkin` decorator in `.storybook/preview.tsx` wraps every story in `<div className="game-container skin-classic" style={classicSkin.tokens}>`. No Tier 3 task adds a per-file skin wrapper — doing so would create a double-wrap. None of the 5 target components consume `--skin-*` tokens themselves, so the global decorator's effect is inert for their visuals; we simply inherit it.
 - **Handler wiring.** Every callback prop wired via `args: { onFoo: fn(), ... }` from `storybook/test` and hidden from the Controls panel via `argTypes: { onFoo: { table: { disable: true } } }`. Do not use `argTypes: { onFoo: { action: '…' } }`. Do not rely on the global `argTypesRegex` alone — react-docgen does not expand DOM-extended prop types, so the regex matches nothing for most handler props.
 - **`StoryArgs` pattern.** When the component takes complex object props or has docgen-inferred rows we want to hide, declare an explicit `interface StoryArgs { … }` with controllable args, mark shadowed raw props as `?: never`, and double-cast `component: Foo as unknown as ComponentType<StoryArgs>`. See `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` for the canonical shape.
 - **Controls map (reminder).** Enum / union → `control: { type: 'select' }` + `options` (or `'radio'` for ≤4 options); boolean → `control: 'boolean'`; bounded number → `control: { type: 'range', min, max, step }`; free text → `control: 'text'`; callback → disabled in Controls and wired via `fn()` in `args`; JSX / complex object → `control: false` or `table: { disable: true }`. Never a raw JSON control for an enumerable domain.
-- **Playground convention.** When existing scenario stories can be reproduced by tweaking args on a single default, collapse them into one `Playground: Story = {}` and keep scenario exports only for states the Controls panel cannot easily reach (survey stories like `AllColors`, per-theme VR shots, `visibleWhen` branches that require a specific fixture). This convention is established by precedent (PR #141 for `InstructionsOverlay`, Task 1 in the Batch 2 plan for `Slot`) and is captured under "Audit / Upgrade Checklist" + "Collapse redundant stories" in the write-storybook skill.
+- **Single-Default Playground pattern (PR #155).** Every Tier 3 file ships exactly one `Default: Story = {}` driven by proper interactive controls. Auxiliary named stories are added only for scenarios the Playground's controls cannot express — the skill's "When to Add Auxiliary Stories" section enumerates legitimate exceptions (surveys like `AllColors`, pinned themes or viewports for `play()` assertions, stateful trigger-button wrappers). Enum-per-value, state-variant, and edge-case snapshots that a control toggle reaches are NOT legitimate auxiliaries — delete them. Story name is `Default` (not `Playground`); "Playground" is the conceptual label per the skill.
 - **Dark-mode stories.** The theme toolbar (registered globally in `.storybook/preview.tsx`) lets reviewers toggle themes interactively — do not add `DefaultDark` / `WithXDark` duplicates. Pin a story to a specific theme only when the variant exercises something theme-specific that the toolbar can't reproduce in one tap (surveys like `AllColorsDark`, VR baseline stories like `ThemeShowcase`'s 4 theme-pinned stories). Prefer `globals: { theme: '<name>' }` over the legacy `withDarkMode` decorator.
 - **Import order (ESLint `import/order`).** Value imports alphabetical → relative imports alphabetical → `storybook/test` → `@storybook/react` type import → `react` / JSX type imports last. If lint complains, regroup.
 - **Per-task verification (always before commit).** `yarn typecheck` → exit 0; `yarn lint` → exit 0. Do **not** run `yarn test:storybook` per file — too slow; the full run lives in CI when the PR opens.
 - **Optional local visual check.** Each subagent may (but is not required to) start a Storybook on a free port (6106+) inside its worktree and navigate to the target stories in a browser — or run a Playwright script to screenshot them — before writing diffs. Kill the Storybook process when done. Use the workflow from `.claude/skills/write-storybook/SKILL.md` ("Running Storybook Tests"). Skip this step if Docker/Storybook bootstrap is flaky; the CI `yarn test:storybook` run is the authoritative gate.
-- **Commit message shape.** `stories(<area>/<name>): retrofit per controls policy`. Body lists the gates applied and any variant dropped with reason. Co-authored trailer.
+- **Commit message shape.** `stories(<area>/<name>): retrofit per single-Default Playground`. Body lists the gates applied and any variant dropped with reason. Co-authored trailer.
 - **One commit per file. One PR per file.** PRs always target `master`. Push freely for Tier 3 (feature work). If the push triggers an automation that auto-opens a PR, edit that PR's title/body instead of creating a new one.
 - **Markdown.** No Markdown edits expected in these tasks. Skip `yarn fix:md`.
 - **Do not extract shared helpers across tasks.** Each story file is self-contained — keep fixtures + wrapper components inline. Shared-helper drift is the main risk if Wave 1 and Wave 2 run in parallel; avoid by design.
@@ -64,10 +66,10 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 
 - Gate 1 — Controls map to something visible: `cards: ReactNode[]` is invisible as a control; hidden and derived from `cardCount` range.
 - Gate 3 — Handler wiring: sample cards inside the render use `fn()` spies on `onPlay` / `onOpenCog`.
-- Gate 4 — No skin wrapper (theme tokens only; `GameGrid` has no CSS of its own beyond layout classes).
+- Gate 4 — Global skin (PR #154) — no per-file wrapper.
 - Gate 5 — Hide shadowed docgen row for `cards`.
-- Gate 6 — Collapse: 2 existing stories (`Default`, `Empty`) collapse into a single `Playground` — `cardCount` range (0–12) reaches every state from Controls in one click; no scenario exports are needed.
-- Gate 8 — Required Variants: `Playground` happy path. Edge cases (empty / many) reachable via the `cardCount` range — no separate exports. No interactive component → no `play()`.
+- Gate 6 — Collapse: 2 existing stories (`Default`, `Empty`) collapse into the single `Default` Playground — `cardCount` range (0–12) reaches every state from Controls in one click; no scenario exports are needed.
+- Gate 8 — Single-Default pattern (PR #155): one `Default` story. Edge cases (empty / many) reachable via the `cardCount` range — no separate exports. No interactive component → no `play()`.
 
 **Steps:**
 
@@ -126,7 +128,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 
   type Story = StoryObj<StoryArgs>;
 
-  export const Playground: Story = {};
+  export const Default: Story = {};
   ```
 
 - [ ] **Step 3: Verify.** Run in the worktree:
@@ -143,13 +145,13 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   ```bash
   git add src/components/GameGrid.stories.tsx
   git commit -m "$(cat <<'EOF'
-  stories(components/GameGrid): retrofit per controls policy
+  stories(components/GameGrid): retrofit per single-Default Playground
 
   StoryArgs exposes a cardCount range (0–12); cards is shadowed and
   hidden from Controls. Sample GameCards inside the render wire
-  onPlay/onOpenCog to fn() spies.
-
-  No skin wrapper — GameGrid is a grid container, uses theme tokens only.
+  onPlay/onOpenCog to fn() spies. Single Default story per the
+  Playground pattern in .claude/skills/write-storybook/SKILL.md
+  (added in PR #155).
 
   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
   EOF
@@ -160,17 +162,18 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 
   ```bash
   git push -u origin stories/game-grid-audit
-  gh pr create --base master --title "stories(components/GameGrid): retrofit per controls policy" --body "$(cat <<'EOF'
+  gh pr create --base master --title "stories(components/GameGrid): retrofit per single-Default Playground" --body "$(cat <<'EOF'
   ## Summary
 
-  Tier 3, file 1 of 5 — retrofits `src/components/GameGrid.stories.tsx` to the
-  Controls Policy + Required Variants gates
-  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md), issue #125).
+  Tier 3, file 1 of 5 — retrofits `src/components/GameGrid.stories.tsx` to the single-Default Playground pattern defined in
+  [`.claude/skills/write-storybook/SKILL.md`](../blob/master/.claude/skills/write-storybook/SKILL.md) (added in PR #155) and
+  the Controls Policy in issue #125.
 
   - `cardCount` range (0–12) drives how many GameCards render.
   - `cards` is shadowed (`?: never` + `table: { disable: true }`) — never meaningful as a control.
   - Sample cards wire `onPlay` / `onOpenCog` to `fn()` spies.
-  - No skin wrapper — `GameGrid.tsx` has no `--skin-*` or `skin.tokens` references (verified by grep); uses theme layout classes only.
+  - Single `Default` story — the `cardCount` range reaches every prior state (0, 3, 12).
+  - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
 
   Closes part of #125.
 
@@ -179,7 +182,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   - [ ] `yarn typecheck` green
   - [ ] `yarn lint` green
   - [ ] `yarn test:storybook` green (runs in CI)
-  - [ ] Controls panel drives the single `Playground` export (cardCount slider reaches 0, 3, and 12 cards visibly)
+  - [ ] Controls panel drives the single `Default` export (cardCount slider reaches 0, 3, and 12 cards visibly)
   EOF
   )"
   ```
@@ -199,11 +202,11 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 - Gate 1 — Controls map: `variant` union, `customGameColor` enum, `isBookmarked` boolean, `bookmarkable` derived-boolean (controls whether `onToggleBookmark` is passed).
 - Gate 2 — Structured inputs: `variant` → radio, `customGameColor` → select of `GAME_COLOR_KEYS`, `chipsText` → free text (split on commas → `chips: string[]`).
 - Gate 3 — Handler wiring: convert `{ action: '…' }` → `fn()` in `args`; hide from Controls. Call `fn()` inside `render` for per-render spy instances (OK for Actions-only; no play() stories here).
-- Gate 4 — No skin wrapper (theme tokens only; verified by grep).
+- Gate 4 — Global skin (PR #154) — no per-file wrapper.
 - Gate 5 — Hide shadowed docgen rows for `chips`, `cover`, `onPlay`, `onOpenCog`, `onToggleBookmark`.
-- Gate 6 — Collapse: 7 existing scenario exports (Default, CustomGame, CustomGamePurple, NotBookmarked, Bookmarked, NotBookmarkedCustomGame, BookmarkedCustomGame) all reduce to arg tweaks on a single `Playground` — the `variant` radio, `customGameColor` select, `bookmarkable` + `isBookmarked` booleans, and `chipsText` text control reach every state from Controls in ≤2 clicks. Drop all 7 and keep only `Playground`.
-- Gate 7 — Real-game parity: in production, `GameCard` renders inside `GameGrid`'s responsive columns (~260–300px wide at xl/2xl breakpoints). In isolation it has no width constraint and stretches to the full canvas, so the cover image dominates. The Playground's `render` wraps the card in `<div className="w-64">` (256px) and the meta pins `parameters: { layout: 'centered' }` so the card renders at a realistic grid-cell size, centred in the preview.
-- Gate 8 — Required Variants: single `Playground` happy path. Enum-per-value (variant), state variants (bookmark on/off), and colour variations are all reachable from the Controls panel — no separate exports.
+- Gate 6 — Collapse: 7 existing scenario exports (Default, CustomGame, CustomGamePurple, NotBookmarked, Bookmarked, NotBookmarkedCustomGame, BookmarkedCustomGame) all reduce to arg tweaks on a single `Default` Playground — the `variant` radio, `customGameColor` select, `bookmarkable` + `isBookmarked` booleans, and `chipsText` text control reach every state from Controls in ≤2 clicks. Drop all 7; keep only `Default`.
+- Gate 7 — Real-game parity: in production, `GameCard` renders inside `GameGrid`'s responsive columns (~260–300px wide at xl/2xl breakpoints). In isolation it has no width constraint and stretches to the full canvas, so the cover image dominates. The `Default` story's `render` wraps the card in `<div className="w-64">` (256px) and the meta pins `parameters: { layout: 'centered' }` so the card renders at a realistic grid-cell size, centred in the preview.
+- Gate 8 — Single-Default pattern (PR #155): one `Default` story. Enum-per-value (variant), state variants (bookmark on/off), and colour variations are all reachable from the Controls panel — no separate exports.
 
 **Steps:**
 
@@ -334,9 +337,9 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 
   type Story = StoryObj<StoryArgs>;
 
-  export const Playground: Story = {};
+  export const Default: Story = {};
 
-  // deleted-for-reference — every prior export is reachable from Playground:
+  // deleted-for-reference — every prior export is reachable from Default's Controls:
   //   CustomGame               → variant='customGame', customGameColor='amber'
   //   CustomGamePurple         → variant='customGame', customGameColor='purple', chipsText='⬇️ Down, 10 numbers, 3s'
   //   NotBookmarked            → bookmarkable=true, isBookmarked=false
@@ -359,7 +362,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   ```bash
   git add src/components/GameCard.stories.tsx
   git commit -m "$(cat <<'EOF'
-  stories(components/GameCard): retrofit per controls policy
+  stories(components/GameCard): retrofit per single-Default Playground
 
   StoryArgs with proper controls: variant radio, customGameColor select
   from GAME_COLOR_KEYS, chipsText split on commas, isBookmarked +
@@ -368,18 +371,16 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   table.disable. Shadowed raw props (chips, cover, onPlay, onOpenCog,
   onToggleBookmark) hidden via ?: never + table.disable.
 
-  Collapse the 7 prior scenario exports into a single Playground —
+  Collapse the 7 prior scenario exports into a single Default story —
   variant radio, customGameColor select, bookmarkable + isBookmarked
   booleans, and chipsText text reach every prior state from Controls
-  in ≤2 clicks.
+  in ≤2 clicks. Matches the single-Default Playground pattern in
+  .claude/skills/write-storybook/SKILL.md (added in PR #155).
 
   Render realism: wrap the card in <div className="w-64"> (256px ≈ a
   typical GameGrid cell width at xl/2xl breakpoints) and pin
   parameters.layout to 'centered' so the card renders at a realistic
   size instead of stretching to the full Storybook canvas.
-
-  No skin wrapper — GameCard uses theme tokens (bg-card,
-  text-foreground, bg-muted) only.
 
   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
   EOF
@@ -390,19 +391,18 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 
   ```bash
   git push -u origin stories/game-card-audit
-  gh pr create --base master --title "stories(components/GameCard): retrofit per controls policy" --body "$(cat <<'EOF'
+  gh pr create --base master --title "stories(components/GameCard): retrofit per single-Default Playground" --body "$(cat <<'EOF'
   ## Summary
 
-  Tier 3, file 2 of 5 — retrofits `src/components/GameCard.stories.tsx` to the
-  Controls Policy + Required Variants gates
-  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md), issue #125).
+  Tier 3, file 2 of 5 — retrofits `src/components/GameCard.stories.tsx` to the single-Default Playground pattern
+  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
 
   - `variant` radio, `customGameColor` select from `GAME_COLOR_KEYS`, `chipsText` splits on commas.
   - `isBookmarked` + `bookmarkable` expose the full bookmark matrix via args.
   - Handlers wired via `fn()` in the render function; raw prop rows hidden from Controls.
-  - Collapse 7 prior scenario exports into a single `Playground` — every prior state is reachable from Controls in ≤2 clicks.
+  - Collapse 7 prior scenario exports into a single `Default` story — every prior state is reachable from Controls in ≤2 clicks.
   - Render realism: card is wrapped in `<div className="w-64">` (~grid-cell size) and the meta pins `layout: 'centered'` so it no longer stretches to the full canvas (the pre-retrofit story rendered at ~1200px wide, dominated by the cover image).
-  - No skin wrapper — `GameCard.tsx` uses theme tokens only (verified by grep).
+  - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
 
   Closes part of #125.
 
@@ -432,10 +432,10 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 - Gate 1 — Controls map to something visible: add controls for `title`, `customGameName`, `customGameColor`, `subject`.
 - Gate 2 — Structured inputs: `customGameColor` → select.
 - Gate 3 — Handler wiring: N/A (no callbacks on `GameNameChipProps`).
-- Gate 4 — No skin wrapper (theme tokens only; `--game-play` is the **game-colors palette**, not the skin system).
+- Gate 4 — Global skin (PR #154) — no per-file wrapper. Note that `--game-play` + `game-bg` / `game-text` are the game-colors palette, not skin tokens; they live at the component level and are unaffected by the global decorator.
 - Gate 5 — N/A (no shadowed props — all props are primitive and controllable).
-- Gate 6 — Collapse: drop `Default` (redundant with `Playground`), `WithCustomGame` (reachable via `customGameName` + `customGameColor` controls), `WithSubject` (reachable via `subject` control), and the 3 `*Dark` duplicates (`DefaultDark`, `WithCustomGameDark`, `WithSubjectDark` — theme toolbar covers dark review). Drop `AllColorsDark` too — a single toolbar flip reproduces it. Keep `Playground` (default args entry point) + `AllColors` (12-colour survey is NOT reachable from Controls in one click — it would take 12 selector clicks to visualise the palette).
-- Gate 8 — Required Variants: `Playground` happy path + `AllColors` palette survey. Per-value enum (`customGameColor`) and state variants (custom-game on/off, subject on/off) are all reachable from Controls without separate exports.
+- Gate 6 — Collapse: drop `Default` (keep as the canonical name — see below), `WithCustomGame` (reachable via `customGameName` + `customGameColor` controls), `WithSubject` (reachable via `subject` control), and the 3 `*Dark` duplicates (`DefaultDark`, `WithCustomGameDark`, `WithSubjectDark` — theme toolbar covers dark review). Drop `AllColorsDark` too — a single toolbar flip reproduces it. Keep the single `Default` Playground + `AllColors` (12-colour survey is NOT reachable from Controls in one click; per the skill's "When to Add Auxiliary Stories", surveys are a legitimate auxiliary).
+- Gate 8 — Single-Default pattern (PR #155): one `Default` Playground + one legitimate auxiliary (`AllColors`). Per-value enum (`customGameColor`) and state variants (custom-game on/off, subject on/off) are reachable from Controls without separate exports.
 - Gate 9 — Decorators: no `withDb` / `withRouter` needed.
 
 **Steps:**
@@ -474,7 +474,7 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 
   type Story = StoryObj<typeof GameNameChip>;
 
-  export const Playground: Story = {};
+  export const Default: Story = {};
 
   export const AllColors: Story = {
     render: () => (
@@ -506,18 +506,17 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
   ```bash
   git add src/components/GameNameChip.stories.tsx
   git commit -m "$(cat <<'EOF'
-  stories(components/GameNameChip): retrofit per controls policy
+  stories(components/GameNameChip): retrofit per single-Default Playground
 
   Add argTypes controls for title, customGameName, customGameColor
-  (select from GAME_COLOR_KEYS), subject. Collapse to Playground +
-  AllColors — drop Default, WithCustomGame, WithSubject, DefaultDark,
-  WithCustomGameDark, WithSubjectDark, AllColorsDark. The first three
-  are reachable from Controls; the four *Dark variants are reachable
-  by a theme-toolbar flip. Keep AllColors as a 12-colour palette survey
-  (NOT reachable from Controls in one click).
-
-  No skin wrapper — GameNameChip uses theme tokens + the game-colors
-  palette (--game-play / game-bg / game-text utilities), not skin tokens.
+  (select from GAME_COLOR_KEYS), subject. Collapse to Default +
+  AllColors — drop WithCustomGame, WithSubject, DefaultDark,
+  WithCustomGameDark, WithSubjectDark, AllColorsDark. WithCustomGame
+  and WithSubject are reachable from Controls; the four *Dark variants
+  are reachable by a theme-toolbar flip. Keep AllColors as a 12-colour
+  palette survey — a legitimate auxiliary per the skill's "When to
+  Add Auxiliary Stories" section (PR #155): it's not reachable from
+  Controls in one click.
 
   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
   EOF
@@ -528,17 +527,16 @@ Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once,
 
   ```bash
   git push -u origin stories/game-name-chip-audit
-  gh pr create --base master --title "stories(components/GameNameChip): retrofit per controls policy" --body "$(cat <<'EOF'
+  gh pr create --base master --title "stories(components/GameNameChip): retrofit per single-Default Playground" --body "$(cat <<'EOF'
   ## Summary
 
-  Tier 3, file 3 of 5 — retrofits `src/components/GameNameChip.stories.tsx` to the
-  Controls Policy + Required Variants gates
-  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md), issue #125).
+  Tier 3, file 3 of 5 — retrofits `src/components/GameNameChip.stories.tsx` to the single-Default Playground pattern
+  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
 
   - `customGameColor` → select from `GAME_COLOR_KEYS`; `title`, `customGameName`, `subject` → text controls.
-  - Collapse to `Playground` + `AllColors` only. Drop `Default`, `WithCustomGame`, `WithSubject` (reachable from Controls) and all 4 `*Dark` variants (theme toolbar reproduces them).
-  - Kept `AllColors` — a 12-colour palette survey is NOT reachable from Controls in one click.
-  - No skin wrapper — `GameNameChip` uses theme tokens + the game-colors palette (`--game-play` / `game-bg` / `game-text`), not skin tokens.
+  - Collapse to `Default` + `AllColors` only. Drop `WithCustomGame`, `WithSubject` (reachable from Controls) and all 4 `*Dark` variants (theme toolbar reproduces them).
+  - Kept `AllColors` as a legitimate auxiliary per the skill's "When to Add Auxiliary Stories" — a 12-colour palette survey is NOT reachable from Controls in one click.
+  - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
 
   Closes part of #125.
 
@@ -561,7 +559,7 @@ Before dispatching Wave 2, confirm the reviewer has approved (or at minimum revi
 - The `StoryArgs` double-cast (`as unknown as ComponentType<StoryArgs>`) and `?: never` pattern are applied correctly.
 - `fn()` wiring works inside the render function for handlers that would otherwise collide with StoryArgs (GameCard / GameGrid).
 - No `withDarkMode` decorator in any new story (GameNameChip).
-- No skin wrapper added anywhere — each PR body explicitly notes the theme-tokens-only status.
+- No per-file skin wrapper added anywhere — the global `withDefaultSkin` decorator (PR #154) handles it. If a Wave 1 PR contains a `<div className="game-container skin-...">` wrapper, it's a bug and must be removed.
 
 If any of these patterns diverges between the three PRs, reconcile by editing this plan's Wave 2 tasks before dispatching, so Tasks 4 and 5 use the agreed shape.
 
@@ -588,10 +586,10 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 - Gate 1 — Controls map: `fields` and `config` are complex objects → hidden from Controls, driven by a `scenario` select.
 - Gate 2 — Structured inputs: `scenario` → select with 4 presets.
 - Gate 3 — Handler wiring: `onChange` wired to `fn()` in `args`; hidden from Controls.
-- Gate 4 — No skin wrapper (theme tokens only).
+- Gate 4 — Global skin (PR #154) — no per-file wrapper.
 - Gate 5 — Hide shadowed rows for `fields`, `config`.
-- Gate 6 — Collapse: the 4 scenario exports + `AllFieldTypesDark` all reduce to a single `Playground` — the `scenario` select in Controls reaches every `visibleWhen` branch in one click, and the theme toolbar reproduces dark. Drop all 5.
-- Gate 8 — Required Variants: single `Playground`. State variants (each `visibleWhen` branch) are reachable from the scenario select — no separate exports.
+- Gate 6 — Collapse: the 4 scenario exports + `AllFieldTypesDark` all reduce to a single `Default` Playground — the `scenario` select in Controls reaches every `visibleWhen` branch in one click, and the theme toolbar reproduces dark. Drop all 5.
+- Gate 8 — Single-Default pattern (PR #155): one `Default` story. State variants (each `visibleWhen` branch) are reachable from the scenario select — no separate exports.
 - Gate 9 — Decorators: N/A (no router/DB deps).
 
 **Steps:**
@@ -785,9 +783,9 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 
   type Story = StoryObj<StoryArgs>;
 
-  export const Playground: Story = {};
+  export const Default: Story = {};
 
-  // deleted-for-reference — every prior export is reachable from Playground via the `scenario` select:
+  // deleted-for-reference — every prior export is reachable from Default via the `scenario` select:
   //   AllFieldTypes                 → scenario='all-types'
   //   SortNumbersFieldsExact        → scenario='sort-numbers-random'
   //   SortNumbersFieldsByMode       → scenario='sort-numbers-by'
@@ -809,7 +807,7 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   ```bash
   git add src/components/ConfigFormFields.stories.tsx
   git commit -m "$(cat <<'EOF'
-  stories(components/ConfigFormFields): retrofit per controls policy
+  stories(components/ConfigFormFields): retrofit per single-Default Playground
 
   StoryArgs with scenario select (all-types / sort-numbers-random /
   sort-numbers-by / sort-numbers-distractors) — each scenario preset
@@ -818,11 +816,12 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   via ?: never + table.disable.
 
   Collapse the 4 scenario exports + AllFieldTypesDark into a single
-  Playground — the scenario select reaches every visibleWhen branch
+  Default story — the scenario select reaches every visibleWhen branch
   from Controls in one click; the theme toolbar reproduces dark.
-
-  No skin wrapper — ConfigFormFields uses theme tokens
-  (bg-background, text-foreground, border-input) only.
+  Matches the single-Default Playground pattern in the skill
+  (added in PR #155). Note: the SortNumbers-specific fixtures inside
+  the file will move to a co-located game story in a follow-up
+  (tracked in #153).
 
   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
   EOF
@@ -833,18 +832,18 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 
   ```bash
   git push -u origin stories/config-form-fields-audit
-  gh pr create --base master --title "stories(components/ConfigFormFields): retrofit per controls policy" --body "$(cat <<'EOF'
+  gh pr create --base master --title "stories(components/ConfigFormFields): retrofit per single-Default Playground" --body "$(cat <<'EOF'
   ## Summary
 
-  Tier 3, file 4 of 5 — retrofits `src/components/ConfigFormFields.stories.tsx` to the
-  Controls Policy + Required Variants gates
-  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md), issue #125).
+  Tier 3, file 4 of 5 — retrofits `src/components/ConfigFormFields.stories.tsx` to the single-Default Playground pattern
+  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
 
   - `scenario` select in Controls drives 4 presets — each surfaces a distinct `visibleWhen` branch.
   - `onChange` wired to `fn()`; hidden from Controls.
   - Complex props (`fields`, `config`) shadowed via `?: never` + `table.disable`.
-  - Collapse the 4 scenario exports + `AllFieldTypesDark` into a single `Playground` — the scenario select reaches every state from Controls; theme toolbar reproduces dark.
-  - No skin wrapper — `ConfigFormFields.tsx` uses theme tokens only (verified by grep).
+  - Collapse the 4 scenario exports + `AllFieldTypesDark` into a single `Default` story — the scenario select reaches every state from Controls; theme toolbar reproduces dark.
+  - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
+  - Follow-up tracked in #153: move the SortNumbers-specific fixtures (`sortFields`) out of this generic file and into a co-located game story (mirroring PR #143's `InstructionsOverlay` pattern).
 
   Closes part of #125.
 
@@ -853,7 +852,7 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   - [ ] `yarn typecheck` green
   - [ ] `yarn lint` green
   - [ ] `yarn test:storybook` green (runs in CI)
-  - [ ] scenario select in the Playground drives all 4 `visibleWhen` branches; theme toolbar cycles dark/light
+  - [ ] scenario select on the `Default` story drives all 4 `visibleWhen` branches; theme toolbar cycles dark/light
   EOF
   )"
   ```
@@ -872,10 +871,10 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 
 - Gate 1 — Controls map: none of the `GameShell` props are meaningful to control in this showcase context (they're fixtures); hide all of them.
 - Gate 3 — Handler wiring: N/A (no callbacks on `GameShell`; `ShowcaseBody`'s inline `onChange={() => {}}` stays inside the fixture).
-- Gate 4 — No skin wrapper (theme tokens only; `ThemeShowcase` is by design a theme-token showcase — this is the flagship "do NOT wrap" case).
+- Gate 4 — Global skin (PR #154) — no per-file wrapper. `ThemeShowcase` is a theme-token showcase; the skin decorator's CSS vars don't conflict with theme-token rendering.
 - Gate 5 — Hide shadowed rows for `config`, `moves`, `initialState`, `sessionId`, `meta`, `initialLog`, `children`.
-- Gate 6 — Collapse: drop 3 of the 4 theme-pinned stories (OceanDark, ForestLight, ForestDark). The theme toolbar (5 themes registered globally in `.storybook/preview.tsx`) lets the reviewer cycle through every theme from a single `Showcase` story in one tap each. VR in this project is Playwright-driven (`e2e/visual.spec.ts`) — Storybook stories do not double as VR baselines, so the "distinct snapshots" argument doesn't hold.
-- Gate 8 — Required Variants: single `Showcase` story. The toolbar provides the "different views" control per the Controls-reach rule.
+- Gate 6 — Collapse: drop 3 of the 4 theme-pinned stories (OceanDark, ForestLight, ForestDark). The theme toolbar (5 themes registered globally in `.storybook/preview.tsx`) lets the reviewer cycle through every theme from the single `Default` story in one tap each. VR in this project is Playwright-driven (`e2e/visual.spec.ts`) — Storybook stories do not double as VR baselines, so the "distinct snapshots" argument doesn't hold.
+- Gate 8 — Single-Default pattern (PR #155): one `Default` story. The toolbar provides the per-theme "different views" control.
 - Gate 9 — Decorators: `withDb` + `withRouter` (already present; keep).
 
 **Steps:**
@@ -1007,7 +1006,7 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
       docs: {
         description: {
           component:
-            'Token-only page composed from GameShell + GameNameChip + ConfigFormFields. Cycle through the 5 registered themes via the toolbar. No skin wrapper — renders against theme tokens only.',
+            'Token-only page composed from GameShell + GameNameChip + ConfigFormFields. Cycle through the 5 registered themes via the toolbar. The global `withDefaultSkin` decorator wraps the preview — unaffected here because this file renders against theme tokens, not skin tokens.',
         },
       },
     },
@@ -1033,7 +1032,7 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 
   type Story = StoryObj<typeof GameShell>;
 
-  export const Showcase: Story = {};
+  export const Default: Story = {};
 
   // deleted-for-reference — the theme toolbar reproduces every prior pin in one tap:
   //   OceanLight  → toolbar theme='light'  (default)
@@ -1056,19 +1055,20 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   ```bash
   git add src/stories/ThemeShowcase.stories.tsx
   git commit -m "$(cat <<'EOF'
-  stories(stories/ThemeShowcase): retrofit per controls policy
+  stories(stories/ThemeShowcase): retrofit per single-Default Playground
 
   Hide all 7 GameShell-prop docgen rows from the Controls panel
   (config, moves, initialState, sessionId, meta, initialLog, children)
   via argTypes.table.disable. Collapse the 4 theme-pinned exports
   (OceanLight, OceanDark, ForestLight, ForestDark) into a single
-  Showcase story — the theme toolbar reproduces each pin in one tap.
+  Default story — the theme toolbar reproduces each pin in one tap.
   VR in this project is Playwright (e2e/visual.spec.ts), not Storybook,
-  so the "distinct VR snapshots" argument doesn't hold.
+  so the "distinct VR snapshots" argument doesn't hold. Matches the
+  single-Default Playground pattern in the skill (added in PR #155).
 
-  No skin wrapper — this file is the flagship theme-token showcase; no
-  --skin-* / skin.tokens references. Explicit note in the component
-  docs description.
+  Skin wrapping handled globally by the withDefaultSkin decorator
+  (PR #154). Docs description updated to note the theme-toolbar
+  workflow.
 
   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
   EOF
@@ -1079,16 +1079,15 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
 
   ```bash
   git push -u origin stories/theme-showcase-audit
-  gh pr create --base master --title "stories(stories/ThemeShowcase): retrofit per controls policy" --body "$(cat <<'EOF'
+  gh pr create --base master --title "stories(stories/ThemeShowcase): retrofit per single-Default Playground" --body "$(cat <<'EOF'
   ## Summary
 
-  Tier 3, file 5 of 5 — retrofits `src/stories/ThemeShowcase.stories.tsx` to the
-  Controls Policy gates
-  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md), issue #125).
+  Tier 3, file 5 of 5 — retrofits `src/stories/ThemeShowcase.stories.tsx` to the single-Default Playground pattern
+  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
 
   - Hide all 7 GameShell-prop rows from Controls (`config`, `moves`, `initialState`, `sessionId`, `meta`, `initialLog`, `children`) via `argTypes.table.disable`.
-  - Collapse the 4 theme-pinned exports into a single `Showcase` — the theme toolbar reproduces every pin in one tap. VR is Playwright (`e2e/visual.spec.ts`), not Storybook, so a distinct-snapshot-per-story argument doesn't apply.
-  - No skin wrapper — flagship theme-token showcase; `ThemeShowcase.tsx` / `GameShell.tsx` have no `--skin-*` / `skin.tokens` references (verified by grep). Explicit note added to the `docs.description.component` string.
+  - Collapse the 4 theme-pinned exports into a single `Default` — the theme toolbar reproduces every pin in one tap. VR is Playwright (`e2e/visual.spec.ts`), not Storybook, so a distinct-snapshot-per-story argument doesn't apply.
+  - Skin wrapping handled globally by `withDefaultSkin` (PR #154); no per-file wrapper.
 
   Closes part of #125.
 
@@ -1097,8 +1096,8 @@ Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, on
   - [ ] `yarn typecheck` green
   - [ ] `yarn lint` green
   - [ ] `yarn test:storybook` green (runs in CI)
-  - [ ] Controls panel is empty on the `Showcase` story (all 7 docgen rows hidden)
-  - [ ] Theme toolbar cycles through all 5 registered themes on the single `Showcase` story
+  - [ ] Controls panel is empty on the `Default` story (all 7 docgen rows hidden)
+  - [ ] Theme toolbar cycles through all 5 registered themes on the single `Default` story
   EOF
   )"
   ```
@@ -1145,10 +1144,15 @@ After all 5 PRs merge:
 
 - Any `.md` / docs edits outside this plan file.
 - Any changes to `.storybook/preview.tsx`, `.storybook/decorators.tsx`, or global Storybook config.
-- Adding a "Playground pattern" section to `.claude/skills/write-storybook/SKILL.md` — consider as a follow-up PR after Tier 3 completes, so the pattern is captured explicitly in the skill rather than only by precedent.
 - Retrofitting the remaining 4 root-components files (`Footer`, `Header`, `OfflineIndicator`, `ThemeToggle`, `UpdateBanner`) — they are still in the Tier 5 / Batch 5 bucket on #125 and should get their own plan.
-- Applying the default skin (`classicSkin`) globally via `.storybook/preview.tsx` — tracked in #152. If that merges before Tier 3 executes, Tier 3 stories inherit the default skin automatically and the per-file "no skin wrapper" notes become redundant.
-- Moving Task 4's SortNumbers-specific scenarios (`sortFields` fixture, the 3 sort presets) out of `ConfigFormFields.stories.tsx` and into a co-located `src/games/sort-numbers/SortNumbers.config-form.stories.tsx` — tracked in #153. Task 4 as written ships the SortNumbers fixtures inside the generic playground and the relocation is a post-#150 follow-up, mirroring #143's per-game `InstructionsOverlay` move.
+- Moving Task 4's SortNumbers-specific scenarios (`sortFields` fixture, the 3 sort presets) out of `ConfigFormFields.stories.tsx` and into a co-located `src/games/sort-numbers/SortNumbers.config-form.stories.tsx` — tracked in #153. Task 4 as written ships the SortNumbers fixtures inside the generic Playground and the relocation is a post-#150 follow-up, mirroring #143's per-game `InstructionsOverlay` move.
+
+---
+
+## Upstream work already merged (informs this plan)
+
+- **PR #154** — `classicSkin` is now applied globally via `withDefaultSkin` in `.storybook/preview.tsx`. No Tier 3 task adds a per-file skin wrapper. Per-file wrappers previously present on `AnswerGame`, `ProgressHUD`, `Slot` were removed in #154; they are the current shell-slim references.
+- **PR #155** — The `.claude/skills/write-storybook/SKILL.md` skill now has explicit "Playground Pattern" + "When to Add Auxiliary Stories" sections. Every Tier 3 task ships a single `Default` story and auxiliary exports only when the Controls panel can't reach the scenario (e.g., Task 3's `AllColors` palette survey).
 
 ---
 
@@ -1158,6 +1162,7 @@ After all 5 PRs merge:
 - **Placeholders:** No `TBD`, `TODO`, "implement later", "appropriate error handling", or stub-only steps. Every code block is complete and runnable. ✓
 - **Type consistency:** `StoryArgs` double-cast uses `ComponentType<StoryArgs>` consistently. `GAME_COLOR_KEYS` imported from `@/lib/game-colors` in Tasks 2 and 3. `ConfigField` import path matches the existing story file in Task 4. `GameEngineState` / `ResolvedContent` / `ResolvedGameConfig` / `SessionMeta` import paths preserved from the existing ThemeShowcase file in Task 5. ✓
 - **Cross-task coupling:** None. Each task touches exactly one file and pins its own worktree. ✓
-- **Playground consistency (Controls-reach rule):** Every task collapses to a single Playground (or Playground + survey) whenever the prior scenario exports are reachable via the Controls panel or the global theme toolbar. Task 1 (GameGrid): Playground only. Task 2 (GameCard): Playground only. Task 3 (GameNameChip): Playground + AllColors survey (not reachable in one click). Task 4 (ConfigFormFields): Playground only — the `scenario` select covers every `visibleWhen` branch. Task 5 (ThemeShowcase): single `Showcase` — the theme toolbar cycles through all 5 themes. ✓
+- **Single-Default Playground consistency (PR #155):** Every task ships a single `Default` story (the Playground) plus auxiliary stories only for scenarios the Controls panel or theme toolbar can't reach. Task 1 (GameGrid): `Default` only. Task 2 (GameCard): `Default` only. Task 3 (GameNameChip): `Default` + `AllColors` survey (12-colour palette — Controls can't reach it in one click; legitimate auxiliary per the skill). Task 4 (ConfigFormFields): `Default` only — the `scenario` select covers every `visibleWhen` branch. Task 5 (ThemeShowcase): `Default` only — the theme toolbar cycles through all 5 themes. ✓
+- **Skin wrapping (PR #154):** Zero per-file wrappers added; every story inherits `withDefaultSkin` from `.storybook/preview.tsx`. ✓
 
 Plan is ready for execution handoff.
