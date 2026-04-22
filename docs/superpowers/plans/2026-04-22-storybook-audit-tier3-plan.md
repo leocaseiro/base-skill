@@ -1147,6 +1147,8 @@ After all 5 PRs merge:
 - Any changes to `.storybook/preview.tsx`, `.storybook/decorators.tsx`, or global Storybook config.
 - Adding a "Playground pattern" section to `.claude/skills/write-storybook/SKILL.md` — consider as a follow-up PR after Tier 3 completes, so the pattern is captured explicitly in the skill rather than only by precedent.
 - Retrofitting the remaining 4 root-components files (`Footer`, `Header`, `OfflineIndicator`, `ThemeToggle`, `UpdateBanner`) — they are still in the Tier 5 / Batch 5 bucket on #125 and should get their own plan.
+- Applying the default skin (`classicSkin`) globally via `.storybook/preview.tsx` — tracked in #152. If that merges before Tier 3 executes, Tier 3 stories inherit the default skin automatically and the per-file "no skin wrapper" notes become redundant.
+- Moving Task 4's SortNumbers-specific scenarios (`sortFields` fixture, the 3 sort presets) out of `ConfigFormFields.stories.tsx` and into a co-located `src/games/sort-numbers/SortNumbers.config-form.stories.tsx` — tracked in #153. Task 4 as written ships the SortNumbers fixtures inside the generic playground and the relocation is a post-#150 follow-up, mirroring #143's per-game `InstructionsOverlay` move.
 
 ---
 
