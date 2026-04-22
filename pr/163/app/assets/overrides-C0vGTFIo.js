@@ -1,0 +1,1 @@
+import{j as e}from"./main-DEhU_T_7.js";const t=()=>e.jsxs("div",{className:"p-8",children:[e.jsx("h1",{className:"text-2xl font-bold",children:"Game Overrides"}),e.jsx("p",{className:"mt-2 text-muted-foreground",children:"Customize game difficulty and content per learner."})]});export{t as component};
