@@ -9,12 +9,11 @@ import { SlotRow } from './SlotRow';
 import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
 import type { SlotRenderProps } from './useSlotBehavior';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { CSSProperties, ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import {
   DiceFace,
   DominoTile,
 } from '@/games/number-match/NumeralTileBank/NumeralTileBank';
-import { classicSkin } from '@/lib/skin';
 
 type SlotVariant = 'letter' | 'dice' | 'domino' | 'inline-gap';
 type DragPreview = 'none' | 'target-empty' | 'target-swap';
@@ -264,10 +263,7 @@ const meta: Meta<StoryArgs> = {
             ];
 
     return (
-      <div
-        className={`game-container skin-${classicSkin.id} p-4`}
-        style={classicSkin.tokens as CSSProperties}
-      >
+      <div className="p-4">
         <AnswerGameProvider
           config={{
             ...baseConfig,
