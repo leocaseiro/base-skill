@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">16/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/174 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">18/44 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">44/44 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/169 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">15 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -3115,12 +3115,12 @@ export const ReplayTrigger: Story = {
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;Footer /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;Footer /&gt;;</code></pre>
             </div>
         </div>
     
@@ -4049,12 +4049,12 @@ sessionId: string</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;Header /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;Header /&gt;;</code></pre>
             </div>
         </div>
     
@@ -5413,19 +5413,19 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="OfflineIndicator">
+  aria-label="OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> OfflineIndicator</h2>
+      <h2><span class="status-dot dot-err"></span> OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        
+        <label for="c-28-components-offlineindicator-err" class="badge err as-toggle">prop type error</label>
         <label for="c-28-components-offlineindicator-info" class="badge info as-toggle">1 info</label>
-        <label for="c-28-components-offlineindicator-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-28-components-offlineindicator-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -5436,7 +5436,7 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-28-components-offlineindicator-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-28-components-offlineindicator-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-28-components-offlineindicator-stories" class="tg tg-stories" type="checkbox" hidden />
   
@@ -5444,6 +5444,89 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  37 | };
+  38 |
+&gt; 39 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  40 |   component: OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;,
+  41 |   tags: [&#39;autodocs&#39;],
+  42 |   parameters: {
+
+./src/components/OfflineIndicator.stories.tsx:
+import { useEffect } from &#39;react&#39;;
+
+import { OfflineIndicator } from &#39;./OfflineIndicator&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  isOffline: boolean;
+}
+
+const OfflineHarness = ({ isOffline }: StoryArgs) =&gt; {
+  useEffect(() =&gt; {
+    const originalDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis.navigator,
+      &#39;onLine&#39;,
+    );
+    Object.defineProperty(globalThis.navigator, &#39;onLine&#39;, {
+      value: !isOffline,
+      writable: true,
+      configurable: true,
+    });
+    globalThis.dispatchEvent(
+      new Event(isOffline ? &#39;offline&#39; : &#39;online&#39;),
+    );
+    return () =&gt; {
+      if (originalDescriptor) {
+        Object.defineProperty(
+          globalThis.navigator,
+          &#39;onLine&#39;,
+          originalDescriptor,
+        );
+      }
+    };
+  }, [isOffline]);
+
+  return &lt;OfflineIndicator /&gt;;
+};
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Renders a polite-live-region yellow banner when `navigator.onLine` is false; renders null when online. The component is zero-prop — all state comes from the `online` / `offline` window events. The Playground exposes a single `isOffline` boolean that patches `navigator.onLine` and fires the matching event so the banner can be toggled in place. State-assertion coverage lives in `OfflineIndicator.test.tsx`.&#39;,
+      },
+    },
+  },
+  args: {
+    isOffline: true,
+  },
+  argTypes: {
+    isOffline: {
+      control: &#39;boolean&#39;,
+      description:
+        &#39;Drives `navigator.onLine` and dispatches an `online`/`offline` event so the component toggles between rendering the banner and rendering `null`.&#39;,
+    },
+  },
+  render: ({ isOffline }) =&gt; &lt;OfflineHarness isOffline={isOffline} /&gt;,
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -5468,21 +5551,12 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Online</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Online = () =&gt; &lt;OfflineIndicator /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Offline</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Offline = () =&gt; &lt;OfflineIndicator /&gt;;</code></pre>
+              <pre><code>const Playground = ({ isOffline }) =&gt; &lt;OfflineHarness isOffline={isOffline} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -7776,12 +7850,12 @@ sessionId?: string</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;ThemeToggle /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;ThemeToggle /&gt;;</code></pre>
             </div>
         </div>
     
@@ -7789,19 +7863,19 @@ sessionId?: string</code></pre>
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="UpdateBanner">
+  aria-label="UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> UpdateBanner</h2>
+      <h2><span class="status-dot dot-err"></span> UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        
+        <label for="c-40-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
         <label for="c-40-components-updatebanner-info" class="badge info as-toggle">1 info</label>
-        <label for="c-40-components-updatebanner-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-40-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -7812,7 +7886,7 @@ sessionId?: string</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-40-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-40-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-40-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
   
@@ -7820,6 +7894,87 @@ sessionId?: string</code></pre>
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  24 | );
+  25 |
+&gt; 26 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  27 |   component: UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;,
+  28 |   tags: [&#39;autodocs&#39;],
+  29 |   decorators: [withRouter],
+
+./src/components/UpdateBanner.stories.tsx:
+import { fn } from &#39;storybook/test&#39;;
+
+import { withRouter } from &#39;../../.storybook/decorators/withRouter&#39;;
+import { UpdateBanner } from &#39;./UpdateBanner&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType, ReactNode } from &#39;react&#39;;
+import { ServiceWorkerContext } from &#39;@/lib/service-worker/ServiceWorkerContext&#39;;
+
+interface StoryArgs {
+  updateAvailable: boolean;
+  applyUpdate: () =&gt; void;
+}
+
+const ServiceWorkerHarness = ({
+  updateAvailable,
+  applyUpdate,
+  children,
+}: StoryArgs &amp; { children: ReactNode }) =&gt; (
+  &lt;ServiceWorkerContext.Provider
+    value={{ updateAvailable, applyUpdate }}
+  &gt;
+    {children}
+  &lt;/ServiceWorkerContext.Provider&gt;
+);
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  decorators: [withRouter],
+  parameters: {
+    layout: &#39;fullscreen&#39;,
+    docs: {
+      description: {
+        component:
+          &#39;Renders a primary-coloured &quot;New version available&quot; banner when `ServiceWorkerContext.updateAvailable` is true, the route is not a `/game/` path, and the banner has not been dismissed. The Playground exposes `updateAvailable` and the `applyUpdate` callback via the `ServiceWorkerContext` provider wrapped around the component; the internal `dismissed` state is reachable by clicking the &quot;✕&quot; button. Use the global Theme toolbar to preview the banner across `light` / `dark` / `forest-light` / `forest-dark` / `high-contrast`.&#39;,
+      },
+    },
+  },
+  args: {
+    updateAvailable: true,
+    applyUpdate: fn(),
+  },
+  argTypes: {
+    updateAvailable: {
+      control: &#39;boolean&#39;,
+      description:
+        &#39;Toggles `ServiceWorkerContext.updateAvailable`. Banner only renders when true.&#39;,
+    },
+    applyUpdate: { table: { disable: true } },
+  },
+  render: ({ updateAvailable, applyUpdate }) =&gt; (
+    &lt;ServiceWorkerHarness
+      updateAvailable={updateAvailable}
+      applyUpdate={applyUpdate}
+    &gt;
+      &lt;UpdateBanner /&gt;
+    &lt;/ServiceWorkerHarness&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -7844,48 +7999,19 @@ sessionId?: string</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;UpdateBanner /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Ocean Light</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const OceanLight = () =&gt; &lt;UpdateBanner /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Ocean Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const OceanDark = () =&gt; &lt;UpdateBanner /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Forest Light</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const ForestLight = () =&gt; &lt;UpdateBanner /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Forest Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const ForestDark = () =&gt; &lt;UpdateBanner /&gt;;</code></pre>
+              <pre><code>const Playground = ({ updateAvailable, applyUpdate }) =&gt; (
+  &lt;ServiceWorkerHarness
+    updateAvailable={updateAvailable}
+    applyUpdate={applyUpdate}
+  &gt;
+    &lt;UpdateBanner /&gt;
+  &lt;/ServiceWorkerHarness&gt;
+);</code></pre>
             </div>
         </div>
     
@@ -8416,7 +8542,7 @@ export const HUD_Round5Of5: Story = {
           <label for="no-component-import-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component import found</span>
-            <span class="group-count">16</span>
+            <span class="group-count">18</span>
           </label>
           <div class="group-cards">
 <article
@@ -11107,14 +11233,165 @@ export const Default: Story = {};
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-11-components-offlineindicator-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-11-components-offlineindicator-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-11-components-offlineindicator-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/OfflineIndicator.stories.tsx">components-offlineindicator · ./src/components/OfflineIndicator.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-11-components-offlineindicator-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-11-components-offlineindicator-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-11-components-offlineindicator-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  37 | };
+  38 |
+&gt; 39 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  40 |   component: OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;,
+  41 |   tags: [&#39;autodocs&#39;],
+  42 |   parameters: {
+
+./src/components/OfflineIndicator.stories.tsx:
+import { useEffect } from &#39;react&#39;;
+
+import { OfflineIndicator } from &#39;./OfflineIndicator&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+interface StoryArgs {
+  isOffline: boolean;
+}
+
+const OfflineHarness = ({ isOffline }: StoryArgs) =&gt; {
+  useEffect(() =&gt; {
+    const originalDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis.navigator,
+      &#39;onLine&#39;,
+    );
+    Object.defineProperty(globalThis.navigator, &#39;onLine&#39;, {
+      value: !isOffline,
+      writable: true,
+      configurable: true,
+    });
+    globalThis.dispatchEvent(
+      new Event(isOffline ? &#39;offline&#39; : &#39;online&#39;),
+    );
+    return () =&gt; {
+      if (originalDescriptor) {
+        Object.defineProperty(
+          globalThis.navigator,
+          &#39;onLine&#39;,
+          originalDescriptor,
+        );
+      }
+    };
+  }, [isOffline]);
+
+  return &lt;OfflineIndicator /&gt;;
+};
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Renders a polite-live-region yellow banner when `navigator.onLine` is false; renders null when online. The component is zero-prop — all state comes from the `online` / `offline` window events. The Playground exposes a single `isOffline` boolean that patches `navigator.onLine` and fires the matching event so the banner can be toggled in place. State-assertion coverage lives in `OfflineIndicator.test.tsx`.&#39;,
+      },
+    },
+  },
+  args: {
+    isOffline: true,
+  },
+  argTypes: {
+    isOffline: {
+      control: &#39;boolean&#39;,
+      description:
+        &#39;Drives `navigator.onLine` and dispatches an `online`/`offline` event so the component toggles between rendering the banner and rendering `null`.&#39;,
+    },
+  },
+  render: ({ isOffline }) =&gt; &lt;OfflineHarness isOffline={isOffline} /&gt;,
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { OfflineIndicator } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = ({ isOffline }) =&gt; &lt;OfflineHarness isOffline={isOffline} /&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-err"></span> ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-11-answer-game-progresshud-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-11-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-11-answer-game-progresshud-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-12-answer-game-progresshud-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-12-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-12-answer-game-progresshud-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -11125,9 +11402,9 @@ export const Default: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-11-answer-game-progresshud-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-11-answer-game-progresshud-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-11-answer-game-progresshud-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-12-answer-game-progresshud-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-12-answer-game-progresshud-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-12-answer-game-progresshud-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -11359,9 +11636,9 @@ export const Playground: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Select as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-12-components-ui-select-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-12-components-ui-select-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-12-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-error-13-components-ui-select-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-13-components-ui-select-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-13-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -11372,9 +11649,9 @@ export const Playground: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-12-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-12-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-12-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-13-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-13-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-13-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -11684,9 +11961,9 @@ export const SelectsOption: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Sheet as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-13-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-13-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-13-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-error-14-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-14-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-14-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -11697,9 +11974,9 @@ export const SelectsOption: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-13-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-13-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-13-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-14-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-14-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-14-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12038,9 +12315,9 @@ export const OpensAndClosesOnEscape: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SlotRow as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-14-answer-game-slot-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-14-answer-game-slot-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-14-answer-game-slot-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-15-answer-game-slot-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-15-answer-game-slot-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-15-answer-game-slot-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12051,9 +12328,9 @@ export const OpensAndClosesOnEscape: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-14-answer-game-slot-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-14-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-14-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-15-answer-game-slot-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-15-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-15-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12506,6 +12783,162 @@ export const Playground: Story = {};
   class="card 
   has-error 
   has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-16-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-16-components-updatebanner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-16-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/UpdateBanner.stories.tsx">components-updatebanner · ./src/components/UpdateBanner.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-16-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-16-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-16-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  24 | );
+  25 |
+&gt; 26 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  27 |   component: UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;,
+  28 |   tags: [&#39;autodocs&#39;],
+  29 |   decorators: [withRouter],
+
+./src/components/UpdateBanner.stories.tsx:
+import { fn } from &#39;storybook/test&#39;;
+
+import { withRouter } from &#39;../../.storybook/decorators/withRouter&#39;;
+import { UpdateBanner } from &#39;./UpdateBanner&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType, ReactNode } from &#39;react&#39;;
+import { ServiceWorkerContext } from &#39;@/lib/service-worker/ServiceWorkerContext&#39;;
+
+interface StoryArgs {
+  updateAvailable: boolean;
+  applyUpdate: () =&gt; void;
+}
+
+const ServiceWorkerHarness = ({
+  updateAvailable,
+  applyUpdate,
+  children,
+}: StoryArgs &amp; { children: ReactNode }) =&gt; (
+  &lt;ServiceWorkerContext.Provider
+    value={{ updateAvailable, applyUpdate }}
+  &gt;
+    {children}
+  &lt;/ServiceWorkerContext.Provider&gt;
+);
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  decorators: [withRouter],
+  parameters: {
+    layout: &#39;fullscreen&#39;,
+    docs: {
+      description: {
+        component:
+          &#39;Renders a primary-coloured &quot;New version available&quot; banner when `ServiceWorkerContext.updateAvailable` is true, the route is not a `/game/` path, and the banner has not been dismissed. The Playground exposes `updateAvailable` and the `applyUpdate` callback via the `ServiceWorkerContext` provider wrapped around the component; the internal `dismissed` state is reachable by clicking the &quot;✕&quot; button. Use the global Theme toolbar to preview the banner across `light` / `dark` / `forest-light` / `forest-dark` / `high-contrast`.&#39;,
+      },
+    },
+  },
+  args: {
+    updateAvailable: true,
+    applyUpdate: fn(),
+  },
+  argTypes: {
+    updateAvailable: {
+      control: &#39;boolean&#39;,
+      description:
+        &#39;Toggles `ServiceWorkerContext.updateAvailable`. Banner only renders when true.&#39;,
+    },
+    applyUpdate: { table: { disable: true } },
+  },
+  render: ({ updateAvailable, applyUpdate }) =&gt; (
+    &lt;ServiceWorkerHarness
+      updateAvailable={updateAvailable}
+      applyUpdate={applyUpdate}
+    &gt;
+      &lt;UpdateBanner /&gt;
+    &lt;/ServiceWorkerHarness&gt;
+  ),
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { ServiceWorkerContext, UpdateBanner } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = ({ updateAvailable, applyUpdate }) =&gt; (
+  &lt;ServiceWorkerHarness
+    updateAvailable={updateAvailable}
+    applyUpdate={applyUpdate}
+  &gt;
+    &lt;UpdateBanner /&gt;
+  &lt;/ServiceWorkerHarness&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
   has-story-error
   no-doc-error"
   role="listitem"
@@ -12514,9 +12947,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
       <div class="badges">
-        <label for="c-error-15-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-15-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-15-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
+        <label for="c-error-17-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-17-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-17-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
         
       </div>
     </div>
@@ -12527,9 +12960,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-15-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-15-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-15-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-17-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-17-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-17-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
