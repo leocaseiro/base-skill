@@ -27,3 +27,4 @@ This file is for **any** coding agent (Cursor, Claude Code, Copilot, etc.). Pref
 
 - [CLAUDE.md](./CLAUDE.md) — React/ESLint expectations, TDD, markdown, CI buckets, VR tests.
 - `.cursor/rules/` — Cursor-specific always-on rules.
+- [.claude/skills/handoff/SKILL.md](./.claude/skills/handoff/SKILL.md) — session handoff workflow (also available as `/handoff` or `/continue` in Claude Code, mirrored as `.cursor/rules/handoff.mdc` for Cursor).
