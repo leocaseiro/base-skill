@@ -1,0 +1,5 @@
+import{j as t}from"./iframe-D9_Qln3t.js";import{w as e}from"./withDb-FhVhCkDF.js";import{A as a}from"./AudioButton-6Mu2K-l_.js";import{A as m}from"./AnswerGameProvider-mab46VIh.js";import"./preload-helper-PPVm8Dsz.js";import"./DbProvider-C4OJuRZC.js";import"./Subject-D3vFcUgp.js";import"./tslib.es6--Hu8dhvm.js";import"./useGameTTS-Bt7sJLRA.js";import"./useSettings-BdCjTA0R.js";import"./useRxDB-BX0pvAjF.js";import"./useRxQuery-Beju1b9B.js";import"./SpeechOutput-Dyw1q0Rq.js";import"./safe-get-voices-dEfMv828.js";import"./useTranslation-C9Dkusk4.js";import"./index-CtvdkcAz.js";import"./index-CCBEK3xk.js";import"./createLucideIcon-D_wTUwsJ.js";import"./AudioFeedback-DxUgBcwr.js";const s={gameId:"storybook",inputMethod:"drag",wrongTileBehavior:"lock-auto-eject",tileBankMode:"exact",totalRounds:1,ttsEnabled:!0},v={component:a,tags:["autodocs"],decorators:[e,r=>t.jsx(m,{config:s,children:t.jsx(r,{})})]},o={args:{prompt:"cat"}};o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:`{
+  args: {
+    prompt: 'cat'
+  }
+}`,...o.parameters?.docs?.source}}};const y=["Default"];export{o as Default,y as __namedExportsOrder,v as default};
