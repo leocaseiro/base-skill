@@ -31,6 +31,7 @@ Name branches after the milestone or feature, e.g. `milestone-3-app-shell`, `fea
 
 - `master` is protected — no direct commits, no direct file edits
 - Every task starts with `git worktree add ./worktrees/<name>` from the project root — **this includes writing docs, specs, and plans**
+- **Baby-step commits:** When a slice of work is in good shape, commit it. **Multiple commits per PR are preferred** so reviewers can follow the history and you can cherry-pick or revert one change without undoing the rest. See [AGENTS.md](./AGENTS.md).
 - PRs merge into `master`; worktrees are removed after merge
 
 > **Why this matters for docs/specs/plans:** Planning files committed directly to master bypass the PR review process. Even non-code changes belong on a branch so they can be reviewed, revised, and merged cleanly.
