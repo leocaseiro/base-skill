@@ -8,6 +8,7 @@ describe('toWordSpellRound', () => {
     region: 'aus',
     level: 2,
     syllableCount: 1,
+    provenance: 'shipped',
   };
 
   it('uses syllables joined by - when present', () => {

@@ -12,6 +12,7 @@ const hit = (word: string): WordHit => ({
   region: 'aus',
   level: 1,
   syllableCount: 1,
+  provenance: 'shipped',
 });
 
 const pool = (words: string[]): WordHit[] => words.map((w) => hit(w));
