@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { filterWords } from './filter';
 import { ALL_REGIONS, LEVEL_LABELS } from './levels';
-import { playPhoneme, stopPhoneme } from './phoneme-audio';
+import { playPhoneme } from './phoneme-audio';
 import type {
   FilterResult,
   Grapheme,
@@ -9,6 +9,7 @@ import type {
   WordFilter,
   WordHit,
 } from './types';
+import { PhonemeBlender } from '#/components/phoneme-blender/PhonemeBlender';
 import { Button } from '#/components/ui/button';
 import {
   Card,
@@ -303,8 +304,9 @@ const Chip = ({ children, onRemove }: ChipProps) => (
   </span>
 );
 
-interface ResultCardProps {
+export interface ResultCardProps {
   hit: WordHit;
+  chipsVisible: boolean;
 }
 
 interface KeyedGrapheme {
@@ -324,7 +326,7 @@ const keyGraphemes = (graphemes: Grapheme[]): KeyedGrapheme[] => {
 };
 
 const GraphemeChips = ({ graphemes }: { graphemes: Grapheme[] }) => (
-  <div className="flex flex-wrap gap-1">
+  <div data-testid="chips-row" className="flex flex-wrap gap-1">
     {keyGraphemes(graphemes).map((gr) => (
       <button
         key={gr.key}
@@ -334,14 +336,6 @@ const GraphemeChips = ({ graphemes }: { graphemes: Grapheme[] }) => (
         onClick={() => {
           void playPhoneme(gr.p);
         }}
-        onPointerEnter={() => {
-          void playPhoneme(gr.p, { sustain: true });
-        }}
-        onPointerLeave={stopPhoneme}
-        onFocus={() => {
-          void playPhoneme(gr.p, { sustain: true });
-        }}
-        onBlur={stopPhoneme}
         className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs transition-colors hover:bg-muted/70"
       >
         {gr.g}
@@ -350,40 +344,39 @@ const GraphemeChips = ({ graphemes }: { graphemes: Grapheme[] }) => (
   </div>
 );
 
-const ResultCard = ({ hit }: ResultCardProps) => (
+export const ResultCard = ({ hit, chipsVisible }: ResultCardProps) => (
   <Card>
-    <CardHeader>
-      <CardTitle className="flex items-start justify-between gap-2">
-        <div className="flex flex-col">
-          <span className="text-2xl font-bold">{hit.word}</span>
-          {hit.syllables ? (
-            <span className="text-sm font-medium text-muted-foreground">
-              {hit.syllables.join('·')}
-            </span>
-          ) : null}
+    <CardHeader className="gap-1">
+      <CardTitle className="text-2xl font-bold">{hit.word}</CardTitle>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        {hit.syllables ? (
+          <span className="text-muted-foreground">
+            {hit.syllables.join('·')}
+          </span>
+        ) : null}
+        {hit.ipa ? (
+          <button
+            type="button"
+            aria-label={`Speak ${hit.word}`}
+            onClick={() =>
+              speak(hit.word, { rate: 0.9, lang: 'en-AU' })
+            }
+            className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-0.5 font-mono text-xs hover:bg-muted"
+          >
+            🔈 /{hit.ipa}/
+          </button>
+        ) : null}
+        <div className="ms-auto flex gap-1 text-xs">
+          <Badge>L{hit.level}</Badge>
+          <Badge>{hit.syllableCount} syl</Badge>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon-sm"
-          aria-label={`Play ${hit.word}`}
-          onClick={() => speak(hit.word, { rate: 0.9, lang: 'en-AU' })}
-        >
-          🔊
-        </Button>
-      </CardTitle>
-      {hit.ipa ? (
-        <p className="font-mono text-sm text-muted-foreground">
-          /{hit.ipa}/
-        </p>
-      ) : null}
-    </CardHeader>
-    <CardContent className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-1 text-xs">
-        <Badge>L{hit.level}</Badge>
-        <Badge>{hit.syllableCount} syl</Badge>
       </div>
+    </CardHeader>
+    <CardContent className="flex flex-col gap-3">
       {hit.graphemes ? (
+        <PhonemeBlender word={hit.word} graphemes={hit.graphemes} />
+      ) : null}
+      {chipsVisible && hit.graphemes ? (
         <GraphemeChips graphemes={hit.graphemes} />
       ) : null}
     </CardContent>
@@ -597,7 +590,11 @@ export const WordLibraryExplorer = () => {
         />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visible.map((hit) => (
-            <ResultCard key={`${hit.region}-${hit.word}`} hit={hit} />
+            <ResultCard
+              key={`${hit.region}-${hit.word}`}
+              hit={hit}
+              chipsVisible
+            />
           ))}
         </div>
       </main>
