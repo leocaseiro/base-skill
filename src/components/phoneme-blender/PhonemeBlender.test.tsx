@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import {
   afterEach,
   beforeEach,
@@ -85,6 +85,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
@@ -231,5 +232,64 @@ describe('PhonemeBlender — scrub', () => {
     firePointer(track, 'pointerdown', 300);
     firePointer(track, 'pointerup', 300);
     expect(stopPhoneme).toHaveBeenCalled();
+  });
+});
+
+describe('PhonemeBlender — auto-play', () => {
+  it('advances through zones via requestAnimationFrame at normal speed', async () => {
+    render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
+    const track = await screen.findByRole('slider');
+    await waitFor(() =>
+      expect(track.getAttribute('aria-valuemax')).toBe('1400'),
+    );
+    vi.useFakeTimers();
+    const playButton = screen.getByRole('button', { name: /^play /i });
+    await act(async () => {
+      playButton.click();
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(260);
+    });
+    const calls = vi.mocked(playPhoneme).mock.calls.map((c) => c[0]);
+    expect(calls).toContain('ʊ');
+    vi.useRealTimers();
+  });
+
+  it('cycles through the three speeds when the selector is clicked', async () => {
+    render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
+    const track = await screen.findByRole('slider');
+    await waitFor(() =>
+      expect(track.getAttribute('aria-valuemax')).toBe('1400'),
+    );
+    expect(
+      screen.getByRole('radio', { name: /normal/i }),
+    ).toHaveAttribute('aria-checked', 'true');
+    await act(async () => {
+      screen.getByRole('radio', { name: /slow/i }).click();
+    });
+    expect(
+      screen.getByRole('radio', { name: /slow/i }),
+    ).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('pauses when the play button is pressed again', async () => {
+    render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
+    const track = await screen.findByRole('slider');
+    await waitFor(() =>
+      expect(track.getAttribute('aria-valuemax')).toBe('1400'),
+    );
+    vi.useFakeTimers();
+    const playButton = screen.getByRole('button', { name: /^play /i });
+    await act(async () => {
+      playButton.click();
+    });
+    const pauseButton = screen.getByRole('button', { name: /^pause/i });
+    await act(async () => {
+      pauseButton.click();
+    });
+    expect(
+      screen.getByRole('button', { name: /^play /i }),
+    ).toBeInTheDocument();
+    vi.useRealTimers();
   });
 });

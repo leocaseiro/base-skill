@@ -37,7 +37,7 @@ describe('usePhonemeSprite', () => {
     const { result } = renderHook(() => usePhonemeSprite());
     expect(result.current).toBeNull();
     await waitFor(() => expect(result.current).not.toBeNull());
-    expect(result.current?.n.loopable).toBe(true);
+    expect(result.current?.n?.loopable).toBe(true);
   });
 
   it('re-uses the cached manifest across two hook instances', async () => {
