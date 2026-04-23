@@ -1,0 +1,73 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Components/phoneme-blender/Flows" />
+
+# PhonemeBlender — Interaction Flows
+
+> Source: `src/components/phoneme-blender/`
+
+## 1. Pointer scrub across zones
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Track as role="slider" div
+  participant Comp as PhonemeBlender
+  participant Audio as phoneme-audio
+
+  User->>Track: pointerdown
+  Track->>Comp: onPointerDown
+  Comp->>Comp: firedStops.clear(), passed.clear()
+  Comp->>Comp: zoneFromMs(ms)
+  alt zone.loopable
+    Comp->>Audio: playPhoneme(p, {sustain:true})
+  else stop consonant
+    Comp->>Audio: playPhoneme(p)
+    Comp->>Comp: firedStops.add(index)
+  end
+  User->>Track: pointermove (same zone)
+  Comp-->>Comp: no-op (index unchanged)
+  User->>Track: pointerup
+  Comp->>Audio: stopPhoneme()
+```
+
+## 2. Auto-play with speed multiplier
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Btn as Play button
+  participant Comp as PhonemeBlender
+  participant RAF as requestAnimationFrame
+  participant Audio as phoneme-audio
+
+  User->>Btn: click
+  Btn->>Comp: startAutoPlay()
+  Comp->>Comp: t0 = performance.now()
+  loop each frame
+    RAF->>Comp: tick()
+    Comp->>Comp: elapsed = (now - t0) / multiplier
+    alt crossed into new zone
+      Comp->>Audio: playPhoneme(p, …)
+    end
+    alt elapsed >= totalMs
+      Comp->>Audio: stopPhoneme()
+    end
+  end
+```
+
+## 3. Stop-on-blur (cross-cutting)
+
+```mermaid
+sequenceDiagram
+  participant Browser
+  participant Audio as phoneme-audio module
+
+  note over Audio: installAutoStopGuards() on first playPhoneme
+  Browser->>Audio: visibilitychange (hidden)
+  Audio->>Audio: stopCurrent()
+  Browser->>Audio: window blur
+  Audio->>Audio: stopCurrent()
+  Browser->>Audio: pagehide (iOS)
+  Audio->>Audio: stopCurrent()
+```

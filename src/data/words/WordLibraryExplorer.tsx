@@ -1,7 +1,9 @@
 import { useEffect, useId, useMemo, useState } from 'react';
+import { deriveActiveFilterPills } from './active-filter-pills';
 import { filterWords } from './filter';
 import { ALL_REGIONS, LEVEL_LABELS } from './levels';
-import { playPhoneme, stopPhoneme } from './phoneme-audio';
+import { playPhoneme } from './phoneme-audio';
+import { useChipsVisibleDefault } from './useChipsVisibleDefault';
 import type {
   FilterResult,
   Grapheme,
@@ -9,6 +11,7 @@ import type {
   WordFilter,
   WordHit,
 } from './types';
+import { PhonemeBlender } from '#/components/phoneme-blender/PhonemeBlender';
 import { Button } from '#/components/ui/button';
 import {
   Card,
@@ -25,6 +28,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '#/components/ui/select';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '#/components/ui/sheet';
 import { speak } from '#/lib/speech/SpeechOutput';
 import { cn } from '#/lib/utils';
 
@@ -303,8 +313,9 @@ const Chip = ({ children, onRemove }: ChipProps) => (
   </span>
 );
 
-interface ResultCardProps {
+export interface ResultCardProps {
   hit: WordHit;
+  chipsVisible: boolean;
 }
 
 interface KeyedGrapheme {
@@ -324,7 +335,7 @@ const keyGraphemes = (graphemes: Grapheme[]): KeyedGrapheme[] => {
 };
 
 const GraphemeChips = ({ graphemes }: { graphemes: Grapheme[] }) => (
-  <div className="flex flex-wrap gap-1">
+  <div data-testid="chips-row" className="flex flex-wrap gap-1">
     {keyGraphemes(graphemes).map((gr) => (
       <button
         key={gr.key}
@@ -334,14 +345,6 @@ const GraphemeChips = ({ graphemes }: { graphemes: Grapheme[] }) => (
         onClick={() => {
           void playPhoneme(gr.p);
         }}
-        onPointerEnter={() => {
-          void playPhoneme(gr.p, { sustain: true });
-        }}
-        onPointerLeave={stopPhoneme}
-        onFocus={() => {
-          void playPhoneme(gr.p, { sustain: true });
-        }}
-        onBlur={stopPhoneme}
         className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs transition-colors hover:bg-muted/70"
       >
         {gr.g}
@@ -350,40 +353,39 @@ const GraphemeChips = ({ graphemes }: { graphemes: Grapheme[] }) => (
   </div>
 );
 
-const ResultCard = ({ hit }: ResultCardProps) => (
+export const ResultCard = ({ hit, chipsVisible }: ResultCardProps) => (
   <Card>
-    <CardHeader>
-      <CardTitle className="flex items-start justify-between gap-2">
-        <div className="flex flex-col">
-          <span className="text-2xl font-bold">{hit.word}</span>
-          {hit.syllables ? (
-            <span className="text-sm font-medium text-muted-foreground">
-              {hit.syllables.join('·')}
-            </span>
-          ) : null}
+    <CardHeader className="gap-1">
+      <CardTitle className="text-2xl font-bold">{hit.word}</CardTitle>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        {hit.syllables ? (
+          <span className="text-muted-foreground">
+            {hit.syllables.join('·')}
+          </span>
+        ) : null}
+        {hit.ipa ? (
+          <button
+            type="button"
+            aria-label={`Speak ${hit.word}`}
+            onClick={() =>
+              speak(hit.word, { rate: 0.9, lang: 'en-AU' })
+            }
+            className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-0.5 font-mono text-xs hover:bg-muted"
+          >
+            🔈 /{hit.ipa}/
+          </button>
+        ) : null}
+        <div className="ms-auto flex gap-1 text-xs">
+          <Badge>L{hit.level}</Badge>
+          <Badge>{hit.syllableCount} syl</Badge>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon-sm"
-          aria-label={`Play ${hit.word}`}
-          onClick={() => speak(hit.word, { rate: 0.9, lang: 'en-AU' })}
-        >
-          🔊
-        </Button>
-      </CardTitle>
-      {hit.ipa ? (
-        <p className="font-mono text-sm text-muted-foreground">
-          /{hit.ipa}/
-        </p>
-      ) : null}
-    </CardHeader>
-    <CardContent className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-1 text-xs">
-        <Badge>L{hit.level}</Badge>
-        <Badge>{hit.syllableCount} syl</Badge>
       </div>
+    </CardHeader>
+    <CardContent className="flex flex-col gap-3">
       {hit.graphemes ? (
+        <PhonemeBlender word={hit.word} graphemes={hit.graphemes} />
+      ) : null}
+      {chipsVisible && hit.graphemes ? (
         <GraphemeChips graphemes={hit.graphemes} />
       ) : null}
     </CardContent>
@@ -406,6 +408,116 @@ const updateLevels = (
   return [...set].toSorted((a, b) => a - b);
 };
 
+interface FiltersPanelProps {
+  wordPrefix: string;
+  setWordPrefix: (v: string) => void;
+  filter: WordFilter;
+  setFilter: React.Dispatch<React.SetStateAction<WordFilter>>;
+  syllableMode: SyllableMode;
+  setSyllableMode: (mode: SyllableMode) => void;
+  graphemePairs: readonly GraphemePair[];
+  setGraphemePairs: React.Dispatch<
+    React.SetStateAction<GraphemePair[]>
+  >;
+  pairOptions: readonly GraphemePair[];
+  graphemeOptions: readonly string[];
+  phonemeOptions: readonly string[];
+}
+
+const FiltersPanel = ({
+  wordPrefix,
+  setWordPrefix,
+  filter,
+  setFilter,
+  syllableMode,
+  setSyllableMode,
+  graphemePairs,
+  setGraphemePairs,
+  pairOptions,
+  graphemeOptions,
+  phonemeOptions,
+}: FiltersPanelProps) => {
+  const setLevels = (levels: number[]) => {
+    setFilter((f) => ({
+      ...f,
+      levels: levels.length > 0 ? levels : undefined,
+    }));
+  };
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Filters</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <WordSearchField value={wordPrefix} onChange={setWordPrefix} />
+        <RegionField />
+        <LevelsField
+          selected={filter.levels}
+          onToggle={(level) =>
+            setLevels(updateLevels(filter.levels, level))
+          }
+          onClear={() => setLevels([])}
+          range={filter.levelRange}
+          onRangeChange={(next) =>
+            setFilter((f) => ({ ...f, levelRange: next }))
+          }
+        />
+        <SyllablesField
+          mode={syllableMode}
+          onModeChange={setSyllableMode}
+          eq={filter.syllableCountEq}
+          range={filter.syllableCountRange}
+          onEq={(n) => setFilter((f) => ({ ...f, syllableCountEq: n }))}
+          onRange={(r) =>
+            setFilter((f) => ({ ...f, syllableCountRange: r }))
+          }
+        />
+        <FallbackField
+          checked={filter.fallbackToAus !== false}
+          onChange={(v) =>
+            setFilter((f) => ({ ...f, fallbackToAus: v }))
+          }
+        />
+        <AdvancedSection
+          pairOptions={pairOptions}
+          graphemeOptions={graphemeOptions}
+          phonemeOptions={phonemeOptions}
+          graphemePairs={graphemePairs}
+          onGraphemePairsChange={setGraphemePairs}
+          graphemesAllowed={filter.graphemesAllowed ?? []}
+          onGraphemesAllowedChange={(next) =>
+            setFilter((f) => ({
+              ...f,
+              graphemesAllowed: next.length > 0 ? next : undefined,
+            }))
+          }
+          graphemesRequired={filter.graphemesRequired ?? []}
+          onGraphemesRequiredChange={(next) =>
+            setFilter((f) => ({
+              ...f,
+              graphemesRequired: next.length > 0 ? next : undefined,
+            }))
+          }
+          phonemesAllowed={filter.phonemesAllowed ?? []}
+          onPhonemesAllowedChange={(next) =>
+            setFilter((f) => ({
+              ...f,
+              phonemesAllowed: next.length > 0 ? next : undefined,
+            }))
+          }
+          phonemesRequired={filter.phonemesRequired ?? []}
+          onPhonemesRequiredChange={(next) =>
+            setFilter((f) => ({
+              ...f,
+              phonemesRequired: next.length > 0 ? next : undefined,
+            }))
+          }
+        />
+      </CardContent>
+    </Card>
+  );
+};
+
 export const WordLibraryExplorer = () => {
   const [filter, setFilter] = useState<WordFilter>({
     region: 'aus',
@@ -419,6 +531,19 @@ export const WordLibraryExplorer = () => {
   const [wordPrefix, setWordPrefix] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<PageSize>(DEFAULT_PAGE_SIZE);
+  const chipsDefault = useChipsVisibleDefault();
+  const [chipsVisible, setChipsVisible] =
+    useState<boolean>(chipsDefault);
+  const [chipsUserSet, setChipsUserSet] = useState(false);
+  // Adjust during render instead of in an effect to avoid cascading renders
+  // (react-hooks/set-state-in-effect). Until the user explicitly toggles,
+  // follow the orientation-driven default from useChipsVisibleDefault.
+  const [prevChipsDefault, setPrevChipsDefault] =
+    useState(chipsDefault);
+  if (chipsDefault !== prevChipsDefault) {
+    setPrevChipsDefault(chipsDefault);
+    if (!chipsUserSet) setChipsVisible(chipsDefault);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -479,13 +604,6 @@ export const WordLibraryExplorer = () => {
     matched === 0 ? 0 : (effectivePage - 1) * pageSize + 1;
   const rangeEnd = Math.min(matched, effectivePage * pageSize);
 
-  const setLevels = (levels: number[]) => {
-    setFilter((f) => ({
-      ...f,
-      levels: levels.length > 0 ? levels : undefined,
-    }));
-  };
-
   const setSyllables = (mode: SyllableMode) => {
     setSyllableMode(mode);
     setFilter((f) => ({
@@ -495,87 +613,97 @@ export const WordLibraryExplorer = () => {
     }));
   };
 
+  const pills = deriveActiveFilterPills(
+    filter,
+    graphemePairs,
+    wordPrefix,
+  );
+
+  const clearFilterPill = (clearKey: string) => {
+    if (clearKey === 'prefix') {
+      setWordPrefix('');
+      return;
+    }
+    if (clearKey.startsWith('pair:')) {
+      const label = clearKey.slice('pair:'.length);
+      setGraphemePairs((curr) => curr.filter((p) => p.label !== label));
+      return;
+    }
+    setFilter((f) => ({ ...f, [clearKey]: undefined }));
+  };
+
+  const filtersPanelProps: FiltersPanelProps = {
+    wordPrefix,
+    setWordPrefix,
+    filter,
+    setFilter,
+    syllableMode,
+    setSyllableMode: setSyllables,
+    graphemePairs,
+    setGraphemePairs,
+    pairOptions,
+    graphemeOptions,
+    phonemeOptions,
+  };
+
   return (
     <div className="flex min-h-screen flex-col gap-4 bg-background p-4 text-foreground md:flex-row">
-      <aside className="flex w-full shrink-0 flex-col gap-4 md:w-80">
-        <Card>
-          <CardHeader>
-            <CardTitle>Filters</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <WordSearchField
-              value={wordPrefix}
-              onChange={setWordPrefix}
-            />
-            <RegionField />
-            <LevelsField
-              selected={filter.levels}
-              onToggle={(level) =>
-                setLevels(updateLevels(filter.levels, level))
-              }
-              onClear={() => setLevels([])}
-              range={filter.levelRange}
-              onRangeChange={(next) =>
-                setFilter((f) => ({ ...f, levelRange: next }))
-              }
-            />
-            <SyllablesField
-              mode={syllableMode}
-              onModeChange={setSyllables}
-              eq={filter.syllableCountEq}
-              range={filter.syllableCountRange}
-              onEq={(n) =>
-                setFilter((f) => ({ ...f, syllableCountEq: n }))
-              }
-              onRange={(r) =>
-                setFilter((f) => ({ ...f, syllableCountRange: r }))
-              }
-            />
-            <FallbackField
-              checked={filter.fallbackToAus !== false}
-              onChange={(v) =>
-                setFilter((f) => ({ ...f, fallbackToAus: v }))
-              }
-            />
-            <AdvancedSection
-              pairOptions={pairOptions}
-              graphemeOptions={graphemeOptions}
-              phonemeOptions={phonemeOptions}
-              graphemePairs={graphemePairs}
-              onGraphemePairsChange={setGraphemePairs}
-              graphemesAllowed={filter.graphemesAllowed ?? []}
-              onGraphemesAllowedChange={(next) =>
-                setFilter((f) => ({
-                  ...f,
-                  graphemesAllowed: next.length > 0 ? next : undefined,
-                }))
-              }
-              graphemesRequired={filter.graphemesRequired ?? []}
-              onGraphemesRequiredChange={(next) =>
-                setFilter((f) => ({
-                  ...f,
-                  graphemesRequired: next.length > 0 ? next : undefined,
-                }))
-              }
-              phonemesAllowed={filter.phonemesAllowed ?? []}
-              onPhonemesAllowedChange={(next) =>
-                setFilter((f) => ({
-                  ...f,
-                  phonemesAllowed: next.length > 0 ? next : undefined,
-                }))
-              }
-              phonemesRequired={filter.phonemesRequired ?? []}
-              onPhonemesRequiredChange={(next) =>
-                setFilter((f) => ({
-                  ...f,
-                  phonemesRequired: next.length > 0 ? next : undefined,
-                }))
-              }
-            />
-          </CardContent>
-        </Card>
+      <aside className="hidden w-full shrink-0 flex-col gap-4 md:flex md:w-80">
+        <FiltersPanel {...filtersPanelProps} />
       </aside>
+      <div className="flex items-center justify-between gap-2 md:hidden">
+        <h1 className="text-lg font-semibold">Word Library</h1>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-label="Open filters"
+            >
+              ⚙️
+              {pills.length > 0 ? (
+                <span className="ms-1 inline-flex size-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                  {pills.length}
+                </span>
+              ) : null}
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            side="bottom"
+            className="max-h-[85dvh] overflow-y-auto"
+          >
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+            </SheetHeader>
+            <div className="p-4">
+              <FiltersPanel {...filtersPanelProps} />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
       <main className="flex flex-1 flex-col gap-4">
+        {pills.length > 0 ? (
+          <div
+            data-testid="active-filter-pills"
+            className="flex flex-nowrap gap-2 overflow-x-auto py-1"
+          >
+            {pills.map((pill) => (
+              <button
+                key={pill.id}
+                type="button"
+                onClick={() => clearFilterPill(pill.clear)}
+                className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs"
+              >
+                {pill.label}
+                <span aria-hidden className="text-muted-foreground">
+                  ✕
+                </span>
+                <span className="sr-only">Remove {pill.label}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
         {result.usedFallback ? (
           <Card>
             <CardContent className="pt-4 text-sm text-muted-foreground">
@@ -595,9 +723,29 @@ export const WordLibraryExplorer = () => {
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
         />
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+          <span className="font-medium">
+            Showing {rangeStart}–{rangeEnd} of {matched}
+          </span>
+          <label className="inline-flex items-center gap-2 text-xs">
+            <input
+              type="checkbox"
+              checked={chipsVisible}
+              onChange={(e) => {
+                setChipsUserSet(true);
+                setChipsVisible(e.target.checked);
+              }}
+            />
+            show g[p] chips
+          </label>
+        </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visible.map((hit) => (
-            <ResultCard key={`${hit.region}-${hit.word}`} hit={hit} />
+            <ResultCard
+              key={`${hit.region}-${hit.word}`}
+              hit={hit}
+              chipsVisible={chipsVisible}
+            />
           ))}
         </div>
       </main>
