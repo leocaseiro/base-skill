@@ -91,10 +91,10 @@ interface PhonemeBlenderProps {
 
 - Each grapheme rendered as `<span data-idx={i}>g</span>`. Three visual
   states drive the color (no opacity-only fade — WCAG 1.4.3 contrast):
-  - **idle** (`unplayed`): faint indigo (`text-indigo-200`)
+  - **idle** (`unplayed`): faint purple (`text-purple-200`)
   - **active** (currently sounding): ink (`text-foreground`, full contrast)
-  - **passed** (already played in this scrub/play pass): indigo-dark
-    (`text-indigo-700`)
+  - **passed** (already played in this scrub/play pass): purple-dark
+    (`text-purple-700`)
 - A passed letter reverts to idle when the scrub returns past it (manual
   drag) or when a fresh play pass starts.
 
@@ -108,9 +108,9 @@ interface PhonemeBlenderProps {
 - Adjacent zones butt up flat against each other (no per-zone rounding).
   Hairline white divider between zones for visual separation.
 - Zone color encodes phoneme type:
-  - `loopable: true` → indigo (`bg-indigo-500`) — sustainable.
-  - `loopable: false` → pink (`bg-pink-500`) — stop consonant.
-- Active zone gets an ink ring (`box-shadow: 0 0 0 2px white inset, 0 0 0 2px var(--ink)`) so the active state survives the indigo background.
+  - `loopable: true` → purple (`bg-purple-500`) — sustainable.
+  - `loopable: false` → yellow (`bg-yellow-400`) — stop consonant.
+- Active zone gets an ink ring (`box-shadow: 0 0 0 2px white inset, 0 0 0 2px var(--ink)`) so the active state survives the purple background.
 
 **Thumb**
 
@@ -205,11 +205,12 @@ In `src/data/words/phoneme-audio.ts`:
     `aria-label="Speak {word}"` so screen readers don't read the IPA
     string aloud.
 - **Blender block** — `PhonemeBlender` instance, surrounded by a tinted
-  `bg-indigo-50` rounded box.
-- **Chips row** — `g[p]` chips (existing `GraphemeChips` data, simplified to
-  display-only spans). Hidden by the chips toggle (see next section). The
-  old hover-to-blend chip behaviour is removed; the blender owns that
-  interaction now.
+  `bg-purple-50` rounded box.
+- **Chips row** — `g[p]` chips (existing `GraphemeChips` data). Each chip is
+  a `<button>` that plays the phoneme **once on tap/click** via
+  `playPhoneme(p)` (no `sustain`). Hover-to-sustain, focus-to-sustain, and
+  `pointerLeave`/`blur` handlers are removed — the blender owns sustained
+  blending. Hidden by the chips toggle (see next section).
 
 ### Explorer shell (mobile + desktop)
 
