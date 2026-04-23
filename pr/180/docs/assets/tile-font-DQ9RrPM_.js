@@ -1,0 +1,1 @@
+const n={56:["text-2xl","text-2xl","text-2xl","text-2xl","text-xl","text-base","text-sm","text-xs"],80:["text-3xl","text-3xl","text-3xl","text-3xl","text-2xl","text-xl","text-base","text-sm"]},a=(x,e)=>{const t=n[e],l=Math.max(0,Math.floor(x)),s=Math.min(l,t.length-1);return t[s]??t.at(-1)};export{a as g};
