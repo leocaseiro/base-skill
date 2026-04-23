@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useState } from 'react';
 import { filterWords } from './filter';
 import { ALL_REGIONS, LEVEL_LABELS } from './levels';
 import { playPhoneme } from './phoneme-audio';
+import { useChipsVisibleDefault } from './useChipsVisibleDefault';
 import type {
   FilterResult,
   Grapheme,
@@ -412,6 +413,19 @@ export const WordLibraryExplorer = () => {
   const [wordPrefix, setWordPrefix] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<PageSize>(DEFAULT_PAGE_SIZE);
+  const chipsDefault = useChipsVisibleDefault();
+  const [chipsVisible, setChipsVisible] =
+    useState<boolean>(chipsDefault);
+  const [chipsUserSet, setChipsUserSet] = useState(false);
+  // Adjust during render instead of in an effect to avoid cascading renders
+  // (react-hooks/set-state-in-effect). Until the user explicitly toggles,
+  // follow the orientation-driven default from useChipsVisibleDefault.
+  const [prevChipsDefault, setPrevChipsDefault] =
+    useState(chipsDefault);
+  if (chipsDefault !== prevChipsDefault) {
+    setPrevChipsDefault(chipsDefault);
+    if (!chipsUserSet) setChipsVisible(chipsDefault);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -588,12 +602,28 @@ export const WordLibraryExplorer = () => {
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
         />
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+          <span className="font-medium">
+            Showing {rangeStart}–{rangeEnd} of {matched}
+          </span>
+          <label className="inline-flex items-center gap-2 text-xs">
+            <input
+              type="checkbox"
+              checked={chipsVisible}
+              onChange={(e) => {
+                setChipsUserSet(true);
+                setChipsVisible(e.target.checked);
+              }}
+            />
+            show g[p] chips
+          </label>
+        </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visible.map((hit) => (
             <ResultCard
               key={`${hit.region}-${hit.word}`}
               hit={hit}
-              chipsVisible
+              chipsVisible={chipsVisible}
             />
           ))}
         </div>
