@@ -88,7 +88,8 @@ const enumerateCandidates = (
     word[letterIdx] === word[letterIdx + 1] &&
     !claimed.has(letterIdx + 1)
   ) {
-    const doubled = word[letterIdx] + word[letterIdx + 1];
+    // Both indices are guarded by `remaining >= 2`, so they are non-null.
+    const doubled = word[letterIdx]! + word[letterIdx + 1]!;
     // Only add if not already added via knownMultiLetter above
     if (!results.some((r) => r.g === doubled)) {
       results.push({ g: doubled, consume: 2 });
@@ -96,7 +97,8 @@ const enumerateCandidates = (
   }
 
   // Single letter fallback (always available, skip claimed)
-  results.push({ g: word[letterIdx], consume: 1 });
+  // letterIdx is always < word.length here (caller guards it).
+  results.push({ g: word[letterIdx]!, consume: 1 });
 
   // Split digraphs (consume only the leading letter; trailing is claimed)
   for (const digraph of SPLIT_DIGRAPHS) {
@@ -134,9 +136,10 @@ const scoreCandidate = (
     const max = maxFreqPerPhoneme.get(phoneme) ?? 1;
     return count / max;
   }
-  // For a doubled consonant (e.g. "tt"), fall back to the single-letter score
+  // For a doubled consonant (e.g. "tt"), fall back to the single-letter score.
+  // candidate.g.length === 2 guarantees [0] is non-null.
   if (candidate.g.length === 2 && candidate.g[0] === candidate.g[1]) {
-    const singleInner = gpFreq.get(candidate.g[0]);
+    const singleInner = gpFreq.get(candidate.g[0]!);
     const singleCount = singleInner?.get(phoneme) ?? 0;
     if (singleCount > 0) {
       const max = maxFreqPerPhoneme.get(phoneme) ?? 1;
@@ -169,7 +172,8 @@ export const align = (
     letterIdx = nextUnclaimedIdx(letterIdx, claimed);
     if (letterIdx >= word.length) break;
 
-    const phoneme = phonemes[phonemeIdx];
+    // phonemeIdx < phonemes.length is guarded by the while condition above.
+    const phoneme = phonemes[phonemeIdx]!;
     const candidates = enumerateCandidates(
       word,
       letterIdx,
@@ -185,7 +189,9 @@ export const align = (
     const phonemesLeft = phonemes.length - phonemeIdx;
     const needsLonger = lettersLeft > phonemesLeft;
 
-    let best: Candidate = candidates.at(-1);
+    // enumerateCandidates always pushes a single-letter fallback, so
+    // candidates is never empty and at(-1) is guaranteed non-null.
+    let best: Candidate = candidates.at(-1)!;
     let bestScore = scoreCandidate(best, phoneme, c);
 
     for (const cand of candidates) {
@@ -224,10 +230,12 @@ export const align = (
   if (out.length > 0) {
     const remaining: string[] = [];
     for (let i = letterIdx; i < word.length; i += 1) {
-      if (!claimed.has(i)) remaining.push(word[i]);
+      // i < word.length guarantees word[i] is defined.
+      if (!claimed.has(i)) remaining.push(word[i]!);
     }
     if (remaining.length > 0) {
-      const last = out.at(-1);
+      // out.length > 0 guarantees at(-1) is non-null.
+      const last = out.at(-1)!;
       out[out.length - 1] = {
         ...last,
         g: `${last.g}${remaining.join('')}`,

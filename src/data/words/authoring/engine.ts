@@ -19,7 +19,7 @@ const splitSyllablesByPhonemeBoundary = (
   const boundaries: number[] = [];
   let acc = 0;
   for (let i = 0; i < phonemeSyllables.length - 1; i += 1) {
-    acc += phonemeSyllables[i].split('-').filter(Boolean).length;
+    acc += phonemeSyllables[i]!.split('-').filter(Boolean).length;
     boundaries.push(Math.round(acc * lettersPerPhoneme));
   }
 

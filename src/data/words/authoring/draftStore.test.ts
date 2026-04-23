@@ -38,7 +38,7 @@ describe('draftStore CRUD', () => {
 
     const listed = await draftStore.listDrafts({ region: 'aus' });
     expect(listed).toHaveLength(1);
-    expect(listed[0].word).toBe('putting');
+    expect(listed[0]?.word).toBe('putting');
   });
 
   it('rejects duplicate [region, word]', async () => {

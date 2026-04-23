@@ -29,7 +29,9 @@ const suggestLevel = (
   };
   for (const chip of chips) {
     for (const lvl of [1, 2, 3, 4, 5, 6, 7, 8] as const) {
-      const hit = GRAPHEMES_BY_LEVEL[lvl].find((u) => u.g === chip.g);
+      const hit = (GRAPHEMES_BY_LEVEL[lvl] ?? []).find(
+        (u) => u.g === chip.g,
+      );
       if (hit && lvl > best.level)
         best = { level: lvl, grapheme: chip.g };
     }
@@ -182,7 +184,13 @@ export const AuthoringPanel = ({
   const updateChip = (i: number, patch: Partial<AlignedGrapheme>) => {
     setChips((prev) => {
       const next = [...prev];
-      next[i] = { ...next[i], ...patch };
+      const existing = next[i];
+      if (!existing) return prev;
+      next[i] = {
+        ...existing,
+        ...patch,
+        confidence: patch.confidence ?? existing.confidence,
+      };
       return next;
     });
     setDirty(true);
@@ -192,9 +200,10 @@ export const AuthoringPanel = ({
     setChips((prev) => {
       const next = [...prev];
       const current = next[i];
+      if (!current) return prev;
       const nextChip = next[i + 1];
       if (!nextChip || nextChip.g.length < 2) return prev;
-      next[i] = { ...current, g: current.g + nextChip.g[0] };
+      next[i] = { ...current, g: current.g + nextChip.g[0]! };
       next[i + 1] = { ...nextChip, g: nextChip.g.slice(1) };
       return next;
     });
@@ -205,7 +214,7 @@ export const AuthoringPanel = ({
     setChips((prev) => {
       const next = [...prev];
       const current = next[i];
-      if (current.g.length < 2) return prev;
+      if (!current || current.g.length < 2) return prev;
       const nextChip = next[i + 1];
       if (!nextChip) return prev;
       const moved = current.g.slice(-1);
@@ -392,7 +401,7 @@ export const AuthoringPanel = ({
                   aria-label="Extend grapheme"
                   disabled={
                     !chips[editingIndex + 1] ||
-                    chips[editingIndex + 1].g.length < 2
+                    (chips[editingIndex + 1]?.g.length ?? 0) < 2
                   }
                   onClick={() => extendChip(editingIndex)}
                   className="rounded border px-2 py-1 text-sm disabled:opacity-50"

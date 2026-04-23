@@ -25,12 +25,12 @@ describe('align (greedy g→p aligner)', () => {
   it('absorbs silent letters into the previous grapheme', () => {
     const aligned = align('should', ['ʃ', 'ʊ', 'd']);
     expect(aligned.map((x) => x.g).join('')).toBe('should');
-    expect(aligned.at(-1).g).toBe('ld');
+    expect(aligned.at(-1)?.g).toBe('ld');
   });
 
   it('marks low confidence on an unseen mapping', () => {
     const aligned = align('qz', ['k', 'z']);
-    expect(aligned[0].confidence).toBeLessThan(0.5);
+    expect(aligned[0]?.confidence).toBeLessThan(0.5);
   });
 
   it('picks up split digraphs like "a_e" in "cake"', () => {
