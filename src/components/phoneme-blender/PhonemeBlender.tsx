@@ -66,7 +66,6 @@ export const PhonemeBlender = ({
 }: PhonemeBlenderProps) => {
   const sprite = usePhonemeSprite();
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const firedStops = useRef<Set<number>>(new Set());
   const rafRef = useRef<number | null>(null);
   const [positionMs, setPositionMs] = useState(0);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -118,10 +117,8 @@ export const PhonemeBlender = ({
     });
     if (zone.loopable) {
       void playPhoneme(zone.p, { sustain: true });
-    } else if (firedStops.current.has(zone.index)) {
-      // already fired this pass — skip
     } else {
-      firedStops.current.add(zone.index);
+      stopPhoneme();
       void playPhoneme(zone.p);
     }
   }, []);
@@ -162,7 +159,6 @@ export const PhonemeBlender = ({
 
   const startAutoPlay = useCallback(() => {
     if (zones.length === 0) return;
-    firedStops.current = new Set();
     setPassedSet(new Set());
     setPlaying(true);
     const t0 = performance.now();
@@ -198,7 +194,6 @@ export const PhonemeBlender = ({
 
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
-    firedStops.current = new Set();
     setPassedSet(new Set());
     setDragging(true);
     updateFromClientX(e.clientX, null);
@@ -216,7 +211,6 @@ export const PhonemeBlender = ({
   };
 
   const stepToZone = (zone: ResolvedZone) => {
-    firedStops.current.delete(zone.index);
     setPositionMs(zone.startMs);
     enterZone(zone);
   };
@@ -293,42 +287,55 @@ export const PhonemeBlender = ({
           );
         })}
       </div>
-      <div
-        ref={trackRef}
-        role="slider"
-        tabIndex={0}
-        aria-label={`Blend /${word}/`}
-        aria-valuemin={0}
-        aria-valuemax={totalMs}
-        aria-valuenow={Math.round(positionMs)}
-        aria-valuetext={
-          activeIndex === null
-            ? undefined
-            : `${zones[activeIndex]!.g} /${zones[activeIndex]!.p}/`
-        }
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-        onPointerLeave={() => {
-          if (dragging) endDrag();
-        }}
-        onKeyDown={onKeyDown}
-        className="relative flex h-10 w-full touch-none overflow-hidden rounded-xl border border-foreground/20"
-      >
-        {zones.map((z) => (
-          <div
-            key={z.index}
-            data-zone-index={z.index}
-            style={{ flexGrow: String(z.durationMs), flexBasis: '0px' }}
-            className={cn(
-              'h-full border-r border-white/60 last:border-r-0',
-              z.loopable ? 'bg-purple-500' : 'bg-yellow-400',
-              activeIndex === z.index &&
-                'ring-2 ring-foreground ring-inset',
-            )}
-          />
-        ))}
+      <div className="relative">
+        <div
+          ref={trackRef}
+          role="slider"
+          tabIndex={0}
+          aria-label={`Blend /${word}/`}
+          aria-valuemin={0}
+          aria-valuemax={totalMs}
+          aria-valuenow={Math.round(positionMs)}
+          aria-valuetext={
+            activeIndex === null
+              ? undefined
+              : `${zones[activeIndex]!.g} /${zones[activeIndex]!.p}/`
+          }
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onPointerLeave={() => {
+            if (dragging) endDrag();
+          }}
+          onKeyDown={onKeyDown}
+          className="flex h-10 w-full touch-none overflow-hidden rounded-xl border border-foreground/20"
+        >
+          {zones.map((z) => (
+            <div
+              key={z.index}
+              data-zone-index={z.index}
+              style={{
+                flexGrow: String(z.durationMs),
+                flexBasis: '0px',
+              }}
+              className={cn(
+                'h-full border-r border-white/60 last:border-r-0',
+                z.loopable ? 'bg-purple-500' : 'bg-yellow-400',
+                activeIndex === z.index &&
+                  'ring-2 ring-foreground ring-inset',
+              )}
+            />
+          ))}
+        </div>
+        <div
+          data-testid="playhead"
+          aria-hidden="true"
+          style={{
+            left: `${totalMs > 0 ? (positionMs / totalMs) * 100 : 0}%`,
+          }}
+          className="pointer-events-none absolute top-1/2 z-10 h-12 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-foreground bg-background shadow-md"
+        />
       </div>
       <div className="flex items-center justify-between gap-2">
         <button
