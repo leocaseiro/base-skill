@@ -1,7 +1,17 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthoringPanel } from './AuthoringPanel';
+
+vi.mock('./engine', () => ({
+  generateBreakdown: vi.fn(async (word: string) => ({
+    word,
+    ipa: word === 'putting' ? 'pʊtɪŋ' : '',
+    syllables: word === 'putting' ? ['put', 'ting'] : [],
+    phonemes: word === 'putting' ? ['p', 'ʊ', 't', 'ɪ', 'ŋ'] : [],
+    ritaKnown: word === 'putting',
+  })),
+}));
 
 const noop = () => {};
 
@@ -9,7 +19,7 @@ describe('AuthoringPanel shell', () => {
   it('renders when open', () => {
     render(<AuthoringPanel open onClose={noop} initialWord="" />);
     expect(
-      screen.getByRole('dialog', { name: /make up a word/i }),
+      screen.getByRole('dialog', { name: /authoring panel/i }),
     ).toBeInTheDocument();
   });
 
@@ -36,5 +46,26 @@ describe('AuthoringPanel shell', () => {
     expect(
       document.querySelector(`#${CSS.escape(labelId!)}`),
     ).toBeInTheDocument();
+  });
+});
+
+describe('AuthoringPanel word field', () => {
+  it('pre-fills the word field from initialWord', () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    expect(screen.getByLabelText(/word/i)).toHaveValue('putting');
+  });
+
+  it('shows the dictionary.com banner for an unknown word', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="" />);
+    await userEvent.type(screen.getByLabelText(/word/i), 'xyzzy');
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(
+      screen.getByRole('link', { name: /open in dictionary\.com/i }),
+    ).toHaveAttribute(
+      'href',
+      'https://www.dictionary.com/browse/xyzzy',
+    );
   });
 });
