@@ -69,9 +69,20 @@ const useDebouncedBreakdown = (
   const [ipa, setIpa] = useState('');
   const [level, setLevel] = useState<DraftLevel>(1);
   const [loading, setLoading] = useState(false);
+  // Tracks whether the user has manually edited the IPA field for the
+  // current word.  When true, the async breakdown result must not
+  // overwrite the user's input.  Reset to false whenever `word` changes
+  // so that auto-fill works again for the new word.
+  const ipaEditedRef = useRef(false);
+
+  const setIpaUser = useCallback((value: string) => {
+    ipaEditedRef.current = true;
+    setIpa(value);
+  }, []);
 
   useEffect(() => {
     const trimmed = word.trim();
+    ipaEditedRef.current = false; // new word — allow auto-fill again
     if (!trimmed) {
       setBreakdown(null);
       setChips([]);
@@ -91,7 +102,11 @@ const useDebouncedBreakdown = (
               : [];
           setBreakdown(b);
           setChips(aligned);
-          setIpa(b.ipa);
+          // Only auto-fill IPA from the breakdown if the user has not
+          // manually edited the field for this word yet.
+          if (!ipaEditedRef.current) {
+            setIpa(b.ipa);
+          }
           setLevel(
             aligned.length > 0 ? suggestLevel(aligned).level : 1,
           );
@@ -111,7 +126,7 @@ const useDebouncedBreakdown = (
     chips,
     setChips,
     ipa,
-    setIpa,
+    setIpa: setIpaUser,
     level,
     setLevel,
     loading,

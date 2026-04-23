@@ -1,6 +1,13 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { AuthoringPanel } from './AuthoringPanel';
 import { draftStore } from './draftStore';
 
@@ -145,6 +152,13 @@ describe('AuthoringPanel IPA and syllables', () => {
 });
 
 describe('AuthoringPanel save + duplicates', () => {
+  beforeEach(async () => {
+    await draftStore.__clearAllForTests();
+  });
+  afterEach(async () => {
+    await draftStore.__clearAllForTests();
+  });
+
   it('disables Save when the word collides with shipped data', async () => {
     render(<AuthoringPanel open onClose={noop} initialWord="an" />);
     await act(() => new Promise((r) => setTimeout(r, 500)));
@@ -157,7 +171,6 @@ describe('AuthoringPanel save + duplicates', () => {
   });
 
   it('saves a draft and calls onSaved', async () => {
-    await draftStore.__clearAllForTests();
     const onSaved = vi.fn();
     render(
       <AuthoringPanel
@@ -176,7 +189,10 @@ describe('AuthoringPanel save + duplicates', () => {
     await userEvent.click(
       screen.getByRole('button', { name: /save draft/i }),
     );
-    expect(onSaved).toHaveBeenCalled();
+    // handleSave is fired with `void` so the click returns before the
+    // async draftStore.saveDraft + onSaved call completes.  Use waitFor
+    // to poll until the callback has been invoked.
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
     const list = await draftStore.listDrafts({ region: 'aus' });
     expect(list.map((d) => d.word)).toContain('zzword');
   });
