@@ -18,8 +18,8 @@ describe('filterWords with draft merge', () => {
       levels: [1],
     });
     expect(hits.length).toBeGreaterThan(0);
-    expect(hits[0].provenance).toBe('shipped');
-    expect(hits[0].draftId).toBeUndefined();
+    expect(hits[0]?.provenance).toBe('shipped');
+    expect(hits[0]?.draftId).toBeUndefined();
   });
 
   it('includes drafts in results with provenance: "draft"', async () => {

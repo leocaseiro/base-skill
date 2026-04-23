@@ -111,7 +111,7 @@ describe('AuthoringPanel grapheme chips', () => {
       <AuthoringPanel open onClose={noop} initialWord="putting" />,
     );
     await act(() => new Promise((r) => setTimeout(r, 500)));
-    const chip = screen.getAllByTestId('grapheme-chip')[0];
+    const chip = screen.getAllByTestId('grapheme-chip')[0]!;
     await userEvent.click(chip);
     expect(
       screen.getByRole('combobox', { name: /phoneme/i }),
