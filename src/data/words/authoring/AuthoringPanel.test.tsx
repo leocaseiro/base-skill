@@ -145,6 +145,9 @@ describe('AuthoringPanel IPA and syllables', () => {
     const select = screen.getByRole('combobox', {
       name: /level/i,
     });
+    if (!(select instanceof HTMLSelectElement)) {
+      throw new TypeError('expected level combobox to be a select');
+    }
     expect(Number(select.value)).toBeGreaterThanOrEqual(1);
     expect(Number(select.value)).toBeLessThanOrEqual(8);
     expect(

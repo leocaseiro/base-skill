@@ -343,6 +343,7 @@ export const AuthoringPanel = ({
             <div className="flex flex-wrap gap-2">
               {chips.map((chip, i) => (
                 <button
+                  // eslint-disable-next-line react/no-array-index-key -- chips re-derive wholesale from align() per word; positional key is stable enough
                   key={`${i}-${chip.g}`}
                   type="button"
                   data-testid="grapheme-chip"
@@ -427,6 +428,7 @@ export const AuthoringPanel = ({
             <div className="flex flex-wrap gap-2">
               {syllables.map((s, i) => (
                 <span
+                  // eslint-disable-next-line react/no-array-index-key -- syllables re-derive from the breakdown per word; positional key is fine
                   key={`${i}-${s}`}
                   data-testid="syllable-chip"
                   className="rounded border border-slate-300 bg-white px-2 py-1 text-sm"
