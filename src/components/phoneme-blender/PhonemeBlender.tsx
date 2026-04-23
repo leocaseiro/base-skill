@@ -115,12 +115,11 @@ export const PhonemeBlender = ({
       next.add(zone.index);
       return next;
     });
-    if (zone.loopable) {
-      void playPhoneme(zone.p, { sustain: true });
-    } else {
-      stopPhoneme();
-      void playPhoneme(zone.p);
-    }
+    // Always fire a one-shot: sustained loops were disorienting for learners
+    // ("a,a,a,a") and amplified a race on iOS where a stuck loop couldn't be
+    // stopped if the drag got stuck. Kids re-enter zones to hear repeats.
+    stopPhoneme();
+    void playPhoneme(zone.p);
   }, []);
 
   const msFromClientX = useCallback(
@@ -193,7 +192,15 @@ export const PhonemeBlender = ({
   );
 
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
+    // iOS Safari can throw InvalidPointerId here or silently not honour
+    // capture, which cascaded into the drag "getting stuck" after the first
+    // tap. Swallow the error and proceed without capture — pointermove still
+    // fires on the track itself, which is what we need for scrubbing.
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // continue without pointer capture
+    }
     setPassedSet(new Set());
     setDragging(true);
     updateFromClientX(e.clientX, null);
@@ -260,7 +267,8 @@ export const PhonemeBlender = ({
   return (
     <div
       data-word={word}
-      className="flex flex-col gap-2 rounded-xl bg-purple-50 p-3"
+      style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
+      className="flex touch-none select-none flex-col gap-2 rounded-xl bg-purple-50 p-3"
     >
       <div
         aria-hidden="true"
@@ -305,11 +313,12 @@ export const PhonemeBlender = ({
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
-          onPointerLeave={() => {
-            if (dragging) endDrag();
-          }}
           onKeyDown={onKeyDown}
-          className="flex h-10 w-full touch-none overflow-hidden rounded-xl border border-foreground/20"
+          onContextMenu={(e) => {
+            e.preventDefault();
+          }}
+          style={{ WebkitTouchCallout: 'none' }}
+          className="flex h-10 w-full touch-none select-none overflow-hidden rounded-xl border border-foreground/20"
         >
           {zones.map((z) => (
             <div
