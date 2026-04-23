@@ -260,7 +260,8 @@ export const PhonemeBlender = ({
   return (
     <div
       data-word={word}
-      className="flex flex-col gap-2 rounded-xl bg-purple-50 p-3"
+      style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
+      className="flex touch-none select-none flex-col gap-2 rounded-xl bg-purple-50 p-3"
     >
       <div
         aria-hidden="true"
