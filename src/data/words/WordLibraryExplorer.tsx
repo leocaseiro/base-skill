@@ -1,10 +1,14 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { deriveActiveFilterPills } from './active-filter-pills';
+import { AuthoringPanel } from './authoring/AuthoringPanel';
+import { DraftsPanel } from './authoring/DraftsPanel';
+import { draftStore } from './authoring/draftStore';
 import { filterWords } from './filter';
 import { ALL_REGIONS, LEVEL_LABELS } from './levels';
 import { playPhoneme } from './phoneme-audio';
 import { useChipsVisibleDefault } from './useChipsVisibleDefault';
 import type {
+  DraftEntry,
   FilterResult,
   Grapheme,
   Region,
@@ -378,6 +382,17 @@ export const ResultCard = ({ hit, chipsVisible }: ResultCardProps) => (
         <div className="ms-auto flex gap-1 text-xs">
           <Badge>L{hit.level}</Badge>
           <Badge>{hit.syllableCount} syl</Badge>
+          <span
+            className={`ml-2 rounded px-2 py-0.5 text-xs ${
+              hit.provenance === 'draft'
+                ? 'bg-amber-100 text-amber-800'
+                : 'bg-slate-100 text-slate-600'
+            }`}
+          >
+            {hit.provenance === 'draft'
+              ? '✏️ draft (unsynced)'
+              : '📚 shipped'}
+          </span>
         </div>
       </div>
     </CardHeader>
@@ -535,6 +550,11 @@ export const WordLibraryExplorer = () => {
   const [chipsVisible, setChipsVisible] =
     useState<boolean>(chipsDefault);
   const [chipsUserSet, setChipsUserSet] = useState(false);
+  const [authoringWord, setAuthoringWord] = useState<string | null>(
+    null,
+  );
+  const [showDrafts, setShowDrafts] = useState(false);
+  const [draftCount, setDraftCount] = useState(0);
   // Adjust during render instead of in an effect to avoid cascading renders
   // (react-hooks/set-state-in-effect). Until the user explicitly toggles,
   // follow the orientation-driven default from useChipsVisibleDefault.
@@ -554,6 +574,16 @@ export const WordLibraryExplorer = () => {
       cancelled = true;
     };
   }, [filter]);
+
+  useEffect(() => {
+    let ignore = false;
+    void draftStore.listDrafts({ region: 'aus' }).then((d) => {
+      if (!ignore) setDraftCount(d.length);
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [authoringWord, showDrafts]);
 
   const pairOptions = useMemo(
     () => collectGraphemePairs(result.hits),
@@ -683,6 +713,27 @@ export const WordLibraryExplorer = () => {
         </Sheet>
       </div>
       <main className="flex flex-1 flex-col gap-4">
+        <div className="hidden items-center justify-between gap-2 md:flex">
+          <h1 className="text-lg font-semibold">Word Library</h1>
+          <div className="flex items-center gap-2">
+            {draftCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowDrafts(true)}
+                className="text-sm underline"
+              >
+                Drafts ({draftCount})
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setAuthoringWord('')}
+              className="rounded bg-sky-600 px-3 py-1 text-sm text-white"
+            >
+              + New word
+            </button>
+          </div>
+        </div>
         {pills.length > 0 ? (
           <div
             data-testid="active-filter-pills"
@@ -739,6 +790,20 @@ export const WordLibraryExplorer = () => {
             show g[p] chips
           </label>
         </div>
+        {visible.length === 0 && wordPrefix.trim() && (
+          <div className="rounded border border-slate-300 bg-white p-4 text-center">
+            <p className="text-sm text-slate-600">
+              No matches for <strong>{wordPrefix.trim()}</strong>.
+            </p>
+            <button
+              type="button"
+              onClick={() => setAuthoringWord(wordPrefix.trim())}
+              className="mt-2 rounded bg-sky-600 px-3 py-1 text-sm text-white"
+            >
+              ✨ Make up this word?
+            </button>
+          </div>
+        )}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visible.map((hit) => (
             <ResultCard
@@ -748,6 +813,20 @@ export const WordLibraryExplorer = () => {
             />
           ))}
         </div>
+        <AuthoringPanel
+          open={authoringWord !== null}
+          initialWord={authoringWord ?? ''}
+          onClose={() => setAuthoringWord(null)}
+          onSaved={() => setAuthoringWord(null)}
+        />
+        <DraftsPanel
+          open={showDrafts}
+          onClose={() => setShowDrafts(false)}
+          onEdit={(d: DraftEntry) => {
+            setShowDrafts(false);
+            setAuthoringWord(d.word);
+          }}
+        />
       </main>
     </div>
   );
