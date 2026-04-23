@@ -23,16 +23,20 @@ const useDebouncedBreakdown = (
       setBreakdown(null);
       return;
     }
+    let ignore = false;
     setLoading(true);
     const timer = setTimeout(async () => {
       try {
         const b = await generateBreakdown(trimmed);
-        setBreakdown(b);
+        if (!ignore) setBreakdown(b);
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     }, DEBOUNCE_MS);
-    return () => clearTimeout(timer);
+    return () => {
+      ignore = true;
+      clearTimeout(timer);
+    };
   }, [word]);
 
   return { breakdown, loading };
@@ -84,10 +88,9 @@ export const AuthoringPanel = ({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-0 md:p-6"
     >
       <div className="flex h-full w-full flex-col bg-white p-6 md:h-auto md:max-w-2xl md:rounded-xl md:shadow-2xl">
-        <span id={titleId} className="sr-only">
-          Authoring panel
-        </span>
-        <h2 className="text-xl font-semibold">Make up a word</h2>
+        <h2 id={titleId} className="text-xl font-semibold">
+          Make up a word
+        </h2>
         <p className="mt-1 text-sm text-slate-600">
           Authoring <strong>{initialWord || '(new word)'}</strong>.
           Fields below populate as you type.

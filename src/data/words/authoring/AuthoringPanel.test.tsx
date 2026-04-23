@@ -19,7 +19,7 @@ describe('AuthoringPanel shell', () => {
   it('renders when open', () => {
     render(<AuthoringPanel open onClose={noop} initialWord="" />);
     expect(
-      screen.getByRole('dialog', { name: /authoring panel/i }),
+      screen.getByRole('dialog', { name: /make up a word/i }),
     ).toBeInTheDocument();
   });
 
@@ -54,12 +54,17 @@ describe('AuthoringPanel word field', () => {
     render(
       <AuthoringPanel open onClose={noop} initialWord="putting" />,
     );
-    expect(screen.getByLabelText(/word/i)).toHaveValue('putting');
+    expect(screen.getByRole('textbox', { name: /word/i })).toHaveValue(
+      'putting',
+    );
   });
 
   it('shows the dictionary.com banner for an unknown word', async () => {
     render(<AuthoringPanel open onClose={noop} initialWord="" />);
-    await userEvent.type(screen.getByLabelText(/word/i), 'xyzzy');
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /word/i }),
+      'xyzzy',
+    );
     await act(() => new Promise((r) => setTimeout(r, 500)));
     expect(
       screen.getByRole('link', { name: /open in dictionary\.com/i }),
