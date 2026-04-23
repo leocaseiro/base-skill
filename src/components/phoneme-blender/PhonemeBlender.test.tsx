@@ -120,7 +120,7 @@ describe('PhonemeBlender — zones', () => {
     );
     const first = screen.getByTestId('letter-0');
     expect(first).toHaveTextContent('p');
-    expect(first.className).toContain('text-purple-200');
+    expect(first.className).toContain('text-neutral-600');
   });
 
   it('colours loopable zones purple and stop zones yellow', async () => {
