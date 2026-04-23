@@ -1,8 +1,30 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { usePhonemeSprite } from './usePhonemeSprite';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { playPhoneme, stopPhoneme } from '#/data/words/phoneme-audio';
 import { cn } from '#/lib/utils';
+
+type Speed = 'slow' | 'normal' | 'fast';
+
+const SPEED_MULTIPLIERS: Record<Speed, number> = {
+  slow: 1.6,
+  normal: 1,
+  fast: 0.55,
+};
+
+const SPEED_LABELS: Record<Speed, string> = {
+  slow: '🐢 slow',
+  normal: '🐈 normal',
+  fast: '🐇 fast',
+};
+
+const SPEEDS: readonly Speed[] = ['slow', 'normal', 'fast'];
 
 export interface PhonemeBlenderProps {
   word: string;
@@ -42,9 +64,12 @@ export const PhonemeBlender = ({
   const sprite = usePhonemeSprite();
   const trackRef = useRef<HTMLDivElement | null>(null);
   const firedStops = useRef<Set<number>>(new Set());
+  const rafRef = useRef<number | null>(null);
   const [positionMs, setPositionMs] = useState(0);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState<Speed>('normal');
   const [passedSet, setPassedSet] = useState<ReadonlySet<number>>(
     () => new Set(),
   );
@@ -120,6 +145,52 @@ export const PhonemeBlender = ({
       return zone.index;
     },
     [msFromClientX, zones, enterZone],
+  );
+
+  const stopAutoPlay = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    setPlaying(false);
+    setActiveIndex(null);
+    stopPhoneme();
+  }, []);
+
+  const startAutoPlay = useCallback(() => {
+    if (zones.length === 0) return;
+    firedStops.current = new Set();
+    setPassedSet(new Set());
+    setPlaying(true);
+    const t0 = performance.now();
+    const multiplier = SPEED_MULTIPLIERS[speed];
+    let lastEntered = -1;
+    const tick = (): void => {
+      const elapsed = (performance.now() - t0) / multiplier;
+      const clamped = Math.min(totalMs, elapsed);
+      setPositionMs(clamped);
+      const zone = zoneFromMs(zones, clamped);
+      if (zone && zone.index !== lastEntered) {
+        lastEntered = zone.index;
+        enterZone(zone);
+      }
+      if (elapsed >= totalMs) {
+        stopAutoPlay();
+        return;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  }, [zones, speed, totalMs, enterZone, stopAutoPlay]);
+
+  useEffect(
+    () => () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    },
+    [],
   );
 
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -206,6 +277,44 @@ export const PhonemeBlender = ({
             )}
           />
         ))}
+      </div>
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          aria-label={playing ? 'Pause' : `Play /${word}/`}
+          onClick={() => {
+            if (playing) {
+              stopAutoPlay();
+            } else {
+              startAutoPlay();
+            }
+          }}
+          className="inline-flex size-9 items-center justify-center rounded-full border-2 border-foreground bg-background text-lg"
+        >
+          {playing ? '⏸' : '▶'}
+        </button>
+        <div role="radiogroup" className="flex gap-1 text-xs">
+          {SPEEDS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              role="radio"
+              aria-checked={speed === s}
+              aria-label={SPEED_LABELS[s]}
+              onClick={() => {
+                setSpeed(s);
+              }}
+              className={cn(
+                'rounded-md border border-input px-2 py-1 transition-colors',
+                speed === s
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-muted',
+              )}
+            >
+              {SPEED_LABELS[s]}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
