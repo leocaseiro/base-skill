@@ -164,3 +164,13 @@ export const __resetPhonemeAudioForTests = (): void => {
   bufferPromise = null;
   spritePromise = null;
 };
+
+if (import.meta.env.DEV) {
+  (
+    globalThis as unknown as { __phonemeAudioState?: unknown }
+  ).__phonemeAudioState = {
+    get currentSource() {
+      return currentSource;
+    },
+  };
+}
