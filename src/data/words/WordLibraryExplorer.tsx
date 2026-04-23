@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useState } from 'react';
+import { deriveActiveFilterPills } from './active-filter-pills';
 import { filterWords } from './filter';
 import { ALL_REGIONS, LEVEL_LABELS } from './levels';
 import { playPhoneme } from './phoneme-audio';
@@ -502,6 +503,25 @@ export const WordLibraryExplorer = () => {
     }));
   };
 
+  const pills = deriveActiveFilterPills(
+    filter,
+    graphemePairs,
+    wordPrefix,
+  );
+
+  const clearFilterPill = (clearKey: string) => {
+    if (clearKey === 'prefix') {
+      setWordPrefix('');
+      return;
+    }
+    if (clearKey.startsWith('pair:')) {
+      const label = clearKey.slice('pair:'.length);
+      setGraphemePairs((curr) => curr.filter((p) => p.label !== label));
+      return;
+    }
+    setFilter((f) => ({ ...f, [clearKey]: undefined }));
+  };
+
   return (
     <div className="flex min-h-screen flex-col gap-4 bg-background p-4 text-foreground md:flex-row">
       <aside className="flex w-full shrink-0 flex-col gap-4 md:w-80">
@@ -583,6 +603,27 @@ export const WordLibraryExplorer = () => {
         </Card>
       </aside>
       <main className="flex flex-1 flex-col gap-4">
+        {pills.length > 0 ? (
+          <div
+            data-testid="active-filter-pills"
+            className="flex flex-nowrap gap-2 overflow-x-auto py-1"
+          >
+            {pills.map((pill) => (
+              <button
+                key={pill.id}
+                type="button"
+                onClick={() => clearFilterPill(pill.clear)}
+                className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs"
+              >
+                {pill.label}
+                <span aria-hidden className="text-muted-foreground">
+                  ✕
+                </span>
+                <span className="sr-only">Remove {pill.label}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
         {result.usedFallback ? (
           <Card>
             <CardContent className="pt-4 text-sm text-muted-foreground">
