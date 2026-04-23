@@ -1068,6 +1068,15 @@
     hashery "^1.5.1"
     keyv "^5.6.0"
 
+"@chevrotain/cst-dts-gen@11.2.0":
+  version "11.2.0"
+  resolved "https://registry.yarnpkg.com/@chevrotain/cst-dts-gen/-/cst-dts-gen-11.2.0.tgz#a822e406c03d8222aa5ff0b75c5db692a4dca169"
+  integrity sha512-ssJFvn/UXhQQeICw3SR/fZPmYVj+JM2mP+Lx7bZ51cOeHaMWOKp3AUMuyM3QR82aFFXTfcAp67P5GpPjGmbZWQ==
+  dependencies:
+    "@chevrotain/gast" "11.2.0"
+    "@chevrotain/types" "11.2.0"
+    lodash-es "4.17.23"
+
 "@chevrotain/cst-dts-gen@12.0.0":
   version "12.0.0"
   resolved "https://registry.yarnpkg.com/@chevrotain/cst-dts-gen/-/cst-dts-gen-12.0.0.tgz#ec068e1e83c5fdad69d81773556cae97f0b5dcdb"
@@ -1076,6 +1085,14 @@
     "@chevrotain/gast" "12.0.0"
     "@chevrotain/types" "12.0.0"
 
+"@chevrotain/gast@11.2.0":
+  version "11.2.0"
+  resolved "https://registry.yarnpkg.com/@chevrotain/gast/-/gast-11.2.0.tgz#0f585b5a0d93354c1a0a732397de386c5f90cf23"
+  integrity sha512-c+KoD6eSI1xjAZZoNUW+V0l13UEn+a4ShmUrjIKs1BeEWCji0Kwhmqn5FSx1K4BhWL7IQKlV7wLR4r8lLArORQ==
+  dependencies:
+    "@chevrotain/types" "11.2.0"
+    lodash-es "4.17.23"
+
 "@chevrotain/gast@12.0.0":
   version "12.0.0"
   resolved "https://registry.yarnpkg.com/@chevrotain/gast/-/gast-12.0.0.tgz#0e0cbf8eee01c7a4449b9caf19e5f3834dba2c35"
@@ -1083,15 +1100,30 @@
   dependencies:
     "@chevrotain/types" "12.0.0"
 
+"@chevrotain/regexp-to-ast@11.2.0":
+  version "11.2.0"
+  resolved "https://registry.yarnpkg.com/@chevrotain/regexp-to-ast/-/regexp-to-ast-11.2.0.tgz#304ed85f50247183a0a8d43c4d217e76ffc87dbb"
+  integrity sha512-lG73pBFqbXODTbXhdZwv0oyUaI+3Irm+uOv5/W79lI3g5hasYaJnVJOm3H2NkhA0Ef4XLBU4Scr7TJDJwgFkAw==
+
 "@chevrotain/regexp-to-ast@12.0.0", "@chevrotain/regexp-to-ast@~12.0.0":
   version "12.0.0"
   resolved "https://registry.yarnpkg.com/@chevrotain/regexp-to-ast/-/regexp-to-ast-12.0.0.tgz#a90bc4b4f5337a883a88dddd0cca7c38cfe66a7a"
   integrity sha512-p+EW9MaJwgaHguhoqwOtx/FwuGr+DnNn857sXWOi/mClXIkPGl3rn7hGNWvo31HA3vyeQxjqe+H36yZJwYU8cA==
 
+"@chevrotain/types@11.2.0":
+  version "11.2.0"
+  resolved "https://registry.yarnpkg.com/@chevrotain/types/-/types-11.2.0.tgz#420bc7f64417d64797fafc742902945289fc1fbd"
+  integrity sha512-vBMSj/lz/LqolbGQEHB0tlpW5BnljHVtp+kzjQfQU+5BtGMTuZCPVgaAjtKvQYXnHb/8i/02Kii00y0tsuwfsw==
+
 "@chevrotain/types@12.0.0":
   version "12.0.0"
   resolved "https://registry.yarnpkg.com/@chevrotain/types/-/types-12.0.0.tgz#a762b5c2b4f07496b56c93c30ce224b3637cc2c8"
   integrity sha512-S+04vjFQKeuYw0/eW3U52LkAHQsB1ASxsPGsLPUyQgrZ2iNNibQrsidruDzjEX2JYfespXMG0eZmXlhA6z7nWA==
+
+"@chevrotain/utils@11.2.0":
+  version "11.2.0"
+  resolved "https://registry.yarnpkg.com/@chevrotain/utils/-/utils-11.2.0.tgz#49db06fc0dc4dc6a3ade80339dffd33d3072bc24"
+  integrity sha512-+7whECg4yNWHottjvr2To2BRxL4XJVjIyyv5J4+bJ0iMOVU8j/8n1qPDLZS/90W/BObDR8VNL46lFbzY/Hosmw==
 
 "@chevrotain/utils@12.0.0":
   version "12.0.0"
@@ -4579,7 +4611,7 @@
     "@typescript-eslint/types" "8.58.0"
     eslint-visitor-keys "^5.0.0"
 
-"@ungap/structured-clone@^1.0.0", "@ungap/structured-clone@^1.3.0":
+"@ungap/structured-clone@^1.0.0", "@ungap/structured-clone@^1.2.0", "@ungap/structured-clone@^1.3.0":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.3.0.tgz#d06bbb384ebcf6c505fde1c3d0ed4ddffe0aaff8"
   integrity sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==
@@ -5553,6 +5585,18 @@ chevrotain-allstar@~0.4.1:
   integrity sha512-PvVJm3oGqrveUVW2Vt/eZGeiAIsJszYweUcYwcskg9e+IubNYKKD+rHHem7A6XVO22eDAL+inxNIGAzZ/VIWlA==
   dependencies:
     lodash-es "^4.17.21"
+
+chevrotain@^11.0.3:
+  version "11.2.0"
+  resolved "https://registry.yarnpkg.com/chevrotain/-/chevrotain-11.2.0.tgz#4cf01bb93b4e41deceda966179c2447182131bc2"
+  integrity sha512-mHCHTxM51nCklUw9RzRVc0DLjAh/SAUPM4k/zMInlTIo25ldWXOZoPt7XEIk/LwoT4lFVmJcu9g5MHtx371x3A==
+  dependencies:
+    "@chevrotain/cst-dts-gen" "11.2.0"
+    "@chevrotain/gast" "11.2.0"
+    "@chevrotain/regexp-to-ast" "11.2.0"
+    "@chevrotain/types" "11.2.0"
+    "@chevrotain/utils" "11.2.0"
+    lodash-es "4.17.23"
 
 chevrotain@~12.0.0:
   version "12.0.0"
@@ -9844,6 +9888,11 @@ locate-path@^6.0.0:
   dependencies:
     p-locate "^5.0.0"
 
+lodash-es@4.17.23:
+  version "4.17.23"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.23.tgz#58c4360fd1b5d33afc6c0bbd3d1149349b1138e0"
+  integrity sha512-kVI48u3PZr38HdYz98UmfPnXl2DXrpdctLrFLCd3kOx1xUkOmpFPx7gCWWM5MPkL/fD8zb+Ph0QzjGFs4+hHWg==
+
 lodash-es@^4.17.21, lodash-es@^4.17.23:
   version "4.18.1"
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.18.1.tgz#b962eeb80d9d983a900bf342961fb7418ca10b1d"
@@ -10663,6 +10712,11 @@ min-indent@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/min-indent/-/min-indent-1.0.1.tgz#a63f681673b30571fbe8bc25686ae746eefa9869"
   integrity sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==
+
+mingo@6.4.9:
+  version "6.4.9"
+  resolved "https://registry.yarnpkg.com/mingo/-/mingo-6.4.9.tgz#715ad1487687259db04623b64a7ba63b564b5ddd"
+  integrity sha512-jsOiIEJ19UtTaWjNFN4CnuKWqELm2sINZcHqI/nmjezMvXthBIQOftJrlT85NuIDoSFc0vrbjD+GnrzEgYnPbA==
 
 mingo@7.2.0:
   version "7.2.0"
@@ -12060,6 +12114,23 @@ rimraf@^3.0.0, rimraf@^3.0.2:
   integrity sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==
   dependencies:
     glob "^7.1.3"
+
+riscript@^1.1.9:
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/riscript/-/riscript-1.1.9.tgz#4ee66c19d069055e47bf1cc32bbb3f7d137c70cf"
+  integrity sha512-GhRkVR5hQLia3QwYgEghJ3YeMFFAWefJRLxbqAFgNniDQRVjioAWUjk00Pslp28gw4BYRcCLtBGiDM+4pxcHqw==
+  dependencies:
+    chevrotain "^11.0.3"
+    he "^1.2.0"
+    mingo "6.4.9"
+
+rita@^3.1.2:
+  version "3.2.11"
+  resolved "https://registry.yarnpkg.com/rita/-/rita-3.2.11.tgz#94c4b8d09a3e122a9ac0ca977f147630c8731e78"
+  integrity sha512-yIkSQGIyj1FmewqZF2/C/tHKTG55Z8JEDIsedoC+rB1DXGqH4HPAbEDND58fWHOpUtKydSPaXOrjQoCbggTAXA==
+  dependencies:
+    "@ungap/structured-clone" "^1.2.0"
+    riscript "^1.1.9"
 
 robust-predicates@^3.0.2:
   version "3.0.3"
@@ -14473,7 +14544,7 @@ zod-to-json-schema@^3.24.6, zod-to-json-schema@^3.25.1:
   resolved "https://registry.yarnpkg.com/zod-validation-error/-/zod-validation-error-4.0.2.tgz#bc605eba49ce0fcd598c127fee1c236be3f22918"
   integrity sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ==
 
-zod@^3.24.1, zod@^3.24.2:
+zod@^3.23.8, zod@^3.24.1, zod@^3.24.2:
   version "3.25.76"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.76.tgz#26841c3f6fd22a6a2760e7ccb719179768471e34"
   integrity sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==
