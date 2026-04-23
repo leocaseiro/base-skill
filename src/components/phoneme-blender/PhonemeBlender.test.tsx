@@ -53,13 +53,15 @@ const firePointer = (
   type: string,
   clientX: number,
 ) => {
-  const evt = new Event(type, { bubbles: true }) as Event & {
-    clientX: number;
-    pointerId: number;
-  };
-  Object.defineProperty(evt, 'clientX', { value: clientX });
-  Object.defineProperty(evt, 'pointerId', { value: 1 });
-  el.dispatchEvent(evt);
+  act(() => {
+    const evt = new Event(type, { bubbles: true }) as Event & {
+      clientX: number;
+      pointerId: number;
+    };
+    Object.defineProperty(evt, 'clientX', { value: clientX });
+    Object.defineProperty(evt, 'pointerId', { value: 1 });
+    el.dispatchEvent(evt);
+  });
 };
 
 const SPRITE: PhonemeSprite = {
@@ -156,6 +158,29 @@ describe('PhonemeBlender — zones', () => {
     expect(track.getAttribute('aria-valuemin')).toBe('0');
     expect(track.getAttribute('aria-valuenow')).toBe('0');
   });
+
+  it('renders a visible playhead indicator at 0% initially', async () => {
+    render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
+    const playhead = await screen.findByTestId('playhead');
+    expect(playhead.style.left).toBe('0%');
+  });
+
+  it('moves the playhead to the scrub position on pointerdown', async () => {
+    render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
+    const track = await screen.findByRole('slider');
+    await waitFor(() =>
+      expect(track.getAttribute('aria-valuemax')).toBe('1400'),
+    );
+    setRect(track);
+    (
+      track as HTMLElement & { setPointerCapture: (id: number) => void }
+    ).setPointerCapture = () => {};
+    firePointer(track, 'pointerdown', 700);
+    await waitFor(() => {
+      const playhead = screen.getByTestId('playhead');
+      expect(playhead.style.left).toBe('50%');
+    });
+  });
 });
 
 describe('PhonemeBlender — scrub', () => {
@@ -183,7 +208,7 @@ describe('PhonemeBlender — scrub', () => {
     );
   });
 
-  it('fires stop consonants once per drag pass (no re-trigger on wiggle)', async () => {
+  it('does not re-fire a phoneme while the pointer wiggles inside the same zone', async () => {
     render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
     const track = await screen.findByRole('slider');
     await waitFor(() =>
@@ -193,14 +218,37 @@ describe('PhonemeBlender — scrub', () => {
     (
       track as HTMLElement & { setPointerCapture: (id: number) => void }
     ).setPointerCapture = () => {};
-    firePointer(track, 'pointerdown', 750);
-    firePointer(track, 'pointermove', 500);
+    // tt zone spans 600–900. All three pointer events land inside it.
+    firePointer(track, 'pointerdown', 650);
     firePointer(track, 'pointermove', 750);
+    firePointer(track, 'pointermove', 850);
     await waitFor(() => {
       const tCalls = vi
         .mocked(playPhoneme)
         .mock.calls.filter((c) => c[0] === 't');
       expect(tCalls).toHaveLength(1);
+    });
+  });
+
+  it('re-fires a stop consonant when the pointer leaves and re-enters its zone', async () => {
+    render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
+    const track = await screen.findByRole('slider');
+    await waitFor(() =>
+      expect(track.getAttribute('aria-valuemax')).toBe('1400'),
+    );
+    setRect(track);
+    (
+      track as HTMLElement & { setPointerCapture: (id: number) => void }
+    ).setPointerCapture = () => {};
+    // tt zone 600–900, u zone 200–600. Drag tt → u → tt in a single pass.
+    firePointer(track, 'pointerdown', 750);
+    firePointer(track, 'pointermove', 400);
+    firePointer(track, 'pointermove', 750);
+    await waitFor(() => {
+      const tCalls = vi
+        .mocked(playPhoneme)
+        .mock.calls.filter((c) => c[0] === 't');
+      expect(tCalls).toHaveLength(2);
     });
   });
 
@@ -222,6 +270,32 @@ describe('PhonemeBlender — scrub', () => {
         .mocked(playPhoneme)
         .mock.calls.filter((c) => c[0] === 't');
       expect(tCalls).toHaveLength(2);
+    });
+  });
+
+  it('stops the sustained loop and re-fires the stop phoneme when re-entering', async () => {
+    // Bug report: drag loopable → stop → loopable → stop (same stop zone).
+    // On the second visit to the stop zone, the loopable's sustain must stop
+    // AND the stop phoneme must re-fire.
+    render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
+    const track = await screen.findByRole('slider');
+    await waitFor(() =>
+      expect(track.getAttribute('aria-valuemax')).toBe('1400'),
+    );
+    setRect(track);
+    (
+      track as HTMLElement & { setPointerCapture: (id: number) => void }
+    ).setPointerCapture = () => {};
+    // u (loopable, 200-600) → tt (stop, 600-900) → u → tt
+    firePointer(track, 'pointerdown', 300); // u loop starts
+    firePointer(track, 'pointermove', 750); // tt fires once
+    firePointer(track, 'pointermove', 300); // u loop restarts
+    vi.mocked(stopPhoneme).mockClear();
+    vi.mocked(playPhoneme).mockClear();
+    firePointer(track, 'pointermove', 750); // tt re-entry
+    await waitFor(() => {
+      expect(stopPhoneme).toHaveBeenCalled();
+      expect(playPhoneme).toHaveBeenCalledWith('t');
     });
   });
 
