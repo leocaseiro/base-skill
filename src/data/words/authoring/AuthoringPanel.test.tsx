@@ -142,7 +142,9 @@ describe('AuthoringPanel IPA and syllables', () => {
       <AuthoringPanel open onClose={noop} initialWord="putting" />,
     );
     await act(() => new Promise((r) => setTimeout(r, 500)));
-    const select = screen.getByRole('combobox', { name: /level/i });
+    const select = screen.getByRole('combobox', {
+      name: /level/i,
+    });
     expect(Number(select.value)).toBeGreaterThanOrEqual(1);
     expect(Number(select.value)).toBeLessThanOrEqual(8);
     expect(
