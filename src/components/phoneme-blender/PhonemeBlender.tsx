@@ -309,7 +309,11 @@ export const PhonemeBlender = ({
             if (dragging) endDrag();
           }}
           onKeyDown={onKeyDown}
-          className="flex h-10 w-full touch-none overflow-hidden rounded-xl border border-foreground/20"
+          onContextMenu={(e) => {
+            e.preventDefault();
+          }}
+          style={{ WebkitTouchCallout: 'none' }}
+          className="flex h-10 w-full touch-none select-none overflow-hidden rounded-xl border border-foreground/20"
         >
           {zones.map((z) => (
             <div
