@@ -110,3 +110,35 @@ describe('AuthoringPanel grapheme chips', () => {
     ).toBeInTheDocument();
   });
 });
+
+describe('AuthoringPanel IPA and syllables', () => {
+  it('pre-fills IPA from the engine for a known word', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(screen.getByLabelText(/IPA/i)).toHaveValue('pʊtɪŋ');
+  });
+
+  it('renders one syllable chip per segment', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.getAllByTestId('syllable-chip');
+    expect(chips.map((c) => c.textContent)).toEqual(['put', 'ting']);
+  });
+
+  it('auto-suggests level and shows the rationale', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const select = screen.getByRole('combobox', { name: /level/i });
+    expect(Number(select.value)).toBeGreaterThanOrEqual(1);
+    expect(Number(select.value)).toBeLessThanOrEqual(8);
+    expect(
+      screen.getByText(/suggested L\d — highest grapheme used: /i),
+    ).toBeInTheDocument();
+  });
+});

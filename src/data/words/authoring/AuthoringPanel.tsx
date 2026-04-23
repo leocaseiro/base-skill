@@ -6,15 +6,34 @@ import {
   useRef,
   useState,
 } from 'react';
+import { GRAPHEMES_BY_LEVEL } from '../levels';
 import { PHONEME_CODE_TO_IPA } from '../phoneme-codes';
 import { align } from './aligner';
 import { generateBreakdown } from './engine';
 import type { AlignedGrapheme } from './aligner';
 import type { Breakdown } from './engine';
+import type { DraftLevel } from '../types';
 
 const BASE_PHONEME_IPA_OPTIONS = [
   ...new Set(Object.values(PHONEME_CODE_TO_IPA)),
 ].toSorted();
+
+const suggestLevel = (
+  chips: AlignedGrapheme[],
+): { level: DraftLevel; reason: string } => {
+  let best: { level: DraftLevel; grapheme: string } = {
+    level: 1,
+    grapheme: chips[0]?.g ?? '',
+  };
+  for (const chip of chips) {
+    for (const lvl of [1, 2, 3, 4, 5, 6, 7, 8] as const) {
+      const hit = GRAPHEMES_BY_LEVEL[lvl].find((u) => u.g === chip.g);
+      if (hit && lvl > best.level)
+        best = { level: lvl, grapheme: chip.g };
+    }
+  }
+  return { level: best.level, reason: best.grapheme };
+};
 
 export interface AuthoringPanelProps {
   open: boolean;
@@ -37,10 +56,16 @@ const useDebouncedBreakdown = (
   breakdown: Breakdown | null;
   chips: AlignedGrapheme[];
   setChips: SetChips;
+  ipa: string;
+  setIpa: (value: string) => void;
+  level: DraftLevel;
+  setLevel: (value: DraftLevel) => void;
   loading: boolean;
 } => {
   const [breakdown, setBreakdown] = useState<Breakdown | null>(null);
   const [chips, setChips] = useState<AlignedGrapheme[]>([]);
+  const [ipa, setIpa] = useState('');
+  const [level, setLevel] = useState<DraftLevel>(1);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -48,6 +73,8 @@ const useDebouncedBreakdown = (
     if (!trimmed) {
       setBreakdown(null);
       setChips([]);
+      setIpa('');
+      setLevel(1);
       return;
     }
     let ignore = false;
@@ -56,11 +83,15 @@ const useDebouncedBreakdown = (
       try {
         const b = await generateBreakdown(trimmed);
         if (!ignore) {
-          setBreakdown(b);
-          setChips(
+          const aligned =
             b.ritaKnown && b.phonemes.length > 0
               ? align(b.word, b.phonemes)
-              : [],
+              : [];
+          setBreakdown(b);
+          setChips(aligned);
+          setIpa(b.ipa);
+          setLevel(
+            aligned.length > 0 ? suggestLevel(aligned).level : 1,
           );
         }
       } finally {
@@ -73,7 +104,16 @@ const useDebouncedBreakdown = (
     };
   }, [word]);
 
-  return { breakdown, chips, setChips, loading };
+  return {
+    breakdown,
+    chips,
+    setChips,
+    ipa,
+    setIpa,
+    level,
+    setLevel,
+    loading,
+  };
 };
 
 export const AuthoringPanel = ({
@@ -88,9 +128,14 @@ export const AuthoringPanel = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [word, setWord] = useState(initialWord);
-  const { breakdown, chips, setChips } = useDebouncedBreakdown(word);
+  const { breakdown, chips, setChips, ipa, setIpa, level, setLevel } =
+    useDebouncedBreakdown(word);
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [variantsInput, setVariantsInput] = useState('');
+
+  const syllables = breakdown?.syllables ?? [];
+  const suggestion = chips.length > 0 ? suggestLevel(chips) : null;
 
   const phonemeIpaOptions = useMemo(
     () =>
@@ -247,9 +292,9 @@ export const AuthoringPanel = ({
                   }
                   className="rounded border px-2 py-1"
                 >
-                  {phonemeIpaOptions.map((ipa) => (
-                    <option key={ipa} value={ipa}>
-                      {ipa}
+                  {phonemeIpaOptions.map((ipaOption) => (
+                    <option key={ipaOption} value={ipaOption}>
+                      {ipaOption}
                     </option>
                   ))}
                 </select>
@@ -282,6 +327,60 @@ export const AuthoringPanel = ({
               </div>
             </div>
           )}
+          <label className="flex flex-col gap-1 text-sm font-medium">
+            IPA
+            <input
+              type="text"
+              value={ipa}
+              onChange={(e) => setIpa(e.target.value)}
+              className="rounded border px-3 py-2"
+            />
+          </label>
+          {syllables.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {syllables.map((s, i) => (
+                <span
+                  key={`${i}-${s}`}
+                  data-testid="syllable-chip"
+                  className="rounded border border-slate-300 bg-white px-2 py-1 text-sm"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
+          <label className="flex flex-col gap-1 text-sm font-medium">
+            Level
+            <select
+              value={level}
+              onChange={(e) =>
+                setLevel(Number(e.target.value) as DraftLevel)
+              }
+              className="rounded border px-2 py-1"
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                <option key={n} value={n}>
+                  Level {n}
+                </option>
+              ))}
+            </select>
+          </label>
+          {suggestion && (
+            <p className="text-xs text-slate-500">
+              suggested L{suggestion.level} — highest grapheme used:{' '}
+              {suggestion.reason}
+            </p>
+          )}
+          <label className="flex flex-col gap-1 text-sm font-medium">
+            Variants (optional, comma-separated)
+            <input
+              type="text"
+              value={variantsInput}
+              onChange={(e) => setVariantsInput(e.target.value)}
+              placeholder="e.g. putting, putts"
+              className="rounded border px-3 py-2"
+            />
+          </label>
         </div>
         <div className="mt-6 flex justify-end gap-2">
           <button
