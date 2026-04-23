@@ -165,6 +165,17 @@ describe('PhonemeBlender — zones', () => {
     expect(playhead.style.left).toBe('0%');
   });
 
+  it('prevents the native context menu so Android Chrome does not pop its download/share sheet on long-press', async () => {
+    render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
+    const track = await screen.findByRole('slider');
+    const evt = new Event('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+    });
+    track.dispatchEvent(evt);
+    expect(evt.defaultPrevented).toBe(true);
+  });
+
   it('moves the playhead to the scrub position on pointerdown', async () => {
     render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
     const track = await screen.findByRole('slider');
