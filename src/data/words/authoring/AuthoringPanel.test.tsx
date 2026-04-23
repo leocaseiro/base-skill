@@ -2,6 +2,7 @@ import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthoringPanel } from './AuthoringPanel';
+import { draftStore } from './draftStore';
 
 vi.mock('./engine', () => ({
   generateBreakdown: vi.fn(async (word: string) => ({
@@ -140,5 +141,59 @@ describe('AuthoringPanel IPA and syllables', () => {
     expect(
       screen.getByText(/suggested L\d — highest grapheme used: /i),
     ).toBeInTheDocument();
+  });
+});
+
+describe('AuthoringPanel save + duplicates', () => {
+  it('disables Save when the word collides with shipped data', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="an" />);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(
+      screen.getByRole('button', { name: /save draft/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByText(/already exists in shipped data/i),
+    ).toBeInTheDocument();
+  });
+
+  it('saves a draft and calls onSaved', async () => {
+    await draftStore.__clearAllForTests();
+    const onSaved = vi.fn();
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord="zzword"
+        onSaved={onSaved}
+      />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Fill IPA manually since rita doesn't know zzword
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /IPA/i }),
+      'zwɜːd',
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /save draft/i }),
+    );
+    expect(onSaved).toHaveBeenCalled();
+    const list = await draftStore.listDrafts({ region: 'aus' });
+    expect(list.map((d) => d.word)).toContain('zzword');
+  });
+
+  it('prompts to confirm on ESC when the form is dirty', async () => {
+    const confirmSpy = vi
+      .spyOn(globalThis, 'confirm')
+      .mockReturnValue(false);
+    const onClose = vi.fn();
+    render(<AuthoringPanel open onClose={onClose} initialWord="" />);
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /word/i }),
+      'zz',
+    );
+    await userEvent.keyboard('{Escape}');
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+    confirmSpy.mockRestore();
   });
 });

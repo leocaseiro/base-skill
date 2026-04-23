@@ -6,9 +6,11 @@ import {
   useRef,
   useState,
 } from 'react';
+import { loadShippedIndex } from '../filter';
 import { GRAPHEMES_BY_LEVEL } from '../levels';
 import { PHONEME_CODE_TO_IPA } from '../phoneme-codes';
 import { align } from './aligner';
+import { draftStore } from './draftStore';
 import { generateBreakdown } from './engine';
 import type { AlignedGrapheme } from './aligner';
 import type { Breakdown } from './engine';
@@ -120,7 +122,7 @@ export const AuthoringPanel = ({
   open,
   onClose,
   initialWord,
-  onSaved: _onSaved,
+  onSaved,
 }: AuthoringPanelProps) => {
   const titleId = useId();
   const wordInputId = useId();
@@ -133,6 +135,20 @@ export const AuthoringPanel = ({
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [variantsInput, setVariantsInput] = useState('');
+  const [shippedSet, setShippedSet] = useState<Set<string>>(new Set());
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    let ignore = false;
+    void loadShippedIndex('aus').then((set) => {
+      if (!ignore) setShippedSet(set);
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [open]);
 
   const syllables = breakdown?.syllables ?? [];
   const suggestion = chips.length > 0 ? suggestLevel(chips) : null;
@@ -154,6 +170,7 @@ export const AuthoringPanel = ({
       next[i] = { ...next[i], ...patch };
       return next;
     });
+    setDirty(true);
   };
 
   const extendChip = (i: number) => {
@@ -166,6 +183,7 @@ export const AuthoringPanel = ({
       next[i + 1] = { ...nextChip, g: nextChip.g.slice(1) };
       return next;
     });
+    setDirty(true);
   };
 
   const shrinkChip = (i: number) => {
@@ -180,13 +198,54 @@ export const AuthoringPanel = ({
       next[i + 1] = { ...nextChip, g: moved + nextChip.g };
       return next;
     });
+    setDirty(true);
   };
+
+  const handleSave = useCallback(async () => {
+    const trimmed = word.trim().toLowerCase();
+    const variants = variantsInput
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    setSaving(true);
+    try {
+      await draftStore.saveDraft({
+        word: trimmed,
+        region: 'aus',
+        level,
+        ipa,
+        syllables: breakdown?.syllables ?? [trimmed],
+        syllableCount: (breakdown?.syllables ?? [trimmed]).length,
+        graphemes: chips.map(({ confidence: _c, ...rest }) => rest),
+        ...(variants.length > 0 ? { variants } : {}),
+        ritaKnown: breakdown?.ritaKnown ?? false,
+      });
+      onSaved?.();
+      onClose();
+    } finally {
+      setSaving(false);
+    }
+  }, [
+    word,
+    variantsInput,
+    level,
+    ipa,
+    breakdown,
+    chips,
+    onSaved,
+    onClose,
+  ]);
+
+  const closeWithConfirm = useCallback(() => {
+    if (dirty && !globalThis.confirm('Discard this draft?')) return;
+    onClose();
+  }, [dirty, onClose]);
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') closeWithConfirm();
     },
-    [onClose],
+    [closeWithConfirm],
   );
 
   useEffect(() => {
@@ -237,6 +296,7 @@ export const AuthoringPanel = ({
               onChange={(e) => {
                 setWord(e.target.value);
                 setEditingIndex(null);
+                setDirty(true);
               }}
               className="rounded border px-3 py-2"
             />
@@ -332,7 +392,10 @@ export const AuthoringPanel = ({
             <input
               type="text"
               value={ipa}
-              onChange={(e) => setIpa(e.target.value)}
+              onChange={(e) => {
+                setIpa(e.target.value);
+                setDirty(true);
+              }}
               className="rounded border px-3 py-2"
             />
           </label>
@@ -353,9 +416,10 @@ export const AuthoringPanel = ({
             Level
             <select
               value={level}
-              onChange={(e) =>
-                setLevel(Number(e.target.value) as DraftLevel)
-              }
+              onChange={(e) => {
+                setLevel(Number(e.target.value) as DraftLevel);
+                setDirty(true);
+              }}
               className="rounded border px-2 py-1"
             >
               {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
@@ -376,27 +440,46 @@ export const AuthoringPanel = ({
             <input
               type="text"
               value={variantsInput}
-              onChange={(e) => setVariantsInput(e.target.value)}
+              onChange={(e) => {
+                setVariantsInput(e.target.value);
+                setDirty(true);
+              }}
               placeholder="e.g. putting, putts"
               className="rounded border px-3 py-2"
             />
           </label>
         </div>
-        <div className="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            className="rounded px-4 py-2 text-slate-700 hover:bg-slate-100"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            disabled
-            className="rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-50"
-          >
-            Save draft
-          </button>
+        <div className="mt-6 flex flex-col gap-2">
+          {shippedSet.has(word.trim().toLowerCase()) && (
+            <p className="text-xs text-rose-600">
+              &quot;{word.trim()}&quot; already exists in shipped data —
+              open that entry instead.
+            </p>
+          )}
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              className="rounded px-4 py-2 text-slate-700 hover:bg-slate-100"
+              onClick={closeWithConfirm}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={
+                saving ||
+                !word.trim() ||
+                !ipa.trim() ||
+                shippedSet.has(word.trim().toLowerCase())
+              }
+              onClick={() => {
+                void handleSave();
+              }}
+              className="rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-50"
+            >
+              Save draft
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -174,6 +174,13 @@ const joinHits = (
 const sortByWord = (hits: WordHit[]): WordHit[] =>
   hits.toSorted((a, b) => a.word.localeCompare(b.word));
 
+export const loadShippedIndex = async (
+  region: Region,
+): Promise<Set<string>> => {
+  const curriculum = await loadCurriculum(region);
+  return new Set(curriculum.map((entry) => entry.word));
+};
+
 export const filterWords = async (
   filter: WordFilter,
 ): Promise<FilterResult> => {
