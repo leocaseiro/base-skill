@@ -189,7 +189,10 @@ export const AuthoringPanel = ({
               id={wordInputId}
               type="text"
               value={word}
-              onChange={(e) => setWord(e.target.value)}
+              onChange={(e) => {
+                setWord(e.target.value);
+                setEditingIndex(null);
+              }}
               className="rounded border px-3 py-2"
             />
           </div>
@@ -254,13 +257,25 @@ export const AuthoringPanel = ({
               <div className="mt-2 flex gap-1">
                 <button
                   type="button"
+                  aria-label="Shrink grapheme"
+                  disabled={
+                    chips[editingIndex].g.length < 2 ||
+                    !chips[editingIndex + 1]
+                  }
                   onClick={() => shrinkChip(editingIndex)}
+                  className="rounded border px-2 py-1 text-sm disabled:opacity-50"
                 >
                   −
                 </button>
                 <button
                   type="button"
+                  aria-label="Extend grapheme"
+                  disabled={
+                    !chips[editingIndex + 1] ||
+                    chips[editingIndex + 1].g.length < 2
+                  }
                   onClick={() => extendChip(editingIndex)}
+                  className="rounded border px-2 py-1 text-sm disabled:opacity-50"
                 >
                   +
                 </button>
