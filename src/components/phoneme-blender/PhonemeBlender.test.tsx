@@ -195,7 +195,9 @@ describe('PhonemeBlender — zones', () => {
 });
 
 describe('PhonemeBlender — scrub', () => {
-  it('fires playPhoneme with sustain=true when pointer enters a loopable zone', async () => {
+  it('fires playPhoneme one-shot (no sustain) when pointer enters a zone', async () => {
+    // Loops were disabled after learners/testers reported "a,a,a,a" stuck
+    // playback on iOS. Every zone — loopable or not — now fires once.
     render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
     const track = await screen.findByRole('slider');
     await waitFor(() =>
@@ -210,9 +212,10 @@ describe('PhonemeBlender — scrub', () => {
       ).setPointerCapture = () => {};
     }
     firePointer(track, 'pointerdown', 300);
-    await waitFor(() =>
-      expect(playPhoneme).toHaveBeenCalledWith('ʊ', { sustain: true }),
-    );
+    await waitFor(() => expect(playPhoneme).toHaveBeenCalledWith('ʊ'));
+    expect(playPhoneme).not.toHaveBeenCalledWith('ʊ', {
+      sustain: true,
+    });
     expect(track.getAttribute('aria-valuenow')).toBe('300');
     expect(screen.getByTestId('letter-1').className).toContain(
       'text-foreground',
@@ -284,10 +287,11 @@ describe('PhonemeBlender — scrub', () => {
     });
   });
 
-  it('stops the sustained loop and re-fires the stop phoneme when re-entering', async () => {
+  it('stops the previous phoneme and re-fires when re-entering a zone across a loopable', async () => {
     // Bug report: drag loopable → stop → loopable → stop (same stop zone).
-    // On the second visit to the stop zone, the loopable's sustain must stop
-    // AND the stop phoneme must re-fire.
+    // On the second visit to the stop zone, the previous phoneme must stop
+    // AND the stop phoneme must re-fire. Since loops were disabled this
+    // regression test still guards the "re-entry" contract.
     render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
     const track = await screen.findByRole('slider');
     await waitFor(() =>
@@ -298,9 +302,9 @@ describe('PhonemeBlender — scrub', () => {
       track as HTMLElement & { setPointerCapture: (id: number) => void }
     ).setPointerCapture = () => {};
     // u (loopable, 200-600) → tt (stop, 600-900) → u → tt
-    firePointer(track, 'pointerdown', 300); // u loop starts
-    firePointer(track, 'pointermove', 750); // tt fires once
-    firePointer(track, 'pointermove', 300); // u loop restarts
+    firePointer(track, 'pointerdown', 300);
+    firePointer(track, 'pointermove', 750);
+    firePointer(track, 'pointermove', 300);
     vi.mocked(stopPhoneme).mockClear();
     vi.mocked(playPhoneme).mockClear();
     firePointer(track, 'pointermove', 750); // tt re-entry
@@ -408,9 +412,7 @@ describe('PhonemeBlender — keyboard', () => {
     );
     track.focus();
     fireEvent.keyDown(track, { key: 'End' });
-    await waitFor(() =>
-      expect(playPhoneme).toHaveBeenCalledWith('ɪŋ', { sustain: true }),
-    );
+    await waitFor(() => expect(playPhoneme).toHaveBeenCalledWith('ɪŋ'));
   });
 
   it('Space toggles auto-play', async () => {
