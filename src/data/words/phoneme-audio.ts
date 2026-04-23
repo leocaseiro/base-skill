@@ -148,6 +148,15 @@ export const stopPhoneme = (): void => {
   stopCurrent();
 };
 
+/**
+ * Returns the cached phoneme sprite manifest, triggering the fetch on
+ * first call. Consumers that only need durations / loopable flags (not
+ * the decoded audio buffer) can use this without forcing the much
+ * heavier mp3 decode.
+ */
+export const getPhonemeSprite = (): Promise<PhonemeSprite> =>
+  loadSprite();
+
 export const __resetPhonemeAudioForTests = (): void => {
   stopCurrent();
   removeAutoStopGuards();
