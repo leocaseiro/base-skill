@@ -17,6 +17,12 @@ let audioCtx: AudioContext | null = null;
 let bufferPromise: Promise<AudioBuffer> | null = null;
 let spritePromise: Promise<PhonemeSprite> | null = null;
 let currentSource: AudioBufferSourceNode | null = null;
+// Incremented on every playPhoneme/stopPhoneme call. Used to abort a
+// pending playPhoneme whose sprite/buffer load is still in flight when
+// stopPhoneme (or another playPhoneme) arrives — otherwise the late
+// resolution would start a loop that nothing is left to stop. Observed
+// on Android where sprite decode is slower than a finger-lift.
+let playGeneration = 0;
 let guardsInstalled = false;
 let onVisibilityChange: (() => void) | null = null;
 let onBlur: (() => void) | null = null;
@@ -98,6 +104,8 @@ export const playPhoneme = async (
   opts: { sustain?: boolean } = {},
 ): Promise<void> => {
   installAutoStopGuards();
+  playGeneration += 1;
+  const myGeneration = playGeneration;
   let sprite: PhonemeSprite;
   let buffer: AudioBuffer;
   try {
@@ -105,6 +113,7 @@ export const playPhoneme = async (
   } catch {
     return;
   }
+  if (playGeneration !== myGeneration) return;
   const entry = sprite[ipa];
   if (!entry) return;
 
@@ -145,6 +154,7 @@ export const playPhoneme = async (
 };
 
 export const stopPhoneme = (): void => {
+  playGeneration += 1;
   stopCurrent();
 };
 
@@ -163,6 +173,7 @@ export const __resetPhonemeAudioForTests = (): void => {
   audioCtx = null;
   bufferPromise = null;
   spritePromise = null;
+  playGeneration = 0;
 };
 
 if (import.meta.env.DEV) {

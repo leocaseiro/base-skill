@@ -169,6 +169,30 @@ describe('stopPhoneme', () => {
   it('is a no-op when nothing is playing', () => {
     expect(() => stopPhoneme()).not.toThrow();
   });
+
+  it('aborts an in-flight playPhoneme whose buffer load resolves after stopPhoneme', async () => {
+    // Regression: on Android the sprite decode is slow enough that a
+    // finger-lift fires stopPhoneme() before playPhoneme's await resolves.
+    // Without generation-guarding the late resolution would start a
+    // loopable source that nothing is left to stop → `a,a,a,a` forever.
+    let resolveDecode: ((buf: AudioBuffer) => void) | null = null;
+    ctx.decodeAudioData = vi.fn(
+      () =>
+        new Promise<AudioBuffer>((resolve) => {
+          resolveDecode = resolve;
+        }),
+    );
+    __resetPhonemeAudioForTests();
+    const playPromise = playPhoneme('n', { sustain: true });
+    // Let the fetch chain reach ctx.decodeAudioData so resolveDecode is bound.
+    await vi.waitFor(() =>
+      expect(ctx.decodeAudioData).toHaveBeenCalled(),
+    );
+    stopPhoneme();
+    resolveDecode!({} as AudioBuffer);
+    await playPromise;
+    expect(sources).toHaveLength(0);
+  });
 });
 
 describe('auto-stop guards', () => {
