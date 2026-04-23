@@ -6,7 +6,10 @@ import {
   useState,
 } from 'react';
 import { usePhonemeSprite } from './usePhonemeSprite';
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import type {
+  KeyboardEvent as ReactKeyboardEvent,
+  PointerEvent as ReactPointerEvent,
+} from 'react';
 import { playPhoneme, stopPhoneme } from '#/data/words/phoneme-audio';
 import { cn } from '#/lib/utils';
 
@@ -212,6 +215,54 @@ export const PhonemeBlender = ({
     stopPhoneme();
   };
 
+  const stepToZone = (zone: ResolvedZone) => {
+    firedStops.current.delete(zone.index);
+    setPositionMs(zone.startMs);
+    enterZone(zone);
+  };
+
+  const onKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (zones.length === 0) return;
+    const current = activeIndex ?? -1;
+    switch (e.key) {
+      case 'ArrowRight':
+      case 'ArrowDown': {
+        e.preventDefault();
+        stepToZone(zones[Math.min(zones.length - 1, current + 1)]!);
+        break;
+      }
+      case 'ArrowLeft':
+      case 'ArrowUp': {
+        e.preventDefault();
+        stepToZone(zones[Math.max(0, current - 1)]!);
+        break;
+      }
+      case 'Home': {
+        e.preventDefault();
+        stepToZone(zones[0]!);
+        break;
+      }
+      case 'End': {
+        e.preventDefault();
+        stepToZone(zones.at(-1)!);
+        break;
+      }
+      case ' ':
+      case 'Enter': {
+        e.preventDefault();
+        if (playing) {
+          stopAutoPlay();
+        } else {
+          startAutoPlay();
+        }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  };
+
   return (
     <div
       data-word={word}
@@ -262,6 +313,7 @@ export const PhonemeBlender = ({
         onPointerLeave={() => {
           if (dragging) endDrag();
         }}
+        onKeyDown={onKeyDown}
         className="relative flex h-10 w-full touch-none overflow-hidden rounded-xl border border-foreground/20"
       >
         {zones.map((z) => (
