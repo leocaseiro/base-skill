@@ -28,6 +28,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '#/components/ui/select';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '#/components/ui/sheet';
 import { speak } from '#/lib/speech/SpeechOutput';
 import { cn } from '#/lib/utils';
 
@@ -401,6 +408,116 @@ const updateLevels = (
   return [...set].toSorted((a, b) => a - b);
 };
 
+interface FiltersPanelProps {
+  wordPrefix: string;
+  setWordPrefix: (v: string) => void;
+  filter: WordFilter;
+  setFilter: React.Dispatch<React.SetStateAction<WordFilter>>;
+  syllableMode: SyllableMode;
+  setSyllableMode: (mode: SyllableMode) => void;
+  graphemePairs: readonly GraphemePair[];
+  setGraphemePairs: React.Dispatch<
+    React.SetStateAction<GraphemePair[]>
+  >;
+  pairOptions: readonly GraphemePair[];
+  graphemeOptions: readonly string[];
+  phonemeOptions: readonly string[];
+}
+
+const FiltersPanel = ({
+  wordPrefix,
+  setWordPrefix,
+  filter,
+  setFilter,
+  syllableMode,
+  setSyllableMode,
+  graphemePairs,
+  setGraphemePairs,
+  pairOptions,
+  graphemeOptions,
+  phonemeOptions,
+}: FiltersPanelProps) => {
+  const setLevels = (levels: number[]) => {
+    setFilter((f) => ({
+      ...f,
+      levels: levels.length > 0 ? levels : undefined,
+    }));
+  };
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Filters</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <WordSearchField value={wordPrefix} onChange={setWordPrefix} />
+        <RegionField />
+        <LevelsField
+          selected={filter.levels}
+          onToggle={(level) =>
+            setLevels(updateLevels(filter.levels, level))
+          }
+          onClear={() => setLevels([])}
+          range={filter.levelRange}
+          onRangeChange={(next) =>
+            setFilter((f) => ({ ...f, levelRange: next }))
+          }
+        />
+        <SyllablesField
+          mode={syllableMode}
+          onModeChange={setSyllableMode}
+          eq={filter.syllableCountEq}
+          range={filter.syllableCountRange}
+          onEq={(n) => setFilter((f) => ({ ...f, syllableCountEq: n }))}
+          onRange={(r) =>
+            setFilter((f) => ({ ...f, syllableCountRange: r }))
+          }
+        />
+        <FallbackField
+          checked={filter.fallbackToAus !== false}
+          onChange={(v) =>
+            setFilter((f) => ({ ...f, fallbackToAus: v }))
+          }
+        />
+        <AdvancedSection
+          pairOptions={pairOptions}
+          graphemeOptions={graphemeOptions}
+          phonemeOptions={phonemeOptions}
+          graphemePairs={graphemePairs}
+          onGraphemePairsChange={setGraphemePairs}
+          graphemesAllowed={filter.graphemesAllowed ?? []}
+          onGraphemesAllowedChange={(next) =>
+            setFilter((f) => ({
+              ...f,
+              graphemesAllowed: next.length > 0 ? next : undefined,
+            }))
+          }
+          graphemesRequired={filter.graphemesRequired ?? []}
+          onGraphemesRequiredChange={(next) =>
+            setFilter((f) => ({
+              ...f,
+              graphemesRequired: next.length > 0 ? next : undefined,
+            }))
+          }
+          phonemesAllowed={filter.phonemesAllowed ?? []}
+          onPhonemesAllowedChange={(next) =>
+            setFilter((f) => ({
+              ...f,
+              phonemesAllowed: next.length > 0 ? next : undefined,
+            }))
+          }
+          phonemesRequired={filter.phonemesRequired ?? []}
+          onPhonemesRequiredChange={(next) =>
+            setFilter((f) => ({
+              ...f,
+              phonemesRequired: next.length > 0 ? next : undefined,
+            }))
+          }
+        />
+      </CardContent>
+    </Card>
+  );
+};
+
 export const WordLibraryExplorer = () => {
   const [filter, setFilter] = useState<WordFilter>({
     region: 'aus',
@@ -487,13 +604,6 @@ export const WordLibraryExplorer = () => {
     matched === 0 ? 0 : (effectivePage - 1) * pageSize + 1;
   const rangeEnd = Math.min(matched, effectivePage * pageSize);
 
-  const setLevels = (levels: number[]) => {
-    setFilter((f) => ({
-      ...f,
-      levels: levels.length > 0 ? levels : undefined,
-    }));
-  };
-
   const setSyllables = (mode: SyllableMode) => {
     setSyllableMode(mode);
     setFilter((f) => ({
@@ -522,86 +632,56 @@ export const WordLibraryExplorer = () => {
     setFilter((f) => ({ ...f, [clearKey]: undefined }));
   };
 
+  const filtersPanelProps: FiltersPanelProps = {
+    wordPrefix,
+    setWordPrefix,
+    filter,
+    setFilter,
+    syllableMode,
+    setSyllableMode: setSyllables,
+    graphemePairs,
+    setGraphemePairs,
+    pairOptions,
+    graphemeOptions,
+    phonemeOptions,
+  };
+
   return (
     <div className="flex min-h-screen flex-col gap-4 bg-background p-4 text-foreground md:flex-row">
-      <aside className="flex w-full shrink-0 flex-col gap-4 md:w-80">
-        <Card>
-          <CardHeader>
-            <CardTitle>Filters</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <WordSearchField
-              value={wordPrefix}
-              onChange={setWordPrefix}
-            />
-            <RegionField />
-            <LevelsField
-              selected={filter.levels}
-              onToggle={(level) =>
-                setLevels(updateLevels(filter.levels, level))
-              }
-              onClear={() => setLevels([])}
-              range={filter.levelRange}
-              onRangeChange={(next) =>
-                setFilter((f) => ({ ...f, levelRange: next }))
-              }
-            />
-            <SyllablesField
-              mode={syllableMode}
-              onModeChange={setSyllables}
-              eq={filter.syllableCountEq}
-              range={filter.syllableCountRange}
-              onEq={(n) =>
-                setFilter((f) => ({ ...f, syllableCountEq: n }))
-              }
-              onRange={(r) =>
-                setFilter((f) => ({ ...f, syllableCountRange: r }))
-              }
-            />
-            <FallbackField
-              checked={filter.fallbackToAus !== false}
-              onChange={(v) =>
-                setFilter((f) => ({ ...f, fallbackToAus: v }))
-              }
-            />
-            <AdvancedSection
-              pairOptions={pairOptions}
-              graphemeOptions={graphemeOptions}
-              phonemeOptions={phonemeOptions}
-              graphemePairs={graphemePairs}
-              onGraphemePairsChange={setGraphemePairs}
-              graphemesAllowed={filter.graphemesAllowed ?? []}
-              onGraphemesAllowedChange={(next) =>
-                setFilter((f) => ({
-                  ...f,
-                  graphemesAllowed: next.length > 0 ? next : undefined,
-                }))
-              }
-              graphemesRequired={filter.graphemesRequired ?? []}
-              onGraphemesRequiredChange={(next) =>
-                setFilter((f) => ({
-                  ...f,
-                  graphemesRequired: next.length > 0 ? next : undefined,
-                }))
-              }
-              phonemesAllowed={filter.phonemesAllowed ?? []}
-              onPhonemesAllowedChange={(next) =>
-                setFilter((f) => ({
-                  ...f,
-                  phonemesAllowed: next.length > 0 ? next : undefined,
-                }))
-              }
-              phonemesRequired={filter.phonemesRequired ?? []}
-              onPhonemesRequiredChange={(next) =>
-                setFilter((f) => ({
-                  ...f,
-                  phonemesRequired: next.length > 0 ? next : undefined,
-                }))
-              }
-            />
-          </CardContent>
-        </Card>
+      <aside className="hidden w-full shrink-0 flex-col gap-4 md:flex md:w-80">
+        <FiltersPanel {...filtersPanelProps} />
       </aside>
+      <div className="flex items-center justify-between gap-2 md:hidden">
+        <h1 className="text-lg font-semibold">Word Library</h1>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-label="Open filters"
+            >
+              ⚙️
+              {pills.length > 0 ? (
+                <span className="ms-1 inline-flex size-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                  {pills.length}
+                </span>
+              ) : null}
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            side="bottom"
+            className="max-h-[85dvh] overflow-y-auto"
+          >
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+            </SheetHeader>
+            <div className="p-4">
+              <FiltersPanel {...filtersPanelProps} />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
       <main className="flex flex-1 flex-col gap-4">
         {pills.length > 0 ? (
           <div
