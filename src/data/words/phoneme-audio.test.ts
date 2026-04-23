@@ -170,3 +170,102 @@ describe('stopPhoneme', () => {
     expect(() => stopPhoneme()).not.toThrow();
   });
 });
+
+describe('auto-stop guards', () => {
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+
+  interface FakeEventTarget {
+    addEventListener: ReturnType<typeof vi.fn>;
+    removeEventListener: ReturnType<typeof vi.fn>;
+    dispatch: (type: string) => void;
+    _listeners: Map<string, Set<() => void>>;
+  }
+
+  const makeTarget = (): FakeEventTarget => {
+    const listeners = new Map<string, Set<() => void>>();
+    return {
+      _listeners: listeners,
+      addEventListener: vi.fn((type: string, fn: () => void) => {
+        if (!listeners.has(type)) listeners.set(type, new Set());
+        listeners.get(type)!.add(fn);
+      }),
+      removeEventListener: vi.fn((type: string, fn: () => void) => {
+        listeners.get(type)?.delete(fn);
+      }),
+      dispatch: (type: string) => {
+        for (const fn of listeners.get(type) ?? []) fn();
+      },
+    };
+  };
+
+  let fakeDoc: FakeEventTarget & { hidden: boolean };
+  let fakeWin: FakeEventTarget;
+
+  beforeEach(() => {
+    fakeDoc = Object.assign(makeTarget(), { hidden: false });
+    fakeWin = makeTarget();
+    vi.stubGlobal('document', fakeDoc);
+    vi.stubGlobal('window', fakeWin);
+  });
+
+  afterEach(() => {
+    vi.stubGlobal('document', originalDocument);
+    vi.stubGlobal('window', originalWindow);
+  });
+
+  it('stops playback when the document becomes hidden', async () => {
+    await playPhoneme('n', { sustain: true });
+    expect(sources[0]!.stop).not.toHaveBeenCalled();
+    fakeDoc.hidden = true;
+    fakeDoc.dispatch('visibilitychange');
+    expect(sources[0]!.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not stop on visibilitychange when the document is still visible', async () => {
+    await playPhoneme('n', { sustain: true });
+    fakeDoc.hidden = false;
+    fakeDoc.dispatch('visibilitychange');
+    expect(sources[0]!.stop).not.toHaveBeenCalled();
+  });
+
+  it('stops playback when the window blurs', async () => {
+    await playPhoneme('n', { sustain: true });
+    fakeWin.dispatch('blur');
+    expect(sources[0]!.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops playback on pagehide (iOS Safari backgrounding)', async () => {
+    await playPhoneme('n', { sustain: true });
+    fakeWin.dispatch('pagehide');
+    expect(sources[0]!.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('installs listeners only once across multiple playPhoneme calls', async () => {
+    await playPhoneme('k');
+    await playPhoneme('n', { sustain: true });
+    await playPhoneme('ʃ');
+    expect(fakeDoc.addEventListener).toHaveBeenCalledTimes(1);
+    // blur + pagehide → two listeners on window
+    expect(fakeWin.addEventListener).toHaveBeenCalledTimes(2);
+  });
+
+  it('__resetPhonemeAudioForTests removes listeners and allows re-installation', async () => {
+    await playPhoneme('k');
+    __resetPhonemeAudioForTests();
+    expect(fakeDoc.removeEventListener).toHaveBeenCalledWith(
+      'visibilitychange',
+      expect.any(Function),
+    );
+    expect(fakeWin.removeEventListener).toHaveBeenCalledWith(
+      'blur',
+      expect.any(Function),
+    );
+    expect(fakeWin.removeEventListener).toHaveBeenCalledWith(
+      'pagehide',
+      expect.any(Function),
+    );
+    await playPhoneme('k');
+    expect(fakeDoc.addEventListener).toHaveBeenCalledTimes(2);
+  });
+});
