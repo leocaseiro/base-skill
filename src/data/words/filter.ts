@@ -151,6 +151,7 @@ const joinHits = (
         variants: c.variants,
         ipa: entry.ipa || undefined,
         graphemes: entry.graphemes,
+        provenance: 'shipped',
       } as WordHit,
     ];
   });

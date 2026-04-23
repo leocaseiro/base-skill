@@ -16,6 +16,7 @@ const hit = (overrides: Partial<WordHit> = {}): WordHit => ({
     { g: 'a', p: 'æ' },
     { g: 't', p: 't' },
   ],
+  provenance: 'shipped',
   ...overrides,
 });
 
@@ -109,6 +110,7 @@ describe('entryMatches', () => {
         { g: 't', p: 't' },
         { g: 'y', p: 'i' },
       ],
+      provenance: 'shipped',
     };
     expect(
       entryMatches(city, {
@@ -125,6 +127,7 @@ describe('entryMatches', () => {
       region: 'aus',
       level: 2,
       syllableCount: 1,
+      provenance: 'shipped',
       // no graphemes
     };
     expect(

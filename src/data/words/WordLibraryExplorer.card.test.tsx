@@ -25,6 +25,7 @@ const putting: WordHit = {
     { g: 'tt', p: 't' },
     { g: 'ing', p: 'ɪŋ' },
   ],
+  provenance: 'shipped',
 };
 
 beforeEach(() => {

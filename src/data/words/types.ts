@@ -22,6 +22,25 @@ export interface CurriculumEntry {
   graphemes: Grapheme[];
 }
 
+export type Provenance = 'shipped' | 'draft';
+
+export type DraftLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+export interface DraftEntry {
+  id: string;
+  word: string;
+  region: 'aus';
+  level: DraftLevel;
+  ipa: string;
+  syllables: string[];
+  syllableCount: number;
+  graphemes: Grapheme[];
+  variants?: string[];
+  ritaKnown: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface WordHit {
   word: string;
   region: Region;
@@ -31,6 +50,8 @@ export interface WordHit {
   variants?: string[];
   ipa?: string;
   graphemes?: Grapheme[];
+  provenance: Provenance;
+  draftId?: string;
 }
 
 export interface WordFilter {

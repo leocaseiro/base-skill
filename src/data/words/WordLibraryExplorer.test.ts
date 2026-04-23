@@ -19,6 +19,7 @@ const cat: WordHit = {
     { g: 'a', p: 'æ' },
     { g: 't', p: 't' },
   ],
+  provenance: 'shipped',
 };
 
 const cell: WordHit = {
@@ -32,6 +33,7 @@ const cell: WordHit = {
     { g: 'l', p: 'l' },
     { g: 'l', p: 'l' },
   ],
+  provenance: 'shipped',
 };
 
 const noGraphemes: WordHit = {
@@ -39,6 +41,7 @@ const noGraphemes: WordHit = {
   region: 'aus',
   level: 5,
   syllableCount: 3,
+  provenance: 'shipped',
 };
 
 describe('collectGraphemePairs', () => {
