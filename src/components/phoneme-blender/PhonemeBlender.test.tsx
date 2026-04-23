@@ -1,4 +1,10 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import {
   afterEach,
   beforeEach,
@@ -291,5 +297,47 @@ describe('PhonemeBlender — auto-play', () => {
       screen.getByRole('button', { name: /^play /i }),
     ).toBeInTheDocument();
     vi.useRealTimers();
+  });
+});
+
+describe('PhonemeBlender — keyboard', () => {
+  it('ArrowRight steps to the next zone and fires its phoneme', async () => {
+    render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
+    const track = await screen.findByRole('slider');
+    await waitFor(() =>
+      expect(track.getAttribute('aria-valuemax')).toBe('1400'),
+    );
+    track.focus();
+    fireEvent.keyDown(track, { key: 'ArrowRight' });
+    await waitFor(() => {
+      const calls = vi.mocked(playPhoneme).mock.calls.map((c) => c[0]);
+      expect(calls).toContain('p');
+    });
+  });
+
+  it('End jumps to the last zone and fires its phoneme', async () => {
+    render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
+    const track = await screen.findByRole('slider');
+    await waitFor(() =>
+      expect(track.getAttribute('aria-valuemax')).toBe('1400'),
+    );
+    track.focus();
+    fireEvent.keyDown(track, { key: 'End' });
+    await waitFor(() =>
+      expect(playPhoneme).toHaveBeenCalledWith('ɪŋ', { sustain: true }),
+    );
+  });
+
+  it('Space toggles auto-play', async () => {
+    render(<PhonemeBlender word="putting" graphemes={PUTTING} />);
+    const track = await screen.findByRole('slider');
+    await waitFor(() =>
+      expect(track.getAttribute('aria-valuemax')).toBe('1400'),
+    );
+    track.focus();
+    fireEvent.keyDown(track, { key: ' ' });
+    expect(
+      screen.getByRole('button', { name: /^pause/i }),
+    ).toBeInTheDocument();
   });
 });
