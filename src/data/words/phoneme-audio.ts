@@ -17,6 +17,10 @@ let audioCtx: AudioContext | null = null;
 let bufferPromise: Promise<AudioBuffer> | null = null;
 let spritePromise: Promise<PhonemeSprite> | null = null;
 let currentSource: AudioBufferSourceNode | null = null;
+let guardsInstalled = false;
+let onVisibilityChange: (() => void) | null = null;
+let onBlur: (() => void) | null = null;
+let onPagehide: (() => void) | null = null;
 
 const getContext = (): AudioContext => {
   audioCtx ??= new AudioContext();
@@ -51,6 +55,38 @@ const stopCurrent = (): void => {
   currentSource = null;
 };
 
+// Stop playback when the tab is hidden, the window blurs, or the page is
+// being dismissed. Without these guards a sustained loop keeps playing after
+// cmd+tab on desktop or when the user backgrounds the PWA on iOS Safari.
+const installAutoStopGuards = (): void => {
+  if (guardsInstalled) return;
+  onVisibilityChange = () => {
+    if (document.hidden) stopCurrent();
+  };
+  onBlur = () => stopCurrent();
+  onPagehide = () => stopCurrent();
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  window.addEventListener('blur', onBlur);
+  window.addEventListener('pagehide', onPagehide);
+  guardsInstalled = true;
+};
+
+const removeAutoStopGuards = (): void => {
+  if (!guardsInstalled) return;
+  if (onVisibilityChange) {
+    document.removeEventListener(
+      'visibilitychange',
+      onVisibilityChange,
+    );
+  }
+  if (onBlur) window.removeEventListener('blur', onBlur);
+  if (onPagehide) window.removeEventListener('pagehide', onPagehide);
+  onVisibilityChange = null;
+  onBlur = null;
+  onPagehide = null;
+  guardsInstalled = false;
+};
+
 /**
  * Plays a single phoneme clip from the audio sprite. When `opts.sustain`
  * is true and the phoneme is marked loopable in the manifest, the clip
@@ -61,6 +97,7 @@ export const playPhoneme = async (
   ipa: string,
   opts: { sustain?: boolean } = {},
 ): Promise<void> => {
+  installAutoStopGuards();
   let sprite: PhonemeSprite;
   let buffer: AudioBuffer;
   try {
@@ -111,9 +148,29 @@ export const stopPhoneme = (): void => {
   stopCurrent();
 };
 
+/**
+ * Returns the cached phoneme sprite manifest, triggering the fetch on
+ * first call. Consumers that only need durations / loopable flags (not
+ * the decoded audio buffer) can use this without forcing the much
+ * heavier mp3 decode.
+ */
+export const getPhonemeSprite = (): Promise<PhonemeSprite> =>
+  loadSprite();
+
 export const __resetPhonemeAudioForTests = (): void => {
   stopCurrent();
+  removeAutoStopGuards();
   audioCtx = null;
   bufferPromise = null;
   spritePromise = null;
 };
+
+if (import.meta.env.DEV) {
+  (
+    globalThis as unknown as { __phonemeAudioState?: unknown }
+  ).__phonemeAudioState = {
+    get currentSource() {
+      return currentSource;
+    },
+  };
+}
