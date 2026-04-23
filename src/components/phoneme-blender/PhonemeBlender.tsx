@@ -285,7 +285,7 @@ export const PhonemeBlender = ({
                   ? 'text-foreground'
                   : isPassed
                     ? 'text-purple-700'
-                    : 'text-purple-200',
+                    : 'text-neutral-600',
               )}
             >
               {z.g}

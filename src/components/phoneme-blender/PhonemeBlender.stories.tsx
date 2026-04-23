@@ -53,6 +53,6 @@ export const Level4: Story = {
 export const LandscapePhone: Story = {
   args: { word: 'putting', graphemes: putting },
   parameters: {
-    viewport: { defaultViewport: 'mobile2' },
+    viewport: { defaultViewport: 'mobileLg' },
   },
 };
