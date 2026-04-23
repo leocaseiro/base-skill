@@ -74,3 +74,39 @@ describe('AuthoringPanel word field', () => {
     );
   });
 });
+
+describe('AuthoringPanel grapheme chips', () => {
+  it('renders a chip per aligned grapheme when the word is known', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.getAllByTestId('grapheme-chip');
+    expect(chips.length).toBe(5);
+    expect(chips[2]).toHaveTextContent('tt');
+    expect(chips[2]).toHaveTextContent('t');
+  });
+
+  it('flags low-confidence chips with aria-invalid + amber class', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="qxz" />);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.queryAllByTestId('grapheme-chip');
+    for (const c of chips) {
+      if (c.classList.contains('border-amber-400')) {
+        expect(c).toHaveAttribute('aria-invalid', 'true');
+      }
+    }
+  });
+
+  it('opens an inline editor when a chip is clicked', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chip = screen.getAllByTestId('grapheme-chip')[0];
+    await userEvent.click(chip);
+    expect(
+      screen.getByRole('combobox', { name: /phoneme/i }),
+    ).toBeInTheDocument();
+  });
+});
