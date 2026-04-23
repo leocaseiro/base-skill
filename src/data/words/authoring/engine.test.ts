@@ -11,7 +11,6 @@ vi.mock('rita', () => ({
   },
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- vitest mocks return untyped values
 const mockIsKnownWord = vi.mocked(RiTa.isKnownWord);
 
 const mockPhones = vi.mocked(RiTa.phones);
