@@ -202,6 +202,100 @@ describe('AuthoringPanel save + duplicates', () => {
     expect(list.map((d) => d.word)).toContain('zzword');
   });
 
+  it('pre-fills all fields from an existing draft when editing', async () => {
+    const saved = await draftStore.saveDraft({
+      word: 'prothesis',
+      region: 'aus',
+      level: 6,
+      ipa: 'prɒθɪsɪs',
+      syllables: ['pro', 'the', 'sis'],
+      syllableCount: 3,
+      graphemes: [
+        { g: 'pr', p: 'pr' },
+        { g: 'o', p: 'ɒ' },
+        { g: 'th', p: 'θ' },
+        { g: 'e', p: 'ɪ' },
+        { g: 's', p: 's' },
+        { g: 'i', p: 'ɪ' },
+        { g: 's', p: 's' },
+      ],
+      ritaKnown: false,
+    });
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={saved.word}
+        initialDraft={saved}
+      />,
+    );
+    expect(screen.getByRole('textbox', { name: /word/i })).toHaveValue(
+      'prothesis',
+    );
+    expect(screen.getByRole('textbox', { name: /IPA/i })).toHaveValue(
+      'prɒθɪsɪs',
+    );
+    const levelSelect = screen.getByRole('combobox', {
+      name: /level/i,
+    });
+    if (!(levelSelect instanceof HTMLSelectElement)) {
+      throw new TypeError('expected level combobox to be a select');
+    }
+    expect(Number(levelSelect.value)).toBe(6);
+    expect(screen.getAllByTestId('grapheme-chip').length).toBe(7);
+    expect(
+      screen.getAllByTestId('syllable-chip').map((c) => c.textContent),
+    ).toEqual(['pro', 'the', 'sis']);
+  });
+
+  it('updates the existing draft in-place instead of throwing when editing', async () => {
+    const saved = await draftStore.saveDraft({
+      word: 'prothesis',
+      region: 'aus',
+      level: 6,
+      ipa: 'prɒθɪsɪs',
+      syllables: ['pro', 'the', 'sis'],
+      syllableCount: 3,
+      graphemes: [
+        { g: 'pr', p: 'pr' },
+        { g: 'o', p: 'ɒ' },
+        { g: 'th', p: 'θ' },
+        { g: 'e', p: 'ɪ' },
+        { g: 's', p: 's' },
+        { g: 'i', p: 'ɪ' },
+        { g: 's', p: 's' },
+      ],
+      ritaKnown: false,
+    });
+    const onSaved = vi.fn();
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={saved.word}
+        initialDraft={saved}
+        onSaved={onSaved}
+      />,
+    );
+    // Tweak the level to prove the patch is applied.
+    const levelSelect = screen.getByRole('combobox', {
+      name: /level/i,
+    });
+    if (!(levelSelect instanceof HTMLSelectElement)) {
+      throw new TypeError('expected level combobox to be a select');
+    }
+    await userEvent.selectOptions(levelSelect, '7');
+    await userEvent.click(
+      screen.getByRole('button', { name: /save draft/i }),
+    );
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    const list = await draftStore.listDrafts({ region: 'aus' });
+    expect(list).toHaveLength(1);
+    expect(list[0]!.id).toBe(saved.id);
+    expect(list[0]!.level).toBe(7);
+    expect(list[0]!.word).toBe('prothesis');
+  });
+
   it('prompts to confirm on ESC when the form is dirty', async () => {
     const confirmSpy = vi
       .spyOn(globalThis, 'confirm')

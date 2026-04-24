@@ -557,6 +557,9 @@ export const WordLibraryExplorer = () => {
   const [authoringWord, setAuthoringWord] = useState<string | null>(
     null,
   );
+  const [editingDraft, setEditingDraft] = useState<DraftEntry | null>(
+    null,
+  );
   const [showDrafts, setShowDrafts] = useState(false);
   const [draftCount, setDraftCount] = useState(0);
   const [shippedLevels, setShippedLevels] = useState<
@@ -590,7 +593,7 @@ export const WordLibraryExplorer = () => {
     return () => {
       ignore = true;
     };
-  }, [authoringWord, showDrafts]);
+  }, [authoringWord, editingDraft, showDrafts]);
 
   useEffect(() => {
     let ignore = false;
@@ -887,17 +890,35 @@ export const WordLibraryExplorer = () => {
           ))}
         </div>
         <AuthoringPanel
-          open={authoringWord !== null}
-          initialWord={authoringWord ?? ''}
-          onClose={() => setAuthoringWord(null)}
-          onSaved={() => setAuthoringWord(null)}
+          // Key by draft id (or "new"/word for the create path) so
+          // React remounts the panel per-target — otherwise opening a
+          // second draft after closing the first would reuse the
+          // debounced hook's stale state instead of re-seeding from
+          // the new draft.
+          key={
+            editingDraft
+              ? `edit-${editingDraft.id}`
+              : `new-${authoringWord ?? ''}`
+          }
+          open={authoringWord !== null || editingDraft !== null}
+          initialWord={editingDraft?.word ?? authoringWord ?? ''}
+          initialDraft={editingDraft ?? undefined}
+          onClose={() => {
+            setAuthoringWord(null);
+            setEditingDraft(null);
+          }}
+          onSaved={() => {
+            setAuthoringWord(null);
+            setEditingDraft(null);
+          }}
         />
         <DraftsPanel
           open={showDrafts}
           onClose={() => setShowDrafts(false)}
           onEdit={(d: DraftEntry) => {
             setShowDrafts(false);
-            setAuthoringWord(d.word);
+            setAuthoringWord(null);
+            setEditingDraft(d);
           }}
         />
       </main>
