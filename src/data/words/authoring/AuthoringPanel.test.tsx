@@ -685,7 +685,7 @@ describe('AuthoringPanel word lock + re-generate', () => {
     confirmSpy.mockRestore();
   });
 
-  it('Re-generate aborts when the form is dirty and the user cancels the confirm', async () => {
+  it('Re-generate aborts when the user cancels the confirm', async () => {
     const { generateBreakdown } = await import('./engine');
     const mocked = vi.mocked(generateBreakdown);
 
@@ -729,6 +729,100 @@ describe('AuthoringPanel word lock + re-generate', () => {
     expect(screen.getAllByTestId('grapheme-chip').length).toBe(
       dirtyChipCount,
     );
+    confirmSpy.mockRestore();
+  });
+
+  it('shows confirm on Re-generate even when the form is not dirty', async () => {
+    const { generateBreakdown } = await import('./engine');
+    const mocked = vi.mocked(generateBreakdown);
+
+    const saved = await draftStore.saveDraft({
+      word: 'putting',
+      region: 'aus',
+      level: 2,
+      ipa: 'pʊtɪŋ',
+      syllables: ['put', 'ting'],
+      syllableCount: 2,
+      graphemes: [
+        { g: 'p', p: 'p' },
+        { g: 'u', p: 'ʊ' },
+        { g: 'tt', p: 't' },
+        { g: 'i', p: 'ɪ' },
+        { g: 'ng', p: 'ŋ' },
+      ],
+      ritaKnown: true,
+    });
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={saved.word}
+        initialDraft={saved}
+      />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    const confirmSpy = vi
+      .spyOn(globalThis, 'confirm')
+      .mockReturnValue(true);
+    mocked.mockClear();
+    await userEvent.click(
+      screen.getByRole('button', { name: /re-generate from ritajs/i }),
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    expect(mocked).toHaveBeenCalledWith('putting');
+    confirmSpy.mockRestore();
+  });
+
+  it('shows confirm on every Re-generate click, including consecutive clicks', async () => {
+    const { generateBreakdown } = await import('./engine');
+    const mocked = vi.mocked(generateBreakdown);
+
+    const saved = await draftStore.saveDraft({
+      word: 'putting',
+      region: 'aus',
+      level: 2,
+      ipa: 'pʊtɪŋ',
+      syllables: ['put', 'ting'],
+      syllableCount: 2,
+      graphemes: [
+        { g: 'p', p: 'p' },
+        { g: 'u', p: 'ʊ' },
+        { g: 'tt', p: 't' },
+        { g: 'i', p: 'ɪ' },
+        { g: 'ng', p: 'ŋ' },
+      ],
+      ritaKnown: true,
+    });
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={saved.word}
+        initialDraft={saved}
+      />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    const confirmSpy = vi
+      .spyOn(globalThis, 'confirm')
+      .mockReturnValue(true);
+    mocked.mockClear();
+
+    const regenerate = screen.getByRole('button', {
+      name: /re-generate from ritajs/i,
+    });
+    await userEvent.click(regenerate);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.click(regenerate);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    expect(confirmSpy).toHaveBeenCalledTimes(2);
+    expect(
+      mocked.mock.calls.filter((c) => c[0] === 'putting').length,
+    ).toBe(2);
     confirmSpy.mockRestore();
   });
 });
