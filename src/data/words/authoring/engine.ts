@@ -40,7 +40,7 @@ export const generateBreakdown = async (
   const word = rawWord.trim().toLowerCase();
   const { RiTa } = await import('rita');
 
-  if (!RiTa.isKnownWord(word)) {
+  if (!RiTa.hasWord(word)) {
     return {
       word,
       ipa: '',
