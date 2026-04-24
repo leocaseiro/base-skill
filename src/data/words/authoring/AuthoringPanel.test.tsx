@@ -118,6 +118,33 @@ describe('AuthoringPanel grapheme chips', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows a play-phoneme button next to the Phoneme label with the selected phoneme', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Click the first chip (p → /p/) so the editor opens on it.
+    await userEvent.click(screen.getAllByTestId('grapheme-chip')[0]!);
+    const play = screen.getByRole('button', {
+      name: /play phoneme \/p\//i,
+    });
+    expect(play).toBeInTheDocument();
+    expect(play).toHaveTextContent('/p/');
+    expect(play).not.toBeDisabled();
+  });
+
+  it('disables the play-phoneme button when the selected chip has no phoneme yet', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="prothesis" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Bootstrap chip has empty phoneme.
+    await userEvent.click(screen.getAllByTestId('grapheme-chip')[0]!);
+    expect(
+      screen.getByRole('button', { name: /play phoneme/i }),
+    ).toBeDisabled();
+  });
+
   it('shows an instructional hint above the chip row', async () => {
     render(
       <AuthoringPanel open onClose={noop} initialWord="putting" />,

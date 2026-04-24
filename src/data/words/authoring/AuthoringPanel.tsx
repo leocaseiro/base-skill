@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { loadShippedIndex } from '../filter';
 import { GRAPHEMES_BY_LEVEL } from '../levels';
+import { playPhoneme } from '../phoneme-audio';
 import { PHONEME_CODE_TO_IPA } from '../phoneme-codes';
 import { align } from './aligner';
 import { draftStore } from './draftStore';
@@ -493,7 +494,20 @@ export const AuthoringPanel = ({
           {editingIndex !== null && chips[editingIndex] && (
             <div className="rounded border border-slate-300 bg-slate-50 p-3">
               <label className="flex flex-col gap-1 text-sm">
-                Phoneme
+                <div className="flex items-center gap-2">
+                  <span>Phoneme</span>
+                  <button
+                    type="button"
+                    aria-label={`Play phoneme /${chips[editingIndex].p}/`}
+                    disabled={!chips[editingIndex].p}
+                    onClick={() => {
+                      void playPhoneme(chips[editingIndex]!.p);
+                    }}
+                    className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-0.5 font-mono text-xs hover:bg-muted disabled:opacity-50"
+                  >
+                    🔈 /{chips[editingIndex].p}/
+                  </button>
+                </div>
                 <select
                   aria-label="phoneme"
                   value={chips[editingIndex].p}
