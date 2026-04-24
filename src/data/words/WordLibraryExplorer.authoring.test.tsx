@@ -70,6 +70,36 @@ describe('WordLibraryExplorer authoring entry points', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('omits the level from the message when the level filter already includes the word', async () => {
+    render(<WordLibraryExplorer />);
+    // "adore" is Level 8 with 2 syllables. Filtering to Level 8 keeps
+    // the level filter satisfied; the syllable filter is what actually
+    // hides it, so the message must NOT imply level is the cause.
+    await userEvent.click(
+      screen.getByRole('button', { name: /^level 8$/i }),
+    );
+    await userEvent.click(
+      screen.getByRole('radio', { name: /exactly/i }),
+    );
+    // Three spinbuttons render once "Exactly" is active: level range
+    // min, level range max, and the newly-revealed syllable-eq input
+    // (last in DOM order because SyllablesField follows LevelsField).
+    const spinbuttons = screen.getAllByRole('spinbutton');
+    const syllablesInput = spinbuttons.at(-1)!;
+    await userEvent.type(syllablesInput, '1');
+    const search = screen.getByLabelText(/word search/i);
+    await userEvent.type(search, 'adore');
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const message = await screen.findByText(
+      /exists in shipped data.*filters hide it/i,
+    );
+    expect(message).toBeInTheDocument();
+    expect(message.textContent).not.toMatch(/level 8/i);
+    expect(
+      screen.getByRole('button', { name: /clear filters/i }),
+    ).toBeInTheDocument();
+  });
+
   it('clear-filters button restores the hidden word to the results', async () => {
     render(<WordLibraryExplorer />);
     await userEvent.click(

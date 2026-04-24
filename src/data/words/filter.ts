@@ -15,6 +15,18 @@ const inRange = (
   [min, max]: readonly [number, number],
 ): boolean => n >= min && n <= max;
 
+export const isLevelInFilter = (
+  filter: WordFilter,
+  level: number,
+): boolean => {
+  if (filter.level !== undefined && filter.level !== level)
+    return false;
+  if (filter.levels && !filter.levels.includes(level)) return false;
+  if (filter.levelRange && !inRange(level, filter.levelRange))
+    return false;
+  return true;
+};
+
 export const entryMatches = (
   hit: WordHit,
   filter: WordFilter,

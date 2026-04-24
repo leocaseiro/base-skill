@@ -3,6 +3,7 @@ import {
   __resetChunkCacheForTests,
   entryMatches,
   filterWords,
+  isLevelInFilter,
   loadShippedWordLevels,
 } from './filter';
 import type { WordHit } from './types';
@@ -209,6 +210,35 @@ describe('filterWords (integration against seeded chunks)', () => {
     });
     expect(result.hits).toHaveLength(0);
     expect(result.usedFallback).toBeUndefined();
+  });
+});
+
+describe('isLevelInFilter', () => {
+  it('returns true when no level filter is set', () => {
+    expect(isLevelInFilter({ region: 'aus' }, 8)).toBe(true);
+  });
+
+  it('respects the exact `level` field', () => {
+    expect(isLevelInFilter({ region: 'aus', level: 8 }, 8)).toBe(true);
+    expect(isLevelInFilter({ region: 'aus', level: 1 }, 8)).toBe(false);
+  });
+
+  it('respects the `levels[]` field', () => {
+    expect(
+      isLevelInFilter({ region: 'aus', levels: [1, 2, 8] }, 8),
+    ).toBe(true);
+    expect(isLevelInFilter({ region: 'aus', levels: [1, 2] }, 8)).toBe(
+      false,
+    );
+  });
+
+  it('respects the `levelRange` field', () => {
+    expect(
+      isLevelInFilter({ region: 'aus', levelRange: [6, 8] }, 8),
+    ).toBe(true);
+    expect(
+      isLevelInFilter({ region: 'aus', levelRange: [1, 3] }, 8),
+    ).toBe(false);
   });
 });
 
