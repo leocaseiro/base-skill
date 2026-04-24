@@ -1,0 +1,1 @@
+import{j as s}from"./main-OVtzv3Go.js";const o=()=>s.jsxs("div",{className:"p-8",children:[s.jsx("h1",{className:"text-2xl font-bold",children:"Cloud Sync"}),s.jsx("p",{className:"mt-2 text-muted-foreground",children:"Sync learner data across devices."})]});export{o as component};
