@@ -179,6 +179,45 @@ describe('AuthoringPanel grapheme chips', () => {
     expect(after[0]!.querySelector('div')?.textContent).toBe('pu');
   });
 
+  it('splits a chip into two and preserves the concatenation invariant', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Split the "tt" chip at index 2 → "t" + "t". Count and invariant
+    // should both hold without hardcoding the aligner's exact output
+    // length, which is documented as 5 by the earlier grapheme-chip
+    // test but could shift if the aligner evolves.
+    const chipsBefore = screen.getAllByTestId('grapheme-chip');
+    const multiLetterIndex = chipsBefore.findIndex(
+      (c) => (c.querySelector('div')?.textContent ?? '').length >= 2,
+    );
+    expect(multiLetterIndex).toBeGreaterThanOrEqual(0);
+    const countBefore = chipsBefore.length;
+    await userEvent.click(chipsBefore[multiLetterIndex]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /split grapheme/i }),
+    );
+    const chipsAfter = screen.getAllByTestId('grapheme-chip');
+    expect(chipsAfter.length).toBe(countBefore + 1);
+    const joined = chipsAfter
+      .map((c) => c.querySelector('div')?.textContent ?? '')
+      .join('');
+    expect(joined).toBe('putting');
+  });
+
+  it('disables the split button when the selected chip has only one letter', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // index 0 is `p` (length 1).
+    await userEvent.click(screen.getAllByTestId('grapheme-chip')[0]!);
+    expect(
+      screen.getByRole('button', { name: /split grapheme/i }),
+    ).toBeDisabled();
+  });
+
   it('disables the delete button when only one chip remains', async () => {
     render(<AuthoringPanel open onClose={noop} initialWord="a" />);
     await act(() => new Promise((r) => setTimeout(r, 500)));
