@@ -27,6 +27,12 @@ vi.mock('./phoneme-audio', async () => {
   };
 });
 
+// These tests drive the full WordLibraryExplorer — multiple clicks,
+// debounced search, IndexedDB-backed drafts. Under CI's slower runners
+// the biggest tests push past Vitest's 5s default and the cascade
+// leaves the next test's render empty. Give the suite more headroom.
+vi.setConfig({ testTimeout: 15_000 });
+
 beforeEach(async () => {
   await draftStore.__clearAllForTests();
 });
@@ -163,7 +169,7 @@ describe('WordLibraryExplorer authoring entry points', () => {
     });
     render(<WordLibraryExplorer />);
     expect(
-      await screen.findByText(/drafts \(1\)/i),
+      await screen.findByText(/drafts \(1\)/i, {}, { timeout: 5000 }),
     ).toBeInTheDocument();
   });
 });

@@ -672,7 +672,7 @@ export const AuthoringPanel = ({
                   target="_blank"
                   rel="noreferrer noopener"
                   aria-label={`Look up ${word.trim()} on Dictionary.com`}
-                  className="text-sky-800 underline"
+                  className="text-sky-800! underline"
                 >
                   Dictionary.com
                 </a>
@@ -681,7 +681,7 @@ export const AuthoringPanel = ({
                   target="_blank"
                   rel="noreferrer noopener"
                   aria-label={`Look up ${word.trim()} on Vocabulary.com`}
-                  className="text-sky-800 underline"
+                  className="text-sky-800! underline"
                 >
                   Vocabulary.com
                 </a>
@@ -690,7 +690,7 @@ export const AuthoringPanel = ({
                   target="_blank"
                   rel="noreferrer noopener"
                   aria-label={`Look up ${word.trim()} on HowManySyllables.com`}
-                  className="text-sky-800 underline"
+                  className="text-sky-800! underline"
                 >
                   HowManySyllables.com
                 </a>
@@ -707,7 +707,7 @@ export const AuthoringPanel = ({
                 href={`https://www.dictionary.com/browse/${encodeURIComponent(word.trim())}`}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="text-sky-800 underline"
+                className="text-sky-800! underline"
               >
                 Open in dictionary.com
               </a>
