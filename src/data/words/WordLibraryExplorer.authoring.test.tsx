@@ -9,24 +9,28 @@ import {
   vi,
 } from 'vitest';
 import { draftStore } from './authoring/draftStore';
-import { __resetPhonemeAudioForTests } from './phoneme-audio';
 import { WordLibraryExplorer } from './WordLibraryExplorer';
+import type * as PhonemeAudioModule from './phoneme-audio';
+
+// Fully mock the audio module: a global fetch stub is racy under CI's
+// slower timing — pending useEffects from ResultCard/PhonemeBlender can
+// fire after afterEach has unstubbed fetch, hitting Node undici with a
+// relative URL and crashing the test run with unhandled rejections.
+vi.mock('./phoneme-audio', async () => {
+  const actual =
+    await vi.importActual<typeof PhonemeAudioModule>('./phoneme-audio');
+  return {
+    ...actual,
+    getPhonemeSprite: vi.fn(() => Promise.resolve({})),
+    playPhoneme: vi.fn(() => Promise.resolve()),
+    stopPhoneme: vi.fn(),
+  };
+});
 
 beforeEach(async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({}),
-        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-      } as Response),
-    ),
-  );
-  __resetPhonemeAudioForTests();
   await draftStore.__clearAllForTests();
 });
 afterEach(async () => {
-  vi.unstubAllGlobals();
   await draftStore.__clearAllForTests();
 });
 

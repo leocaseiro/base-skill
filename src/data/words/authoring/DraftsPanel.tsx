@@ -67,7 +67,7 @@ export const DraftsPanel = ({
   if (!open) return null;
 
   return (
-    <aside
+    <div
       role="dialog"
       aria-label="Drafts"
       className="fixed inset-y-0 right-0 z-40 w-full max-w-md bg-white p-4 shadow-2xl"
@@ -130,6 +130,6 @@ export const DraftsPanel = ({
           </li>
         ))}
       </ul>
-    </aside>
+    </div>
   );
 };
