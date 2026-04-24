@@ -133,6 +133,26 @@ describe('AuthoringPanel grapheme chips', () => {
     expect(play).not.toBeDisabled();
   });
 
+  it('offers the full AUS phoneme inventory (≥40 options) in the Phoneme dropdown', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.click(screen.getAllByTestId('grapheme-chip')[0]!);
+    const select = screen.getByRole('combobox', { name: /phoneme/i });
+    if (!(select instanceof HTMLSelectElement)) {
+      throw new TypeError('expected phoneme combobox to be a select');
+    }
+    expect(select.options.length).toBeGreaterThanOrEqual(40);
+    // Sanity: AUS-specific phonemes that `PHONEME_CODE_TO_IPA` omits
+    // must be present — these are the ones that were missing before.
+    const values = [...select.options].map((o) => o.value);
+    expect(values).toContain('ɒ');
+    expect(values).toContain('ɜː');
+    expect(values).toContain('iː');
+    expect(values).toContain('ə');
+  });
+
   it('disables the play-phoneme button when the selected chip has no phoneme yet', async () => {
     render(
       <AuthoringPanel open onClose={noop} initialWord="prothesis" />,
