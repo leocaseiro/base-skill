@@ -578,6 +578,14 @@ export const WordLibraryExplorer = () => {
   );
   const [showDrafts, setShowDrafts] = useState(false);
   const [draftCount, setDraftCount] = useState(0);
+  // Bumped on every draft save / update / delete so the filterWords
+  // effect and the draftCount effect re-run without depending on
+  // a panel transition. Without this, save-then-close leaves the
+  // grid showing pre-save state until a manual reload.
+  const [draftVersion, setDraftVersion] = useState(0);
+  const bumpDraftVersion = () => {
+    setDraftVersion((v) => v + 1);
+  };
   const [shippedLevels, setShippedLevels] = useState<
     Map<string, number>
   >(() => new Map());
@@ -599,7 +607,7 @@ export const WordLibraryExplorer = () => {
     return () => {
       cancelled = true;
     };
-  }, [filter]);
+  }, [filter, draftVersion]);
 
   useEffect(() => {
     let ignore = false;
@@ -609,7 +617,7 @@ export const WordLibraryExplorer = () => {
     return () => {
       ignore = true;
     };
-  }, [authoringWord, editingDraft, showDrafts]);
+  }, [authoringWord, editingDraft, showDrafts, draftVersion]);
 
   useEffect(() => {
     let ignore = false;
@@ -970,6 +978,7 @@ export const WordLibraryExplorer = () => {
           onSaved={() => {
             setAuthoringWord(null);
             setEditingDraft(null);
+            bumpDraftVersion();
           }}
         />
         <DraftsPanel
@@ -980,6 +989,7 @@ export const WordLibraryExplorer = () => {
             setAuthoringWord(null);
             setEditingDraft(d);
           }}
+          onMutated={bumpDraftVersion}
         />
       </main>
     </div>
