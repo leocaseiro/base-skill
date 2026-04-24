@@ -5,6 +5,12 @@ export interface Breakdown {
   ipa: string;
   syllables: string[];
   phonemes: string[];
+  /**
+   * True iff the word is in RiTa's dictionary. When false, the
+   * phonemes and syllables (if any) come from RiTa's letter-to-sound
+   * fallback — usable but guessed. The authoring UI keeps a
+   * dictionary.com banner for that case so teachers can verify.
+   */
   ritaKnown: boolean;
 }
 
@@ -34,26 +40,50 @@ const splitSyllablesByPhonemeBoundary = (
   return out.filter((s) => s.length > 0);
 };
 
+interface RitaAnalysis {
+  phones?: string;
+  syllables?: string;
+  stresses?: string;
+  pos?: string;
+}
+
 export const generateBreakdown = async (
   rawWord: string,
 ): Promise<Breakdown> => {
   const word = rawWord.trim().toLowerCase();
   const { RiTa } = await import('rita');
+  const ritaKnown = RiTa.hasWord(word);
 
-  if (!RiTa.hasWord(word)) {
+  // RiTa.analyze gives us phones + syllables in one call and
+  // returns LTS-derived guesses for words outside the dictionary
+  // (the `hasWord` miss case). Using it unconditionally means
+  // "prothesis" etc. still come back with usable data — marked
+  // `ritaKnown: false` so the UI can warn the guess needs review.
+  let phonemes: string[] = [];
+  let phonemeSyllables: string[] = [];
+  try {
+    const analysis = RiTa.analyze(word) as RitaAnalysis;
+    const phonesStr = analysis.phones ?? '';
+    const syllStr = analysis.syllables ?? '';
+    if (phonesStr) phonemes = arpabetStringToIpa(phonesStr);
+    if (syllStr) phonemeSyllables = syllStr.split('/');
+  } catch (error) {
+    // arpabetStringToIpa throws on unknown tokens; treat as "no
+    // alignment available" and let the caller bootstrap. Surface
+    // the error for debugging.
+    console.error('[authoring] RiTa.analyze parse failed:', error);
+  }
+
+  if (phonemes.length === 0) {
     return {
       word,
       ipa: '',
       syllables: [],
       phonemes: [],
-      ritaKnown: false,
+      ritaKnown,
     };
   }
 
-  const phonesStr = RiTa.phones(word, { silent: true });
-  const syllStr = RiTa.syllables(word, { silent: true });
-  const phonemes = arpabetStringToIpa(phonesStr);
-  const phonemeSyllables = syllStr.split('/');
   const syllables = splitSyllablesByPhonemeBoundary(
     word,
     phonemes,
@@ -65,6 +95,6 @@ export const generateBreakdown = async (
     ipa: phonemes.join(''),
     syllables,
     phonemes,
-    ritaKnown: true,
+    ritaKnown,
   };
 };
