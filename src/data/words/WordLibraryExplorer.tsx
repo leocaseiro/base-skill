@@ -3,7 +3,7 @@ import { deriveActiveFilterPills } from './active-filter-pills';
 import { AuthoringPanel } from './authoring/AuthoringPanel';
 import { DraftsPanel } from './authoring/DraftsPanel';
 import { draftStore } from './authoring/draftStore';
-import { filterWords } from './filter';
+import { filterWords, loadShippedWordLevels } from './filter';
 import { ALL_REGIONS, LEVEL_LABELS } from './levels';
 import { playPhoneme } from './phoneme-audio';
 import { useChipsVisibleDefault } from './useChipsVisibleDefault';
@@ -555,6 +555,9 @@ export const WordLibraryExplorer = () => {
   );
   const [showDrafts, setShowDrafts] = useState(false);
   const [draftCount, setDraftCount] = useState(0);
+  const [shippedLevels, setShippedLevels] = useState<
+    Map<string, number>
+  >(() => new Map());
   // Adjust during render instead of in an effect to avoid cascading renders
   // (react-hooks/set-state-in-effect). Until the user explicitly toggles,
   // follow the orientation-driven default from useChipsVisibleDefault.
@@ -584,6 +587,16 @@ export const WordLibraryExplorer = () => {
       ignore = true;
     };
   }, [authoringWord, showDrafts]);
+
+  useEffect(() => {
+    let ignore = false;
+    void loadShippedWordLevels(filter.region).then((map) => {
+      if (!ignore) setShippedLevels(map);
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [filter.region]);
 
   const pairOptions = useMemo(
     () => collectGraphemePairs(result.hits),
@@ -660,6 +673,18 @@ export const WordLibraryExplorer = () => {
       return;
     }
     setFilter((f) => ({ ...f, [clearKey]: undefined }));
+  };
+
+  // Clears every filter that could hide an otherwise-shipped word while
+  // keeping the chosen region, the fallback toggle, and the word-prefix
+  // search — so the previously-hidden match becomes visible in place.
+  const clearAllFilters = () => {
+    setFilter((f) => ({
+      region: f.region,
+      fallbackToAus: f.fallbackToAus,
+    }));
+    setGraphemePairs([]);
+    setSyllableMode('any');
   };
 
   const filtersPanelProps: FiltersPanelProps = {
@@ -790,20 +815,46 @@ export const WordLibraryExplorer = () => {
             show g[p] chips
           </label>
         </div>
-        {visible.length === 0 && wordPrefix.trim() && (
-          <div className="rounded border border-slate-300 bg-white p-4 text-center">
-            <p className="text-sm text-slate-600">
-              No matches for <strong>{wordPrefix.trim()}</strong>.
-            </p>
-            <button
-              type="button"
-              onClick={() => setAuthoringWord(wordPrefix.trim())}
-              className="mt-2 rounded bg-sky-600 px-3 py-1 text-sm text-white"
-            >
-              ✨ Make up this word?
-            </button>
-          </div>
-        )}
+        {visible.length === 0 && wordPrefix.trim()
+          ? (() => {
+              const term = wordPrefix.trim();
+              const shippedLevel = shippedLevels.get(
+                term.toLowerCase(),
+              );
+              if (shippedLevel !== undefined) {
+                return (
+                  <div className="rounded border border-sky-300 bg-sky-50 p-4 text-center">
+                    <p className="text-sm text-slate-700">
+                      <strong>{term}</strong> is available at{' '}
+                      {LEVEL_LABELS.aus(shippedLevel)}, but your current
+                      filters hide it.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={clearAllFilters}
+                      className="mt-2 rounded bg-sky-600 px-3 py-1 text-sm text-white"
+                    >
+                      Clear filters
+                    </button>
+                  </div>
+                );
+              }
+              return (
+                <div className="rounded border border-slate-300 bg-white p-4 text-center">
+                  <p className="text-sm text-slate-600">
+                    No matches for <strong>{term}</strong>.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setAuthoringWord(term)}
+                    className="mt-2 rounded bg-sky-600 px-3 py-1 text-sm text-white"
+                  >
+                    ✨ Make up this word?
+                  </button>
+                </div>
+              );
+            })()
+          : null}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visible.map((hit) => (
             <ResultCard
