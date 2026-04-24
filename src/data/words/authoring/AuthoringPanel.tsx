@@ -18,8 +18,19 @@ import type { AlignedGrapheme } from './aligner';
 import type { Breakdown } from './engine';
 import type { DraftEntry, DraftLevel } from '../types';
 
+// Full AUS phoneme inventory. Primary source is the 44-unit teaching
+// set in `GRAPHEMES_BY_LEVEL`; we union with `PHONEME_CODE_TO_IPA`
+// values to pick up standalone symbols the curriculum only teaches
+// inside diphthongs (notably `ə` — shipped curriculum has `eə`,
+// `ɛə`, `ɪə` but no bare schwa). Previously this list was just
+// `PHONEME_CODE_TO_IPA`'s 9 entries, which capped the dropdown at 9.
 const BASE_PHONEME_IPA_OPTIONS = [
-  ...new Set(Object.values(PHONEME_CODE_TO_IPA)),
+  ...new Set([
+    ...Object.values(GRAPHEMES_BY_LEVEL).flatMap((units) =>
+      units.map((u) => u.p),
+    ),
+    ...Object.values(PHONEME_CODE_TO_IPA),
+  ]),
 ].toSorted();
 
 const suggestLevel = (
