@@ -31,6 +31,7 @@ import { Slider } from '@/components/ui/slider';
 import { useRxDB } from '@/db/hooks/useRxDB';
 import { useRxQuery } from '@/db/hooks/useRxQuery';
 import { useSettings } from '@/db/hooks/useSettings';
+import { isAppGameSessionPath } from '@/lib/app-paths';
 import { safeGetVoices } from '@/lib/speech/safe-get-voices';
 import { APP_VERSION, IS_BETA } from '@/lib/version';
 
@@ -236,6 +237,10 @@ export const Header = () => {
     );
     void navigate({ to: newPath });
   };
+
+  if (isAppGameSessionPath(location.pathname)) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] backdrop-blur-lg">
