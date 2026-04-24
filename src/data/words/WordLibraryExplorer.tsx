@@ -3,7 +3,11 @@ import { deriveActiveFilterPills } from './active-filter-pills';
 import { AuthoringPanel } from './authoring/AuthoringPanel';
 import { DraftsPanel } from './authoring/DraftsPanel';
 import { draftStore } from './authoring/draftStore';
-import { filterWords, loadShippedWordLevels } from './filter';
+import {
+  filterWords,
+  isLevelInFilter,
+  loadShippedWordLevels,
+} from './filter';
 import { ALL_REGIONS, LEVEL_LABELS } from './levels';
 import { playPhoneme } from './phoneme-audio';
 import { useChipsVisibleDefault } from './useChipsVisibleDefault';
@@ -822,12 +826,30 @@ export const WordLibraryExplorer = () => {
                 term.toLowerCase(),
               );
               if (shippedLevel !== undefined) {
+                // Only call out the level when the level filter itself
+                // is what's hiding the word. If the level matches the
+                // current filter, something else (syllable count,
+                // grapheme constraints, …) is the culprit and naming
+                // the level would mislead the user.
+                const levelHides = !isLevelInFilter(
+                  filter,
+                  shippedLevel,
+                );
                 return (
                   <div className="rounded border border-sky-300 bg-sky-50 p-4 text-center">
                     <p className="text-sm text-slate-700">
-                      <strong>{term}</strong> is available at{' '}
-                      {LEVEL_LABELS.aus(shippedLevel)}, but your current
-                      filters hide it.
+                      {levelHides ? (
+                        <>
+                          <strong>{term}</strong> is available at{' '}
+                          {LEVEL_LABELS.aus(shippedLevel)}, but your
+                          current filters hide it.
+                        </>
+                      ) : (
+                        <>
+                          <strong>{term}</strong> exists in shipped
+                          data, but your current filters hide it.
+                        </>
+                      )}
                     </p>
                     <button
                       type="button"
