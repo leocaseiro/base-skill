@@ -1,10 +1,19 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { deriveActiveFilterPills } from './active-filter-pills';
-import { filterWords } from './filter';
+import { AuthoringPanel } from './authoring/AuthoringPanel';
+import { DraftsPanel } from './authoring/DraftsPanel';
+import { draftStore } from './authoring/draftStore';
+import { normalizeIpa } from './authoring/ipa';
+import {
+  filterWords,
+  isLevelInFilter,
+  loadShippedWordLevels,
+} from './filter';
 import { ALL_REGIONS, LEVEL_LABELS } from './levels';
 import { playPhoneme } from './phoneme-audio';
 import { useChipsVisibleDefault } from './useChipsVisibleDefault';
 import type {
+  DraftEntry,
   FilterResult,
   Grapheme,
   Region,
@@ -316,6 +325,7 @@ const Chip = ({ children, onRemove }: ChipProps) => (
 export interface ResultCardProps {
   hit: WordHit;
   chipsVisible: boolean;
+  onEdit?: (hit: WordHit) => void;
 }
 
 interface KeyedGrapheme {
@@ -353,7 +363,11 @@ const GraphemeChips = ({ graphemes }: { graphemes: Grapheme[] }) => (
   </div>
 );
 
-export const ResultCard = ({ hit, chipsVisible }: ResultCardProps) => (
+export const ResultCard = ({
+  hit,
+  chipsVisible,
+  onEdit,
+}: ResultCardProps) => (
   <Card>
     <CardHeader className="gap-1">
       <CardTitle className="text-2xl font-bold">{hit.word}</CardTitle>
@@ -372,12 +386,33 @@ export const ResultCard = ({ hit, chipsVisible }: ResultCardProps) => (
             }
             className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-0.5 font-mono text-xs hover:bg-muted"
           >
-            🔈 /{hit.ipa}/
+            🔈 /{normalizeIpa(hit.ipa)}/
           </button>
         ) : null}
-        <div className="ms-auto flex gap-1 text-xs">
+        <div className="ms-auto flex items-center gap-1 text-xs">
           <Badge>L{hit.level}</Badge>
           <Badge>{hit.syllableCount} syl</Badge>
+          <span
+            className={`ml-2 rounded px-2 py-0.5 text-xs ${
+              hit.provenance === 'draft'
+                ? 'bg-amber-100 text-amber-800'
+                : 'bg-slate-100 text-slate-600'
+            }`}
+          >
+            {hit.provenance === 'draft'
+              ? '✏️ draft (unsynced)'
+              : '📚 shipped'}
+          </span>
+          {onEdit ? (
+            <button
+              type="button"
+              aria-label={`Edit ${hit.word}`}
+              onClick={() => onEdit(hit)}
+              className="rounded-md border border-input px-2 py-0.5 text-xs hover:bg-muted"
+            >
+              Edit
+            </button>
+          ) : null}
         </div>
       </div>
     </CardHeader>
@@ -535,6 +570,25 @@ export const WordLibraryExplorer = () => {
   const [chipsVisible, setChipsVisible] =
     useState<boolean>(chipsDefault);
   const [chipsUserSet, setChipsUserSet] = useState(false);
+  const [authoringWord, setAuthoringWord] = useState<string | null>(
+    null,
+  );
+  const [editingDraft, setEditingDraft] = useState<DraftEntry | null>(
+    null,
+  );
+  const [showDrafts, setShowDrafts] = useState(false);
+  const [draftCount, setDraftCount] = useState(0);
+  // Bumped on every draft save / update / delete so the filterWords
+  // effect and the draftCount effect re-run without depending on
+  // a panel transition. Without this, save-then-close leaves the
+  // grid showing pre-save state until a manual reload.
+  const [draftVersion, setDraftVersion] = useState(0);
+  const bumpDraftVersion = () => {
+    setDraftVersion((v) => v + 1);
+  };
+  const [shippedLevels, setShippedLevels] = useState<
+    Map<string, number>
+  >(() => new Map());
   // Adjust during render instead of in an effect to avoid cascading renders
   // (react-hooks/set-state-in-effect). Until the user explicitly toggles,
   // follow the orientation-driven default from useChipsVisibleDefault.
@@ -553,7 +607,27 @@ export const WordLibraryExplorer = () => {
     return () => {
       cancelled = true;
     };
-  }, [filter]);
+  }, [filter, draftVersion]);
+
+  useEffect(() => {
+    let ignore = false;
+    void draftStore.listDrafts({ region: 'aus' }).then((d) => {
+      if (!ignore) setDraftCount(d.length);
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [authoringWord, editingDraft, showDrafts, draftVersion]);
+
+  useEffect(() => {
+    let ignore = false;
+    void loadShippedWordLevels(filter.region).then((map) => {
+      if (!ignore) setShippedLevels(map);
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [filter.region]);
 
   const pairOptions = useMemo(
     () => collectGraphemePairs(result.hits),
@@ -632,6 +706,59 @@ export const WordLibraryExplorer = () => {
     setFilter((f) => ({ ...f, [clearKey]: undefined }));
   };
 
+  // Clears every filter that could hide an otherwise-shipped word while
+  // keeping the chosen region, the fallback toggle, and the word-prefix
+  // search — so the previously-hidden match becomes visible in place.
+  const clearAllFilters = () => {
+    setFilter((f) => ({
+      region: f.region,
+      fallbackToAus: f.fallbackToAus,
+    }));
+    setGraphemePairs([]);
+    setSyllableMode('any');
+  };
+
+  // Opens the authoring panel for a result card. For an existing
+  // draft we look up the DraftEntry from the store (the hit only
+  // carries the id). For a shipped hit we synthesise a seed shaped
+  // like a DraftEntry but with `id: ''` — the AuthoringPanel treats
+  // that as "create a new draft override" and routes Save through
+  // `draftStore.saveDraft`, leaving the curriculum JSON untouched.
+  const handleEditHit = async (hit: WordHit) => {
+    if (hit.provenance === 'draft' && hit.draftId) {
+      const drafts = await draftStore.listDrafts({ region: 'aus' });
+      const found = drafts.find((d) => d.id === hit.draftId);
+      if (found) {
+        setAuthoringWord(null);
+        setEditingDraft(found);
+      }
+      return;
+    }
+    // Shipped hit: synthesise an empty-id seed. Values default to
+    // sensible blanks when the shipped entry lacks a field.
+    const nowIso = new Date().toISOString();
+    // `WordHit.level` is `number`; DraftEntry's is the 1..8 narrow
+    // union. Cast rather than validate — shipped data is guaranteed
+    // in-range by the curriculum JSON schema.
+    const level = hit.level as DraftEntry['level'];
+    const seed: DraftEntry = {
+      id: '',
+      word: hit.word,
+      region: 'aus',
+      level,
+      ipa: hit.ipa ?? '',
+      syllables: hit.syllables ?? [hit.word],
+      syllableCount: hit.syllableCount,
+      graphemes: hit.graphemes ?? [],
+      ritaKnown: false,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      ...(hit.variants ? { variants: hit.variants } : {}),
+    };
+    setAuthoringWord(null);
+    setEditingDraft(seed);
+  };
+
   const filtersPanelProps: FiltersPanelProps = {
     wordPrefix,
     setWordPrefix,
@@ -683,6 +810,27 @@ export const WordLibraryExplorer = () => {
         </Sheet>
       </div>
       <main className="flex flex-1 flex-col gap-4">
+        <div className="hidden items-center justify-between gap-2 md:flex">
+          <h1 className="text-lg font-semibold">Word Library</h1>
+          <div className="flex items-center gap-2">
+            {draftCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowDrafts(true)}
+                className="text-sm underline"
+              >
+                Drafts ({draftCount})
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setAuthoringWord('')}
+              className="rounded bg-sky-600 px-3 py-1 text-sm text-white"
+            >
+              + New word
+            </button>
+          </div>
+        </div>
         {pills.length > 0 ? (
           <div
             data-testid="active-filter-pills"
@@ -739,15 +887,110 @@ export const WordLibraryExplorer = () => {
             show g[p] chips
           </label>
         </div>
+        {visible.length === 0 && wordPrefix.trim()
+          ? (() => {
+              const term = wordPrefix.trim();
+              const shippedLevel = shippedLevels.get(
+                term.toLowerCase(),
+              );
+              if (shippedLevel !== undefined) {
+                // Only call out the level when the level filter itself
+                // is what's hiding the word. If the level matches the
+                // current filter, something else (syllable count,
+                // grapheme constraints, …) is the culprit and naming
+                // the level would mislead the user.
+                const levelHides = !isLevelInFilter(
+                  filter,
+                  shippedLevel,
+                );
+                return (
+                  <div className="rounded border border-sky-300 bg-sky-50 p-4 text-center">
+                    <p className="text-sm text-slate-700">
+                      {levelHides ? (
+                        <>
+                          <strong>{term}</strong> is available at{' '}
+                          {LEVEL_LABELS.aus(shippedLevel)}, but your
+                          current filters hide it.
+                        </>
+                      ) : (
+                        <>
+                          <strong>{term}</strong> exists in shipped
+                          data, but your current filters hide it.
+                        </>
+                      )}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={clearAllFilters}
+                      className="mt-2 rounded bg-sky-600 px-3 py-1 text-sm text-white"
+                    >
+                      Clear filters
+                    </button>
+                  </div>
+                );
+              }
+              return (
+                <div className="rounded border border-slate-300 bg-white p-4 text-center">
+                  <p className="text-sm text-slate-600">
+                    No matches for <strong>{term}</strong>.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setAuthoringWord(term)}
+                    className="mt-2 rounded bg-sky-600 px-3 py-1 text-sm text-white"
+                  >
+                    ✨ Make up this word?
+                  </button>
+                </div>
+              );
+            })()
+          : null}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visible.map((hit) => (
             <ResultCard
               key={`${hit.region}-${hit.word}`}
               hit={hit}
               chipsVisible={chipsVisible}
+              onEdit={(h) => {
+                void handleEditHit(h);
+              }}
             />
           ))}
         </div>
+        <AuthoringPanel
+          // Key by draft id (or "new"/word for the create path) so
+          // React remounts the panel per-target — otherwise opening a
+          // second draft after closing the first would reuse the
+          // debounced hook's stale state instead of re-seeding from
+          // the new draft.
+          key={
+            editingDraft
+              ? `edit-${editingDraft.id}`
+              : `new-${authoringWord ?? ''}`
+          }
+          open={authoringWord !== null || editingDraft !== null}
+          initialWord={editingDraft?.word ?? authoringWord ?? ''}
+          initialDraft={editingDraft ?? undefined}
+          onClose={() => {
+            setAuthoringWord(null);
+            setEditingDraft(null);
+          }}
+          onSaved={() => {
+            setAuthoringWord(null);
+            setEditingDraft(null);
+            bumpDraftVersion();
+          }}
+        />
+        <DraftsPanel
+          open={showDrafts}
+          onClose={() => setShowDrafts(false)}
+          onEdit={(d: DraftEntry) => {
+            setShowDrafts(false);
+            setAuthoringWord(null);
+            setEditingDraft(d);
+          }}
+          onMutated={bumpDraftVersion}
+        />
       </main>
     </div>
   );

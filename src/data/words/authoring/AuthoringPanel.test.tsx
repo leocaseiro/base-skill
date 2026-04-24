@@ -1,0 +1,1062 @@
+import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+import { AuthoringPanel } from './AuthoringPanel';
+import { draftStore } from './draftStore';
+import type { DraftEntry } from '../types';
+
+vi.mock('./engine', () => ({
+  generateBreakdown: vi.fn(async (word: string) => ({
+    word,
+    ipa: word === 'putting' ? 'pʊtɪŋ' : '',
+    syllables: word === 'putting' ? ['put', 'ting'] : [],
+    phonemes: word === 'putting' ? ['p', 'ʊ', 't', 'ɪ', 'ŋ'] : [],
+    ritaKnown: word === 'putting',
+  })),
+}));
+
+const noop = () => {};
+
+describe('AuthoringPanel shell', () => {
+  it('renders when open', () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="" />);
+    expect(
+      screen.getByRole('dialog', { name: /make up a word/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('does not render when closed', () => {
+    render(
+      <AuthoringPanel open={false} onClose={noop} initialWord="" />,
+    );
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('calls onClose when ESC is pressed (clean form)', async () => {
+    const onClose = vi.fn();
+    render(<AuthoringPanel open onClose={onClose} initialWord="" />);
+    await userEvent.keyboard('{Escape}');
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('exposes aria-modal="true" and aria-labelledby', () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="" />);
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    const labelId = dialog.getAttribute('aria-labelledby');
+    expect(labelId).toBeTruthy();
+    expect(
+      document.querySelector(`#${CSS.escape(labelId!)}`),
+    ).toBeInTheDocument();
+  });
+});
+
+describe('AuthoringPanel word field', () => {
+  it('pre-fills the word field from initialWord', () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    expect(screen.getByRole('textbox', { name: /word/i })).toHaveValue(
+      'putting',
+    );
+  });
+
+  it('exposes reference links to dictionary.com, vocabulary.com, and howmanysyllables.com for the current word', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(
+      screen.getByRole('link', {
+        name: /look up putting on dictionary\.com/i,
+      }),
+    ).toHaveAttribute(
+      'href',
+      'https://www.dictionary.com/browse/putting',
+    );
+    expect(
+      screen.getByRole('link', {
+        name: /look up putting on vocabulary\.com/i,
+      }),
+    ).toHaveAttribute(
+      'href',
+      'https://www.vocabulary.com/dictionary/putting',
+    );
+    expect(
+      screen.getByRole('link', {
+        name: /look up putting on howmanysyllables\.com/i,
+      }),
+    ).toHaveAttribute(
+      'href',
+      'https://www.howmanysyllables.com/syllables/putting',
+    );
+  });
+
+  it('shows the dictionary.com banner for an unknown word', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="" />);
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /word/i }),
+      'xyzzy',
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(
+      screen.getByRole('link', { name: /open in dictionary\.com/i }),
+    ).toHaveAttribute(
+      'href',
+      'https://www.dictionary.com/browse/xyzzy',
+    );
+  });
+});
+
+describe('AuthoringPanel grapheme chips', () => {
+  it('renders a chip per aligned grapheme when the word is known', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.getAllByTestId('grapheme-chip');
+    expect(chips.length).toBe(5);
+    expect(chips[2]).toHaveTextContent('tt');
+    expect(chips[2]).toHaveTextContent('t');
+  });
+
+  it('flags low-confidence chips with aria-invalid + amber class', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="qxz" />);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.queryAllByTestId('grapheme-chip');
+    for (const c of chips) {
+      if (c.classList.contains('border-amber-400')) {
+        expect(c).toHaveAttribute('aria-invalid', 'true');
+      }
+    }
+  });
+
+  it('opens an inline editor when a chip is clicked', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chip = screen.getAllByTestId('grapheme-chip')[0]!;
+    await userEvent.click(chip);
+    expect(
+      screen.getByRole('combobox', { name: /phoneme/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('shows a play-phoneme button next to the Phoneme label with the selected phoneme', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Click the first chip (p → /p/) so the editor opens on it.
+    await userEvent.click(screen.getAllByTestId('grapheme-chip')[0]!);
+    const play = screen.getByRole('button', {
+      name: /play phoneme \/p\//i,
+    });
+    expect(play).toBeInTheDocument();
+    expect(play).toHaveTextContent('/p/');
+    expect(play).not.toBeDisabled();
+  });
+
+  it('offers the full AUS phoneme inventory (≥40 options) in the Phoneme dropdown', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.click(screen.getAllByTestId('grapheme-chip')[0]!);
+    const select = screen.getByRole('combobox', { name: /phoneme/i });
+    if (!(select instanceof HTMLSelectElement)) {
+      throw new TypeError('expected phoneme combobox to be a select');
+    }
+    expect(select.options.length).toBeGreaterThanOrEqual(40);
+    // Sanity: AUS-specific phonemes that `PHONEME_CODE_TO_IPA` omits
+    // must be present — these are the ones that were missing before.
+    const values = [...select.options].map((o) => o.value);
+    expect(values).toContain('ɒ');
+    expect(values).toContain('ɜː');
+    expect(values).toContain('iː');
+    expect(values).toContain('ə');
+  });
+
+  it('disables the play-phoneme button when the selected chip has no phoneme yet', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="prothesis" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Bootstrap chip has empty phoneme.
+    await userEvent.click(screen.getAllByTestId('grapheme-chip')[0]!);
+    expect(
+      screen.getByRole('button', { name: /play phoneme/i }),
+    ).toBeDisabled();
+  });
+
+  it('shows an instructional hint above the chip row', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(screen.getByText(/click a chip/i)).toBeInTheDocument();
+  });
+
+  it('rings the selected chip when the editor is open', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.getAllByTestId('grapheme-chip');
+    await userEvent.click(chips[2]!);
+    expect(chips[2]!.className).toMatch(/ring-/);
+    expect(chips[0]!.className).not.toMatch(/ring-/);
+  });
+
+  it('joins a chip into its left neighbour preserving the word', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const before = screen.getAllByTestId('grapheme-chip');
+    const countBefore = before.length;
+    await userEvent.click(before[2]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /join with previous/i }),
+    );
+    const after = screen.getAllByTestId('grapheme-chip');
+    expect(after.length).toBe(countBefore - 1);
+    const joined = after
+      .map((c) => c.querySelector('div')?.textContent ?? '')
+      .join('');
+    expect(joined).toBe('putting');
+  });
+
+  it('joins a chip into its right neighbour preserving the word', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const before = screen.getAllByTestId('grapheme-chip');
+    const countBefore = before.length;
+    await userEvent.click(before[0]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /join with next/i }),
+    );
+    const after = screen.getAllByTestId('grapheme-chip');
+    expect(after.length).toBe(countBefore - 1);
+    const joined = after
+      .map((c) => c.querySelector('div')?.textContent ?? '')
+      .join('');
+    expect(joined).toBe('putting');
+    // After joining chip 0 into chip 1, the new chip 0 carries both.
+    expect(after[0]!.querySelector('div')?.textContent).toBe('pu');
+  });
+
+  it('moves a letter from the current chip into the left neighbour', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // "tt" lives at index 2; move a letter left → chip[1] "u"
+    // becomes "ut", chip[2] "tt" becomes "t". Chip count preserved.
+    const chips = screen.getAllByTestId('grapheme-chip');
+    const countBefore = chips.length;
+    await userEvent.click(chips[2]!);
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /move letter to previous/i,
+      }),
+    );
+    const after = screen.getAllByTestId('grapheme-chip');
+    expect(after.length).toBe(countBefore);
+    const joined = after
+      .map((c) => c.querySelector('div')?.textContent ?? '')
+      .join('');
+    expect(joined).toBe('putting');
+  });
+
+  it('disables move-left and join-left on the first chip', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.click(screen.getAllByTestId('grapheme-chip')[0]!);
+    expect(
+      screen.getByRole('button', {
+        name: /move letter to previous/i,
+      }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /join with previous/i }),
+    ).toBeDisabled();
+  });
+
+  it('bootstraps a single full-word chip when rita does not know the word, so split works', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="prothesis" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.getAllByTestId('grapheme-chip');
+    expect(chips).toHaveLength(1);
+    expect(chips[0]!.querySelector('div')?.textContent).toBe(
+      'prothesis',
+    );
+    // Low-confidence (amber) because nothing is aligned yet.
+    expect(chips[0]!.className).toMatch(/border-amber-400/);
+    // Split must be enabled (length >= 2) so the user can carve it.
+    await userEvent.click(chips[0]!);
+    expect(
+      screen.getByRole('button', { name: /split grapheme/i }),
+    ).not.toBeDisabled();
+  });
+
+  it('splits a chip into two and preserves the concatenation invariant', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Split the "tt" chip at index 2 → "t" + "t". Count and invariant
+    // should both hold without hardcoding the aligner's exact output
+    // length, which is documented as 5 by the earlier grapheme-chip
+    // test but could shift if the aligner evolves.
+    const chipsBefore = screen.getAllByTestId('grapheme-chip');
+    const multiLetterIndex = chipsBefore.findIndex(
+      (c) => (c.querySelector('div')?.textContent ?? '').length >= 2,
+    );
+    expect(multiLetterIndex).toBeGreaterThanOrEqual(0);
+    const countBefore = chipsBefore.length;
+    await userEvent.click(chipsBefore[multiLetterIndex]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /split grapheme/i }),
+    );
+    const chipsAfter = screen.getAllByTestId('grapheme-chip');
+    expect(chipsAfter.length).toBe(countBefore + 1);
+    const joined = chipsAfter
+      .map((c) => c.querySelector('div')?.textContent ?? '')
+      .join('');
+    expect(joined).toBe('putting');
+  });
+
+  it('disables the split button when the selected chip has only one letter', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // index 0 is `p` (length 1).
+    await userEvent.click(screen.getAllByTestId('grapheme-chip')[0]!);
+    expect(
+      screen.getByRole('button', { name: /split grapheme/i }),
+    ).toBeDisabled();
+  });
+
+  it('re-aligns chip phonemes when the user pastes IPA and clicks Align chips', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const ipaInput = screen.getByRole('textbox', { name: /IPA/i });
+    await userEvent.clear(ipaInput);
+    await userEvent.type(ipaInput, '/ˈpʊtɪŋ/');
+    await userEvent.click(
+      screen.getByRole('button', { name: /align chips from ipa/i }),
+    );
+    const chips = screen.getAllByTestId('grapheme-chip');
+    // The "tt" chip should map to /t/ after re-alignment (same as the
+    // default alignment, proving the apply-IPA path produced a
+    // self-consistent result).
+    const tt = chips.find((c) =>
+      (c.querySelector('div')?.textContent ?? '').includes('tt'),
+    );
+    expect(tt).toBeDefined();
+    expect(tt!.textContent).toMatch(/\/t\//);
+    // And the join invariant still holds.
+    const joined = chips
+      .map((c) => c.querySelector('div')?.textContent ?? '')
+      .join('');
+    expect(joined).toBe('putting');
+  });
+
+  it('disables both join buttons when only one chip remains', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="a" />);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.queryAllByTestId('grapheme-chip');
+    if (chips.length !== 1) return;
+    await userEvent.click(chips[0]!);
+    expect(
+      screen.getByRole('button', { name: /join with previous/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /join with next/i }),
+    ).toBeDisabled();
+  });
+});
+
+describe('AuthoringPanel syllable editor', () => {
+  it('splits a syllable and preserves the join-equals-word invariant', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const before = screen.getAllByTestId('syllable-chip');
+    expect(before.map((c) => c.textContent)).toEqual(['put', 'ting']);
+    await userEvent.click(before[1]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /split syllable/i }),
+    );
+    const after = screen.getAllByTestId('syllable-chip');
+    expect(after).toHaveLength(3);
+    expect(after.map((c) => c.textContent).join('')).toBe('putting');
+  });
+
+  it('joins a syllable into its previous neighbour', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.click(screen.getAllByTestId('syllable-chip')[1]!);
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /join with previous syllable/i,
+      }),
+    );
+    const after = screen.getAllByTestId('syllable-chip');
+    expect(after).toHaveLength(1);
+    expect(after[0]!.textContent).toBe('putting');
+  });
+
+  it('bootstraps a single full-word syllable when rita returns no alignment', async () => {
+    // Mock engine returns empty syllables for anything not "putting".
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="prothesis" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.getAllByTestId('syllable-chip');
+    expect(chips).toHaveLength(1);
+    expect(chips[0]!.textContent).toBe('prothesis');
+    // And the editor lets us split that single syllable into pieces.
+    await userEvent.click(chips[0]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /split syllable/i }),
+    );
+    const after = screen.getAllByTestId('syllable-chip');
+    expect(after).toHaveLength(2);
+    expect(after.map((c) => c.textContent).join('')).toBe('prothesis');
+  });
+
+  it('moves a letter between adjacent syllables without changing the count', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Syllables are ['put', 'ting']. Move a letter right from index 0
+    // → ['pu', 'tting']. Join invariant preserved.
+    await userEvent.click(screen.getAllByTestId('syllable-chip')[0]!);
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /move letter to next syllable/i,
+      }),
+    );
+    const after = screen.getAllByTestId('syllable-chip');
+    expect(after.length).toBe(2);
+    expect(after.map((c) => c.textContent)).toEqual(['pu', 'tting']);
+  });
+
+  it('disables both syllable join buttons when only one syllable remains', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="prothesis" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.click(screen.getAllByTestId('syllable-chip')[0]!);
+    expect(
+      screen.getByRole('button', {
+        name: /join with previous syllable/i,
+      }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /join with next syllable/i }),
+    ).toBeDisabled();
+  });
+});
+
+describe('AuthoringPanel IPA and syllables', () => {
+  it('pre-fills IPA from the engine for a known word', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(screen.getByLabelText(/^IPA$/)).toHaveValue('pʊtɪŋ');
+  });
+
+  it('renders one syllable chip per segment', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.getAllByTestId('syllable-chip');
+    expect(chips.map((c) => c.textContent)).toEqual(['put', 'ting']);
+  });
+
+  it('auto-suggests level and shows the rationale', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const select = screen.getByRole('combobox', {
+      name: /level/i,
+    });
+    if (!(select instanceof HTMLSelectElement)) {
+      throw new TypeError('expected level combobox to be a select');
+    }
+    expect(Number(select.value)).toBeGreaterThanOrEqual(1);
+    expect(Number(select.value)).toBeLessThanOrEqual(8);
+    expect(
+      screen.getByText(/suggested L\d — highest grapheme used: /i),
+    ).toBeInTheDocument();
+  });
+});
+
+describe('AuthoringPanel word lock + re-generate', () => {
+  beforeEach(async () => {
+    await draftStore.__clearAllForTests();
+  });
+  afterEach(async () => {
+    await draftStore.__clearAllForTests();
+  });
+
+  it('disables the Word input and shows a Re-generate button in edit mode (existing draft)', async () => {
+    const saved = await draftStore.saveDraft({
+      word: 'prothesis',
+      region: 'aus',
+      level: 6,
+      ipa: 'prɒθɪsɪs',
+      syllables: ['pro', 'the', 'sis'],
+      syllableCount: 3,
+      graphemes: [
+        { g: 'pr', p: 'pr' },
+        { g: 'o', p: 'ɒ' },
+        { g: 'th', p: 'θ' },
+        { g: 'e', p: 'ɪ' },
+        { g: 's', p: 's' },
+        { g: 'i', p: 'ɪ' },
+        { g: 's', p: 's' },
+      ],
+      ritaKnown: false,
+    });
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={saved.word}
+        initialDraft={saved}
+      />,
+    );
+    expect(
+      screen.getByRole('textbox', { name: /^word$/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /re-generate from ritajs/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('disables the Word input in shipped-override edit mode (initialDraft.id === "")', async () => {
+    const nowIso = new Date().toISOString();
+    const shippedSeed: DraftEntry = {
+      id: '',
+      word: 'an',
+      region: 'aus',
+      level: 1,
+      ipa: 'æn',
+      syllables: ['an'],
+      syllableCount: 1,
+      graphemes: [
+        { g: 'a', p: 'æ' },
+        { g: 'n', p: 'n' },
+      ],
+      ritaKnown: true,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={shippedSeed.word}
+        initialDraft={shippedSeed}
+      />,
+    );
+    expect(
+      screen.getByRole('textbox', { name: /^word$/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /re-generate from ritajs/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the Word input editable in new-word mode before the first blur', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="" />);
+    const wordInput = screen.getByRole('textbox', { name: /^word$/i });
+    expect(wordInput).not.toBeDisabled();
+    await userEvent.type(wordInput, 'zzword');
+    // No blur yet → input still editable, no Re-generate button.
+    expect(wordInput).not.toBeDisabled();
+    expect(
+      screen.queryByRole('button', {
+        name: /re-generate from ritajs/i,
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('disables the Word input after the first non-empty blur in new-word mode and shows Re-generate', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="" />);
+    const wordInput = screen.getByRole('textbox', { name: /^word$/i });
+    await userEvent.type(wordInput, 'zzword');
+    // Tab off the input to trigger blur.
+    await userEvent.tab();
+    expect(wordInput).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /re-generate from ritajs/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('does not lock the Word input when blurring with an empty value', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="" />);
+    const wordInput = screen.getByRole('textbox', { name: /^word$/i });
+    // Focus then blur without typing anything.
+    await userEvent.click(wordInput);
+    await userEvent.tab();
+    expect(wordInput).not.toBeDisabled();
+    expect(
+      screen.queryByRole('button', {
+        name: /re-generate from ritajs/i,
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('clicking Re-generate invokes the engine again and reseeds the chips from the new breakdown', async () => {
+    const { generateBreakdown } = await import('./engine');
+    const mocked = vi.mocked(generateBreakdown);
+
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(screen.getAllByTestId('grapheme-chip').length).toBe(5);
+
+    // Mutate a chip so the form is dirty AND so we can prove the
+    // reseed wiped local edits when the user confirms. Pick the first
+    // multi-letter chip so Split is enabled.
+    const splitTarget = screen
+      .getAllByTestId('grapheme-chip')
+      .findIndex(
+        (c) => (c.querySelector('div')?.textContent ?? '').length >= 2,
+      );
+    expect(splitTarget).toBeGreaterThanOrEqual(0);
+    await userEvent.click(
+      screen.getAllByTestId('grapheme-chip')[splitTarget]!,
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /split grapheme/i }),
+    );
+    expect(screen.getAllByTestId('grapheme-chip').length).toBe(6);
+
+    // Tab away to lock the word + reveal Re-generate.
+    const wordInput = screen.getByRole('textbox', { name: /^word$/i });
+    await userEvent.click(wordInput);
+    await userEvent.tab();
+    const regenerate = screen.getByRole('button', {
+      name: /re-generate from ritajs/i,
+    });
+
+    const confirmSpy = vi
+      .spyOn(globalThis, 'confirm')
+      .mockReturnValue(true);
+    mocked.mockClear();
+    await userEvent.click(regenerate);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    // Engine called again with the same word.
+    expect(mocked).toHaveBeenCalledWith('putting');
+    // Chips reseeded back to the engine's 5-chip breakdown.
+    expect(screen.getAllByTestId('grapheme-chip').length).toBe(5);
+    confirmSpy.mockRestore();
+  });
+
+  it('Re-generate aborts when the user cancels the confirm', async () => {
+    const { generateBreakdown } = await import('./engine');
+    const mocked = vi.mocked(generateBreakdown);
+
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    // Dirty the form by splitting a chip. Pick a multi-letter chip
+    // so Split is enabled.
+    const splitTarget = screen
+      .getAllByTestId('grapheme-chip')
+      .findIndex(
+        (c) => (c.querySelector('div')?.textContent ?? '').length >= 2,
+      );
+    expect(splitTarget).toBeGreaterThanOrEqual(0);
+    await userEvent.click(
+      screen.getAllByTestId('grapheme-chip')[splitTarget]!,
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /split grapheme/i }),
+    );
+    const dirtyChipCount =
+      screen.getAllByTestId('grapheme-chip').length;
+
+    const wordInput = screen.getByRole('textbox', { name: /^word$/i });
+    await userEvent.click(wordInput);
+    await userEvent.tab();
+
+    const confirmSpy = vi
+      .spyOn(globalThis, 'confirm')
+      .mockReturnValue(false);
+    mocked.mockClear();
+    await userEvent.click(
+      screen.getByRole('button', { name: /re-generate from ritajs/i }),
+    );
+
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(mocked).not.toHaveBeenCalled();
+    // Dirty edit preserved.
+    expect(screen.getAllByTestId('grapheme-chip').length).toBe(
+      dirtyChipCount,
+    );
+    confirmSpy.mockRestore();
+  });
+
+  it('shows confirm on Re-generate even when the form is not dirty', async () => {
+    const { generateBreakdown } = await import('./engine');
+    const mocked = vi.mocked(generateBreakdown);
+
+    const saved = await draftStore.saveDraft({
+      word: 'putting',
+      region: 'aus',
+      level: 2,
+      ipa: 'pʊtɪŋ',
+      syllables: ['put', 'ting'],
+      syllableCount: 2,
+      graphemes: [
+        { g: 'p', p: 'p' },
+        { g: 'u', p: 'ʊ' },
+        { g: 'tt', p: 't' },
+        { g: 'i', p: 'ɪ' },
+        { g: 'ng', p: 'ŋ' },
+      ],
+      ritaKnown: true,
+    });
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={saved.word}
+        initialDraft={saved}
+      />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    const confirmSpy = vi
+      .spyOn(globalThis, 'confirm')
+      .mockReturnValue(true);
+    mocked.mockClear();
+    await userEvent.click(
+      screen.getByRole('button', { name: /re-generate from ritajs/i }),
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    expect(mocked).toHaveBeenCalledWith('putting');
+    confirmSpy.mockRestore();
+  });
+
+  it('shows confirm on every Re-generate click, including consecutive clicks', async () => {
+    const { generateBreakdown } = await import('./engine');
+    const mocked = vi.mocked(generateBreakdown);
+
+    const saved = await draftStore.saveDraft({
+      word: 'putting',
+      region: 'aus',
+      level: 2,
+      ipa: 'pʊtɪŋ',
+      syllables: ['put', 'ting'],
+      syllableCount: 2,
+      graphemes: [
+        { g: 'p', p: 'p' },
+        { g: 'u', p: 'ʊ' },
+        { g: 'tt', p: 't' },
+        { g: 'i', p: 'ɪ' },
+        { g: 'ng', p: 'ŋ' },
+      ],
+      ritaKnown: true,
+    });
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={saved.word}
+        initialDraft={saved}
+      />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    const confirmSpy = vi
+      .spyOn(globalThis, 'confirm')
+      .mockReturnValue(true);
+    mocked.mockClear();
+
+    const regenerate = screen.getByRole('button', {
+      name: /re-generate from ritajs/i,
+    });
+    await userEvent.click(regenerate);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.click(regenerate);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    expect(confirmSpy).toHaveBeenCalledTimes(2);
+    expect(
+      mocked.mock.calls.filter((c) => c[0] === 'putting').length,
+    ).toBe(2);
+    confirmSpy.mockRestore();
+  });
+});
+
+describe('AuthoringPanel save + duplicates', () => {
+  beforeEach(async () => {
+    await draftStore.__clearAllForTests();
+  });
+  afterEach(async () => {
+    await draftStore.__clearAllForTests();
+  });
+
+  it('disables Save when the word collides with shipped data', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="an" />);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(
+      screen.getByRole('button', { name: /save draft/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByText(/already exists in shipped data/i),
+    ).toBeInTheDocument();
+  });
+
+  it('saves a draft and calls onSaved', async () => {
+    const onSaved = vi.fn();
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord="zzword"
+        onSaved={onSaved}
+      />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Fill IPA manually since rita doesn't know zzword
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /IPA/i }),
+      'zwɜːd',
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /save draft/i }),
+    );
+    // handleSave is fired with `void` so the click returns before the
+    // async draftStore.saveDraft + onSaved call completes.  Use waitFor
+    // to poll until the callback has been invoked.
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    const list = await draftStore.listDrafts({ region: 'aus' });
+    expect(list.map((d) => d.word)).toContain('zzword');
+  });
+
+  it('pre-fills all fields from an existing draft when editing', async () => {
+    const saved = await draftStore.saveDraft({
+      word: 'prothesis',
+      region: 'aus',
+      level: 6,
+      ipa: 'prɒθɪsɪs',
+      syllables: ['pro', 'the', 'sis'],
+      syllableCount: 3,
+      graphemes: [
+        { g: 'pr', p: 'pr' },
+        { g: 'o', p: 'ɒ' },
+        { g: 'th', p: 'θ' },
+        { g: 'e', p: 'ɪ' },
+        { g: 's', p: 's' },
+        { g: 'i', p: 'ɪ' },
+        { g: 's', p: 's' },
+      ],
+      ritaKnown: false,
+    });
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={saved.word}
+        initialDraft={saved}
+      />,
+    );
+    expect(screen.getByRole('textbox', { name: /word/i })).toHaveValue(
+      'prothesis',
+    );
+    expect(screen.getByRole('textbox', { name: /IPA/i })).toHaveValue(
+      'prɒθɪsɪs',
+    );
+    const levelSelect = screen.getByRole('combobox', {
+      name: /level/i,
+    });
+    if (!(levelSelect instanceof HTMLSelectElement)) {
+      throw new TypeError('expected level combobox to be a select');
+    }
+    expect(Number(levelSelect.value)).toBe(6);
+    expect(screen.getAllByTestId('grapheme-chip').length).toBe(7);
+    expect(
+      screen.getAllByTestId('syllable-chip').map((c) => c.textContent),
+    ).toEqual(['pro', 'the', 'sis']);
+  });
+
+  it('treats an initialDraft with empty id as a shipped override and creates a new draft on save', async () => {
+    // "an" exists at Level 1 AUS — the synthesised seed here shadows
+    // the shipped entry so the user can correct a mistake without
+    // editing the curriculum JSON.
+    const nowIso = new Date().toISOString();
+    const shippedSeed: DraftEntry = {
+      id: '',
+      word: 'an',
+      region: 'aus',
+      level: 1,
+      ipa: 'OLD',
+      syllables: ['an'],
+      syllableCount: 1,
+      graphemes: [
+        { g: 'a', p: 'æ' },
+        { g: 'n', p: 'n' },
+      ],
+      ritaKnown: true,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+    const onSaved = vi.fn();
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={shippedSeed.word}
+        initialDraft={shippedSeed}
+        onSaved={onSaved}
+      />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Shipped-collision warning must NOT appear — this is an
+    // intentional override.
+    expect(
+      screen.queryByText(/already exists in shipped data/i),
+    ).not.toBeInTheDocument();
+    // Override banner explains what will happen on save.
+    expect(
+      screen.getByText(/editing the shipped entry/i),
+    ).toBeInTheDocument();
+    // Save is enabled and actually persists a new draft row.
+    const saveBtn = screen.getByRole('button', { name: /save draft/i });
+    expect(saveBtn).not.toBeDisabled();
+    await userEvent.click(saveBtn);
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    const list = await draftStore.listDrafts({ region: 'aus' });
+    const draft = list.find((d) => d.word === 'an');
+    expect(draft).toBeDefined();
+    expect(draft?.id).toBeTruthy();
+    expect(draft?.id).not.toBe('');
+  });
+
+  it('updates the existing draft in-place instead of throwing when editing', async () => {
+    const saved = await draftStore.saveDraft({
+      word: 'prothesis',
+      region: 'aus',
+      level: 6,
+      ipa: 'prɒθɪsɪs',
+      syllables: ['pro', 'the', 'sis'],
+      syllableCount: 3,
+      graphemes: [
+        { g: 'pr', p: 'pr' },
+        { g: 'o', p: 'ɒ' },
+        { g: 'th', p: 'θ' },
+        { g: 'e', p: 'ɪ' },
+        { g: 's', p: 's' },
+        { g: 'i', p: 'ɪ' },
+        { g: 's', p: 's' },
+      ],
+      ritaKnown: false,
+    });
+    const onSaved = vi.fn();
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={saved.word}
+        initialDraft={saved}
+        onSaved={onSaved}
+      />,
+    );
+    // Tweak the level to prove the patch is applied.
+    const levelSelect = screen.getByRole('combobox', {
+      name: /level/i,
+    });
+    if (!(levelSelect instanceof HTMLSelectElement)) {
+      throw new TypeError('expected level combobox to be a select');
+    }
+    await userEvent.selectOptions(levelSelect, '7');
+    await userEvent.click(
+      screen.getByRole('button', { name: /save draft/i }),
+    );
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    const list = await draftStore.listDrafts({ region: 'aus' });
+    expect(list).toHaveLength(1);
+    expect(list[0]!.id).toBe(saved.id);
+    expect(list[0]!.level).toBe(7);
+    expect(list[0]!.word).toBe('prothesis');
+  });
+
+  it('normalises the IPA field on save (strips slashes, whitespace, and stress marks)', async () => {
+    const onSaved = vi.fn();
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord="zzword"
+        onSaved={onSaved}
+      />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /IPA/i }),
+      '/ˈzwɜːd/',
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /save draft/i }),
+    );
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    const list = await draftStore.listDrafts({ region: 'aus' });
+    const draft = list.find((d) => d.word === 'zzword');
+    expect(draft?.ipa).toBe('zwɜːd');
+  });
+
+  it('prompts to confirm on ESC when the form is dirty', async () => {
+    const confirmSpy = vi
+      .spyOn(globalThis, 'confirm')
+      .mockReturnValue(false);
+    const onClose = vi.fn();
+    render(<AuthoringPanel open onClose={onClose} initialWord="" />);
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /word/i }),
+      'zz',
+    );
+    await userEvent.keyboard('{Escape}');
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+    confirmSpy.mockRestore();
+  });
+});
