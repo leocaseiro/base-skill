@@ -49,6 +49,46 @@ describe('WordLibraryExplorer authoring entry points', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows a level-aware message when the word exists at a filtered-out level', async () => {
+    render(<WordLibraryExplorer />);
+    // "adore" is shipped at Level 8; filter to Level 1 so it is hidden.
+    await userEvent.click(
+      screen.getByRole('button', { name: /^level 1$/i }),
+    );
+    const search = screen.getByLabelText(/word search/i);
+    await userEvent.type(search, 'adore');
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(
+      await screen.findByText(/available at level 8/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /clear filters/i }),
+    ).toBeInTheDocument();
+    // The "Make up this word?" CTA must NOT appear for a shipped word.
+    expect(
+      screen.queryByRole('button', { name: /make up this word/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('clear-filters button restores the hidden word to the results', async () => {
+    render(<WordLibraryExplorer />);
+    await userEvent.click(
+      screen.getByRole('button', { name: /^level 1$/i }),
+    );
+    const search = screen.getByLabelText(/word search/i);
+    await userEvent.type(search, 'adore');
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const clearBtn = await screen.findByRole('button', {
+      name: /clear filters/i,
+    });
+    await userEvent.click(clearBtn);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // The level-aware message should be gone and adore visible as a result.
+    expect(
+      screen.queryByText(/available at level 8/i),
+    ).not.toBeInTheDocument();
+  });
+
   it('shows a Drafts link when drafts exist', async () => {
     await draftStore.saveDraft({
       word: 'zzword',

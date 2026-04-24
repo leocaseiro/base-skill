@@ -181,6 +181,20 @@ export const loadShippedIndex = async (
   return new Set(curriculum.map((entry) => entry.word));
 };
 
+export const loadShippedWordLevels = async (
+  region: Region,
+): Promise<Map<string, number>> => {
+  const curriculum = await loadCurriculum(region);
+  const map = new Map<string, number>();
+  for (const entry of curriculum) {
+    const existing = map.get(entry.word);
+    if (existing === undefined || entry.level < existing) {
+      map.set(entry.word, entry.level);
+    }
+  }
+  return map;
+};
+
 export const filterWords = async (
   filter: WordFilter,
 ): Promise<FilterResult> => {
