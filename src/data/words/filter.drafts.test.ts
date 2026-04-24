@@ -79,6 +79,31 @@ describe('filterWords with draft merge', () => {
     expect(miss.hits.some((h) => h.word === 'zzone')).toBe(false);
   });
 
+  it('prefers the draft when a shipped word has a same-word draft override', async () => {
+    // "an" is shipped at Level 1 AUS. Author a draft override at
+    // Level 2 and expect exactly one "an" hit, the draft, in the
+    // region-wide (no-level-filter) result.
+    await draftStore.saveDraft({
+      word: 'an',
+      region: 'aus',
+      level: 2,
+      ipa: 'ANOVERRIDE',
+      syllables: ['an'],
+      syllableCount: 1,
+      graphemes: [
+        { g: 'a', p: 'æ' },
+        { g: 'n', p: 'n' },
+      ],
+      ritaKnown: true,
+    });
+
+    const { hits } = await filterWords({ region: 'aus' });
+    const ans = hits.filter((h) => h.word === 'an');
+    expect(ans).toHaveLength(1);
+    expect(ans[0]?.provenance).toBe('draft');
+    expect(ans[0]?.ipa).toBe('ANOVERRIDE');
+  });
+
   it('sorts shipped + draft together by word', async () => {
     await draftStore.saveDraft({
       word: 'aaapple',
