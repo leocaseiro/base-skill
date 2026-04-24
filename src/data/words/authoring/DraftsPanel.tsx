@@ -6,6 +6,13 @@ export interface DraftsPanelProps {
   open: boolean;
   onClose: () => void;
   onEdit: (draft: DraftEntry) => void;
+  /**
+   * Called after a draft is mutated from inside the panel (currently
+   * only delete). Lets the parent invalidate any cached views (the
+   * WordLibraryExplorer grid in particular) without re-opening the
+   * panel.
+   */
+  onMutated?: () => void;
 }
 
 const triggerDownload = (blob: Blob, filename: string) => {
@@ -38,6 +45,7 @@ export const DraftsPanel = ({
   open,
   onClose,
   onEdit,
+  onMutated,
 }: DraftsPanelProps) => {
   const [drafts, setDrafts] = useState<DraftEntry[]>([]);
 
@@ -109,7 +117,10 @@ export const DraftsPanel = ({
               <button
                 type="button"
                 onClick={() => {
-                  void deleteDraft(d.id, refresh);
+                  void deleteDraft(d.id, () => {
+                    refresh();
+                    onMutated?.();
+                  });
                 }}
                 className="rounded border border-rose-300 px-2 py-1 text-sm text-rose-700"
               >
