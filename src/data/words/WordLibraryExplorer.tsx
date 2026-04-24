@@ -325,6 +325,7 @@ const Chip = ({ children, onRemove }: ChipProps) => (
 export interface ResultCardProps {
   hit: WordHit;
   chipsVisible: boolean;
+  onEdit?: (hit: WordHit) => void;
 }
 
 interface KeyedGrapheme {
@@ -362,7 +363,11 @@ const GraphemeChips = ({ graphemes }: { graphemes: Grapheme[] }) => (
   </div>
 );
 
-export const ResultCard = ({ hit, chipsVisible }: ResultCardProps) => (
+export const ResultCard = ({
+  hit,
+  chipsVisible,
+  onEdit,
+}: ResultCardProps) => (
   <Card>
     <CardHeader className="gap-1">
       <CardTitle className="text-2xl font-bold">{hit.word}</CardTitle>
@@ -384,7 +389,7 @@ export const ResultCard = ({ hit, chipsVisible }: ResultCardProps) => (
             🔈 /{normalizeIpa(hit.ipa)}/
           </button>
         ) : null}
-        <div className="ms-auto flex gap-1 text-xs">
+        <div className="ms-auto flex items-center gap-1 text-xs">
           <Badge>L{hit.level}</Badge>
           <Badge>{hit.syllableCount} syl</Badge>
           <span
@@ -398,6 +403,16 @@ export const ResultCard = ({ hit, chipsVisible }: ResultCardProps) => (
               ? '✏️ draft (unsynced)'
               : '📚 shipped'}
           </span>
+          {onEdit ? (
+            <button
+              type="button"
+              aria-label={`Edit ${hit.word}`}
+              onClick={() => onEdit(hit)}
+              className="rounded-md border border-input px-2 py-0.5 text-xs hover:bg-muted"
+            >
+              Edit
+            </button>
+          ) : null}
         </div>
       </div>
     </CardHeader>
@@ -695,6 +710,47 @@ export const WordLibraryExplorer = () => {
     setSyllableMode('any');
   };
 
+  // Opens the authoring panel for a result card. For an existing
+  // draft we look up the DraftEntry from the store (the hit only
+  // carries the id). For a shipped hit we synthesise a seed shaped
+  // like a DraftEntry but with `id: ''` — the AuthoringPanel treats
+  // that as "create a new draft override" and routes Save through
+  // `draftStore.saveDraft`, leaving the curriculum JSON untouched.
+  const handleEditHit = async (hit: WordHit) => {
+    if (hit.provenance === 'draft' && hit.draftId) {
+      const drafts = await draftStore.listDrafts({ region: 'aus' });
+      const found = drafts.find((d) => d.id === hit.draftId);
+      if (found) {
+        setAuthoringWord(null);
+        setEditingDraft(found);
+      }
+      return;
+    }
+    // Shipped hit: synthesise an empty-id seed. Values default to
+    // sensible blanks when the shipped entry lacks a field.
+    const nowIso = new Date().toISOString();
+    // `WordHit.level` is `number`; DraftEntry's is the 1..8 narrow
+    // union. Cast rather than validate — shipped data is guaranteed
+    // in-range by the curriculum JSON schema.
+    const level = hit.level as DraftEntry['level'];
+    const seed: DraftEntry = {
+      id: '',
+      word: hit.word,
+      region: 'aus',
+      level,
+      ipa: hit.ipa ?? '',
+      syllables: hit.syllables ?? [hit.word],
+      syllableCount: hit.syllableCount,
+      graphemes: hit.graphemes ?? [],
+      ritaKnown: false,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      ...(hit.variants ? { variants: hit.variants } : {}),
+    };
+    setAuthoringWord(null);
+    setEditingDraft(seed);
+  };
+
   const filtersPanelProps: FiltersPanelProps = {
     wordPrefix,
     setWordPrefix,
@@ -887,6 +943,9 @@ export const WordLibraryExplorer = () => {
               key={`${hit.region}-${hit.word}`}
               hit={hit}
               chipsVisible={chipsVisible}
+              onEdit={(h) => {
+                void handleEditHit(h);
+              }}
             />
           ))}
         </div>

@@ -509,15 +509,20 @@ export const AuthoringPanel = ({
     const cleanIpa = normalizeIpa(ipa);
     setSaving(true);
     try {
-      await (initialDraft
-        ? draftStore.updateDraft(initialDraft.id, {
+      // `initialDraft.id === ''` is the "shipped override" seed — the
+      // panel was opened with a DraftEntry shape synthesised from a
+      // shipped WordHit, and we want to create a fresh draft that
+      // shadows the shipped entry.
+      const hasExistingDraft = Boolean(initialDraft?.id);
+      await (hasExistingDraft
+        ? draftStore.updateDraft(initialDraft!.id, {
             level,
             ipa: cleanIpa,
             syllables: saveSyllables,
             syllableCount: saveSyllables.length,
             graphemes,
             variants: variants.length > 0 ? variants : undefined,
-            ritaKnown: breakdown?.ritaKnown ?? initialDraft.ritaKnown,
+            ritaKnown: breakdown?.ritaKnown ?? initialDraft!.ritaKnown,
           })
         : draftStore.saveDraft({
             word: trimmed,
@@ -528,7 +533,8 @@ export const AuthoringPanel = ({
             syllableCount: saveSyllables.length,
             graphemes,
             ...(variants.length > 0 ? { variants } : {}),
-            ritaKnown: breakdown?.ritaKnown ?? false,
+            ritaKnown:
+              breakdown?.ritaKnown ?? initialDraft?.ritaKnown ?? false,
           }));
       onSaved?.();
       onClose();
@@ -957,12 +963,36 @@ export const AuthoringPanel = ({
           </label>
         </div>
         <div className="mt-6 flex flex-col gap-2">
-          {shippedSet.has(word.trim().toLowerCase()) && (
-            <p className="text-xs text-rose-600">
-              &quot;{word.trim()}&quot; already exists in shipped data —
-              open that entry instead.
-            </p>
-          )}
+          {(() => {
+            // Allow the collision when the user opened this panel
+            // specifically to override a shipped entry — the flow
+            // intentionally creates a same-word draft that shadows
+            // the shipped data. The `initialDraft.id === ''` seed
+            // from WordLibraryExplorer marks that intent.
+            const isShippedOverride = Boolean(
+              initialDraft && !initialDraft.id,
+            );
+            if (isShippedOverride) {
+              return (
+                <p className="text-xs text-amber-700">
+                  Editing the shipped entry for{' '}
+                  <strong>{initialDraft!.word}</strong>. Saving creates
+                  a draft that shadows the shipped word — the curriculum
+                  JSON isn&apos;t modified. Promote with{' '}
+                  <code>yarn words:import</code>.
+                </p>
+              );
+            }
+            if (shippedSet.has(word.trim().toLowerCase())) {
+              return (
+                <p className="text-xs text-rose-600">
+                  &quot;{word.trim()}&quot; already exists in shipped
+                  data — open that entry instead.
+                </p>
+              );
+            }
+            return null;
+          })()}
           <div className="flex justify-end gap-2">
             <button
               type="button"
@@ -977,7 +1007,8 @@ export const AuthoringPanel = ({
                 saving ||
                 !word.trim() ||
                 !normalizeIpa(ipa) ||
-                shippedSet.has(word.trim().toLowerCase())
+                (initialDraft === undefined &&
+                  shippedSet.has(word.trim().toLowerCase()))
               }
               onClick={() => {
                 void handleSave();

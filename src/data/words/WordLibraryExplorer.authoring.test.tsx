@@ -119,6 +119,30 @@ describe('WordLibraryExplorer authoring entry points', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('edits a shipped entry as a draft override when the Edit button is clicked', async () => {
+    render(<WordLibraryExplorer />);
+    // Filter to Level 1 and narrow to a single shipped word so we
+    // can click its Edit button.
+    await userEvent.click(
+      screen.getByRole('button', { name: /^level 1$/i }),
+    );
+    const search = screen.getByLabelText(/word search/i);
+    await userEvent.type(search, 'an');
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const editButton = await screen.findByRole('button', {
+      name: /^edit an$/i,
+    });
+    await userEvent.click(editButton);
+    // The authoring dialog should open pre-filled from the shipped
+    // data and announce the override mode.
+    expect(
+      await screen.findByRole('dialog', { name: /make up a word/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/editing the shipped entry/i),
+    ).toBeInTheDocument();
+  });
+
   it('shows a Drafts link when drafts exist', async () => {
     await draftStore.saveDraft({
       word: 'zzword',

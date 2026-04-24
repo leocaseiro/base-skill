@@ -10,6 +10,7 @@ import {
 } from 'vitest';
 import { AuthoringPanel } from './AuthoringPanel';
 import { draftStore } from './draftStore';
+import type { DraftEntry } from '../types';
 
 vi.mock('./engine', () => ({
   generateBreakdown: vi.fn(async (word: string) => ({
@@ -608,6 +609,59 @@ describe('AuthoringPanel save + duplicates', () => {
     expect(
       screen.getAllByTestId('syllable-chip').map((c) => c.textContent),
     ).toEqual(['pro', 'the', 'sis']);
+  });
+
+  it('treats an initialDraft with empty id as a shipped override and creates a new draft on save', async () => {
+    // "an" exists at Level 1 AUS — the synthesised seed here shadows
+    // the shipped entry so the user can correct a mistake without
+    // editing the curriculum JSON.
+    const nowIso = new Date().toISOString();
+    const shippedSeed: DraftEntry = {
+      id: '',
+      word: 'an',
+      region: 'aus',
+      level: 1,
+      ipa: 'OLD',
+      syllables: ['an'],
+      syllableCount: 1,
+      graphemes: [
+        { g: 'a', p: 'æ' },
+        { g: 'n', p: 'n' },
+      ],
+      ritaKnown: true,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+    const onSaved = vi.fn();
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={shippedSeed.word}
+        initialDraft={shippedSeed}
+        onSaved={onSaved}
+      />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Shipped-collision warning must NOT appear — this is an
+    // intentional override.
+    expect(
+      screen.queryByText(/already exists in shipped data/i),
+    ).not.toBeInTheDocument();
+    // Override banner explains what will happen on save.
+    expect(
+      screen.getByText(/editing the shipped entry/i),
+    ).toBeInTheDocument();
+    // Save is enabled and actually persists a new draft row.
+    const saveBtn = screen.getByRole('button', { name: /save draft/i });
+    expect(saveBtn).not.toBeDisabled();
+    await userEvent.click(saveBtn);
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    const list = await draftStore.listDrafts({ region: 'aus' });
+    const draft = list.find((d) => d.word === 'an');
+    expect(draft).toBeDefined();
+    expect(draft?.id).toBeTruthy();
+    expect(draft?.id).not.toBe('');
   });
 
   it('updates the existing draft in-place instead of throwing when editing', async () => {

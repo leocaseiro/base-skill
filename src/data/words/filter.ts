@@ -232,7 +232,13 @@ export const filterWords = async (
     filter.region === 'aus' ||
     filter.fallbackToAus === false
   ) {
-    return { hits: sortByWord([...shipped, ...drafts]) };
+    // Drafts shadow shipped entries for the same word — the draft is
+    // treated as the authoritative working copy (this is how the
+    // "edit shipped" flow persists corrections without mutating the
+    // curriculum JSON at runtime).
+    const draftWords = new Set(drafts.map((d) => d.word));
+    const shippedOnly = shipped.filter((s) => !draftWords.has(s.word));
+    return { hits: sortByWord([...shippedOnly, ...drafts]) };
   }
 
   const ausCurriculum = await loadCurriculum('aus');
@@ -243,8 +249,12 @@ export const filterWords = async (
   const ausFilteredDrafts = ausDrafts
     .map((d) => draftToHit(d))
     .filter((h) => entryMatches(h, { ...filter, region: 'aus' }));
+  const ausDraftWords = new Set(ausFilteredDrafts.map((d) => d.word));
+  const ausShippedOnly = ausShipped.filter(
+    (s) => !ausDraftWords.has(s.word),
+  );
   return {
-    hits: sortByWord([...ausShipped, ...ausFilteredDrafts]),
+    hits: sortByWord([...ausShippedOnly, ...ausFilteredDrafts]),
     usedFallback: { from: filter.region, to: 'aus' },
   };
 };
