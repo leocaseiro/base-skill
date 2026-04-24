@@ -142,14 +142,16 @@ const useDebouncedBreakdown = (
       try {
         const b = await generateBreakdown(trimmed);
         if (!ignore) {
+          // Align whenever we have phonemes — even when ritaKnown is
+          // false, the LTS guess in `b.phonemes` is strictly more
+          // useful than no alignment. Low-confidence chips surface
+          // the "please double-check" signal through the amber
+          // styling (already applied by the aligner).
           const aligned =
-            b.ritaKnown && b.phonemes.length > 0
-              ? align(b.word, b.phonemes)
-              : [];
-          // When rita has no alignment for this word, seed a single
-          // low-confidence chip holding the whole word so the user
-          // can click ✂ Split to carve out graphemes one by one.
-          // Same invariant as aligned chips: join(g) === word.
+            b.phonemes.length > 0 ? align(b.word, b.phonemes) : [];
+          // Only seed a single bootstrap chip when we have literally
+          // nothing (e.g. analyze threw, or the word was empty) —
+          // the user can still split it from there.
           const chipsToSet =
             aligned.length === 0 && b.word.length > 0
               ? [{ g: b.word, p: '', confidence: 0.2 }]
@@ -449,8 +451,10 @@ export const AuthoringPanel = ({
           </div>
           {breakdown && !breakdown.ritaKnown && word.trim() && (
             <div className="rounded border border-amber-300 bg-amber-50 p-3 text-sm">
-              RitaJS doesn&apos;t know <strong>{word.trim()}</strong>.
-              Look it up →{' '}
+              <strong>{word.trim()}</strong> isn&apos;t in RitaJS&apos;s
+              dictionary — the phonemes and syllables below are
+              letter-to-sound guesses. Please confirm in a dictionary
+              before saving →{' '}
               <a
                 href={`https://www.dictionary.com/browse/${encodeURIComponent(word.trim())}`}
                 target="_blank"
