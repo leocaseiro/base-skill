@@ -5,13 +5,13 @@ import { generateBreakdown } from './engine';
 
 vi.mock('rita', () => ({
   RiTa: {
-    isKnownWord: vi.fn(),
+    hasWord: vi.fn(),
     phones: vi.fn(),
     syllables: vi.fn(),
   },
 }));
 
-const mockIsKnownWord = vi.mocked(RiTa.isKnownWord);
+const mockHasWord = vi.mocked(RiTa.hasWord);
 
 const mockPhones = vi.mocked(RiTa.phones);
 
@@ -23,7 +23,7 @@ afterEach(() => {
 
 describe('generateBreakdown', () => {
   it('returns an empty breakdown when RitaJS does not know the word', async () => {
-    mockIsKnownWord.mockReturnValue(false);
+    mockHasWord.mockReturnValue(false);
 
     const result = await generateBreakdown('xyzzy');
 
@@ -38,7 +38,7 @@ describe('generateBreakdown', () => {
   });
 
   it('produces IPA + phonemes for a known word', async () => {
-    mockIsKnownWord.mockReturnValue(true);
+    mockHasWord.mockReturnValue(true);
     mockPhones.mockReturnValue('p-uh1 t-ih-ng');
     mockSyllables.mockReturnValue('p-uh/t-ih-ng');
 
@@ -50,7 +50,7 @@ describe('generateBreakdown', () => {
   });
 
   it('derives letter-space syllables from phoneme-space syllables', async () => {
-    mockIsKnownWord.mockReturnValue(true);
+    mockHasWord.mockReturnValue(true);
     mockPhones.mockReturnValue('p-uh1 t-ih-ng');
     mockSyllables.mockReturnValue('p-uh/t-ih-ng');
 
@@ -61,13 +61,13 @@ describe('generateBreakdown', () => {
   });
 
   it('lowercases and trims the word before calling Rita', async () => {
-    mockIsKnownWord.mockReturnValue(true);
+    mockHasWord.mockReturnValue(true);
     mockPhones.mockReturnValue('k-ae1 t');
     mockSyllables.mockReturnValue('k-ae-t');
 
     await generateBreakdown('  CAT  ');
 
-    expect(mockIsKnownWord).toHaveBeenCalledWith('cat');
+    expect(mockHasWord).toHaveBeenCalledWith('cat');
     expect(mockPhones).toHaveBeenCalledWith('cat', { silent: true });
   });
 });

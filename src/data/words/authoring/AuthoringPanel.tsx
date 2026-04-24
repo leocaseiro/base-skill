@@ -113,6 +113,10 @@ const useDebouncedBreakdown = (
             aligned.length > 0 ? suggestLevel(aligned).level : 1,
           );
         }
+      } catch (error) {
+        // Surface engine failures (e.g. rita missing/renamed methods,
+        // lexicon fetch errors) to devtools instead of swallowing them.
+        console.error('[authoring] generateBreakdown failed:', error);
       } finally {
         if (!ignore) setLoading(false);
       }
