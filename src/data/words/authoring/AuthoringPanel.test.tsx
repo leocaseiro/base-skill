@@ -519,6 +519,220 @@ describe('AuthoringPanel IPA and syllables', () => {
   });
 });
 
+describe('AuthoringPanel word lock + re-generate', () => {
+  beforeEach(async () => {
+    await draftStore.__clearAllForTests();
+  });
+  afterEach(async () => {
+    await draftStore.__clearAllForTests();
+  });
+
+  it('disables the Word input and shows a Re-generate button in edit mode (existing draft)', async () => {
+    const saved = await draftStore.saveDraft({
+      word: 'prothesis',
+      region: 'aus',
+      level: 6,
+      ipa: 'prɒθɪsɪs',
+      syllables: ['pro', 'the', 'sis'],
+      syllableCount: 3,
+      graphemes: [
+        { g: 'pr', p: 'pr' },
+        { g: 'o', p: 'ɒ' },
+        { g: 'th', p: 'θ' },
+        { g: 'e', p: 'ɪ' },
+        { g: 's', p: 's' },
+        { g: 'i', p: 'ɪ' },
+        { g: 's', p: 's' },
+      ],
+      ritaKnown: false,
+    });
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={saved.word}
+        initialDraft={saved}
+      />,
+    );
+    expect(
+      screen.getByRole('textbox', { name: /^word$/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /re-generate from ritajs/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('disables the Word input in shipped-override edit mode (initialDraft.id === "")', async () => {
+    const nowIso = new Date().toISOString();
+    const shippedSeed: DraftEntry = {
+      id: '',
+      word: 'an',
+      region: 'aus',
+      level: 1,
+      ipa: 'æn',
+      syllables: ['an'],
+      syllableCount: 1,
+      graphemes: [
+        { g: 'a', p: 'æ' },
+        { g: 'n', p: 'n' },
+      ],
+      ritaKnown: true,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord={shippedSeed.word}
+        initialDraft={shippedSeed}
+      />,
+    );
+    expect(
+      screen.getByRole('textbox', { name: /^word$/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /re-generate from ritajs/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the Word input editable in new-word mode before the first blur', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="" />);
+    const wordInput = screen.getByRole('textbox', { name: /^word$/i });
+    expect(wordInput).not.toBeDisabled();
+    await userEvent.type(wordInput, 'zzword');
+    // No blur yet → input still editable, no Re-generate button.
+    expect(wordInput).not.toBeDisabled();
+    expect(
+      screen.queryByRole('button', {
+        name: /re-generate from ritajs/i,
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('disables the Word input after the first non-empty blur in new-word mode and shows Re-generate', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="" />);
+    const wordInput = screen.getByRole('textbox', { name: /^word$/i });
+    await userEvent.type(wordInput, 'zzword');
+    // Tab off the input to trigger blur.
+    await userEvent.tab();
+    expect(wordInput).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /re-generate from ritajs/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('does not lock the Word input when blurring with an empty value', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="" />);
+    const wordInput = screen.getByRole('textbox', { name: /^word$/i });
+    // Focus then blur without typing anything.
+    await userEvent.click(wordInput);
+    await userEvent.tab();
+    expect(wordInput).not.toBeDisabled();
+    expect(
+      screen.queryByRole('button', {
+        name: /re-generate from ritajs/i,
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('clicking Re-generate invokes the engine again and reseeds the chips from the new breakdown', async () => {
+    const { generateBreakdown } = await import('./engine');
+    const mocked = vi.mocked(generateBreakdown);
+
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(screen.getAllByTestId('grapheme-chip').length).toBe(5);
+
+    // Mutate a chip so the form is dirty AND so we can prove the
+    // reseed wiped local edits when the user confirms. Pick the first
+    // multi-letter chip so Split is enabled.
+    const splitTarget = screen
+      .getAllByTestId('grapheme-chip')
+      .findIndex(
+        (c) => (c.querySelector('div')?.textContent ?? '').length >= 2,
+      );
+    expect(splitTarget).toBeGreaterThanOrEqual(0);
+    await userEvent.click(
+      screen.getAllByTestId('grapheme-chip')[splitTarget]!,
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /split grapheme/i }),
+    );
+    expect(screen.getAllByTestId('grapheme-chip').length).toBe(6);
+
+    // Tab away to lock the word + reveal Re-generate.
+    const wordInput = screen.getByRole('textbox', { name: /^word$/i });
+    await userEvent.click(wordInput);
+    await userEvent.tab();
+    const regenerate = screen.getByRole('button', {
+      name: /re-generate from ritajs/i,
+    });
+
+    const confirmSpy = vi
+      .spyOn(globalThis, 'confirm')
+      .mockReturnValue(true);
+    mocked.mockClear();
+    await userEvent.click(regenerate);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    // Engine called again with the same word.
+    expect(mocked).toHaveBeenCalledWith('putting');
+    // Chips reseeded back to the engine's 5-chip breakdown.
+    expect(screen.getAllByTestId('grapheme-chip').length).toBe(5);
+    confirmSpy.mockRestore();
+  });
+
+  it('Re-generate aborts when the form is dirty and the user cancels the confirm', async () => {
+    const { generateBreakdown } = await import('./engine');
+    const mocked = vi.mocked(generateBreakdown);
+
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+
+    // Dirty the form by splitting a chip. Pick a multi-letter chip
+    // so Split is enabled.
+    const splitTarget = screen
+      .getAllByTestId('grapheme-chip')
+      .findIndex(
+        (c) => (c.querySelector('div')?.textContent ?? '').length >= 2,
+      );
+    expect(splitTarget).toBeGreaterThanOrEqual(0);
+    await userEvent.click(
+      screen.getAllByTestId('grapheme-chip')[splitTarget]!,
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /split grapheme/i }),
+    );
+    const dirtyChipCount =
+      screen.getAllByTestId('grapheme-chip').length;
+
+    const wordInput = screen.getByRole('textbox', { name: /^word$/i });
+    await userEvent.click(wordInput);
+    await userEvent.tab();
+
+    const confirmSpy = vi
+      .spyOn(globalThis, 'confirm')
+      .mockReturnValue(false);
+    mocked.mockClear();
+    await userEvent.click(
+      screen.getByRole('button', { name: /re-generate from ritajs/i }),
+    );
+
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(mocked).not.toHaveBeenCalled();
+    // Dirty edit preserved.
+    expect(screen.getAllByTestId('grapheme-chip').length).toBe(
+      dirtyChipCount,
+    );
+    confirmSpy.mockRestore();
+  });
+});
+
 describe('AuthoringPanel save + duplicates', () => {
   beforeEach(async () => {
     await draftStore.__clearAllForTests();

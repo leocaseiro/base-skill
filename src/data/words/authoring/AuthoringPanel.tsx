@@ -94,6 +94,7 @@ const useDebouncedBreakdown = (
   level: DraftLevel;
   setLevel: (value: DraftLevel) => void;
   loading: boolean;
+  regenerate: () => void;
 } => {
   const [breakdown, setBreakdown] = useState<Breakdown | null>(
     seed
@@ -115,6 +116,11 @@ const useDebouncedBreakdown = (
   const [ipa, setIpa] = useState(seed?.ipa ?? '');
   const [level, setLevel] = useState<DraftLevel>(seed?.level ?? 1);
   const [loading, setLoading] = useState(false);
+  // Bumped by `regenerate()` to re-trigger the breakdown effect for
+  // the same word — used by the "Re-generate from RitaJS" button so
+  // the user can rebuild chips/IPA/syllables/level from the engine
+  // after manually editing the form.
+  const [regenVersion, setRegenVersion] = useState(0);
   // Tracks whether the user has manually edited the IPA field for the
   // current word.  When true, the async breakdown result must not
   // overwrite the user's input.  Reset to false whenever `word` changes
@@ -129,6 +135,14 @@ const useDebouncedBreakdown = (
   const setIpaUser = useCallback((value: string) => {
     ipaEditedRef.current = true;
     setIpa(value);
+  }, []);
+
+  const regenerate = useCallback(() => {
+    // Force a re-run of the breakdown effect even when `word` hasn't
+    // changed. Also flip skipNextRef false so a seeded mount that
+    // immediately gets a Re-generate click still calls the engine.
+    skipNextRef.current = false;
+    setRegenVersion((v) => v + 1);
   }, []);
 
   useEffect(() => {
@@ -205,7 +219,7 @@ const useDebouncedBreakdown = (
       ignore = true;
       clearTimeout(timer);
     };
-  }, [word]);
+  }, [word, regenVersion]);
 
   return {
     breakdown,
@@ -218,6 +232,7 @@ const useDebouncedBreakdown = (
     level,
     setLevel,
     loading,
+    regenerate,
   };
 };
 
@@ -245,7 +260,16 @@ export const AuthoringPanel = ({
     setIpa,
     level,
     setLevel,
+    regenerate,
   } = useDebouncedBreakdown(word, initialDraft);
+  // Edit mode locks the Word input from the start because changing
+  // the word would require a delete + re-save (the draftStore uses
+  // `[region+word]` as a unique key). In new-word mode the user can
+  // freely type until the first non-empty blur, after which we lock
+  // and offer the "Re-generate from RitaJS" button instead.
+  const [wordCommitted, setWordCommitted] = useState(
+    initialDraft !== undefined,
+  );
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingSyllableIndex, setEditingSyllableIndex] = useState<
@@ -611,13 +635,37 @@ export const AuthoringPanel = ({
               id={wordInputId}
               type="text"
               value={word}
+              disabled={wordCommitted}
               onChange={(e) => {
                 setWord(e.target.value);
                 setEditingIndex(null);
                 setDirty(true);
               }}
-              className="rounded border px-3 py-2"
+              onBlur={() => {
+                if (word.trim() !== '') setWordCommitted(true);
+              }}
+              className="rounded border px-3 py-2 disabled:bg-slate-100 disabled:text-slate-700"
             />
+            {wordCommitted && word.trim() && (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (
+                      dirty &&
+                      !globalThis.confirm(
+                        'Re-generate from RitaJS? This will overwrite your local edits to chips, IPA, syllables, and level.',
+                      )
+                    )
+                      return;
+                    regenerate();
+                  }}
+                  className="rounded-md border border-input px-2 py-0.5 text-xs hover:bg-muted"
+                >
+                  ↻ Re-generate from RitaJS
+                </button>
+              </div>
+            )}
             {word.trim() && (
               <div className="flex flex-wrap gap-3 text-xs text-sky-700">
                 <a
