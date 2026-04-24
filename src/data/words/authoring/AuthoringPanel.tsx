@@ -12,6 +12,7 @@ import { PHONEME_CODE_TO_IPA } from '../phoneme-codes';
 import { align } from './aligner';
 import { draftStore } from './draftStore';
 import { generateBreakdown } from './engine';
+import { normalizeIpa } from './ipa';
 import type { AlignedGrapheme } from './aligner';
 import type { Breakdown } from './engine';
 import type { DraftEntry, DraftLevel } from '../types';
@@ -271,12 +272,13 @@ export const AuthoringPanel = ({
       .filter(Boolean);
     const saveSyllables = breakdown?.syllables ?? [trimmed];
     const graphemes = chips.map(({ confidence: _c, ...rest }) => rest);
+    const cleanIpa = normalizeIpa(ipa);
     setSaving(true);
     try {
       await (initialDraft
         ? draftStore.updateDraft(initialDraft.id, {
             level,
-            ipa,
+            ipa: cleanIpa,
             syllables: saveSyllables,
             syllableCount: saveSyllables.length,
             graphemes,
@@ -287,7 +289,7 @@ export const AuthoringPanel = ({
             word: trimmed,
             region: 'aus',
             level,
-            ipa,
+            ipa: cleanIpa,
             syllables: saveSyllables,
             syllableCount: saveSyllables.length,
             graphemes,
@@ -546,7 +548,7 @@ export const AuthoringPanel = ({
               disabled={
                 saving ||
                 !word.trim() ||
-                !ipa.trim() ||
+                !normalizeIpa(ipa) ||
                 shippedSet.has(word.trim().toLowerCase())
               }
               onClick={() => {

@@ -296,6 +296,30 @@ describe('AuthoringPanel save + duplicates', () => {
     expect(list[0]!.word).toBe('prothesis');
   });
 
+  it('normalises the IPA field on save (strips slashes, whitespace, and stress marks)', async () => {
+    const onSaved = vi.fn();
+    render(
+      <AuthoringPanel
+        open
+        onClose={noop}
+        initialWord="zzword"
+        onSaved={onSaved}
+      />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /IPA/i }),
+      '/ˈzwɜːd/',
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /save draft/i }),
+    );
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    const list = await draftStore.listDrafts({ region: 'aus' });
+    const draft = list.find((d) => d.word === 'zzword');
+    expect(draft?.ipa).toBe('zwɜːd');
+  });
+
   it('prompts to confirm on ESC when the form is dirty', async () => {
     const confirmSpy = vi
       .spyOn(globalThis, 'confirm')
