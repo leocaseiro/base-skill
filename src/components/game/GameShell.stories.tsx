@@ -105,14 +105,6 @@ export const NoTimer: Story = {
   },
 };
 
-export const NoUndo: Story = {
-  args: {
-    ...Default.args,
-    sessionId: 'storybook-session-003',
-    config: { ...baseConfig, maxUndoDepth: 0 },
-  },
-};
-
 export const FirstRound: Story = {
   args: {
     ...Default.args,
