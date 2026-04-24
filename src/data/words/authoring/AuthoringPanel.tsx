@@ -297,30 +297,34 @@ export const AuthoringPanel = ({
     setDirty(true);
   };
 
-  const extendChip = (i: number) => {
+  // Move the first letter of chip `i` onto the end of chip `i - 1`.
+  // Rebalances the boundary between two adjacent chips without
+  // changing the chip count; requires a left neighbour and at least
+  // two letters in the current chip (otherwise the source would be
+  // emptied).
+  const moveChipLetterLeft = (i: number) => {
     setChips((prev) => {
       const next = [...prev];
       const current = next[i];
-      if (!current) return prev;
-      const nextChip = next[i + 1];
-      if (!nextChip || nextChip.g.length < 2) return prev;
-      next[i] = { ...current, g: current.g + nextChip.g[0]! };
-      next[i + 1] = { ...nextChip, g: nextChip.g.slice(1) };
+      const left = next[i - 1];
+      if (!current || !left || current.g.length < 2) return prev;
+      next[i] = { ...current, g: current.g.slice(1) };
+      next[i - 1] = { ...left, g: left.g + current.g[0]! };
       return next;
     });
     setDirty(true);
   };
 
-  const shrinkChip = (i: number) => {
+  // Mirror of `moveChipLetterLeft` — move the last letter of chip
+  // `i` to the start of chip `i + 1`.
+  const moveChipLetterRight = (i: number) => {
     setChips((prev) => {
       const next = [...prev];
       const current = next[i];
-      if (!current || current.g.length < 2) return prev;
-      const nextChip = next[i + 1];
-      if (!nextChip) return prev;
-      const moved = current.g.slice(-1);
+      const right = next[i + 1];
+      if (!current || !right || current.g.length < 2) return prev;
       next[i] = { ...current, g: current.g.slice(0, -1) };
-      next[i + 1] = { ...nextChip, g: moved + nextChip.g };
+      next[i + 1] = { ...right, g: current.g.slice(-1) + right.g };
       return next;
     });
     setDirty(true);
@@ -352,23 +356,33 @@ export const AuthoringPanel = ({
     setDirty(true);
   };
 
-  // Remove chip `i` and re-attach its letters to a neighbour so the
-  // invariant `chips.map(c => c.g).join('') === word` still holds.
-  // When `i === 0` the removed letters prepend onto chip 1; otherwise
-  // they append onto chip `i - 1`. Refuses to delete the only chip.
-  const deleteChip = (i: number) => {
+  // Remove chip `i` and append its letters to the previous chip.
+  // Refuses on the first chip (no left neighbour) or when it's the
+  // only chip.
+  const joinChipLeft = (i: number) => {
     setChips((prev) => {
-      if (prev.length <= 1) return prev;
+      if (prev.length <= 1 || i === 0) return prev;
       const next = [...prev];
       const [removed] = next.splice(i, 1);
-      if (!removed) return prev;
-      if (i === 0) {
-        const right = next[0];
-        if (right) next[0] = { ...right, g: removed.g + right.g };
-      } else {
-        const left = next[i - 1];
-        if (left) next[i - 1] = { ...left, g: left.g + removed.g };
-      }
+      const left = next[i - 1];
+      if (!removed || !left) return prev;
+      next[i - 1] = { ...left, g: left.g + removed.g };
+      return next;
+    });
+    setEditingIndex(null);
+    setDirty(true);
+  };
+
+  // Mirror of `joinChipLeft` — prepend current chip's letters onto
+  // the next chip and remove the current one.
+  const joinChipRight = (i: number) => {
+    setChips((prev) => {
+      if (prev.length <= 1 || i === prev.length - 1) return prev;
+      const next = [...prev];
+      const [removed] = next.splice(i, 1);
+      const right = next[i];
+      if (!removed || !right) return prev;
+      next[i] = { ...right, g: removed.g + right.g };
       return next;
     });
     setEditingIndex(null);
@@ -414,22 +428,70 @@ export const AuthoringPanel = ({
     setDirty(true);
   };
 
-  // Delete syllable `i`, merging its letters into the previous
-  // syllable (or the next one if `i === 0`). Refuses to delete the
-  // only syllable.
-  const deleteSyllable = (i: number) => {
+  // Mirror of the chip letter-move helpers for syllables: rebalance
+  // the boundary without changing the syllable count.
+  const moveSyllableLetterLeft = (i: number) => {
     setSyllables((prev) => {
-      if (prev.length <= 1) return prev;
+      const next = [...prev];
+      const current = next[i];
+      const left = next[i - 1];
+      if (
+        current === undefined ||
+        left === undefined ||
+        current.length < 2
+      )
+        return prev;
+      next[i] = current.slice(1);
+      next[i - 1] = left + current[0]!;
+      return next;
+    });
+    setDirty(true);
+  };
+
+  const moveSyllableLetterRight = (i: number) => {
+    setSyllables((prev) => {
+      const next = [...prev];
+      const current = next[i];
+      const right = next[i + 1];
+      if (
+        current === undefined ||
+        right === undefined ||
+        current.length < 2
+      )
+        return prev;
+      next[i] = current.slice(0, -1);
+      next[i + 1] = current.slice(-1) + right;
+      return next;
+    });
+    setDirty(true);
+  };
+
+  // Join syllable `i` into the previous one (current disappears,
+  // letters append). Refuses on index 0 or when only one remains.
+  const joinSyllableLeft = (i: number) => {
+    setSyllables((prev) => {
+      if (prev.length <= 1 || i === 0) return prev;
       const next = [...prev];
       const [removed] = next.splice(i, 1);
-      if (removed === undefined) return prev;
-      if (i === 0) {
-        const right = next[0];
-        if (right !== undefined) next[0] = removed + right;
-      } else {
-        const left = next[i - 1];
-        if (left !== undefined) next[i - 1] = left + removed;
-      }
+      const left = next[i - 1];
+      if (removed === undefined || left === undefined) return prev;
+      next[i - 1] = left + removed;
+      return next;
+    });
+    setEditingSyllableIndex(null);
+    setDirty(true);
+  };
+
+  // Mirror of `joinSyllableLeft` — prepend current letters onto the
+  // next syllable.
+  const joinSyllableRight = (i: number) => {
+    setSyllables((prev) => {
+      if (prev.length <= 1 || i === prev.length - 1) return prev;
+      const next = [...prev];
+      const [removed] = next.splice(i, 1);
+      const right = next[i];
+      if (removed === undefined || right === undefined) return prev;
+      next[i] = removed + right;
       return next;
     });
     setEditingSyllableIndex(null);
@@ -570,10 +632,10 @@ export const AuthoringPanel = ({
           {chips.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-slate-500">
-                Click a chip to change its phoneme, rebalance letters,
-                split it into two, or delete it. The selected chip has a
-                blue ring; amber chips are low-confidence guesses to
-                double-check.
+                Click a chip to change its phoneme, move a letter to a
+                neighbour, split it, or join it with a neighbour. The
+                selected chip has a blue ring; amber chips are
+                low-confidence guesses to double-check.
               </p>
               <div className="flex flex-wrap gap-2">
                 {chips.map((chip, i) => {
@@ -640,30 +702,27 @@ export const AuthoringPanel = ({
                   ))}
                 </select>
               </label>
-              <div className="mt-2 flex gap-1">
+              <div className="mt-2 flex flex-wrap gap-1">
                 <button
                   type="button"
-                  aria-label="Shrink grapheme"
+                  aria-label="Move letter to previous grapheme"
                   disabled={
-                    chips[editingIndex].g.length < 2 ||
-                    !chips[editingIndex + 1]
+                    editingIndex === 0 ||
+                    chips[editingIndex].g.length < 2
                   }
-                  onClick={() => shrinkChip(editingIndex)}
+                  onClick={() => moveChipLetterLeft(editingIndex)}
                   className="rounded border px-2 py-1 text-sm disabled:opacity-50"
                 >
-                  −
+                  ‹ Move
                 </button>
                 <button
                   type="button"
-                  aria-label="Extend grapheme"
-                  disabled={
-                    !chips[editingIndex + 1] ||
-                    (chips[editingIndex + 1]?.g.length ?? 0) < 2
-                  }
-                  onClick={() => extendChip(editingIndex)}
+                  aria-label="Join with previous grapheme"
+                  disabled={editingIndex === 0 || chips.length <= 1}
+                  onClick={() => joinChipLeft(editingIndex)}
                   className="rounded border px-2 py-1 text-sm disabled:opacity-50"
                 >
-                  +
+                  « Join
                 </button>
                 <button
                   type="button"
@@ -676,12 +735,27 @@ export const AuthoringPanel = ({
                 </button>
                 <button
                   type="button"
-                  aria-label="Delete grapheme"
-                  disabled={chips.length <= 1}
-                  onClick={() => deleteChip(editingIndex)}
-                  className="ms-auto rounded border border-rose-300 px-2 py-1 text-sm text-rose-700 disabled:opacity-50"
+                  aria-label="Join with next grapheme"
+                  disabled={
+                    editingIndex === chips.length - 1 ||
+                    chips.length <= 1
+                  }
+                  onClick={() => joinChipRight(editingIndex)}
+                  className="rounded border px-2 py-1 text-sm disabled:opacity-50"
                 >
-                  🗑 Delete
+                  Join »
+                </button>
+                <button
+                  type="button"
+                  aria-label="Move letter to next grapheme"
+                  disabled={
+                    editingIndex === chips.length - 1 ||
+                    chips[editingIndex].g.length < 2
+                  }
+                  onClick={() => moveChipLetterRight(editingIndex)}
+                  className="rounded border px-2 py-1 text-sm disabled:opacity-50"
+                >
+                  Move ›
                 </button>
               </div>
             </div>
@@ -713,8 +787,8 @@ export const AuthoringPanel = ({
           {syllables.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-slate-500">
-                Click a syllable to split it into two or delete it
-                (letters merge into the neighbour).
+                Click a syllable to move a letter to a neighbour, split
+                it, or join it with a neighbour.
               </p>
               <div className="flex flex-wrap gap-2">
                 {syllables.map((s, i) => {
@@ -740,7 +814,35 @@ export const AuthoringPanel = ({
               </div>
               {editingSyllableIndex !== null &&
                 syllables[editingSyllableIndex] !== undefined && (
-                  <div className="flex gap-1 rounded border border-slate-300 bg-slate-50 p-2">
+                  <div className="flex flex-wrap gap-1 rounded border border-slate-300 bg-slate-50 p-2">
+                    <button
+                      type="button"
+                      aria-label="Move letter to previous syllable"
+                      disabled={
+                        editingSyllableIndex === 0 ||
+                        syllables[editingSyllableIndex].length < 2
+                      }
+                      onClick={() =>
+                        moveSyllableLetterLeft(editingSyllableIndex)
+                      }
+                      className="rounded border px-2 py-1 text-sm disabled:opacity-50"
+                    >
+                      ‹ Move
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Join with previous syllable"
+                      disabled={
+                        editingSyllableIndex === 0 ||
+                        syllables.length <= 1
+                      }
+                      onClick={() =>
+                        joinSyllableLeft(editingSyllableIndex)
+                      }
+                      className="rounded border px-2 py-1 text-sm disabled:opacity-50"
+                    >
+                      « Join
+                    </button>
                     <button
                       type="button"
                       aria-label="Split syllable"
@@ -756,14 +858,31 @@ export const AuthoringPanel = ({
                     </button>
                     <button
                       type="button"
-                      aria-label="Delete syllable"
-                      disabled={syllables.length <= 1}
-                      onClick={() =>
-                        deleteSyllable(editingSyllableIndex)
+                      aria-label="Join with next syllable"
+                      disabled={
+                        editingSyllableIndex === syllables.length - 1 ||
+                        syllables.length <= 1
                       }
-                      className="ms-auto rounded border border-rose-300 px-2 py-1 text-sm text-rose-700 disabled:opacity-50"
+                      onClick={() =>
+                        joinSyllableRight(editingSyllableIndex)
+                      }
+                      className="rounded border px-2 py-1 text-sm disabled:opacity-50"
                     >
-                      🗑 Delete
+                      Join »
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Move letter to next syllable"
+                      disabled={
+                        editingSyllableIndex === syllables.length - 1 ||
+                        syllables[editingSyllableIndex].length < 2
+                      }
+                      onClick={() =>
+                        moveSyllableLetterRight(editingSyllableIndex)
+                      }
+                      className="rounded border px-2 py-1 text-sm disabled:opacity-50"
+                    >
+                      Move ›
                     </button>
                   </div>
                 )}

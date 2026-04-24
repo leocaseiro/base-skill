@@ -184,46 +184,83 @@ describe('AuthoringPanel grapheme chips', () => {
     expect(chips[0]!.className).not.toMatch(/ring-/);
   });
 
-  it('deletes a chip via the editor and merges its letters into the previous chip', async () => {
+  it('joins a chip into its left neighbour preserving the word', async () => {
     render(
       <AuthoringPanel open onClose={noop} initialWord="putting" />,
     );
     await act(() => new Promise((r) => setTimeout(r, 500)));
-    const before = screen
-      .getAllByTestId('grapheme-chip')
-      .map((c) => c.textContent);
-    expect(before.length).toBe(5);
-    await userEvent.click(screen.getAllByTestId('grapheme-chip')[2]!);
+    const before = screen.getAllByTestId('grapheme-chip');
+    const countBefore = before.length;
+    await userEvent.click(before[2]!);
     await userEvent.click(
-      screen.getByRole('button', { name: /delete grapheme/i }),
+      screen.getByRole('button', { name: /join with previous/i }),
     );
     const after = screen.getAllByTestId('grapheme-chip');
-    expect(after.length).toBe(4);
-    // `putting` → p, u, tt, ing → delete index 2 (tt) → p, u, utt (u
-    // absorbs tt), ing. The concatenation must still equal "putting".
+    expect(after.length).toBe(countBefore - 1);
     const joined = after
       .map((c) => c.querySelector('div')?.textContent ?? '')
       .join('');
     expect(joined).toBe('putting');
   });
 
-  it('deleting the first chip merges its letters into the next chip', async () => {
+  it('joins a chip into its right neighbour preserving the word', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const before = screen.getAllByTestId('grapheme-chip');
+    const countBefore = before.length;
+    await userEvent.click(before[0]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /join with next/i }),
+    );
+    const after = screen.getAllByTestId('grapheme-chip');
+    expect(after.length).toBe(countBefore - 1);
+    const joined = after
+      .map((c) => c.querySelector('div')?.textContent ?? '')
+      .join('');
+    expect(joined).toBe('putting');
+    // After joining chip 0 into chip 1, the new chip 0 carries both.
+    expect(after[0]!.querySelector('div')?.textContent).toBe('pu');
+  });
+
+  it('moves a letter from the current chip into the left neighbour', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // "tt" lives at index 2; move a letter left → chip[1] "u"
+    // becomes "ut", chip[2] "tt" becomes "t". Chip count preserved.
+    const chips = screen.getAllByTestId('grapheme-chip');
+    const countBefore = chips.length;
+    await userEvent.click(chips[2]!);
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /move letter to previous/i,
+      }),
+    );
+    const after = screen.getAllByTestId('grapheme-chip');
+    expect(after.length).toBe(countBefore);
+    const joined = after
+      .map((c) => c.querySelector('div')?.textContent ?? '')
+      .join('');
+    expect(joined).toBe('putting');
+  });
+
+  it('disables move-left and join-left on the first chip', async () => {
     render(
       <AuthoringPanel open onClose={noop} initialWord="putting" />,
     );
     await act(() => new Promise((r) => setTimeout(r, 500)));
     await userEvent.click(screen.getAllByTestId('grapheme-chip')[0]!);
-    await userEvent.click(
-      screen.getByRole('button', { name: /delete grapheme/i }),
-    );
-    const after = screen.getAllByTestId('grapheme-chip');
-    expect(after.length).toBe(4);
-    const joined = after
-      .map((c) => c.querySelector('div')?.textContent ?? '')
-      .join('');
-    expect(joined).toBe('putting');
-    // The first chip now absorbs the previously-deleted leading chip.
-    expect(after[0]!.querySelector('div')?.textContent).toBe('pu');
+    expect(
+      screen.getByRole('button', {
+        name: /move letter to previous/i,
+      }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /join with previous/i }),
+    ).toBeDisabled();
   });
 
   it('bootstraps a single full-word chip when rita does not know the word, so split works', async () => {
@@ -311,18 +348,17 @@ describe('AuthoringPanel grapheme chips', () => {
     expect(joined).toBe('putting');
   });
 
-  it('disables the delete button when only one chip remains', async () => {
+  it('disables both join buttons when only one chip remains', async () => {
     render(<AuthoringPanel open onClose={noop} initialWord="a" />);
     await act(() => new Promise((r) => setTimeout(r, 500)));
     const chips = screen.queryAllByTestId('grapheme-chip');
-    if (chips.length !== 1) {
-      // If the engine didn't align "a" to a single chip, skip — the
-      // assertion only makes sense with exactly one chip present.
-      return;
-    }
+    if (chips.length !== 1) return;
     await userEvent.click(chips[0]!);
     expect(
-      screen.getByRole('button', { name: /delete grapheme/i }),
+      screen.getByRole('button', { name: /join with previous/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /join with next/i }),
     ).toBeDisabled();
   });
 });
@@ -344,14 +380,16 @@ describe('AuthoringPanel syllable editor', () => {
     expect(after.map((c) => c.textContent).join('')).toBe('putting');
   });
 
-  it('deletes a syllable and merges its letters into a neighbour', async () => {
+  it('joins a syllable into its previous neighbour', async () => {
     render(
       <AuthoringPanel open onClose={noop} initialWord="putting" />,
     );
     await act(() => new Promise((r) => setTimeout(r, 500)));
     await userEvent.click(screen.getAllByTestId('syllable-chip')[1]!);
     await userEvent.click(
-      screen.getByRole('button', { name: /delete syllable/i }),
+      screen.getByRole('button', {
+        name: /join with previous syllable/i,
+      }),
     );
     const after = screen.getAllByTestId('syllable-chip');
     expect(after).toHaveLength(1);
@@ -377,14 +415,37 @@ describe('AuthoringPanel syllable editor', () => {
     expect(after.map((c) => c.textContent).join('')).toBe('prothesis');
   });
 
-  it('disables delete when only one syllable remains', async () => {
+  it('moves a letter between adjacent syllables without changing the count', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    // Syllables are ['put', 'ting']. Move a letter right from index 0
+    // → ['pu', 'tting']. Join invariant preserved.
+    await userEvent.click(screen.getAllByTestId('syllable-chip')[0]!);
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /move letter to next syllable/i,
+      }),
+    );
+    const after = screen.getAllByTestId('syllable-chip');
+    expect(after.length).toBe(2);
+    expect(after.map((c) => c.textContent)).toEqual(['pu', 'tting']);
+  });
+
+  it('disables both syllable join buttons when only one syllable remains', async () => {
     render(
       <AuthoringPanel open onClose={noop} initialWord="prothesis" />,
     );
     await act(() => new Promise((r) => setTimeout(r, 500)));
     await userEvent.click(screen.getAllByTestId('syllable-chip')[0]!);
     expect(
-      screen.getByRole('button', { name: /delete syllable/i }),
+      screen.getByRole('button', {
+        name: /join with previous syllable/i,
+      }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /join with next syllable/i }),
     ).toBeDisabled();
   });
 });
