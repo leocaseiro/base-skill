@@ -264,6 +264,32 @@ export const AuthoringPanel = ({
     setDirty(true);
   };
 
+  // Carve the trailing letter of chip `i` into a new chip inserted
+  // at `i + 1`. This is the only way to add a chip: the invariant
+  // `chips.map(c => c.g).join('') === word` means every chip's
+  // letters come from the word, so "adding" really means splitting
+  // an existing boundary. The new chip inherits the source chip's
+  // phoneme as a placeholder (flagged low-confidence so the amber
+  // treatment cues the user to re-check it).
+  const splitChip = (i: number) => {
+    setChips((prev) => {
+      const next = [...prev];
+      const current = next[i];
+      if (!current || current.g.length < 2) return prev;
+      const head = current.g.slice(0, -1);
+      const tail = current.g.slice(-1);
+      next[i] = { ...current, g: head };
+      next.splice(i + 1, 0, {
+        g: tail,
+        p: current.p,
+        confidence: 0.4,
+      });
+      return next;
+    });
+    setEditingIndex(i + 1);
+    setDirty(true);
+  };
+
   // Remove chip `i` and re-attach its letters to a neighbour so the
   // invariant `chips.map(c => c.g).join('') === word` still holds.
   // When `i === 0` the removed letters prepend onto chip 1; otherwise
@@ -419,8 +445,9 @@ export const AuthoringPanel = ({
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-slate-500">
                 Click a chip to change its phoneme, rebalance letters,
-                or delete it. The selected chip has a blue ring; amber
-                chips are low-confidence guesses to double-check.
+                split it into two, or delete it. The selected chip has a
+                blue ring; amber chips are low-confidence guesses to
+                double-check.
               </p>
               <div className="flex flex-wrap gap-2">
                 {chips.map((chip, i) => {
@@ -498,6 +525,15 @@ export const AuthoringPanel = ({
                   className="rounded border px-2 py-1 text-sm disabled:opacity-50"
                 >
                   +
+                </button>
+                <button
+                  type="button"
+                  aria-label="Split grapheme"
+                  disabled={chips[editingIndex].g.length < 2}
+                  onClick={() => splitChip(editingIndex)}
+                  className="rounded border px-2 py-1 text-sm disabled:opacity-50"
+                >
+                  ✂ Split
                 </button>
                 <button
                   type="button"
