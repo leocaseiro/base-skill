@@ -14,7 +14,7 @@ import { draftStore } from './draftStore';
 import { generateBreakdown } from './engine';
 import type { AlignedGrapheme } from './aligner';
 import type { Breakdown } from './engine';
-import type { DraftLevel } from '../types';
+import type { DraftEntry, DraftLevel } from '../types';
 
 const BASE_PHONEME_IPA_OPTIONS = [
   ...new Set(Object.values(PHONEME_CODE_TO_IPA)),
@@ -43,6 +43,12 @@ export interface AuthoringPanelProps {
   open: boolean;
   onClose: () => void;
   initialWord: string;
+  /**
+   * When set, the panel opens in edit mode: the form is pre-filled
+   * from the draft and Save routes through `draftStore.updateDraft`
+   * instead of `saveDraft` (which would throw on the existing row).
+   */
+  initialDraft?: DraftEntry;
   onSaved?: () => void;
 }
 
@@ -54,8 +60,12 @@ type SetChips = (
     | ((prev: AlignedGrapheme[]) => AlignedGrapheme[]),
 ) => void;
 
+const seedFromDraft = (draft: DraftEntry): AlignedGrapheme[] =>
+  draft.graphemes.map((g) => ({ ...g, confidence: 1 }));
+
 const useDebouncedBreakdown = (
   word: string,
+  seed: DraftEntry | undefined,
 ): {
   breakdown: Breakdown | null;
   chips: AlignedGrapheme[];
@@ -66,16 +76,33 @@ const useDebouncedBreakdown = (
   setLevel: (value: DraftLevel) => void;
   loading: boolean;
 } => {
-  const [breakdown, setBreakdown] = useState<Breakdown | null>(null);
-  const [chips, setChips] = useState<AlignedGrapheme[]>([]);
-  const [ipa, setIpa] = useState('');
-  const [level, setLevel] = useState<DraftLevel>(1);
+  const [breakdown, setBreakdown] = useState<Breakdown | null>(
+    seed
+      ? {
+          word: seed.word,
+          ipa: seed.ipa,
+          syllables: seed.syllables,
+          phonemes: seed.graphemes.map((g) => g.p),
+          ritaKnown: seed.ritaKnown,
+        }
+      : null,
+  );
+  const [chips, setChips] = useState<AlignedGrapheme[]>(
+    seed ? seedFromDraft(seed) : [],
+  );
+  const [ipa, setIpa] = useState(seed?.ipa ?? '');
+  const [level, setLevel] = useState<DraftLevel>(seed?.level ?? 1);
   const [loading, setLoading] = useState(false);
   // Tracks whether the user has manually edited the IPA field for the
   // current word.  When true, the async breakdown result must not
   // overwrite the user's input.  Reset to false whenever `word` changes
   // so that auto-fill works again for the new word.
   const ipaEditedRef = useRef(false);
+  // Skip the first breakdown effect when we opened from an existing
+  // draft — the seed is the authoritative state, and letting rita
+  // re-run would wipe the user's saved chips/IPA/level on mount.
+  // Subsequent word edits in the input still trigger re-derivation.
+  const skipNextRef = useRef(seed !== undefined);
 
   const setIpaUser = useCallback((value: string) => {
     ipaEditedRef.current = true;
@@ -83,6 +110,10 @@ const useDebouncedBreakdown = (
   }, []);
 
   useEffect(() => {
+    if (skipNextRef.current) {
+      skipNextRef.current = false;
+      return;
+    }
     const trimmed = word.trim();
     ipaEditedRef.current = false; // new word — allow auto-fill again
     if (!trimmed) {
@@ -143,6 +174,7 @@ export const AuthoringPanel = ({
   open,
   onClose,
   initialWord,
+  initialDraft,
   onSaved,
 }: AuthoringPanelProps) => {
   const titleId = useId();
@@ -150,12 +182,14 @@ export const AuthoringPanel = ({
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const [word, setWord] = useState(initialWord);
+  const [word, setWord] = useState(initialDraft?.word ?? initialWord);
   const { breakdown, chips, setChips, ipa, setIpa, level, setLevel } =
-    useDebouncedBreakdown(word);
+    useDebouncedBreakdown(word, initialDraft);
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [variantsInput, setVariantsInput] = useState('');
+  const [variantsInput, setVariantsInput] = useState(
+    initialDraft?.variants?.join(', ') ?? '',
+  );
   const [shippedSet, setShippedSet] = useState<Set<string>>(new Set());
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -235,19 +269,31 @@ export const AuthoringPanel = ({
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
+    const saveSyllables = breakdown?.syllables ?? [trimmed];
+    const graphemes = chips.map(({ confidence: _c, ...rest }) => rest);
     setSaving(true);
     try {
-      await draftStore.saveDraft({
-        word: trimmed,
-        region: 'aus',
-        level,
-        ipa,
-        syllables: breakdown?.syllables ?? [trimmed],
-        syllableCount: (breakdown?.syllables ?? [trimmed]).length,
-        graphemes: chips.map(({ confidence: _c, ...rest }) => rest),
-        ...(variants.length > 0 ? { variants } : {}),
-        ritaKnown: breakdown?.ritaKnown ?? false,
-      });
+      await (initialDraft
+        ? draftStore.updateDraft(initialDraft.id, {
+            level,
+            ipa,
+            syllables: saveSyllables,
+            syllableCount: saveSyllables.length,
+            graphemes,
+            variants: variants.length > 0 ? variants : undefined,
+            ritaKnown: breakdown?.ritaKnown ?? initialDraft.ritaKnown,
+          })
+        : draftStore.saveDraft({
+            word: trimmed,
+            region: 'aus',
+            level,
+            ipa,
+            syllables: saveSyllables,
+            syllableCount: saveSyllables.length,
+            graphemes,
+            ...(variants.length > 0 ? { variants } : {}),
+            ritaKnown: breakdown?.ritaKnown ?? false,
+          }));
       onSaved?.();
       onClose();
     } finally {
@@ -260,6 +306,7 @@ export const AuthoringPanel = ({
     ipa,
     breakdown,
     chips,
+    initialDraft,
     onSaved,
     onClose,
   ]);
