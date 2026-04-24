@@ -21,3 +21,34 @@ export const normalizeIpa = (value: string): string =>
     .replaceAll(/\s+/g, '')
     .replaceAll('ˈ', '')
     .replaceAll('ˌ', '');
+
+/**
+ * Tokenises a concatenated IPA string into a sequence of phonemes
+ * drawn from the provided inventory. Uses greedy longest-match so
+ * multi-character phonemes (`tʃ`, `eɪ`, `iː`) bind before their
+ * single-character prefixes.
+ *
+ * Unknown characters are dropped silently — the call site has
+ * already normalised away slashes/whitespace/stress, and we don't
+ * want one stray symbol to blow up the whole parse.
+ */
+export const tokenizeIpa = (
+  value: string,
+  inventory: readonly string[],
+): string[] => {
+  const cleaned = normalizeIpa(value);
+  if (!cleaned) return [];
+  const sorted = [...inventory].toSorted((a, b) => b.length - a.length);
+  const tokens: string[] = [];
+  let i = 0;
+  while (i < cleaned.length) {
+    const match = sorted.find((p) => cleaned.startsWith(p, i));
+    if (match === undefined) {
+      i += 1;
+      continue;
+    }
+    tokens.push(match);
+    i += match.length;
+  }
+  return tokens;
+};

@@ -10,10 +10,10 @@ import { loadShippedIndex } from '../filter';
 import { GRAPHEMES_BY_LEVEL } from '../levels';
 import { playPhoneme } from '../phoneme-audio';
 import { PHONEME_CODE_TO_IPA } from '../phoneme-codes';
-import { align } from './aligner';
+import { align, flattenAlignedChips } from './aligner';
 import { draftStore } from './draftStore';
 import { generateBreakdown } from './engine';
-import { normalizeIpa } from './ipa';
+import { normalizeIpa, tokenizeIpa } from './ipa';
 import type { AlignedGrapheme } from './aligner';
 import type { Breakdown } from './engine';
 import type { DraftEntry, DraftLevel } from '../types';
@@ -157,8 +157,16 @@ const useDebouncedBreakdown = (
           // useful than no alignment. Low-confidence chips surface
           // the "please double-check" signal through the amber
           // styling (already applied by the aligner).
+          // Flatten split-digraphs (e.g. `a_e` in "cake") into their
+          // literal letters + a silent-e chip so every chip is a
+          // contiguous substring of the word. The aligner otherwise
+          // hides the trailing silent letter inside the digraph
+          // chip's span, which broke Split/Delete/Extend/Shrink and
+          // was visually confusing (e.g. "prothesis" showed no `e`).
           const aligned =
-            b.phonemes.length > 0 ? align(b.word, b.phonemes) : [];
+            b.phonemes.length > 0
+              ? flattenAlignedChips(b.word, align(b.word, b.phonemes))
+              : [];
           // Only seed a single bootstrap chip when we have literally
           // nothing (e.g. analyze threw, or the word was empty) —
           // the user can still split it from there.
@@ -222,6 +230,7 @@ export const AuthoringPanel = ({
 }: AuthoringPanelProps) => {
   const titleId = useId();
   const wordInputId = useId();
+  const ipaInputId = useId();
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -362,6 +371,29 @@ export const AuthoringPanel = ({
       }
       return next;
     });
+    setEditingIndex(null);
+    setDirty(true);
+  };
+
+  // Re-runs the chip aligner using the phonemes tokenised from the
+  // current IPA field, then flattens split-digraphs. Lets a user
+  // paste a canonical transcription (e.g. copied from a dictionary)
+  // and have every chip's phoneme updated in one click rather than
+  // picking each one from the dropdown. Falls back to no-op when
+  // the IPA can't be tokenised against the known inventory.
+  const applyIpaToChips = () => {
+    const cleanIpa = normalizeIpa(ipa);
+    if (!cleanIpa) return;
+    const phonemes = tokenizeIpa(cleanIpa, BASE_PHONEME_IPA_OPTIONS);
+    if (phonemes.length === 0) return;
+    const trimmedWord = word.trim().toLowerCase();
+    if (!trimmedWord) return;
+    const aligned = flattenAlignedChips(
+      trimmedWord,
+      align(trimmedWord, phonemes),
+    );
+    if (aligned.length === 0) return;
+    setChips(aligned);
     setEditingIndex(null);
     setDirty(true);
   };
@@ -654,9 +686,21 @@ export const AuthoringPanel = ({
               </div>
             </div>
           )}
-          <label className="flex flex-col gap-1 text-sm font-medium">
-            IPA
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <label htmlFor={ipaInputId}>IPA</label>
+              <button
+                type="button"
+                aria-label="Align chips from IPA"
+                disabled={!normalizeIpa(ipa) || chips.length === 0}
+                onClick={applyIpaToChips}
+                className="rounded-md border border-input px-2 py-0.5 text-xs font-normal hover:bg-muted disabled:opacity-50"
+              >
+                → Align chips
+              </button>
+            </div>
             <input
+              id={ipaInputId}
               type="text"
               value={ipa}
               onChange={(e) => {
@@ -665,7 +709,7 @@ export const AuthoringPanel = ({
               }}
               className="rounded border px-3 py-2"
             />
-          </label>
+          </div>
           {syllables.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-slate-500">

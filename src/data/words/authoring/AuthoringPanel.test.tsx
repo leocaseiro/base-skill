@@ -284,6 +284,33 @@ describe('AuthoringPanel grapheme chips', () => {
     ).toBeDisabled();
   });
 
+  it('re-aligns chip phonemes when the user pastes IPA and clicks Align chips', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const ipaInput = screen.getByRole('textbox', { name: /IPA/i });
+    await userEvent.clear(ipaInput);
+    await userEvent.type(ipaInput, '/ˈpʊtɪŋ/');
+    await userEvent.click(
+      screen.getByRole('button', { name: /align chips from ipa/i }),
+    );
+    const chips = screen.getAllByTestId('grapheme-chip');
+    // The "tt" chip should map to /t/ after re-alignment (same as the
+    // default alignment, proving the apply-IPA path produced a
+    // self-consistent result).
+    const tt = chips.find((c) =>
+      (c.querySelector('div')?.textContent ?? '').includes('tt'),
+    );
+    expect(tt).toBeDefined();
+    expect(tt!.textContent).toMatch(/\/t\//);
+    // And the join invariant still holds.
+    const joined = chips
+      .map((c) => c.querySelector('div')?.textContent ?? '')
+      .join('');
+    expect(joined).toBe('putting');
+  });
+
   it('disables the delete button when only one chip remains', async () => {
     render(<AuthoringPanel open onClose={noop} initialWord="a" />);
     await act(() => new Promise((r) => setTimeout(r, 500)));
@@ -368,7 +395,7 @@ describe('AuthoringPanel IPA and syllables', () => {
       <AuthoringPanel open onClose={noop} initialWord="putting" />,
     );
     await act(() => new Promise((r) => setTimeout(r, 500)));
-    expect(screen.getByLabelText(/IPA/i)).toHaveValue('pʊtɪŋ');
+    expect(screen.getByLabelText(/^IPA$/)).toHaveValue('pʊtɪŋ');
   });
 
   it('renders one syllable chip per segment', async () => {

@@ -249,3 +249,61 @@ export const align = (
 export const __resetCorpusForTests = (): void => {
   corpus = null;
 };
+
+/**
+ * Expands split-digraph graphemes (e.g. `a_e` in `cake`) into the
+ * literal letters they cover, so every chip corresponds to a
+ * contiguous run of letters and the invariant
+ * `flattened.map(c => c.g).join('') === word` always holds.
+ *
+ * The aligner otherwise emits split-digraph chips where `.g` is the
+ * symbol (e.g. `"o_e"`) and `.span` marks non-contiguous positions.
+ * That breaks the editing surface in the authoring panel — Split,
+ * Delete, Extend, Shrink all operate on `.g` assuming it is a plain
+ * substring of the word. The trailing silent letter becomes its own
+ * chip with an empty phoneme so the user can set or delete it
+ * intentionally.
+ */
+export const flattenAlignedChips = (
+  word: string,
+  chips: AlignedGrapheme[],
+): AlignedGrapheme[] => {
+  const emitted: Array<{ pos: number; chip: AlignedGrapheme }> = [];
+  let cursor = 0;
+
+  for (const chip of chips) {
+    if (chip.span && chip.g.includes('_')) {
+      const [leadingIdx, trailingIdx] = chip.span;
+      emitted.push(
+        {
+          pos: leadingIdx,
+          chip: {
+            g: word[leadingIdx]!,
+            p: chip.p,
+            confidence: chip.confidence,
+          },
+        },
+        {
+          pos: trailingIdx,
+          chip: {
+            g: word[trailingIdx]!,
+            p: '',
+            confidence: 0.3,
+          },
+        },
+      );
+      cursor = leadingIdx + 1;
+    } else {
+      // Contiguous chip; `.g` is already the literal letters starting
+      // at `cursor`. Skip over any position claimed by an earlier
+      // split-digraph trailing-letter emission so subsequent
+      // non-digraph chips land at their true position.
+      while (emitted.some((e) => e.pos === cursor)) cursor += 1;
+      emitted.push({ pos: cursor, chip });
+      cursor += chip.g.length;
+    }
+  }
+
+  emitted.sort((a, b) => a.pos - b.pos);
+  return emitted.map((e) => e.chip);
+};
