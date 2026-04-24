@@ -102,7 +102,7 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 describe('GameRoute', () => {
-  it('renders the game shell with title from loaderData', async () => {
+  it('renders the game shell with exit control from loaderData', async () => {
     render(
       <GameRoute
         config={testConfig}
@@ -121,7 +121,9 @@ describe('GameRoute', () => {
       { wrapper },
     );
     await waitFor(() => {
-      expect(screen.getByText('Word Builder')).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /exit/i }),
+      ).toBeInTheDocument();
     });
   });
 
