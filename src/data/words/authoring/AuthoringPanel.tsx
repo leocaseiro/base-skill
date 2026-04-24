@@ -73,6 +73,10 @@ type SetChips = (
     | ((prev: AlignedGrapheme[]) => AlignedGrapheme[]),
 ) => void;
 
+type SetSyllables = (
+  value: string[] | ((prev: string[]) => string[]),
+) => void;
+
 const seedFromDraft = (draft: DraftEntry): AlignedGrapheme[] =>
   draft.graphemes.map((g) => ({ ...g, confidence: 1 }));
 
@@ -83,6 +87,8 @@ const useDebouncedBreakdown = (
   breakdown: Breakdown | null;
   chips: AlignedGrapheme[];
   setChips: SetChips;
+  syllables: string[];
+  setSyllables: SetSyllables;
   ipa: string;
   setIpa: (value: string) => void;
   level: DraftLevel;
@@ -102,6 +108,9 @@ const useDebouncedBreakdown = (
   );
   const [chips, setChips] = useState<AlignedGrapheme[]>(
     seed ? seedFromDraft(seed) : [],
+  );
+  const [syllables, setSyllables] = useState<string[]>(
+    seed ? seed.syllables : [],
   );
   const [ipa, setIpa] = useState(seed?.ipa ?? '');
   const [level, setLevel] = useState<DraftLevel>(seed?.level ?? 1);
@@ -132,6 +141,7 @@ const useDebouncedBreakdown = (
     if (!trimmed) {
       setBreakdown(null);
       setChips([]);
+      setSyllables([]);
       setIpa('');
       setLevel(1);
       return;
@@ -156,8 +166,16 @@ const useDebouncedBreakdown = (
             aligned.length === 0 && b.word.length > 0
               ? [{ g: b.word, p: '', confidence: 0.2 }]
               : aligned;
+          // Same bootstrap rule for syllables: if the engine
+          // returned none but the word has text, seed a single
+          // full-word syllable the user can split down.
+          const syllablesToSet =
+            b.syllables.length === 0 && b.word.length > 0
+              ? [b.word]
+              : b.syllables;
           setBreakdown(b);
           setChips(chipsToSet);
+          setSyllables(syllablesToSet);
           // Only auto-fill IPA from the breakdown if the user has not
           // manually edited the field for this word yet.
           if (!ipaEditedRef.current) {
@@ -185,6 +203,8 @@ const useDebouncedBreakdown = (
     breakdown,
     chips,
     setChips,
+    syllables,
+    setSyllables,
     ipa,
     setIpa: setIpaUser,
     level,
@@ -206,10 +226,22 @@ export const AuthoringPanel = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [word, setWord] = useState(initialDraft?.word ?? initialWord);
-  const { breakdown, chips, setChips, ipa, setIpa, level, setLevel } =
-    useDebouncedBreakdown(word, initialDraft);
+  const {
+    breakdown,
+    chips,
+    setChips,
+    syllables,
+    setSyllables,
+    ipa,
+    setIpa,
+    level,
+    setLevel,
+  } = useDebouncedBreakdown(word, initialDraft);
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingSyllableIndex, setEditingSyllableIndex] = useState<
+    number | null
+  >(null);
   const [variantsInput, setVariantsInput] = useState(
     initialDraft?.variants?.join(', ') ?? '',
   );
@@ -228,7 +260,6 @@ export const AuthoringPanel = ({
     };
   }, [open]);
 
-  const syllables = breakdown?.syllables ?? [];
   const suggestion = chips.length > 0 ? suggestLevel(chips) : null;
 
   const phonemeIpaOptions = useMemo(
@@ -335,13 +366,51 @@ export const AuthoringPanel = ({
     setDirty(true);
   };
 
+  // Split syllable `i` at the last letter, inserting a new syllable
+  // at `i + 1`. Preserves `syllables.join('') === word`. Disabled
+  // when the syllable has a single letter.
+  const splitSyllable = (i: number) => {
+    setSyllables((prev) => {
+      const next = [...prev];
+      const current = next[i];
+      if (current === undefined || current.length < 2) return prev;
+      next[i] = current.slice(0, -1);
+      next.splice(i + 1, 0, current.slice(-1));
+      return next;
+    });
+    setEditingSyllableIndex(i + 1);
+    setDirty(true);
+  };
+
+  // Delete syllable `i`, merging its letters into the previous
+  // syllable (or the next one if `i === 0`). Refuses to delete the
+  // only syllable.
+  const deleteSyllable = (i: number) => {
+    setSyllables((prev) => {
+      if (prev.length <= 1) return prev;
+      const next = [...prev];
+      const [removed] = next.splice(i, 1);
+      if (removed === undefined) return prev;
+      if (i === 0) {
+        const right = next[0];
+        if (right !== undefined) next[0] = removed + right;
+      } else {
+        const left = next[i - 1];
+        if (left !== undefined) next[i - 1] = left + removed;
+      }
+      return next;
+    });
+    setEditingSyllableIndex(null);
+    setDirty(true);
+  };
+
   const handleSave = useCallback(async () => {
     const trimmed = word.trim().toLowerCase();
     const variants = variantsInput
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
-    const saveSyllables = breakdown?.syllables ?? [trimmed];
+    const saveSyllables = syllables.length > 0 ? syllables : [trimmed];
     const graphemes = chips.map(({ confidence: _c, ...rest }) => rest);
     const cleanIpa = normalizeIpa(ipa);
     setSaving(true);
@@ -379,6 +448,7 @@ export const AuthoringPanel = ({
     ipa,
     breakdown,
     chips,
+    syllables,
     initialDraft,
     onSaved,
     onClose,
@@ -597,17 +667,62 @@ export const AuthoringPanel = ({
             />
           </label>
           {syllables.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {syllables.map((s, i) => (
-                <span
-                  // eslint-disable-next-line react/no-array-index-key -- syllables re-derive from the breakdown per word; positional key is fine
-                  key={`${i}-${s}`}
-                  data-testid="syllable-chip"
-                  className="rounded border border-slate-300 bg-white px-2 py-1 text-sm"
-                >
-                  {s}
-                </span>
-              ))}
+            <div className="flex flex-col gap-1.5">
+              <p className="text-xs text-slate-500">
+                Click a syllable to split it into two or delete it
+                (letters merge into the neighbour).
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {syllables.map((s, i) => {
+                  const selected = i === editingSyllableIndex;
+                  return (
+                    <button
+                      // eslint-disable-next-line react/no-array-index-key -- syllables re-derive per word; positional key is stable enough
+                      key={`${i}-${s}`}
+                      type="button"
+                      data-testid="syllable-chip"
+                      aria-pressed={selected}
+                      onClick={() => setEditingSyllableIndex(i)}
+                      className={`rounded border border-slate-300 bg-white px-2 py-1 text-sm${
+                        selected
+                          ? ' ring-2 ring-sky-500 ring-offset-1'
+                          : ''
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+              {editingSyllableIndex !== null &&
+                syllables[editingSyllableIndex] !== undefined && (
+                  <div className="flex gap-1 rounded border border-slate-300 bg-slate-50 p-2">
+                    <button
+                      type="button"
+                      aria-label="Split syllable"
+                      disabled={
+                        syllables[editingSyllableIndex].length < 2
+                      }
+                      onClick={() =>
+                        splitSyllable(editingSyllableIndex)
+                      }
+                      className="rounded border px-2 py-1 text-sm disabled:opacity-50"
+                    >
+                      ✂ Split
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Delete syllable"
+                      disabled={syllables.length <= 1}
+                      onClick={() =>
+                        deleteSyllable(editingSyllableIndex)
+                      }
+                      className="ms-auto rounded border border-rose-300 px-2 py-1 text-sm text-rose-700 disabled:opacity-50"
+                    >
+                      🗑 Delete
+                    </button>
+                  </div>
+                )}
             </div>
           )}
           <label className="flex flex-col gap-1 text-sm font-medium">

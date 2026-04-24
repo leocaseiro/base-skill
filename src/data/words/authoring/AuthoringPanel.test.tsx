@@ -300,6 +300,68 @@ describe('AuthoringPanel grapheme chips', () => {
   });
 });
 
+describe('AuthoringPanel syllable editor', () => {
+  it('splits a syllable and preserves the join-equals-word invariant', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const before = screen.getAllByTestId('syllable-chip');
+    expect(before.map((c) => c.textContent)).toEqual(['put', 'ting']);
+    await userEvent.click(before[1]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /split syllable/i }),
+    );
+    const after = screen.getAllByTestId('syllable-chip');
+    expect(after).toHaveLength(3);
+    expect(after.map((c) => c.textContent).join('')).toBe('putting');
+  });
+
+  it('deletes a syllable and merges its letters into a neighbour', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.click(screen.getAllByTestId('syllable-chip')[1]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /delete syllable/i }),
+    );
+    const after = screen.getAllByTestId('syllable-chip');
+    expect(after).toHaveLength(1);
+    expect(after[0]!.textContent).toBe('putting');
+  });
+
+  it('bootstraps a single full-word syllable when rita returns no alignment', async () => {
+    // Mock engine returns empty syllables for anything not "putting".
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="prothesis" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.getAllByTestId('syllable-chip');
+    expect(chips).toHaveLength(1);
+    expect(chips[0]!.textContent).toBe('prothesis');
+    // And the editor lets us split that single syllable into pieces.
+    await userEvent.click(chips[0]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /split syllable/i }),
+    );
+    const after = screen.getAllByTestId('syllable-chip');
+    expect(after).toHaveLength(2);
+    expect(after.map((c) => c.textContent).join('')).toBe('prothesis');
+  });
+
+  it('disables delete when only one syllable remains', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="prothesis" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.click(screen.getAllByTestId('syllable-chip')[0]!);
+    expect(
+      screen.getByRole('button', { name: /delete syllable/i }),
+    ).toBeDisabled();
+  });
+});
+
 describe('AuthoringPanel IPA and syllables', () => {
   it('pre-fills IPA from the engine for a known word', async () => {
     render(
