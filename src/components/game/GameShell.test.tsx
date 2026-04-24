@@ -105,9 +105,21 @@ function renderShell(
 }
 
 describe('GameShell', () => {
-  it('renders game title in top bar', () => {
+  it('renders exit control and does not show the game title in chrome', () => {
     renderShell();
-    expect(screen.getByText('Word Builder')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /exit/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Word Builder')).not.toBeInTheDocument();
+  });
+
+  it('portals the top chrome to document.body with z-45 (above instructions z-40)', () => {
+    renderShell();
+    const exit = screen.getByRole('button', { name: /exit/i });
+    const bar = exit.parentElement;
+    expect(bar).not.toBeNull();
+    expect(document.body.contains(exit)).toBe(true);
+    expect(bar).toHaveClass('fixed', 'z-[45]');
   });
 
   it('does not render a round counter (HUD now owns round display)', () => {
@@ -132,30 +144,19 @@ describe('GameShell', () => {
     expect(screen.queryByTestId('game-timer')).not.toBeInTheDocument();
   });
 
-  it('renders undo button when maxUndoDepth is non-zero', () => {
+  it('does not render undo or pause controls', () => {
     renderShell({ maxUndoDepth: 3 });
     expect(
-      screen.getByRole('button', { name: /undo/i }),
-    ).toBeInTheDocument();
-  });
-
-  it('hides undo button when maxUndoDepth is 0', () => {
-    renderShell({ maxUndoDepth: 0 });
-    expect(
       screen.queryByRole('button', { name: /undo/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /pause/i }),
     ).not.toBeInTheDocument();
   });
 
   it('renders the game component children', () => {
     renderShell();
     expect(screen.getByTestId('game-content')).toBeInTheDocument();
-  });
-
-  it('renders Exit button in footer', () => {
-    renderShell();
-    expect(
-      screen.getByRole('button', { name: /exit/i }),
-    ).toBeInTheDocument();
   });
 
   it('opens exit confirmation dialog when Exit is clicked', async () => {
@@ -167,14 +168,6 @@ describe('GameShell', () => {
     expect(
       screen.getByText(/want to leave the game/i),
     ).toBeInTheDocument();
-  });
-
-  it('opens exit confirmation dialog when header Back is clicked', async () => {
-    renderShell();
-    await userEvent.click(
-      screen.getByRole('button', { name: /back/i }),
-    );
-    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
   });
 
   it('closes dialog when Keep Playing is clicked', async () => {
