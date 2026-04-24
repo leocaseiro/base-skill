@@ -3,6 +3,7 @@ import { deriveActiveFilterPills } from './active-filter-pills';
 import { AuthoringPanel } from './authoring/AuthoringPanel';
 import { DraftsPanel } from './authoring/DraftsPanel';
 import { draftStore } from './authoring/draftStore';
+import { normalizeIpa } from './authoring/ipa';
 import {
   filterWords,
   isLevelInFilter,
@@ -380,7 +381,7 @@ export const ResultCard = ({ hit, chipsVisible }: ResultCardProps) => (
             }
             className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-0.5 font-mono text-xs hover:bg-muted"
           >
-            🔈 /{hit.ipa}/
+            🔈 /{normalizeIpa(hit.ipa)}/
           </button>
         ) : null}
         <div className="ms-auto flex gap-1 text-xs">
