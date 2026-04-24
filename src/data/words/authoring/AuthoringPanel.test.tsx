@@ -179,6 +179,25 @@ describe('AuthoringPanel grapheme chips', () => {
     expect(after[0]!.querySelector('div')?.textContent).toBe('pu');
   });
 
+  it('bootstraps a single full-word chip when rita does not know the word, so split works', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="prothesis" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.getAllByTestId('grapheme-chip');
+    expect(chips).toHaveLength(1);
+    expect(chips[0]!.querySelector('div')?.textContent).toBe(
+      'prothesis',
+    );
+    // Low-confidence (amber) because nothing is aligned yet.
+    expect(chips[0]!.className).toMatch(/border-amber-400/);
+    // Split must be enabled (length >= 2) so the user can carve it.
+    await userEvent.click(chips[0]!);
+    expect(
+      screen.getByRole('button', { name: /split grapheme/i }),
+    ).not.toBeDisabled();
+  });
+
   it('splits a chip into two and preserves the concatenation invariant', async () => {
     render(
       <AuthoringPanel open onClose={noop} initialWord="putting" />,

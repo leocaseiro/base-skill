@@ -134,8 +134,16 @@ const useDebouncedBreakdown = (
             b.ritaKnown && b.phonemes.length > 0
               ? align(b.word, b.phonemes)
               : [];
+          // When rita has no alignment for this word, seed a single
+          // low-confidence chip holding the whole word so the user
+          // can click ✂ Split to carve out graphemes one by one.
+          // Same invariant as aligned chips: join(g) === word.
+          const chipsToSet =
+            aligned.length === 0 && b.word.length > 0
+              ? [{ g: b.word, p: '', confidence: 0.2 }]
+              : aligned;
           setBreakdown(b);
-          setChips(aligned);
+          setChips(chipsToSet);
           // Only auto-fill IPA from the breakdown if the user has not
           // manually edited the field for this word yet.
           if (!ipaEditedRef.current) {
