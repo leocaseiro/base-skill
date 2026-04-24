@@ -652,7 +652,6 @@ export const AuthoringPanel = ({
                   type="button"
                   onClick={() => {
                     if (
-                      dirty &&
                       !globalThis.confirm(
                         'Re-generate from RitaJS? This will overwrite your local edits to chips, IPA, syllables, and level.',
                       )
