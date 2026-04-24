@@ -15,8 +15,8 @@ import {
   vi,
 } from 'vitest';
 import { draftStore } from './authoring/draftStore';
-import { __resetPhonemeAudioForTests } from './phoneme-audio';
 import { WordLibraryExplorer } from './WordLibraryExplorer';
+import type * as PhonemeAudioModule from './phoneme-audio';
 
 // Mock engine so the test does not need RiTa.  The engine resolves
 // quickly with an empty breakdown — the user fills IPA manually before
@@ -31,22 +31,30 @@ vi.mock('./authoring/engine', () => ({
   })),
 }));
 
+// Fully mock the audio module: a global fetch stub is racy under CI's
+// slower timing — pending useEffects from ResultCard/PhonemeBlender can
+// fire after afterEach has unstubbed fetch, hitting Node undici with a
+// relative URL and producing unhandled rejections.
+vi.mock('./phoneme-audio', async () => {
+  const actual =
+    await vi.importActual<typeof PhonemeAudioModule>('./phoneme-audio');
+  return {
+    ...actual,
+    getPhonemeSprite: vi.fn(() => Promise.resolve({})),
+    playPhoneme: vi.fn(() => Promise.resolve()),
+    stopPhoneme: vi.fn(),
+  };
+});
+
+// CI runs this suite through IndexedDB + React liveQuery + grid
+// re-renders; the default 5s ceiling + 1s waitFor are too tight.
+vi.setConfig({ testTimeout: 15_000 });
+
 beforeEach(async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({}),
-        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-      } as Response),
-    ),
-  );
-  __resetPhonemeAudioForTests();
   await draftStore.__clearAllForTests();
 });
 
 afterEach(async () => {
-  vi.unstubAllGlobals();
   await draftStore.__clearAllForTests();
 });
 
@@ -146,10 +154,13 @@ describe('WordLibraryExplorer draft refresh', () => {
 
     // The grid in the explorer must drop the deleted draft without
     // a manual page reload.
-    await waitFor(() => {
-      expect(
-        screen.queryByRole('button', { name: /^edit zzword$/i }),
-      ).not.toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.queryByRole('button', { name: /^edit zzword$/i }),
+        ).not.toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
   });
 });
