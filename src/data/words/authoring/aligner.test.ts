@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { align } from './aligner';
+import { align, flattenAlignedChips } from './aligner';
 
 const pluck = (pairs: Array<{ g: string; p: string }>) =>
   pairs.map((g) => ({ g: g.g, p: g.p }));
@@ -46,5 +46,40 @@ describe('align (greedy g→p aligner)', () => {
       expect(g.confidence).toBeGreaterThanOrEqual(0);
       expect(g.confidence).toBeLessThanOrEqual(1);
     }
+  });
+});
+
+describe('flattenAlignedChips', () => {
+  it('leaves contiguous chips untouched', () => {
+    const aligned = align('putting', ['p', 'ʊ', 't', 'ɪ', 'ŋ']);
+    const flat = flattenAlignedChips('putting', aligned);
+    expect(flat.map((c) => c.g)).toEqual(['p', 'u', 'tt', 'i', 'ng']);
+    expect(flat.map((c) => c.g).join('')).toBe('putting');
+  });
+
+  it('expands the "a_e" split digraph in "cake" into a + silent e', () => {
+    const aligned = align('cake', ['k', 'eɪ', 'k']);
+    const flat = flattenAlignedChips('cake', aligned);
+    expect(flat.map((c) => c.g)).toEqual(['c', 'a', 'k', 'e']);
+    expect(flat.map((c) => c.g).join('')).toBe('cake');
+    const silent = flat.find((c) => c.g === 'e');
+    expect(silent?.p).toBe('');
+  });
+
+  it('handles words where the digraph is interleaved with another chip ("prothesis" LTS case)', () => {
+    // Synthetic input mirroring the real-world o_e + th overlap.
+    const chips = align('prothesis', [
+      'p',
+      'r',
+      'ʌ',
+      'θ',
+      's',
+      'ɪ',
+      's',
+    ]);
+    const flat = flattenAlignedChips('prothesis', chips);
+    expect(flat.map((c) => c.g).join('')).toBe('prothesis');
+    // The previously-invisible "e" should now appear as its own chip.
+    expect(flat.map((c) => c.g)).toContain('e');
   });
 });
