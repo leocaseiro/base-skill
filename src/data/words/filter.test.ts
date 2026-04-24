@@ -3,6 +3,8 @@ import {
   __resetChunkCacheForTests,
   entryMatches,
   filterWords,
+  isLevelInFilter,
+  loadShippedWordLevels,
 } from './filter';
 import type { WordHit } from './types';
 
@@ -16,6 +18,7 @@ const hit = (overrides: Partial<WordHit> = {}): WordHit => ({
     { g: 'a', p: 'æ' },
     { g: 't', p: 't' },
   ],
+  provenance: 'shipped',
   ...overrides,
 });
 
@@ -109,6 +112,7 @@ describe('entryMatches', () => {
         { g: 't', p: 't' },
         { g: 'y', p: 'i' },
       ],
+      provenance: 'shipped',
     };
     expect(
       entryMatches(city, {
@@ -125,6 +129,7 @@ describe('entryMatches', () => {
       region: 'aus',
       level: 2,
       syllableCount: 1,
+      provenance: 'shipped',
       // no graphemes
     };
     expect(
@@ -205,5 +210,67 @@ describe('filterWords (integration against seeded chunks)', () => {
     });
     expect(result.hits).toHaveLength(0);
     expect(result.usedFallback).toBeUndefined();
+  });
+});
+
+describe('isLevelInFilter', () => {
+  it('returns true when no level filter is set', () => {
+    expect(isLevelInFilter({ region: 'aus' }, 8)).toBe(true);
+  });
+
+  it('respects the exact `level` field', () => {
+    expect(isLevelInFilter({ region: 'aus', level: 8 }, 8)).toBe(true);
+    expect(isLevelInFilter({ region: 'aus', level: 1 }, 8)).toBe(false);
+  });
+
+  it('respects the `levels[]` field', () => {
+    expect(
+      isLevelInFilter({ region: 'aus', levels: [1, 2, 8] }, 8),
+    ).toBe(true);
+    expect(isLevelInFilter({ region: 'aus', levels: [1, 2] }, 8)).toBe(
+      false,
+    );
+  });
+
+  it('respects the `levelRange` field', () => {
+    expect(
+      isLevelInFilter({ region: 'aus', levelRange: [6, 8] }, 8),
+    ).toBe(true);
+    expect(
+      isLevelInFilter({ region: 'aus', levelRange: [1, 3] }, 8),
+    ).toBe(false);
+  });
+});
+
+describe('loadShippedWordLevels', () => {
+  beforeEach(() => __resetChunkCacheForTests());
+  afterEach(() => __resetChunkCacheForTests());
+
+  it('returns a word → level map for the region', async () => {
+    const map = await loadShippedWordLevels('aus');
+    expect(map.size).toBeGreaterThan(0);
+    for (const level of map.values()) {
+      expect(level).toBeGreaterThanOrEqual(1);
+      expect(level).toBeLessThanOrEqual(8);
+    }
+  });
+
+  it('uses the lowest level for words that appear in multiple levels', async () => {
+    const map = await loadShippedWordLevels('aus');
+    const level1Result = await filterWords({ region: 'aus', level: 1 });
+    for (const entry of level1Result.hits) {
+      expect(map.get(entry.word)).toBe(1);
+    }
+  });
+
+  it('returns a level outside the filter when the filter excludes it', async () => {
+    const map = await loadShippedWordLevels('aus');
+    const level1Result = await filterWords({ region: 'aus', level: 1 });
+    const level1Words = new Set(level1Result.hits.map((h) => h.word));
+    const outside = [...map.entries()].find(
+      ([word, lvl]) => lvl > 1 && !level1Words.has(word),
+    );
+    expect(outside).toBeDefined();
+    expect(outside![1]).toBeGreaterThan(1);
   });
 });
