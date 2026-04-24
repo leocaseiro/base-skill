@@ -67,6 +67,37 @@ describe('AuthoringPanel word field', () => {
     );
   });
 
+  it('exposes reference links to dictionary.com, vocabulary.com, and howmanysyllables.com for the current word', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(
+      screen.getByRole('link', {
+        name: /look up putting on dictionary\.com/i,
+      }),
+    ).toHaveAttribute(
+      'href',
+      'https://www.dictionary.com/browse/putting',
+    );
+    expect(
+      screen.getByRole('link', {
+        name: /look up putting on vocabulary\.com/i,
+      }),
+    ).toHaveAttribute(
+      'href',
+      'https://www.vocabulary.com/dictionary/putting',
+    );
+    expect(
+      screen.getByRole('link', {
+        name: /look up putting on howmanysyllables\.com/i,
+      }),
+    ).toHaveAttribute(
+      'href',
+      'https://www.howmanysyllables.com/syllables/putting',
+    );
+  });
+
   it('shows the dictionary.com banner for an unknown word', async () => {
     render(<AuthoringPanel open onClose={noop} initialWord="" />);
     await userEvent.type(

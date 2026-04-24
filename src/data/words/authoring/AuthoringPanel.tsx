@@ -612,6 +612,37 @@ export const AuthoringPanel = ({
               }}
               className="rounded border px-3 py-2"
             />
+            {word.trim() && (
+              <div className="flex flex-wrap gap-3 text-xs text-sky-700">
+                <a
+                  href={`https://www.dictionary.com/browse/${encodeURIComponent(word.trim())}`}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  aria-label={`Look up ${word.trim()} on Dictionary.com`}
+                  className="underline"
+                >
+                  Dictionary.com
+                </a>
+                <a
+                  href={`https://www.vocabulary.com/dictionary/${encodeURIComponent(word.trim())}`}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  aria-label={`Look up ${word.trim()} on Vocabulary.com`}
+                  className="underline"
+                >
+                  Vocabulary.com
+                </a>
+                <a
+                  href={`https://www.howmanysyllables.com/syllables/${encodeURIComponent(word.trim())}`}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  aria-label={`Look up ${word.trim()} on HowManySyllables.com`}
+                  className="underline"
+                >
+                  HowManySyllables.com
+                </a>
+              </div>
+            )}
           </div>
           {breakdown && !breakdown.ritaKnown && word.trim() && (
             <div className="rounded border border-amber-300 bg-amber-50 p-3 text-sm">
