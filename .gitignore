@@ -3,6 +3,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.mcp.local.json
 .env
 .env.local
 .nitro

@@ -162,6 +162,37 @@ VR tests use Docker to ensure screenshots match CI exactly (Linux/Chromium).
 **Requires Docker running.** If Docker is not available, the VR check is skipped
 with a warning.
 
+## MCP Servers
+
+The committed `.mcp.json` only includes servers that work out of the box. Extras
+that depend on a local service live in `.mcp.local.json` (gitignored) so each
+developer can opt in.
+
+### Storybook MCP (optional)
+
+The Storybook MCP connects to `http://localhost:6006/mcp` and only works while
+`yarn storybook` is running. If you want it, create `.mcp.local.json` in the
+repo root:
+
+```json
+{
+  "mcpServers": {
+    "storybook": {
+      "url": "http://localhost:6006/mcp"
+    }
+  }
+}
+```
+
+Then start Storybook in a separate terminal before your Claude session:
+
+```bash
+yarn storybook
+```
+
+Without the dev server running the MCP will fail to connect on session start —
+this is why it is not in the committed config.
+
 ## Architecture Documentation
 
 When modifying game state logic — any file in `src/components/answer-game/`,
