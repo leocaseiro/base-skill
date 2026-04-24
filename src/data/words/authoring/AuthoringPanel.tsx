@@ -264,6 +264,29 @@ export const AuthoringPanel = ({
     setDirty(true);
   };
 
+  // Remove chip `i` and re-attach its letters to a neighbour so the
+  // invariant `chips.map(c => c.g).join('') === word` still holds.
+  // When `i === 0` the removed letters prepend onto chip 1; otherwise
+  // they append onto chip `i - 1`. Refuses to delete the only chip.
+  const deleteChip = (i: number) => {
+    setChips((prev) => {
+      if (prev.length <= 1) return prev;
+      const next = [...prev];
+      const [removed] = next.splice(i, 1);
+      if (!removed) return prev;
+      if (i === 0) {
+        const right = next[0];
+        if (right) next[0] = { ...right, g: removed.g + right.g };
+      } else {
+        const left = next[i - 1];
+        if (left) next[i - 1] = { ...left, g: left.g + removed.g };
+      }
+      return next;
+    });
+    setEditingIndex(null);
+    setDirty(true);
+  };
+
   const handleSave = useCallback(async () => {
     const trimmed = word.trim().toLowerCase();
     const variants = variantsInput
@@ -393,29 +416,43 @@ export const AuthoringPanel = ({
             </div>
           )}
           {chips.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {chips.map((chip, i) => (
-                <button
-                  // eslint-disable-next-line react/no-array-index-key -- chips re-derive wholesale from align() per word; positional key is stable enough
-                  key={`${i}-${chip.g}`}
-                  type="button"
-                  data-testid="grapheme-chip"
-                  aria-invalid={
-                    chip.confidence < 0.5 ? 'true' : undefined
-                  }
-                  className={`rounded border px-2 py-1 text-sm ${
+            <div className="flex flex-col gap-1.5">
+              <p className="text-xs text-slate-500">
+                Click a chip to change its phoneme, rebalance letters,
+                or delete it. The selected chip has a blue ring; amber
+                chips are low-confidence guesses to double-check.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {chips.map((chip, i) => {
+                  const selected = i === editingIndex;
+                  const confidenceClass =
                     chip.confidence < 0.5
                       ? 'border-amber-400 bg-amber-50'
-                      : 'border-slate-300 bg-white'
-                  }`}
-                  onClick={() => setEditingIndex(i)}
-                >
-                  <div className="font-semibold">{chip.g}</div>
-                  <div className="text-xs text-slate-500">
-                    /{chip.p}/
-                  </div>
-                </button>
-              ))}
+                      : 'border-slate-300 bg-white';
+                  const selectedClass = selected
+                    ? ' ring-2 ring-sky-500 ring-offset-1'
+                    : '';
+                  return (
+                    <button
+                      // eslint-disable-next-line react/no-array-index-key -- chips re-derive wholesale from align() per word; positional key is stable enough
+                      key={`${i}-${chip.g}`}
+                      type="button"
+                      data-testid="grapheme-chip"
+                      aria-invalid={
+                        chip.confidence < 0.5 ? 'true' : undefined
+                      }
+                      aria-pressed={selected}
+                      className={`rounded border px-2 py-1 text-sm ${confidenceClass}${selectedClass}`}
+                      onClick={() => setEditingIndex(i)}
+                    >
+                      <div className="font-semibold">{chip.g}</div>
+                      <div className="text-xs text-slate-500">
+                        /{chip.p}/
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
           {editingIndex !== null && chips[editingIndex] && (
@@ -461,6 +498,15 @@ export const AuthoringPanel = ({
                   className="rounded border px-2 py-1 text-sm disabled:opacity-50"
                 >
                   +
+                </button>
+                <button
+                  type="button"
+                  aria-label="Delete grapheme"
+                  disabled={chips.length <= 1}
+                  onClick={() => deleteChip(editingIndex)}
+                  className="ms-auto rounded border border-rose-300 px-2 py-1 text-sm text-rose-700 disabled:opacity-50"
+                >
+                  🗑 Delete
                 </button>
               </div>
             </div>

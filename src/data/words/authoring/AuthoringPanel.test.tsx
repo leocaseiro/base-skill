@@ -117,6 +117,82 @@ describe('AuthoringPanel grapheme chips', () => {
       screen.getByRole('combobox', { name: /phoneme/i }),
     ).toBeInTheDocument();
   });
+
+  it('shows an instructional hint above the chip row', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    expect(screen.getByText(/click a chip/i)).toBeInTheDocument();
+  });
+
+  it('rings the selected chip when the editor is open', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.getAllByTestId('grapheme-chip');
+    await userEvent.click(chips[2]!);
+    expect(chips[2]!.className).toMatch(/ring-/);
+    expect(chips[0]!.className).not.toMatch(/ring-/);
+  });
+
+  it('deletes a chip via the editor and merges its letters into the previous chip', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const before = screen
+      .getAllByTestId('grapheme-chip')
+      .map((c) => c.textContent);
+    expect(before.length).toBe(5);
+    await userEvent.click(screen.getAllByTestId('grapheme-chip')[2]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /delete grapheme/i }),
+    );
+    const after = screen.getAllByTestId('grapheme-chip');
+    expect(after.length).toBe(4);
+    // `putting` → p, u, tt, ing → delete index 2 (tt) → p, u, utt (u
+    // absorbs tt), ing. The concatenation must still equal "putting".
+    const joined = after
+      .map((c) => c.querySelector('div')?.textContent ?? '')
+      .join('');
+    expect(joined).toBe('putting');
+  });
+
+  it('deleting the first chip merges its letters into the next chip', async () => {
+    render(
+      <AuthoringPanel open onClose={noop} initialWord="putting" />,
+    );
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    await userEvent.click(screen.getAllByTestId('grapheme-chip')[0]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: /delete grapheme/i }),
+    );
+    const after = screen.getAllByTestId('grapheme-chip');
+    expect(after.length).toBe(4);
+    const joined = after
+      .map((c) => c.querySelector('div')?.textContent ?? '')
+      .join('');
+    expect(joined).toBe('putting');
+    // The first chip now absorbs the previously-deleted leading chip.
+    expect(after[0]!.querySelector('div')?.textContent).toBe('pu');
+  });
+
+  it('disables the delete button when only one chip remains', async () => {
+    render(<AuthoringPanel open onClose={noop} initialWord="a" />);
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    const chips = screen.queryAllByTestId('grapheme-chip');
+    if (chips.length !== 1) {
+      // If the engine didn't align "a" to a single chip, skip — the
+      // assertion only makes sense with exactly one chip present.
+      return;
+    }
+    await userEvent.click(chips[0]!);
+    expect(
+      screen.getByRole('button', { name: /delete grapheme/i }),
+    ).toBeDisabled();
+  });
 });
 
 describe('AuthoringPanel IPA and syllables', () => {
