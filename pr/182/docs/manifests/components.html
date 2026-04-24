@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1810,7 +1810,7 @@ export const Scenario3CorrectAndRoundComplete: Story = {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AuthoringPanel</h2>
       <div class="badges">
-        <label for="c-4-data-authoring-authoringpanel-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-4-data-authoring-authoringpanel-props" class="badge ok as-toggle">5 prop types</label>
         <label for="c-4-data-authoring-authoringpanel-info" class="badge info as-toggle">1 info</label>
         <label for="c-4-data-authoring-authoringpanel-stories" class="badge ok as-toggle">4 stories</label>
         
@@ -1844,11 +1844,18 @@ export const Scenario3CorrectAndRoundComplete: Story = {
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">4 prop types</span>
+              <span class="badge ok">5 prop types</span>
             </div>
             <pre><code>Component: src/data/words/authoring/AuthoringPanel.tsx::AuthoringPanel</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>initialWord: string
+            <pre><code>/**
+ * When set, the panel opens in edit mode: the form is pre-filled
+ * from the draft and Save routes through `draftStore.updateDraft`
+ * instead of `saveDraft` (which would throw on the existing row).
+ */
+initialDraft?: DraftEntry
+
+initialWord: string
 
 onClose: () =&gt; void
 
@@ -2813,7 +2820,7 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DraftsPanel</h2>
       <div class="badges">
-        <label for="c-10-data-authoring-draftspanel-props" class="badge ok as-toggle">3 prop types</label>
+        <label for="c-10-data-authoring-draftspanel-props" class="badge ok as-toggle">4 prop types</label>
         <label for="c-10-data-authoring-draftspanel-info" class="badge info as-toggle">1 info</label>
         <label for="c-10-data-authoring-draftspanel-stories" class="badge ok as-toggle">2 stories</label>
         
@@ -2847,13 +2854,21 @@ export const Playground: Story = {};
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">3 prop types</span>
+              <span class="badge ok">4 prop types</span>
             </div>
             <pre><code>Component: src/data/words/authoring/DraftsPanel.tsx::DraftsPanel</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>onClose: () =&gt; void
 
 onEdit: (draft: DraftEntry) =&gt; void
+
+/**
+ * Called after a draft is mutated from inside the panel (currently
+ * only delete). Lets the parent invalidate any cached views (the
+ * WordLibraryExplorer grid in particular) without re-opening the
+ * panel.
+ */
+onMutated?: () =&gt; void
 
 open: boolean</code></pre>
           </div>

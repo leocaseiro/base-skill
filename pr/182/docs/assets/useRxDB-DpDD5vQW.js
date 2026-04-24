@@ -1,1 +1,0 @@
-import{r as t}from"./iframe-DkYS_M01.js";import{a as o}from"./DbProvider-5RJ5g1V2.js";function n(){const r=t.useContext(o);if(!r)throw new Error("useRxDB must be used within DbProvider");return r}export{n as u};
