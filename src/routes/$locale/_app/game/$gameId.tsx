@@ -106,7 +106,7 @@ const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
   // via the settings panel.
   roundsInOrder: true,
   ttsEnabled: true,
-  mode: 'picture',
+  mode: 'recall',
   tileUnit: 'letter',
   rounds: sliceWordSpellRounds(8),
 };

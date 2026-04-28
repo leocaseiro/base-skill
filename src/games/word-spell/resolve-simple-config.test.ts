@@ -20,7 +20,7 @@ describe('WordSpell resolveSimpleConfig', () => {
         phonemesAllowed: ['m', 'd', 'g'],
       },
     });
-    expect(full.mode).toBe('scramble');
+    expect(full.mode).toBe('recall');
     expect(full.inputMethod).toBe('drag');
   });
 
