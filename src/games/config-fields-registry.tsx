@@ -55,12 +55,19 @@ export const getSimpleConfigFormRenderer = (
   }
 };
 
+const WordSpellAdvancedHeader = (props: {
+  config: Record<string, unknown>;
+  onChange: (config: Record<string, unknown>) => void;
+}): JSX.Element => (
+  <WordSpellLibrarySource {...props} variant="checkbox-tree" />
+);
+
 export const getAdvancedHeaderRenderer = (
   gameId: string,
 ): ConfigFormRenderer | undefined => {
   switch (gameId) {
     case 'word-spell': {
-      return WordSpellLibrarySource;
+      return WordSpellAdvancedHeader;
     }
     default: {
       return undefined;
