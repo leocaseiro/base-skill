@@ -5,6 +5,18 @@ description: Use when adding, writing, or refactoring Storybook stories for Reac
 
 # Write Storybook
 
+## For plan authors
+
+If you are writing an implementation plan that will create or modify `*.stories.tsx` files, **read this skill before prescribing the story shape**. Plans are binding source of truth for executor agents — boilerplate templates that contradict this skill (e.g. multiple named stories per component, raw JSON controls, `Default` instead of `Playground`) get shipped verbatim because executors trust the plan over their own judgement.
+
+The non-negotiables this skill enforces — flag a **Spec Delta** at the top of the plan if you intend to deviate from any of these:
+
+- A single `Playground` story per component (named exactly `Playground`, not `Default`).
+- Every UI-affecting prop wired as a proper control (select / radio / boolean / range / color / text), never raw JSON in args.
+- Auxiliary named stories only when a scenario genuinely cannot be expressed by toggling Playground controls.
+
+See PR #182 / issue #183 for the incident that motivated this preamble.
+
 ## Overview
 
 Stories live co-located with their component (`ComponentName.stories.tsx`). This project uses `@storybook/react` with TanStack Router and `next-themes`.
