@@ -1,6 +1,28 @@
-# WordSpell — Multi-Select Levels & Per-Unit Phoneme Toggles
+# ~~WordSpell — Multi-Select Levels & Per-Unit Phoneme Toggles~~
 
-> Status: **Approved (design)** — implementation plan to follow.
+> ⚠️ **SUPERSEDED on 2026-04-29** by
+> [`2026-04-29-wordspell-cumulative-y-filter-design.md`](./2026-04-29-wordspell-cumulative-y-filter-design.md).
+>
+> The disjoint multi-level model below was retired after testing PR #219
+> revealed two problems: (a) picking a single chip (e.g. only L4 `sh`)
+> produced empty word pools because prior-level graphemes weren't in
+> `graphemesAllowed`; (b) the design didn't address easy-word filtering
+> for higher-level focus.
+>
+> **What survived from this spec:** the `selectedUnits: LevelGraphemeUnit[]`
+> data shape, the `level-unit-selection.ts` helpers (toggle/default), and
+> the IndexedDB migration (`migrateWordSpellConfig`, schema bumps).
+>
+> **What changed:** the filter contract (now cumulative graphemes +
+> Y phoneme filter), the UI (group-click headers replace native
+> checkboxes; single rendering for Simple and Advanced), and the
+> mode-default invariant (recall ⇒ library source; picture ⇒ emoji
+> rounds; never both).
+>
+> Read the new spec for the current decisions. The text below is kept
+> for historical context.
+>
+> ~~Status: **Approved (design)** — implementation plan to follow.~~
 > Date: 2026-04-28
 > Owner: leocaseiro
 
