@@ -23,3 +23,4 @@ worktrees/
 .superpowers/
 .local-debug/
 .claude/settings.local.json
+*.code-workspace
