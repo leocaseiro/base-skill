@@ -44,6 +44,7 @@ Additional named stories are only added when a scenario genuinely **cannot** be 
 - The Playground export **must be named exactly `Playground`** (not `Default`). Every reference story in this project uses this name — see [InstructionsOverlay](../../../src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx)
 - Use `tags: ['autodocs']` in meta unless there's a reason not to
 - Do NOT import `React` — JSX transform handles it
+- Story `title:` uses **PascalCase segments separated by `/`** — e.g. `AnswerGame/InstructionsOverlay`, `Games/SortNumbers/ConfigForm`. Sidebar titles do not mirror the kebab-case filesystem; see [CLAUDE.md → Storybook Sidebar Titles](../../../CLAUDE.md#storybook-sidebar-titles).
 - Auxiliary named stories are allowed only when a scenario can't be expressed by toggling controls on `Playground` (see "When to Add Auxiliary Stories")
 
 ## File Structure
