@@ -1,1 +1,0 @@
-import{j as e}from"./main-DgR2sRpB.js";const a=()=>e.jsxs("div",{className:"p-8",children:[e.jsx("h1",{className:"text-2xl font-bold",children:"Data Management"}),e.jsx("p",{className:"mt-2 text-muted-foreground",children:"Export, import, or delete learner data."})]});export{a as component};
