@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -3630,13 +3630,13 @@ export const ReplayTrigger: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;GameCard as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  26 | }
-  27 |
-&gt; 28 | const meta: Meta&lt;StoryArgs&gt; = {
+  29 | }
+  30 |
+&gt; 31 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  29 |   component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
-  30 |   tags: [&#39;autodocs&#39;],
-  31 |   parameters: {
+  32 |   component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
+  33 |   tags: [&#39;autodocs&#39;],
+  34 |   parameters: {
 
 ./src/components/GameCard.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -3645,9 +3645,12 @@ import { GameCard } from &#39;./GameCard&#39;;
 import type { GameColorKey } from &#39;@/lib/game-colors&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { ComponentType } from &#39;react&#39;;
+import { GAME_CATALOG } from &#39;@/games/registry&#39;;
 import { GAME_COLOR_KEYS } from &#39;@/lib/game-colors&#39;;
 
 type Variant = &#39;default&#39; | &#39;customGame&#39;;
+
+const GAME_IDS = GAME_CATALOG.map((g) =&gt; g.id);
 
 interface StoryArgs {
   variant: Variant;
@@ -3658,12 +3661,12 @@ interface StoryArgs {
   customGameColor: GameColorKey;
   bookmarkable: boolean;
   isBookmarked: boolean;
+  onPlay: () =&gt; void;
+  onOpenCog: () =&gt; void;
+  onToggleBookmark: () =&gt; void;
   // Shadowed raw props — driven by StoryArgs above; hidden from Controls.
   chips?: never;
   cover?: never;
-  onPlay?: never;
-  onOpenCog?: never;
-  onToggleBookmark?: never;
 }
 
 const meta: Meta&lt;StoryArgs&gt; = {
@@ -3674,7 +3677,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
     docs: {
       description: {
         component:
-          &#39;Bookmark-aware game tile used on the homepage and saved-games view. The variant radio toggles between the default cover and the customGame coloured chip; bookmarkable + isBookmarked expose the full bookmark matrix. The card is wrapped in a w-64 container to mimic GameGrid cell width at xl/2xl breakpoints.&#39;,
+          &#39;Bookmark-aware game tile used on the homepage and saved-games view. The variant radio toggles between the default cover and the customGame coloured chip; bookmarkable + isBookmarked expose the full bookmark matrix. gameId is a select over the real GAME_CATALOG so the default cover swaps between the three shipped games. The card is wrapped in a w-64 container to mimic GameGrid cell width at xl/2xl breakpoints.&#39;,
       },
     },
   },
@@ -3687,13 +3690,19 @@ const meta: Meta&lt;StoryArgs&gt; = {
     customGameColor: &#39;indigo&#39;,
     bookmarkable: false,
     isBookmarked: false,
+    onPlay: fn(),
+    onOpenCog: fn(),
+    onToggleBookmark: fn(),
   },
   argTypes: {
     variant: {
       control: { type: &#39;radio&#39; },
       options: [&#39;default&#39;, &#39;customGame&#39;] satisfies Variant[],
     },
-    gameId: { control: &#39;text&#39; },
+    gameId: {
+      control: { type: &#39;select&#39; },
+      options: GAME_IDS,
+    },
     title: { control: &#39;text&#39; },
     chipsText: { control: &#39;text&#39; },
     customGameName: { control: &#39;text&#39; },
@@ -3705,9 +3714,6 @@ const meta: Meta&lt;StoryArgs&gt; = {
     isBookmarked: { control: &#39;boolean&#39; },
     chips: { table: { disable: true } },
     cover: { table: { disable: true } },
-    onPlay: { table: { disable: true } },
-    onOpenCog: { table: { disable: true } },
-    onToggleBookmark: { table: { disable: true } },
   },
   render: ({
     variant,
@@ -3718,6 +3724,9 @@ const meta: Meta&lt;StoryArgs&gt; = {
     customGameColor,
     bookmarkable,
     isBookmarked,
+    onPlay,
+    onOpenCog,
+    onToggleBookmark,
   }) =&gt; {
     const chips = chipsText
       .split(&#39;,&#39;)
@@ -3725,7 +3734,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
       .filter(Boolean);
 
     const bookmarkProps = bookmarkable
-      ? { isBookmarked, onToggleBookmark: fn() }
+      ? { isBookmarked, onToggleBookmark }
       : {};
 
     return (
@@ -3738,8 +3747,8 @@ const meta: Meta&lt;StoryArgs&gt; = {
             chips={chips}
             customGameName={customGameName || &#39;Custom&#39;}
             customGameColor={customGameColor}
-            onPlay={fn()}
-            onOpenCog={fn()}
+            onPlay={onPlay}
+            onOpenCog={onOpenCog}
             {...bookmarkProps}
           /&gt;
         ) : (
@@ -3748,8 +3757,8 @@ const meta: Meta&lt;StoryArgs&gt; = {
             gameId={gameId}
             title={title}
             chips={chips}
-            onPlay={fn()}
-            onOpenCog={fn()}
+            onPlay={onPlay}
+            onOpenCog={onOpenCog}
             {...bookmarkProps}
           /&gt;
         )}
@@ -3803,6 +3812,9 @@ export const Playground: Story = {};
   customGameColor,
   bookmarkable,
   isBookmarked,
+  onPlay,
+  onOpenCog,
+  onToggleBookmark,
 }) =&gt; {
   const chips = chipsText
     .split(&#39;,&#39;)
@@ -3810,7 +3822,7 @@ export const Playground: Story = {};
     .filter(Boolean);
 
   const bookmarkProps = bookmarkable
-    ? { isBookmarked, onToggleBookmark: fn() }
+    ? { isBookmarked, onToggleBookmark }
     : {};
 
   return (
@@ -3823,8 +3835,8 @@ export const Playground: Story = {};
           chips={chips}
           customGameName={customGameName || &#39;Custom&#39;}
           customGameColor={customGameColor}
-          onPlay={fn()}
-          onOpenCog={fn()}
+          onPlay={onPlay}
+          onOpenCog={onOpenCog}
           {...bookmarkProps}
         /&gt;
       ) : (
@@ -3833,8 +3845,8 @@ export const Playground: Story = {};
           gameId={gameId}
           title={title}
           chips={chips}
-          onPlay={fn()}
-          onOpenCog={fn()}
+          onPlay={onPlay}
+          onOpenCog={onOpenCog}
           {...bookmarkProps}
         /&gt;
       )}
@@ -11871,13 +11883,13 @@ export const ReplayTrigger: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;GameCard as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  26 | }
-  27 |
-&gt; 28 | const meta: Meta&lt;StoryArgs&gt; = {
+  29 | }
+  30 |
+&gt; 31 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  29 |   component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
-  30 |   tags: [&#39;autodocs&#39;],
-  31 |   parameters: {
+  32 |   component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
+  33 |   tags: [&#39;autodocs&#39;],
+  34 |   parameters: {
 
 ./src/components/GameCard.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -11886,9 +11898,12 @@ import { GameCard } from &#39;./GameCard&#39;;
 import type { GameColorKey } from &#39;@/lib/game-colors&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { ComponentType } from &#39;react&#39;;
+import { GAME_CATALOG } from &#39;@/games/registry&#39;;
 import { GAME_COLOR_KEYS } from &#39;@/lib/game-colors&#39;;
 
 type Variant = &#39;default&#39; | &#39;customGame&#39;;
+
+const GAME_IDS = GAME_CATALOG.map((g) =&gt; g.id);
 
 interface StoryArgs {
   variant: Variant;
@@ -11899,12 +11914,12 @@ interface StoryArgs {
   customGameColor: GameColorKey;
   bookmarkable: boolean;
   isBookmarked: boolean;
+  onPlay: () =&gt; void;
+  onOpenCog: () =&gt; void;
+  onToggleBookmark: () =&gt; void;
   // Shadowed raw props — driven by StoryArgs above; hidden from Controls.
   chips?: never;
   cover?: never;
-  onPlay?: never;
-  onOpenCog?: never;
-  onToggleBookmark?: never;
 }
 
 const meta: Meta&lt;StoryArgs&gt; = {
@@ -11915,7 +11930,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
     docs: {
       description: {
         component:
-          &#39;Bookmark-aware game tile used on the homepage and saved-games view. The variant radio toggles between the default cover and the customGame coloured chip; bookmarkable + isBookmarked expose the full bookmark matrix. The card is wrapped in a w-64 container to mimic GameGrid cell width at xl/2xl breakpoints.&#39;,
+          &#39;Bookmark-aware game tile used on the homepage and saved-games view. The variant radio toggles between the default cover and the customGame coloured chip; bookmarkable + isBookmarked expose the full bookmark matrix. gameId is a select over the real GAME_CATALOG so the default cover swaps between the three shipped games. The card is wrapped in a w-64 container to mimic GameGrid cell width at xl/2xl breakpoints.&#39;,
       },
     },
   },
@@ -11928,13 +11943,19 @@ const meta: Meta&lt;StoryArgs&gt; = {
     customGameColor: &#39;indigo&#39;,
     bookmarkable: false,
     isBookmarked: false,
+    onPlay: fn(),
+    onOpenCog: fn(),
+    onToggleBookmark: fn(),
   },
   argTypes: {
     variant: {
       control: { type: &#39;radio&#39; },
       options: [&#39;default&#39;, &#39;customGame&#39;] satisfies Variant[],
     },
-    gameId: { control: &#39;text&#39; },
+    gameId: {
+      control: { type: &#39;select&#39; },
+      options: GAME_IDS,
+    },
     title: { control: &#39;text&#39; },
     chipsText: { control: &#39;text&#39; },
     customGameName: { control: &#39;text&#39; },
@@ -11946,9 +11967,6 @@ const meta: Meta&lt;StoryArgs&gt; = {
     isBookmarked: { control: &#39;boolean&#39; },
     chips: { table: { disable: true } },
     cover: { table: { disable: true } },
-    onPlay: { table: { disable: true } },
-    onOpenCog: { table: { disable: true } },
-    onToggleBookmark: { table: { disable: true } },
   },
   render: ({
     variant,
@@ -11959,6 +11977,9 @@ const meta: Meta&lt;StoryArgs&gt; = {
     customGameColor,
     bookmarkable,
     isBookmarked,
+    onPlay,
+    onOpenCog,
+    onToggleBookmark,
   }) =&gt; {
     const chips = chipsText
       .split(&#39;,&#39;)
@@ -11966,7 +11987,7 @@ const meta: Meta&lt;StoryArgs&gt; = {
       .filter(Boolean);
 
     const bookmarkProps = bookmarkable
-      ? { isBookmarked, onToggleBookmark: fn() }
+      ? { isBookmarked, onToggleBookmark }
       : {};
 
     return (
@@ -11979,8 +12000,8 @@ const meta: Meta&lt;StoryArgs&gt; = {
             chips={chips}
             customGameName={customGameName || &#39;Custom&#39;}
             customGameColor={customGameColor}
-            onPlay={fn()}
-            onOpenCog={fn()}
+            onPlay={onPlay}
+            onOpenCog={onOpenCog}
             {...bookmarkProps}
           /&gt;
         ) : (
@@ -11989,8 +12010,8 @@ const meta: Meta&lt;StoryArgs&gt; = {
             gameId={gameId}
             title={title}
             chips={chips}
-            onPlay={fn()}
-            onOpenCog={fn()}
+            onPlay={onPlay}
+            onOpenCog={onOpenCog}
             {...bookmarkProps}
           /&gt;
         )}
@@ -12044,6 +12065,9 @@ export const Playground: Story = {};
   customGameColor,
   bookmarkable,
   isBookmarked,
+  onPlay,
+  onOpenCog,
+  onToggleBookmark,
 }) =&gt; {
   const chips = chipsText
     .split(&#39;,&#39;)
@@ -12051,7 +12075,7 @@ export const Playground: Story = {};
     .filter(Boolean);
 
   const bookmarkProps = bookmarkable
-    ? { isBookmarked, onToggleBookmark: fn() }
+    ? { isBookmarked, onToggleBookmark }
     : {};
 
   return (
@@ -12064,8 +12088,8 @@ export const Playground: Story = {};
           chips={chips}
           customGameName={customGameName || &#39;Custom&#39;}
           customGameColor={customGameColor}
-          onPlay={fn()}
-          onOpenCog={fn()}
+          onPlay={onPlay}
+          onOpenCog={onOpenCog}
           {...bookmarkProps}
         /&gt;
       ) : (
@@ -12074,8 +12098,8 @@ export const Playground: Story = {};
           gameId={gameId}
           title={title}
           chips={chips}
-          onPlay={fn()}
-          onOpenCog={fn()}
+          onPlay={onPlay}
+          onOpenCog={onOpenCog}
           {...bookmarkProps}
         /&gt;
       )}
