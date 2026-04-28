@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   defaultSelection,
+  headerStateForLevel,
   toggleLevel,
   toggleUnit,
   triStateForLevel,
-  unitLevel, // ← new
+  unitLevel,
 } from './level-unit-selection';
+import type { LevelHeaderState } from './level-unit-selection';
 import type { LevelGraphemeUnit } from '@/data/words';
 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
 
@@ -89,5 +91,54 @@ describe('unitLevel', () => {
 
   it('returns undefined for an unknown unit', () => {
     expect(unitLevel({ g: 'qq', p: 'qq' })).toBeUndefined();
+  });
+});
+
+describe('headerStateForLevel', () => {
+  const L1Local = (GRAPHEMES_BY_LEVEL[1] ?? []) as LevelGraphemeUnit[];
+  const L4Local = (GRAPHEMES_BY_LEVEL[4] ?? []) as LevelGraphemeUnit[];
+
+  it('returns "all-on" with counts when every L1 unit is selected and maxLevel >= 1', () => {
+    const state: LevelHeaderState = headerStateForLevel(
+      1,
+      [...L1Local],
+      1,
+    );
+    expect(state.kind).toBe('all-on');
+    expect(state).toMatchObject({
+      count: L1Local.length,
+      total: L1Local.length,
+    });
+  });
+
+  it('returns "partial" with counts when some chips are on', () => {
+    const state: LevelHeaderState = headerStateForLevel(
+      1,
+      [L1Local[0]!, L1Local[1]!],
+      1,
+    );
+    expect(state.kind).toBe('partial');
+    expect(state).toMatchObject({ count: 2, total: L1Local.length });
+  });
+
+  it('returns "tiles-only" when level <= maxLevel but no chips are ticked at this level', () => {
+    const sh = L4Local.find((u) => u.g === 'sh' && u.p === 'ʃ')!;
+    const state: LevelHeaderState = headerStateForLevel(2, [sh], 4);
+    expect(state.kind).toBe('tiles-only');
+    expect(state).toMatchObject({
+      total: GRAPHEMES_BY_LEVEL[2]!.length,
+    });
+  });
+
+  it('returns "not-in-scope" when level > maxLevel', () => {
+    const state: LevelHeaderState = headerStateForLevel(
+      5,
+      [...L1Local],
+      1,
+    );
+    expect(state.kind).toBe('not-in-scope');
+    expect(state).toMatchObject({
+      total: GRAPHEMES_BY_LEVEL[5]!.length,
+    });
   });
 });
