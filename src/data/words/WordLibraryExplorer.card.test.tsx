@@ -18,13 +18,16 @@ const putting: WordHit = {
   level: 3,
   syllableCount: 2,
   syllables: ['put', 'ting'],
-  ipa: 'ˈpʊtɪŋ',
+  // Shipped AUS curriculum stores IPA without stress marks; mirror
+  // that convention here so tests reflect production data shape.
+  ipa: 'pʊtɪŋ',
   graphemes: [
     { g: 'p', p: 'p' },
     { g: 'u', p: 'ʊ' },
     { g: 'tt', p: 't' },
     { g: 'ing', p: 'ɪŋ' },
   ],
+  provenance: 'shipped',
 };
 
 beforeEach(() => {
@@ -52,9 +55,24 @@ describe('ResultCard', () => {
     const speak = screen.getByRole('button', {
       name: /speak putting/i,
     });
-    expect(speak).toHaveTextContent('/ˈpʊtɪŋ/');
+    expect(speak).toHaveTextContent('/pʊtɪŋ/');
     expect(screen.getByText('L3')).toBeInTheDocument();
     expect(screen.getByText('2 syl')).toBeInTheDocument();
+  });
+
+  it('strips slashes, whitespace, and stress marks from legacy ipa before wrapping', () => {
+    render(
+      <ResultCard
+        hit={{ ...putting, ipa: '/ ˈpʊtɪŋ /' }}
+        chipsVisible
+      />,
+    );
+    const speak = screen.getByRole('button', {
+      name: /speak putting/i,
+    });
+    expect(speak).toHaveTextContent('/pʊtɪŋ/');
+    expect(speak.textContent).not.toMatch(/\/\//);
+    expect(speak.textContent).not.toMatch(/ˈ/);
   });
 
   it('renders the PhonemeBlender wrapper', () => {

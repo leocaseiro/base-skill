@@ -1,7 +1,9 @@
 import { ALL_REGIONS } from './levels';
 import type {
   CurriculumEntry,
+  DraftEntry,
   FilterResult,
+  Provenance,
   Region,
   WordCore,
   WordFilter,
@@ -12,6 +14,18 @@ const inRange = (
   n: number,
   [min, max]: readonly [number, number],
 ): boolean => n >= min && n <= max;
+
+export const isLevelInFilter = (
+  filter: WordFilter,
+  level: number,
+): boolean => {
+  if (filter.level !== undefined && filter.level !== level)
+    return false;
+  if (filter.levels && !filter.levels.includes(level)) return false;
+  if (filter.levelRange && !inRange(level, filter.levelRange))
+    return false;
+  return true;
+};
 
 export const entryMatches = (
   hit: WordHit,
@@ -133,6 +147,19 @@ const loadCurriculum = async (
   return flat;
 };
 
+const draftToHit = (d: DraftEntry): WordHit => ({
+  word: d.word,
+  region: d.region,
+  level: d.level,
+  syllableCount: d.syllableCount,
+  syllables: d.syllables,
+  variants: d.variants,
+  ipa: d.ipa || undefined,
+  graphemes: d.graphemes,
+  provenance: 'draft' satisfies Provenance,
+  draftId: d.id,
+});
+
 const joinHits = (
   curriculum: CurriculumEntry[],
   core: Map<string, WordCore>,
@@ -151,33 +178,83 @@ const joinHits = (
         variants: c.variants,
         ipa: entry.ipa || undefined,
         graphemes: entry.graphemes,
+        provenance: 'shipped',
       } as WordHit,
     ];
   });
+
+const sortByWord = (hits: WordHit[]): WordHit[] =>
+  hits.toSorted((a, b) => a.word.localeCompare(b.word));
+
+export const loadShippedIndex = async (
+  region: Region,
+): Promise<Set<string>> => {
+  const curriculum = await loadCurriculum(region);
+  return new Set(curriculum.map((entry) => entry.word));
+};
+
+export const loadShippedWordLevels = async (
+  region: Region,
+): Promise<Map<string, number>> => {
+  const curriculum = await loadCurriculum(region);
+  const map = new Map<string, number>();
+  for (const entry of curriculum) {
+    const existing = map.get(entry.word);
+    if (existing === undefined || entry.level < existing) {
+      map.set(entry.word, entry.level);
+    }
+  }
+  return map;
+};
 
 export const filterWords = async (
   filter: WordFilter,
 ): Promise<FilterResult> => {
   const core = await loadCore();
   const curriculum = await loadCurriculum(filter.region);
-  const hits = joinHits(curriculum, core, filter.region).filter((h) =>
-    entryMatches(h, filter),
+  const shipped = joinHits(curriculum, core, filter.region).filter(
+    (h) => entryMatches(h, filter),
   );
 
+  // Lazy import to avoid Dexie singleton conflicts in environments
+  // that also load RxDB (which bundles a different Dexie version).
+  const { draftStore } = await import('./authoring/draftStore');
+  const allDrafts = await draftStore.listDrafts({
+    region: filter.region,
+  });
+  const drafts = allDrafts
+    .map((d) => draftToHit(d))
+    .filter((h) => entryMatches(h, filter));
+
   if (
-    hits.length > 0 ||
+    shipped.length > 0 ||
+    drafts.length > 0 ||
     filter.region === 'aus' ||
     filter.fallbackToAus === false
   ) {
-    return { hits };
+    // Drafts shadow shipped entries for the same word — the draft is
+    // treated as the authoritative working copy (this is how the
+    // "edit shipped" flow persists corrections without mutating the
+    // curriculum JSON at runtime).
+    const draftWords = new Set(drafts.map((d) => d.word));
+    const shippedOnly = shipped.filter((s) => !draftWords.has(s.word));
+    return { hits: sortByWord([...shippedOnly, ...drafts]) };
   }
 
   const ausCurriculum = await loadCurriculum('aus');
-  const ausHits = joinHits(ausCurriculum, core, 'aus').filter((h) =>
+  const ausShipped = joinHits(ausCurriculum, core, 'aus').filter((h) =>
     entryMatches(h, { ...filter, region: 'aus' }),
   );
+  const ausDrafts = await draftStore.listDrafts({ region: 'aus' });
+  const ausFilteredDrafts = ausDrafts
+    .map((d) => draftToHit(d))
+    .filter((h) => entryMatches(h, { ...filter, region: 'aus' }));
+  const ausDraftWords = new Set(ausFilteredDrafts.map((d) => d.word));
+  const ausShippedOnly = ausShipped.filter(
+    (s) => !ausDraftWords.has(s.word),
+  );
   return {
-    hits: ausHits,
+    hits: sortByWord([...ausShippedOnly, ...ausFilteredDrafts]),
     usedFallback: { from: filter.region, to: 'aus' },
   };
 };
