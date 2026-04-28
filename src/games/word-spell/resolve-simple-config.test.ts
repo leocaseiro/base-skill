@@ -21,19 +21,79 @@ describe('resolveSimpleConfig', () => {
     expect(full.source?.filter.region).toBe('aus');
   });
 
-  it('derives phonemesAllowed and graphemesAllowed from selectedUnits', () => {
+  it('derives cumulative graphemesAllowed from maxLevel of selectedUnits', () => {
+    const simple: WordSpellSimpleConfig = {
+      configMode: 'simple',
+      selectedUnits: [{ g: 'sh', p: 'ʃ' }],
+      region: 'aus',
+      inputMethod: 'drag',
+    };
+    const full = resolveSimpleConfig(simple);
+    const allowed = new Set(full.source?.filter.graphemesAllowed);
+    expect(allowed.has('s')).toBe(true);
+    expect(allowed.has('a')).toBe(true);
+    expect(allowed.has('i')).toBe(true);
+    expect(allowed.has('p')).toBe(true);
+    expect(allowed.has('sh')).toBe(true);
+    expect(allowed.has('ai')).toBe(false);
+  });
+
+  it('derives phonemesRequired (Y filter) from selected unit phonemes', () => {
+    const simple: WordSpellSimpleConfig = {
+      configMode: 'simple',
+      selectedUnits: [{ g: 'sh', p: 'ʃ' }],
+      region: 'aus',
+      inputMethod: 'drag',
+    };
+    const full = resolveSimpleConfig(simple);
+    expect(full.source?.filter.phonemesRequired).toEqual(['ʃ']);
+    expect(full.source?.filter.phonemesAllowed).toBeUndefined();
+  });
+
+  it('dedupes phonemes when multiple units share a phoneme', () => {
     const simple: WordSpellSimpleConfig = {
       configMode: 'simple',
       selectedUnits: [
-        { g: 's', p: 's' },
-        { g: 'a', p: 'æ' },
+        { g: 'c', p: 'k' },
+        { g: 'k', p: 'k' },
+        { g: 'ck', p: 'k' },
       ],
       region: 'aus',
       inputMethod: 'drag',
     };
     const full = resolveSimpleConfig(simple);
-    expect(full.source?.filter.phonemesAllowed).toEqual(['s', 'æ']);
-    expect(full.source?.filter.graphemesAllowed).toEqual(['s', 'a']);
+    expect(full.source?.filter.phonemesRequired).toEqual(['k']);
+  });
+
+  it('falls back to L1 default when selectedUnits is empty', () => {
+    const simple = {
+      configMode: 'simple',
+      selectedUnits: [],
+      region: 'aus',
+      inputMethod: 'drag',
+    } as WordSpellSimpleConfig;
+    const full = resolveSimpleConfig(simple);
+    const allowed = new Set(full.source?.filter.graphemesAllowed);
+    expect(allowed.has('s')).toBe(true);
+    expect(allowed.has('m')).toBe(false);
+    expect(full.source?.filter.phonemesRequired).toEqual([]);
+  });
+
+  it('handles legacy { level, phonemesAllowed } shape via fallback', () => {
+    const legacy = {
+      configMode: 'simple',
+      level: 2,
+      phonemesAllowed: ['s', 'm'],
+      region: 'aus',
+      inputMethod: 'drag',
+    } as unknown as WordSpellSimpleConfig;
+    const full = resolveSimpleConfig(legacy);
+    expect(full.source?.filter.phonemesRequired).toContain('s');
+    expect(full.source?.filter.phonemesRequired).toContain('m');
+    const allowed = new Set(full.source?.filter.graphemesAllowed);
+    expect(allowed.has('s')).toBe(true);
+    expect(allowed.has('a')).toBe(true);
+    expect(allowed.has('m')).toBe(true);
   });
 });
 

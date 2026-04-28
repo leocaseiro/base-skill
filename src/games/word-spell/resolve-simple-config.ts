@@ -1,14 +1,24 @@
-import { defaultSelection } from './level-unit-selection';
+import { defaultSelection, unitLevel } from './level-unit-selection';
 import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
 import type { LevelGraphemeUnit } from '@/data/words';
-import { GRAPHEMES_BY_LEVEL } from '@/data/words';
+import { GRAPHEMES_BY_LEVEL, cumulativeGraphemes } from '@/data/words';
 
-const phonemesOf = (units: readonly LevelGraphemeUnit[]): string[] => [
-  ...new Set(units.map((u) => u.p)),
-];
+const uniquePhonemes = (
+  units: readonly LevelGraphemeUnit[],
+): string[] => [...new Set(units.map((u) => u.p))];
 
-const graphemesOf = (units: readonly LevelGraphemeUnit[]): string[] => [
-  ...new Set(units.map((u) => u.g)),
+const maxLevelOf = (units: readonly LevelGraphemeUnit[]): number => {
+  if (units.length === 0) return 1;
+  let max = 1;
+  for (const u of units) {
+    const lvl = unitLevel(u);
+    if (lvl !== undefined && lvl > max) max = lvl;
+  }
+  return max;
+};
+
+const cumulativeGraphemeForms = (level: number): string[] => [
+  ...new Set(cumulativeGraphemes(level).map((u) => u.g)),
 ];
 
 const unitsFromLegacy = (
@@ -38,6 +48,10 @@ export const resolveSimpleConfig = (
   const region =
     typeof raw.region === 'string' ? (raw.region as 'aus') : 'aus';
 
+  const maxLevel = maxLevelOf(units);
+  const graphemesAllowed = cumulativeGraphemeForms(maxLevel);
+  const phonemesRequired = uniquePhonemes(units);
+
   return {
     gameId: 'word-spell',
     component: 'WordSpell',
@@ -54,8 +68,8 @@ export const resolveSimpleConfig = (
       type: 'word-library',
       filter: {
         region,
-        phonemesAllowed: phonemesOf(units),
-        graphemesAllowed: graphemesOf(units),
+        graphemesAllowed,
+        phonemesRequired,
       },
     },
   };
