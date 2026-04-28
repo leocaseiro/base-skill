@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { resolveSimpleConfig } from '../resolve-simple-config';
 import { WordSpellSimpleConfigForm } from './WordSpellSimpleConfigForm';
 import type { LevelGraphemeUnit } from '@/data/words';
+import type { JSX } from 'react';
 import { GRAPHEMES_BY_LEVEL, filterWords } from '@/data/words';
 
 const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
@@ -61,7 +62,7 @@ describe('Simple form emits playable source for every level', () => {
         inputMethod: 'drag';
       };
       const resolved = resolveSimpleConfig(simple);
-      const result = await filterWords(resolved.source.filter);
+      const result = await filterWords(resolved.source!.filter);
       expect(result.hits.length).toBeGreaterThan(0);
     });
   }

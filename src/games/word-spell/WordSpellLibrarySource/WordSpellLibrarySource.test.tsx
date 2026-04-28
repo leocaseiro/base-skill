@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 import { WordSpellLibrarySource } from './WordSpellLibrarySource';
 import type { LevelGraphemeUnit } from '@/data/words';
+import type { JSX } from 'react';
 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
 
 const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
