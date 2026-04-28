@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">25/50 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">50/50 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/177 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">16 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">26/50 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">50/50 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/167 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">16 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2511,19 +2511,19 @@ export const Small: Story = {
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="ConfigFormFields">
+  aria-label="ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> ConfigFormFields</h2>
+      <h2><span class="status-dot dot-err"></span> ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-8-components-configformfields-props" class="badge ok as-toggle">3 prop types</label>
+        <label for="c-8-components-configformfields-err" class="badge err as-toggle">prop type error</label>
         <label for="c-8-components-configformfields-info" class="badge info as-toggle">1 info</label>
-        <label for="c-8-components-configformfields-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-8-components-configformfields-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -2534,14 +2534,204 @@ export const Small: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-8-components-configformfields-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-8-components-configformfields-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-8-components-configformfields-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-8-components-configformfields-props" class="tg tg-props" type="checkbox" hidden />
+  
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  126 | };
+  127 |
+&gt; 128 | const meta: Meta&lt;StoryArgs&gt; = {
+      | ^
+  129 |   component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
+  130 |   tags: [&#39;autodocs&#39;],
+  131 |   parameters: {
+
+./src/components/ConfigFormFields.stories.tsx:
+import { fn } from &#39;storybook/test&#39;;
+
+import { ConfigFormFields } from &#39;./ConfigFormFields&#39;;
+import type { ConfigField } from &#39;@/lib/config-fields&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+type Scenario =
+  | &#39;primitive-types&#39;
+  | &#39;nested-types&#39;
+  | &#39;nested-select-or-number&#39;
+  | &#39;visible-when-hidden&#39;
+  | &#39;visible-when-shown&#39;;
+
+interface StoryArgs {
+  scenario: Scenario;
+  onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
+  // Shadowed raw props — driven by scenario; hidden from Controls.
+  fields?: never;
+  config?: never;
+}
+
+// Generic fixtures — one per rendering branch of ConfigFormFields.tsx.
+const primitiveFields: ConfigField[] = [
+  {
+    type: &#39;select&#39;,
+    key: &#39;size&#39;,
+    label: &#39;Size&#39;,
+    options: [
+      { value: &#39;small&#39;, label: &#39;Small&#39; },
+      { value: &#39;medium&#39;, label: &#39;Medium&#39; },
+      { value: &#39;large&#39;, label: &#39;Large&#39; },
+    ],
+  },
+  {
+    type: &#39;number&#39;,
+    key: &#39;count&#39;,
+    label: &#39;Count&#39;,
+    min: 1,
+    max: 20,
+  },
+  {
+    type: &#39;checkbox&#39;,
+    key: &#39;enabled&#39;,
+    label: &#39;Enabled&#39;,
+  },
+];
+
+const nestedFields: ConfigField[] = [
+  {
+    type: &#39;nested-select&#39;,
+    key: &#39;group&#39;,
+    subKey: &#39;mode&#39;,
+    label: &#39;Group mode&#39;,
+    options: [
+      { value: &#39;auto&#39;, label: &#39;Auto&#39; },
+      { value: &#39;manual&#39;, label: &#39;Manual&#39; },
+    ],
+  },
+  {
+    type: &#39;nested-number&#39;,
+    key: &#39;group&#39;,
+    subKey: &#39;size&#39;,
+    label: &#39;Group size&#39;,
+    min: 1,
+    max: 10,
+  },
+];
+
+const selectOrNumberFields: ConfigField[] = [
+  {
+    type: &#39;nested-select-or-number&#39;,
+    key: &#39;range&#39;,
+    subKey: &#39;max&#39;,
+    label: &#39;Max range&#39;,
+    min: 1,
+    max: 100,
+  },
+];
+
+const visibleWhenFields: ConfigField[] = [
+  {
+    type: &#39;select&#39;,
+    key: &#39;mode&#39;,
+    label: &#39;Mode&#39;,
+    options: [
+      { value: &#39;simple&#39;, label: &#39;Simple&#39; },
+      { value: &#39;advanced&#39;, label: &#39;Advanced&#39; },
+    ],
+  },
+  {
+    type: &#39;nested-number&#39;,
+    key: &#39;advanced&#39;,
+    subKey: &#39;threshold&#39;,
+    label: &#39;Threshold&#39;,
+    min: 1,
+    max: 100,
+    visibleWhen: { key: &#39;mode&#39;, value: &#39;advanced&#39; },
+  },
+];
+
+const scenarioData: Record&lt;
+  Scenario,
+  { fields: ConfigField[]; config: Record&lt;string, unknown&gt; }
+&gt; = {
+  &#39;primitive-types&#39;: {
+    fields: primitiveFields,
+    config: { size: &#39;medium&#39;, count: 5, enabled: true },
+  },
+  &#39;nested-types&#39;: {
+    fields: nestedFields,
+    config: { group: { mode: &#39;auto&#39;, size: 4 } },
+  },
+  &#39;nested-select-or-number&#39;: {
+    fields: selectOrNumberFields,
+    config: { range: { max: 10 } },
+  },
+  &#39;visible-when-hidden&#39;: {
+    fields: visibleWhenFields,
+    config: { mode: &#39;simple&#39;, advanced: { threshold: 50 } },
+  },
+  &#39;visible-when-shown&#39;: {
+    fields: visibleWhenFields,
+    config: { mode: &#39;advanced&#39;, advanced: { threshold: 50 } },
+  },
+};
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Generic form renderer for the ConfigField union — used by SimpleConfigForm and AdvancedConfigModal across every game. The scenario select cycles through the 5 rendering branches (primitive types, nested types, select-or-number, visibleWhen-hidden, visibleWhen-shown) so reviewers can see every branch in one place. Per-game fixtures live in co-located stories under src/games/&lt;game&gt;/.&#39;,
+      },
+    },
+  },
+  args: {
+    scenario: &#39;primitive-types&#39;,
+    onChange: fn(),
+  },
+  argTypes: {
+    scenario: {
+      control: { type: &#39;select&#39; },
+      options: [
+        &#39;primitive-types&#39;,
+        &#39;nested-types&#39;,
+        &#39;nested-select-or-number&#39;,
+        &#39;visible-when-hidden&#39;,
+        &#39;visible-when-shown&#39;,
+      ] satisfies Scenario[],
+    },
+    onChange: { table: { disable: true } },
+    fields: { table: { disable: true } },
+    config: { table: { disable: true } },
+  },
+  render: ({ scenario, onChange }) =&gt; {
+    const { fields, config } = scenarioData[scenario];
+    return (
+      &lt;ConfigFormFields
+        fields={fields}
+        config={config}
+        onChange={onChange}
+      /&gt;
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -2551,21 +2741,6 @@ export const Small: Story = {
     </div>
         </div>
     
-        <div class="panel panel-props">
-          <div class="note ok">
-            <div class="row">
-              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">3 prop types</span>
-            </div>
-            <pre><code>Component: src/components/ConfigFormFields.tsx::ConfigFormFields</code></pre>
-            <pre><code>Props:</code></pre>
-            <pre><code>config: Record&lt;string, unknown&gt;
-
-fields: ConfigField[]
-
-onChange: (config: Record&lt;string, unknown&gt;) =&gt; void</code></pre>
-          </div>
-        </div>
     
         <div class="panel panel-stories">
           
@@ -2581,75 +2756,21 @@ onChange: (config: Record&lt;string, unknown&gt;) =&gt; void</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">All Field Types</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const AllFieldTypes = () =&gt; &lt;ConfigFormFields
-    fields={allFields}
-    config={{ mode: &#39;picture&#39;, totalRounds: 8, ttsEnabled: true }}
-    onChange={() =&gt; {}} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">All Field Types Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const AllFieldTypesDark = () =&gt; &lt;ConfigFormFields
-    fields={allFields}
-    config={{ mode: &#39;picture&#39;, totalRounds: 8, ttsEnabled: true }}
-    onChange={() =&gt; {}} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Sort Numbers Fields Exact</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const SortNumbersFieldsExact = () =&gt; &lt;ConfigFormFields
-    fields={sortFields}
-    config={{
-      skip: { mode: &#39;random&#39; },
-      tileBankMode: &#39;exact&#39;,
-      distractors: { source: &#39;random&#39;, count: 2 },
-    }}
-    onChange={() =&gt; {}} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Sort Numbers Fields By Mode</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const SortNumbersFieldsByMode = () =&gt; &lt;ConfigFormFields
-    fields={sortFields}
-    config={{
-      skip: { mode: &#39;by&#39;, step: 5, start: &#39;range-min&#39; },
-      tileBankMode: &#39;exact&#39;,
-      distractors: { source: &#39;random&#39;, count: 2 },
-    }}
-    onChange={() =&gt; {}} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Sort Numbers Fields Distractors</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const SortNumbersFieldsDistractors = () =&gt; &lt;ConfigFormFields
-    fields={sortFields}
-    config={{
-      skip: { mode: &#39;random&#39; },
-      tileBankMode: &#39;distractors&#39;,
-      distractors: { source: &#39;gaps-only&#39;, count: 3 },
-    }}
-    onChange={() =&gt; {}} /&gt;;</code></pre>
+              <pre><code>const Playground = ({ scenario, onChange }) =&gt; {
+  const { fields, config } = scenarioData[scenario];
+  return (
+    &lt;ConfigFormFields
+      fields={fields}
+      config={config}
+      onChange={onChange}
+    /&gt;
+  );
+};</code></pre>
             </div>
         </div>
     
@@ -3836,7 +3957,7 @@ export const Playground: Story = {};
       <div class="badges">
         <label for="c-16-components-gamenamechip-props" class="badge ok as-toggle">4 prop types</label>
         <label for="c-16-components-gamenamechip-info" class="badge info as-toggle">1 info</label>
-        <label for="c-16-components-gamenamechip-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-16-components-gamenamechip-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -3896,57 +4017,12 @@ title: string</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Default Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const DefaultDark = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Custom Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithCustomGame = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; customGameName=&quot;Easy Mode&quot; customGameColor=&quot;indigo&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Custom Game Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithCustomGameDark = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; customGameName=&quot;Easy Mode&quot; customGameColor=&quot;indigo&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Subject</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithSubject = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; subject=&quot;reading&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Subject Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithSubjectDark = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; subject=&quot;reading&quot; /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -3957,22 +4033,7 @@ title: string</code></pre>
               
               <pre><code>const AllColors = () =&gt; (
   &lt;div className=&quot;flex flex-col gap-2&quot;&gt;
-    {(
-      [
-        &#39;indigo&#39;,
-        &#39;teal&#39;,
-        &#39;rose&#39;,
-        &#39;amber&#39;,
-        &#39;sky&#39;,
-        &#39;lime&#39;,
-        &#39;purple&#39;,
-        &#39;orange&#39;,
-        &#39;pink&#39;,
-        &#39;emerald&#39;,
-        &#39;slate&#39;,
-        &#39;cyan&#39;,
-      ] as const
-    ).map((color) =&gt; (
+    {GAME_COLOR_KEYS.map((color) =&gt; (
       &lt;GameNameChip
         key={color}
         title=&quot;Word Spell&quot;
@@ -3982,15 +4043,6 @@ title: string</code></pre>
     ))}
   &lt;/div&gt;
 );</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">All Colors Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const AllColorsDark = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; /&gt;;</code></pre>
             </div>
         </div>
     
@@ -9755,7 +9807,7 @@ export const HUD_Round5Of5: Story = {
           <label for="no-component-import-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component import found</span>
-            <span class="group-count">25</span>
+            <span class="group-count">26</span>
           </label>
           <div class="group-cards">
 <article
@@ -11390,14 +11442,281 @@ export const Small: Story = {
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-6-components-configformfields-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-6-components-configformfields-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-6-components-configformfields-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ConfigFormFields.stories.tsx">components-configformfields · ./src/components/ConfigFormFields.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-6-components-configformfields-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-6-components-configformfields-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-6-components-configformfields-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  126 | };
+  127 |
+&gt; 128 | const meta: Meta&lt;StoryArgs&gt; = {
+      | ^
+  129 |   component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
+  130 |   tags: [&#39;autodocs&#39;],
+  131 |   parameters: {
+
+./src/components/ConfigFormFields.stories.tsx:
+import { fn } from &#39;storybook/test&#39;;
+
+import { ConfigFormFields } from &#39;./ConfigFormFields&#39;;
+import type { ConfigField } from &#39;@/lib/config-fields&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+
+type Scenario =
+  | &#39;primitive-types&#39;
+  | &#39;nested-types&#39;
+  | &#39;nested-select-or-number&#39;
+  | &#39;visible-when-hidden&#39;
+  | &#39;visible-when-shown&#39;;
+
+interface StoryArgs {
+  scenario: Scenario;
+  onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
+  // Shadowed raw props — driven by scenario; hidden from Controls.
+  fields?: never;
+  config?: never;
+}
+
+// Generic fixtures — one per rendering branch of ConfigFormFields.tsx.
+const primitiveFields: ConfigField[] = [
+  {
+    type: &#39;select&#39;,
+    key: &#39;size&#39;,
+    label: &#39;Size&#39;,
+    options: [
+      { value: &#39;small&#39;, label: &#39;Small&#39; },
+      { value: &#39;medium&#39;, label: &#39;Medium&#39; },
+      { value: &#39;large&#39;, label: &#39;Large&#39; },
+    ],
+  },
+  {
+    type: &#39;number&#39;,
+    key: &#39;count&#39;,
+    label: &#39;Count&#39;,
+    min: 1,
+    max: 20,
+  },
+  {
+    type: &#39;checkbox&#39;,
+    key: &#39;enabled&#39;,
+    label: &#39;Enabled&#39;,
+  },
+];
+
+const nestedFields: ConfigField[] = [
+  {
+    type: &#39;nested-select&#39;,
+    key: &#39;group&#39;,
+    subKey: &#39;mode&#39;,
+    label: &#39;Group mode&#39;,
+    options: [
+      { value: &#39;auto&#39;, label: &#39;Auto&#39; },
+      { value: &#39;manual&#39;, label: &#39;Manual&#39; },
+    ],
+  },
+  {
+    type: &#39;nested-number&#39;,
+    key: &#39;group&#39;,
+    subKey: &#39;size&#39;,
+    label: &#39;Group size&#39;,
+    min: 1,
+    max: 10,
+  },
+];
+
+const selectOrNumberFields: ConfigField[] = [
+  {
+    type: &#39;nested-select-or-number&#39;,
+    key: &#39;range&#39;,
+    subKey: &#39;max&#39;,
+    label: &#39;Max range&#39;,
+    min: 1,
+    max: 100,
+  },
+];
+
+const visibleWhenFields: ConfigField[] = [
+  {
+    type: &#39;select&#39;,
+    key: &#39;mode&#39;,
+    label: &#39;Mode&#39;,
+    options: [
+      { value: &#39;simple&#39;, label: &#39;Simple&#39; },
+      { value: &#39;advanced&#39;, label: &#39;Advanced&#39; },
+    ],
+  },
+  {
+    type: &#39;nested-number&#39;,
+    key: &#39;advanced&#39;,
+    subKey: &#39;threshold&#39;,
+    label: &#39;Threshold&#39;,
+    min: 1,
+    max: 100,
+    visibleWhen: { key: &#39;mode&#39;, value: &#39;advanced&#39; },
+  },
+];
+
+const scenarioData: Record&lt;
+  Scenario,
+  { fields: ConfigField[]; config: Record&lt;string, unknown&gt; }
+&gt; = {
+  &#39;primitive-types&#39;: {
+    fields: primitiveFields,
+    config: { size: &#39;medium&#39;, count: 5, enabled: true },
+  },
+  &#39;nested-types&#39;: {
+    fields: nestedFields,
+    config: { group: { mode: &#39;auto&#39;, size: 4 } },
+  },
+  &#39;nested-select-or-number&#39;: {
+    fields: selectOrNumberFields,
+    config: { range: { max: 10 } },
+  },
+  &#39;visible-when-hidden&#39;: {
+    fields: visibleWhenFields,
+    config: { mode: &#39;simple&#39;, advanced: { threshold: 50 } },
+  },
+  &#39;visible-when-shown&#39;: {
+    fields: visibleWhenFields,
+    config: { mode: &#39;advanced&#39;, advanced: { threshold: 50 } },
+  },
+};
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Generic form renderer for the ConfigField union — used by SimpleConfigForm and AdvancedConfigModal across every game. The scenario select cycles through the 5 rendering branches (primitive types, nested types, select-or-number, visibleWhen-hidden, visibleWhen-shown) so reviewers can see every branch in one place. Per-game fixtures live in co-located stories under src/games/&lt;game&gt;/.&#39;,
+      },
+    },
+  },
+  args: {
+    scenario: &#39;primitive-types&#39;,
+    onChange: fn(),
+  },
+  argTypes: {
+    scenario: {
+      control: { type: &#39;select&#39; },
+      options: [
+        &#39;primitive-types&#39;,
+        &#39;nested-types&#39;,
+        &#39;nested-select-or-number&#39;,
+        &#39;visible-when-hidden&#39;,
+        &#39;visible-when-shown&#39;,
+      ] satisfies Scenario[],
+    },
+    onChange: { table: { disable: true } },
+    fields: { table: { disable: true } },
+    config: { table: { disable: true } },
+  },
+  render: ({ scenario, onChange }) =&gt; {
+    const { fields, config } = scenarioData[scenario];
+    return (
+      &lt;ConfigFormFields
+        fields={fields}
+        config={config}
+        onChange={onChange}
+      /&gt;
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { ConfigFormFields } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = ({ scenario, onChange }) =&gt; {
+  const { fields, config } = scenarioData[scenario];
+  return (
+    &lt;ConfigFormFields
+      fields={fields}
+      config={config}
+      onChange={onChange}
+    /&gt;
+  );
+};</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="DotGroupQuestion as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-err"></span> DotGroupQuestion as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-6-components-questions-dotgroupquestion-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-6-components-questions-dotgroupquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-6-components-questions-dotgroupquestion-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-7-components-questions-dotgroupquestion-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-7-components-questions-dotgroupquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-7-components-questions-dotgroupquestion-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -11408,9 +11727,9 @@ export const Small: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-6-components-questions-dotgroupquestion-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-6-components-questions-dotgroupquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-6-components-questions-dotgroupquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-7-components-questions-dotgroupquestion-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-7-components-questions-dotgroupquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-7-components-questions-dotgroupquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -11548,9 +11867,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-7-components-ui-dropdown-menu-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-7-components-ui-dropdown-menu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-7-components-ui-dropdown-menu-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-error-8-components-ui-dropdown-menu-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-8-components-ui-dropdown-menu-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-8-components-ui-dropdown-menu-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -11561,9 +11880,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-7-components-ui-dropdown-menu-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-7-components-ui-dropdown-menu-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-7-components-ui-dropdown-menu-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-8-components-ui-dropdown-menu-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-8-components-ui-dropdown-menu-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-8-components-ui-dropdown-menu-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -11858,9 +12177,9 @@ export const WithDestructiveItem: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> EncouragementAnnouncer as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-8-answer-game-encouragementannouncer-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-8-answer-game-encouragementannouncer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-8-answer-game-encouragementannouncer-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-error-9-answer-game-encouragementannouncer-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-9-answer-game-encouragementannouncer-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-9-answer-game-encouragementannouncer-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -11871,9 +12190,9 @@ export const WithDestructiveItem: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-8-answer-game-encouragementannouncer-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-8-answer-game-encouragementannouncer-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-8-answer-game-encouragementannouncer-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-9-answer-game-encouragementannouncer-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-9-answer-game-encouragementannouncer-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-9-answer-game-encouragementannouncer-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12043,9 +12362,9 @@ export const ReplayTrigger: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> GameGrid as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-9-components-gamegrid-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-9-components-gamegrid-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-9-components-gamegrid-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-10-components-gamegrid-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-10-components-gamegrid-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-10-components-gamegrid-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12056,9 +12375,9 @@ export const ReplayTrigger: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-9-components-gamegrid-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-9-components-gamegrid-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-9-components-gamegrid-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-10-components-gamegrid-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-10-components-gamegrid-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-10-components-gamegrid-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12228,9 +12547,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-10-answer-game-gameoveroverlay-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-10-answer-game-gameoveroverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-10-answer-game-gameoveroverlay-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-11-answer-game-gameoveroverlay-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-11-answer-game-gameoveroverlay-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-11-answer-game-gameoveroverlay-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12241,9 +12560,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-10-answer-game-gameoveroverlay-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-10-answer-game-gameoveroverlay-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-10-answer-game-gameoveroverlay-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-11-answer-game-gameoveroverlay-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-11-answer-game-gameoveroverlay-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-11-answer-game-gameoveroverlay-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12373,9 +12692,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-11-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-11-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-11-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-12-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-12-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-12-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12386,9 +12705,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-11-answer-game-instructionsoverlay-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-11-answer-game-instructionsoverlay-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-11-answer-game-instructionsoverlay-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-12-answer-game-instructionsoverlay-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-12-answer-game-instructionsoverlay-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-12-answer-game-instructionsoverlay-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12666,9 +12985,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Label as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-12-components-ui-label-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-12-components-ui-label-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-12-components-ui-label-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-13-components-ui-label-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-13-components-ui-label-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-13-components-ui-label-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12679,9 +12998,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-12-components-ui-label-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-12-components-ui-label-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-12-components-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-13-components-ui-label-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-13-components-ui-label-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-13-components-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12792,9 +13111,9 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> NumberMatchConfigFormHarness</h2>
       <div class="badges">
-        <label for="c-error-13-games-numbermatch-configform-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-13-games-numbermatch-configform-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-13-games-numbermatch-configform-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-14-games-numbermatch-configform-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-14-games-numbermatch-configform-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-14-games-numbermatch-configform-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12805,9 +13124,9 @@ export const Default: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-13-games-numbermatch-configform-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-13-games-numbermatch-configform-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-13-games-numbermatch-configform-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-14-games-numbermatch-configform-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-14-games-numbermatch-configform-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-14-games-numbermatch-configform-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12996,9 +13315,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> NumberMatchWithHarness</h2>
       <div class="badges">
-        <label for="c-error-14-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-14-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-14-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        <label for="c-error-15-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-15-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-15-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
         
       </div>
     </div>
@@ -13009,9 +13328,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-14-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-14-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-14-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-15-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-15-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-15-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13153,9 +13472,9 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-15-components-offlineindicator-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-15-components-offlineindicator-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-15-components-offlineindicator-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-16-components-offlineindicator-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-16-components-offlineindicator-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-16-components-offlineindicator-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -13166,9 +13485,9 @@ export const Default: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-15-components-offlineindicator-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-15-components-offlineindicator-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-15-components-offlineindicator-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-16-components-offlineindicator-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-16-components-offlineindicator-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-16-components-offlineindicator-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13304,9 +13623,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-16-answer-game-progresshud-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-16-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-16-answer-game-progresshud-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-17-answer-game-progresshud-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-17-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-17-answer-game-progresshud-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -13317,9 +13636,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-16-answer-game-progresshud-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-16-answer-game-progresshud-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-16-answer-game-progresshud-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-17-answer-game-progresshud-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-17-answer-game-progresshud-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-17-answer-game-progresshud-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13551,9 +13870,9 @@ export const Playground: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Select as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-17-components-ui-select-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-17-components-ui-select-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-17-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-error-18-components-ui-select-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-18-components-ui-select-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-18-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -13564,9 +13883,9 @@ export const Playground: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-17-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-17-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-17-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-18-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-18-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-18-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13876,9 +14195,9 @@ export const SelectsOption: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Sheet as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-18-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-18-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-18-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-error-19-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-19-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-19-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -13889,9 +14208,9 @@ export const SelectsOption: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-18-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-18-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-18-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-19-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-19-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-19-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -14230,9 +14549,9 @@ export const OpensAndClosesOnEscape: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SlotRow as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-19-answer-game-slot-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-19-answer-game-slot-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-19-answer-game-slot-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-20-answer-game-slot-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-20-answer-game-slot-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-20-answer-game-slot-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -14243,9 +14562,9 @@ export const OpensAndClosesOnEscape: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-19-answer-game-slot-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-19-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-19-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-20-answer-game-slot-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-20-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-20-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -14706,9 +15025,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SortNumbersConfigFormHarness</h2>
       <div class="badges">
-        <label for="c-error-20-games-sortnumbers-configform-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-20-games-sortnumbers-configform-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-20-games-sortnumbers-configform-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-21-games-sortnumbers-configform-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-21-games-sortnumbers-configform-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-21-games-sortnumbers-configform-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -14719,9 +15038,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-20-games-sortnumbers-configform-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-20-games-sortnumbers-configform-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-20-games-sortnumbers-configform-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-21-games-sortnumbers-configform-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-21-games-sortnumbers-configform-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-21-games-sortnumbers-configform-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -14912,9 +15231,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-21-components-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-21-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-21-components-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-22-components-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-22-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-22-components-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -14925,9 +15244,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-21-components-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-21-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-21-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-22-components-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-22-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-22-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -15053,9 +15372,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-22-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-22-components-updatebanner-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-22-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-23-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-23-components-updatebanner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-23-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -15066,9 +15385,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-22-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-22-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-22-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-23-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-23-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-23-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -15209,9 +15528,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellConfigFormHarness</h2>
       <div class="badges">
-        <label for="c-error-23-games-wordspell-configform-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-23-games-wordspell-configform-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-23-games-wordspell-configform-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-24-games-wordspell-configform-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-24-games-wordspell-configform-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-24-games-wordspell-configform-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -15222,9 +15541,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-23-games-wordspell-configform-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-23-games-wordspell-configform-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-23-games-wordspell-configform-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-24-games-wordspell-configform-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-24-games-wordspell-configform-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-24-games-wordspell-configform-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -15404,9 +15723,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
       <div class="badges">
-        <label for="c-error-24-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-24-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-24-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
+        <label for="c-error-25-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-25-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-25-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
         
       </div>
     </div>
@@ -15417,9 +15736,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-24-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-24-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-24-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-25-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-25-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-25-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
