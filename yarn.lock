@@ -6481,11 +6481,6 @@ dexie@4.0.10:
   resolved "https://registry.yarnpkg.com/dexie/-/dexie-4.0.10.tgz#979e3ee75993b44eea3852f97ceb198019d5b287"
   integrity sha512-eM2RzuR3i+M046r2Q0Optl3pS31qTWf8aFuA7H9wnsHTwl8EPvroVLwvQene/6paAs39Tbk6fWZcn2aZaHkc/w==
 
-dexie@^4.4.2:
-  version "4.4.2"
-  resolved "https://registry.yarnpkg.com/dexie/-/dexie-4.4.2.tgz#447511328c982baaf6a88c736ddc08484916886c"
-  integrity sha512-zMtV8q79EFE5U8FKZvt0Y/77PCU/Hr/RDxv1EDeo228L+m/HTbeN2AjoQm674rhQCX8n3ljK87lajt7UQuZfvw==
-
 diff@^8.0.2:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/diff/-/diff-8.0.4.tgz#4f5baf3188b9b2431117b962eb20ba330fadf696"
