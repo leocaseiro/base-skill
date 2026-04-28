@@ -1,13 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { WordSpellLibrarySource } from './WordSpellLibrarySource';
 import type { LevelGraphemeUnit } from '@/data/words';
 import type { JSX } from 'react';
-import { GRAPHEMES_BY_LEVEL } from '@/data/words';
+import {
+  GRAPHEMES_BY_LEVEL,
+  __resetChunkCacheForTests,
+} from '@/data/words';
 
 const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
+const L2 = [...(GRAPHEMES_BY_LEVEL[2] ?? [])];
 
 const Harness = ({
   initial,
@@ -23,53 +27,69 @@ const Harness = ({
   );
 };
 
-describe('WordSpellLibrarySource — chips variant (default)', () => {
+afterEach(() => {
+  __resetChunkCacheForTests();
+});
+
+describe('WordSpellLibrarySource', () => {
   it('renders 8 level rows', () => {
     render(<Harness initial={L1} />);
     for (let n = 1; n <= 8; n++) {
-      expect(screen.getByLabelText(`Level ${n}`)).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: new RegExp(`Level ${n}`) }),
+      ).toBeInTheDocument();
     }
   });
 
-  it('shows the L1 row checkbox as checked when all L1 units are selected', () => {
-    render(<Harness initial={L1} />);
-    const cb = screen.getByLabelText('Level 1');
-    expect(cb).toBeChecked();
-    expect(cb).not.toBePartiallyChecked();
+  it('uses no native <input type="checkbox"> (group-click only)', () => {
+    const { container } = render(<Harness initial={L1} />);
+    expect(
+      container.querySelectorAll('input[type="checkbox"]'),
+    ).toHaveLength(0);
   });
 
-  it('shows the L1 row checkbox as indeterminate when one L1 unit is missing', () => {
+  it('marks the L1 header as all-on when every L1 unit is selected', () => {
+    render(<Harness initial={L1} />);
+    const l1 = screen.getByRole('button', { name: /Level 1/i });
+    expect(l1).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('marks the L1 header as partial (mixed) when one L1 unit is missing', () => {
     render(<Harness initial={L1.slice(1)} />);
-    const cb = screen.getByLabelText('Level 1');
-    expect(cb).toBePartiallyChecked();
+    const l1 = screen.getByRole('button', { name: /Level 1/i });
+    expect(l1).toHaveAttribute('aria-pressed', 'mixed');
   });
 
-  it('shows the L2 row checkbox as unchecked when no L2 units are selected', () => {
+  it('marks the L2 header as off when no L2 units are selected', () => {
     render(<Harness initial={L1} />);
-    const cb = screen.getByLabelText('Level 2');
-    expect(cb).not.toBeChecked();
-    expect(cb).not.toBePartiallyChecked();
+    const l2 = screen.getByRole('button', { name: /Level 2/i });
+    expect(l2).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('clicking a row checkbox toggles every unit in that row', async () => {
+  it('clicking a level header toggles every chip in that row', async () => {
     const user = userEvent.setup();
     render(<Harness initial={L1} />);
-    const l2 = screen.getByLabelText('Level 2');
+    const l2 = screen.getByRole('button', { name: /Level 2/i });
     await user.click(l2);
-    expect(l2).toBeChecked();
-    expect(l2).not.toBePartiallyChecked();
+    expect(l2).toHaveAttribute('aria-pressed', 'true');
+    for (const u of L2) {
+      const chip = screen.getByRole('button', {
+        name: new RegExp(String.raw`${u.g}.*\/${u.p}\/`, 'i'),
+      });
+      expect(chip).toHaveAttribute('aria-pressed', 'true');
+    }
   });
 
-  it('clicking an individual chip toggles just that unit and updates the row', async () => {
+  it('clicking a chip toggles just that unit and updates header to partial', async () => {
     const user = userEvent.setup();
     render(<Harness initial={L1} />);
     const firstL1Chip = screen.getByRole('button', {
-      name: new RegExp(String.raw`${L1[0]!.g} \/${L1[0]!.p}\/`, 'i'),
+      name: new RegExp(String.raw`^${L1[0]!.g} \/${L1[0]!.p}\/`, 'i'),
     });
     await user.click(firstL1Chip);
     expect(firstL1Chip).toHaveAttribute('aria-pressed', 'false');
-    const l1 = screen.getByLabelText('Level 1');
-    expect(l1).toBePartiallyChecked();
+    const l1 = screen.getByRole('button', { name: /Level 1/i });
+    expect(l1).toHaveAttribute('aria-pressed', 'mixed');
   });
 
   it('renders L1 `s /s/` and L4 `c /s/` as independent chips', () => {
@@ -85,5 +105,10 @@ describe('WordSpellLibrarySource — chips variant (default)', () => {
       'data-invalid',
       'true',
     );
+  });
+
+  it('renders a WordPreviewBar', () => {
+    render(<Harness initial={L1} />);
+    expect(screen.getByTestId('word-preview-bar')).toBeInTheDocument();
   });
 });
