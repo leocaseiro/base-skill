@@ -2,15 +2,15 @@ import type { JSX } from 'react';
 import { CellSelect } from '@/components/config/CellSelect';
 import { ChipStrip } from '@/components/config/ChipStrip';
 import { ChunkGroup } from '@/components/config/ChunkGroup';
-import { GRAPHEMES_BY_LEVEL } from '@/data/words/levels';
+import { cumulativeGraphemes } from '@/data/words/levels';
 
 type Props = {
   config: Record<string, unknown>;
   onChange: (config: Record<string, unknown>) => void;
 };
 
-const LEVEL_OPTIONS = Object.keys(GRAPHEMES_BY_LEVEL).map((n) => ({
-  value: n,
+const LEVEL_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
+  value: String(n),
   label: `Level ${n}`,
 }));
 
@@ -36,7 +36,7 @@ export const WordSpellSimpleConfigForm = ({
       ? config.inputMethod
       : 'drag';
 
-  const unitsAtLevel = GRAPHEMES_BY_LEVEL[level] ?? [];
+  const unitsAtLevel = cumulativeGraphemes(level);
   // Multiple graphemes can teach the same phoneme at one level
   // (e.g. level 2 has c, k, ck → /k/). Collapse them into one chip per sound
   // so toggling is unambiguous.
@@ -59,7 +59,7 @@ export const WordSpellSimpleConfigForm = ({
 
   const setLevel = (n: number) => {
     const available = [
-      ...new Set((GRAPHEMES_BY_LEVEL[n] ?? []).map((u) => u.p)),
+      ...new Set(cumulativeGraphemes(n).map((u) => u.p)),
     ];
     onChange({
       ...config,
