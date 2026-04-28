@@ -1,11 +1,15 @@
 import type { AnswerGameConfig } from '@/components/answer-game/types';
-import type { WordSpellSource } from '@/data/words';
+import type {
+  LevelGraphemeUnit,
+  Region,
+  WordSpellSource,
+} from '@/data/words';
 import type { ConfigField } from '@/lib/config-fields';
 
 export type WordSpellSimpleConfig = {
   configMode: 'simple';
-  level: number;
-  phonemesAllowed: string[];
+  selectedUnits: LevelGraphemeUnit[];
+  region: Region;
   inputMethod: 'drag' | 'type' | 'both';
 };
 
