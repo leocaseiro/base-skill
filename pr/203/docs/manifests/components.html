@@ -3675,13 +3675,13 @@ export const ReplayTrigger: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;GameGrid as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  12 | }
-  13 |
-&gt; 14 | const meta: Meta&lt;StoryArgs&gt; = {
+  30 | }
+  31 |
+&gt; 32 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  15 |   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
-  16 |   tags: [&#39;autodocs&#39;],
-  17 |   parameters: {
+  33 |   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
+  34 |   tags: [&#39;autodocs&#39;],
+  35 |   parameters: {
 
 ./src/components/GameGrid.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -3691,8 +3691,26 @@ import { GameGrid } from &#39;./GameGrid&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { ComponentType } from &#39;react&#39;;
 
+interface SampleCardSeed {
+  gameId: string;
+  title: string;
+  chips: string[];
+}
+
+const SAMPLE_CARD_SEEDS: readonly SampleCardSeed[] = [
+  { gameId: &#39;word-spell&#39;, title: &#39;Word Spell&#39;, chips: [&#39;PK&#39;, &#39;K&#39;] },
+  {
+    gameId: &#39;number-match&#39;,
+    title: &#39;Match the Number&#39;,
+    chips: [&#39;1&#39;, &#39;2&#39;],
+  },
+  { gameId: &#39;sort-numbers&#39;, title: &#39;Sort Numbers&#39;, chips: [&#39;K&#39;, &#39;1&#39;] },
+];
+
 interface StoryArgs {
   cardCount: number;
+  onPlay: () =&gt; void;
+  onOpenCog: () =&gt; void;
   // Raw GameGrid prop shadowed by the cardCount bridge — hidden from Controls.
   cards?: never;
 }
@@ -3704,32 +3722,41 @@ const meta: Meta&lt;StoryArgs&gt; = {
     docs: {
       description: {
         component:
-          &#39;Responsive grid that lays GameCard children out in 2/3/4 columns at xs/lg/xl breakpoints. The cardCount range drives how many sample cards render — slide to 0 for the empty state, or up to 12 to see how the grid wraps.&#39;,
+          &#39;Responsive grid that lays GameCard children out in 2/3/4 columns at xs/lg/xl breakpoints. The cardCount range drives how many sample cards render — slide to 0 for the empty state, or up to 12 to see how the grid wraps. Sample cards cycle through the three real game seeds (word-spell, number-match, sort-numbers) so the layout reflects realistic cover art.&#39;,
       },
     },
   },
   args: {
     cardCount: 3,
+    onPlay: fn(),
+    onOpenCog: fn(),
   },
   argTypes: {
     cardCount: {
       control: { type: &#39;range&#39;, min: 0, max: 12, step: 1 },
     },
+    onPlay: { table: { disable: true } },
+    onOpenCog: { table: { disable: true } },
     cards: { table: { disable: true } },
   },
-  render: ({ cardCount }) =&gt; (
+  render: ({ cardCount, onPlay, onOpenCog }) =&gt; (
     &lt;GameGrid
-      cards={Array.from({ length: cardCount }, (_, i) =&gt; (
-        &lt;GameCard
-          key={`card-${String(i)}`}
-          variant=&quot;default&quot;
-          gameId=&quot;sort-numbers&quot;
-          title={`Card ${String(i + 1)}`}
-          chips={[&#39;K&#39;, &#39;1&#39;, &#39;2&#39;]}
-          onPlay={fn()}
-          onOpenCog={fn()}
-        /&gt;
-      ))}
+      cards={Array.from({ length: cardCount }, (_, i) =&gt; {
+        // Modulo by a positive constant always yields a valid index;
+        // noUncheckedIndexedAccess can&#39;t see that, so assert it.
+        const seed = SAMPLE_CARD_SEEDS[i % SAMPLE_CARD_SEEDS.length]!;
+        return (
+          &lt;GameCard
+            key={`${seed.gameId}-${String(i)}`}
+            variant=&quot;default&quot;
+            gameId={seed.gameId}
+            title={seed.title}
+            chips={seed.chips}
+            onPlay={onPlay}
+            onOpenCog={onOpenCog}
+          /&gt;
+        );
+      })}
     /&gt;
   ),
 };
@@ -3770,19 +3797,24 @@ export const Playground: Story = {};
               </div>
               
               
-              <pre><code>const Playground = ({ cardCount }) =&gt; (
+              <pre><code>const Playground = ({ cardCount, onPlay, onOpenCog }) =&gt; (
   &lt;GameGrid
-    cards={Array.from({ length: cardCount }, (_, i) =&gt; (
-      &lt;GameCard
-        key={`card-${String(i)}`}
-        variant=&quot;default&quot;
-        gameId=&quot;sort-numbers&quot;
-        title={`Card ${String(i + 1)}`}
-        chips={[&#39;K&#39;, &#39;1&#39;, &#39;2&#39;]}
-        onPlay={fn()}
-        onOpenCog={fn()}
-      /&gt;
-    ))}
+    cards={Array.from({ length: cardCount }, (_, i) =&gt; {
+      // Modulo by a positive constant always yields a valid index;
+      // noUncheckedIndexedAccess can&#39;t see that, so assert it.
+      const seed = SAMPLE_CARD_SEEDS[i % SAMPLE_CARD_SEEDS.length]!;
+      return (
+        &lt;GameCard
+          key={`${seed.gameId}-${String(i)}`}
+          variant=&quot;default&quot;
+          gameId={seed.gameId}
+          title={seed.title}
+          chips={seed.chips}
+          onPlay={onPlay}
+          onOpenCog={onOpenCog}
+        /&gt;
+      );
+    })}
   /&gt;
 );</code></pre>
             </div>
@@ -11432,13 +11464,13 @@ export const ReplayTrigger: Story = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;GameGrid as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  12 | }
-  13 |
-&gt; 14 | const meta: Meta&lt;StoryArgs&gt; = {
+  30 | }
+  31 |
+&gt; 32 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  15 |   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
-  16 |   tags: [&#39;autodocs&#39;],
-  17 |   parameters: {
+  33 |   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
+  34 |   tags: [&#39;autodocs&#39;],
+  35 |   parameters: {
 
 ./src/components/GameGrid.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -11448,8 +11480,26 @@ import { GameGrid } from &#39;./GameGrid&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { ComponentType } from &#39;react&#39;;
 
+interface SampleCardSeed {
+  gameId: string;
+  title: string;
+  chips: string[];
+}
+
+const SAMPLE_CARD_SEEDS: readonly SampleCardSeed[] = [
+  { gameId: &#39;word-spell&#39;, title: &#39;Word Spell&#39;, chips: [&#39;PK&#39;, &#39;K&#39;] },
+  {
+    gameId: &#39;number-match&#39;,
+    title: &#39;Match the Number&#39;,
+    chips: [&#39;1&#39;, &#39;2&#39;],
+  },
+  { gameId: &#39;sort-numbers&#39;, title: &#39;Sort Numbers&#39;, chips: [&#39;K&#39;, &#39;1&#39;] },
+];
+
 interface StoryArgs {
   cardCount: number;
+  onPlay: () =&gt; void;
+  onOpenCog: () =&gt; void;
   // Raw GameGrid prop shadowed by the cardCount bridge — hidden from Controls.
   cards?: never;
 }
@@ -11461,32 +11511,41 @@ const meta: Meta&lt;StoryArgs&gt; = {
     docs: {
       description: {
         component:
-          &#39;Responsive grid that lays GameCard children out in 2/3/4 columns at xs/lg/xl breakpoints. The cardCount range drives how many sample cards render — slide to 0 for the empty state, or up to 12 to see how the grid wraps.&#39;,
+          &#39;Responsive grid that lays GameCard children out in 2/3/4 columns at xs/lg/xl breakpoints. The cardCount range drives how many sample cards render — slide to 0 for the empty state, or up to 12 to see how the grid wraps. Sample cards cycle through the three real game seeds (word-spell, number-match, sort-numbers) so the layout reflects realistic cover art.&#39;,
       },
     },
   },
   args: {
     cardCount: 3,
+    onPlay: fn(),
+    onOpenCog: fn(),
   },
   argTypes: {
     cardCount: {
       control: { type: &#39;range&#39;, min: 0, max: 12, step: 1 },
     },
+    onPlay: { table: { disable: true } },
+    onOpenCog: { table: { disable: true } },
     cards: { table: { disable: true } },
   },
-  render: ({ cardCount }) =&gt; (
+  render: ({ cardCount, onPlay, onOpenCog }) =&gt; (
     &lt;GameGrid
-      cards={Array.from({ length: cardCount }, (_, i) =&gt; (
-        &lt;GameCard
-          key={`card-${String(i)}`}
-          variant=&quot;default&quot;
-          gameId=&quot;sort-numbers&quot;
-          title={`Card ${String(i + 1)}`}
-          chips={[&#39;K&#39;, &#39;1&#39;, &#39;2&#39;]}
-          onPlay={fn()}
-          onOpenCog={fn()}
-        /&gt;
-      ))}
+      cards={Array.from({ length: cardCount }, (_, i) =&gt; {
+        // Modulo by a positive constant always yields a valid index;
+        // noUncheckedIndexedAccess can&#39;t see that, so assert it.
+        const seed = SAMPLE_CARD_SEEDS[i % SAMPLE_CARD_SEEDS.length]!;
+        return (
+          &lt;GameCard
+            key={`${seed.gameId}-${String(i)}`}
+            variant=&quot;default&quot;
+            gameId={seed.gameId}
+            title={seed.title}
+            chips={seed.chips}
+            onPlay={onPlay}
+            onOpenCog={onOpenCog}
+          /&gt;
+        );
+      })}
     /&gt;
   ),
 };
@@ -11527,19 +11586,24 @@ export const Playground: Story = {};
               </div>
               
               
-              <pre><code>const Playground = ({ cardCount }) =&gt; (
+              <pre><code>const Playground = ({ cardCount, onPlay, onOpenCog }) =&gt; (
   &lt;GameGrid
-    cards={Array.from({ length: cardCount }, (_, i) =&gt; (
-      &lt;GameCard
-        key={`card-${String(i)}`}
-        variant=&quot;default&quot;
-        gameId=&quot;sort-numbers&quot;
-        title={`Card ${String(i + 1)}`}
-        chips={[&#39;K&#39;, &#39;1&#39;, &#39;2&#39;]}
-        onPlay={fn()}
-        onOpenCog={fn()}
-      /&gt;
-    ))}
+    cards={Array.from({ length: cardCount }, (_, i) =&gt; {
+      // Modulo by a positive constant always yields a valid index;
+      // noUncheckedIndexedAccess can&#39;t see that, so assert it.
+      const seed = SAMPLE_CARD_SEEDS[i % SAMPLE_CARD_SEEDS.length]!;
+      return (
+        &lt;GameCard
+          key={`${seed.gameId}-${String(i)}`}
+          variant=&quot;default&quot;
+          gameId={seed.gameId}
+          title={seed.title}
+          chips={seed.chips}
+          onPlay={onPlay}
+          onOpenCog={onOpenCog}
+        /&gt;
+      );
+    })}
   /&gt;
 );</code></pre>
             </div>
