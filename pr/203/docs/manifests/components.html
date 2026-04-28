@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -3681,7 +3681,7 @@ export const ReplayTrigger: Story = {
      | ^
   15 |   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
   16 |   tags: [&#39;autodocs&#39;],
-  17 |   args: {
+  17 |   parameters: {
 
 ./src/components/GameGrid.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -3700,6 +3700,14 @@ interface StoryArgs {
 const meta: Meta&lt;StoryArgs&gt; = {
   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
   tags: [&#39;autodocs&#39;],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Responsive grid that lays GameCard children out in 2/3/4 columns at xs/lg/xl breakpoints. The cardCount range drives how many sample cards render — slide to 0 for the empty state, or up to 12 to see how the grid wraps.&#39;,
+      },
+    },
+  },
   args: {
     cardCount: 3,
   },
@@ -3729,7 +3737,7 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Default: Story = {};
+export const Playground: Story = {};
 </code></pre></div>
     </div>
         </div>
@@ -3757,12 +3765,12 @@ export const Default: Story = {};
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = ({ cardCount }) =&gt; (
+              <pre><code>const Playground = ({ cardCount }) =&gt; (
   &lt;GameGrid
     cards={Array.from({ length: cardCount }, (_, i) =&gt; (
       &lt;GameCard
@@ -11430,7 +11438,7 @@ export const ReplayTrigger: Story = {
      | ^
   15 |   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
   16 |   tags: [&#39;autodocs&#39;],
-  17 |   args: {
+  17 |   parameters: {
 
 ./src/components/GameGrid.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -11449,6 +11457,14 @@ interface StoryArgs {
 const meta: Meta&lt;StoryArgs&gt; = {
   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
   tags: [&#39;autodocs&#39;],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Responsive grid that lays GameCard children out in 2/3/4 columns at xs/lg/xl breakpoints. The cardCount range drives how many sample cards render — slide to 0 for the empty state, or up to 12 to see how the grid wraps.&#39;,
+      },
+    },
+  },
   args: {
     cardCount: 3,
   },
@@ -11478,7 +11494,7 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Default: Story = {};
+export const Playground: Story = {};
 </code></pre></div>
     </div>
         </div>
@@ -11506,12 +11522,12 @@ export const Default: Story = {};
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = ({ cardCount }) =&gt; (
+              <pre><code>const Playground = ({ cardCount }) =&gt; (
   &lt;GameGrid
     cards={Array.from({ length: cardCount }, (_, i) =&gt; (
       &lt;GameCard
