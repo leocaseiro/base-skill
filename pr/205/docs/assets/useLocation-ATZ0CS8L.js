@@ -1,0 +1,1 @@
+import{u,a,r as n}from"./withRouter-D911h49w.js";import{r as c}from"./iframe-DlSW3Ihc.js";function f(i){const r=u(),t=c.useRef(void 0);return a(r.stores.location,s=>{const e=s;if(r.options.defaultStructuralSharing){const o=n(t.current,e);return t.current=o,o}return e})}export{f as u};
