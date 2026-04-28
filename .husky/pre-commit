@@ -1,2 +1,37 @@
-npx lint-staged
-yarn test
+#!/usr/bin/env bash
+# .husky/pre-commit — staged-file-gated quality gate.
+#
+# Runs only the checks whose triggers match staged files
+# (see scripts/detect-buckets.mjs). Issue #224: a markdown-only commit
+# must not run unit tests or TypeScript on src/.
+#
+# Skip env vars (mirror pre-push):
+#   SKIP_PREPUSH=1     bypass every pre-commit check
+#   SKIP_LINT=1        skip lint-staged
+#   SKIP_TYPECHECK=1   skip typecheck
+
+if [ "${SKIP_PREPUSH:-0}" = "1" ]; then
+  echo "  ⚠ All pre-commit checks (skipped — SKIP_PREPUSH=1)"
+  exit 0
+fi
+
+set -euo pipefail
+
+# 1. Per-file formatters/linters. lint-staged is itself file-aware via
+#    .lintstagedrc.mjs, so a markdown-only stage runs only markdownlint +
+#    prettier on the staged .md files.
+if [ "${SKIP_LINT:-0}" != "1" ]; then
+  npx lint-staged
+fi
+
+# 2. Compute which atomic checks the staged files trigger.
+CHECKS=$(node scripts/detect-buckets.mjs --staged)
+
+# 3. TypeScript — only if a staged file affects type-checking.
+case " $CHECKS " in
+  *" typecheck "*)
+    if [ "${SKIP_TYPECHECK:-0}" != "1" ]; then
+      yarn typecheck
+    fi
+    ;;
+esac
