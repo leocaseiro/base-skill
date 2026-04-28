@@ -34,21 +34,21 @@ describe('WordSpellLibrarySource — chips variant (default)', () => {
   it('shows the L1 row checkbox as checked when all L1 units are selected', () => {
     render(<Harness initial={L1} />);
     const cb = screen.getByLabelText('Level 1');
-    expect(cb.checked).toBe(true);
-    expect(cb.indeterminate).toBe(false);
+    expect(cb).toBeChecked();
+    expect(cb).not.toBePartiallyChecked();
   });
 
   it('shows the L1 row checkbox as indeterminate when one L1 unit is missing', () => {
     render(<Harness initial={L1.slice(1)} />);
     const cb = screen.getByLabelText('Level 1');
-    expect(cb.indeterminate).toBe(true);
+    expect(cb).toBePartiallyChecked();
   });
 
   it('shows the L2 row checkbox as unchecked when no L2 units are selected', () => {
     render(<Harness initial={L1} />);
     const cb = screen.getByLabelText('Level 2');
-    expect(cb.checked).toBe(false);
-    expect(cb.indeterminate).toBe(false);
+    expect(cb).not.toBeChecked();
+    expect(cb).not.toBePartiallyChecked();
   });
 
   it('clicking a row checkbox toggles every unit in that row', async () => {
@@ -56,8 +56,8 @@ describe('WordSpellLibrarySource — chips variant (default)', () => {
     render(<Harness initial={L1} />);
     const l2 = screen.getByLabelText('Level 2');
     await user.click(l2);
-    expect(l2.checked).toBe(true);
-    expect(l2.indeterminate).toBe(false);
+    expect(l2).toBeChecked();
+    expect(l2).not.toBePartiallyChecked();
   });
 
   it('clicking an individual chip toggles just that unit and updates the row', async () => {
@@ -69,7 +69,7 @@ describe('WordSpellLibrarySource — chips variant (default)', () => {
     await user.click(firstL1Chip);
     expect(firstL1Chip).toHaveAttribute('aria-pressed', 'false');
     const l1 = screen.getByLabelText('Level 1');
-    expect(l1.indeterminate).toBe(true);
+    expect(l1).toBePartiallyChecked();
   });
 
   it('renders L1 `s /s/` and L4 `c /s/` as independent chips', () => {
