@@ -28,15 +28,18 @@ class from returning.
 1. **Fix Level 3+** — cumulative phoneme handling so library queries return
    playable word counts at every level.
 2. **Advanced ⊇ Simple** — every option in the Simple form is also reachable
-   from the Advanced form.
+   from the Advanced form. Concretely, Advanced gains:
+   - **Level** (currently Simple-only)
+   - **Phonemes / sounds at this level** (currently Simple-only)
+   - **`distractorCount`** — never exposed in WordSpell's Advanced even though
+     the game uses distractor mode. NumberMatch already exposes this; WordSpell
+     forgot to.
 3. **`recall` becomes the default mode** — picture mode is a scaffold; recall
    is the synthetic-phonics target. Library-sourced rounds also have no
    image/emoji today, so picture mode silently degrades.
 4. **Random rounds by default** (`roundsInOrder: false`).
 5. **Remove the unused `scramble` mode.**
-6. **Add a `distractorCount` field to Advanced** — the only `AnswerGameConfig`
-   field other Word/Number games expose that WordSpell's Advanced is missing.
-7. **Lock the bug class out of the codebase** with parameterized regression
+6. **Lock the bug class out of the codebase** with parameterized regression
    tests that fail loudly if any (region, level) ever drops below the playable
    minimum.
 
@@ -112,23 +115,23 @@ default truly random.
 
 ### Advanced form gap
 
-| `AnswerGameConfig` field                  | In WordSpell Advanced today? | Action                               |
-| ----------------------------------------- | ---------------------------- | ------------------------------------ |
-| `inputMethod`                             | ✅                           | keep                                 |
-| `wrongTileBehavior`                       | ✅                           | keep                                 |
-| `tileBankMode`                            | ✅                           | keep                                 |
-| `distractorCount`                         | ❌                           | **add** (NumberMatch already has it) |
-| `totalRounds`                             | ✅                           | keep                                 |
-| `roundsInOrder`                           | ✅                           | keep                                 |
-| `ttsEnabled`                              | ✅                           | keep                                 |
-| `mode`                                    | ✅                           | keep (drop `scramble`)               |
-| `tileUnit`                                | ✅                           | keep                                 |
-| `source.filter.level` + `phonemesAllowed` | ❌                           | **add** via shared sub-component     |
-| `skin`                                    | ❌                           | skip — managed by `SkinHarness`      |
-| `hud.*`                                   | ❌                           | skip — not exposed by any game       |
-| `timing.*`                                | ❌                           | skip — not exposed by any game       |
-| `slotInteraction`                         | ❌                           | skip — derived from `mode`           |
-| `touchKeyboardInputMode`                  | ❌                           | skip — derived from `inputMethod`    |
+| Field                                     | In Advanced today | Action                               |
+| ----------------------------------------- | ----------------- | ------------------------------------ |
+| `inputMethod`                             | yes               | keep                                 |
+| `wrongTileBehavior`                       | yes               | keep                                 |
+| `tileBankMode`                            | yes               | keep                                 |
+| `distractorCount`                         | no                | **add** (NumberMatch already has it) |
+| `totalRounds`                             | yes               | keep                                 |
+| `roundsInOrder`                           | yes               | keep                                 |
+| `ttsEnabled`                              | yes               | keep                                 |
+| `mode`                                    | yes               | keep (drop `scramble`)               |
+| `tileUnit`                                | yes               | keep                                 |
+| `source.filter.level` + `phonemesAllowed` | no                | **add** via shared sub-component     |
+| `skin`                                    | no                | skip — managed by `SkinHarness`      |
+| `hud` fields                              | no                | skip — not exposed by any game       |
+| `timing` fields                           | no                | skip — not exposed by any game       |
+| `slotInteraction`                         | no                | skip — derived from `mode`           |
+| `touchKeyboardInputMode`                  | no                | skip — derived from `inputMethod`    |
 
 ### `scramble` mode is unused
 
@@ -326,25 +329,25 @@ short test asserting `cumulativeGraphemes(3)` includes phonemes from levels
 
 ## Acceptance Criteria
 
-- [ ] Selecting any level 1..8 in the Simple form produces a playable round
-      pool (≥ 4 words).
-- [ ] Selecting a level shows the cumulative phoneme chips for levels 1..N,
-      not just level N.
-- [ ] The Advanced modal for WordSpell shows Level + Phonemes controls at the
-      top, plus the existing 8 fields, plus a new `distractorCount` field
-      that appears only when `tileBankMode === 'distractors'`.
-- [ ] Saving from Simple and Advanced both produce equivalent
-      `WordSpellConfig` objects when the same options are set.
-- [ ] No-config WordSpell launch defaults to `mode: 'recall'`,
-      `roundsInOrder: false`.
-- [ ] Simple-form launch defaults to `mode: 'recall'`.
-- [ ] No `scramble` references remain in production code; type union is
-      narrowed to `'picture' | 'recall' | 'sentence-gap'`.
-- [ ] `yarn typecheck`, `yarn lint`, `yarn test` pass.
-- [ ] VR baselines stable (re-recorded once for the new defaults; subsequent
-      runs match without drift).
-- [ ] Curriculum-invariant test exists and passes for every
-      `(region, level)`.
+- Selecting any level 1..8 in the Simple form produces a playable round
+  pool (≥ 4 words).
+- Selecting a level shows the cumulative phoneme chips for levels 1..N,
+  not just level N.
+- The Advanced modal for WordSpell shows Level + Phonemes controls at the
+  top, plus the existing 8 fields, plus a new `distractorCount` field
+  that appears only when `tileBankMode === 'distractors'`.
+- Saving from Simple and Advanced both produce equivalent
+  `WordSpellConfig` objects when the same options are set.
+- No-config WordSpell launch defaults to `mode: 'recall'`,
+  `roundsInOrder: false`.
+- Simple-form launch defaults to `mode: 'recall'`.
+- No `scramble` references remain in production code; type union is
+  narrowed to `'picture' | 'recall' | 'sentence-gap'`.
+- `yarn typecheck`, `yarn lint`, `yarn test` pass.
+- VR baselines stable (re-recorded once for the new defaults; subsequent
+  runs match without drift).
+- Curriculum-invariant test exists and passes for every
+  `(region, level)`.
 
 ## Open Questions Deferred to Plan
 
@@ -353,4 +356,4 @@ short test asserting `cumulativeGraphemes(3)` includes phonemes from levels
   paths.
 - Whether to keep `WordSpellSimpleConfigForm` at all once Advanced has
   parity, or whether the Simple form remains as a streamlined onboarding
-  view. Spec assumes the latter (status quo).
+  view. Spec assumes the latter (status **quo).**
