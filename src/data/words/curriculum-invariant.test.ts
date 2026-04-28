@@ -83,3 +83,61 @@ describe('curriculum invariant: each level 3-8 adds words beyond the baseline', 
     }
   }
 });
+
+describe('curriculum invariant: cumulative graphemes + single-phoneme Y filter yields ≥ 1 hit per level', () => {
+  for (const region of ALL_REGIONS) {
+    for (const level of LEVELS) {
+      const units = GRAPHEMES_BY_LEVEL[level] ?? [];
+      for (const unit of units) {
+        it(`${region} L${level} chip ${unit.g} /${unit.p}/ → ≥ 1 hit`, async () => {
+          const result = await filterWords({
+            region,
+            graphemesAllowed: [
+              ...new Set(unitsThrough(level).map((u) => u.g)),
+            ],
+            phonemesRequired: [unit.p],
+          });
+          expect(
+            result.hits.length,
+            `Single-chip selection ${unit.g} /${unit.p}/ at L${level} should produce at least one playable word`,
+          ).toBeGreaterThanOrEqual(1);
+        });
+      }
+    }
+  }
+});
+
+describe('curriculum invariant: cumulative + Y filter excludes pure-prior-level words', () => {
+  for (const region of ALL_REGIONS) {
+    for (const level of [3, 4, 5, 6, 7, 8] as const) {
+      it(`${region} L${level} all chips → result excludes pure-L1-only words`, async () => {
+        const phonemes = (GRAPHEMES_BY_LEVEL[level] ?? []).map(
+          (u) => u.p,
+        );
+        const result = await filterWords({
+          region,
+          graphemesAllowed: [
+            ...new Set(unitsThrough(level).map((u) => u.g)),
+          ],
+          phonemesRequired: [...new Set(phonemes)],
+        });
+        const l1Phonemes = new Set(
+          (GRAPHEMES_BY_LEVEL[1] ?? []).map((u) => u.p),
+        );
+        for (const hit of result.hits) {
+          const wordPhonemes = (hit.graphemes ?? []).map((g) => g.p);
+          const usesAnyLNphoneme = wordPhonemes.some((p) =>
+            phonemes.includes(p),
+          );
+          const usesOnlyL1 = wordPhonemes.every((p) =>
+            l1Phonemes.has(p),
+          );
+          expect(
+            usesAnyLNphoneme || !usesOnlyL1,
+            `Word "${hit.word}" should either use an L${level} phoneme or have a non-L1 phoneme`,
+          ).toBe(true);
+        }
+      });
+    }
+  }
+});
