@@ -76,6 +76,14 @@ export const wordSpellConfigFields: ConfigField[] = [
   },
   {
     type: 'number',
+    key: 'distractorCount',
+    label: 'Distractor count',
+    min: 1,
+    max: 10,
+    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+  },
+  {
+    type: 'number',
     key: 'totalRounds',
     label: 'Total rounds',
     min: 1,
