@@ -25,6 +25,7 @@ import type {
 import type { JSX } from 'react';
 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
 import { GameShell } from '@/components/game/GameShell';
+import { cumulativeGraphemes } from '@/data/words';
 import { getOrCreateDatabase } from '@/db/create-database';
 import { useBookmarks } from '@/db/hooks/useBookmarks';
 import { useCustomGames } from '@/db/hooks/useCustomGames';
@@ -36,6 +37,7 @@ import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
 import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
 import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+import { defaultSelection } from '@/games/word-spell/level-unit-selection';
 import { resolveSimpleConfig as resolveWordSpellSimpleConfig } from '@/games/word-spell/resolve-simple-config';
 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
 import { loadGameConfig } from '@/lib/game-engine/config-loader';
@@ -93,20 +95,39 @@ const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
   return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
 };
 
-const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
+const DEFAULT_RECALL_CONFIG: WordSpellConfig = {
+  gameId: 'word-spell',
+  component: 'WordSpell',
+  inputMethod: 'drag',
+  wrongTileBehavior: 'lock-manual',
+  tileBankMode: 'exact',
+  totalRounds: 4,
+  roundsInOrder: false,
+  ttsEnabled: true,
+  mode: 'recall',
+  tileUnit: 'letter',
+  source: {
+    type: 'word-library',
+    filter: {
+      region: 'aus',
+      graphemesAllowed: [
+        ...new Set(cumulativeGraphemes(1).map((u) => u.g)),
+      ],
+      phonemesRequired: defaultSelection().map((u) => u.p),
+    },
+  },
+};
+
+const DEFAULT_PICTURE_CONFIG: WordSpellConfig = {
   gameId: 'word-spell',
   component: 'WordSpell',
   inputMethod: 'drag',
   wrongTileBehavior: 'lock-auto-eject',
   tileBankMode: 'exact',
   totalRounds: 8,
-  // Deterministic order by default. `buildRoundOrder` shuffles when this is
-  // false using a nanoid-based seed (crypto.getRandomValues) which VR tests
-  // cannot pin, causing baseline drift. Users can still opt into shuffling
-  // via the settings panel.
   roundsInOrder: true,
   ttsEnabled: true,
-  mode: 'recall',
+  mode: 'picture',
   tileUnit: 'letter',
   rounds: sliceWordSpellRounds(8),
 };
@@ -128,7 +149,7 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
   tileBankMode: 'distractors',
   distractorCount: 2,
   totalRounds: 3,
-  // Deterministic order by default — see DEFAULT_WORD_SPELL_CONFIG comment.
+  // Deterministic order by default — see DEFAULT_PICTURE_CONFIG comment.
   roundsInOrder: true,
   ttsEnabled: true,
   mode: 'numeral-to-group',
@@ -191,17 +212,25 @@ const makeDefaultSortNumbersConfig = (): SortNumbersConfig =>
 export const resolveWordSpellConfig = (
   saved: Record<string, unknown> | null,
 ): WordSpellConfig => {
-  const base: WordSpellConfig = {
-    ...DEFAULT_WORD_SPELL_CONFIG,
-    rounds: (DEFAULT_WORD_SPELL_CONFIG.rounds ?? []).map((r) => ({
-      ...r,
-    })),
+  const mode =
+    (saved as { mode?: unknown } | null)?.mode === 'picture'
+      ? 'picture'
+      : 'recall';
+  const base =
+    mode === 'picture' ? DEFAULT_PICTURE_CONFIG : DEFAULT_RECALL_CONFIG;
+  const baseClone: WordSpellConfig = {
+    ...base,
+    rounds: base.rounds
+      ? base.rounds.map((r) => ({ ...r }))
+      : undefined,
+    source: base.source
+      ? { ...base.source, filter: { ...base.source.filter } }
+      : undefined,
   };
-  if (!saved || saved.component !== 'WordSpell') return base;
 
-  // Simple mode: library-sourced config from the Simple Config form.
-  // Delegate to word-spell's resolveSimpleConfig so library words load
-  // instead of the emoji-round fallback.
+  if (!saved || saved.component !== 'WordSpell') return baseClone;
+
+  // Simple-mode: delegate to word-spell's library-source resolver.
   if (saved.configMode === 'simple') {
     const savedInput = saved.inputMethod;
     return resolveWordSpellSimpleConfig({
@@ -214,37 +243,39 @@ export const resolveWordSpellConfig = (
     } as Parameters<typeof resolveWordSpellSimpleConfig>[0]);
   }
 
+  // Advanced merge — start from mode-appropriate base, then layer saved
+  // fields, then enforce the mode invariant.
   const merged: WordSpellConfig = {
-    ...base,
+    ...baseClone,
     ...(saved as Partial<WordSpellConfig>),
     gameId: 'word-spell',
     component: 'WordSpell',
   };
 
-  // Library-sourced advanced configs: drop the emoji fallback rounds so
-  // useLibraryRounds samples from the library instead of short-circuiting
-  // to the explicit rounds branch.
-  if (merged.source) {
-    const { rounds: _rounds, ...rest } = merged;
-    return { ...rest };
+  // Mode invariant:
+  // recall  ⇒ source defined ∧ rounds undefined
+  // picture ⇒ rounds defined ∧ source undefined
+  if (merged.mode === 'recall') {
+    if (merged.rounds) {
+      const { rounds: _ignored, ...rest } = merged;
+      return rest as WordSpellConfig;
+    }
+    return merged;
   }
 
-  const targetTotal = Math.max(
-    1,
-    Math.min(
-      merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
-      WORD_SPELL_ROUND_POOL.length,
-    ),
-  );
-  if (
-    !Array.isArray(merged.rounds) ||
-    merged.rounds.length === 0 ||
-    merged.rounds.length !== targetTotal
-  ) {
-    merged.rounds = sliceWordSpellRounds(targetTotal);
+  // mode === 'picture' (or 'sentence-gap' — treat as picture for default fallback)
+  const picture = { ...merged };
+  if (picture.source) {
+    delete picture.source;
   }
-  merged.totalRounds = merged.rounds.length;
-  return merged;
+  if (!Array.isArray(picture.rounds) || picture.rounds.length === 0) {
+    picture.rounds = sliceWordSpellRounds(8);
+  }
+  picture.totalRounds = Math.min(
+    picture.rounds.length,
+    WORD_SPELL_ROUND_POOL.length,
+  );
+  return picture;
 };
 
 const resolveNumberMatchConfig = (
