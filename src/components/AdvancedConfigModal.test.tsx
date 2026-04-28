@@ -302,4 +302,41 @@ describe('AdvancedConfigModal', () => {
     expect(onDelete).toHaveBeenCalledWith('abc');
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it('renders the Level select for word-spell games', () => {
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="word-spell"
+        mode={{ kind: 'default' }}
+        config={{
+          source: {
+            type: 'word-library',
+            filter: { region: 'aus', level: 2, phonemesAllowed: [] },
+          },
+        }}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+      />,
+      { wrapper },
+    );
+    expect(screen.getByLabelText(/level/i)).toBeInTheDocument();
+  });
+
+  it('does not render the Level select for non-word-spell games', () => {
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="sort-numbers"
+        mode={{ kind: 'default' }}
+        config={{}}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+      />,
+      { wrapper },
+    );
+    expect(screen.queryByLabelText(/level/i)).toBeNull();
+  });
 });
