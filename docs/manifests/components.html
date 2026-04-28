@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">23/47 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">47/47 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/170 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">16 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">23/47 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">47/47 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/164 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">16 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -3957,7 +3957,7 @@ export const Playground: Story = {};
       <div class="badges">
         <label for="c-16-components-gamenamechip-props" class="badge ok as-toggle">4 prop types</label>
         <label for="c-16-components-gamenamechip-info" class="badge info as-toggle">1 info</label>
-        <label for="c-16-components-gamenamechip-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-16-components-gamenamechip-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -4017,57 +4017,12 @@ title: string</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Default Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const DefaultDark = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Custom Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithCustomGame = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; customGameName=&quot;Easy Mode&quot; customGameColor=&quot;indigo&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Custom Game Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithCustomGameDark = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; customGameName=&quot;Easy Mode&quot; customGameColor=&quot;indigo&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Subject</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithSubject = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; subject=&quot;reading&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Subject Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const WithSubjectDark = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; subject=&quot;reading&quot; /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -4078,22 +4033,7 @@ title: string</code></pre>
               
               <pre><code>const AllColors = () =&gt; (
   &lt;div className=&quot;flex flex-col gap-2&quot;&gt;
-    {(
-      [
-        &#39;indigo&#39;,
-        &#39;teal&#39;,
-        &#39;rose&#39;,
-        &#39;amber&#39;,
-        &#39;sky&#39;,
-        &#39;lime&#39;,
-        &#39;purple&#39;,
-        &#39;orange&#39;,
-        &#39;pink&#39;,
-        &#39;emerald&#39;,
-        &#39;slate&#39;,
-        &#39;cyan&#39;,
-      ] as const
-    ).map((color) =&gt; (
+    {GAME_COLOR_KEYS.map((color) =&gt; (
       &lt;GameNameChip
         key={color}
         title=&quot;Word Spell&quot;
@@ -4103,15 +4043,6 @@ title: string</code></pre>
     ))}
   &lt;/div&gt;
 );</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">All Colors Dark</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const AllColorsDark = () =&gt; &lt;GameNameChip title=&quot;Word Spell&quot; /&gt;;</code></pre>
             </div>
         </div>
     
