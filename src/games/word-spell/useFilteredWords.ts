@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { WordFilter, WordHit } from '@/data/words';
-import { filterWords } from '@/data/words';
+import { filterSignature, filterWords } from '@/data/words';
 
 interface State {
   hits: WordHit[];
@@ -13,9 +13,7 @@ export const useFilteredWords = (filter: WordFilter): State => {
     isLoading: true,
   });
 
-  // Stable signature — re-runs effect only when meaningful inputs change.
-  // JSON.stringify is fine here because filters are small (≤ 50 keys).
-  const signature = JSON.stringify(filter);
+  const signature = filterSignature(filter);
 
   useEffect(() => {
     const cancellation = { isCancelled: false as boolean };
