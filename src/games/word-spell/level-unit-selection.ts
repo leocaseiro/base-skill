@@ -50,3 +50,13 @@ export const toggleUnit = (
 };
 
 export const defaultSelection = (): LevelGraphemeUnit[] => unitsAt(1);
+
+export const unitLevel = (
+  unit: LevelGraphemeUnit,
+): number | undefined => {
+  for (const lvl of [1, 2, 3, 4, 5, 6, 7, 8] as const) {
+    const units = unitsAt(lvl);
+    if (units.some((u) => sameUnit(u, unit))) return lvl;
+  }
+  return undefined;
+};

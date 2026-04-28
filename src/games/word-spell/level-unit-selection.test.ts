@@ -4,6 +4,7 @@ import {
   toggleLevel,
   toggleUnit,
   triStateForLevel,
+  unitLevel, // ← new
 } from './level-unit-selection';
 import type { LevelGraphemeUnit } from '@/data/words';
 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
@@ -69,5 +70,24 @@ describe('toggleUnit', () => {
 describe('defaultSelection', () => {
   it('returns every unit at level 1', () => {
     expect(defaultSelection()).toEqual(L1);
+  });
+});
+
+describe('unitLevel', () => {
+  it('returns 1 for L1 unit { g: "s", p: "s" }', () => {
+    expect(unitLevel({ g: 's', p: 's' })).toBe(1);
+  });
+
+  it('returns 4 for L4 unit { g: "sh", p: "ʃ" }', () => {
+    expect(unitLevel({ g: 'sh', p: 'ʃ' })).toBe(4);
+  });
+
+  it('distinguishes same-grapheme-different-phoneme units across levels', () => {
+    expect(unitLevel({ g: 'c', p: 'k' })).toBe(2);
+    expect(unitLevel({ g: 'c', p: 's' })).toBe(4);
+  });
+
+  it('returns undefined for an unknown unit', () => {
+    expect(unitLevel({ g: 'qq', p: 'qq' })).toBeUndefined();
   });
 });
