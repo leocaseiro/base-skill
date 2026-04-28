@@ -1,5 +1,0 @@
-import{j as t}from"./iframe-BrcFHF6J.js";import{G as a}from"./GameNameChip-beheu3r6.js";import{G as s}from"./game-colors-Cy8IxB7V.js";import"./preload-helper-PPVm8Dsz.js";const n={component:a,tags:["autodocs"],args:{title:"Word Spell"},argTypes:{title:{control:"text"},customGameName:{control:"text"},customGameColor:{control:{type:"select"},options:s},subject:{control:"text"}}},e={},o={render:()=>t.jsx("div",{className:"flex flex-col gap-2",children:s.map(r=>t.jsx(a,{title:"Word Spell",customGameName:r,customGameColor:r},r))})};e.parameters={...e.parameters,docs:{...e.parameters?.docs,source:{originalSource:"{}",...e.parameters?.docs?.source}}};o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:`{
-  render: () => <div className="flex flex-col gap-2">
-      {GAME_COLOR_KEYS.map(color => <GameNameChip key={color} title="Word Spell" customGameName={color} customGameColor={color} />)}
-    </div>
-}`,...o.parameters?.docs?.source}}};const i=["Default","AllColors"];export{o as AllColors,e as Default,i as __namedExportsOrder,n as default};
