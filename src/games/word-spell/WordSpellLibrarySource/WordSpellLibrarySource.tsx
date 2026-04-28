@@ -90,11 +90,8 @@ const LevelRowChips = ({
     onChange(acc);
   };
 
-  const dimmed = tri === 'unchecked';
   return (
-    <div
-      className={`flex flex-col gap-2 ${dimmed ? 'opacity-60' : ''}`.trim()}
-    >
+    <div className="flex flex-col gap-2">
       <label className="flex items-center gap-2 text-sm font-semibold">
         <input
           ref={cbRef}

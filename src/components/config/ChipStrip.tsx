@@ -29,7 +29,7 @@ export const ChipStrip = (props: ChipStripProps): JSX.Element => {
         const base = 'rounded-full px-2.5 py-1 text-xs font-bold';
         const cls = on
           ? `${base} bg-primary text-primary-foreground`
-          : `${base} bg-muted text-muted-foreground`;
+          : `${base} border border-border bg-muted text-foreground`;
 
         if (mode === 'read-only') {
           return (
