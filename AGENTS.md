@@ -17,6 +17,21 @@ This file is for **any** coding agent (Cursor, Claude Code, Copilot, etc.). Pref
 - Never commit to `master`. Branch → PR → merge.
 - Project rules also live in `.cursor/rules/` (see `git-workflow.mdc`); this file and those rules should agree.
 
+## Before writing a plan
+
+Plans are binding source of truth for executor agents. If a plan will create or modify any of the following, **invoke the corresponding project skill before prescribing code**, and let the skill override plan boilerplate:
+
+| Plan touches                                 | Required skill                                       |
+| -------------------------------------------- | ---------------------------------------------------- |
+| `*.stories.tsx`                              | `write-storybook`                                    |
+| `tests-vr/**`, `tests-e2e/**`, `*.e2e.ts`    | `write-e2e-vr-tests`                                 |
+| `*.md` authored by an agent                  | Markdown Authoring rules in [CLAUDE.md](./CLAUDE.md) |
+| Architecture docs (`*.mdx` under game state) | `update-architecture-docs`                           |
+
+If a plan's code sample conflicts with a skill, flag it as a **Spec Delta** at the top of the plan and justify the deviation — don't silently ship boilerplate that contradicts project convention. Executors must load the corresponding skill into context when the plan prescribes matching files; if the plan and skill disagree and there is no Spec Delta, treat the skill as authoritative and flag the conflict before coding.
+
+See [CLAUDE.md → Before writing a plan](./CLAUDE.md#before-writing-a-plan) for the canonical version.
+
 ## Commits (baby steps)
 
 - After each **coherent** chunk of work (feature slice, bugfix + test, doc section, rule tweak), **commit** with a clear message. Do not wait until the end of a large task to make one giant commit.
