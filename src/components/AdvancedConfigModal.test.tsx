@@ -339,4 +339,38 @@ describe('AdvancedConfigModal', () => {
     );
     expect(screen.queryByLabelText(/level/i)).toBeNull();
   });
+
+  it('reveals distractorCount when WordSpell tileBankMode is distractors', () => {
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="word-spell"
+        mode={{ kind: 'default' }}
+        config={{ tileBankMode: 'distractors', distractorCount: 3 }}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+      />,
+      { wrapper },
+    );
+    expect(
+      screen.getByLabelText(/distractor count/i),
+    ).toBeInTheDocument();
+  });
+
+  it('hides distractorCount when WordSpell tileBankMode is exact', () => {
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="word-spell"
+        mode={{ kind: 'default' }}
+        config={{ tileBankMode: 'exact' }}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+      />,
+      { wrapper },
+    );
+    expect(screen.queryByLabelText(/distractor count/i)).toBeNull();
+  });
 });
