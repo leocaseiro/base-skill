@@ -21,6 +21,22 @@ If a plan's code sample conflicts with a skill, flag it as a **Spec Delta** at t
 
 Executors must mirror this: when the plan prescribes files matching the table above, load the corresponding skill into the implementer's context as the authoritative reference. If the plan and skill disagree and there is no Spec Delta, treat the skill as authoritative and flag the conflict to the user before coding.
 
+## Storybook Sidebar Titles
+
+**One rule:** every story's `title:` uses **PascalCase** segments separated by `/`.
+
+| `title:` value                      | Verdict                                   |
+| ----------------------------------- | ----------------------------------------- |
+| `'AnswerGame/InstructionsOverlay'`  | ✅                                        |
+| `'Games/SortNumbers/ConfigForm'`    | ✅                                        |
+| `'answer-game/InstructionsOverlay'` | ❌ kebab-case top-level                   |
+| `'games/sort-numbers/ConfigForm'`   | ❌ mirrors filesystem, doesn't match rule |
+
+The Storybook sidebar is a presentation concern — it does **not** mirror the
+filesystem. Filesystem paths under `src/games/<game-id>/` stay kebab-case
+(they're runtime `gameId`s used by registries and URLs); Storybook titles
+PascalCase the same names for display.
+
 ## Git Workflow
 
 **Never commit directly to `master`.** All changes must be made on a branch via a git worktree.

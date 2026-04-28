@@ -25,7 +25,7 @@ interface StoryArgs {
 
 const meta: Meta<StoryArgs> = {
   component: AnswerGame as unknown as ComponentType<StoryArgs>,
-  title: 'answer-game/AnswerGame',
+  title: 'AnswerGame/AnswerGame',
   tags: ['autodocs'],
   decorators: [withDb],
   parameters: {

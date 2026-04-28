@@ -58,7 +58,7 @@ const ShowTrigger = ({
 const meta: Meta<StoryArgs> = {
   component:
     EncouragementAnnouncer as unknown as ComponentType<StoryArgs>,
-  title: 'answer-game/EncouragementAnnouncer',
+  title: 'AnswerGame/EncouragementAnnouncer',
   tags: ['autodocs'],
   args: {
     message: 'Keep trying!',
