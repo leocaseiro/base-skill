@@ -60,3 +60,27 @@ export const unitLevel = (
   }
   return undefined;
 };
+
+export type LevelHeaderState =
+  | { kind: 'all-on'; count: number; total: number }
+  | { kind: 'partial'; count: number; total: number }
+  | { kind: 'tiles-only'; total: number }
+  | { kind: 'not-in-scope'; total: number };
+
+export const headerStateForLevel = (
+  level: number,
+  selected: readonly LevelGraphemeUnit[],
+  maxLevel: number,
+): LevelHeaderState => {
+  const units = unitsAt(level);
+  const total = units.length;
+  const count = units.filter((u) =>
+    selected.some((s) => sameUnit(s, u)),
+  ).length;
+
+  if (count === total && total > 0)
+    return { kind: 'all-on', count, total };
+  if (count > 0) return { kind: 'partial', count, total };
+  if (level <= maxLevel) return { kind: 'tiles-only', total };
+  return { kind: 'not-in-scope', total };
+};
