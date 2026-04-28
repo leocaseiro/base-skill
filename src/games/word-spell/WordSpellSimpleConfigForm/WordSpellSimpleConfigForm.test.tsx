@@ -35,10 +35,10 @@ describe('WordSpellSimpleConfigForm', () => {
 
   it('flags data-invalid when no phonemes are selected', () => {
     const { container } = render(<Harness initialLevel={2} />);
-    expect(container.firstElementChild).toHaveAttribute(
-      'data-invalid',
-      'true',
-    );
+    // data-invalid is on WordSpellLibrarySource's root (first child of the form)
+    expect(
+      container.firstElementChild?.firstElementChild,
+    ).toHaveAttribute('data-invalid', 'true');
   });
 
   it('marks aria-pressed=true after tapping a chip', async () => {
