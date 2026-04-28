@@ -128,6 +128,14 @@ const scenarioData: Record<
 const meta: Meta<StoryArgs> = {
   component: ConfigFormFields as unknown as ComponentType<StoryArgs>,
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Generic form renderer for the ConfigField union — used by SimpleConfigForm and AdvancedConfigModal across every game. The scenario select cycles through the 5 rendering branches (primitive types, nested types, select-or-number, visibleWhen-hidden, visibleWhen-shown) so reviewers can see every branch in one place. Per-game fixtures live in co-located stories under src/games/<game>/.',
+      },
+    },
+  },
   args: {
     scenario: 'primitive-types',
     onChange: fn(),
@@ -162,4 +170,4 @@ export default meta;
 
 type Story = StoryObj<StoryArgs>;
 
-export const Default: Story = {};
+export const Playground: Story = {};
