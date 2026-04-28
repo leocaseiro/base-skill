@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">23/47 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">47/47 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/163 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">16 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">24/47 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">47/47 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">5/157 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">16 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -3594,19 +3594,19 @@ export const ReplayTrigger: Story = {
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="GameCard">
+  aria-label="GameCard as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> GameCard</h2>
+      <h2><span class="status-dot dot-err"></span> GameCard as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        
+        <label for="c-14-components-gamecard-err" class="badge err as-toggle">prop type error</label>
         <label for="c-14-components-gamecard-info" class="badge info as-toggle">1 info</label>
-        <label for="c-14-components-gamecard-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-14-components-gamecard-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -3617,7 +3617,7 @@ export const ReplayTrigger: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-14-components-gamecard-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-14-components-gamecard-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-14-components-gamecard-stories" class="tg tg-stories" type="checkbox" hidden />
   
@@ -3625,6 +3625,155 @@ export const ReplayTrigger: Story = {
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;GameCard as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  29 | }
+  30 |
+&gt; 31 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  32 |   component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
+  33 |   tags: [&#39;autodocs&#39;],
+  34 |   parameters: {
+
+./src/components/GameCard.stories.tsx:
+import { fn } from &#39;storybook/test&#39;;
+
+import { GameCard } from &#39;./GameCard&#39;;
+import type { GameColorKey } from &#39;@/lib/game-colors&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+import { GAME_CATALOG } from &#39;@/games/registry&#39;;
+import { GAME_COLOR_KEYS } from &#39;@/lib/game-colors&#39;;
+
+type Variant = &#39;default&#39; | &#39;customGame&#39;;
+
+const GAME_IDS = GAME_CATALOG.map((g) =&gt; g.id);
+
+interface StoryArgs {
+  variant: Variant;
+  gameId: string;
+  title: string;
+  chipsText: string;
+  customGameName: string;
+  customGameColor: GameColorKey;
+  bookmarkable: boolean;
+  isBookmarked: boolean;
+  onPlay: () =&gt; void;
+  onOpenCog: () =&gt; void;
+  onToggleBookmark: () =&gt; void;
+  // Shadowed raw props — driven by StoryArgs above; hidden from Controls.
+  chips?: never;
+  cover?: never;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  parameters: {
+    layout: &#39;centered&#39;,
+    docs: {
+      description: {
+        component:
+          &#39;Bookmark-aware game tile used on the homepage and saved-games view. The variant radio toggles between the default cover and the customGame coloured chip; bookmarkable + isBookmarked expose the full bookmark matrix. gameId is a select over the real GAME_CATALOG so the default cover swaps between the three shipped games. The card is wrapped in a w-64 container to mimic GameGrid cell width at xl/2xl breakpoints.&#39;,
+      },
+    },
+  },
+  args: {
+    variant: &#39;default&#39;,
+    gameId: &#39;sort-numbers&#39;,
+    title: &#39;Count in Order&#39;,
+    chipsText: &#39;🚀 Up, 5 numbers, 2s&#39;,
+    customGameName: &#39;Skip by 2&#39;,
+    customGameColor: &#39;indigo&#39;,
+    bookmarkable: false,
+    isBookmarked: false,
+    onPlay: fn(),
+    onOpenCog: fn(),
+    onToggleBookmark: fn(),
+  },
+  argTypes: {
+    variant: {
+      control: { type: &#39;radio&#39; },
+      options: [&#39;default&#39;, &#39;customGame&#39;] satisfies Variant[],
+    },
+    gameId: {
+      control: { type: &#39;select&#39; },
+      options: GAME_IDS,
+    },
+    title: { control: &#39;text&#39; },
+    chipsText: { control: &#39;text&#39; },
+    customGameName: { control: &#39;text&#39; },
+    customGameColor: {
+      control: { type: &#39;select&#39; },
+      options: GAME_COLOR_KEYS,
+    },
+    bookmarkable: { control: &#39;boolean&#39; },
+    isBookmarked: { control: &#39;boolean&#39; },
+    chips: { table: { disable: true } },
+    cover: { table: { disable: true } },
+  },
+  render: ({
+    variant,
+    gameId,
+    title,
+    chipsText,
+    customGameName,
+    customGameColor,
+    bookmarkable,
+    isBookmarked,
+    onPlay,
+    onOpenCog,
+    onToggleBookmark,
+  }) =&gt; {
+    const chips = chipsText
+      .split(&#39;,&#39;)
+      .map((s) =&gt; s.trim())
+      .filter(Boolean);
+
+    const bookmarkProps = bookmarkable
+      ? { isBookmarked, onToggleBookmark }
+      : {};
+
+    return (
+      &lt;div className=&quot;w-64&quot;&gt;
+        {variant === &#39;customGame&#39; ? (
+          &lt;GameCard
+            variant=&quot;customGame&quot;
+            gameId={gameId}
+            title={title}
+            chips={chips}
+            customGameName={customGameName || &#39;Custom&#39;}
+            customGameColor={customGameColor}
+            onPlay={onPlay}
+            onOpenCog={onOpenCog}
+            {...bookmarkProps}
+          /&gt;
+        ) : (
+          &lt;GameCard
+            variant=&quot;default&quot;
+            gameId={gameId}
+            title={title}
+            chips={chips}
+            onPlay={onPlay}
+            onOpenCog={onOpenCog}
+            {...bookmarkProps}
+          /&gt;
+        )}
+      &lt;/div&gt;
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -3649,110 +3798,61 @@ export const ReplayTrigger: Story = {
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;GameCard
-    gameId=&quot;sort-numbers&quot;
-    title=&quot;Count in Order&quot;
-    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
-    variant=&quot;default&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Custom Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const CustomGame = () =&gt; &lt;GameCard
-    gameId=&quot;sort-numbers&quot;
-    title=&quot;Count in Order&quot;
-    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
-    variant=&quot;customGame&quot;
-    customGameName=&quot;Skip by 2&quot;
-    customGameColor=&quot;amber&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Custom Game Purple</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const CustomGamePurple = () =&gt; &lt;GameCard
-    gameId=&quot;sort-numbers&quot;
-    title=&quot;Count in Order&quot;
-    chips={[&#39;⬇️ Down&#39;, &#39;10 numbers&#39;, &#39;3s&#39;]}
-    variant=&quot;customGame&quot;
-    customGameName=&quot;Big to Small&quot;
-    customGameColor=&quot;purple&quot; /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Not Bookmarked</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const NotBookmarked = () =&gt; &lt;GameCard
-    gameId=&quot;sort-numbers&quot;
-    title=&quot;Count in Order&quot;
-    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
-    variant=&quot;default&quot;
-    isBookmarked={false}
-    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Bookmarked</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Bookmarked = () =&gt; &lt;GameCard
-    gameId=&quot;sort-numbers&quot;
-    title=&quot;Count in Order&quot;
-    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
-    variant=&quot;default&quot;
-    isBookmarked
-    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Not Bookmarked Custom Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const NotBookmarkedCustomGame = () =&gt; &lt;GameCard
-    gameId=&quot;sort-numbers&quot;
-    title=&quot;Count in Order&quot;
-    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
-    variant=&quot;customGame&quot;
-    customGameName=&quot;Skip by 2&quot;
-    customGameColor=&quot;amber&quot;
-    isBookmarked={false}
-    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Bookmarked Custom Game</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const BookmarkedCustomGame = () =&gt; &lt;GameCard
-    gameId=&quot;sort-numbers&quot;
-    title=&quot;Count in Order&quot;
-    chips={[&#39;🚀 Up&#39;, &#39;5 numbers&#39;, &#39;2s&#39;]}
-    variant=&quot;customGame&quot;
-    customGameName=&quot;Skip by 2&quot;
-    customGameColor=&quot;amber&quot;
-    isBookmarked
-    onToggleBookmark={() =&gt; {}} /&gt;;</code></pre>
+              <pre><code>const Playground = ({
+  variant,
+  gameId,
+  title,
+  chipsText,
+  customGameName,
+  customGameColor,
+  bookmarkable,
+  isBookmarked,
+  onPlay,
+  onOpenCog,
+  onToggleBookmark,
+}) =&gt; {
+  const chips = chipsText
+    .split(&#39;,&#39;)
+    .map((s) =&gt; s.trim())
+    .filter(Boolean);
+
+  const bookmarkProps = bookmarkable
+    ? { isBookmarked, onToggleBookmark }
+    : {};
+
+  return (
+    &lt;div className=&quot;w-64&quot;&gt;
+      {variant === &#39;customGame&#39; ? (
+        &lt;GameCard
+          variant=&quot;customGame&quot;
+          gameId={gameId}
+          title={title}
+          chips={chips}
+          customGameName={customGameName || &#39;Custom&#39;}
+          customGameColor={customGameColor}
+          onPlay={onPlay}
+          onOpenCog={onOpenCog}
+          {...bookmarkProps}
+        /&gt;
+      ) : (
+        &lt;GameCard
+          variant=&quot;default&quot;
+          gameId={gameId}
+          title={title}
+          chips={chips}
+          onPlay={onPlay}
+          onOpenCog={onOpenCog}
+          {...bookmarkProps}
+        /&gt;
+      )}
+    &lt;/div&gt;
+  );
+};</code></pre>
             </div>
         </div>
     
@@ -9193,7 +9293,7 @@ export const HUD_Round5Of5: Story = {
           <label for="no-component-import-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component import found</span>
-            <span class="group-count">23</span>
+            <span class="group-count">24</span>
           </label>
           <div class="group-cards">
 <article
@@ -11743,14 +11843,280 @@ export const ReplayTrigger: Story = {
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="GameCard as unknown as ComponentType&lt;StoryArgs&gt;">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> GameCard as unknown as ComponentType&lt;StoryArgs&gt;</h2>
+      <div class="badges">
+        <label for="c-error-10-components-gamecard-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-10-components-gamecard-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-10-components-gamecard-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/GameCard.stories.tsx">components-gamecard · ./src/components/GameCard.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-10-components-gamecard-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-10-components-gamecard-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-10-components-gamecard-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;GameCard as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
+  29 | }
+  30 |
+&gt; 31 | const meta: Meta&lt;StoryArgs&gt; = {
+     | ^
+  32 |   component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
+  33 |   tags: [&#39;autodocs&#39;],
+  34 |   parameters: {
+
+./src/components/GameCard.stories.tsx:
+import { fn } from &#39;storybook/test&#39;;
+
+import { GameCard } from &#39;./GameCard&#39;;
+import type { GameColorKey } from &#39;@/lib/game-colors&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+import type { ComponentType } from &#39;react&#39;;
+import { GAME_CATALOG } from &#39;@/games/registry&#39;;
+import { GAME_COLOR_KEYS } from &#39;@/lib/game-colors&#39;;
+
+type Variant = &#39;default&#39; | &#39;customGame&#39;;
+
+const GAME_IDS = GAME_CATALOG.map((g) =&gt; g.id);
+
+interface StoryArgs {
+  variant: Variant;
+  gameId: string;
+  title: string;
+  chipsText: string;
+  customGameName: string;
+  customGameColor: GameColorKey;
+  bookmarkable: boolean;
+  isBookmarked: boolean;
+  onPlay: () =&gt; void;
+  onOpenCog: () =&gt; void;
+  onToggleBookmark: () =&gt; void;
+  // Shadowed raw props — driven by StoryArgs above; hidden from Controls.
+  chips?: never;
+  cover?: never;
+}
+
+const meta: Meta&lt;StoryArgs&gt; = {
+  component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
+  tags: [&#39;autodocs&#39;],
+  parameters: {
+    layout: &#39;centered&#39;,
+    docs: {
+      description: {
+        component:
+          &#39;Bookmark-aware game tile used on the homepage and saved-games view. The variant radio toggles between the default cover and the customGame coloured chip; bookmarkable + isBookmarked expose the full bookmark matrix. gameId is a select over the real GAME_CATALOG so the default cover swaps between the three shipped games. The card is wrapped in a w-64 container to mimic GameGrid cell width at xl/2xl breakpoints.&#39;,
+      },
+    },
+  },
+  args: {
+    variant: &#39;default&#39;,
+    gameId: &#39;sort-numbers&#39;,
+    title: &#39;Count in Order&#39;,
+    chipsText: &#39;🚀 Up, 5 numbers, 2s&#39;,
+    customGameName: &#39;Skip by 2&#39;,
+    customGameColor: &#39;indigo&#39;,
+    bookmarkable: false,
+    isBookmarked: false,
+    onPlay: fn(),
+    onOpenCog: fn(),
+    onToggleBookmark: fn(),
+  },
+  argTypes: {
+    variant: {
+      control: { type: &#39;radio&#39; },
+      options: [&#39;default&#39;, &#39;customGame&#39;] satisfies Variant[],
+    },
+    gameId: {
+      control: { type: &#39;select&#39; },
+      options: GAME_IDS,
+    },
+    title: { control: &#39;text&#39; },
+    chipsText: { control: &#39;text&#39; },
+    customGameName: { control: &#39;text&#39; },
+    customGameColor: {
+      control: { type: &#39;select&#39; },
+      options: GAME_COLOR_KEYS,
+    },
+    bookmarkable: { control: &#39;boolean&#39; },
+    isBookmarked: { control: &#39;boolean&#39; },
+    chips: { table: { disable: true } },
+    cover: { table: { disable: true } },
+  },
+  render: ({
+    variant,
+    gameId,
+    title,
+    chipsText,
+    customGameName,
+    customGameColor,
+    bookmarkable,
+    isBookmarked,
+    onPlay,
+    onOpenCog,
+    onToggleBookmark,
+  }) =&gt; {
+    const chips = chipsText
+      .split(&#39;,&#39;)
+      .map((s) =&gt; s.trim())
+      .filter(Boolean);
+
+    const bookmarkProps = bookmarkable
+      ? { isBookmarked, onToggleBookmark }
+      : {};
+
+    return (
+      &lt;div className=&quot;w-64&quot;&gt;
+        {variant === &#39;customGame&#39; ? (
+          &lt;GameCard
+            variant=&quot;customGame&quot;
+            gameId={gameId}
+            title={title}
+            chips={chips}
+            customGameName={customGameName || &#39;Custom&#39;}
+            customGameColor={customGameColor}
+            onPlay={onPlay}
+            onOpenCog={onOpenCog}
+            {...bookmarkProps}
+          /&gt;
+        ) : (
+          &lt;GameCard
+            variant=&quot;default&quot;
+            gameId={gameId}
+            title={title}
+            chips={chips}
+            onPlay={onPlay}
+            onOpenCog={onOpenCog}
+            {...bookmarkProps}
+          /&gt;
+        )}
+      &lt;/div&gt;
+    );
+  },
+};
+export default meta;
+
+type Story = StoryObj&lt;StoryArgs&gt;;
+
+export const Playground: Story = {};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { GameCard } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = ({
+  variant,
+  gameId,
+  title,
+  chipsText,
+  customGameName,
+  customGameColor,
+  bookmarkable,
+  isBookmarked,
+  onPlay,
+  onOpenCog,
+  onToggleBookmark,
+}) =&gt; {
+  const chips = chipsText
+    .split(&#39;,&#39;)
+    .map((s) =&gt; s.trim())
+    .filter(Boolean);
+
+  const bookmarkProps = bookmarkable
+    ? { isBookmarked, onToggleBookmark }
+    : {};
+
+  return (
+    &lt;div className=&quot;w-64&quot;&gt;
+      {variant === &#39;customGame&#39; ? (
+        &lt;GameCard
+          variant=&quot;customGame&quot;
+          gameId={gameId}
+          title={title}
+          chips={chips}
+          customGameName={customGameName || &#39;Custom&#39;}
+          customGameColor={customGameColor}
+          onPlay={onPlay}
+          onOpenCog={onOpenCog}
+          {...bookmarkProps}
+        /&gt;
+      ) : (
+        &lt;GameCard
+          variant=&quot;default&quot;
+          gameId={gameId}
+          title={title}
+          chips={chips}
+          onPlay={onPlay}
+          onOpenCog={onOpenCog}
+          {...bookmarkProps}
+        /&gt;
+      )}
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="GameGrid as unknown as ComponentType&lt;StoryArgs&gt;">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-err"></span> GameGrid as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-10-components-gamegrid-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-10-components-gamegrid-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-10-components-gamegrid-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-11-components-gamegrid-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-11-components-gamegrid-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-11-components-gamegrid-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -11761,9 +12127,9 @@ export const ReplayTrigger: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-10-components-gamegrid-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-10-components-gamegrid-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-10-components-gamegrid-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-11-components-gamegrid-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-11-components-gamegrid-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-11-components-gamegrid-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -11933,9 +12299,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-11-answer-game-gameoveroverlay-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-11-answer-game-gameoveroverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-11-answer-game-gameoveroverlay-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-12-answer-game-gameoveroverlay-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-12-answer-game-gameoveroverlay-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-12-answer-game-gameoveroverlay-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -11946,9 +12312,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-11-answer-game-gameoveroverlay-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-11-answer-game-gameoveroverlay-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-11-answer-game-gameoveroverlay-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-12-answer-game-gameoveroverlay-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-12-answer-game-gameoveroverlay-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-12-answer-game-gameoveroverlay-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12078,9 +12444,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> InstructionsOverlay as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-12-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-12-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-12-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-13-answer-game-instructionsoverlay-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-13-answer-game-instructionsoverlay-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-13-answer-game-instructionsoverlay-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12091,9 +12457,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-12-answer-game-instructionsoverlay-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-12-answer-game-instructionsoverlay-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-12-answer-game-instructionsoverlay-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-13-answer-game-instructionsoverlay-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-13-answer-game-instructionsoverlay-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-13-answer-game-instructionsoverlay-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12371,9 +12737,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Label as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-13-components-ui-label-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-13-components-ui-label-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-13-components-ui-label-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-14-components-ui-label-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-14-components-ui-label-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-14-components-ui-label-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12384,9 +12750,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-13-components-ui-label-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-13-components-ui-label-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-13-components-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-14-components-ui-label-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-14-components-ui-label-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-14-components-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12497,9 +12863,9 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> NumberMatchWithHarness</h2>
       <div class="badges">
-        <label for="c-error-14-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-14-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-14-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        <label for="c-error-15-games-numbermatch-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-15-games-numbermatch-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-15-games-numbermatch-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
         
       </div>
     </div>
@@ -12510,9 +12876,9 @@ export const Default: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-14-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-14-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-14-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-15-games-numbermatch-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-15-games-numbermatch-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-15-games-numbermatch-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12654,9 +13020,9 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-15-components-offlineindicator-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-15-components-offlineindicator-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-15-components-offlineindicator-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-16-components-offlineindicator-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-16-components-offlineindicator-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-16-components-offlineindicator-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12667,9 +13033,9 @@ export const Default: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-15-components-offlineindicator-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-15-components-offlineindicator-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-15-components-offlineindicator-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-16-components-offlineindicator-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-16-components-offlineindicator-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-16-components-offlineindicator-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12805,9 +13171,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> ProgressHUD as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-16-answer-game-progresshud-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-16-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-16-answer-game-progresshud-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-17-answer-game-progresshud-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-17-answer-game-progresshud-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-17-answer-game-progresshud-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12818,9 +13184,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-16-answer-game-progresshud-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-16-answer-game-progresshud-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-16-answer-game-progresshud-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-17-answer-game-progresshud-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-17-answer-game-progresshud-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-17-answer-game-progresshud-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13052,9 +13418,9 @@ export const Playground: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Select as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-17-components-ui-select-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-17-components-ui-select-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-17-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-error-18-components-ui-select-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-18-components-ui-select-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-18-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -13065,9 +13431,9 @@ export const Playground: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-17-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-17-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-17-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-18-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-18-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-18-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13377,9 +13743,9 @@ export const SelectsOption: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Sheet as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-18-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-18-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-18-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-error-19-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-19-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-19-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -13390,9 +13756,9 @@ export const SelectsOption: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-18-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-18-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-18-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-19-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-19-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-19-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13731,9 +14097,9 @@ export const OpensAndClosesOnEscape: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SlotRow as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-19-answer-game-slot-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-19-answer-game-slot-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-19-answer-game-slot-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-20-answer-game-slot-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-20-answer-game-slot-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-20-answer-game-slot-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -13744,9 +14110,9 @@ export const OpensAndClosesOnEscape: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-19-answer-game-slot-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-19-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-19-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-20-answer-game-slot-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-20-answer-game-slot-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-20-answer-game-slot-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -14207,9 +14573,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-20-components-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-20-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-20-components-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-21-components-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-21-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-21-components-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -14220,9 +14586,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-20-components-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-20-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-20-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-21-components-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-21-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-21-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -14348,9 +14714,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-21-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-21-components-updatebanner-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-21-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-22-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-22-components-updatebanner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-22-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -14361,9 +14727,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-21-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-21-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-21-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-22-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-22-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-22-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -14504,9 +14870,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
       <div class="badges">
-        <label for="c-error-22-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-22-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-22-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
+        <label for="c-error-23-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-23-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-23-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
         
       </div>
     </div>
@@ -14517,9 +14883,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-22-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-22-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-22-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-23-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-23-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-23-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
