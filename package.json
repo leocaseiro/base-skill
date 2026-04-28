@@ -26,6 +26,7 @@
     "word:seed": "tsx scripts/seed-word-library.ts",
     "word:phonemes": "tsx scripts/generate-phoneme-sprite.ts",
     "words:import": "tsx scripts/words-import.ts",
+    "specstory": "bash scripts/specstory-sync.sh",
     "lint": "eslint . --max-warnings 0 && knip --no-config-hints",
     "lint:css": "stylelint 'src/**/*.css'",
     "lint:md": "markdownlint-cli2 '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees'",
