@@ -14,6 +14,14 @@ interface StoryArgs {
 const meta: Meta<StoryArgs> = {
   component: GameGrid as unknown as ComponentType<StoryArgs>,
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Responsive grid that lays GameCard children out in 2/3/4 columns at xs/lg/xl breakpoints. The cardCount range drives how many sample cards render — slide to 0 for the empty state, or up to 12 to see how the grid wraps.',
+      },
+    },
+  },
   args: {
     cardCount: 3,
   },
@@ -43,4 +51,4 @@ export default meta;
 
 type Story = StoryObj<StoryArgs>;
 
-export const Default: Story = {};
+export const Playground: Story = {};
