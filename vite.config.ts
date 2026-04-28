@@ -1,3 +1,4 @@
+import { copyFileSync, existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 
@@ -41,15 +42,27 @@ const workboxPlugin = (): Plugin => ({
       const clientEnv = builder.environments['client'];
       if (!clientEnv?.isBuilt) return;
       const outDir = clientEnv.config.build.outDir;
+
+      // TanStack Start SPA mode outputs _shell.html; create index.html
+      // before workbox scans so the navigateFallback URL is precached.
+      const shellPath = path.join(outDir, '_shell.html');
+      const indexPath = path.join(outDir, 'index.html');
+      if (existsSync(shellPath) && !existsSync(indexPath)) {
+        copyFileSync(shellPath, indexPath);
+      }
+
       const { generateSW } = await import('workbox-build');
       const result = await generateSW({
         swDest: path.join(outDir, 'sw.js'),
         globDirectory: outDir,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: `${base}index.html`,
-        // Exclude PR preview paths so the production SW does not hijack
-        // navigations to /base-skill/pr/<N>/app|docs/.
-        navigateFallbackDenylist: [/\/api\//, /\/pr\//],
+        navigateFallbackDenylist: [
+          /\/api\//,
+          // Only the production SW should block /pr/ paths; the PR
+          // preview's own SW needs navigate fallback for its own URLs.
+          ...(base.includes('/pr/') ? [] : [/\/pr\//]),
+        ],
         cleanupOutdatedCaches: true,
         mode: 'production',
         runtimeCaching: [
