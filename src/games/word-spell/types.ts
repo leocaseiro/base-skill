@@ -35,7 +35,7 @@ export interface WordSpellRound {
 export interface WordSpellConfig extends AnswerGameConfig {
   component: 'WordSpell';
   configMode?: 'simple' | 'advanced';
-  mode: 'picture' | 'scramble' | 'recall' | 'sentence-gap';
+  mode: 'picture' | 'recall' | 'sentence-gap';
   /** @default 'letter' */
   tileUnit: 'letter' | 'syllable' | 'word';
   /** Explicit hand-authored rounds. Wins over `source` when both are present. */
@@ -95,7 +95,6 @@ export const wordSpellConfigFields: ConfigField[] = [
     label: 'Mode',
     options: [
       { value: 'picture', label: 'picture' },
-      { value: 'scramble', label: 'scramble' },
       { value: 'recall', label: 'recall' },
       { value: 'sentence-gap', label: 'sentence-gap' },
     ],

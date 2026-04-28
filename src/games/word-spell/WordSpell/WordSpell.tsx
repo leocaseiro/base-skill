@@ -503,7 +503,6 @@ export const WordSpell = ({
       initialTiles: tiles,
       initialZones: zones,
       slotInteraction:
-        resolvedConfig.mode === 'scramble' ||
         resolvedConfig.mode === 'sentence-gap'
           ? 'free-swap'
           : 'ordered',
