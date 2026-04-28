@@ -122,9 +122,9 @@ git commit -m "docs(handoff): <brief description>"
 
 ### Step 6 — Print the resume hint
 
-Tell the user:
+Tell the user, using the **absolute path** (run `pwd` if needed and join with the handoff filename — never print the repo-relative form):
 
-> Saved handoff: `.claude/handoffs/YYYY-MM-DD-<slug>.md` — paste that path in a new session to resume.
+> Saved handoff: `/absolute/path/to/.claude/handoffs/YYYY-MM-DD-<slug>.md` — paste that path in a new session to resume.
 
 ## Quality check (before writing)
 
