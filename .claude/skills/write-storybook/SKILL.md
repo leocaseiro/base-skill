@@ -428,6 +428,7 @@ When you edit an existing story file for any reason, run this checklist before o
 
 - [ ] All non-callback, non-JSX props have proper `argTypes` controls (no raw JSON for enums/booleans/numbers/colors)
 - [ ] Every `onFoo` handler wired to a `fn()` spy in `args` (shows in Actions panel + usable in `play()`) — do NOT rely on the global `argTypesRegex` alone; it only covers props already in `argTypes`, which react-docgen doesn't produce for DOM-extended props
+- [ ] No `{ action: '...' }` for `onFoo` handlers — use `fn()` from `storybook/test` instead (it doubles as a spy)
 - [ ] Required variants are present (Default, enum-per-value where the visual differs, state variants, edge cases — see "Required Variants")
 - [ ] At least one `play()` interaction story if the component is interactive
 - [ ] Decorators match current component dependencies (e.g., if the component started using `useSettings`, `withDb` is now required)
