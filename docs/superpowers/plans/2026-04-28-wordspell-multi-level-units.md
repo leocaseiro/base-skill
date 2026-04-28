@@ -1,8 +1,26 @@
-# WordSpell Multi-Select Levels & Per-Unit Phoneme Toggles — Implementation Plan
+# ~~WordSpell Multi-Select Levels & Per-Unit Phoneme Toggles — Implementation Plan~~
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> ⚠️ **SUPERSEDED on 2026-04-29.** Driving spec was retired in favour of
+> [`2026-04-29-wordspell-cumulative-y-filter-design.md`](../specs/2026-04-29-wordspell-cumulative-y-filter-design.md).
+> The new implementation plan will live at
+> `docs/superpowers/plans/2026-04-29-wordspell-cumulative-y-filter.md`
+> (writing-plans pass to follow).
+>
+> **Steps from this plan that survive in the new plan:** the IndexedDB
+> migration (`migrateWordSpellConfig`, schema bumps for
+> `saved_game_configs` v3 and `custom_games` v1) and the `selectedUnits`
+> data shape. **Steps that change:** the filter derivation
+> (cumulative `graphemesAllowed` + `phonemesRequired` Y filter), the
+> Simple/Advanced UI (group-click headers, single rendering), and the
+> mode-default invariant.
+>
+> Do NOT execute the steps below as-is. They reference the disjoint
+> filter model that was retired. Refer to the superseding plan when it
+> lands.
+>
+> ~~**For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.~~
 
-**Spec:** `docs/superpowers/specs/2026-04-28-wordspell-multi-level-units-design.md`
+**Original spec (also superseded):** `docs/superpowers/specs/2026-04-28-wordspell-multi-level-units-design.md`
 
 **Goal:** Replace WordSpell's single-Level Simple form with a disjoint
 multi-level checkbox UI where each `(grapheme, phoneme)` unit is an
