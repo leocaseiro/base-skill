@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2553,7 +2553,7 @@ export const Small: Story = {
       | ^
   129 |   component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
   130 |   tags: [&#39;autodocs&#39;],
-  131 |   args: {
+  131 |   parameters: {
 
 ./src/components/ConfigFormFields.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -2686,6 +2686,14 @@ const scenarioData: Record&lt;
 const meta: Meta&lt;StoryArgs&gt; = {
   component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
   tags: [&#39;autodocs&#39;],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Generic form renderer for the ConfigField union — used by SimpleConfigForm and AdvancedConfigModal across every game. The scenario select cycles through the 5 rendering branches (primitive types, nested types, select-or-number, visibleWhen-hidden, visibleWhen-shown) so reviewers can see every branch in one place. Per-game fixtures live in co-located stories under src/games/&lt;game&gt;/.&#39;,
+      },
+    },
+  },
   args: {
     scenario: &#39;primitive-types&#39;,
     onChange: fn(),
@@ -2720,7 +2728,7 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Default: Story = {};
+export const Playground: Story = {};
 </code></pre></div>
     </div>
         </div>
@@ -2748,12 +2756,12 @@ export const Default: Story = {};
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = ({ scenario, onChange }) =&gt; {
+              <pre><code>const Playground = ({ scenario, onChange }) =&gt; {
   const { fields, config } = scenarioData[scenario];
   return (
     &lt;ConfigFormFields
@@ -10838,7 +10846,7 @@ export const Small: Story = {
       | ^
   129 |   component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
   130 |   tags: [&#39;autodocs&#39;],
-  131 |   args: {
+  131 |   parameters: {
 
 ./src/components/ConfigFormFields.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -10971,6 +10979,14 @@ const scenarioData: Record&lt;
 const meta: Meta&lt;StoryArgs&gt; = {
   component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
   tags: [&#39;autodocs&#39;],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Generic form renderer for the ConfigField union — used by SimpleConfigForm and AdvancedConfigModal across every game. The scenario select cycles through the 5 rendering branches (primitive types, nested types, select-or-number, visibleWhen-hidden, visibleWhen-shown) so reviewers can see every branch in one place. Per-game fixtures live in co-located stories under src/games/&lt;game&gt;/.&#39;,
+      },
+    },
+  },
   args: {
     scenario: &#39;primitive-types&#39;,
     onChange: fn(),
@@ -11005,7 +11021,7 @@ export default meta;
 
 type Story = StoryObj&lt;StoryArgs&gt;;
 
-export const Default: Story = {};
+export const Playground: Story = {};
 </code></pre></div>
     </div>
         </div>
@@ -11033,12 +11049,12 @@ export const Default: Story = {};
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
+                <span class="ex-name">Playground</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Default = ({ scenario, onChange }) =&gt; {
+              <pre><code>const Playground = ({ scenario, onChange }) =&gt; {
   const { fields, config } = scenarioData[scenario];
   return (
     &lt;ConfigFormFields
