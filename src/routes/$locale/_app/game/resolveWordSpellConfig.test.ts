@@ -11,7 +11,7 @@ describe('resolveWordSpellConfig', () => {
         filter: {
           region: 'aus',
           level: 2,
-          phonemesAllowed: ['s', 'a', 't'],
+          phonemesAllowed: ['s', 't'],
         },
       },
       inputMethod: 'drag',
@@ -20,9 +20,11 @@ describe('resolveWordSpellConfig', () => {
     const resolved = resolveWordSpellConfig(saved);
 
     expect(resolved.configMode).toBe('simple');
-    expect(resolved.source).toEqual(saved.source);
-    // Critically: no explicit rounds array — otherwise useLibraryRounds
-    // short-circuits and returns emoji defaults instead of library words.
+    expect(resolved.source?.type).toBe('word-library');
+    expect(resolved.source?.filter.region).toBe('aus');
+    expect(resolved.source?.filter.phonemesAllowed).toContain('s');
+    expect(resolved.source?.filter.phonemesAllowed).toContain('t');
+    expect(resolved.source?.filter.graphemesAllowed).toBeDefined();
     expect(resolved.rounds ?? []).toEqual([]);
     expect(resolved.roundsInOrder).toBe(false);
   });
