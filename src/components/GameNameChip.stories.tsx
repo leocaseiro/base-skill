@@ -5,6 +5,14 @@ import { GAME_COLOR_KEYS } from '@/lib/game-colors';
 const meta: Meta<typeof GameNameChip> = {
   component: GameNameChip,
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          "Coloured chip that renders a game's display name — used on GameCard, InstructionsOverlay, and across the app to identify a saved game. Set customGameName to flip the chip into custom-game mode (custom name as primary heading, gameTitle as a coloured subtitle). The AllColors auxiliary story surveys all 12 game-color keys.",
+      },
+    },
+  },
   args: {
     title: 'Word Spell',
   },
@@ -22,7 +30,7 @@ export default meta;
 
 type Story = StoryObj<typeof GameNameChip>;
 
-export const Default: Story = {};
+export const Playground: Story = {};
 
 export const AllColors: Story = {
   render: () => (
