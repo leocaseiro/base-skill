@@ -316,7 +316,9 @@ describe('AdvancedConfigModal', () => {
       />,
       { wrapper },
     );
-    expect(screen.getByLabelText('Level 1')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Level 1/ }),
+    ).toBeInTheDocument();
   });
 
   it('does not render the Level select for non-word-spell games', () => {
@@ -332,7 +334,7 @@ describe('AdvancedConfigModal', () => {
       />,
       { wrapper },
     );
-    expect(screen.queryByLabelText(/level/i)).toBeNull();
+    expect(screen.queryByRole('button', { name: /Level/i })).toBeNull();
   });
 
   it('reveals distractorCount when WordSpell tileBankMode is distractors', () => {
