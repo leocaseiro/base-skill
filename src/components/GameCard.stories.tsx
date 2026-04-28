@@ -28,7 +28,15 @@ interface StoryArgs {
 const meta: Meta<StoryArgs> = {
   component: GameCard as unknown as ComponentType<StoryArgs>,
   tags: ['autodocs'],
-  parameters: { layout: 'centered' },
+  parameters: {
+    layout: 'centered',
+    docs: {
+      description: {
+        component:
+          'Bookmark-aware game tile used on the homepage and saved-games view. The variant radio toggles between the default cover and the customGame coloured chip; bookmarkable + isBookmarked expose the full bookmark matrix. The card is wrapped in a w-64 container to mimic GameGrid cell width at xl/2xl breakpoints.',
+      },
+    },
+  },
   args: {
     variant: 'default',
     gameId: 'sort-numbers',
@@ -112,4 +120,4 @@ export default meta;
 
 type Story = StoryObj<StoryArgs>;
 
-export const Default: Story = {};
+export const Playground: Story = {};
