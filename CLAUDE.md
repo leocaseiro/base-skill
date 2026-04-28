@@ -6,6 +6,21 @@ Agents using Cursor or other tools: read [AGENTS.md](./AGENTS.md) first for the 
 
 Analyse the [eslint.config.js](./eslint.config.js) to decide what approach to write the code. For example we don't use functions, but const(react/function-component-definition)
 
+## Before writing a plan
+
+Plans are binding source of truth for executor agents. If a plan will create or modify any of the following, **invoke the corresponding project skill before prescribing code**, and let the skill override plan boilerplate:
+
+| Plan touches                                 | Required skill                 |
+| -------------------------------------------- | ------------------------------ |
+| `*.stories.tsx`                              | `write-storybook`              |
+| `tests-vr/**`, `tests-e2e/**`, `*.e2e.ts`    | `write-e2e-vr-tests`           |
+| `*.md` authored by an agent                  | Markdown Authoring rules below |
+| Architecture docs (`*.mdx` under game state) | `update-architecture-docs`     |
+
+If a plan's code sample conflicts with a skill, flag it as a **Spec Delta** at the top of the plan and justify the deviation — don't silently ship boilerplate that contradicts project convention.
+
+Executors must mirror this: when the plan prescribes files matching the table above, load the corresponding skill into the implementer's context as the authoritative reference. If the plan and skill disagree and there is no Spec Delta, treat the skill as authoritative and flag the conflict to the user before coding.
+
 ## Git Workflow
 
 **Never commit directly to `master`.** All changes must be made on a branch via a git worktree.
