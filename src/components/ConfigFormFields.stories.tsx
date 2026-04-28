@@ -1,147 +1,173 @@
-import { withDarkMode } from '../../.storybook/decorators';
+import { fn } from 'storybook/test';
+
 import { ConfigFormFields } from './ConfigFormFields';
 import type { ConfigField } from '@/lib/config-fields';
 import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
 
-const allFields: ConfigField[] = [
+type Scenario =
+  | 'primitive-types'
+  | 'nested-types'
+  | 'nested-select-or-number'
+  | 'visible-when-hidden'
+  | 'visible-when-shown';
+
+interface StoryArgs {
+  scenario: Scenario;
+  onChange: (config: Record<string, unknown>) => void;
+  // Shadowed raw props — driven by scenario; hidden from Controls.
+  fields?: never;
+  config?: never;
+}
+
+// Generic fixtures — one per rendering branch of ConfigFormFields.tsx.
+const primitiveFields: ConfigField[] = [
   {
     type: 'select',
-    key: 'mode',
-    label: 'Mode',
+    key: 'size',
+    label: 'Size',
     options: [
-      { value: 'picture', label: 'Picture' },
-      { value: 'text', label: 'Text' },
+      { value: 'small', label: 'Small' },
+      { value: 'medium', label: 'Medium' },
+      { value: 'large', label: 'Large' },
     ],
   },
   {
     type: 'number',
-    key: 'totalRounds',
-    label: 'Total rounds',
+    key: 'count',
+    label: 'Count',
     min: 1,
     max: 20,
   },
   {
     type: 'checkbox',
-    key: 'ttsEnabled',
-    label: 'Text-to-speech',
+    key: 'enabled',
+    label: 'Enabled',
   },
 ];
 
-const meta: Meta<typeof ConfigFormFields> = {
-  component: ConfigFormFields,
-  tags: ['autodocs'],
-  args: {
-    fields: allFields,
-    config: { mode: 'picture', totalRounds: 8, ttsEnabled: true },
-    onChange: () => {},
-  },
-  argTypes: {
-    onChange: { action: 'changed' },
-  },
-};
-export default meta;
-
-type Story = StoryObj<typeof ConfigFormFields>;
-
-export const AllFieldTypes: Story = {};
-
-export const AllFieldTypesDark: Story = {
-  decorators: [withDarkMode],
-};
-
-const sortFields: ConfigField[] = [
+const nestedFields: ConfigField[] = [
   {
     type: 'nested-select',
-    key: 'skip',
+    key: 'group',
     subKey: 'mode',
-    label: 'Skip mode',
+    label: 'Group mode',
     options: [
-      { value: 'random', label: 'random' },
-      { value: 'consecutive', label: 'consecutive' },
-      { value: 'by', label: 'by' },
+      { value: 'auto', label: 'Auto' },
+      { value: 'manual', label: 'Manual' },
     ],
   },
   {
     type: 'nested-number',
-    key: 'skip',
-    subKey: 'step',
-    label: 'Skip step',
-    min: 2,
-    max: 100,
-    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
-  },
-  {
-    type: 'nested-select',
-    key: 'skip',
-    subKey: 'start',
-    label: 'Skip start',
-    options: [
-      { value: 'range-min', label: 'range-min' },
-      { value: 'random', label: 'random' },
-    ],
-    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
-  },
-  {
-    type: 'select',
-    key: 'tileBankMode',
-    label: 'Tile bank mode',
-    options: [
-      { value: 'exact', label: 'exact' },
-      { value: 'distractors', label: 'distractors' },
-    ],
-  },
-  {
-    type: 'nested-select',
-    key: 'distractors',
-    subKey: 'source',
-    label: 'Distractor source',
-    options: [
-      { value: 'random', label: 'random' },
-      { value: 'gaps-only', label: 'gaps-only' },
-      { value: 'full-range', label: 'full-range' },
-    ],
-    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
-  },
-  {
-    type: 'nested-select-or-number',
-    key: 'distractors',
-    subKey: 'count',
-    label: 'Distractor count',
+    key: 'group',
+    subKey: 'size',
+    label: 'Group size',
     min: 1,
-    max: 20,
-    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+    max: 10,
   },
 ];
 
-export const SortNumbersFieldsExact: Story = {
-  args: {
-    fields: sortFields,
-    config: {
-      skip: { mode: 'random' },
-      tileBankMode: 'exact',
-      distractors: { source: 'random', count: 2 },
-    },
+const selectOrNumberFields: ConfigField[] = [
+  {
+    type: 'nested-select-or-number',
+    key: 'range',
+    subKey: 'max',
+    label: 'Max range',
+    min: 1,
+    max: 100,
+  },
+];
+
+const visibleWhenFields: ConfigField[] = [
+  {
+    type: 'select',
+    key: 'mode',
+    label: 'Mode',
+    options: [
+      { value: 'simple', label: 'Simple' },
+      { value: 'advanced', label: 'Advanced' },
+    ],
+  },
+  {
+    type: 'nested-number',
+    key: 'advanced',
+    subKey: 'threshold',
+    label: 'Threshold',
+    min: 1,
+    max: 100,
+    visibleWhen: { key: 'mode', value: 'advanced' },
+  },
+];
+
+const scenarioData: Record<
+  Scenario,
+  { fields: ConfigField[]; config: Record<string, unknown> }
+> = {
+  'primitive-types': {
+    fields: primitiveFields,
+    config: { size: 'medium', count: 5, enabled: true },
+  },
+  'nested-types': {
+    fields: nestedFields,
+    config: { group: { mode: 'auto', size: 4 } },
+  },
+  'nested-select-or-number': {
+    fields: selectOrNumberFields,
+    config: { range: { max: 10 } },
+  },
+  'visible-when-hidden': {
+    fields: visibleWhenFields,
+    config: { mode: 'simple', advanced: { threshold: 50 } },
+  },
+  'visible-when-shown': {
+    fields: visibleWhenFields,
+    config: { mode: 'advanced', advanced: { threshold: 50 } },
   },
 };
 
-export const SortNumbersFieldsByMode: Story = {
-  args: {
-    fields: sortFields,
-    config: {
-      skip: { mode: 'by', step: 5, start: 'range-min' },
-      tileBankMode: 'exact',
-      distractors: { source: 'random', count: 2 },
+const meta: Meta<StoryArgs> = {
+  component: ConfigFormFields as unknown as ComponentType<StoryArgs>,
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Generic form renderer for the ConfigField union — used by SimpleConfigForm and AdvancedConfigModal across every game. The scenario select cycles through the 5 rendering branches (primitive types, nested types, select-or-number, visibleWhen-hidden, visibleWhen-shown) so reviewers can see every branch in one place. Per-game fixtures live in co-located stories under src/games/<game>/.',
+      },
     },
   },
+  args: {
+    scenario: 'primitive-types',
+    onChange: fn(),
+  },
+  argTypes: {
+    scenario: {
+      control: { type: 'select' },
+      options: [
+        'primitive-types',
+        'nested-types',
+        'nested-select-or-number',
+        'visible-when-hidden',
+        'visible-when-shown',
+      ] satisfies Scenario[],
+    },
+    onChange: { table: { disable: true } },
+    fields: { table: { disable: true } },
+    config: { table: { disable: true } },
+  },
+  render: ({ scenario, onChange }) => {
+    const { fields, config } = scenarioData[scenario];
+    return (
+      <ConfigFormFields
+        fields={fields}
+        config={config}
+        onChange={onChange}
+      />
+    );
+  },
 };
+export default meta;
 
-export const SortNumbersFieldsDistractors: Story = {
-  args: {
-    fields: sortFields,
-    config: {
-      skip: { mode: 'random' },
-      tileBankMode: 'distractors',
-      distractors: { source: 'gaps-only', count: 3 },
-    },
-  },
-};
+type Story = StoryObj<StoryArgs>;
+
+export const Playground: Story = {};
