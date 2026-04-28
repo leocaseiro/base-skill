@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { fn } from 'storybook/test';
 import { withDb } from '../../.storybook/decorators/withDb';
 import { withRouter } from '../../.storybook/decorators/withRouter';
 import type { ConfigField } from '@/lib/config-fields';
@@ -8,6 +10,7 @@ import type {
   SessionMeta,
 } from '@/lib/game-engine/types';
 import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
 import { GameShell } from '@/components/game/GameShell';
 import { GameNameChip } from '@/components/GameNameChip';
@@ -83,59 +86,93 @@ const configFields: ConfigField[] = [
 
 // ── Story body ────────────────────────────────────────────────────────────
 
-const ShowcaseBody = () => (
-  <div className="flex flex-col gap-4 p-4">
-    <GameNameChip
-      title="Sort Numbers"
-      customGameName="Easy Numbers"
-      customGameColor="teal"
-    />
-    <GameNameChip title="Word Spell" subject="reading" />
-    <ConfigFormFields
-      fields={configFields}
-      config={{ inputMethod: 'drag', totalRounds: 8, ttsEnabled: true }}
-      onChange={() => {}}
-    />
-  </div>
-);
+interface ShowcaseBodyProps {
+  onConfigChange: (config: Record<string, unknown>) => void;
+}
+
+const ShowcaseBody = ({ onConfigChange }: ShowcaseBodyProps) => {
+  const [formConfig, setFormConfig] = useState<Record<string, unknown>>(
+    {
+      inputMethod: 'drag',
+      totalRounds: 8,
+      ttsEnabled: true,
+    },
+  );
+  return (
+    <div className="flex flex-col gap-4 p-4">
+      <GameNameChip
+        title="Sort Numbers"
+        customGameName="Easy Numbers"
+        customGameColor="teal"
+      />
+      <GameNameChip title="Word Spell" subject="reading" />
+      <ConfigFormFields
+        fields={configFields}
+        config={formConfig}
+        onChange={(next) => {
+          setFormConfig(next);
+          onConfigChange(next);
+        }}
+      />
+    </div>
+  );
+};
 
 // ── Meta ──────────────────────────────────────────────────────────────────
 
-const meta = {
-  component: GameShell,
+interface StoryArgs {
+  onConfigChange: (config: Record<string, unknown>) => void;
+  // Shadowed GameShell props — fixed by the showcase, hidden from Controls.
+  config?: never;
+  moves?: never;
+  initialState?: never;
+  sessionId?: never;
+  meta?: never;
+  initialLog?: never;
+  children?: never;
+}
+
+const meta: Meta<StoryArgs> = {
+  component: GameShell as unknown as ComponentType<StoryArgs>,
   title: 'Pages/ThemeShowcase',
   tags: ['autodocs'],
   decorators: [withDb, withRouter],
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component:
+          'Theme showcase page that combines GameShell, GameNameChip, and ConfigFormFields so reviewers can see every registered theme applied to a real, dense layout. Use the Theme toolbar to cycle through Ocean Light/Dark, Forest Light/Dark, and High Contrast — the previously theme-pinned exports are reproduced by the toolbar in one tap. Form fields are stateful so editing a value in the Controls area updates the rendered preview, and onChange invocations log to the Actions panel.',
+      },
+    },
   },
   args: {
-    config: shellConfig,
-    moves: {},
-    initialState,
-    sessionId: 'showcase-session',
-    meta: sessionMeta,
-    children: <ShowcaseBody />,
+    onConfigChange: fn(),
   },
-} satisfies Meta<typeof GameShell>;
+  argTypes: {
+    onConfigChange: { table: { disable: true } },
+    config: { table: { disable: true } },
+    moves: { table: { disable: true } },
+    initialState: { table: { disable: true } },
+    sessionId: { table: { disable: true } },
+    meta: { table: { disable: true } },
+    initialLog: { table: { disable: true } },
+    children: { table: { disable: true } },
+  },
+  render: ({ onConfigChange }) => (
+    <GameShell
+      config={shellConfig}
+      moves={{}}
+      initialState={initialState}
+      sessionId="showcase-session"
+      meta={sessionMeta}
+    >
+      <ShowcaseBody onConfigChange={onConfigChange} />
+    </GameShell>
+  ),
+};
 export default meta;
 
-type Story = StoryObj<typeof GameShell>;
+type Story = StoryObj<StoryArgs>;
 
-// ── 4 locked-theme VR stories ─────────────────────────────────────────────
-
-export const OceanLight: Story = {
-  parameters: { globals: { theme: 'light' } },
-};
-
-export const OceanDark: Story = {
-  parameters: { globals: { theme: 'dark' } },
-};
-
-export const ForestLight: Story = {
-  parameters: { globals: { theme: 'forest-light' } },
-};
-
-export const ForestDark: Story = {
-  parameters: { globals: { theme: 'forest-dark' } },
-};
+export const Playground: Story = {};
