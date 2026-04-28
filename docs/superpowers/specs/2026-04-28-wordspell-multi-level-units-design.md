@@ -42,9 +42,6 @@ data shape and the player's mental model.
 
 ## Non-Goals
 
-- Migration of pre-existing saved configs. The project is pre-launch; any
-  `WordSpellSimpleConfig` rows stored under the old `{ level, phonemesAllowed }`
-  shape will be refreshed via the default selection on first read.
 - Curriculum data changes. `GRAPHEMES_BY_LEVEL` and the per-level word lists
   are unchanged.
 - Play-Again repeating sequence (issue #220). Tracked separately.
@@ -289,6 +286,165 @@ export const defaultSelection = (): LevelGraphemeUnit[]; // → L1 units
 
 Pure functions; trivially unit-testable.
 
+## IndexedDB migration
+
+Existing players have WordSpell configs persisted in IndexedDB under the old
+shape (`source.filter.{level, phonemesAllowed}` for full configs;
+`{configMode: 'simple', level, phonemesAllowed}` for simple configs). The
+new code reads `selectedUnits`. Without a migration, those rows would either
+crash the form on read or fall back to defaults — both unacceptable per
+"don't break current games."
+
+### Affected collections
+
+- `saved_game_configs` — schema **bumps to v3**. Holds the resume-last-session
+  row (id `last:anonymous:<gameId>`) plus any legacy named saves not yet
+  migrated to `custom_games`.
+- `custom_games` — schema **bumps from v0 to v1** (first migration on this
+  collection). Holds the user's named custom games. Same `config: object`
+  shape as `saved_game_configs`.
+
+`session_history_index` is NOT affected — it stores resolved rounds and round
+order, not the simple config.
+
+### Migration strategy (shared by both collections)
+
+A pure helper, `migrateWordSpellConfig`, transforms a single doc's `config`
+field. The RxDB `migrationStrategies[N]` per collection wraps it.
+
+```ts
+// src/db/migrations/word-spell-multi-level.ts
+import { GRAPHEMES_BY_LEVEL } from '@/data/words';
+import type { LevelGraphemeUnit } from '@/data/words';
+
+const buildSelectedUnits = (
+  level: number,
+  phonemesAllowed: readonly string[],
+): LevelGraphemeUnit[] => {
+  const units: LevelGraphemeUnit[] = [];
+  // Scan levels 1..N (covers both pre-fix and cumulative-fix shapes from PR #219)
+  for (let lvl = 1; lvl <= level; lvl++) {
+    for (const u of GRAPHEMES_BY_LEVEL[lvl] ?? []) {
+      if (phonemesAllowed.includes(u.p)) units.push(u);
+    }
+  }
+  return units;
+};
+
+export const migrateWordSpellConfig = (
+  doc: Record<string, unknown>,
+): Record<string, unknown> => {
+  if (doc.gameId !== 'word-spell') return doc;
+
+  const config = (doc.config as Record<string, unknown>) ?? {};
+  if (Array.isArray(config.selectedUnits)) return doc; // already new shape
+
+  // Simple-shape: { configMode: 'simple', level, phonemesAllowed }
+  if (
+    config.configMode === 'simple' &&
+    typeof config.level === 'number' &&
+    Array.isArray(config.phonemesAllowed)
+  ) {
+    return {
+      ...doc,
+      config: {
+        ...config,
+        selectedUnits: buildSelectedUnits(
+          config.level,
+          config.phonemesAllowed as string[],
+        ),
+      },
+    };
+  }
+
+  // Full-shape: { source: { filter: { level, phonemesAllowed } } }
+  const source = config.source as
+    | { filter?: { level?: number; phonemesAllowed?: string[] } }
+    | undefined;
+  if (
+    source?.filter &&
+    typeof source.filter.level === 'number' &&
+    Array.isArray(source.filter.phonemesAllowed)
+  ) {
+    return {
+      ...doc,
+      config: {
+        ...config,
+        selectedUnits: buildSelectedUnits(
+          source.filter.level,
+          source.filter.phonemesAllowed,
+        ),
+      },
+    };
+  }
+
+  // Unrecognised shape (e.g. hand-authored rounds with no source) — leave alone.
+  return doc;
+};
+```
+
+### Schema bumps
+
+In `src/db/create-database.ts`:
+
+```ts
+saved_game_configs: {
+  schema: savedGameConfigsSchema, // version: 3
+  migrationStrategies: {
+    1: ...existing,
+    2: ...existing,
+    3: migrateWordSpellConfig,
+  },
+},
+custom_games: {
+  schema: customGamesSchema, // version: 1
+  migrationStrategies: {
+    1: migrateWordSpellConfig,
+  },
+},
+```
+
+The schema files (`savedGameConfigsSchema`, `customGamesSchema`) are updated
+to set `version: 3` / `version: 1` respectively. The `config` field stays
+typed as `Record<string, unknown>` — no schema-level field changes needed.
+
+### Belt-and-suspenders: tolerant reader
+
+`resolveSimpleConfig` and the new component's selection-derivation also
+accept the legacy shape at read-time, falling back to `buildSelectedUnits`
+if `selectedUnits` is missing. This protects against:
+
+- A doc that escaped the migration (e.g. test fixtures, mocked DBs).
+- Future schemas where the migration runs lazily.
+
+In production code: prefer `selectedUnits`; fall back to deriving from
+`level + phonemesAllowed`; default to L1 only if neither is present.
+
+### Migration tests
+
+`src/db/migrations/word-spell-multi-level.test.ts`:
+
+- Migrates a simple-shape doc (`level=4`, `phonemesAllowed=['s','m']`) →
+  `selectedUnits` contains every `(g, /s/)` unit and every `(g, /m/)` unit
+  in L1–L4.
+- Migrates a full-shape doc (`source.filter.{level, phonemesAllowed}`) →
+  same result.
+- Idempotent: a doc that already has `selectedUnits` is returned unchanged.
+- Non-WordSpell doc returned unchanged.
+- Hand-authored full config (no `source`) returned unchanged.
+- Edge case: `phonemesAllowed=[]` → empty `selectedUnits` (the form will
+  flag this as invalid on read, prompting the user to pick at least one).
+- Cross-level phoneme: `phonemesAllowed=['/s/']` at `level=4` produces both
+  `{g:'s',p:'s'}` (from L1) **and** `{g:'c',p:'s'}` (from L4) — preserves
+  the player's previous reach.
+
+`src/db/migrate-collections.test.ts` (or extension of the existing
+collection-migration tests):
+
+- Insert a v2 `saved_game_configs` doc with the legacy shape; bump to v3;
+  re-read; assert `selectedUnits` is present and correct.
+- Same for `custom_games` v0 → v1.
+
 ## Testing strategy
 
 Three layers, mirroring the previous spec's discipline:
@@ -330,10 +486,11 @@ catches the UI side.
 
 ## Risk & mitigation
 
-**Saved Custom Games under the old shape break on read.** `resolveSimpleConfig`
-and `advancedToSimple` both handle absent / legacy fields gracefully; the plan
-adds a coercion layer that maps old `{ level, phonemesAllowed }` to a
-`selectedUnits` equivalent on read.
+**Saved Custom Games under the old shape break on read.** Addressed by the
+RxDB migration above: `saved_game_configs` v3 and `custom_games` v1 both run
+`migrateWordSpellConfig` on every legacy doc, populating `selectedUnits` from
+the saved `level + phonemesAllowed`. `resolveSimpleConfig` also has a
+read-time coercion fallback as belt-and-suspenders.
 
 **Visual regression in Storybook.** Plan re-records affected baselines and
 includes a manual diff review step.
@@ -348,14 +505,22 @@ from data on every render; no cached state.
 ## Implementation order (preview — full plan separate)
 
 1. Add `level-unit-selection.ts` pure helpers + tests
-2. Rewrite `WordSpellLibrarySource` with the `chips` variant; tests
-3. Add the `checkbox-tree` variant; tests
-4. Wire `getAdvancedHeaderRenderer` to pass `variant="checkbox-tree"`
-5. Update `WordSpellSimpleConfig` and `resolveSimpleConfig` for `selectedUnits`
-6. Rewrite `curriculum-invariant.test.ts` and `source-emits-playable.test.tsx`
-7. Hook last-session-game-config restore for the simple form
-8. Re-record affected Storybook baselines; run VR
-9. Manual smoke test in dev server (recorded in plan checklist)
+2. Add `migrateWordSpellConfig` helper + unit tests; bump
+   `saved_game_configs` schema to v3 and `custom_games` schema to v1; wire
+   the migration strategies in `create-database.ts`; collection-level
+   migration tests
+3. Rewrite `WordSpellLibrarySource` with the `chips` variant; tests
+4. Add the `checkbox-tree` variant; tests
+5. Wire `getAdvancedHeaderRenderer` to pass `variant="checkbox-tree"`
+6. Update `WordSpellSimpleConfig` and `resolveSimpleConfig` for
+   `selectedUnits` (with read-time fallback to `level + phonemesAllowed`)
+7. Rewrite `curriculum-invariant.test.ts` and `source-emits-playable.test.tsx`
+8. Hook last-session-game-config restore for the simple form (verifies the
+   migrated row drives the new UI on first read)
+9. Re-record affected Storybook baselines; run VR
+10. Manual smoke test in dev server, including a pre-seeded legacy doc that
+    must round-trip through the migration without crashing or losing the
+    user's selection
 
 The plan elaborates each step into red-green TDD pairs with the exact files
 to touch.
