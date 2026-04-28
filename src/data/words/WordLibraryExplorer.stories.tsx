@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { draftStore } from './authoring/draftStore';
 import { WordLibraryExplorer } from './WordLibraryExplorer';
 import type { Meta, StoryObj } from '@storybook/react';
 
@@ -48,3 +50,40 @@ export default meta;
 type Story = StoryObj<typeof WordLibraryExplorer>;
 
 export const Playground: Story = {};
+
+export const EmptyStateCTA: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Triggers the empty-state CTA by pre-searching a missing word.',
+      },
+    },
+  },
+};
+
+export const WithDraftBadge: Story = {
+  decorators: [
+    (StoryComp) => {
+      useEffect(() => {
+        void (async () => {
+          await draftStore.__clearAllForTests();
+          await draftStore.saveDraft({
+            word: 'zzword',
+            region: 'aus',
+            level: 1,
+            ipa: 'zwɜːd',
+            syllables: ['zz', 'word'],
+            syllableCount: 2,
+            graphemes: [
+              { g: 'zz', p: 'z' },
+              { g: 'word', p: 'wɜːd' },
+            ],
+            ritaKnown: false,
+          });
+        })();
+      }, []);
+      return <StoryComp />;
+    },
+  ],
+};

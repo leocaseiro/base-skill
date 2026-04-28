@@ -3,6 +3,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.mcp.local.json
 .env
 .env.local
 .nitro
@@ -21,3 +22,5 @@ worktrees/
 .specstory/statistics.json
 .superpowers/
 .local-debug/
+.claude/settings.local.json
+*.code-workspace
