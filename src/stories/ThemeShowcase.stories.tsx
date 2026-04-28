@@ -108,6 +108,12 @@ const meta = {
   decorators: [withDb, withRouter],
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component:
+          'Token-only page composed from GameShell + GameNameChip + ConfigFormFields. Cycle through the registered themes via the toolbar.',
+      },
+    },
   },
   args: {
     config: shellConfig,
@@ -117,25 +123,18 @@ const meta = {
     meta: sessionMeta,
     children: <ShowcaseBody />,
   },
+  argTypes: {
+    config: { table: { disable: true } },
+    moves: { table: { disable: true } },
+    initialState: { table: { disable: true } },
+    sessionId: { table: { disable: true } },
+    meta: { table: { disable: true } },
+    initialLog: { table: { disable: true } },
+    children: { table: { disable: true } },
+  },
 } satisfies Meta<typeof GameShell>;
 export default meta;
 
 type Story = StoryObj<typeof GameShell>;
 
-// ── 4 locked-theme VR stories ─────────────────────────────────────────────
-
-export const OceanLight: Story = {
-  parameters: { globals: { theme: 'light' } },
-};
-
-export const OceanDark: Story = {
-  parameters: { globals: { theme: 'dark' } },
-};
-
-export const ForestLight: Story = {
-  parameters: { globals: { theme: 'forest-light' } },
-};
-
-export const ForestDark: Story = {
-  parameters: { globals: { theme: 'forest-dark' } },
-};
+export const Default: Story = {};
