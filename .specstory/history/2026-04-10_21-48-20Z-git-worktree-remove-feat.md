@@ -6,7 +6,7 @@
 
 _**User (2026-04-10 21:48:20Z)**_
 
-$ git worktree remove feat/pr-previews-auto-bump                          
+$ git worktree remove feat/pr-previews-auto-bump
 fatal: 'feat/pr-previews-auto-bump' is not a working tree
 
 ---
@@ -30,6 +30,7 @@ List all git worktrees
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/jolly-stonebraker  bed6bb8 [claude/jolly-stonebraker]
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-answer-game-primitive 39f4922 [feat/answer-game-primitive]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-10 21:48:28Z)**_

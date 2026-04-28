@@ -6,7 +6,7 @@
 
 _**User**_
 
-@/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/1.txt:2469-2496 
+@/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/1.txt:2469-2496
 
 ---
 
@@ -19,10 +19,7 @@ I'm resolving TypeScript errors in Storybook files related to Story component us
 
 _**Agent (composer-2)**_
 
-
 Fixing Storybook TypeScript errors: reading the affected files and Storybook types.
-
-
 
 _**Agent (composer-2)**_
 
@@ -68,23 +65,19 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating story rendering**
 
-I'm fixing the story rendering by updating the JSX usage to match Storybook 10's type changes. I'm adjusting the Story component return type to match Storybook 10's expected signature with context. 
+I'm fixing the story rendering by updating the JSX usage to match Storybook 10's type changes. I'm adjusting the Story component return type to match Storybook 10's expected signature with context.
 
 I'm switching from JSX to function call for Storybook 10 compatibility by using `Story()` instead of `<Story />`. </details></think>
 
 _**Agent (composer-2)**_
 
-
 Checking Storybook 10 `Decorator` and `StoryFn` types:
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -96,6 +89,7 @@ Parameters:
   "pattern": "Decorator|StoryFn|PartialStoryFn"
 }
 ```
+
 Additional data:
 
 ```json
@@ -109,8 +103,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -121,11 +115,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -145,17 +134,11 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -167,6 +150,7 @@ Parameters:
   "pattern": "export type Decorator"
 }
 ```
+
 Additional data:
 
 ```json
@@ -180,8 +164,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -193,17 +177,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -215,6 +193,7 @@ Parameters:
   "pattern": "DecoratorFunction"
 }
 ```
+
 Additional data:
 
 ```json
@@ -228,8 +207,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -241,17 +220,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -262,6 +235,7 @@ Parameters:
   "pattern": "DecoratorFunction"
 }
 ```
+
 Additional data:
 
 ```json
@@ -280,8 +254,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -292,11 +266,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -366,11 +335,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -399,11 +363,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -419,17 +378,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -440,6 +393,7 @@ Parameters:
   "pattern": "Decorator|Preview"
 }
 ```
+
 Additional data:
 
 ```json
@@ -458,8 +412,8 @@ Additional data:
   "totalMatches": 21
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -475,7 +429,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -485,6 +438,7 @@ Parameters:
   "pattern": "DecoratorFunction"
 }
 ```
+
 Additional data:
 
 ```json
@@ -503,8 +457,8 @@ Additional data:
   "totalMatches": 8
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -516,17 +470,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -537,6 +485,7 @@ Parameters:
   "pattern": "DecoratorFunction|ProjectAnnotations|type Preview"
 }
 ```
+
 Additional data:
 
 ```json
@@ -555,8 +504,8 @@ Additional data:
   "totalMatches": 12
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -568,17 +517,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -589,6 +532,7 @@ Parameters:
   "pattern": "PartialStoryFn"
 }
 ```
+
 Additional data:
 
 ```json
@@ -607,8 +551,8 @@ Additional data:
   "totalMatches": 3
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -619,11 +563,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -640,11 +579,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -660,17 +594,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -681,6 +609,7 @@ Parameters:
   "pattern": "StoryFn"
 }
 ```
+
 Additional data:
 
 ```json
@@ -699,8 +628,8 @@ Additional data:
   "totalMatches": 8
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -719,10 +648,7 @@ I'm switching from `StoryFn` to `PartialStoryFn` for withTheme decorator, consid
 
 _**Agent (composer-2)**_
 
-
 Storybook 10 passes `PartialStoryFn` to decorators — a function `(update?) => ReactNode`, not a JSX component. React 19's stricter JSX typing rejects `<Story />`. Invoking `Story()` fixes it. Replacing `Preview['decorators'][number]` with `Decorator` fixes the union type that isn't indexable.
-
-
 
 _**Agent (composer-2)**_
 
@@ -786,11 +712,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -799,6 +720,7 @@ _**Agent (composer-2)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && npx tsc --noEmit
 ```
+
 </details>
 </tool-use>
 
@@ -813,7 +735,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **read_lints**</summary>
 
-
 Parameters:
 
 ```json
@@ -824,6 +745,7 @@ Parameters:
   ]
 }
 ```
+
 Result:
 
 ```json
@@ -838,8 +760,8 @@ Result:
   ]
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -851,13 +773,13 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
 Here’s what was wrong and what we changed.
 
 **Cause:** In Storybook 10, decorator `Story` is a **`PartialStoryFn`**: `(update?) => ReactNode`, not a React component. Using `<Story />` makes TypeScript treat it like a component with a single `props` argument, which doesn’t match that signature (and React 19’s JSX types are stricter).  
 `Preview['decorators']` is typed as **either** a single decorator **or** an array, so `Preview['decorators'][number]` isn’t valid.
 
 **Changes:**
+
 1. **`withTheme.tsx`** — Use `Parameters<Decorator>[0]` for the inner `Story` prop and render with **`Story()`** instead of `<Story />`.
 2. **`preview.tsx`** — Type the wrapper as **`Decorator`** and render with **`Story()`** inside `ThemeProvider`.
 
@@ -889,11 +811,8 @@ I'm investigating why the CI workflow in `.github/workflows/ci.yml` might be run
 
 _**Agent (composer-2)**_
 
-
 Checking `.storybook` files in the repo — CI may be running on a branch that doesn't include the earlier fix.
 
-
-
 _**Agent (composer-2)**_
 
 File not found
@@ -913,11 +832,6 @@ File not found
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -937,17 +851,11 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -959,6 +867,7 @@ Parameters:
   "pattern": "withTheme"
 }
 ```
+
 Additional data:
 
 ```json
@@ -972,8 +881,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -984,11 +893,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1011,11 +915,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees** (1 file)
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1068,11 +967,6 @@ I'm verifying if the main repository has the .storybook directory or if it's onl
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -1087,6 +981,7 @@ master
 no .storybook at root
 
 ```
+
 </details>
 </tool-use>
 
@@ -1096,11 +991,6 @@ no .storybook at root
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1116,6 +1006,7 @@ milestone-storybook-setup
 ## milestone-storybook-setup...origin/milestone-storybook-setup
 
 ```
+
 </details>
 </tool-use>
 
@@ -1126,11 +1017,6 @@ milestone-storybook-setup
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -1139,6 +1025,7 @@ _**Agent (composer-2)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && git diff origin/milestone-storybook-setup -- .storybook/
 ```
+
 </details>
 </tool-use>
 
@@ -1157,11 +1044,6 @@ note: we are inside the worktree milestone-storybook-setup
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -1170,6 +1052,7 @@ _**Agent (composer-2)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && npx tsc --noEmit
 ```
+
 </details>
 </tool-use>
 
@@ -1179,7 +1062,6 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && npx
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Good — **`milestone-storybook-setup` is the right place** for Storybook and the decorator/preview code.
 
@@ -1202,7 +1084,6 @@ I got nothing when running that
 
 _**Agent (composer-2)**_
 
-
 That’s expected. **`tsc --noEmit` prints nothing when there are no errors** — a clean run is silent.
 
 To confirm it succeeded:
@@ -1221,7 +1102,7 @@ _**User**_
 I found the issue which was the mardown missing semi colons, why didn't my pre-commit hook didn't identify and autofix those issues?
 (check my staged files)
 
-eg @/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/src/db/hooks/useRxQuery.mdx:13-16 
+eg @/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/src/db/hooks/useRxQuery.mdx:13-16
 
 ---
 
@@ -1234,10 +1115,7 @@ I'm examining the husky pre-commit hook configuration to understand why markdown
 
 _**Agent (composer-2)**_
 
-
 Tracing the pre-commit setup and what runs on `.mdx` files.
-
-
 
 _**Agent (composer-2)**_
 
@@ -1295,7 +1173,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -1305,6 +1182,7 @@ Parameters:
   "pattern": "lint-staged"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1375,8 +1253,8 @@ Additional data:
   "totalMatches": 225
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1387,11 +1265,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1415,7 +1288,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -1425,6 +1297,7 @@ Parameters:
   "pattern": "lint-staged"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1443,8 +1316,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1469,17 +1342,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1491,6 +1358,7 @@ Parameters:
   "pattern": "\"lint-staged\""
 }
 ```
+
 Additional data:
 
 ```json
@@ -1509,8 +1377,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1557,11 +1425,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1623,18 +1486,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing lint-staged config**
 
-I discovered that lint-staged doesn't process *.mdx files because there's no pattern matching them in the configuration. The issue isn't with lint-staged configuration but with understanding how markdownlint and prettier handle MDX code blocks. 
+I discovered that lint-staged doesn't process *.mdx files because there's no pattern matching them in the configuration. The issue isn't with lint-staged configuration but with understanding how markdownlint and prettier handle MDX code blocks.
 
 **Verifying prettier behavior**
 
 I'm checking if prettier formats code blocks in .mdx files and whether markdownlint catches issues in MDX code blocks. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1658,11 +1516,6 @@ I'm verifying if markdownlint-cli2 supports .mdx files, as JSX in .mdx may cause
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -1680,6 +1533,7 @@ Summary: 0 error(s)
 exit:0
 
 ```
+
 </details>
 </tool-use>
 
@@ -1689,11 +1543,6 @@ exit:0
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1710,6 +1559,7 @@ const x = 1;
 &#96;&#96;&#96;
 
 ```
+
 </details>
 </tool-use>
 
@@ -1738,7 +1588,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Checking lint-staged config**
 
-I'm reading the current .lintstagedrc to understand the existing patterns. I need to add `*.mdx` pattern to lint-staged config to properly handle Storybook markdown files. 
+I'm reading the current .lintstagedrc to understand the existing patterns. I need to add `*.mdx` pattern to lint-staged config to properly handle Storybook markdown files.
 
 **Updating lint-staged config**
 
@@ -1746,10 +1596,7 @@ I'll add `*.{md,mdx}` patterns to lint-staged to handle Storybook markdown files
 
 _**Agent (composer-2)**_
 
-
 Confirming: `*.{ts,tsx}` already covers `.storybook/*.ts(x)` and `*.stories.tsx`. The gap is MDX. Adding `mdx` to lint-staged (same pipeline as Markdown) and aligning `lint:md` for CI parity.
-
-
 
 _**Agent (composer-2)**_
 
@@ -1794,11 +1641,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -1831,6 +1673,7 @@ src/lib/theme/css-vars.mdx:1:4 error MD037/no-space-in-emphasis Spaces inside em
 src/lib/theme/css-vars.mdx:1:19 error MD037/no-space-in-emphasis Spaces inside emphasis markers [Context: "e *"]
 
 ```
+
 </details>
 </tool-use>
 
@@ -1840,11 +1683,6 @@ src/lib/theme/css-vars.mdx:1:19 error MD037/no-space-in-emphasis Spaces inside e
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1868,11 +1706,6 @@ I'm adding markdownlint --fix to mdx on pre-commit, but it may break commits unt
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search">
@@ -1895,11 +1728,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1936,17 +1764,11 @@ I'm adjusting markdownlint rules to disable MD037 specifically for MDX files whi
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1958,6 +1780,7 @@ Parameters:
   "pattern": "markdownlint-cli2"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1971,8 +1794,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1987,11 +1810,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Configuring markdownlint**
 
-I'm setting up .markdownlint-cli2.yaml to handle MDX-specific overrides. I'm switching to lint-staged for MDX files to run only Prettier, avoiding markdownlint conflicts. 
+I'm setting up .markdownlint-cli2.yaml to handle MDX-specific overrides. I'm switching to lint-staged for MDX files to run only Prettier, avoiding markdownlint conflicts.
 
 **Adding markdownlint config**
 
-I'm adding `.markdownlint-cli2.yaml` to disable MD037 for MDX files only. I'm implementing `.markdownlint-cli2.yaml` to properly configure markdownlint for MDX files while preserving existing rules. I'm configuring `.markdownlint-cli2.yaml` with single config format and file pattern overrides. I'm switching to array format in `.markdownlint-cli2.jsonc` for glob-specific config overrides. 
+I'm adding `.markdownlint-cli2.yaml` to disable MD037 for MDX files only. I'm implementing `.markdownlint-cli2.yaml` to properly configure markdownlint for MDX files while preserving existing rules. I'm configuring `.markdownlint-cli2.yaml` with single config format and file pattern overrides. I'm switching to array format in `.markdownlint-cli2.jsonc` for glob-specific config overrides.
 
 **Updating linting strategy**
 
@@ -1999,10 +1822,7 @@ I'm simplifying the linting setup to run prettier on TS fences and markdownlint 
 
 _**Agent (composer-2)**_
 
-
 Storybook `.ts`/`.tsx` files (including `.storybook/` and `*.stories.tsx`) are already covered by `*.{ts,tsx}`. Only MDX was missing. Running `markdownlint-cli2` on our MDX files triggers MD037 false positives on `{/* eslint-disable */}`. Adding `*.mdx` to lint-staged with Prettier only — Prettier formats fenced `ts` blocks (including semicolons) without those false positives.
-
-
 
 _**Agent (composer-2)**_
 
@@ -2020,8 +1840,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
 
 **Short answer**
 

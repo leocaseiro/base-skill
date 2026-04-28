@@ -11,6 +11,7 @@ Complete **Task 14** in `/Users/leocaseiro/Sites/base-skill/worktrees/milestone-
 **Label UI:** `src/components/ui/label.tsx` was just added via shadcn (may be untracked or you need to include it in commit).
 
 **Replace** `src/routes/$locale/_app/settings.tsx` with the Milestone 3 Task 14 `SettingsScreen` implementation:
+
 - useTranslation('settings'), useSettings(), Slider volume/speechRate, Select for language with LOCALES
 - **Routing:** This repo’s public paths use `to: '/$locale/settings'` (not `/_app/settings`) when calling `navigate` — check `routeTree.gen.ts` `FileRoutesByTo` if unsure. `useParams({ from: '/$locale' })` for locale.
 - `createFileRoute('/$locale/_app/settings')` stays as-is (file path route id).
@@ -35,10 +36,7 @@ I'm examining the milestone-3-app-shell worktree to understand Task 14's specifi
 
 _**Agent (composer-2)**_
 
-
 Implementing Task 14: exploring the worktree for `useSettings`, routing, and UI patterns.
-
-
 
 _**Agent (composer-2)**_
 
@@ -59,7 +57,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -69,6 +66,7 @@ Parameters:
   "pattern": "useSettings|LOCALES"
 }
 ```
+
 Additional data:
 
 ```json
@@ -135,8 +133,8 @@ Additional data:
   "totalMatches": 87
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -180,11 +178,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell*
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -288,11 +281,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell*
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -351,7 +339,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -361,6 +348,7 @@ Parameters:
   "pattern": "navigate\\(\\{"
 }
 ```
+
 Additional data:
 
 ```json
@@ -383,8 +371,8 @@ Additional data:
   "totalMatches": 3
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -395,11 +383,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -445,9 +428,9 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Handling locale navigation**
 
-I'm implementing locale-aware navigation for settings using the navigate API with locale param. I'm adding minimal i18n keys for hardcoded labels like 'Language' to align with the existing locale structure. I'm adding translation keys for form labels like 'Language', 'Volume', and 'Speech rate' to support i18n. 
+I'm implementing locale-aware navigation for settings using the navigate API with locale param. I'm adding minimal i18n keys for hardcoded labels like 'Language' to align with the existing locale structure. I'm adding translation keys for form labels like 'Language', 'Volume', and 'Speech rate' to support i18n.
 
-I'm implementing i18n for the title using `t()` function while keeping labels in English for minimal scope. 
+I'm implementing i18n for the title using `t()` function while keeping labels in English for minimal scope.
 
 **Adding i18n keys**
 
@@ -455,17 +438,11 @@ I'm adding i18n keys for volume, speechRate, and language settings to support lo
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -476,6 +453,7 @@ Parameters:
   "pattern": "settings"
 }
 ```
+
 Additional data:
 
 ```json
@@ -502,8 +480,8 @@ Additional data:
   "totalMatches": 6
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -518,7 +496,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating locale types**
 
-I'm narrowing the Select component's locale type from string to HeaderLocale and using LOCALES array for type safety. I'm defining the LOCALES array with strict typing for locale options. I'm refining the locale type definition to ensure strict typing for locale codes. I'm ensuring navigate params use `as const` for locale to maintain type safety. I'm adding i18n keys for volume, speechRate, and language to ensure full translation coverage. I'm verifying the useParams implementation for nested routes and ensuring type safety with speechRate handling. 
+I'm narrowing the Select component's locale type from string to HeaderLocale and using LOCALES array for type safety. I'm defining the LOCALES array with strict typing for locale options. I'm refining the locale type definition to ensure strict typing for locale codes. I'm ensuring navigate params use `as const` for locale to maintain type safety. I'm adding i18n keys for volume, speechRate, and language to ensure full translation coverage. I'm verifying the useParams implementation for nested routes and ensuring type safety with speechRate handling.
 
 **Checking label imports**
 
@@ -526,10 +504,7 @@ I'm verifying the correct radix-ui import path for LabelPrimitive and checking i
 
 _**Agent (composer-2)**_
 
-
 Implementing the settings screen with `to: '/$locale/settings'` for navigation and adding i18n keys for form labels. Verifying `label.tsx` and running checks.
-
-
 
 _**Agent (composer-2)**_
 
@@ -578,11 +553,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -609,6 +579,7 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 error Command failed with exit code 2.
 
 ```
+
 </details>
 </tool-use>
 
@@ -623,7 +594,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **read_lints**</summary>
 
-
 Parameters:
 
 ```json
@@ -633,6 +603,7 @@ Parameters:
   ]
 }
 ```
+
 Result:
 
 ```json
@@ -644,8 +615,8 @@ Result:
   ]
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -664,17 +635,13 @@ I'm addressing pre-existing type errors in test files to pass the typecheck as r
 
 _**Agent (composer-2)**_
 
-
 Investigating and fixing TypeScript errors so typecheck passes.
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -685,6 +652,7 @@ Parameters:
   "pattern": "DbProvider"
 }
 ```
+
 Additional data:
 
 ```json
@@ -723,8 +691,8 @@ Additional data:
   "totalMatches": 17
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -762,11 +730,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -785,16 +748,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing type inference**
 
-I'm fixing the createElement call to include `children` in the props object to satisfy TypeScript's type checking. I'm addressing TypeScript errors in useSettings.ts where the function return type doesn't match the expected union type. I'm refining the type assertion in plainSettingsFromQuery to properly handle the union type. I'm fixing the type assertion to properly handle the union type where TypeScript narrows incorrectly after conditional checks. 
+I'm fixing the createElement call to include `children` in the props object to satisfy TypeScript's type checking. I'm addressing TypeScript errors in useSettings.ts where the function return type doesn't match the expected union type. I'm refining the type assertion in plainSettingsFromQuery to properly handle the union type. I'm fixing the type assertion to properly handle the union type where TypeScript narrows incorrectly after conditional checks.
 
 I'm addressing TypeScript's incorrect narrowing in the else branch where doc should be narrowed to SettingsDoc but might still include toJSON due to union type ambiguity. </details></think>
 
 _**Agent (composer-2)**_
 
-
 Fixing TypeScript errors: `createElement` must include `children` in the props object, and narrowing the return type in `useSettings.ts`.
-
-
 
 _**Agent (composer-2)**_
 
@@ -842,11 +802,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -906,6 +861,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -923,11 +879,6 @@ I'm committing the settings screen wiring to RxDB sliders and locale select with
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -942,22 +893,23 @@ On branch milestone-3-app-shell
 Changes not staged for commit:
   (use "git add &lt;file&gt;..." to update what will be committed)
   (use "git restore &lt;file&gt;..." to discard changes in working directory)
-	modified:   src/db/hooks/useBookmarks.test.ts
-	modified:   src/db/hooks/useSettings.test.ts
-	modified:   src/db/hooks/useSettings.ts
-	modified:   src/lib/i18n/locales/en/settings.json
-	modified:   src/lib/i18n/locales/pt-BR/settings.json
-	modified:   src/routeTree.gen.ts
-	modified:   src/routes/$locale/_app/settings.tsx
+ modified:   src/db/hooks/useBookmarks.test.ts
+ modified:   src/db/hooks/useSettings.test.ts
+ modified:   src/db/hooks/useSettings.ts
+ modified:   src/lib/i18n/locales/en/settings.json
+ modified:   src/lib/i18n/locales/pt-BR/settings.json
+ modified:   src/routeTree.gen.ts
+ modified:   src/routes/$locale/_app/settings.tsx
 
 Untracked files:
   (use "git add &lt;file&gt;..." to include in what will be committed)
-	src/components/ui/label.tsx
+ src/components/ui/label.tsx
 
 no changes added to commit (use "git add" and/or "git commit -a")
 milestone-3-app-shell
 
 ```
+
 </details>
 </tool-use>
 
@@ -967,11 +919,6 @@ milestone-3-app-shell
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1065,6 +1012,7 @@ index 85e6f20..078b12b 100644
 -const LocaleAppParentIndexRoute =
 
 ```
+
 </details>
 </tool-use>
 
@@ -1075,10 +1023,7 @@ index 85e6f20..078b12b 100644
 
 _**Agent (composer-2)**_
 
-
 Restoring `routeTree.gen.ts` — formatting-only drift, unrelated to Task 14.
-
-
 
 _**Agent (composer-2)**_
 
@@ -1088,6 +1033,7 @@ _**Agent (composer-2)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git restore src/routeTree.gen.ts
 ```
+
 </details>
 </tool-use>
 
@@ -1104,11 +1050,6 @@ _**Agent (composer-2)**_
 I'm committing the settings screen wiring with RxDB sliders and locale select as specified by the user. I'm committing the settings screen wiring with RxDB sliders and locale select. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1158,6 +1099,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git add
 husky - pre-commit script failed (code 1)
 
 ```
+
 </details>
 </tool-use>
 
@@ -1171,18 +1113,15 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing ts issues**
 
-I'm using JSX instead of createElement for DbProvider in tests to satisfy TypeScript while keeping the original structure. I'm adding a type assertion to bypass the props inference issue in tests since renaming to .tsx isn't feasible. 
+I'm using JSX instead of createElement for DbProvider in tests to satisfy TypeScript while keeping the original structure. I'm adding a type assertion to bypass the props inference issue in tests since renaming to .tsx isn't feasible.
 
-I'm using a type assertion on the props to bypass the children prop issue in the test file. I'm addressing the TypeScript error where `children` property is missing from DbProviderProps by adjusting the function component signature to match React's createElement overloads. 
+I'm using a type assertion on the props to bypass the children prop issue in the test file. I'm addressing the TypeScript error where `children` property is missing from DbProviderProps by adjusting the function component signature to match React's createElement overloads.
 
 I'm converting the wrapper to JSX syntax to properly handle the children prop type. I'm renaming useSettings.test.ts to useSettings.test.tsx for consistency with JSX usage. I'm making `children` optional in `DbProviderProps` to align with how `createElement` handles children as a third argument. </details></think>
 
 _**Agent (composer-2)**_
 
-
 Fixing the test wrappers: TypeScript required `children` in props, but ESLint forbids that. Using `Omit<DbProviderProps, 'children'>` for the props object and passing `children` as the third argument to `createElement`.
-
-
 
 _**Agent (composer-2)**_
 
@@ -1215,7 +1154,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Importing types**
 
-I'm importing ComponentProps to reference DbProvider's props. 
+I'm importing ComponentProps to reference DbProvider's props.
 
 **Fixing auth middleware**
 
@@ -1223,11 +1162,6 @@ I'm fixing the exhaustive-deps warning by using `[]` and capturing testDb from c
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -1289,11 +1223,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1319,6 +1248,7 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 error Command failed with exit code 2.
 
 ```
+
 </details>
 </tool-use>
 
@@ -1336,10 +1266,7 @@ I'm renaming test files to .tsx to enable JSX usage for cleaner createElement ha
 
 _**Agent (composer-2)**_
 
-
 Renaming hook tests to `.tsx` and using JSX for `DbProvider` so TypeScript and ESLint agree.
-
-
 
 _**Agent (composer-2)**_
 
@@ -1368,11 +1295,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1409,7 +1331,6 @@ _**Agent (composer-2)**_
 <tool-use data-tool-type="write" data-tool-name="delete_file">
 <details><summary>Tool use: **delete_file**</summary>
 
-
 </details>
 </tool-use>
 
@@ -1423,7 +1344,6 @@ _**Agent (composer-2)**_
 <tool-use data-tool-type="write" data-tool-name="delete_file">
 <details><summary>Tool use: **delete_file**</summary>
 
-
 </details>
 </tool-use>
 
@@ -1434,17 +1354,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1455,6 +1369,7 @@ Parameters:
   "pattern": "useSettings\\.test\\.ts|useBookmarks\\.test\\.ts"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1473,8 +1388,8 @@ Additional data:
   "totalMatches": 12
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1513,6 +1428,7 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 error Command failed with exit code 1.
 
 ```
+
 </details>
 </tool-use>
 
@@ -1522,11 +1438,6 @@ error Command failed with exit code 1.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1559,11 +1470,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1623,6 +1529,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -1632,11 +1539,6 @@ This ensures that you're testing the behavior the user would see in the browser.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1651,28 +1553,29 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git sta
 On branch milestone-3-app-shell
 Changes to be committed:
   (use "git restore --staged &lt;file&gt;..." to unstage)
-	new file:   src/components/ui/label.tsx
-	modified:   src/db/hooks/useBookmarks.test.ts
-	modified:   src/db/hooks/useSettings.test.ts
-	modified:   src/db/hooks/useSettings.ts
-	modified:   src/lib/i18n/locales/en/settings.json
-	modified:   src/lib/i18n/locales/pt-BR/settings.json
-	modified:   src/routes/$locale/_app/settings.tsx
+ new file:   src/components/ui/label.tsx
+ modified:   src/db/hooks/useBookmarks.test.ts
+ modified:   src/db/hooks/useSettings.test.ts
+ modified:   src/db/hooks/useSettings.ts
+ modified:   src/lib/i18n/locales/en/settings.json
+ modified:   src/lib/i18n/locales/pt-BR/settings.json
+ modified:   src/routes/$locale/_app/settings.tsx
 
 Changes not staged for commit:
   (use "git add/rm &lt;file&gt;..." to update what will be committed)
   (use "git restore &lt;file&gt;..." to discard changes in working directory)
-	deleted:    src/db/hooks/useBookmarks.test.ts
-	deleted:    src/db/hooks/useSettings.test.ts
-	modified:   src/routeTree.gen.ts
+ deleted:    src/db/hooks/useBookmarks.test.ts
+ deleted:    src/db/hooks/useSettings.test.ts
+ modified:   src/routeTree.gen.ts
 
 Untracked files:
   (use "git add &lt;file&gt;..." to include in what will be committed)
-	src/db/hooks/useBookmarks.test.tsx
-	src/db/hooks/useSettings.test.tsx
+ src/db/hooks/useBookmarks.test.tsx
+ src/db/hooks/useSettings.test.tsx
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -1690,11 +1593,6 @@ I'm resetting the staged state and staging the correct files, including restorin
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -1708,16 +1606,17 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell && git res
 On branch milestone-3-app-shell
 Changes to be committed:
   (use "git restore --staged &lt;file&gt;..." to unstage)
-	new file:   src/components/ui/label.tsx
-	renamed:    src/db/hooks/useBookmarks.test.ts -&gt; src/db/hooks/useBookmarks.test.tsx
-	renamed:    src/db/hooks/useSettings.test.ts -&gt; src/db/hooks/useSettings.test.tsx
-	modified:   src/db/hooks/useSettings.ts
-	modified:   src/lib/i18n/locales/en/settings.json
-	modified:   src/lib/i18n/locales/pt-BR/settings.json
-	modified:   src/routes/$locale/_app/settings.tsx
+ new file:   src/components/ui/label.tsx
+ renamed:    src/db/hooks/useBookmarks.test.ts -&gt; src/db/hooks/useBookmarks.test.tsx
+ renamed:    src/db/hooks/useSettings.test.ts -&gt; src/db/hooks/useSettings.test.tsx
+ modified:   src/db/hooks/useSettings.ts
+ modified:   src/lib/i18n/locales/en/settings.json
+ modified:   src/lib/i18n/locales/pt-BR/settings.json
+ modified:   src/routes/$locale/_app/settings.tsx
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -1727,11 +1626,6 @@ Changes to be committed:
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1817,6 +1711,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 2.27s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -1826,11 +1721,6 @@ Done in 2.27s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1846,12 +1736,13 @@ On branch milestone-3-app-shell
 Changes not staged for commit:
   (use "git add &lt;file&gt;..." to update what will be committed)
   (use "git restore &lt;file&gt;..." to discard changes in working directory)
-	modified:   src/routeTree.gen.ts
+ modified:   src/routeTree.gen.ts
 
 no changes added to commit (use "git add" and/or "git commit -a")
 68a1f06ffd54a534b4e77c689ed8330403935967
 
 ```
+
 </details>
 </tool-use>
 
@@ -1861,11 +1752,6 @@ no changes added to commit (use "git add" and/or "git commit -a")
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1881,6 +1767,7 @@ On branch milestone-3-app-shell
 nothing to commit, working tree clean
 
 ```
+
 </details>
 </tool-use>
 
@@ -1890,11 +1777,6 @@ nothing to commit, working tree clean
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1926,6 +1808,7 @@ Date:   Wed Apr 1 21:46:38 2026 +1100
  7 files changed, 135 insertions(+), 25 deletions(-)
 
 ```
+
 </details>
 </tool-use>
 
@@ -1936,10 +1819,10 @@ Date:   Wed Apr 1 21:46:38 2026 +1100
 
 _**Agent (composer-2)**_
 
-
 ## Status: **Complete**
 
 ### What changed
+
 - **`src/routes/$locale/_app/settings.tsx`** — `SettingsScreen` with `useTranslation('settings')`, `useSettings()`, volume/speech-rate **Sliders**, **Select** + same `LOCALES` as the header, `useParams({ from: '/$locale' })`, and `navigate({ to: '/$locale/settings', params: { locale } })`. Route registration remains `createFileRoute('/$locale/_app/settings')`.
 - **`src/components/ui/label.tsx`** — shadcn `Label` (committed).
 - **`src/lib/i18n/locales/en/settings.json`** & **`pt-BR/settings.json`** — `volume`, `speechRate`, `language` strings (with interpolation for percent/rate).
@@ -1947,10 +1830,12 @@ _**Agent (composer-2)**_
 - **`useBookmarks.test.tsx` / `useSettings.test.tsx`** — renamed from `.ts`, wrappers use JSX `<DbProvider>` so TypeScript and `react/no-children-prop` both pass.
 
 ### Verification
+
 - `yarn typecheck` — pass  
 - `yarn test --run` — pass (52 tests)
 
 ### Commit
+
 - **SHA:** `68a1f06ffd54a534b4e77c689ed8330403935967` (short: `68a1f06`)  
 - **Branch:** `milestone-3-app-shell`  
 - **Message:** `feat(settings): wire settings screen to RxDB sliders and locale select`

@@ -6,7 +6,7 @@
 
 _**User**_
 
-/subagent-driven-development to execute @docs/superpowers/plans/2026-04-02-storybook-setup.md 
+/subagent-driven-development to execute @docs/superpowers/plans/2026-04-02-storybook-setup.md
 
 ---
 
@@ -15,7 +15,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Executing subagent plan**
 
-I'm reading the Storybook setup plan and extracting all tasks for implementation. I'm implementing the git worktree workflow for subagent development. 
+I'm reading the Storybook setup plan and extracting all tasks for implementation. I'm implementing the git worktree workflow for subagent development.
 
 **Finding prompt templates**
 
@@ -23,10 +23,7 @@ I'm locating the prompt templates relative to the skill folder for subagent deve
 
 _**Agent (composer-2)**_
 
-
 Executing subagent-driven development for the Storybook setup plan: reading the plan structure, the git-worktrees skill, and subagent prompt templates.
-
-
 
 _**Agent (composer-2)**_
 
@@ -47,7 +44,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -57,6 +53,7 @@ Parameters:
   "pattern": "^## Task|^### Task|^## Phase|^\\*\\*Task"
 }
 ```
+
 Additional data:
 
 ```json
@@ -75,8 +72,8 @@ Additional data:
   "totalMatches": 29
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -114,18 +111,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Setting up worktree**
 
-I'm creating the worktree myself using the git worktree command as specified in the plan. 
+I'm creating the worktree myself using the git worktree command as specified in the plan.
 
 **Reading plan tasks**
 
 I'm reviewing the plan tasks to understand which ones need implementation. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -171,13 +163,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Running worktree commands**
 
-I'm executing worktree commands to set up the environment: checking ignored worktrees, creating worktree, running yarn install, and yarn typecheck. I'll complete Task 1 in shell and handle remaining work sequentially in the worktree, reserving mental spec/code quality checks or reviewer batches for later. 
+I'm executing worktree commands to set up the environment: checking ignored worktrees, creating worktree, running yarn install, and yarn typecheck. I'll complete Task 1 in shell and handle remaining work sequentially in the worktree, reserving mental spec/code quality checks or reviewer batches for later.
 
-I'll implement tasks in batches using subagents for review only, skipping direct review skips. 
+I'll implement tasks in batches using subagents for review only, skipping direct review skips.
 
 **Creating worktree**
 
-I'm checking if the worktree already exists and verifying .gitignore has worktrees before proceeding with setup. 
+I'm checking if the worktree already exists and verifying .gitignore has worktrees before proceeding with setup.
 
 **Checking paths**
 
@@ -185,10 +177,7 @@ I'm verifying the correct import paths for theme CSS variables in storybook deco
 
 _**Agent (composer-2)**_
 
-
 Using the using-git-worktrees skill to create an isolated workspace, then executing the plan task-by-task. Verifying `worktrees` is ignored and creating the worktree.
-
-
 
 _**Agent (composer-2)**_
 
@@ -206,6 +195,7 @@ worktrees
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine 844e83a [milestone-4-game-engine]
 
 ```
+
 </details>
 </tool-use>
 
@@ -215,11 +205,6 @@ worktrees
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -235,6 +220,7 @@ HEAD is now at b39cedd docs(storybook): add MCP tooling and bump to Storybook 10
 Preparing worktree (new branch 'milestone-storybook-setup')
 
 ```
+
 </details>
 </tool-use>
 
@@ -244,11 +230,6 @@ Preparing worktree (new branch 'milestone-storybook-setup')
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -286,6 +267,7 @@ warning " &gt; @axe-core/playwright@4.11.1" has unmet peer dependency "playwrigh
 warning Workspaces can only be enabled in private projects.
 
 ```
+
 </details>
 </tool-use>
 
@@ -299,18 +281,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Implementing tasks**
 
-I'm implementing tasks 2-28 directly in the worktree while using subagents for spec and code quality reviews. 
+I'm implementing tasks 2-28 directly in the worktree while using subagents for spec and code quality reviews.
 
 **Dispatching tasks**
 
 I'm dispatching Task 2 to validate the subagent workflow before continuing with other tasks. I'm adjusting my approach to follow the '/subagent-driven-development' pattern by using the Task tool for implementer subagents instead of bulk implementing in worktree. I'm switching to a hybrid approach: implementing tasks 2-28 in worktree with TDD, then using code-reviewer Task for logical groups. I'm implementing sequentially in worktree instead of batching, per user rules, even though it's less efficient. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -327,10 +304,7 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
 Task 1 complete: worktree at `worktrees/milestone-storybook-setup`, `yarn typecheck` passes. Creating the task list and implementing the plan in the worktree (orchestrating batches; full 29×3 subagent runs isn’t practical in one turn). Reading the plan sections for Tasks 5–10 and CI tasks.
-
-
 
 _**Agent (composer-2)**_
 
@@ -363,18 +337,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing import paths**
 
-I'm correcting the import paths in withTheme decorator from `../src/` to `../../src/`. 
+I'm correcting the import paths in withTheme decorator from `../src/` to `../../src/`.
 
 **Generating from patterns**
 
 I'm following the plan to add dependencies and set up the project structure. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -408,7 +377,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -418,6 +386,7 @@ Parameters:
   "pattern": "viteFinal|storybook"
 }
 ```
+
 Additional data:
 
 ```json
@@ -436,8 +405,8 @@ Additional data:
   "totalMatches": 139
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -448,11 +417,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -485,11 +449,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing sonner stories**
 
-I'm fixing the sonner stories to avoid duplicating Toaster by using a simpler pattern instead of wrapping Story with decorator. 
+I'm fixing the sonner stories to avoid duplicating Toaster by using a simpler pattern instead of wrapping Story with decorator.
 
 **Adding storybook dependencies**
 
-I'm adding Storybook dependencies and setting up scripts in separate commits. I'm verifying `mergeConfig` behavior in Storybook's Vite config. I'm adding merge to handle Storybook's Vite config and will verify the TanStack Router API for withRouter. 
+I'm adding Storybook dependencies and setting up scripts in separate commits. I'm verifying `mergeConfig` behavior in Storybook's Vite config. I'm adding merge to handle Storybook's Vite config and will verify the TanStack Router API for withRouter.
 
 **Reviewing router integration**
 
@@ -497,10 +461,7 @@ I'm adjusting the withRouter implementation to properly render stories within Ou
 
 _**Agent (composer-2)**_
 
-
 Implementing the plan in the worktree: installing Storybook and creating config files with corrected import paths and a `viteFinal` that merges Tailwind and tsconfig paths so `@/` imports resolve.
-
-
 
 _**Agent (composer-2)**_
 
@@ -543,11 +504,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -582,11 +538,6 @@ _**Agent (composer-2)**_
 I'm verifying how ThemeToggle uses next-themes and where ThemeProvider should be added in the preview or story. I confirmed that ../../.storybook path is correct for importing withRouter decorator. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -629,17 +580,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -650,6 +595,7 @@ Parameters:
   "pattern": "GameCatalogEntry"
 }
 ```
+
 Additional data:
 
 ```json
@@ -672,8 +618,8 @@ Additional data:
   "totalMatches": 5
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -684,11 +630,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -705,17 +646,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -726,6 +661,7 @@ Parameters:
   "pattern": "createMemoryHistory|createRouter"
 }
 ```
+
 Additional data:
 
 ```json
@@ -772,8 +708,8 @@ Additional data:
   "totalMatches": 16
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -784,11 +720,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -804,11 +735,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -828,16 +754,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating router types**
 
-I'm adjusting the router types to match the expected structure for `useParams` with `from: '/$locale'`. I'm implementing withRouter and fixing type errors through module augmentation for Register. I'm adjusting the router setup to use `rootRoute` with `Outlet` and `localeRoute` with path `/$locale` for Story component. I'm verifying TanStack path syntax and will implement the locale route pattern. I'm checking for conflicts between next-themes and our existing withTheme decorator in Storybook. 
+I'm adjusting the router types to match the expected structure for `useParams` with `from: '/$locale'`. I'm implementing withRouter and fixing type errors through module augmentation for Register. I'm adjusting the router setup to use `rootRoute` with `Outlet` and `localeRoute` with path `/$locale` for Story component. I'm verifying TanStack path syntax and will implement the locale route pattern. I'm checking for conflicts between next-themes and our existing withTheme decorator in Storybook.
 
 I'm adding ThemeProvider to Storybook preview with `enableSystem` and `attribute="class"` to avoid conflicts with existing withTheme decorator. </details></think>
 
 _**Agent (composer-2)**_
 
-
 Running package install and creating core files. Reading MDX sections from the plan.
-
-
 
 _**Agent (composer-2)**_
 
@@ -853,11 +776,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -939,11 +857,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -979,17 +892,11 @@ I'm ensuring GameEventBus emits properly typed events by casting to BaseGameEven
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1000,6 +907,7 @@ Parameters:
   "pattern": "export async function getOrCreateDatabase|function getOrCreateDatabase"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1018,8 +926,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1031,10 +939,7 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
 Installing packages and applying changes in the worktree. Executing the install.
-
-
 
 _**Agent (composer-2)**_
 
@@ -1053,6 +958,7 @@ info Visit https://yarnpkg.com/en/docs/cli/add for documentation about this comm
 error Couldn't find any versions for "@storybook/addon-essentials" that matches "^10.3.0"
 
 ```
+
 </details>
 </tool-use>
 
@@ -1062,11 +968,6 @@ error Couldn't find any versions for "@storybook/addon-essentials" that matches 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1110,6 +1011,7 @@ npm view storybook versions --json 2>/dev/null | tail -30
 ]
 
 ```
+
 </details>
 </tool-use>
 
@@ -1119,11 +1021,6 @@ npm view storybook versions --json 2>/dev/null | tail -30
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1145,6 +1042,7 @@ npm error 404 tarball, folder, http url, or git url.
 npm error A complete log of this run can be found in: /Users/leocaseiro/.npm/_logs/2026-04-01T21_19_59_354Z-debug-0.log
 
 ```
+
 </details>
 </tool-use>
 
@@ -1154,11 +1052,6 @@ npm error A complete log of this run can be found in: /Users/leocaseiro/.npm/_lo
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1187,6 +1080,7 @@ npm view @storybook/addon-essentials versions --json 2>/dev/null | tail -15
 ]
 
 ```
+
 </details>
 </tool-use>
 
@@ -1196,11 +1090,6 @@ npm view @storybook/addon-essentials versions --json 2>/dev/null | tail -15
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1228,6 +1117,7 @@ npm view storybook@10.3.0 dependencies --json 2>/dev/null | head -40
 }
 
 ```
+
 </details>
 </tool-use>
 
@@ -1237,11 +1127,6 @@ npm view storybook@10.3.0 dependencies --json 2>/dev/null | head -40
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1256,6 +1141,7 @@ npm view "@storybook/addon-essentials@*" version 2>&1 | tail -5
 8.6.14
 
 ```
+
 </details>
 </tool-use>
 
@@ -1265,11 +1151,6 @@ npm view "@storybook/addon-essentials@*" version 2>&1 | tail -5
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1300,6 +1181,7 @@ dependencies = {
 }
 
 ```
+
 </details>
 </tool-use>
 
@@ -1309,11 +1191,6 @@ dependencies = {
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1337,6 +1214,7 @@ npm error 404 tarball, folder, http url, or git url.
 npm error A complete log of this run can be found in: /Users/leocaseiro/.npm/_logs/2026-04-01T21_20_18_067Z-debug-0.log
 
 ```
+
 </details>
 </tool-use>
 
@@ -1346,11 +1224,6 @@ npm error A complete log of this run can be found in: /Users/leocaseiro/.npm/_lo
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1369,6 +1242,7 @@ Maintainers: storybook-bot domyen kasperpeulen valentinpalkovic jreinhold kylega
 Keywords: storybook-addons test
 
 ```
+
 </details>
 </tool-use>
 
@@ -1378,11 +1252,6 @@ Keywords: storybook-addons test
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1407,11 +1276,6 @@ Directory: **/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skil
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1426,11 +1290,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1447,17 +1306,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="mcp-context7-plugin-compound-engineering-context7-resolve-library-id">
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-resolve-library-id**</summary>
-
 
 Parameters:
 
@@ -1472,6 +1325,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -1479,6 +1333,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -1486,8 +1341,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"Available Libraries:\\n\\n- Title: Storybook\\n- Context7-compatible library ID: /storybookjs/storybook\\n- Description: Storybook is a frontend workshop for building UI components and pages in isolation, used by thousands of teams for development, testing, and documentation.\\n- Code Snippets: 4302\\n- Source Reputation: High\\n- Benchmark Score: 69.07\\n- Versions: v9.0.15, v8_6_14, v6_5_9, v10.2.9\\n----------\\n- Title: Storybook\\n- Context7-compatible library ID: /websites/storybook_js\\n- Description: Storybook is a frontend workshop for building UI components and pages in isolation, used for UI development, testing, and documentation.\\n- Code Snippets: 5561\\n- Source Reputation: High\\n- Benchmark Score: 83.98\\n----------\\n- Title: Storybook\\n- Context7-compatible library ID: /storybookjs/web\\n- Description: The main website and documentation for Storybook, built with Next.js, Tailwind, Turborepo, and Storybook.\\n- Code Snippets: 77\\n- Source Reputation: High\\n- Benchmark Score: 29.43\\n----------\\n- Title: MSW Storybook Addon\\n- Context7-compatible library ID: /mswjs/msw-storybook-addon\\n- Description: MSW Storybook Addon integrates Mock Service Worker (MSW) into Storybook, allowing developers to mock REST and GraphQL requests directly within their stories for isolated component testing and documentation.\\n- Code Snippets: 86\\n- Source Reputation: High\\n- Benchmark Score: 63.08\\n----------\\n- Title: Storybook Branch Switcher\\n- Context7-compatible library ID: /utarwyn/storybook-branch-switcher\\n- Description: A Storybook 7+ addon that allows navigation between multiple Git branches, and a command-line tool to automatically generate a Storybook instance for each branch.\\n- Code Snippets: 28\\n- Source Reputation: High\\n- Benchmark Score: 64.5\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1499,17 +1354,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="mcp-context7-plugin-compound-engineering-context7-query-docs">
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-query-docs**</summary>
-
 
 Parameters:
 
@@ -1524,6 +1373,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -1531,6 +1381,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -1538,8 +1389,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"### Configure Storybook main.ts - CSF 3 Common\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/addon-a11y-register.md\\n\\nTypeScript version of Storybook configuration for CSF 3 format. Includes StorybookConfig type definition for type safety. Specifies framework, story patterns, and a11y addon configuration.\\n\\n&#96;&#96;&#96;typescript\\n// Replace your-framework with the framework you are using (e.g., react-vite, vue3-vite, angular, etc.)\\nimport type { StorybookConfig } from '@storybook/your-framework';\\n\\nconst config: StorybookConfig = {\\n  framework: '@storybook/your-framework',\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],\\n  addons: [\\n    // Other Storybook addons\\n    '@storybook/addon-a11y', //👈 The a11y addon goes here\\n  ],\\n};\\n\\nexport default config;\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure Storybook A11y Addon - CSF Next Web Components\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/storybook-main-register-example-addon.md\\n\\nAdd the @storybook/addon-a11y accessibility addon using CSF Next syntax with defineMain for Web Components framework with Vite.\\n\\n&#96;&#96;&#96;ts\\nimport { defineMain } from '@storybook/web-components-vite/node';\\n\\nexport default defineMain({\\n  addons: [\\n    // Other Storybook addons\\n    '@storybook/addon-a11y',\\n  ],\\n});\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;js\\nimport { defineMain } from '@storybook/web-components-vite/node';\\n\\nexport default defineMain({\\n  addons: [\\n    // Other Storybook addons\\n    '@storybook/addon-a11y',\\n  ],\\n});\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure Storybook with defineMain - CSF Next Web Components\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/addon-a11y-register.md\\n\\nStorybook configuration using defineMain for Web Components with Vite in CSF Next format. Imports from @storybook/web-components-vite/node and configures story patterns with a11y addon.\\n\\n&#96;&#96;&#96;typescript\\nimport { defineMain } from '@storybook/web-components-vite/node';\\n\\nexport default defineMain({\\n  framework: '@storybook/web-components-vite',\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],\\n  addons: [\\n    // Other Storybook addons\\n    '@storybook/addon-a11y', //👈 The a11y addon goes here\\n  ],\\n});\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;javascript\\nimport { defineMain } from '@storybook/web-components-vite/node';\\n\\nexport default defineMain({\\n  framework: '@storybook/web-components-vite',\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],\\n  addons: [\\n    // Other Storybook addons\\n    '@storybook/addon-a11y', //👈 The a11y addon goes here\\n  ],\\n});\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure Storybook A11y Addon - CSF Next Vue\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/storybook-main-register-example-addon.md\\n\\nAdd the @storybook/addon-a11y accessibility addon using CSF Next syntax with defineMain for Vue 3 framework with Vite.\\n\\n&#96;&#96;&#96;ts\\nimport { defineMain } from '@storybook/vue3-vite/node';\\n\\nexport default defineMain({\\n  addons: [\\n    // Other Storybook addons\\n    '@storybook/addon-a11y',\\n  ],\\n});\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;js\\nimport { defineMain } from '@storybook/vue3-vite/node';\\n\\nexport default defineMain({\\n  addons: [\\n    // Other Storybook addons\\n    '@storybook/addon-a11y',\\n  ],\\n});\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure Storybook with defineMain - CSF Next Vue\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/addon-a11y-register.md\\n\\nStorybook configuration using defineMain for Vue 3 with Vite in CSF Next format. Imports from @storybook/vue3-vite/node and configures story patterns with a11y addon.\\n\\n&#96;&#96;&#96;typescript\\nimport { defineMain } from '@storybook/vue3-vite/node';\\n\\nexport default defineMain({\\n  framework: '@storybook/vue3-vite',\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],\\n  addons: [\\n    // Other Storybook addons\\n    '@storybook/addon-a11y', //👈 The a11y addon goes here\\n  ],\\n});\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;javascript\\nimport { defineMain } from '@storybook/vue3-vite/node';\\n\\nexport default defineMain({\\n  framework: '@storybook/vue3-vite',\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],\\n  addons: [\\n    // Other Storybook addons\\n    '@storybook/addon-a11y', //👈 The a11y addon goes here\\n  ],\\n});\\n&#96;&#96;&#96;\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1551,17 +1402,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="mcp-context7-plugin-compound-engineering-context7-query-docs">
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-query-docs**</summary>
-
 
 Parameters:
 
@@ -1576,6 +1421,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -1583,6 +1429,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -1590,8 +1437,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"### Configure Storybook Main using defineMain for React/Next.js (TypeScript)\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/storybook-vite-builder-ts-configure.md\\n\\nThis snippet illustrates configuring Storybook's &#96;main.ts&#96; using the &#96;defineMain&#96; helper function, specifically for React or Next.js frameworks. It simplifies the configuration object definition, sets story file paths, and provides a &#96;viteFinal&#96; hook for advanced Vite customization.\\n\\n&#96;&#96;&#96;ts\\n// Replace your-framework with the framework you are using (e.g., react-vite, nextjs-vite)\\nimport { defineMain } from '@storybook/your-framework/node';\\n\\nexport default defineMain({\\n  framework: '@storybook/your-framework',\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],\\n  async viteFinal(config, options) {\\n    // Add your configuration here\\n    return config;\\n  },\\n});\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure Storybook main.ts with addon-docs and remark-gfm\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/storybook-main-config-remark-options.md\\n\\nTypeScript version of Storybook configuration with StorybookConfig type definition, framework setup, story discovery, and addon-docs with MDX plugin options including remark-gfm. Applicable for CSF 3 format.\\n\\n&#96;&#96;&#96;ts\\nimport remarkGfm from 'remark-gfm';\\nimport type { StorybookConfig } from '@storybook/your-framework';\\n\\nconst config: StorybookConfig = {\\n  framework: '@storybook/your-framework',\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],\\n  addons: [\\n    {\\n      name: '@storybook/addon-docs',\\n      options: {\\n        mdxPluginOptions: {\\n          mdxCompileOptions: {\\n            remarkPlugins: [remarkGfm],\\n          },\\n        },\\n      },\\n    },\\n  ],\\n};\\n\\nexport default config;\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure Viewport Addon in Storybook Configuration\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/code/core/src/viewport/README.md\\n\\nAdd the viewport addon to the Storybook configuration file (.storybook/main.js) by including it in the addons array. This enables the viewport addon functionality in your Storybook instance.\\n\\n&#96;&#96;&#96;javascript\\nexport default {\\n  addons: ['storybook/viewport']\\n};\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure Storybook for React Native Web Vite Migration (JS/TS)\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/react-native-web-vite-add-framework.md\\n\\nThese snippets demonstrate how to update your Storybook configuration file (&#96;main.js&#96; or &#96;main.ts&#96;) to use the &#96;@storybook/react-native-web-vite&#96; framework. This is essential when migrating a Storybook project from a Webpack-based setup to a Vite-based one for React Native Web. It also includes a comment to remove the &#96;@storybook/addon-react-native-web&#96; addon, which might be superseded by the new framework.\\n\\n&#96;&#96;&#96;js\\nexport default {\\n  addons: [\\n    '@storybook/addon-react-native-web', // 👈 Remove the addon\\n  ],\\n  // Replace @storybook/react-webpack5 with the Vite framework\\n  framework: '@storybook/react-native-web-vite',\\n};\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;ts\\nimport type { StorybookConfig } from '@storybook/react-native-web-vite';\\n\\nconst config: StorybookConfig = {\\n  addons: [\\n    '@storybook/addon-react-native-web', // 👈 Remove the addon\\n  ],\\n  // Replace @storybook/react-webpack5 with the Vite framework\\n  framework: '@storybook/react-native-web-vite',\\n};\\n\\nexport default config;\\n&#96;&#96;&#96;\\n\\n### Addon-specific Changes \u003e Essentials Addon\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/MIGRATION.md\\n\\nThe @storybook/addon-essentials package has been removed in Storybook 10.2.9. The viewport, controls, interactions, and actions addons have been moved from their respective packages to Storybook core, so you no longer need to install these separately or include them in your addons list. However, if you were using @storybook/addon-docs as part of essentials, you need to manually install it using npx storybook add @storybook/addon-docs.\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1602,11 +1449,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1629,6 +1471,7 @@ npm error 404 tarball, folder, http url, or git url.
 npm error A complete log of this run can be found in: /Users/leocaseiro/.npm/_logs/2026-04-01T21_20_50_038Z-debug-0.log
 
 ```
+
 </details>
 </tool-use>
 
@@ -1638,11 +1481,6 @@ npm error A complete log of this run can be found in: /Users/leocaseiro/.npm/_lo
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1676,6 +1514,7 @@ npm view @storybook/test-runner versions --json 2>/dev/null | tail -20
 ]
 
 ```
+
 </details>
 </tool-use>
 
@@ -1685,11 +1524,6 @@ npm view @storybook/test-runner versions --json 2>/dev/null | tail -20
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1707,6 +1541,7 @@ peerDependencies = {
 }
 
 ```
+
 </details>
 </tool-use>
 
@@ -1716,11 +1551,6 @@ peerDependencies = {
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1742,6 +1572,7 @@ npm error 404 tarball, folder, http url, or git url.
 npm error A complete log of this run can be found in: /Users/leocaseiro/.npm/_logs/2026-04-01T21_20_58_252Z-debug-0.log
 
 ```
+
 </details>
 </tool-use>
 
@@ -1751,11 +1582,6 @@ npm error A complete log of this run can be found in: /Users/leocaseiro/.npm/_lo
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1794,6 +1620,7 @@ npm view @storybook/test versions --json 2>/dev/null | tail -25
 ]
 
 ```
+
 </details>
 </tool-use>
 
@@ -1803,11 +1630,6 @@ npm view @storybook/test versions --json 2>/dev/null | tail -25
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1829,6 +1651,7 @@ npm view @storybook/addon-mcp versions --json 2>/dev/null | tail -8
 ]
 
 ```
+
 </details>
 </tool-use>
 
@@ -1838,11 +1661,6 @@ npm view @storybook/addon-mcp versions --json 2>/dev/null | tail -8
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2077,6 +1895,7 @@ warning Workspaces can only be enabled in private projects.
 warning Workspaces can only be enabled in private projects.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2094,10 +1913,7 @@ I'm adding npm scripts for serving storybook and running tests. </details></thin
 
 _**Agent (composer-2)**_
 
-
 Adding scripts and Storybook config files. Storybook 10 removed `@storybook/addon-essentials`; we're using `@storybook/addon-docs` plus a11y and themes.
-
-
 
 _**Agent (composer-2)**_
 
@@ -2164,26 +1980,21 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing withTheme**
 
-I'm converting preview.ts to preview.tsx to support JSX and importing ThemeProvider. 
+I'm converting preview.ts to preview.tsx to support JSX and importing ThemeProvider.
 
 **Writing previewtsx**
 
-I'm writing preview.tsx with ThemeProvider and withTheme decorator order. I'm adjusting the decorator order to place `withTheme` inside `ThemeProvider` for proper CSS variable application. 
+I'm writing preview.tsx with ThemeProvider and withTheme decorator order. I'm adjusting the decorator order to place `withTheme` inside `ThemeProvider` for proper CSS variable application.
 
 **Adjusting decorator order**
 
-I'm ensuring `withTheme` applies CSS variables correctly by placing it inside `ThemeProvider`. I'm simplifying the theme setup by using ThemeProvider with defaultTheme='light' and avoiding attribute conflicts, since Toaster uses `useTheme` from next-themes. I'm implementing ThemeProvider with defaultTheme='light' and enableSystem=false to simplify global theme management. I'm removing the global ThemeProvider and using a local decorator in sonner.stories.tsx instead. 
+I'm ensuring `withTheme` applies CSS variables correctly by placing it inside `ThemeProvider`. I'm simplifying the theme setup by using ThemeProvider with defaultTheme='light' and avoiding attribute conflicts, since Toaster uses `useTheme` from next-themes. I'm implementing ThemeProvider with defaultTheme='light' and enableSystem=false to simplify global theme management. I'm removing the global ThemeProvider and using a local decorator in sonner.stories.tsx instead.
 
 **Updating storybook config**
 
 I'm adding a global ThemeProvider to preview.ts with enableSystem={false} and defaultTheme="light". </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2202,11 +2013,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -2224,6 +2030,7 @@ error Command failed with exit code 2.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2233,11 +2040,6 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2283,6 +2085,7 @@ warning Workspaces can only be enabled in private projects.
 warning Workspaces can only be enabled in private projects.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2292,11 +2095,6 @@ warning Workspaces can only be enabled in private projects.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2313,6 +2111,7 @@ $ tsc --noEmit
 Done in 2.35s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2322,11 +2121,6 @@ Done in 2.35s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2363,11 +2157,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -2390,11 +2179,6 @@ I'm updating Playwright and related config files including .mcp.json and knip.js
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -2409,11 +2193,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2437,10 +2216,7 @@ I'm emitting simplified game:start and game:end events with required fields for 
 
 _**Agent (composer-2)**_
 
-
 Adding tooling files, Header update, and story files.
-
-
 
 _**Agent (composer-2)**_
 
@@ -2503,11 +2279,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2601,11 +2372,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -2698,11 +2464,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -2786,11 +2547,6 @@ _**Agent (composer-2)**_
 I'm correcting the import path for Header/Footer components from `src/components/Header.stories.tsx` to `.storybook` using `../../.storybook`. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2883,11 +2639,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3026,11 +2777,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -3055,6 +2801,7 @@ error Command failed with exit code 2.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3068,16 +2815,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing type issues**
 
-I'm addressing type issues with `SpeechRecognitionEvent` by using `unknown` cast or adding DOM lib, since the event type might be missing in TS 5.7. I'm casting SpeechRecognitionEvent to unknown and using a type assertion to avoid missing DOM lib errors. I'm using inline types for SpeechRecognitionResultList to avoid DOM lib errors. 
+I'm addressing type issues with `SpeechRecognitionEvent` by using `unknown` cast or adding DOM lib, since the event type might be missing in TS 5.7. I'm casting SpeechRecognitionEvent to unknown and using a type assertion to avoid missing DOM lib errors. I'm using inline types for SpeechRecognitionResultList to avoid DOM lib errors.
 
 I'm stabilizing the component reference by using `useMemo` to ensure consistent routing behavior. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3126,11 +2868,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -3146,6 +2883,7 @@ $ tsc --noEmit
 Done in 2.53s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3155,11 +2893,6 @@ Done in 2.53s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3318,6 +3051,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3334,11 +3068,6 @@ _**Agent (composer-2)**_
 I'm adding .storybook to tsconfig or eslint ignore in eslint.config.js for the project service. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3358,20 +3087,15 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Configuring eslint**
 
-I'm adding eslint overrides for storybook files to disable import/no-default-export rule. I'm checking tsconfig settings to resolve eslint file inclusion issues. 
+I'm adding eslint overrides for storybook files to disable import/no-default-export rule. I'm checking tsconfig settings to resolve eslint file inclusion issues.
 
 **Fixing eslint parser**
 
-I'm adding explicit eslint configuration for .storybook files to resolve TypeScript parser issues. I'm adding explicit eslint overrides for .storybook files with `files: ['.storybook/**']` and `parserOptions: { project: false }` to avoid TypeScript parser issues. I'm updating eslint config to use `project: false` for .storybook files to disable TypeScript parsing. I'm adjusting the flat config to handle .storybook files with explicit project: false and merging storybook-related rules. 
+I'm adding explicit eslint configuration for .storybook files to resolve TypeScript parser issues. I'm adding explicit eslint overrides for .storybook files with `files: ['.storybook/**']` and `parserOptions: { project: false }` to avoid TypeScript parser issues. I'm updating eslint config to use `project: false` for .storybook files to disable TypeScript parsing. I'm adjusting the flat config to handle .storybook files with explicit project: false and merging storybook-related rules.
 
 I'm adding `parserOptions.project` override to ensure ESLint uses the correct tsconfig for .storybook files. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3391,7 +3115,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Checking TS exclude defaults**
 
-I'm investigating whether .storybook folders are excluded by default in TypeScript 5+. TS includes .storybook files in project, but ESLint may limit them via project config; I'll test ESLint debug output to confirm. 
+I'm investigating whether .storybook folders are excluded by default in TypeScript 5+. TS includes .storybook files in project, but ESLint may limit them via project config; I'll test ESLint debug output to confirm.
 
 **Fixing speech input**
 
@@ -3399,10 +3123,7 @@ I'm updating SpeechInput to use recognition.addEventListener for error and end e
 
 _**Agent (composer-2)**_
 
-
 Adding ESLint overrides for Storybook and story files, and fixing remaining lint issues.
-
-
 
 _**Agent (composer-2)**_
 
@@ -3457,11 +3178,6 @@ _**Agent (composer-2)**_
 I'm correcting the import order to place `@storybook/react` type import after `react`. I'm reordering imports to group external libraries and alphabetize @tanstack before @storybook. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3538,6 +3254,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3554,11 +3271,6 @@ _**Agent (composer-2)**_
 I'm adding explicit include patterns for Storybook files to fix TypeScript compilation issues. I'm adding explicit `.storybook/**/*.ts` and `.storybook/**/*.tsx` patterns to tsconfig to resolve TypeScript compilation errors. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3610,11 +3322,6 @@ I'm replacing useRxQuery.demo with useState for Subject. </details></think>
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -3662,11 +3369,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -3701,6 +3403,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3714,18 +3417,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Implementing theme decorator**
 
-I'm implementing a theme decorator using a wrapper component to enable hooks in Storybook decorators. 
+I'm implementing a theme decorator using a wrapper component to enable hooks in Storybook decorators.
 
 **Fixing theme decorator**
 
 I'm renaming the theme decorator function to start with uppercase to satisfy the rule. I'm refactoring the theme decorator to use a more consistent naming pattern with explicit type annotations. I'm updating the theme decorator to use explicit StoryFn type imports and consistent naming patterns. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3774,11 +3472,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -3796,11 +3489,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -3816,6 +3504,7 @@ $ /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/node_mo
 Done in 3.38s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3825,11 +3514,6 @@ Done in 3.38s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3938,6 +3622,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3951,16 +3636,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating knip config**
 
-I'm updating knip.json to ignore storybook dependencies and CI scripts that aren't part of the source code. I'm updating knip.json to explicitly list optional dependencies and ignore transitive storybook packages. 
+I'm updating knip.json to ignore storybook dependencies and CI scripts that aren't part of the source code. I'm updating knip.json to explicitly list optional dependencies and ignore transitive storybook packages.
 
 I'm adding several dependencies to knip's ignore list including storybook packages and build-time dependencies like @mdx-js/react. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3985,11 +3665,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -4012,16 +3687,10 @@ I'm updating the knip.config.ts file to include story and demo entry patterns an
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="delete_file">
 <details><summary>Tool use: **delete_file**</summary>
-
 
 </details>
 </tool-use>
@@ -4063,11 +3732,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -4088,6 +3752,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -4097,11 +3762,6 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4119,11 +3779,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4288,6 +3943,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -4298,17 +3954,11 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="mcp-context7-plugin-compound-engineering-context7-query-docs">
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-query-docs**</summary>
-
 
 Parameters:
 
@@ -4323,6 +3973,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -4330,6 +3981,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -4337,8 +3989,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"### Configure Storybook main.js with addon-docs and remark-gfm\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/storybook-main-config-remark-options.md\\n\\nSets up Storybook configuration with framework specification, story file patterns, and addon-docs with MDX plugin options including remark-gfm for enhanced markdown rendering. Supports both CSF 3 and CSF Next formats across JavaScript and TypeScript.\\n\\n&#96;&#96;&#96;js\\nimport remarkGfm from 'remark-gfm';\\n\\nexport default {\\n  framework: '@storybook/your-framework',\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],\\n  addons: [\\n    {\\n      name: '@storybook/addon-docs',\\n      options: {\\n        mdxPluginOptions: {\\n          mdxCompileOptions: {\\n            remarkPlugins: [remarkGfm],\\n          },\\n        },\\n      },\\n    },\\n  ],\\n};\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure MDX File Loading in Storybook\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/code/addons/docs/docs/frameworks/ANGULAR.md\\n\\nUpdate the stories array in .storybook/main.js to include MDX files alongside story files. This enables Storybook to load and render MDX documentation files.\\n\\n&#96;&#96;&#96;javascript\\nexport default {\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],\\n};\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure Storybook Custom Indexers and Stories\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/main-config-indexers.md\\n\\nThese snippets demonstrate how to configure Storybook's &#96;main.js&#96; or &#96;main.ts&#96; file to include custom story file patterns and define an experimental indexer for them. This allows Storybook to correctly discover and process stories with non-standard naming conventions, such as &#96;.custom-stories.js&#96; or &#96;.custom-stories.ts&#96; files. The configuration ensures that Storybook's internal indexing mechanism can parse these files and generate the necessary metadata for the UI.\\n\\n&#96;&#96;&#96;js\\nexport default {\\n  // Replace your-framework with the framework you are using, e.g. react-vite, nextjs, vue3-vite, etc.\\n  framework: '@storybook/your-framework',\\n  stories: [\\n    '../src/**/*.mdx',\\n    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',\\n    // 👇 Make sure files to index are included in &#96;stories&#96;\\n    '../src/**/*.custom-stories.@(js|jsx|ts|tsx)',\\n  ],\\n  experimental_indexers: async (existingIndexers) =\u003e {\\n    const customIndexer = {\\n      test: /\\\\.custom-stories\\\\.[tj]sx?$/,\\n      createIndex: async (fileName) =\u003e {\\n        // See API and examples below...\\n      },\\n    };\\n    return [...existingIndexers, customIndexer];\\n  },\\n};\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;ts\\n// Replace your-framework with the framework you are using, e.g. react-vite, nextjs, vue3-vite, etc.\\nimport type { StorybookConfig } from '@storybook/your-framework';\\n\\nconst config: StorybookConfig = {\\n  framework: '@storybook/your-framework',\\n  stories: [\\n    '../src/**/*.mdx',\\n    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',\\n    // 👇 Make sure files to index are included in &#96;stories&#96;\\n    '../src/**/*.custom-stories.@(js|jsx|ts|tsx)',\\n  ],\\n  experimental_indexers: async (existingIndexers) =\u003e {\\n    const customIndexer = {\\n      test: /\\\\.custom-stories\\\\.[tj]sx?$/,\\n      createIndex: async (fileName) =\u003e {\\n        // See API and examples below...\\n      },\\n    };\\n    return [...existingIndexers, customIndexer];\\n  },\\n};\\n\\nexport default config;\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;ts\\n// Replace your-framework with the framework you are using (e.g., react-vite, nextjs, nextjs-vite)\\nimport { defineMain } from '@storybook/your-framework/node';\\n\\nexport default defineMain({\\n  framework: '@storybook/your-framework',\\n  stories: [\\n    '../src/**/*.mdx',\\n    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',\\n    // 👇 Make sure files to index are included in &#96;stories&#96;\\n    '../src/**/*.custom-stories.@(js|jsx|ts|tsx)',\\n  ],\\n  experimental_indexers: async (existingIndexers) =\u003e {\\n    const customIndexer = {\\n      test: /\\\\.custom-stories\\\\.[tj]sx?$/,\\n      createIndex: async (fileName) =\u003e {\\n        // See API and examples below...\\n      },\\n    };\\n    return [...existingIndexers, customIndexer];\\n  },\\n});\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;js\\n// Replace your-framework with the framework you are using (e.g., react-vite, nextjs, nextjs-vite)\\nimport { defineMain } from '@storybook/your-framework/node';\\n\\nexport default defineMain({\\n  framework: '@storybook/your-framework',\\n  stories: [\\n    '../src/**/*.mdx',\\n    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',\\n    // 👇 Make sure files to index are included in &#96;stories&#96;\\n    '../src/**/*.custom-stories.@(js|jsx|ts|tsx)',\\n  ],\\n  experimental_indexers: async (existingIndexers) =\u003e {\\n    const customIndexer = {\\n      test: /\\\\.custom-stories\\\\.[tj]sx?$/,\\n      createIndex: async (fileName) =\u003e {\\n        // See API and examples below...\\n      },\\n    };\\n    return [...existingIndexers, customIndexer];\\n  },\\n});\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;ts\\nimport { defineMain } from '@storybook/vue3-vite/node';\\n\\nexport default defineMain({\\n  framework: '@storybook/vue3-vite',\\n  stories: [\\n    '../src/**/*.mdx',\\n    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',\\n    // 👇 Make sure files to index are included in &#96;stories&#96;\\n    '../src/**/*.custom-stories.@(js|jsx|ts|tsx)',\\n  ],\\n  experimental_indexers: async (existingIndexers) =\u003e {\\n    const customIndexer = {\\n      test: /\\\\.custom-stories\\\\.[tj]sx?$/,\\n      createIndex: async (fileName) =\u003e {\\n        // See API and examples below...\\n      },\\n    };\\n    return [...existingIndexers, customIndexer];\\n  },\\n});\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;js\\nimport { defineMain } from '@storybook/vue3-vite/node';\\n\\nexport default defineMain({\\n  framework: '@storybook/vue3-vite',\\n  stories: [\\n    '../src/**/*.mdx',\\n    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',\\n    // 👇 Make sure files to index are included in &#96;stories&#96;\\n    '../src/**/*.custom-stories.@(js|jsx|ts|tsx)',\\n  ],\\n  experimental_indexers: async (existingIndexers) =\u003e {\\n    const customIndexer = {\\n      test: /\\\\.custom-stories\\\\.[tj]sx?$/,\\n      createIndex: async (fileName) =\u003e {\\n        // See API and examples below...\\n      },\\n    };\\n    return [...existingIndexers, customIndexer];\\n  },\\n});\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;ts\\nimport { defineMain } from '@storybook/angular/node';\\n\\nexport default defineMain({\\n  framework: '@storybook/angular',\\n  stories: [\\n    '../src/**/*.mdx',\\n    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',\\n  ]\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Storybook Stories Glob Configuration Changes\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/MIGRATION.md\\n\\nIn Storybook 6.x, a directory-based &#96;stories&#96; glob implicitly matched &#96;.stories.js&#96; and &#96;.stories.mdx&#96; files. In 7.0, this pattern will also match &#96;.mdx&#96; files (new docs extension). To prevent unwanted &#96;.mdx&#96; files from appearing, explicitly define the &#96;files&#96; specifier.\\n\\n&#96;&#96;&#96;js\\n// in main.js\\nexport default {\\n  stories: ['../path/to/directory']\\n};\\n\\n// or\\nexport default {\\n  stories: [{ directory: '../path/to/directory' }]\\n};\\n&#96;&#96;&#96;\\n\\n&#96;&#96;&#96;js\\nexport default {\\n  stories: [\\n    {\\n      directory: '../path/to/directory',\\n      files: '**/*.stories.@(mdx|tsx|ts|jsx|js)',\\n    },\\n  ],\\n};\\n&#96;&#96;&#96;\\n\\n### MDX File Names and Configuration\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/code/addons/docs/docs/mdx.md\\n\\nAll MDX files should have the suffix &#96;*.stories.mdx&#96; unless you use a custom webpack configuration. This naming convention tells Storybook to apply its special processing to the &#96;\u003cMeta\u003e&#96; and &#96;\u003cStory\u003e&#96; elements in the file. Be sure to update your Storybook config file to load &#96;.stories.mdx&#96; stories as per the addon-docs installation instructions.\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4357,11 +4009,6 @@ The glob pattern `*.stories.@(tsx|mdx)` should correctly match `foo.stories.mdx`
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -4378,11 +4025,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4544,6 +4186,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -4561,17 +4204,11 @@ I'm investigating how to properly configure MDX support in Storybook by checking
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4583,6 +4220,7 @@ Parameters:
   "pattern": "mdx|indexer"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4641,8 +4279,8 @@ Additional data:
   "totalMatches": 254
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4654,17 +4292,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4676,6 +4308,7 @@ Parameters:
   "pattern": "indexer|\\.mdx"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4689,8 +4322,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4701,11 +4334,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4763,11 +4391,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -4782,11 +4405,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4803,17 +4421,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4825,6 +4437,7 @@ Parameters:
   "pattern": "indexer|mdx"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4838,8 +4451,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4850,11 +4463,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4871,17 +4479,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4892,6 +4494,7 @@ Parameters:
   "pattern": "No matching indexer"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4905,8 +4508,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4918,17 +4521,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4939,6 +4536,7 @@ Parameters:
   "pattern": "matching indexer"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4952,8 +4550,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4965,17 +4563,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4986,6 +4578,7 @@ Parameters:
   "pattern": "indexer"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5004,8 +4597,8 @@ Additional data:
   "totalMatches": 6
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5016,11 +4609,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5037,11 +4625,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -5056,11 +4639,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5077,17 +4655,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5098,6 +4670,7 @@ Parameters:
   "pattern": "addon-docs"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5111,8 +4684,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5123,11 +4696,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5148,7 +4716,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -5158,6 +4725,7 @@ Parameters:
   "pattern": "indexer|mdx"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5171,8 +4739,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5184,17 +4752,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5206,6 +4768,7 @@ Parameters:
   "pattern": "indexer|mdx"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5219,8 +4782,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5232,17 +4795,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5253,6 +4810,7 @@ Parameters:
   "pattern": "mdx|indexer"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5271,8 +4829,8 @@ Additional data:
   "totalMatches": 6
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5284,17 +4842,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5306,6 +4858,7 @@ Parameters:
   "pattern": "experimental_indexers|indexer"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5319,8 +4872,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5332,17 +4885,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5354,6 +4901,7 @@ Parameters:
   "pattern": "indexer|mdx"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5367,8 +4915,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5379,11 +4927,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5403,17 +4946,11 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5424,6 +4961,7 @@ Parameters:
   "pattern": "\\.mdx"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5442,8 +4980,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5454,11 +4992,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5478,18 +5011,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Analyzing MDX handling**
 
-The .stories.mdx files are not being handled by CSF indexer because it only matches .js/.ts files, not .mdx files. The regex `(?<!\.stories)\.mdx$` correctly excludes `.stories.mdx` files because `.mdx` is not preceded by `.stories`. The regex `(?<!\.stories)\.mdx$` correctly excludes `.stories.mdx` files because the lookbehind checks that `.mdx` is not immediately preceded by `.stories`. I'm clarifying the regex logic - for `useBookmarks.stories.mdx`, the part before `.mdx` is `.stories`, so the negative lookbehind `(?<!.stories)` correctly excludes it. I'm clarifying the regex lookbehind logic for `.mdx` matching. I confirmed that `.stories.mdx` fails the negative lookbehind and returns false for `isDocsMdx`, so it goes to `extractStories` with `csfIndex`. 
+The .stories.mdx files are not being handled by CSF indexer because it only matches .js/.ts files, not .mdx files. The regex `(?<!\.stories)\.mdx$` correctly excludes `.stories.mdx` files because `.mdx` is not preceded by `.stories`. The regex `(?<!\.stories)\.mdx$` correctly excludes `.stories.mdx` files because the lookbehind checks that `.mdx` is not immediately preceded by `.stories`. I'm clarifying the regex logic - for `useBookmarks.stories.mdx`, the part before `.mdx` is `.stories`, so the negative lookbehind `(?<!.stories)` correctly excludes it. I'm clarifying the regex lookbehind logic for `.mdx` matching. I confirmed that `.stories.mdx` fails the negative lookbehind and returns false for `isDocsMdx`, so it goes to `extractStories` with `csfIndex`.
 
 **Updating MDX patterns**
 
 I found that the regex `/^(stories|story)\.(m?js|ts)x?$/` excludes MDX files, so I'll rename `X.stories.mdx` to `X.mdx` and adjust indexing accordingly. I'm adjusting the MDX file renaming logic to handle story files while preserving unique naming for docs MDX. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5524,14 +5052,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Renaming story files**
 
-I'm renaming 9 story files from *.stories.mdx to *.mdx, ensuring no conflicts with useSettings.mdx. </details></think>
+I'm renaming 9 story files from *.stories.mdx to*.mdx, ensuring no conflicts with useSettings.mdx. </details></think>
 
 _**Agent (composer-2)**_
 
-
 Renaming `*.stories.mdx` to `*.mdx`. Storybook 10 treats `.stories.mdx` as CSF (no MDX indexer); unattached docs use `*.mdx` (see `isDocsMdx` in core-server).
-
-
 
 _**Agent (composer-2)**_
 
@@ -5559,6 +5084,7 @@ mv src/lib/speech/SpeechInput.stories.mdx src/lib/speech/SpeechInput.mdx && \
 mv src/lib/speech/SpeechOutput.stories.mdx src/lib/speech/SpeechOutput.mdx && \
 mv src/lib/theme/css-vars.stories.mdx src/lib/theme/css-vars.mdx
 ```
+
 </details>
 </tool-use>
 
@@ -5598,11 +5124,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5737,6 +5258,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -5754,17 +5276,11 @@ I'm filtering out the vite-plugin-pwa from Storybook's Vite configuration to pre
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5776,6 +5292,7 @@ Parameters:
   "pattern": "STORYBOOK"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5789,8 +5306,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5805,16 +5322,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating vite config**
 
-I'm using `defineConfig` callback in vite.config.ts and checking for storybook via `process.env.npm_lifecycle_event === 'storybook'`. I'm stripping the Vite PWA plugin from the final config and merging it with custom base and plugin settings. 
+I'm using `defineConfig` callback in vite.config.ts and checking for storybook via `process.env.npm_lifecycle_event === 'storybook'`. I'm stripping the Vite PWA plugin from the final config and merging it with custom base and plugin settings.
 
 I'm replacing the Vite PWA plugin entirely in the final config instead of merging, as mergeConfig appends plugins. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5831,11 +5343,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -5867,11 +5374,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5944,6 +5446,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -5954,17 +5457,11 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5975,6 +5472,7 @@ Parameters:
   "pattern": "name:"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5993,8 +5491,8 @@ Additional data:
   "totalMatches": 10
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -6005,11 +5503,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6027,11 +5520,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6128,6 +5616,7 @@ $ storybook build
 Done in 5.00s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -6137,11 +5626,6 @@ Done in 5.00s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6170,11 +5654,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6208,11 +5687,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -6240,6 +5714,7 @@ npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and cont
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -6249,11 +5724,6 @@ npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and cont
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6283,17 +5753,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -6304,6 +5768,7 @@ Parameters:
   "pattern": "addon-mcp"
 }
 ```
+
 Additional data:
 
 ```json
@@ -6322,8 +5787,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -6334,11 +5799,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6371,11 +5831,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6604,6 +6059,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -6613,11 +6069,6 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6633,11 +6084,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6684,6 +6130,7 @@ $ /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/node_mo
 Done in 3.00s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -6693,11 +6140,6 @@ Done in 3.00s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6757,6 +6199,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 2.80s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -6766,11 +6209,6 @@ Done in 2.80s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6899,6 +6337,7 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 (Use &#96;node --trace-deprecation ...&#96; to show where the warning was created)
 
 ```
+
 </details>
 </tool-use>
 
@@ -6908,11 +6347,6 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6954,6 +6388,7 @@ Downloading Chrome Headless Shell 147.0.7727.15 (playwright chromium-headless-sh
 Chrome Headless Shell 147.0.7727.15 (playwright chromium-headless-shell v1217) downloaded to /Users/leocaseiro/Library/Caches/ms-playwright/chromium_headless_shell-1217
 
 ```
+
 </details>
 </tool-use>
 
@@ -6963,11 +6398,6 @@ Chrome Headless Shell 147.0.7727.15 (playwright chromium-headless-shell v1217) d
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6991,7 +6421,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Summarizing storybook setup**
 
-I've completed the Storybook 10.3.3 setup with config and decorator in the worktree. 
+I've completed the Storybook 10.3.3 setup with config and decorator in the worktree.
 
 **Updating storybook config**
 
@@ -6999,18 +6429,20 @@ I've updated the Storybook config to use MDX files and added necessary linting a
 
 _**Agent (composer-2)**_
 
-
 ## Storybook milestone — handoff for next session
 
 ### Where the work lives
+
 - **Branch / worktree:** `milestone-storybook-setup` → `worktrees/milestone-storybook-setup` (do **not** commit on `master`).
 - **Build output:** `storybook-static/` (in `.gitignore`; CI builds fresh).
 
 ### Already in good shape (last verified)
+
 - `yarn typecheck`, `yarn lint`, `yarn test`, and `yarn build-storybook` were passing in that worktree.
 - Playwright **Chromium for 1.59.x** was installed locally (`npx playwright install chromium`) so `test-storybook` can launch the browser.
 
 ### Do next (in order)
+
 1. **Finish Task 25 — Storybook test runner**  
    From the worktree root:
    - `yarn build-storybook --output-dir storybook-static`
@@ -7030,10 +6462,12 @@ _**Agent (composer-2)**_
    - Open the PR with the title/body from the plan (Storybook + deploy + CI + MCP).
 
 ### Optional / nice-to-have
+
 - Build warns **“unable to find package.json for radix-ui”** — harmless unless you want to chase it.
 - Confirm **`.mcp.json`** `storybook` entry matches your Cursor MCP schema (HTTP server URL is only valid while `yarn storybook` is running on 6006).
 
 ### Plan deviations to remember
+
 - **Storybook 10:** `@storybook/addon-essentials` was replaced by **`@storybook/addon-docs`** + a11y/themes; **`@storybook/test-runner`** is **0.24.x**, not `^10.3.0`.
 - **MDX docs** were renamed from `*.stories.mdx` → **`*.mdx`** so Storybook 10’s indexer treats them as docs (not CSF).
 - **Knip:** `knip.json` from the plan was folded into **`knip.config.ts`** (entries + `ignoreDependencies`).

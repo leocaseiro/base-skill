@@ -7,6 +7,7 @@
 _**User (2026-04-07 16:34:23Z)**_
 
 <ide_selection>The user selected the lines 5985 to 6037 from /Users/leocaseiro/Sites/base-skill/.specstory/history/2026-04-07_15-54-14Z-i-am-trying-to.md:
+
 ## Findings for the "slot tile returns to bank on failed drop" bug
 
 ### Root Cause
@@ -59,7 +60,6 @@ Good instinct — but no. The new `EJECT_TILE` effect in `useSlotBehavior` fires
 
 1. `fix(tilebank): prevent bank tile disappearing on failed drop` — keeps same DOM structure for `inBank` tiles so the button never unmounts during drag
 2. `fix(eject): move EJECT_TILE dispatch to useSlotBehavior` — eject timer now lives in the slot (always mounted), not in the bank tile's hook (which unmounts)
-
 
 This may or may not be related to the current task.</ide_selection>
 
@@ -158,6 +158,7 @@ d6125ab fix(slot): slot-to-bank drag, swap evaluation, animations & sounds
 edc3a57 fix: ghost parks at hole, fades only after EJECT_TILE fires (tile visible in bank)
 e227b55 fix: eject animation flies to hole first, then fades out on arrival
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:34:30Z)**_
@@ -167,177 +168,178 @@ _**Agent (claude-opus-4-6 2026-04-07 16:34:30Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
-3	import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
-4	import { useCallback, useEffect, useRef } from 'react';
-5	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-6	import { useTouchDrag } from './useTouchDrag';
-7	import type { TouchDragHandlers } from './useTouchDrag';
-8	import type { RefObject } from 'react';
-9	
-10	export interface SlotTileDrag extends TouchDragHandlers {
-11	  dragRef: RefObject<HTMLButtonElement | null>;
-12	}
-13	
-14	interface UseSlotTileDragOptions {
-15	  /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
-16	  tileId: string | null;
-17	  label: string | null;
-18	  zoneIndex: number;
-19	  /**
-20	   * Called when the dragged tile is dropped on a target zone.
-21	   * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
-22	   * REMOVE_TILE or SWAP_TILES as appropriate.
-23	   */
-24	  onDrop: (tileId: string, targetZoneIndex: number) => void;
-25	  /**
-26	   * Called immediately before REMOVE_TILE is dispatched when the tile
-27	   * is returning to the bank (no valid drop target). Use this to trigger
-28	   * the eject-return animation while the slot button is still in the DOM.
-29	   */
-30	  onBankReturn?: () => void;
-31	}
-32	
-33	/**
-34	 * Enables an occupied slot tile to be dragged back to the bank or to another
-35	 * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
-36	 *
-37	 * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
-38	 * visible in the slot during the drag.
-39	 *
-40	 * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
-41	 * called so the caller can dispatch SWAP_TILES or REMOVE_TILE+PLACE_TILE.
-42	 *
-43	 * On cancel or no valid drop target: onBankReturn is called (for animation),
-44	 * then REMOVE_TILE + SET_DRAG_ACTIVE are dispatched to return the tile to bank.
-45	 */
-46	export const useSlotTileDrag = ({
-47	  tileId,
-48	  label,
-49	  zoneIndex,
-50	  onDrop,
-51	  onBankReturn,
-52	}: UseSlotTileDragOptions): SlotTileDrag => {
-53	  const dispatch = useAnswerGameDispatch();
-54	  const dragRef = useRef<HTMLButtonElement>(null);
-55	
-56	  // Keep stable refs so the HTML5 adapter closure stays current.
-57	  const onDropRef = useRef(onDrop);
-58	  useEffect(() => {
-59	    onDropRef.current = onDrop;
-60	  }, [onDrop]);
-61	
-62	  const onBankReturnRef = useRef(onBankReturn);
-63	  useEffect(() => {
-64	    onBankReturnRef.current = onBankReturn;
-65	  }, [onBankReturn]);
-66	
-67	  // HTML5 DnD — desktop
-68	  useEffect(() => {
-69	    if (!tileId) return;
-70	    const element = dragRef.current;
-71	    if (!element) return;
-72	    const currentTileId = tileId;
-73	    const currentZoneIndex = zoneIndex;
-74	    return draggable({
-75	      element,
-76	      getInitialData: () => ({
-77	        tileId: currentTileId,
-78	        sourceZoneIndex: currentZoneIndex,
-79	      }),
-80	      onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
-81	        setCustomNativeDragPreview({
-82	          nativeSetDragImage,
-83	          getOffset: preserveOffsetOnSource({
-84	            element,
-85	            input: location.current.input,
-86	          }),
-87	          render({ container }) {
-88	            const rect = element.getBoundingClientRect();
-89	            const ghost = document.createElement('div');
-90	            // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
-91	            // inner elements are preserved — avoids the shrunken-font issue
-92	            // that occurs when reading fontSize from the button itself.
-93	            ghost.innerHTML = element.innerHTML;
-94	            Object.assign(ghost.style, {
-95	              width: `${rect.width}px`,
-96	              height: `${rect.height}px`,
-97	              borderRadius: '12px',
-98	              display: 'flex',
-99	              alignItems: 'center',
-100	              justifyContent: 'center',
-101	              background: 'var(--card, #fff)',
-102	              color: 'var(--card-foreground, #000)',
-103	              boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-104	              transform: 'scale(1.08)',
-105	            });
-106	            container.append(ghost);
-107	            return () => ghost.remove();
-108	          },
-109	        });
-110	      },
-111	      onDragStart: () =>
-112	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
-113	      onDrop: ({ location }) => {
-114	        const targets = location.current.dropTargets;
-115	        const targetZoneIndex = targets[0]?.data['zoneIndex'];
-116	
-117	        // Always clear drag state first.
-118	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-119	
-120	        if (targets.length > 0 && typeof targetZoneIndex === 'number') {
-121	          // Confirmed drop on a valid slot — caller handles REMOVE_TILE / SWAP_TILES.
-122	          onDropRef.current(currentTileId, targetZoneIndex);
-123	        } else {
-124	          // No valid slot target (dropped on bank or outside) — return to bank.
-125	          onBankReturnRef.current?.();
-126	          dispatch({
-127	            type: 'REMOVE_TILE',
-128	            zoneIndex: currentZoneIndex,
-129	          });
-130	        }
-131	      },
-132	    });
-133	  }, [tileId, zoneIndex, dispatch]);
-134	
-135	  // Wrap onDrop for the touch path: caller handles REMOVE_TILE / SWAP_TILES.
-136	  const handleTouchDrop = useCallback(
-137	    (droppedTileId: string, targetZoneIndex: number) => {
-138	      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-139	      onDrop(droppedTileId, targetZoneIndex);
-140	    },
-141	    [dispatch, onDrop],
-142	  );
-143	
-144	  // Pointer-events drag — touch / mobile
-145	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-146	    useTouchDrag({
-147	      tileId: tileId ?? '',
-148	      label: label ?? '',
-149	      onDragStart: tileId
-150	        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
-151	        : undefined,
-152	      onDragCancel: tileId
-153	        ? () => {
-154	            onBankReturnRef.current?.();
-155	            dispatch({ type: 'REMOVE_TILE', zoneIndex });
-156	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-157	          }
-158	        : undefined,
-159	      onDrop: handleTouchDrop,
-160	    });
-161	
-162	  return {
-163	    dragRef,
-164	    onPointerDown,
-165	    onPointerMove,
-166	    onPointerUp,
-167	    onPointerCancel,
-168	  };
-169	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
+3 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
+4 import { useCallback, useEffect, useRef } from 'react';
+5 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+6 import { useTouchDrag } from './useTouchDrag';
+7 import type { TouchDragHandlers } from './useTouchDrag';
+8 import type { RefObject } from 'react';
+9 
+10 export interface SlotTileDrag extends TouchDragHandlers {
+11   dragRef: RefObject<HTMLButtonElement | null>;
+12 }
+13 
+14 interface UseSlotTileDragOptions {
+15   /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
+16   tileId: string | null;
+17   label: string | null;
+18   zoneIndex: number;
+19   /**
+20    * Called when the dragged tile is dropped on a target zone.
+21    * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
+22    * REMOVE_TILE or SWAP_TILES as appropriate.
+23    */
+24   onDrop: (tileId: string, targetZoneIndex: number) => void;
+25   /**
+26    * Called immediately before REMOVE_TILE is dispatched when the tile
+27    * is returning to the bank (no valid drop target). Use this to trigger
+28    * the eject-return animation while the slot button is still in the DOM.
+29    */
+30   onBankReturn?: () => void;
+31 }
+32 
+33 /**
+34  * Enables an occupied slot tile to be dragged back to the bank or to another
+35  * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
+36  *
+37  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
+38  * visible in the slot during the drag.
+39  *
+40  * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
+41  * called so the caller can dispatch SWAP_TILES or REMOVE_TILE+PLACE_TILE.
+42  *
+43  * On cancel or no valid drop target: onBankReturn is called (for animation),
+44  * then REMOVE_TILE + SET_DRAG_ACTIVE are dispatched to return the tile to bank.
+45  */
+46 export const useSlotTileDrag = ({
+47   tileId,
+48   label,
+49   zoneIndex,
+50   onDrop,
+51   onBankReturn,
+52 }: UseSlotTileDragOptions): SlotTileDrag => {
+53   const dispatch = useAnswerGameDispatch();
+54   const dragRef = useRef<HTMLButtonElement>(null);
+55 
+56   // Keep stable refs so the HTML5 adapter closure stays current.
+57   const onDropRef = useRef(onDrop);
+58   useEffect(() => {
+59     onDropRef.current = onDrop;
+60   }, [onDrop]);
+61 
+62   const onBankReturnRef = useRef(onBankReturn);
+63   useEffect(() => {
+64     onBankReturnRef.current = onBankReturn;
+65   }, [onBankReturn]);
+66 
+67   // HTML5 DnD — desktop
+68   useEffect(() => {
+69     if (!tileId) return;
+70     const element = dragRef.current;
+71     if (!element) return;
+72     const currentTileId = tileId;
+73     const currentZoneIndex = zoneIndex;
+74     return draggable({
+75       element,
+76       getInitialData: () => ({
+77         tileId: currentTileId,
+78         sourceZoneIndex: currentZoneIndex,
+79       }),
+80       onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
+81         setCustomNativeDragPreview({
+82           nativeSetDragImage,
+83           getOffset: preserveOffsetOnSource({
+84             element,
+85             input: location.current.input,
+86           }),
+87           render({ container }) {
+88             const rect = element.getBoundingClientRect();
+89             const ghost = document.createElement('div');
+90             // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
+91             // inner elements are preserved — avoids the shrunken-font issue
+92             // that occurs when reading fontSize from the button itself.
+93             ghost.innerHTML = element.innerHTML;
+94             Object.assign(ghost.style, {
+95               width: `${rect.width}px`,
+96               height: `${rect.height}px`,
+97               borderRadius: '12px',
+98               display: 'flex',
+99               alignItems: 'center',
+100               justifyContent: 'center',
+101               background: 'var(--card, #fff)',
+102               color: 'var(--card-foreground, #000)',
+103               boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+104               transform: 'scale(1.08)',
+105             });
+106             container.append(ghost);
+107             return () => ghost.remove();
+108           },
+109         });
+110       },
+111       onDragStart: () =>
+112         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
+113       onDrop: ({ location }) => {
+114         const targets = location.current.dropTargets;
+115         const targetZoneIndex = targets[0]?.data['zoneIndex'];
+116 
+117         // Always clear drag state first.
+118         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+119 
+120         if (targets.length > 0 && typeof targetZoneIndex === 'number') {
+121           // Confirmed drop on a valid slot — caller handles REMOVE_TILE / SWAP_TILES.
+122           onDropRef.current(currentTileId, targetZoneIndex);
+123         } else {
+124           // No valid slot target (dropped on bank or outside) — return to bank.
+125           onBankReturnRef.current?.();
+126           dispatch({
+127             type: 'REMOVE_TILE',
+128             zoneIndex: currentZoneIndex,
+129           });
+130         }
+131       },
+132     });
+133   }, [tileId, zoneIndex, dispatch]);
+134 
+135   // Wrap onDrop for the touch path: caller handles REMOVE_TILE / SWAP_TILES.
+136   const handleTouchDrop = useCallback(
+137     (droppedTileId: string, targetZoneIndex: number) => {
+138       dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+139       onDrop(droppedTileId, targetZoneIndex);
+140     },
+141     [dispatch, onDrop],
+142   );
+143 
+144   // Pointer-events drag — touch / mobile
+145   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+146     useTouchDrag({
+147       tileId: tileId ?? '',
+148       label: label ?? '',
+149       onDragStart: tileId
+150         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
+151         : undefined,
+152       onDragCancel: tileId
+153         ? () => {
+154             onBankReturnRef.current?.();
+155             dispatch({ type: 'REMOVE_TILE', zoneIndex });
+156             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+157           }
+158         : undefined,
+159       onDrop: handleTouchDrop,
+160     });
+161 
+162   return {
+163     dragRef,
+164     onPointerDown,
+165     onPointerMove,
+166     onPointerUp,
+167     onPointerCancel,
+168   };
+169 };
 170
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:34:34Z)**_
@@ -357,257 +359,258 @@ _**Agent (claude-opus-4-6 2026-04-07 16:34:37Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef } from 'react';
-2	import type { PointerEvent } from 'react';
-3	
-4	const DRAG_THRESHOLD_PX = 8;
-5	
-6	interface GhostInfo {
-7	  el: HTMLDivElement;
-8	  halfW: number;
-9	  halfH: number;
-10	}
-11	
-12	const buildGhost = (
-13	  sourceEl: HTMLElement,
-14	  label: string,
-15	  x: number,
-16	  y: number,
-17	): GhostInfo => {
-18	  const rect = sourceEl.getBoundingClientRect();
-19	  const halfW = rect.width / 2;
-20	  const halfH = rect.height / 2;
-21	  const el = document.createElement('div');
-22	  el.textContent = label;
-23	  el.setAttribute('aria-hidden', 'true');
-24	  Object.assign(el.style, {
-25	    position: 'fixed',
-26	    left: `${x - halfW}px`,
-27	    top: `${y - halfH}px`,
-28	    width: `${rect.width}px`,
-29	    height: `${rect.height}px`,
-30	    display: 'flex',
-31	    alignItems: 'center',
-32	    justifyContent: 'center',
-33	    borderRadius: '12px',
-34	    background: 'var(--card, #fff)',
-35	    color: 'var(--card-foreground, #000)',
-36	    fontSize: getComputedStyle(sourceEl).fontSize,
-37	    fontWeight: 'bold',
-38	    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-39	    pointerEvents: 'none',
-40	    zIndex: '9999',
-41	    opacity: '0.95',
-42	    userSelect: 'none',
-43	    transform: 'scale(1.08)',
-44	  });
-45	  document.body.append(el);
-46	  return { el, halfW, halfH };
-47	};
-48	
-49	export interface TouchDragHandlers {
-50	  onPointerDown: (e: PointerEvent<HTMLElement>) => void;
-51	  onPointerMove: (e: PointerEvent<HTMLElement>) => void;
-52	  onPointerUp: (e: PointerEvent<HTMLElement>) => void;
-53	  onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
-54	}
-55	
-56	interface UseTouchDragOptions {
-57	  /** Empty string disables the drag (no pointer capture, no ghost). */
-58	  tileId: string;
-59	  label: string;
-60	  onDragStart?: () => void;
-61	  /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
-62	  onDragCancel?: () => void;
-63	  onDrop: (tileId: string, zoneIndex: number) => void;
-64	}
-65	
-66	export const useTouchDrag = ({
-67	  tileId,
-68	  label,
-69	  onDragStart,
-70	  onDragCancel,
-71	  onDrop,
-72	}: UseTouchDragOptions): TouchDragHandlers => {
-73	  const onDragCancelRef = useRef(onDragCancel);
-74	  useEffect(() => {
-75	    onDragCancelRef.current = onDragCancel;
-76	  }, [onDragCancel]);
-77	
-78	  const ghostRef = useRef<GhostInfo | null>(null);
-79	  const isDragging = useRef(false);
-80	  const startPos = useRef<{ x: number; y: number } | null>(null);
-81	  const capturedElRef = useRef<HTMLElement | null>(null);
-82	  const capturedPointerIdRef = useRef<number | null>(null);
-83	  const safetyTimerRef = useRef<ReturnType<
-84	    typeof globalThis.setTimeout
-85	  > | null>(null);
-86	
-87	  // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
-88	  // → cleanupGhost re-entry.
-89	  const cleanupInProgressRef = useRef(false);
-90	
-91	  const cleanupGhost = useCallback(() => {
-92	    if (cleanupInProgressRef.current) return;
-93	    cleanupInProgressRef.current = true;
-94	
-95	    if (safetyTimerRef.current !== null) {
-96	      globalThis.clearTimeout(safetyTimerRef.current);
-97	      safetyTimerRef.current = null;
-98	    }
-99	
-100	    ghostRef.current?.el.remove();
-101	    ghostRef.current = null;
-102	
-103	    // Clear refs BEFORE releasePointerCapture so that any synchronous
-104	    // lostpointercapture event triggered by it sees null refs and bails out.
-105	    const el = capturedElRef.current;
-106	    const pointerId = capturedPointerIdRef.current;
-107	    capturedElRef.current = null;
-108	    capturedPointerIdRef.current = null;
-109	
-110	    if (el !== null && pointerId !== null) {
-111	      try {
-112	        el.releasePointerCapture(pointerId);
-113	      } catch {
-114	        // Element may no longer be in the DOM — ignore.
-115	      }
-116	    }
-117	
-118	    isDragging.current = false;
-119	    startPos.current = null;
-120	    cleanupInProgressRef.current = false;
-121	  }, []);
-122	
-123	  const cleanup = useCallback(() => {
-124	    cleanupGhost();
-125	  }, [cleanupGhost]);
-126	
-127	  const onPointerDown = useCallback(
-128	    (e: PointerEvent<HTMLElement>) => {
-129	      if (e.pointerType === 'mouse' || !tileId) return;
-130	      e.currentTarget.setPointerCapture(e.pointerId);
-131	      capturedElRef.current = e.currentTarget;
-132	      capturedPointerIdRef.current = e.pointerId;
-133	      startPos.current = { x: e.clientX, y: e.clientY };
-134	      isDragging.current = false;
-135	
-136	      // When the captured element is removed from the DOM (e.g. a slot tile
-137	      // gets auto-ejected while the user is dragging it), the browser fires
-138	      // lostpointercapture and onPointerUp never fires.  Clean up here so the
-139	      // ghost doesn't float for 5 seconds.
-140	      e.currentTarget.addEventListener(
-141	        'lostpointercapture',
-142	        () => {
-143	          if (!cleanupInProgressRef.current && isDragging.current) {
-144	            cleanupGhost();
-145	            onDragCancelRef.current?.();
-146	          }
-147	        },
-148	        { once: true },
-149	      );
-150	    },
-151	    [tileId, cleanupGhost],
-152	  );
-153	
-154	  const onPointerMove = useCallback(
-155	    (e: PointerEvent<HTMLElement>) => {
-156	      if (e.pointerType === 'mouse' || !startPos.current) return;
-157	
-158	      if (!isDragging.current) {
-159	        const dx = e.clientX - startPos.current.x;
-160	        const dy = e.clientY - startPos.current.y;
-161	        if (
-162	          Math.abs(dx) > DRAG_THRESHOLD_PX ||
-163	          Math.abs(dy) > DRAG_THRESHOLD_PX
-164	        ) {
-165	          isDragging.current = true;
-166	          ghostRef.current = buildGhost(
-167	            e.currentTarget,
-168	            label,
-169	            e.clientX,
-170	            e.clientY,
-171	          );
-172	          onDragStart?.();
-173	
-174	          safetyTimerRef.current = globalThis.setTimeout(() => {
-175	            cleanupGhost();
-176	            onDragCancelRef.current?.();
-177	          }, 5000);
-178	
-179	          document.addEventListener('contextmenu', cleanupGhost, {
-180	            once: true,
-181	          });
-182	          document.addEventListener('visibilitychange', cleanupGhost, {
-183	            once: true,
-184	          });
-185	        }
-186	      }
-187	
-188	      if (isDragging.current && ghostRef.current) {
-189	        const { el, halfW, halfH } = ghostRef.current;
-190	        el.style.left = `${e.clientX - halfW}px`;
-191	        el.style.top = `${e.clientY - halfH}px`;
-192	      }
-193	    },
-194	    [label, onDragStart, cleanupGhost],
-195	  );
-196	
-197	  const onPointerUp = useCallback(
-198	    (e: PointerEvent<HTMLElement>) => {
-199	      if (e.pointerType === 'mouse' || !startPos.current) return;
-200	
-201	      if (isDragging.current) {
-202	        // Remove ghost before elementsFromPoint so it doesn't interfere.
-203	        ghostRef.current?.el.remove();
-204	        ghostRef.current = null;
-205	
-206	        const elements = document.elementsFromPoint(
-207	          e.clientX,
-208	          e.clientY,
-209	        );
-210	        let dropped = false;
-211	        for (const el of elements) {
-212	          if (
-213	            el instanceof HTMLElement &&
-214	            el.dataset['zoneIndex'] !== undefined
-215	          ) {
-216	            const zoneIndex = Number.parseInt(
-217	              el.dataset['zoneIndex'],
-218	              10,
-219	            );
-220	            if (!Number.isNaN(zoneIndex)) {
-221	              onDrop(tileId, zoneIndex);
-222	              dropped = true;
-223	              break;
-224	            }
-225	          }
-226	        }
-227	        if (!dropped) {
-228	          onDragCancelRef.current?.();
-229	        }
-230	      }
-231	
-232	      cleanup();
-233	    },
-234	    [tileId, onDrop, cleanup],
-235	  );
-236	
-237	  const onPointerCancel = useCallback(
-238	    (e: PointerEvent<HTMLElement>) => {
-239	      if (e.pointerType === 'mouse') return;
-240	      if (isDragging.current) {
-241	        onDragCancelRef.current?.();
-242	      }
-243	      cleanupGhost();
-244	    },
-245	    [cleanupGhost],
-246	  );
-247	
-248	  return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
-249	};
+1 import { useCallback, useEffect, useRef } from 'react';
+2 import type { PointerEvent } from 'react';
+3 
+4 const DRAG_THRESHOLD_PX = 8;
+5 
+6 interface GhostInfo {
+7   el: HTMLDivElement;
+8   halfW: number;
+9   halfH: number;
+10 }
+11 
+12 const buildGhost = (
+13   sourceEl: HTMLElement,
+14   label: string,
+15   x: number,
+16   y: number,
+17 ): GhostInfo => {
+18   const rect = sourceEl.getBoundingClientRect();
+19   const halfW = rect.width / 2;
+20   const halfH = rect.height / 2;
+21   const el = document.createElement('div');
+22   el.textContent = label;
+23   el.setAttribute('aria-hidden', 'true');
+24   Object.assign(el.style, {
+25     position: 'fixed',
+26     left: `${x - halfW}px`,
+27     top: `${y - halfH}px`,
+28     width: `${rect.width}px`,
+29     height: `${rect.height}px`,
+30     display: 'flex',
+31     alignItems: 'center',
+32     justifyContent: 'center',
+33     borderRadius: '12px',
+34     background: 'var(--card, #fff)',
+35     color: 'var(--card-foreground, #000)',
+36     fontSize: getComputedStyle(sourceEl).fontSize,
+37     fontWeight: 'bold',
+38     boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+39     pointerEvents: 'none',
+40     zIndex: '9999',
+41     opacity: '0.95',
+42     userSelect: 'none',
+43     transform: 'scale(1.08)',
+44   });
+45   document.body.append(el);
+46   return { el, halfW, halfH };
+47 };
+48 
+49 export interface TouchDragHandlers {
+50   onPointerDown: (e: PointerEvent<HTMLElement>) => void;
+51   onPointerMove: (e: PointerEvent<HTMLElement>) => void;
+52   onPointerUp: (e: PointerEvent<HTMLElement>) => void;
+53   onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
+54 }
+55 
+56 interface UseTouchDragOptions {
+57   /** Empty string disables the drag (no pointer capture, no ghost). */
+58   tileId: string;
+59   label: string;
+60   onDragStart?: () => void;
+61   /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
+62   onDragCancel?: () => void;
+63   onDrop: (tileId: string, zoneIndex: number) => void;
+64 }
+65 
+66 export const useTouchDrag = ({
+67   tileId,
+68   label,
+69   onDragStart,
+70   onDragCancel,
+71   onDrop,
+72 }: UseTouchDragOptions): TouchDragHandlers => {
+73   const onDragCancelRef = useRef(onDragCancel);
+74   useEffect(() => {
+75     onDragCancelRef.current = onDragCancel;
+76   }, [onDragCancel]);
+77 
+78   const ghostRef = useRef<GhostInfo | null>(null);
+79   const isDragging = useRef(false);
+80   const startPos = useRef<{ x: number; y: number } | null>(null);
+81   const capturedElRef = useRef<HTMLElement | null>(null);
+82   const capturedPointerIdRef = useRef<number | null>(null);
+83   const safetyTimerRef = useRef<ReturnType<
+84     typeof globalThis.setTimeout
+85   > | null>(null);
+86 
+87   // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
+88   // → cleanupGhost re-entry.
+89   const cleanupInProgressRef = useRef(false);
+90 
+91   const cleanupGhost = useCallback(() => {
+92     if (cleanupInProgressRef.current) return;
+93     cleanupInProgressRef.current = true;
+94 
+95     if (safetyTimerRef.current !== null) {
+96       globalThis.clearTimeout(safetyTimerRef.current);
+97       safetyTimerRef.current = null;
+98     }
+99 
+100     ghostRef.current?.el.remove();
+101     ghostRef.current = null;
+102 
+103     // Clear refs BEFORE releasePointerCapture so that any synchronous
+104     // lostpointercapture event triggered by it sees null refs and bails out.
+105     const el = capturedElRef.current;
+106     const pointerId = capturedPointerIdRef.current;
+107     capturedElRef.current = null;
+108     capturedPointerIdRef.current = null;
+109 
+110     if (el !== null && pointerId !== null) {
+111       try {
+112         el.releasePointerCapture(pointerId);
+113       } catch {
+114         // Element may no longer be in the DOM — ignore.
+115       }
+116     }
+117 
+118     isDragging.current = false;
+119     startPos.current = null;
+120     cleanupInProgressRef.current = false;
+121   }, []);
+122 
+123   const cleanup = useCallback(() => {
+124     cleanupGhost();
+125   }, [cleanupGhost]);
+126 
+127   const onPointerDown = useCallback(
+128     (e: PointerEvent<HTMLElement>) => {
+129       if (e.pointerType === 'mouse' || !tileId) return;
+130       e.currentTarget.setPointerCapture(e.pointerId);
+131       capturedElRef.current = e.currentTarget;
+132       capturedPointerIdRef.current = e.pointerId;
+133       startPos.current = { x: e.clientX, y: e.clientY };
+134       isDragging.current = false;
+135 
+136       // When the captured element is removed from the DOM (e.g. a slot tile
+137       // gets auto-ejected while the user is dragging it), the browser fires
+138       // lostpointercapture and onPointerUp never fires.  Clean up here so the
+139       // ghost doesn't float for 5 seconds.
+140       e.currentTarget.addEventListener(
+141         'lostpointercapture',
+142         () => {
+143           if (!cleanupInProgressRef.current && isDragging.current) {
+144             cleanupGhost();
+145             onDragCancelRef.current?.();
+146           }
+147         },
+148         { once: true },
+149       );
+150     },
+151     [tileId, cleanupGhost],
+152   );
+153 
+154   const onPointerMove = useCallback(
+155     (e: PointerEvent<HTMLElement>) => {
+156       if (e.pointerType === 'mouse' || !startPos.current) return;
+157 
+158       if (!isDragging.current) {
+159         const dx = e.clientX - startPos.current.x;
+160         const dy = e.clientY - startPos.current.y;
+161         if (
+162           Math.abs(dx) > DRAG_THRESHOLD_PX ||
+163           Math.abs(dy) > DRAG_THRESHOLD_PX
+164         ) {
+165           isDragging.current = true;
+166           ghostRef.current = buildGhost(
+167             e.currentTarget,
+168             label,
+169             e.clientX,
+170             e.clientY,
+171           );
+172           onDragStart?.();
+173 
+174           safetyTimerRef.current = globalThis.setTimeout(() => {
+175             cleanupGhost();
+176             onDragCancelRef.current?.();
+177           }, 5000);
+178 
+179           document.addEventListener('contextmenu', cleanupGhost, {
+180             once: true,
+181           });
+182           document.addEventListener('visibilitychange', cleanupGhost, {
+183             once: true,
+184           });
+185         }
+186       }
+187 
+188       if (isDragging.current && ghostRef.current) {
+189         const { el, halfW, halfH } = ghostRef.current;
+190         el.style.left = `${e.clientX - halfW}px`;
+191         el.style.top = `${e.clientY - halfH}px`;
+192       }
+193     },
+194     [label, onDragStart, cleanupGhost],
+195   );
+196 
+197   const onPointerUp = useCallback(
+198     (e: PointerEvent<HTMLElement>) => {
+199       if (e.pointerType === 'mouse' || !startPos.current) return;
+200 
+201       if (isDragging.current) {
+202         // Remove ghost before elementsFromPoint so it doesn't interfere.
+203         ghostRef.current?.el.remove();
+204         ghostRef.current = null;
+205 
+206         const elements = document.elementsFromPoint(
+207           e.clientX,
+208           e.clientY,
+209         );
+210         let dropped = false;
+211         for (const el of elements) {
+212           if (
+213             el instanceof HTMLElement &&
+214             el.dataset['zoneIndex'] !== undefined
+215           ) {
+216             const zoneIndex = Number.parseInt(
+217               el.dataset['zoneIndex'],
+218               10,
+219             );
+220             if (!Number.isNaN(zoneIndex)) {
+221               onDrop(tileId, zoneIndex);
+222               dropped = true;
+223               break;
+224             }
+225           }
+226         }
+227         if (!dropped) {
+228           onDragCancelRef.current?.();
+229         }
+230       }
+231 
+232       cleanup();
+233     },
+234     [tileId, onDrop, cleanup],
+235   );
+236 
+237   const onPointerCancel = useCallback(
+238     (e: PointerEvent<HTMLElement>) => {
+239       if (e.pointerType === 'mouse') return;
+240       if (isDragging.current) {
+241         onDragCancelRef.current?.();
+242       }
+243       cleanupGhost();
+244     },
+245     [cleanupGhost],
+246   );
+247 
+248   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
+249 };
 250
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:34:38Z)**_
@@ -626,6 +629,7 @@ src/components/answer-game/Slot/slot-animations.test.ts
 src/components/answer-game/Slot/SentenceWithGaps.test.tsx
 src/components/answer-game/Slot/Slot.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:34:41Z)**_
@@ -641,37 +645,38 @@ _**Agent (claude-opus-4-6 2026-04-07 16:34:43Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useBankDropTarget.ts`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import type { RefObject } from 'react';
-4	
-5	/**
-6	 * Registers a container element as a drop target for the tile bank.
-7	 *
-8	 * This makes the bank an accepted HTML5 drop zone so the browser shows
-9	 * a "move" cursor (instead of the "no drop" reject animation) when a slot
-10	 * tile is dragged over it. The actual REMOVE_TILE dispatch is handled by
-11	 * useSlotTileDrag's onDrop — the bank target intentionally carries no
-12	 * zoneIndex so that path treats it as "return to bank".
-13	 */
-14	export const useBankDropTarget = (): {
-15	  bankRef: RefObject<HTMLDivElement | null>;
-16	} => {
-17	  const bankRef = useRef<HTMLDivElement>(null);
-18	
-19	  useEffect(() => {
-20	    const el = bankRef.current;
-21	    if (!el) return;
-22	    return dropTargetForElements({
-23	      element: el,
-24	      getData: () => ({ isBankTarget: true }),
-25	    });
-26	  }, []);
-27	
-28	  return { bankRef };
-29	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import type { RefObject } from 'react';
+4 
+5 /**
+6  * Registers a container element as a drop target for the tile bank.
+7  *
+8  * This makes the bank an accepted HTML5 drop zone so the browser shows
+9  * a "move" cursor (instead of the "no drop" reject animation) when a slot
+10  * tile is dragged over it. The actual REMOVE_TILE dispatch is handled by
+11  * useSlotTileDrag's onDrop — the bank target intentionally carries no
+12  * zoneIndex so that path treats it as "return to bank".
+13  */
+14 export const useBankDropTarget = (): {
+15   bankRef: RefObject<HTMLDivElement | null>;
+16 } => {
+17   const bankRef = useRef<HTMLDivElement>(null);
+18 
+19   useEffect(() => {
+20     const el = bankRef.current;
+21     if (!el) return;
+22     return dropTargetForElements({
+23       element: el,
+24       getData: () => ({ isBankTarget: true }),
+25     });
+26   }, []);
+27 
+28   return { bankRef };
+29 };
 30
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:34:44Z)**_
@@ -686,6 +691,7 @@ src/components/answer-game/useBankDropTarget.ts
 src/components/answer-game/Slot/slot-animations.ts
 src/components/answer-game/Slot/slot-animations.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:02Z)**_
@@ -693,7 +699,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:35:02Z)**_
 <think><details><summary>Thought Process</summary>
 Now I understand the full picture:
 
-1. **HTML5 DnD path** (`useSlotTileDrag.ts` lines 113-131): The `onDrop` handler checks if `targets.length > 0 && typeof targetZoneIndex === 'number'`. If a tile is dropped on the bank, it IS a valid target (because `useBankDropTarget` registers it with `dropTargetForElements`), so `targets.length > 0` is true, but `targetZoneIndex` is `undefined` (since the bank has no `zoneIndex`, only `isBankTarget: true`). 
+1. **HTML5 DnD path** (`useSlotTileDrag.ts` lines 113-131): The `onDrop` handler checks if `targets.length > 0 && typeof targetZoneIndex === 'number'`. If a tile is dropped on the bank, it IS a valid target (because `useBankDropTarget` registers it with `dropTargetForElements`), so `targets.length > 0` is true, but `targetZoneIndex` is `undefined` (since the bank has no `zoneIndex`, only `isBankTarget: true`).
 
 So both the bank drop and the "dropped nowhere" case end up in the else branch, triggering the same callback. The fix is to check for the `isBankTarget` flag in the else branch to distinguish between these two scenarios.
 
@@ -716,6 +722,7 @@ src/components/answer-game/Slot/useSlotBehavior.ts
 src/components/answer-game/useSlotTileDrag.ts
 src/components/answer-game/answer-game-reducer.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:05Z)**_
@@ -735,6 +742,7 @@ src/components/answer-game/useTouchKeyboardInput.test.tsx
 src/components/answer-game/useKeyboardInput.test.tsx
 src/components/answer-game/answer-game-reducer.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:08Z)**_
@@ -746,6 +754,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:35:08Z)**_
 ```text
 src/components/answer-game/useBankDropTarget.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:08Z)**_
@@ -757,6 +766,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:35:08Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:11Z)**_
@@ -811,6 +821,7 @@ useTouchDrag.ts
 useTouchKeyboardInput.test.tsx
 useTouchKeyboardInput.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:14Z)**_
@@ -820,97 +831,99 @@ _**Agent (claude-opus-4-6 2026-04-07 16:35:14Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useAutoNextSlot } from './useAutoNextSlot';
-5	import { useGameTTS } from './useGameTTS';
-6	import { useTileEvaluation } from './useTileEvaluation';
-7	import { useTouchDrag } from './useTouchDrag';
-8	import type { TileItem } from './types';
-9	import type { TouchDragHandlers } from './useTouchDrag';
-10	import type { RefObject } from 'react';
-11	
-12	export interface DraggableTile extends TouchDragHandlers {
-13	  ref: RefObject<HTMLButtonElement | null>;
-14	  handleClick: () => void;
-15	}
-16	
-17	export const useDraggableTile = (tile: TileItem): DraggableTile => {
-18	  const ref = useRef<HTMLButtonElement>(null);
-19	  const dispatch = useAnswerGameDispatch();
-20	  const { placeInNextSlot } = useAutoNextSlot();
-21	  const { speakTile } = useGameTTS();
-22	  const speakTileRef = useRef(speakTile);
-23	  const { placeTile } = useTileEvaluation();
-24	
-25	  useEffect(() => {
-26	    speakTileRef.current = speakTile;
-27	  }, [speakTile]);
-28	
-29	  // HTML5 DnD — desktop
-30	  useEffect(() => {
-31	    const element = ref.current;
-32	    if (!element) return;
-33	    return draggable({
-34	      element,
-35	      getInitialData: () => ({ tileId: tile.id }),
-36	      onDragStart: () => {
-37	        speakTileRef.current(tile.label);
-38	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-39	      },
-40	      onDrop: () => {
-41	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-42	      },
-43	    });
-44	  }, [tile.id, tile.label, dispatch]);
-45	
-46	  // Pointer-events drag — touch / mobile
-47	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-48	    useTouchDrag({
-49	      tileId: tile.id,
-50	      label: tile.label,
-51	      onDragStart: () => {
-52	        speakTileRef.current(tile.label);
-53	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-54	      },
-55	      onDragCancel: () =>
-56	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
-57	      onDrop: (droppedTileId, zoneIndex) => {
-58	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-59	        placeTile(droppedTileId, zoneIndex);
-60	      },
-61	    });
-62	
-63	  const handleClick = () => {
-64	    speakTile(tile.label);
-65	    placeInNextSlot(tile.id);
-66	  };
-67	
-68	  return {
-69	    ref,
-70	    handleClick,
-71	    onPointerDown,
-72	    onPointerMove,
-73	    onPointerUp,
-74	    onPointerCancel,
-75	  };
-76	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useAutoNextSlot } from './useAutoNextSlot';
+5 import { useGameTTS } from './useGameTTS';
+6 import { useTileEvaluation } from './useTileEvaluation';
+7 import { useTouchDrag } from './useTouchDrag';
+8 import type { TileItem } from './types';
+9 import type { TouchDragHandlers } from './useTouchDrag';
+10 import type { RefObject } from 'react';
+11 
+12 export interface DraggableTile extends TouchDragHandlers {
+13   ref: RefObject<HTMLButtonElement | null>;
+14   handleClick: () => void;
+15 }
+16 
+17 export const useDraggableTile = (tile: TileItem): DraggableTile => {
+18   const ref = useRef<HTMLButtonElement>(null);
+19   const dispatch = useAnswerGameDispatch();
+20   const { placeInNextSlot } = useAutoNextSlot();
+21   const { speakTile } = useGameTTS();
+22   const speakTileRef = useRef(speakTile);
+23   const { placeTile } = useTileEvaluation();
+24 
+25   useEffect(() => {
+26     speakTileRef.current = speakTile;
+27   }, [speakTile]);
+28 
+29   // HTML5 DnD — desktop
+30   useEffect(() => {
+31     const element = ref.current;
+32     if (!element) return;
+33     return draggable({
+34       element,
+35       getInitialData: () => ({ tileId: tile.id }),
+36       onDragStart: () => {
+37         speakTileRef.current(tile.label);
+38         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+39       },
+40       onDrop: () => {
+41         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+42       },
+43     });
+44   }, [tile.id, tile.label, dispatch]);
+45 
+46   // Pointer-events drag — touch / mobile
+47   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+48     useTouchDrag({
+49       tileId: tile.id,
+50       label: tile.label,
+51       onDragStart: () => {
+52         speakTileRef.current(tile.label);
+53         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+54       },
+55       onDragCancel: () =>
+56         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
+57       onDrop: (droppedTileId, zoneIndex) => {
+58         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+59         placeTile(droppedTileId, zoneIndex);
+60       },
+61     });
+62 
+63   const handleClick = () => {
+64     speakTile(tile.label);
+65     placeInNextSlot(tile.id);
+66   };
+67 
+68   return {
+69     ref,
+70     handleClick,
+71     onPointerDown,
+72     onPointerMove,
+73     onPointerUp,
+74     onPointerCancel,
+75   };
+76 };
 77
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:22Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I see the bank tile drag hook (`useDraggableTile.ts`). When a bank tile is dragged, on the HTML5 DnD path:
+
 - `onDragStart`: sets `SET_DRAG_ACTIVE`
 - `onDrop`: clears `SET_DRAG_ACTIVE` with `tileId: null`
 
 On the touch path:
+
 - `onDragStart`: sets `SET_DRAG_ACTIVE`
 - `onDragCancel`: clears `SET_DRAG_ACTIVE`
-
 
 - `onDrop`: clears `SET_DRAG_ACTIVE` and calls `placeTile`
 
@@ -940,6 +953,7 @@ slot-animations.ts
 useSlotBehavior.test.tsx
 useSlotBehavior.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:27Z)**_
@@ -998,6 +1012,7 @@ src/components/answer-game/answer-game-reducer.ts:254:              : state.drag
 src/components/answer-game/answer-game-reducer.ts:301:    case 'SET_DRAG_ACTIVE': {
 src/components/answer-game/answer-game-reducer.ts:302:      return { ...state, dragActiveTileId: action.tileId };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:30Z)**_
@@ -1023,6 +1038,7 @@ AnswerGame.stories.tsx
 AnswerGame.test.tsx
 AnswerGame.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:36Z)**_
@@ -1032,48 +1048,49 @@ _**Agent (claude-opus-4-6 2026-04-07 16:35:36Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/AnswerGame/AnswerGame.tsx`
 
 ```text
-1	import { AnswerGameProvider } from '../AnswerGameProvider';
-2	import type { AnswerGameConfig } from '../types';
-3	import type { ReactNode } from 'react';
-4	
-5	interface AnswerGameProps {
-6	  config: AnswerGameConfig;
-7	  children: ReactNode;
-8	}
-9	
-10	const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
-11	  <AnswerGameProvider config={config}>
-12	    <div className="flex min-h-0 w-full flex-col items-center">
-13	      {children}
-14	    </div>
-15	  </AnswerGameProvider>
-16	);
-17	
-18	const Question = ({ children }: { children?: ReactNode }) => (
-19	  <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
-20	    {children}
-21	  </div>
-22	);
-23	
-24	const Answer = ({ children }: { children?: ReactNode }) => (
-25	  <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
-26	    {children}
-27	  </div>
-28	);
-29	
-30	const Choices = ({ children }: { children?: ReactNode }) => (
-31	  <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
-32	    {children}
-33	  </div>
-34	);
-35	
-36	export const AnswerGame = Object.assign(AnswerGameRoot, {
-37	  Question,
-38	  Answer,
-39	  Choices,
-40	});
+1 import { AnswerGameProvider } from '../AnswerGameProvider';
+2 import type { AnswerGameConfig } from '../types';
+3 import type { ReactNode } from 'react';
+4 
+5 interface AnswerGameProps {
+6   config: AnswerGameConfig;
+7   children: ReactNode;
+8 }
+9 
+10 const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
+11   <AnswerGameProvider config={config}>
+12     <div className="flex min-h-0 w-full flex-col items-center">
+13       {children}
+14     </div>
+15   </AnswerGameProvider>
+16 );
+17 
+18 const Question = ({ children }: { children?: ReactNode }) => (
+19   <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
+20     {children}
+21   </div>
+22 );
+23 
+24 const Answer = ({ children }: { children?: ReactNode }) => (
+25   <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
+26     {children}
+27   </div>
+28 );
+29 
+30 const Choices = ({ children }: { children?: ReactNode }) => (
+31   <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
+32     {children}
+33   </div>
+34 );
+35 
+36 export const AnswerGame = Object.assign(AnswerGameRoot, {
+37   Question,
+38   Answer,
+39   Choices,
+40 });
 41
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:40Z)**_
@@ -1097,6 +1114,7 @@ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx
 src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx
 src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:43Z)**_
@@ -1106,87 +1124,88 @@ _**Agent (claude-opus-4-6 2026-04-07 16:35:43Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
-5	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-6	
-7	const NumberTile = ({ tile }: { tile: TileItem }) => {
-8	  const {
-9	    ref,
-10	    handleClick,
-11	    onPointerDown,
-12	    onPointerMove,
-13	    onPointerUp,
-14	    onPointerCancel,
-15	  } = useDraggableTile(tile);
-16	
-17	  return (
-18	    <button
-19	      ref={ref}
-20	      type="button"
-21	      aria-label={`Number ${tile.label}`}
-22	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
-23	      style={skeuoStyle}
-24	      onClick={handleClick}
-25	      onPointerDown={onPointerDown}
-26	      onPointerMove={onPointerMove}
-27	      onPointerUp={onPointerUp}
-28	      onPointerCancel={onPointerCancel}
-29	    >
-30	      {tile.label}
-31	    </button>
-32	  );
-33	};
-34	
-35	export const SortNumbersTileBank = () => {
-36	  const { allTiles, bankTileIds, dragActiveTileId } =
-37	    useAnswerGameContext();
-38	  const { bankRef } = useBankDropTarget();
-39	
-40	  return (
-41	    <div
-42	      ref={bankRef}
-43	      data-tile-bank=""
-44	      className="flex flex-wrap justify-center gap-3"
-45	    >
-46	      {allTiles.map((tile) => {
-47	        const inBank = bankTileIds.includes(tile.id);
-48	        const isDragging = tile.id === dragActiveTileId;
-49	
-50	        if (inBank) {
-51	          return (
-52	            <div key={tile.id} className="relative size-14">
-53	              <div
-54	                data-tile-bank-hole={tile.id}
-55	                className="size-14 rounded-xl bg-muted/60 shadow-inner"
-56	                aria-hidden="true"
-57	              />
-58	              <div
-59	                className={`absolute inset-0${isDragging ? ' invisible' : ''}`}
-60	                aria-hidden={isDragging || undefined}
-61	              >
-62	                <NumberTile tile={tile} />
-63	              </div>
-64	            </div>
-65	          );
-66	        }
-67	
-68	        return (
-69	          <div
-70	            key={tile.id}
-71	            data-tile-bank-hole={tile.id}
-72	            className="size-14 rounded-xl bg-muted/60 shadow-inner"
-73	            aria-hidden="true"
-74	          />
-75	        );
-76	      })}
-77	    </div>
-78	  );
-79	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
+5 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+6 
+7 const NumberTile = ({ tile }: { tile: TileItem }) => {
+8   const {
+9     ref,
+10     handleClick,
+11     onPointerDown,
+12     onPointerMove,
+13     onPointerUp,
+14     onPointerCancel,
+15   } = useDraggableTile(tile);
+16 
+17   return (
+18     <button
+19       ref={ref}
+20       type="button"
+21       aria-label={`Number ${tile.label}`}
+22       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+23       style={skeuoStyle}
+24       onClick={handleClick}
+25       onPointerDown={onPointerDown}
+26       onPointerMove={onPointerMove}
+27       onPointerUp={onPointerUp}
+28       onPointerCancel={onPointerCancel}
+29     >
+30       {tile.label}
+31     </button>
+32   );
+33 };
+34 
+35 export const SortNumbersTileBank = () => {
+36   const { allTiles, bankTileIds, dragActiveTileId } =
+37     useAnswerGameContext();
+38   const { bankRef } = useBankDropTarget();
+39 
+40   return (
+41     <div
+42       ref={bankRef}
+43       data-tile-bank=""
+44       className="flex flex-wrap justify-center gap-3"
+45     >
+46       {allTiles.map((tile) => {
+47         const inBank = bankTileIds.includes(tile.id);
+48         const isDragging = tile.id === dragActiveTileId;
+49 
+50         if (inBank) {
+51           return (
+52             <div key={tile.id} className="relative size-14">
+53               <div
+54                 data-tile-bank-hole={tile.id}
+55                 className="size-14 rounded-xl bg-muted/60 shadow-inner"
+56                 aria-hidden="true"
+57               />
+58               <div
+59                 className={`absolute inset-0${isDragging ? ' invisible' : ''}`}
+60                 aria-hidden={isDragging || undefined}
+61               >
+62                 <NumberTile tile={tile} />
+63               </div>
+64             </div>
+65           );
+66         }
+67 
+68         return (
+69           <div
+70             key={tile.id}
+71             data-tile-bank-hole={tile.id}
+72             className="size-14 rounded-xl bg-muted/60 shadow-inner"
+73             aria-hidden="true"
+74           />
+75         );
+76       })}
+77     </div>
+78   );
+79 };
 80
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:50Z)**_
@@ -1233,6 +1252,7 @@ Date:   Wed Apr 8 02:04:01 2026 +1000
  src/games/word-spell/LetterTileBank/LetterTileBank.tsx   | 10 +++-------
  3 files changed, 9 insertions(+), 27 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:52Z)**_
@@ -1294,6 +1314,7 @@ Show all changes between master and bold-chatelet
  src/styles.css                                     |  39 +++
  48 files changed, 2690 insertions(+), 1034 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:35:56Z)**_
@@ -1312,6 +1333,7 @@ Show full diff of bank tile fix commit
 Exit code 128
 fatal: unrecognized argument: --no-stat
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:36:02Z)**_
@@ -1455,6 +1477,7 @@ index 9a998b3..1b7beac 100644
            <div
              key={tile.id}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:36:58Z)**_
@@ -1463,6 +1486,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:36:58Z)**_
 Now I understand the full picture. The commit `598ab83` was a fix that merged two branches of the conditional rendering for `inBank` tiles:
 
 Before the fix:
+
 ```
 if (inBank && isDragging) {
   // Render with hole + invisible overlay
@@ -1472,13 +1496,14 @@ if (inBank && isDragging) {
 ```
 
 After the fix:
+
 ```
 if (inBank) {
   // Always render with hole + overlay (toggle invisible class based on isDragging)
 }
 ```
 
-This fix was needed because the previous code would change the DOM structure when dragging started — going from a plain `<NumberTile>` to a wrapper `<div>` with a hole and an invisible overlay. 
+This fix was needed because the previous code would change the DOM structure when dragging started — going from a plain `<NumberTile>` to a wrapper `<div>` with a hole and an invisible overlay.
 
 This caused React to unmount and remount the button, which broke the HTML5 drag operation. But now I'm looking at the user's actual bug report more carefully — they're saying the tile fades out when dragged out from the bank. Let me check the findings again to see what the root cause actually is. It looks like there's an issue in the `useSlotTileDrag.ts` file around the onDrop handler that might be causing the tile to return to the bank on a failed drop.
 
@@ -1522,98 +1547,99 @@ _**Agent (claude-opus-4-6 2026-04-07 16:36:58Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-1	import { skeuoStyle } from '../styles';
-2	import { useSlotBehavior } from './useSlotBehavior';
-3	import type { SlotRenderProps } from './useSlotBehavior';
-4	import type { ReactNode, Ref } from 'react';
-5	
-6	interface SlotProps {
-7	  index: number;
-8	  as?: 'li' | 'span' | 'div';
-9	  className?: string;
-10	  children: (props: SlotRenderProps) => ReactNode;
-11	}
-12	
-13	export const Slot = ({
-14	  index,
-15	  as: Tag = 'li',
-16	  className,
-17	  children,
-18	}: SlotProps) => {
-19	  const {
-20	    renderProps,
-21	    slotRef,
-22	    dragRef,
-23	    handleClick,
-24	    pointerHandlers,
-25	    isBeingDragged,
-26	  } = useSlotBehavior(index);
-27	
-28	  const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
-29	
-30	  const ariaLabel = isEmpty
-31	    ? `Slot ${index + 1}, empty`
-32	    : `Slot ${index + 1}, filled with ${label}`;
-33	
-34	  const stateClasses = [
-35	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-36	    isEmpty && !isActive
-37	      ? 'border-border'
-38	      : isEmpty && isActive
-39	        ? 'border-primary ring-2 ring-primary ring-offset-2'
-40	        : isWrong
-41	          ? 'border-destructive bg-destructive/10 text-destructive'
-42	          : 'border-primary bg-primary/10 text-primary',
-43	  ]
-44	    .filter(Boolean)
-45	    .join(' ');
-46	
-47	  return (
-48	    <Tag
-49	      ref={
-50	        slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
-51	      }
-52	      aria-label={ariaLabel}
-53	      data-zone-index={index}
-54	      className={[stateClasses, className].filter(Boolean).join(' ')}
-55	    >
-56	      {isEmpty ? (
-57	        <>
-58	          {children(renderProps)}
-59	          {showCursor ? (
-60	            <span
-61	              aria-hidden="true"
-62	              className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
-63	            />
-64	          ) : null}
-65	        </>
-66	      ) : (
-67	        <>
-68	          <div
-69	            className="absolute inset-0 bg-muted/60 shadow-inner"
-70	            aria-hidden="true"
-71	          />
-72	          <button
-73	            ref={dragRef}
-74	            type="button"
-75	            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}`}
-76	            aria-hidden={isBeingDragged ? 'true' : undefined}
-77	            style={skeuoStyle}
-78	            onClick={handleClick}
-79	            onPointerDown={pointerHandlers.onPointerDown}
-80	            onPointerMove={pointerHandlers.onPointerMove}
-81	            onPointerUp={pointerHandlers.onPointerUp}
-82	            onPointerCancel={pointerHandlers.onPointerCancel}
-83	          >
-84	            {children(renderProps)}
-85	          </button>
-86	        </>
-87	      )}
-88	    </Tag>
-89	  );
-90	};
+1 import { skeuoStyle } from '../styles';
+2 import { useSlotBehavior } from './useSlotBehavior';
+3 import type { SlotRenderProps } from './useSlotBehavior';
+4 import type { ReactNode, Ref } from 'react';
+5 
+6 interface SlotProps {
+7   index: number;
+8   as?: 'li' | 'span' | 'div';
+9   className?: string;
+10   children: (props: SlotRenderProps) => ReactNode;
+11 }
+12 
+13 export const Slot = ({
+14   index,
+15   as: Tag = 'li',
+16   className,
+17   children,
+18 }: SlotProps) => {
+19   const {
+20     renderProps,
+21     slotRef,
+22     dragRef,
+23     handleClick,
+24     pointerHandlers,
+25     isBeingDragged,
+26   } = useSlotBehavior(index);
+27 
+28   const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
+29 
+30   const ariaLabel = isEmpty
+31     ? `Slot ${index + 1}, empty`
+32     : `Slot ${index + 1}, filled with ${label}`;
+33 
+34   const stateClasses = [
+35     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+36     isEmpty && !isActive
+37       ? 'border-border'
+38       : isEmpty && isActive
+39         ? 'border-primary ring-2 ring-primary ring-offset-2'
+40         : isWrong
+41           ? 'border-destructive bg-destructive/10 text-destructive'
+42           : 'border-primary bg-primary/10 text-primary',
+43   ]
+44     .filter(Boolean)
+45     .join(' ');
+46 
+47   return (
+48     <Tag
+49       ref={
+50         slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
+51       }
+52       aria-label={ariaLabel}
+53       data-zone-index={index}
+54       className={[stateClasses, className].filter(Boolean).join(' ')}
+55     >
+56       {isEmpty ? (
+57         <>
+58           {children(renderProps)}
+59           {showCursor ? (
+60             <span
+61               aria-hidden="true"
+62               className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+63             />
+64           ) : null}
+65         </>
+66       ) : (
+67         <>
+68           <div
+69             className="absolute inset-0 bg-muted/60 shadow-inner"
+70             aria-hidden="true"
+71           />
+72           <button
+73             ref={dragRef}
+74             type="button"
+75             className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}`}
+76             aria-hidden={isBeingDragged ? 'true' : undefined}
+77             style={skeuoStyle}
+78             onClick={handleClick}
+79             onPointerDown={pointerHandlers.onPointerDown}
+80             onPointerMove={pointerHandlers.onPointerMove}
+81             onPointerUp={pointerHandlers.onPointerUp}
+82             onPointerCancel={pointerHandlers.onPointerCancel}
+83           >
+84             {children(renderProps)}
+85           </button>
+86         </>
+87       )}
+88     </Tag>
+89   );
+90 };
 91
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:36:58Z)**_
@@ -1623,251 +1649,252 @@ _**Agent (claude-opus-4-6 2026-04-07 16:36:58Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useCallback, useEffect, useRef } from 'react';
-3	import { useAnswerGameContext } from '../useAnswerGameContext';
-4	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
-5	import { useSlotTileDrag } from '../useSlotTileDrag';
-6	import { useTileEvaluation } from '../useTileEvaluation';
-7	import {
-8	  triggerEjectReturn,
-9	  triggerPop,
-10	  triggerShake,
-11	} from './slot-animations';
-12	import type { RefObject } from 'react';
-13	import { playSound } from '@/lib/audio/AudioFeedback';
-14	
-15	export interface SlotRenderProps {
-16	  label: string | null;
-17	  tileId: string | null;
-18	  isActive: boolean;
-19	  isWrong: boolean;
-20	  isLocked: boolean;
-21	  isEmpty: boolean;
-22	  showCursor: boolean;
-23	}
-24	
-25	export interface UseSlotBehaviorReturn {
-26	  renderProps: SlotRenderProps;
-27	  slotRef: RefObject<HTMLElement | null>;
-28	  dragRef: RefObject<HTMLButtonElement | null>;
-29	  handleClick: () => void;
-30	  isBeingDragged: boolean;
-31	  pointerHandlers: {
-32	    onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
-33	    onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
-34	    onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
-35	    onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
-36	  };
-37	}
-38	
-39	export const useSlotBehavior = (
-40	  index: number,
-41	): UseSlotBehaviorReturn => {
-42	  const { zones, allTiles, activeSlotIndex, config, dragActiveTileId } =
-43	    useAnswerGameContext();
-44	  const dispatch = useAnswerGameDispatch();
-45	  const { placeTile } = useTileEvaluation();
-46	
-47	  const zone = zones[index];
-48	  const tileId = zone?.placedTileId ?? null;
-49	  const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
-50	  const label = tile?.label ?? null;
-51	  const isWrong = zone?.isWrong ?? false;
-52	  const isLocked = zone?.isLocked ?? false;
-53	  const isEmpty = tileId === null;
-54	
-55	  // Resolve interaction mode: explicit config or inferred from inputMethod
-56	  const slotInteraction =
-57	    config.slotInteraction ??
-58	    (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
-59	  const isOrdered = slotInteraction === 'ordered';
-60	
-61	  const isActive = isOrdered && activeSlotIndex === index;
-62	  const showCursor =
-63	    isActive && isEmpty && config.inputMethod !== 'drag';
-64	  const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
-65	
-66	  const slotRef = useRef<HTMLElement | null>(null);
-67	  const prevIsWrongRef = useRef(isWrong);
-68	  const prevTileIdRef = useRef(tileId);
-69	  // Holds the startFade handle returned by triggerEjectReturn so we can call
-70	  // it when EJECT_TILE fires and the tile is back in the bank.
-71	  const startFadeRef = useRef<(() => void) | null>(null);
-72	
-73	  // Drop target handler — choose evaluation or swap based on interaction mode
-74	  const handleDrop = useCallback(
-75	    (droppedTileId: string, targetZoneIndex: number) => {
-76	      if (isOrdered) {
-77	        placeTile(droppedTileId, targetZoneIndex);
-78	        return;
-79	      }
-80	      // free-swap: if tile comes from a slot, always SWAP_TILES (even to empty target = move).
-81	      // Only fall back to placeTile for bank tiles.
-82	      const targetZone = zones[targetZoneIndex];
-83	      if (!targetZone) return;
-84	      const sourceZoneIndex = zones.findIndex(
-85	        (z) => z.placedTileId === droppedTileId,
-86	      );
-87	      if (sourceZoneIndex !== -1) {
-88	        // Evaluate both outcomes before dispatching to play exactly one sound.
-89	        const droppedTile = allTiles.find(
-90	          (t) => t.id === droppedTileId,
-91	        );
-92	        const displacedTile = targetZone.placedTileId
-93	          ? allTiles.find((t) => t.id === targetZone.placedTileId)
-94	          : null;
-95	        const sourceZone = zones[sourceZoneIndex];
-96	        const droppedCorrect =
-97	          droppedTile?.value === targetZone.expectedValue;
-98	        const displacedCorrect = displacedTile
-99	          ? displacedTile.value === sourceZone?.expectedValue
-100	          : true;
-101	        playSound(
-102	          droppedCorrect || displacedCorrect ? 'correct' : 'wrong',
-103	        );
-104	        dispatch({
-105	          type: 'SWAP_TILES',
-106	          fromZoneIndex: sourceZoneIndex,
-107	          toZoneIndex: targetZoneIndex,
-108	        });
-109	        return;
-110	      }
-111	      placeTile(droppedTileId, targetZoneIndex);
-112	    },
-113	    [isOrdered, placeTile, zones, dispatch, allTiles],
-114	  );
-115	
-116	  // Register as drop target
-117	  useEffect(() => {
-118	    const el = slotRef.current;
-119	    if (!el) return;
-120	    return dropTargetForElements({
-121	      element: el,
-122	      getData: () => ({ zoneIndex: index }),
-123	      onDrop: ({ source }) => {
-124	        // Slot-tile drags (sourceZoneIndex present) handle their own
-125	        // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
-126	        if (typeof source.data['sourceZoneIndex'] === 'number') return;
-127	        const sourceTileId = source.data['tileId'];
-128	        if (typeof sourceTileId === 'string') {
-129	          handleDrop(sourceTileId, index);
-130	          // Clear drag active state here — the draggable component (bank tile)
-131	          // unmounts when PLACE_TILE fires, so its own onDrop may never run.
-132	          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-133	        }
-134	      },
-135	    });
-136	  }, [index, handleDrop, dispatch]);
-137	
-138	  // Drag source for filled slots
-139	  const {
-140	    dragRef,
-141	    onPointerDown,
-142	    onPointerMove,
-143	    onPointerUp,
-144	    onPointerCancel,
-145	  } = useSlotTileDrag({
-146	    tileId,
-147	    label,
-148	    zoneIndex: index,
-149	    onDrop: handleDrop,
-150	  });
-151	
-152	  // Click handler: remove tile from slot (returns to bank)
-153	  const handleClick = useCallback(() => {
-154	    if (isEmpty) return;
-155	    dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
-156	  }, [isEmpty, dispatch, index]);
-157	
-158	  // Feedback animations: trigger on state transitions
-159	  useEffect(() => {
-160	    const el = slotRef.current;
-161	    if (!el) return;
-162	
-163	    const wasWrong = prevIsWrongRef.current;
-164	    prevIsWrongRef.current = isWrong;
-165	
-166	    const prevTileId = prevTileIdRef.current;
-167	    prevTileIdRef.current = tileId;
-168	    const freshlyPlaced = tileId !== null && prevTileId === null;
-169	
-170	    if (
-171	      tileId !== null &&
-172	      prevTileId !== null &&
-173	      tileId !== prevTileId
-174	    ) {
-175	      // Tile swapped between slots — animate per zone; sound played once in handleDrop.
-176	      if (isWrong) {
-177	        triggerShake(el);
-178	      } else {
-179	        triggerPop(el);
-180	      }
-181	    } else if (isWrong && !wasWrong) {
-182	      // Newly wrong via PLACE_TILE (sound already played by useTileEvaluation).
-183	      triggerShake(el);
-184	
-185	      if (config.wrongTileBehavior === 'lock-auto-eject') {
-186	        // Start the eject animation after the shake settles.
-187	        const animationTimerId = setTimeout(() => {
-188	          const tileEl = dragRef.current;
-189	          if (!tileEl) return;
-190	          const { startFade } = triggerEjectReturn(
-191	            tileEl,
-192	            tileId,
-193	            () => {},
-194	          );
-195	          startFadeRef.current = startFade;
-196	        }, 350);
-197	        return () => clearTimeout(animationTimerId);
-198	      }
-199	    } else if (freshlyPlaced && !isWrong) {
-200	      // Correctly placed from bank (sound already played by useTileEvaluation).
-201	      triggerPop(el);
-202	    } else if (tileId === null && prevTileId !== null) {
-203	      // Tile returned to bank (click, drag, or eject).
-204	      playSound('tile-place');
-205	      startFadeRef.current?.();
-206	      startFadeRef.current = null;
-207	    }
-208	  }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
-209	
-210	  // EJECT_TILE dispatch lives in its own effect (no DOM ref needed) so the
-211	  // timer survives when the bank tile unmounts after PLACE_TILE. The animation
-212	  // effect above also uses isWrong/tileId so both fire on the same transition.
-213	  useEffect(() => {
-214	    if (!isWrong || config.wrongTileBehavior !== 'lock-auto-eject')
-215	      return;
-216	    const timerId = setTimeout(() => {
-217	      dispatch({ type: 'EJECT_TILE', zoneIndex: index });
-218	    }, 1000);
-219	    return () => clearTimeout(timerId);
-220	  }, [isWrong, config.wrongTileBehavior, dispatch, index]);
-221	
-222	  return {
-223	    renderProps: {
-224	      label,
-225	      tileId,
-226	      isActive,
-227	      isWrong,
-228	      isLocked,
-229	      isEmpty,
-230	      showCursor,
-231	    },
-232	    slotRef,
-233	    dragRef,
-234	    handleClick,
-235	    isBeingDragged,
-236	    pointerHandlers: {
-237	      onPointerDown,
-238	      onPointerMove,
-239	      onPointerUp,
-240	      onPointerCancel,
-241	    },
-242	  };
-243	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useCallback, useEffect, useRef } from 'react';
+3 import { useAnswerGameContext } from '../useAnswerGameContext';
+4 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+5 import { useSlotTileDrag } from '../useSlotTileDrag';
+6 import { useTileEvaluation } from '../useTileEvaluation';
+7 import {
+8   triggerEjectReturn,
+9   triggerPop,
+10   triggerShake,
+11 } from './slot-animations';
+12 import type { RefObject } from 'react';
+13 import { playSound } from '@/lib/audio/AudioFeedback';
+14 
+15 export interface SlotRenderProps {
+16   label: string | null;
+17   tileId: string | null;
+18   isActive: boolean;
+19   isWrong: boolean;
+20   isLocked: boolean;
+21   isEmpty: boolean;
+22   showCursor: boolean;
+23 }
+24 
+25 export interface UseSlotBehaviorReturn {
+26   renderProps: SlotRenderProps;
+27   slotRef: RefObject<HTMLElement | null>;
+28   dragRef: RefObject<HTMLButtonElement | null>;
+29   handleClick: () => void;
+30   isBeingDragged: boolean;
+31   pointerHandlers: {
+32     onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
+33     onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
+34     onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
+35     onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
+36   };
+37 }
+38 
+39 export const useSlotBehavior = (
+40   index: number,
+41 ): UseSlotBehaviorReturn => {
+42   const { zones, allTiles, activeSlotIndex, config, dragActiveTileId } =
+43     useAnswerGameContext();
+44   const dispatch = useAnswerGameDispatch();
+45   const { placeTile } = useTileEvaluation();
+46 
+47   const zone = zones[index];
+48   const tileId = zone?.placedTileId ?? null;
+49   const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
+50   const label = tile?.label ?? null;
+51   const isWrong = zone?.isWrong ?? false;
+52   const isLocked = zone?.isLocked ?? false;
+53   const isEmpty = tileId === null;
+54 
+55   // Resolve interaction mode: explicit config or inferred from inputMethod
+56   const slotInteraction =
+57     config.slotInteraction ??
+58     (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
+59   const isOrdered = slotInteraction === 'ordered';
+60 
+61   const isActive = isOrdered && activeSlotIndex === index;
+62   const showCursor =
+63     isActive && isEmpty && config.inputMethod !== 'drag';
+64   const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
+65 
+66   const slotRef = useRef<HTMLElement | null>(null);
+67   const prevIsWrongRef = useRef(isWrong);
+68   const prevTileIdRef = useRef(tileId);
+69   // Holds the startFade handle returned by triggerEjectReturn so we can call
+70   // it when EJECT_TILE fires and the tile is back in the bank.
+71   const startFadeRef = useRef<(() => void) | null>(null);
+72 
+73   // Drop target handler — choose evaluation or swap based on interaction mode
+74   const handleDrop = useCallback(
+75     (droppedTileId: string, targetZoneIndex: number) => {
+76       if (isOrdered) {
+77         placeTile(droppedTileId, targetZoneIndex);
+78         return;
+79       }
+80       // free-swap: if tile comes from a slot, always SWAP_TILES (even to empty target = move).
+81       // Only fall back to placeTile for bank tiles.
+82       const targetZone = zones[targetZoneIndex];
+83       if (!targetZone) return;
+84       const sourceZoneIndex = zones.findIndex(
+85         (z) => z.placedTileId === droppedTileId,
+86       );
+87       if (sourceZoneIndex !== -1) {
+88         // Evaluate both outcomes before dispatching to play exactly one sound.
+89         const droppedTile = allTiles.find(
+90           (t) => t.id === droppedTileId,
+91         );
+92         const displacedTile = targetZone.placedTileId
+93           ? allTiles.find((t) => t.id === targetZone.placedTileId)
+94           : null;
+95         const sourceZone = zones[sourceZoneIndex];
+96         const droppedCorrect =
+97           droppedTile?.value === targetZone.expectedValue;
+98         const displacedCorrect = displacedTile
+99           ? displacedTile.value === sourceZone?.expectedValue
+100           : true;
+101         playSound(
+102           droppedCorrect || displacedCorrect ? 'correct' : 'wrong',
+103         );
+104         dispatch({
+105           type: 'SWAP_TILES',
+106           fromZoneIndex: sourceZoneIndex,
+107           toZoneIndex: targetZoneIndex,
+108         });
+109         return;
+110       }
+111       placeTile(droppedTileId, targetZoneIndex);
+112     },
+113     [isOrdered, placeTile, zones, dispatch, allTiles],
+114   );
+115 
+116   // Register as drop target
+117   useEffect(() => {
+118     const el = slotRef.current;
+119     if (!el) return;
+120     return dropTargetForElements({
+121       element: el,
+122       getData: () => ({ zoneIndex: index }),
+123       onDrop: ({ source }) => {
+124         // Slot-tile drags (sourceZoneIndex present) handle their own
+125         // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
+126         if (typeof source.data['sourceZoneIndex'] === 'number') return;
+127         const sourceTileId = source.data['tileId'];
+128         if (typeof sourceTileId === 'string') {
+129           handleDrop(sourceTileId, index);
+130           // Clear drag active state here — the draggable component (bank tile)
+131           // unmounts when PLACE_TILE fires, so its own onDrop may never run.
+132           dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+133         }
+134       },
+135     });
+136   }, [index, handleDrop, dispatch]);
+137 
+138   // Drag source for filled slots
+139   const {
+140     dragRef,
+141     onPointerDown,
+142     onPointerMove,
+143     onPointerUp,
+144     onPointerCancel,
+145   } = useSlotTileDrag({
+146     tileId,
+147     label,
+148     zoneIndex: index,
+149     onDrop: handleDrop,
+150   });
+151 
+152   // Click handler: remove tile from slot (returns to bank)
+153   const handleClick = useCallback(() => {
+154     if (isEmpty) return;
+155     dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
+156   }, [isEmpty, dispatch, index]);
+157 
+158   // Feedback animations: trigger on state transitions
+159   useEffect(() => {
+160     const el = slotRef.current;
+161     if (!el) return;
+162 
+163     const wasWrong = prevIsWrongRef.current;
+164     prevIsWrongRef.current = isWrong;
+165 
+166     const prevTileId = prevTileIdRef.current;
+167     prevTileIdRef.current = tileId;
+168     const freshlyPlaced = tileId !== null && prevTileId === null;
+169 
+170     if (
+171       tileId !== null &&
+172       prevTileId !== null &&
+173       tileId !== prevTileId
+174     ) {
+175       // Tile swapped between slots — animate per zone; sound played once in handleDrop.
+176       if (isWrong) {
+177         triggerShake(el);
+178       } else {
+179         triggerPop(el);
+180       }
+181     } else if (isWrong && !wasWrong) {
+182       // Newly wrong via PLACE_TILE (sound already played by useTileEvaluation).
+183       triggerShake(el);
+184 
+185       if (config.wrongTileBehavior === 'lock-auto-eject') {
+186         // Start the eject animation after the shake settles.
+187         const animationTimerId = setTimeout(() => {
+188           const tileEl = dragRef.current;
+189           if (!tileEl) return;
+190           const { startFade } = triggerEjectReturn(
+191             tileEl,
+192             tileId,
+193             () => {},
+194           );
+195           startFadeRef.current = startFade;
+196         }, 350);
+197         return () => clearTimeout(animationTimerId);
+198       }
+199     } else if (freshlyPlaced && !isWrong) {
+200       // Correctly placed from bank (sound already played by useTileEvaluation).
+201       triggerPop(el);
+202     } else if (tileId === null && prevTileId !== null) {
+203       // Tile returned to bank (click, drag, or eject).
+204       playSound('tile-place');
+205       startFadeRef.current?.();
+206       startFadeRef.current = null;
+207     }
+208   }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
+209 
+210   // EJECT_TILE dispatch lives in its own effect (no DOM ref needed) so the
+211   // timer survives when the bank tile unmounts after PLACE_TILE. The animation
+212   // effect above also uses isWrong/tileId so both fire on the same transition.
+213   useEffect(() => {
+214     if (!isWrong || config.wrongTileBehavior !== 'lock-auto-eject')
+215       return;
+216     const timerId = setTimeout(() => {
+217       dispatch({ type: 'EJECT_TILE', zoneIndex: index });
+218     }, 1000);
+219     return () => clearTimeout(timerId);
+220   }, [isWrong, config.wrongTileBehavior, dispatch, index]);
+221 
+222   return {
+223     renderProps: {
+224       label,
+225       tileId,
+226       isActive,
+227       isWrong,
+228       isLocked,
+229       isEmpty,
+230       showCursor,
+231     },
+232     slotRef,
+233     dragRef,
+234     handleClick,
+235     isBeingDragged,
+236     pointerHandlers: {
+237       onPointerDown,
+238       onPointerMove,
+239       onPointerUp,
+240       onPointerCancel,
+241     },
+242   };
+243 };
 244
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:37:35Z)**_
@@ -1879,7 +1906,6 @@ Now I need to understand what happens when a bank tile is dragged and dropped so
 2. User drops tile on empty space (not a slot) → `useDraggableTile` HTML5 `onDrop` fires → `SET_DRAG_ACTIVE: null` dispatched → tile should become visible again
 
 Wait, but there's also the slot drop target's `onDrop` handler. When a bank tile is dropped on a slot:
-
 
 The slot's drop handler checks if the source is from another slot and skips it, then extracts the tile ID and calls the placement handler while clearing the drag state. Both the slot and the bank tile's own drop handler fire, but that's redundant since they both clear the drag state anyway.
 
@@ -1899,152 +1925,153 @@ _**Agent (claude-opus-4-6 2026-04-07 16:37:35Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/slot-animations.ts`
 
 ```text
-1	/** Adds animate-shake class, removes it on animationend. */
-2	export const triggerShake = (el: HTMLElement): void => {
-3	  el.classList.remove('animate-shake');
-4	  // Force reflow to restart animation if already running
-5	  void el.offsetWidth;
-6	  el.classList.add('animate-shake');
-7	  el.addEventListener(
-8	    'animationend',
-9	    () => el.classList.remove('animate-shake'),
-10	    { once: true },
-11	  );
-12	};
-13	
-14	/** Adds animate-pop class, removes it on animationend. */
-15	export const triggerPop = (el: HTMLElement): void => {
-16	  el.classList.remove('animate-pop');
-17	  void el.offsetWidth;
-18	  el.classList.add('animate-pop');
-19	  el.addEventListener(
-20	    'animationend',
-21	    () => el.classList.remove('animate-pop'),
-22	    { once: true },
-23	  );
-24	};
-25	
-26	/**
-27	 * Animates a tile flying from its slot toward the tile bank.
-28	 *
-29	 * Phase 1: ghost flies to the hole (transform only, no opacity change).
-30	 * Phase 2: ghost fades out — but only when the caller invokes `startFade()`.
-31	 *          This lets the caller wait until the real tile has appeared in the
-32	 *          bank (i.e. after EJECT_TILE fires) before fading the ghost out,
-33	 *          preventing a visible gap between ghost disappearing and tile appearing.
-34	 *
-35	 * Returns { startFade } — call it when the bank tile is ready to be shown.
-36	 * If startFade is called before phase 1 completes, the fade starts immediately
-37	 * after the ghost arrives. Calling it multiple times is a no-op.
-38	 *
-39	 * el is the button inside the slot. We use its parent (the slot li) for
-40	 * accurate pixel dimensions and border-radius, then build a fresh fixed-
-41	 * position ghost div so the animation escapes overflow:hidden ancestors
-42	 * and avoids size-full / percentage class conflicts.
-43	 */
-44	export const triggerEjectReturn = (
-45	  el: HTMLElement,
-46	  tileId: string | null,
-47	  onComplete: () => void,
-48	): { startFade: () => void } => {
-49	  // Slot element gives us correct size + border-radius (button has size-full %).
-50	  const sourceEl = el.parentElement ?? el;
-51	  const sourceRect = sourceEl.getBoundingClientRect();
-52	  const { borderRadius } = globalThis.getComputedStyle(sourceEl);
-53	
-54	  // Fresh div — no inherited classes that could break fixed positioning.
-55	  const ghost = document.createElement('div');
-56	  ghost.innerHTML = el.innerHTML;
-57	  ghost.style.cssText = `
-58	    position: fixed;
-59	    top: ${sourceRect.top}px;
-60	    left: ${sourceRect.left}px;
-61	    width: ${sourceRect.width}px;
-62	    height: ${sourceRect.height}px;
-63	    border-radius: ${borderRadius};
-64	    display: flex;
-65	    align-items: center;
-66	    justify-content: center;
-67	    background: var(--card);
-68	    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-69	    z-index: 9999;
-70	    pointer-events: none;
-71	    margin: 0;
-72	  `;
-73	  document.body.append(ghost);
-74	
-75	  // Hide the original so only the ghost is visible during the flight.
-76	  el.style.opacity = '0';
-77	
-78	  const cleanup = () => {
-79	    ghost.remove();
-80	    el.style.opacity = '';
-81	    onComplete();
-82	  };
-83	
-84	  // Look up the specific hole for this tile, or fall back to the bank container.
-85	  const targetEl = tileId
-86	    ? document.querySelector<HTMLElement>(
-87	        `[data-tile-bank-hole="${tileId}"]`,
-88	      )
-89	    : document.querySelector<HTMLElement>('[data-tile-bank]');
-90	
-91	  // startFade state machine: phase-1 may complete before or after the caller
-92	  // triggers the fade, so we track both independently.
-93	  let fadeRequested = false;
-94	  let phaseOneDone = false;
-95	
-96	  const doFade = () => {
-97	    ghost.style.transition = 'opacity 200ms ease-out';
-98	    void ghost.offsetWidth;
-99	    ghost.style.opacity = '0';
-100	    ghost.addEventListener('transitionend', cleanup, { once: true });
-101	  };
-102	
-103	  const startFade = () => {
-104	    if (fadeRequested) return; // idempotent
-105	    fadeRequested = true;
-106	    if (phaseOneDone) doFade();
-107	  };
-108	
-109	  if (!targetEl) {
-110	    // No target — fade in place immediately (no hole to fly to).
-111	    ghost.style.transition = 'opacity 300ms ease-in';
-112	    void ghost.offsetWidth;
-113	    ghost.style.opacity = '0';
-114	    ghost.addEventListener('transitionend', cleanup, { once: true });
-115	    return { startFade };
-116	  }
-117	
-118	  const bankRect = targetEl.getBoundingClientRect();
-119	  const deltaX =
-120	    bankRect.left +
-121	    bankRect.width / 2 -
-122	    (sourceRect.left + sourceRect.width / 2);
-123	  const deltaY =
-124	    bankRect.top +
-125	    bankRect.height / 2 -
-126	    (sourceRect.top + sourceRect.height / 2);
-127	
-128	  // Phase 1: fly to the hole (no opacity change during flight).
-129	  ghost.style.transition = 'transform 300ms ease-in';
-130	  void ghost.offsetWidth;
-131	  ghost.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-132	
-133	  ghost.addEventListener(
-134	    'transitionend',
-135	    () => {
-136	      phaseOneDone = true;
-137	      if (fadeRequested) doFade();
-138	      // Otherwise ghost waits at hole until startFade() is called.
-139	    },
-140	    { once: true },
-141	  );
-142	
-143	  return { startFade };
-144	};
+1 /** Adds animate-shake class, removes it on animationend. */
+2 export const triggerShake = (el: HTMLElement): void => {
+3   el.classList.remove('animate-shake');
+4   // Force reflow to restart animation if already running
+5   void el.offsetWidth;
+6   el.classList.add('animate-shake');
+7   el.addEventListener(
+8     'animationend',
+9     () => el.classList.remove('animate-shake'),
+10     { once: true },
+11   );
+12 };
+13 
+14 /** Adds animate-pop class, removes it on animationend. */
+15 export const triggerPop = (el: HTMLElement): void => {
+16   el.classList.remove('animate-pop');
+17   void el.offsetWidth;
+18   el.classList.add('animate-pop');
+19   el.addEventListener(
+20     'animationend',
+21     () => el.classList.remove('animate-pop'),
+22     { once: true },
+23   );
+24 };
+25 
+26 /**
+27  * Animates a tile flying from its slot toward the tile bank.
+28  *
+29  * Phase 1: ghost flies to the hole (transform only, no opacity change).
+30  * Phase 2: ghost fades out — but only when the caller invokes `startFade()`.
+31  *          This lets the caller wait until the real tile has appeared in the
+32  *          bank (i.e. after EJECT_TILE fires) before fading the ghost out,
+33  *          preventing a visible gap between ghost disappearing and tile appearing.
+34  *
+35  * Returns { startFade } — call it when the bank tile is ready to be shown.
+36  * If startFade is called before phase 1 completes, the fade starts immediately
+37  * after the ghost arrives. Calling it multiple times is a no-op.
+38  *
+39  * el is the button inside the slot. We use its parent (the slot li) for
+40  * accurate pixel dimensions and border-radius, then build a fresh fixed-
+41  * position ghost div so the animation escapes overflow:hidden ancestors
+42  * and avoids size-full / percentage class conflicts.
+43  */
+44 export const triggerEjectReturn = (
+45   el: HTMLElement,
+46   tileId: string | null,
+47   onComplete: () => void,
+48 ): { startFade: () => void } => {
+49   // Slot element gives us correct size + border-radius (button has size-full %).
+50   const sourceEl = el.parentElement ?? el;
+51   const sourceRect = sourceEl.getBoundingClientRect();
+52   const { borderRadius } = globalThis.getComputedStyle(sourceEl);
+53 
+54   // Fresh div — no inherited classes that could break fixed positioning.
+55   const ghost = document.createElement('div');
+56   ghost.innerHTML = el.innerHTML;
+57   ghost.style.cssText = `
+58     position: fixed;
+59     top: ${sourceRect.top}px;
+60     left: ${sourceRect.left}px;
+61     width: ${sourceRect.width}px;
+62     height: ${sourceRect.height}px;
+63     border-radius: ${borderRadius};
+64     display: flex;
+65     align-items: center;
+66     justify-content: center;
+67     background: var(--card);
+68     box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+69     z-index: 9999;
+70     pointer-events: none;
+71     margin: 0;
+72   `;
+73   document.body.append(ghost);
+74 
+75   // Hide the original so only the ghost is visible during the flight.
+76   el.style.opacity = '0';
+77 
+78   const cleanup = () => {
+79     ghost.remove();
+80     el.style.opacity = '';
+81     onComplete();
+82   };
+83 
+84   // Look up the specific hole for this tile, or fall back to the bank container.
+85   const targetEl = tileId
+86     ? document.querySelector<HTMLElement>(
+87         `[data-tile-bank-hole="${tileId}"]`,
+88       )
+89     : document.querySelector<HTMLElement>('[data-tile-bank]');
+90 
+91   // startFade state machine: phase-1 may complete before or after the caller
+92   // triggers the fade, so we track both independently.
+93   let fadeRequested = false;
+94   let phaseOneDone = false;
+95 
+96   const doFade = () => {
+97     ghost.style.transition = 'opacity 200ms ease-out';
+98     void ghost.offsetWidth;
+99     ghost.style.opacity = '0';
+100     ghost.addEventListener('transitionend', cleanup, { once: true });
+101   };
+102 
+103   const startFade = () => {
+104     if (fadeRequested) return; // idempotent
+105     fadeRequested = true;
+106     if (phaseOneDone) doFade();
+107   };
+108 
+109   if (!targetEl) {
+110     // No target — fade in place immediately (no hole to fly to).
+111     ghost.style.transition = 'opacity 300ms ease-in';
+112     void ghost.offsetWidth;
+113     ghost.style.opacity = '0';
+114     ghost.addEventListener('transitionend', cleanup, { once: true });
+115     return { startFade };
+116   }
+117 
+118   const bankRect = targetEl.getBoundingClientRect();
+119   const deltaX =
+120     bankRect.left +
+121     bankRect.width / 2 -
+122     (sourceRect.left + sourceRect.width / 2);
+123   const deltaY =
+124     bankRect.top +
+125     bankRect.height / 2 -
+126     (sourceRect.top + sourceRect.height / 2);
+127 
+128   // Phase 1: fly to the hole (no opacity change during flight).
+129   ghost.style.transition = 'transform 300ms ease-in';
+130   void ghost.offsetWidth;
+131   ghost.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+132 
+133   ghost.addEventListener(
+134     'transitionend',
+135     () => {
+136       phaseOneDone = true;
+137       if (fadeRequested) doFade();
+138       // Otherwise ghost waits at hole until startFade() is called.
+139     },
+140     { once: true },
+141   );
+142 
+143   return { startFade };
+144 };
 145
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:37:53Z)**_
@@ -2055,7 +2082,7 @@ Now I see `triggerEjectReturn` in line 76: `el.style.opacity = '0';` — this di
 Let me re-think the problem. The user says "when the tile is dragged out from the bank to anywhere. For some reason is fading out."
 
 Let me look at the actual diff more carefully to see what was the "hack" that was introduced. Let me look at the full state of the files before the hack commits.
- 
+
 Looking at the two commits on the branch, the first one keeps the same DOM structure for bank tiles to prevent them from disappearing on failed drops, and the second moves the eject timer dispatch. But actually, the structural fix isn't really a hack — it's the right approach to ensure the draggable element stays in the DOM. Let me re-read what the user actually said about these being hacks.
 
 The user mentions "the tile is dragged out from the bank to anywhere. For some reason is fading out" — this sounds like a current bug rather than something from a past attempt. The `invisible` class gets applied when `isDragging` is true, which makes the tile disappear instantly, and it should reappear when the drag ends. But something's preventing that from happening correctly.
@@ -2070,602 +2097,603 @@ _**Agent (claude-opus-4-6 2026-04-07 16:37:54Z)**_
  `./.claude/worktrees/bold-chatelet/src/styles.css`
 
 ```text
-1	@import 'https://fonts.googleapis.com/css2?family=Andika:ital,wght@0,400;0,700;1,400;1,700&family=Edu+NSW+ACT+Foundation:wght@400..700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap';
-2	@import 'tailwindcss';
-3	@import 'tw-animate-css';
-4	@import 'shadcn/tailwind.css';
-5	@import '@fontsource-variable/geist';
-6	
-7	@custom-variant dark (&:is(.dark *));
-8	
-9	@plugin "@tailwindcss/typography";
-10	
-11	@theme {
-12	  --font-sans:
-13	    'Andika', 'Edu NSW ACT Foundation', 'Nunito', 'Manrope',
-14	    ui-sans-serif, system-ui, sans-serif;
-15	}
-16	
-17	:root {
-18	  --sea-ink: #173a40;
-19	  --sea-ink-soft: #416166;
-20	  --lagoon: #4fb8b2;
-21	  --lagoon-light: #7ed3bf;
-22	  --lagoon-deep: #328f97;
-23	  --palm: #2f6a4a;
-24	  --sand: #e7f0e8;
-25	  --foam: #f3faf5;
-26	  --surface: rgb(255 255 255 / 74%);
-27	  --surface-strong: rgb(255 255 255 / 90%);
-28	  --line: rgb(23 58 64 / 14%);
-29	  --inset-glint: rgb(255 255 255 / 82%);
-30	  --kicker: rgb(47 106 74 / 90%);
-31	  --bg-base: #e7f3ec;
-32	  --header-bg: rgb(251 255 248 / 84%);
-33	  --chip-bg: rgb(255 255 255 / 80%);
-34	  --chip-line: rgb(47 106 74 / 18%);
-35	  --link-bg-hover: rgb(255 255 255 / 90%);
-36	  --hero-a: rgb(79 184 178 / 36%);
-37	  --hero-b: rgb(47 106 74 / 20%);
-38	
-39	  /* Wire shadcn vars from --bs-* tokens; inline style only sets --bs-*, so .dark class wins */
-40	  --foreground: var(--bs-text);
-41	  --background: var(--bs-background);
-42	  --popover: oklch(100% 0 0deg);
-43	  --popover-foreground: oklch(14.5% 0 0deg);
-44	  --primary: var(--bs-primary);
-45	  --primary-foreground: var(--bs-surface);
-46	  --secondary: var(--bs-secondary);
-47	  --secondary-foreground: var(--bs-surface);
-48	  --card: var(--bs-surface);
-49	  --card-foreground: var(--bs-text);
-50	  --muted: oklch(97% 0 0deg);
-51	  --muted-foreground: oklch(55.6% 0 0deg);
-52	  --accent: oklch(97% 0 0deg);
-53	  --accent-foreground: oklch(20.5% 0 0deg);
-54	  --destructive: oklch(57.7% 0.245 27.325deg);
-55	  --border: var(--bs-accent);
-56	  --input: oklch(92.2% 0 0deg);
-57	  --ring: var(--bs-primary);
-58	  --chart-1: oklch(87% 0 0deg);
-59	  --chart-2: oklch(55.6% 0 0deg);
-60	  --chart-3: oklch(43.9% 0 0deg);
-61	  --chart-4: oklch(37.1% 0 0deg);
-62	  --chart-5: oklch(26.9% 0 0deg);
-63	  --radius: 0.625rem;
-64	  --sidebar: oklch(98.5% 0 0deg);
-65	  --sidebar-foreground: oklch(14.5% 0 0deg);
-66	  --sidebar-primary: oklch(20.5% 0 0deg);
-67	  --sidebar-primary-foreground: oklch(98.5% 0 0deg);
-68	  --sidebar-accent: oklch(97% 0 0deg);
-69	  --sidebar-accent-foreground: oklch(20.5% 0 0deg);
-70	  --sidebar-border: oklch(92.2% 0 0deg);
-71	  --sidebar-ring: oklch(70.8% 0 0deg);
-72	
-73	  /* BaseSkill Design System — light defaults (aligned with Ocean preset / WCAG AA) */
-74	  --bs-primary: #0077b6;
-75	  --bs-secondary: #00b4d8;
-76	  --bs-background: #caf0f8;
-77	  --bs-surface: #fff;
-78	  --bs-text: #03045e;
-79	  --bs-accent: #f77f00;
-80	  --bs-success: #6bcb77;
-81	  --bs-warning: #f4a261;
-82	  --bs-error: #e63946;
-83	  --bs-font-weight-default: 600;
-84	  --bs-radius-card: 1.5rem;
-85	  --bs-radius-button: 1rem;
-86	}
-87	
-88	:root[data-theme='dark'] {
-89	  --sea-ink: #d7ece8;
-90	  --sea-ink-soft: #afcdc8;
-91	  --lagoon: #60d7cf;
-92	  --lagoon-deep: #8de5db;
-93	  --palm: #6ec89a;
-94	  --sand: #0f1a1e;
-95	  --foam: #101d22;
-96	  --surface: rgb(16 30 34 / 80%);
-97	  --surface-strong: rgb(15 27 31 / 92%);
-98	  --line: rgb(141 229 219 / 18%);
-99	  --inset-glint: rgb(194 247 238 / 14%);
-100	  --kicker: #b8efe5;
-101	  --bg-base: #0a1418;
-102	  --header-bg: rgb(10 20 24 / 80%);
-103	  --chip-bg: rgb(13 28 32 / 90%);
-104	  --chip-line: rgb(141 229 219 / 24%);
-105	  --link-bg-hover: rgb(24 44 49 / 80%);
-106	  --hero-a: rgb(96 215 207 / 18%);
-107	  --hero-b: rgb(110 200 154 / 12%);
-108	
-109	  /* BaseSkill Design System — Galaxy (dark) */
-110	  --bs-primary: #ff9f43;
-111	  --bs-secondary: #54a0ff;
-112	  --bs-background: #1a1a2e;
-113	  --bs-surface: #16213e;
-114	  --bs-text: #e8f4fd;
-115	  --bs-accent: #feca57;
-116	  --bs-success: #6bcb77;
-117	  --bs-warning: #f4a261;
-118	  --bs-error: #ff6b6b;
-119	}
-120	
-121	@media (prefers-color-scheme: dark) {
-122	  :root:not([data-theme='light']) {
-123	    --sea-ink: #d7ece8;
-124	    --sea-ink-soft: #afcdc8;
-125	    --lagoon: #60d7cf;
-126	    --lagoon-deep: #8de5db;
-127	    --palm: #6ec89a;
-128	    --sand: #0f1a1e;
-129	    --foam: #101d22;
-130	    --surface: rgb(16 30 34 / 80%);
-131	    --surface-strong: rgb(15 27 31 / 92%);
-132	    --line: rgb(141 229 219 / 18%);
-133	    --inset-glint: rgb(194 247 238 / 14%);
-134	    --kicker: #b8efe5;
-135	    --bg-base: #0a1418;
-136	    --header-bg: rgb(10 20 24 / 80%);
-137	    --chip-bg: rgb(13 28 32 / 90%);
-138	    --chip-line: rgb(141 229 219 / 24%);
-139	    --link-bg-hover: rgb(24 44 49 / 80%);
-140	    --hero-a: rgb(96 215 207 / 18%);
-141	    --hero-b: rgb(110 200 154 / 12%);
-142	
-143	    /* BaseSkill Design System — Galaxy (dark) */
-144	    --bs-primary: #ff9f43;
-145	    --bs-secondary: #54a0ff;
-146	    --bs-background: #1a1a2e;
-147	    --bs-surface: #16213e;
-148	    --bs-text: #e8f4fd;
-149	    --bs-accent: #feca57;
-150	    --bs-success: #6bcb77;
-151	    --bs-warning: #f4a261;
-152	    --bs-error: #ff6b6b;
-153	  }
-154	}
-155	
-156	* {
-157	  box-sizing: border-box;
-158	}
-159	
-160	html,
-161	body,
-162	#app {
-163	  min-height: 100%;
-164	}
-165	
-166	body {
-167	  margin: 0;
-168	  color: var(--sea-ink);
-169	  font-family: var(--font-sans);
-170	  background:
-171	    radial-gradient(
-172	      1100px 620px at -8% -10%,
-173	      var(--hero-a),
-174	      transparent 58%
-175	    ),
-176	    radial-gradient(
-177	      1050px 620px at 112% -12%,
-178	      var(--hero-b),
-179	      transparent 62%
-180	    ),
-181	    radial-gradient(
-182	      720px 380px at 50% 115%,
-183	      rgb(79 184 178 / 10%),
-184	      transparent 68%
-185	    ),
-186	    linear-gradient(
-187	      180deg,
-188	      color-mix(in oklab, var(--sand) 68%, oklch(100% 0 0deg)) 0%,
-189	      var(--foam) 44%,
-190	      var(--bg-base) 100%
-191	    );
-192	  overflow-x: hidden;
-193	  -webkit-font-smoothing: antialiased;
-194	  -moz-osx-font-smoothing: grayscale;
-195	}
-196	
-197	body::before {
-198	  content: '';
-199	  position: fixed;
-200	  inset: 0;
-201	  pointer-events: none;
-202	  z-index: -1;
-203	  opacity: 0.28;
-204	  background:
-205	    radial-gradient(
-206	      circle at 20% 15%,
-207	      rgb(255 255 255 / 80%),
-208	      transparent 34%
-209	    ),
-210	    radial-gradient(
-211	      circle at 78% 26%,
-212	      rgb(79 184 178 / 20%),
-213	      transparent 42%
-214	    ),
-215	    radial-gradient(
-216	      circle at 42% 82%,
-217	      rgb(47 106 74 / 14%),
-218	      transparent 36%
-219	    );
-220	}
-221	
-222	body::after {
-223	  content: '';
-224	  position: fixed;
-225	  inset: 0;
-226	  pointer-events: none;
-227	  z-index: -1;
-228	  opacity: 0.14;
-229	  background-image:
-230	    linear-gradient(rgb(255 255 255 / 7%) 1px, transparent 1px),
-231	    linear-gradient(90deg, rgb(255 255 255 / 6%) 1px, transparent 1px);
-232	  background-size: 28px 28px;
-233	  mask-image: radial-gradient(
-234	    circle at 50% 30%,
-235	    oklch(0% 0 0deg),
-236	    transparent 78%
-237	  );
-238	}
-239	
-240	a {
-241	  color: var(--lagoon-deep);
-242	  text-decoration-color: rgb(50 143 151 / 40%);
-243	  text-decoration-thickness: 1px;
-244	  text-underline-offset: 2px;
-245	}
-246	
-247	code {
-248	  font-size: 0.9em;
-249	  border: 1px solid var(--line);
-250	  background: color-mix(
-251	    in oklab,
-252	    var(--surface-strong) 82%,
-253	    oklch(100% 0 0deg) 18%
-254	  );
-255	  border-radius: 7px;
-256	  padding: 2px 7px;
-257	}
-258	
-259	pre code {
-260	  border: 0;
-261	  background: transparent;
-262	  padding: 0;
-263	  border-radius: 0;
-264	  font-size: inherit;
-265	  color: inherit;
-266	}
-267	
-268	.page-wrap {
-269	  width: min(1080px, calc(100% - 2rem));
-270	  margin-inline: auto;
-271	}
-272	
-273	.display-title {
-274	  font-family: Fraunces, Georgia, serif;
-275	}
-276	
-277	.island-shell {
-278	  border: 1px solid var(--line);
-279	  background: linear-gradient(
-280	    165deg,
-281	    var(--surface-strong),
-282	    var(--surface)
-283	  );
-284	  box-shadow:
-285	    0 1px 0 var(--inset-glint) inset,
-286	    0 22px 44px rgb(30 90 72 / 10%),
-287	    0 6px 18px rgb(23 58 64 / 8%);
-288	  backdrop-filter: blur(4px);
-289	}
-290	
-291	.feature-card {
-292	  background: linear-gradient(
-293	    165deg,
-294	    color-mix(
-295	      in oklab,
-296	      var(--surface-strong) 93%,
-297	      oklch(100% 0 0deg) 7%
-298	    ),
-299	    var(--surface)
-300	  );
-301	  box-shadow:
-302	    0 1px 0 var(--inset-glint) inset,
-303	    0 18px 34px rgb(30 90 72 / 10%),
-304	    0 4px 14px rgb(23 58 64 / 6%);
-305	}
-306	
-307	.feature-card:hover {
-308	  transform: translateY(-2px);
-309	  border-color: color-mix(
-310	    in oklab,
-311	    var(--lagoon-deep) 35%,
-312	    var(--line)
-313	  );
-314	}
-315	
-316	button,
-317	.island-shell,
-318	a {
-319	  transition:
-320	    background-color 180ms ease,
-321	    color 180ms ease,
-322	    border-color 180ms ease,
-323	    transform 180ms ease;
-324	}
-325	
-326	a:hover {
-327	  color: var(--lagoon-deep);
-328	}
-329	
-330	.island-kicker {
-331	  letter-spacing: 0.16em;
-332	  text-transform: uppercase;
-333	  font-weight: 700;
-334	  font-size: 0.69rem;
-335	  color: var(--kicker);
-336	}
-337	
-338	.nav-link {
-339	  position: relative;
-340	  display: inline-flex;
-341	  align-items: center;
-342	  text-decoration: none;
-343	  color: var(--sea-ink-soft);
-344	}
-345	
-346	.nav-link::after {
-347	  content: '';
-348	  position: absolute;
-349	  left: 0;
-350	  bottom: -6px;
-351	  width: 100%;
-352	  height: 2px;
-353	  transform: scaleX(0);
-354	  transform-origin: left;
-355	  background: linear-gradient(
-356	    90deg,
-357	    var(--lagoon),
-358	    var(--lagoon-light)
-359	  );
-360	  transition: transform 170ms ease;
-361	}
-362	
-363	.nav-link:hover,
-364	.nav-link.is-active {
-365	  color: var(--sea-ink);
-366	}
-367	
-368	.nav-link:hover::after,
-369	.nav-link.is-active::after {
-370	  transform: scaleX(1);
-371	}
-372	
-373	@media (width <= 640px) {
-374	  .nav-link::after {
-375	    bottom: -4px;
-376	  }
-377	}
-378	
-379	.site-footer {
-380	  border-top: 1px solid var(--line);
-381	  background: color-mix(
-382	    in oklab,
-383	    var(--header-bg) 84%,
-384	    transparent 16%
-385	  );
-386	}
-387	
-388	.rise-in {
-389	  animation: rise-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-390	}
-391	
-392	@keyframes rise-in {
-393	  from {
-394	    opacity: 0;
-395	    transform: translateY(12px);
-396	  }
-397	
-398	  to {
-399	    opacity: 1;
-400	    transform: translateY(0);
-401	  }
-402	}
-403	
-404	@keyframes blink {
-405	  0%,
-406	  100% {
-407	    opacity: 1;
-408	  }
-409	
-410	  50% {
-411	    opacity: 0;
-412	  }
-413	}
-414	
-415	@keyframes shake {
-416	  0%,
-417	  100% {
-418	    transform: translateX(0);
-419	  }
-420	
-421	  20% {
-422	    transform: translateX(-4px);
-423	  }
-424	
-425	  40% {
-426	    transform: translateX(4px);
-427	  }
-428	
-429	  60% {
-430	    transform: translateX(-3px);
-431	  }
-432	
-433	  80% {
-434	    transform: translateX(2px);
-435	  }
-436	}
-437	
-438	@keyframes pop {
-439	  0% {
-440	    transform: scale(1);
-441	  }
-442	
-443	  50% {
-444	    transform: scale(1.08);
-445	  }
-446	
-447	  100% {
-448	    transform: scale(1);
-449	  }
-450	}
-451	
-452	@theme inline {
-453	  --animate-blink: blink 1s step-end infinite;
-454	  --animate-shake: shake 300ms ease-in-out;
-455	  --animate-pop: pop 250ms ease-out;
-456	  --font-heading: var(--font-sans);
-457	  --font-sans:
-458	    'Andika', 'Edu NSW ACT Foundation', 'Nunito', 'Manrope', system-ui,
-459	    sans-serif;
-460	  --color-sidebar-ring: var(--sidebar-ring);
-461	  --color-sidebar-border: var(--sidebar-border);
-462	  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-463	  --color-sidebar-accent: var(--sidebar-accent);
-464	  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-465	  --color-sidebar-primary: var(--sidebar-primary);
-466	  --color-sidebar-foreground: var(--sidebar-foreground);
-467	  --color-sidebar: var(--sidebar);
-468	  --color-chart-5: var(--chart-5);
-469	  --color-chart-4: var(--chart-4);
-470	  --color-chart-3: var(--chart-3);
-471	  --color-chart-2: var(--chart-2);
-472	  --color-chart-1: var(--chart-1);
-473	  --color-ring: var(--ring);
-474	  --color-input: var(--input);
-475	  --color-border: var(--border);
-476	  --color-destructive: var(--destructive);
-477	  --color-accent-foreground: var(--accent-foreground);
-478	  --color-accent: var(--accent);
-479	  --color-muted-foreground: var(--muted-foreground);
-480	  --color-muted: var(--muted);
-481	  --color-secondary-foreground: var(--secondary-foreground);
-482	  --color-secondary: var(--secondary);
-483	  --color-primary-foreground: var(--primary-foreground);
-484	  --color-primary: var(--primary);
-485	  --color-popover-foreground: var(--popover-foreground);
-486	  --color-popover: var(--popover);
-487	  --color-card-foreground: var(--card-foreground);
-488	  --color-card: var(--card);
-489	  --color-foreground: var(--foreground);
-490	  --color-background: var(--background);
-491	  --radius-sm: calc(var(--radius) * 0.6);
-492	  --radius-md: calc(var(--radius) * 0.8);
-493	  --radius-lg: var(--radius);
-494	  --radius-xl: calc(var(--radius) * 1.4);
-495	  --radius-2xl: calc(var(--radius) * 1.8);
-496	  --radius-3xl: calc(var(--radius) * 2.2);
-497	  --radius-4xl: calc(var(--radius) * 2.6);
-498	}
-499	
-500	.dark {
-501	  --background: oklch(14.5% 0 0deg);
-502	  --foreground: oklch(98.5% 0 0deg);
-503	  --card: oklch(20.5% 0 0deg);
-504	  --card-foreground: oklch(98.5% 0 0deg);
-505	  --popover: oklch(20.5% 0 0deg);
-506	  --popover-foreground: oklch(98.5% 0 0deg);
-507	  --primary: oklch(92.2% 0 0deg);
-508	  --primary-foreground: oklch(20.5% 0 0deg);
-509	  --secondary: oklch(26.9% 0 0deg);
-510	  --secondary-foreground: oklch(98.5% 0 0deg);
-511	  --muted: oklch(26.9% 0 0deg);
-512	  --muted-foreground: oklch(70.8% 0 0deg);
-513	  --accent: oklch(26.9% 0 0deg);
-514	  --accent-foreground: oklch(98.5% 0 0deg);
-515	  --destructive: oklch(70.4% 0.191 22.216deg);
-516	  --border: oklch(100% 0 0deg / 10%);
-517	  --input: oklch(100% 0 0deg / 15%);
-518	  --ring: oklch(55.6% 0 0deg);
-519	  --chart-1: oklch(87% 0 0deg);
-520	  --chart-2: oklch(55.6% 0 0deg);
-521	  --chart-3: oklch(43.9% 0 0deg);
-522	  --chart-4: oklch(37.1% 0 0deg);
-523	  --chart-5: oklch(26.9% 0 0deg);
-524	  --sidebar: oklch(20.5% 0 0deg);
-525	  --sidebar-foreground: oklch(98.5% 0 0deg);
-526	  --sidebar-primary: oklch(48.8% 0.243 264.376deg);
-527	  --sidebar-primary-foreground: oklch(98.5% 0 0deg);
-528	  --sidebar-accent: oklch(26.9% 0 0deg);
-529	  --sidebar-accent-foreground: oklch(98.5% 0 0deg);
-530	  --sidebar-border: oklch(100% 0 0deg / 10%);
-531	  --sidebar-ring: oklch(55.6% 0 0deg);
-532	}
-533	
-534	/* Bookmark colour utilities — derived from --bookmark-play set per-component */
-535	.bookmark-bg {
-536	  background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
-537	}
-538	
-539	.dark .bookmark-bg {
-540	  background: color-mix(in srgb, var(--bookmark-play) 20%, transparent);
-541	}
-542	
-543	.bookmark-tag-bg {
-544	  background: color-mix(in srgb, var(--bookmark-play) 18%, transparent);
-545	}
-546	
-547	.dark .bookmark-tag-bg {
-548	  background: color-mix(in srgb, var(--bookmark-play) 25%, transparent);
-549	}
-550	
-551	.bookmark-text {
-552	  color: var(--bookmark-play);
-553	}
-554	
-555	@layer base {
-556	  * {
-557	    @apply border-border outline-ring/50;
-558	  }
-559	
-560	  body {
-561	    @apply bg-background text-foreground;
-562	  }
-563	
-564	  html {
-565	    @apply font-sans;
-566	  }
-567	}
-568	
-569	/* ── BaseSkill Design System ─────────────────────────────────────── */
-570	
-571	[data-theme='ocean'] {
-572	  --bs-primary: #0077b6;
-573	  --bs-secondary: #00b4d8;
-574	  --bs-background: #eaf6fb;
-575	  --bs-surface: #fff;
-576	  --bs-text: #023e57;
-577	  --bs-accent: #ffb703;
-578	  --bs-success: #2dc653;
-579	  --bs-warning: #f4a261;
-580	  --bs-error: #e63946;
-581	  --bs-font-weight-default: 600;
-582	}
-583	
-584	@theme inline {
-585	  --color-bs-primary: var(--bs-primary);
-586	  --color-bs-secondary: var(--bs-secondary);
-587	  --color-bs-background: var(--bs-background);
-588	  --color-bs-surface: var(--bs-surface);
-589	  --color-bs-text: var(--bs-text);
-590	  --color-bs-accent: var(--bs-accent);
-591	  --color-bs-success: var(--bs-success);
-592	  --color-bs-warning: var(--bs-warning);
-593	  --color-bs-error: var(--bs-error);
-594	}
+1 @import 'https://fonts.googleapis.com/css2?family=Andika:ital,wght@0,400;0,700;1,400;1,700&family=Edu+NSW+ACT+Foundation:wght@400..700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap';
+2 @import 'tailwindcss';
+3 @import 'tw-animate-css';
+4 @import 'shadcn/tailwind.css';
+5 @import '@fontsource-variable/geist';
+6 
+7 @custom-variant dark (&:is(.dark *));
+8 
+9 @plugin "@tailwindcss/typography";
+10 
+11 @theme {
+12   --font-sans:
+13     'Andika', 'Edu NSW ACT Foundation', 'Nunito', 'Manrope',
+14     ui-sans-serif, system-ui, sans-serif;
+15 }
+16 
+17 :root {
+18   --sea-ink: #173a40;
+19   --sea-ink-soft: #416166;
+20   --lagoon: #4fb8b2;
+21   --lagoon-light: #7ed3bf;
+22   --lagoon-deep: #328f97;
+23   --palm: #2f6a4a;
+24   --sand: #e7f0e8;
+25   --foam: #f3faf5;
+26   --surface: rgb(255 255 255 / 74%);
+27   --surface-strong: rgb(255 255 255 / 90%);
+28   --line: rgb(23 58 64 / 14%);
+29   --inset-glint: rgb(255 255 255 / 82%);
+30   --kicker: rgb(47 106 74 / 90%);
+31   --bg-base: #e7f3ec;
+32   --header-bg: rgb(251 255 248 / 84%);
+33   --chip-bg: rgb(255 255 255 / 80%);
+34   --chip-line: rgb(47 106 74 / 18%);
+35   --link-bg-hover: rgb(255 255 255 / 90%);
+36   --hero-a: rgb(79 184 178 / 36%);
+37   --hero-b: rgb(47 106 74 / 20%);
+38 
+39   /* Wire shadcn vars from --bs-* tokens; inline style only sets --bs-*, so .dark class wins */
+40   --foreground: var(--bs-text);
+41   --background: var(--bs-background);
+42   --popover: oklch(100% 0 0deg);
+43   --popover-foreground: oklch(14.5% 0 0deg);
+44   --primary: var(--bs-primary);
+45   --primary-foreground: var(--bs-surface);
+46   --secondary: var(--bs-secondary);
+47   --secondary-foreground: var(--bs-surface);
+48   --card: var(--bs-surface);
+49   --card-foreground: var(--bs-text);
+50   --muted: oklch(97% 0 0deg);
+51   --muted-foreground: oklch(55.6% 0 0deg);
+52   --accent: oklch(97% 0 0deg);
+53   --accent-foreground: oklch(20.5% 0 0deg);
+54   --destructive: oklch(57.7% 0.245 27.325deg);
+55   --border: var(--bs-accent);
+56   --input: oklch(92.2% 0 0deg);
+57   --ring: var(--bs-primary);
+58   --chart-1: oklch(87% 0 0deg);
+59   --chart-2: oklch(55.6% 0 0deg);
+60   --chart-3: oklch(43.9% 0 0deg);
+61   --chart-4: oklch(37.1% 0 0deg);
+62   --chart-5: oklch(26.9% 0 0deg);
+63   --radius: 0.625rem;
+64   --sidebar: oklch(98.5% 0 0deg);
+65   --sidebar-foreground: oklch(14.5% 0 0deg);
+66   --sidebar-primary: oklch(20.5% 0 0deg);
+67   --sidebar-primary-foreground: oklch(98.5% 0 0deg);
+68   --sidebar-accent: oklch(97% 0 0deg);
+69   --sidebar-accent-foreground: oklch(20.5% 0 0deg);
+70   --sidebar-border: oklch(92.2% 0 0deg);
+71   --sidebar-ring: oklch(70.8% 0 0deg);
+72 
+73   /* BaseSkill Design System — light defaults (aligned with Ocean preset / WCAG AA) */
+74   --bs-primary: #0077b6;
+75   --bs-secondary: #00b4d8;
+76   --bs-background: #caf0f8;
+77   --bs-surface: #fff;
+78   --bs-text: #03045e;
+79   --bs-accent: #f77f00;
+80   --bs-success: #6bcb77;
+81   --bs-warning: #f4a261;
+82   --bs-error: #e63946;
+83   --bs-font-weight-default: 600;
+84   --bs-radius-card: 1.5rem;
+85   --bs-radius-button: 1rem;
+86 }
+87 
+88 :root[data-theme='dark'] {
+89   --sea-ink: #d7ece8;
+90   --sea-ink-soft: #afcdc8;
+91   --lagoon: #60d7cf;
+92   --lagoon-deep: #8de5db;
+93   --palm: #6ec89a;
+94   --sand: #0f1a1e;
+95   --foam: #101d22;
+96   --surface: rgb(16 30 34 / 80%);
+97   --surface-strong: rgb(15 27 31 / 92%);
+98   --line: rgb(141 229 219 / 18%);
+99   --inset-glint: rgb(194 247 238 / 14%);
+100   --kicker: #b8efe5;
+101   --bg-base: #0a1418;
+102   --header-bg: rgb(10 20 24 / 80%);
+103   --chip-bg: rgb(13 28 32 / 90%);
+104   --chip-line: rgb(141 229 219 / 24%);
+105   --link-bg-hover: rgb(24 44 49 / 80%);
+106   --hero-a: rgb(96 215 207 / 18%);
+107   --hero-b: rgb(110 200 154 / 12%);
+108 
+109   /* BaseSkill Design System — Galaxy (dark) */
+110   --bs-primary: #ff9f43;
+111   --bs-secondary: #54a0ff;
+112   --bs-background: #1a1a2e;
+113   --bs-surface: #16213e;
+114   --bs-text: #e8f4fd;
+115   --bs-accent: #feca57;
+116   --bs-success: #6bcb77;
+117   --bs-warning: #f4a261;
+118   --bs-error: #ff6b6b;
+119 }
+120 
+121 @media (prefers-color-scheme: dark) {
+122   :root:not([data-theme='light']) {
+123     --sea-ink: #d7ece8;
+124     --sea-ink-soft: #afcdc8;
+125     --lagoon: #60d7cf;
+126     --lagoon-deep: #8de5db;
+127     --palm: #6ec89a;
+128     --sand: #0f1a1e;
+129     --foam: #101d22;
+130     --surface: rgb(16 30 34 / 80%);
+131     --surface-strong: rgb(15 27 31 / 92%);
+132     --line: rgb(141 229 219 / 18%);
+133     --inset-glint: rgb(194 247 238 / 14%);
+134     --kicker: #b8efe5;
+135     --bg-base: #0a1418;
+136     --header-bg: rgb(10 20 24 / 80%);
+137     --chip-bg: rgb(13 28 32 / 90%);
+138     --chip-line: rgb(141 229 219 / 24%);
+139     --link-bg-hover: rgb(24 44 49 / 80%);
+140     --hero-a: rgb(96 215 207 / 18%);
+141     --hero-b: rgb(110 200 154 / 12%);
+142 
+143     /* BaseSkill Design System — Galaxy (dark) */
+144     --bs-primary: #ff9f43;
+145     --bs-secondary: #54a0ff;
+146     --bs-background: #1a1a2e;
+147     --bs-surface: #16213e;
+148     --bs-text: #e8f4fd;
+149     --bs-accent: #feca57;
+150     --bs-success: #6bcb77;
+151     --bs-warning: #f4a261;
+152     --bs-error: #ff6b6b;
+153   }
+154 }
+155 
+156 * {
+157   box-sizing: border-box;
+158 }
+159 
+160 html,
+161 body,
+162 #app {
+163   min-height: 100%;
+164 }
+165 
+166 body {
+167   margin: 0;
+168   color: var(--sea-ink);
+169   font-family: var(--font-sans);
+170   background:
+171     radial-gradient(
+172       1100px 620px at -8% -10%,
+173       var(--hero-a),
+174       transparent 58%
+175     ),
+176     radial-gradient(
+177       1050px 620px at 112% -12%,
+178       var(--hero-b),
+179       transparent 62%
+180     ),
+181     radial-gradient(
+182       720px 380px at 50% 115%,
+183       rgb(79 184 178 / 10%),
+184       transparent 68%
+185     ),
+186     linear-gradient(
+187       180deg,
+188       color-mix(in oklab, var(--sand) 68%, oklch(100% 0 0deg)) 0%,
+189       var(--foam) 44%,
+190       var(--bg-base) 100%
+191     );
+192   overflow-x: hidden;
+193   -webkit-font-smoothing: antialiased;
+194   -moz-osx-font-smoothing: grayscale;
+195 }
+196 
+197 body::before {
+198   content: '';
+199   position: fixed;
+200   inset: 0;
+201   pointer-events: none;
+202   z-index: -1;
+203   opacity: 0.28;
+204   background:
+205     radial-gradient(
+206       circle at 20% 15%,
+207       rgb(255 255 255 / 80%),
+208       transparent 34%
+209     ),
+210     radial-gradient(
+211       circle at 78% 26%,
+212       rgb(79 184 178 / 20%),
+213       transparent 42%
+214     ),
+215     radial-gradient(
+216       circle at 42% 82%,
+217       rgb(47 106 74 / 14%),
+218       transparent 36%
+219     );
+220 }
+221 
+222 body::after {
+223   content: '';
+224   position: fixed;
+225   inset: 0;
+226   pointer-events: none;
+227   z-index: -1;
+228   opacity: 0.14;
+229   background-image:
+230     linear-gradient(rgb(255 255 255 / 7%) 1px, transparent 1px),
+231     linear-gradient(90deg, rgb(255 255 255 / 6%) 1px, transparent 1px);
+232   background-size: 28px 28px;
+233   mask-image: radial-gradient(
+234     circle at 50% 30%,
+235     oklch(0% 0 0deg),
+236     transparent 78%
+237   );
+238 }
+239 
+240 a {
+241   color: var(--lagoon-deep);
+242   text-decoration-color: rgb(50 143 151 / 40%);
+243   text-decoration-thickness: 1px;
+244   text-underline-offset: 2px;
+245 }
+246 
+247 code {
+248   font-size: 0.9em;
+249   border: 1px solid var(--line);
+250   background: color-mix(
+251     in oklab,
+252     var(--surface-strong) 82%,
+253     oklch(100% 0 0deg) 18%
+254   );
+255   border-radius: 7px;
+256   padding: 2px 7px;
+257 }
+258 
+259 pre code {
+260   border: 0;
+261   background: transparent;
+262   padding: 0;
+263   border-radius: 0;
+264   font-size: inherit;
+265   color: inherit;
+266 }
+267 
+268 .page-wrap {
+269   width: min(1080px, calc(100% - 2rem));
+270   margin-inline: auto;
+271 }
+272 
+273 .display-title {
+274   font-family: Fraunces, Georgia, serif;
+275 }
+276 
+277 .island-shell {
+278   border: 1px solid var(--line);
+279   background: linear-gradient(
+280     165deg,
+281     var(--surface-strong),
+282     var(--surface)
+283   );
+284   box-shadow:
+285     0 1px 0 var(--inset-glint) inset,
+286     0 22px 44px rgb(30 90 72 / 10%),
+287     0 6px 18px rgb(23 58 64 / 8%);
+288   backdrop-filter: blur(4px);
+289 }
+290 
+291 .feature-card {
+292   background: linear-gradient(
+293     165deg,
+294     color-mix(
+295       in oklab,
+296       var(--surface-strong) 93%,
+297       oklch(100% 0 0deg) 7%
+298     ),
+299     var(--surface)
+300   );
+301   box-shadow:
+302     0 1px 0 var(--inset-glint) inset,
+303     0 18px 34px rgb(30 90 72 / 10%),
+304     0 4px 14px rgb(23 58 64 / 6%);
+305 }
+306 
+307 .feature-card:hover {
+308   transform: translateY(-2px);
+309   border-color: color-mix(
+310     in oklab,
+311     var(--lagoon-deep) 35%,
+312     var(--line)
+313   );
+314 }
+315 
+316 button,
+317 .island-shell,
+318 a {
+319   transition:
+320     background-color 180ms ease,
+321     color 180ms ease,
+322     border-color 180ms ease,
+323     transform 180ms ease;
+324 }
+325 
+326 a:hover {
+327   color: var(--lagoon-deep);
+328 }
+329 
+330 .island-kicker {
+331   letter-spacing: 0.16em;
+332   text-transform: uppercase;
+333   font-weight: 700;
+334   font-size: 0.69rem;
+335   color: var(--kicker);
+336 }
+337 
+338 .nav-link {
+339   position: relative;
+340   display: inline-flex;
+341   align-items: center;
+342   text-decoration: none;
+343   color: var(--sea-ink-soft);
+344 }
+345 
+346 .nav-link::after {
+347   content: '';
+348   position: absolute;
+349   left: 0;
+350   bottom: -6px;
+351   width: 100%;
+352   height: 2px;
+353   transform: scaleX(0);
+354   transform-origin: left;
+355   background: linear-gradient(
+356     90deg,
+357     var(--lagoon),
+358     var(--lagoon-light)
+359   );
+360   transition: transform 170ms ease;
+361 }
+362 
+363 .nav-link:hover,
+364 .nav-link.is-active {
+365   color: var(--sea-ink);
+366 }
+367 
+368 .nav-link:hover::after,
+369 .nav-link.is-active::after {
+370   transform: scaleX(1);
+371 }
+372 
+373 @media (width <= 640px) {
+374   .nav-link::after {
+375     bottom: -4px;
+376   }
+377 }
+378 
+379 .site-footer {
+380   border-top: 1px solid var(--line);
+381   background: color-mix(
+382     in oklab,
+383     var(--header-bg) 84%,
+384     transparent 16%
+385   );
+386 }
+387 
+388 .rise-in {
+389   animation: rise-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+390 }
+391 
+392 @keyframes rise-in {
+393   from {
+394     opacity: 0;
+395     transform: translateY(12px);
+396   }
+397 
+398   to {
+399     opacity: 1;
+400     transform: translateY(0);
+401   }
+402 }
+403 
+404 @keyframes blink {
+405   0%,
+406   100% {
+407     opacity: 1;
+408   }
+409 
+410   50% {
+411     opacity: 0;
+412   }
+413 }
+414 
+415 @keyframes shake {
+416   0%,
+417   100% {
+418     transform: translateX(0);
+419   }
+420 
+421   20% {
+422     transform: translateX(-4px);
+423   }
+424 
+425   40% {
+426     transform: translateX(4px);
+427   }
+428 
+429   60% {
+430     transform: translateX(-3px);
+431   }
+432 
+433   80% {
+434     transform: translateX(2px);
+435   }
+436 }
+437 
+438 @keyframes pop {
+439   0% {
+440     transform: scale(1);
+441   }
+442 
+443   50% {
+444     transform: scale(1.08);
+445   }
+446 
+447   100% {
+448     transform: scale(1);
+449   }
+450 }
+451 
+452 @theme inline {
+453   --animate-blink: blink 1s step-end infinite;
+454   --animate-shake: shake 300ms ease-in-out;
+455   --animate-pop: pop 250ms ease-out;
+456   --font-heading: var(--font-sans);
+457   --font-sans:
+458     'Andika', 'Edu NSW ACT Foundation', 'Nunito', 'Manrope', system-ui,
+459     sans-serif;
+460   --color-sidebar-ring: var(--sidebar-ring);
+461   --color-sidebar-border: var(--sidebar-border);
+462   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+463   --color-sidebar-accent: var(--sidebar-accent);
+464   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+465   --color-sidebar-primary: var(--sidebar-primary);
+466   --color-sidebar-foreground: var(--sidebar-foreground);
+467   --color-sidebar: var(--sidebar);
+468   --color-chart-5: var(--chart-5);
+469   --color-chart-4: var(--chart-4);
+470   --color-chart-3: var(--chart-3);
+471   --color-chart-2: var(--chart-2);
+472   --color-chart-1: var(--chart-1);
+473   --color-ring: var(--ring);
+474   --color-input: var(--input);
+475   --color-border: var(--border);
+476   --color-destructive: var(--destructive);
+477   --color-accent-foreground: var(--accent-foreground);
+478   --color-accent: var(--accent);
+479   --color-muted-foreground: var(--muted-foreground);
+480   --color-muted: var(--muted);
+481   --color-secondary-foreground: var(--secondary-foreground);
+482   --color-secondary: var(--secondary);
+483   --color-primary-foreground: var(--primary-foreground);
+484   --color-primary: var(--primary);
+485   --color-popover-foreground: var(--popover-foreground);
+486   --color-popover: var(--popover);
+487   --color-card-foreground: var(--card-foreground);
+488   --color-card: var(--card);
+489   --color-foreground: var(--foreground);
+490   --color-background: var(--background);
+491   --radius-sm: calc(var(--radius) * 0.6);
+492   --radius-md: calc(var(--radius) * 0.8);
+493   --radius-lg: var(--radius);
+494   --radius-xl: calc(var(--radius) * 1.4);
+495   --radius-2xl: calc(var(--radius) * 1.8);
+496   --radius-3xl: calc(var(--radius) * 2.2);
+497   --radius-4xl: calc(var(--radius) * 2.6);
+498 }
+499 
+500 .dark {
+501   --background: oklch(14.5% 0 0deg);
+502   --foreground: oklch(98.5% 0 0deg);
+503   --card: oklch(20.5% 0 0deg);
+504   --card-foreground: oklch(98.5% 0 0deg);
+505   --popover: oklch(20.5% 0 0deg);
+506   --popover-foreground: oklch(98.5% 0 0deg);
+507   --primary: oklch(92.2% 0 0deg);
+508   --primary-foreground: oklch(20.5% 0 0deg);
+509   --secondary: oklch(26.9% 0 0deg);
+510   --secondary-foreground: oklch(98.5% 0 0deg);
+511   --muted: oklch(26.9% 0 0deg);
+512   --muted-foreground: oklch(70.8% 0 0deg);
+513   --accent: oklch(26.9% 0 0deg);
+514   --accent-foreground: oklch(98.5% 0 0deg);
+515   --destructive: oklch(70.4% 0.191 22.216deg);
+516   --border: oklch(100% 0 0deg / 10%);
+517   --input: oklch(100% 0 0deg / 15%);
+518   --ring: oklch(55.6% 0 0deg);
+519   --chart-1: oklch(87% 0 0deg);
+520   --chart-2: oklch(55.6% 0 0deg);
+521   --chart-3: oklch(43.9% 0 0deg);
+522   --chart-4: oklch(37.1% 0 0deg);
+523   --chart-5: oklch(26.9% 0 0deg);
+524   --sidebar: oklch(20.5% 0 0deg);
+525   --sidebar-foreground: oklch(98.5% 0 0deg);
+526   --sidebar-primary: oklch(48.8% 0.243 264.376deg);
+527   --sidebar-primary-foreground: oklch(98.5% 0 0deg);
+528   --sidebar-accent: oklch(26.9% 0 0deg);
+529   --sidebar-accent-foreground: oklch(98.5% 0 0deg);
+530   --sidebar-border: oklch(100% 0 0deg / 10%);
+531   --sidebar-ring: oklch(55.6% 0 0deg);
+532 }
+533 
+534 /* Bookmark colour utilities — derived from --bookmark-play set per-component */
+535 .bookmark-bg {
+536   background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
+537 }
+538 
+539 .dark .bookmark-bg {
+540   background: color-mix(in srgb, var(--bookmark-play) 20%, transparent);
+541 }
+542 
+543 .bookmark-tag-bg {
+544   background: color-mix(in srgb, var(--bookmark-play) 18%, transparent);
+545 }
+546 
+547 .dark .bookmark-tag-bg {
+548   background: color-mix(in srgb, var(--bookmark-play) 25%, transparent);
+549 }
+550 
+551 .bookmark-text {
+552   color: var(--bookmark-play);
+553 }
+554 
+555 @layer base {
+556   * {
+557     @apply border-border outline-ring/50;
+558   }
+559 
+560   body {
+561     @apply bg-background text-foreground;
+562   }
+563 
+564   html {
+565     @apply font-sans;
+566   }
+567 }
+568 
+569 /* ── BaseSkill Design System ─────────────────────────────────────── */
+570 
+571 [data-theme='ocean'] {
+572   --bs-primary: #0077b6;
+573   --bs-secondary: #00b4d8;
+574   --bs-background: #eaf6fb;
+575   --bs-surface: #fff;
+576   --bs-text: #023e57;
+577   --bs-accent: #ffb703;
+578   --bs-success: #2dc653;
+579   --bs-warning: #f4a261;
+580   --bs-error: #e63946;
+581   --bs-font-weight-default: 600;
+582 }
+583 
+584 @theme inline {
+585   --color-bs-primary: var(--bs-primary);
+586   --color-bs-secondary: var(--bs-secondary);
+587   --color-bs-background: var(--bs-background);
+588   --color-bs-surface: var(--bs-surface);
+589   --color-bs-text: var(--bs-text);
+590   --color-bs-accent: var(--bs-accent);
+591   --color-bs-success: var(--bs-success);
+592   --color-bs-warning: var(--bs-warning);
+593   --color-bs-error: var(--bs-error);
+594 }
 595
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:38:15Z)**_
@@ -2687,11 +2715,11 @@ a {
 
 Every `button` element has a `transition: ... transform 180ms ease` applied. But this doesn't include `visibility` or `opacity`, so the `invisible` class (which sets `visibility: hidden`) shouldn't transition.
 
-Hmm, but `invisible` in Tailwind also affects layout... Actually no, `invisible` sets `visibility: hidden` which preserves layout but hides the element. 
+Hmm, but `invisible` in Tailwind also affects layout... Actually no, `invisible` sets `visibility: hidden` which preserves layout but hides the element.
 
 It shouldn't cause a "fade." But wait, maybe `tw-animate-css` is imported and adding extra transition properties that I'm not seeing. Let me trace through what actually happens when a bank tile gets dragged to an invalid location—the browser's native drag-and-drop snap-back animation might be interacting with the hidden state in an unexpected way, or there could be something about how the source element visibility changes during the drag sequence that's creating the visual effect.
 
-Actually, I need to think through the timing more carefully. The `onDrop` callback fires during the `dragend` event, which happens *after* the snap-back animation completes. So the ghost is flying back to its original position, that animation finishes, then `dragend` fires and my `onDrop` handler runs to make the tile visible again—and that's when the ghost fades out. The sequence of the snap-back finishing and the tile reappearing might be creating the appearance of a fade.
+Actually, I need to think through the timing more carefully. The `onDrop` callback fires during the `dragend` event, which happens _after_ the snap-back animation completes. So the ghost is flying back to its original position, that animation finishes, then `dragend` fires and my `onDrop` handler runs to make the tile visible again—and that's when the ghost fades out. The sequence of the snap-back finishing and the tile reappearing might be creating the appearance of a fade.
 
 But wait, rereading the user's description—they said the tile itself is fading out when dragging starts, not during the drop. That's a different issue entirely. Let me check if the skeuomorphic styling is somehow causing the tile to fade when the drag begins.
 </details></think>
@@ -2703,18 +2731,19 @@ _**Agent (claude-opus-4-6 2026-04-07 16:38:15Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/styles.ts`
 
 ```text
-1	import type { CSSProperties } from 'react';
-2	
-3	/** Skeuomorphic tile button style — applied to all draggable tile buttons. */
-4	export const skeuoStyle: CSSProperties = {
-5	  background:
-6	    'linear-gradient(180deg, rgba(255,255,255,0) 70.48%, #FFF 93.62%, rgba(255,255,255,0) 100%), linear-gradient(180deg, rgba(30,54,87,0) 0%, rgba(30,54,87,0.01) 100%), #FAFAFA',
-7	  boxShadow:
-8	    'rgba(0,0,0,0.08) 0 0 0 1px, rgba(0,0,0,0.08) 0 -2px 1px 0 inset, rgba(255,255,255,0.5) 0 2px 1px 0 inset, 0 2px 5px -1px rgba(0,0,0,0.05), 0 1px 3px -1px rgba(0,0,0,0.3)',
-9	  textShadow: '0px 1px 1px rgba(0,0,0,0.12)',
-10	};
+1 import type { CSSProperties } from 'react';
+2 
+3 /** Skeuomorphic tile button style — applied to all draggable tile buttons. */
+4 export const skeuoStyle: CSSProperties = {
+5   background:
+6     'linear-gradient(180deg, rgba(255,255,255,0) 70.48%, #FFF 93.62%, rgba(255,255,255,0) 100%), linear-gradient(180deg, rgba(30,54,87,0) 0%, rgba(30,54,87,0.01) 100%), #FAFAFA',
+7   boxShadow:
+8     'rgba(0,0,0,0.08) 0 0 0 1px, rgba(0,0,0,0.08) 0 -2px 1px 0 inset, rgba(255,255,255,0.5) 0 2px 1px 0 inset, 0 2px 5px -1px rgba(0,0,0,0.05), 0 1px 3px -1px rgba(0,0,0,0.3)',
+9   textShadow: '0px 1px 1px rgba(0,0,0,0.12)',
+10 };
 11
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:39:46Z)**_
@@ -2726,7 +2755,6 @@ When `draggable()` from pragmatic-drag-and-drop is set up on a bank tile button,
 
 1. `onGenerateDragPreview` fires — for bank tiles in `useDraggableTile.ts`, this is NOT configured (no `onGenerateDragPreview`), so the browser uses the default drag preview (a screenshot of the element)
 2. `onDragStart` fires — dispatches `SET_DRAG_ACTIVE`
-
 
 3. React re-renders — bank tile gets `invisible` class
 
@@ -2775,6 +2803,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:39:56Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:40:00Z)**_
@@ -2788,399 +2817,400 @@ _**Agent (claude-opus-4-6 2026-04-07 16:40:00Z)**_
  `./.claude/worktrees/bold-chatelet/docs/superpowers/specs/2026-04-07-unified-slot-component-design.md`
 
 ```text
-1	# Unified Slot Component Design
-2	
-3	**Date:** 2026-04-07
-4	**Status:** Approved
-5	**Approach:** New component, parallel migration (Approach A)
-6	
-7	## Context
-8	
-9	The answer-game framework has two slot components that serve nearly identical purposes:
-10	
-11	- `OrderedSlots` (used by WordSpell and SortNumbers) — auto-advancing sequential slots with keyboard input support
-12	- `MatchingPairZones` (used by NumberMatch) — free-swap slots, drag-only
-13	
-14	These components share ~80% of their code (drag source, drop target, click-to-remove, state styling) but diverge on interaction mode and sizing. This duplication blocks reuse for upcoming features (scramble mode, sentence-gap) and makes it harder to deliver consistent animations and drag behavior across games.
-15	
-16	Additionally, the current drag system has a mobile bug (frozen ghost tiles) and lacks visual polish (no feedback animations, inconsistent drag effects between bank↔slot directions).
-17	
-18	## Goals
-19	
-20	1. **Unify** `OrderedSlots` and `MatchingPairZones` into a single `<Slot>` compound component
-21	2. **Add feedback animations** — shake on wrong, pop/bounce on correct, animated auto-eject return
-22	3. **Fix mobile drag bug** — frozen ghost tiles when touch gestures are interrupted
-23	4. **Skeuomorphic drag** — consistent "lift + hole" effect in both directions (bank→slot, slot→bank)
-24	5. **Dynamic slot sizing** — slots adapt to content (letters, dice, dominoes, words)
-25	6. **Sentence-gap support** — inline droppable gaps within sentence text, with multi-gap support
-26	
-27	## 1. Unified Slot Component
-28	
-29	### Location
-30	
-31	`src/components/answer-game/Slot/`
-32	
-33	### Pattern: Compound Component with Render Prop
-34	
-35	The `<Slot>` component owns all behavior; the consumer controls visual content via a render function.
-36	
-37	```tsx
-38	// WordSpell — small square letter slots
-39	<SlotRow className="gap-2">
-40	  {zones.map((zone, i) => (
-41	    <Slot key={zone.id} index={i} className="size-14 rounded-lg">
-42	      {({ label }) => <span className="text-2xl font-bold">{label}</span>}
-43	    </Slot>
-44	  ))}
-45	</SlotRow>
-46	
-47	// NumberMatch — dice content inside larger slots
-48	<SlotRow className="gap-4">
-49	  {zones.map((zone, i) => (
-50	    <Slot key={zone.id} index={i} className="size-20 rounded-2xl">
-51	      {({ label }) =>
-52	        label ? <DiceFace value={Number(label)} /> : null
-53	      }
-54	    </Slot>
-55	  ))}
-56	</SlotRow>
-57	
-58	// Sentence-gap — inline slots within text
-59	<p className="text-lg leading-relaxed">
-60	  The{' '}
-61	  <Slot index={0} as="span" className="inline-block min-w-16 border-b-2 border-dashed mx-1">
-62	    {({ label }) => <span className="text-lg font-bold">{label ?? '\u00A0'}</span>}
-63	  </Slot>
-64	  {' '}sat on the mat.
-65	</p>
-66	```
-67	
-68	### What `<Slot>` Owns (Behavior)
-69	
-70	- Drop target registration (pragmatic DnD + touch via `useTouchDrag`)
-71	- Drag source when filled (for removing/swapping)
-72	- Click-to-remove handler
-73	- Keyboard input focus (when `inputMethod` includes `'type'`)
-74	- Correct/wrong state styling (border + background colors)
-75	- Feedback animations (shake, pop, auto-eject return)
-76	- Active slot cursor (blinking underline, only in `ordered` interaction mode)
-77	- Accessibility (aria-labels, roles)
-78	
-79	### What the Consumer Owns (Rendering)
-80	
-81	- Inner content (letter, number, dice face, word, image) via render prop
-82	- Size and shape via `className` (`size-14`, `size-20`, `h-[72px] w-32`, inline)
-83	- HTML element via `as` prop (`li` default, `span` for inline gaps)
-84	
-85	### Render Prop Signature
-86	
-87	```tsx
-88	interface SlotRenderProps {
-89	  label: string | null;       // placed tile's label, or null if empty
-90	  tileId: string | null;      // placed tile's ID
-91	  isActive: boolean;          // this slot is the current auto-advance target
-92	  isWrong: boolean;           // placed tile is incorrect
-93	  isLocked: boolean;          // tile is locked (wrong + lock mode)
-94	  isEmpty: boolean;           // no tile placed
-95	  showCursor: boolean;        // should show blinking cursor (type/both mode + ordered)
-96	}
-97	
-98	interface SlotProps {
-99	  index: number;
-100	  as?: 'li' | 'span' | 'div';
-101	  className?: string;
-102	  children: (props: SlotRenderProps) => React.ReactNode;
-103	}
-104	```
-105	
-106	### `SlotRow` Wrapper
-107	
-108	Optional layout wrapper for row-based slot arrangements:
-109	
-110	```tsx
-111	interface SlotRowProps {
-112	  className?: string;
-113	  children: React.ReactNode;
-114	}
-115	
-116	// Renders <ol> with flex layout, role="list"
-117	```
-118	
-119	### Config: `slotInteraction` (New Field)
-120	
-121	Added to `AnswerGameConfig`:
-122	
-123	```typescript
-124	interface AnswerGameConfig {
-125	  // ... existing fields ...
-126	  slotInteraction: 'ordered' | 'free-swap';
-127	}
-128	```
-129	
-130	- **`ordered`**: Active slot highlighted, auto-advances on placement. Used for letter-spelling (picture, recall modes).
-131	- **`free-swap`**: No active slot, tiles can be swapped between any slots. Used for scramble, NumberMatch, SortNumbers.
-132	- **Default**: `'free-swap'` when `inputMethod` is `'drag'` or `'both'`; `'ordered'` when `inputMethod` is `'type'`.
-133	
-134	## 2. Feedback Animations
-135	
-136	### Wrong Placement — Shake + Red Flash (~400ms)
-137	
-138	1. Tile lands in slot → `wrong.mp3` plays
-139	2. Slot border/bg turns `border-destructive bg-destructive/10 text-destructive`
-140	3. CSS `animate-shake`: horizontal oscillation (±4px, 3 cycles, 300ms)
-141	4. Brief red flash overlay fades out (100ms)
-142	5. Behavior continues per `wrongTileBehavior` setting
-143	
-144	### Correct Placement — Pop/Bounce (~250ms)
-145	
-146	1. Tile lands in slot → `correct.mp3` plays
-147	2. Slot scales up (`scale(1.08)`) then settles back (`scale(1)`) — spring-like ease
-148	3. Border/bg transitions to `border-primary bg-primary/10 text-primary`
-149	
-150	### CSS Keyframes
-151	
-152	```css
-153	@keyframes shake {
-154	  0%, 100% { transform: translateX(0); }
-155	  20%      { transform: translateX(-4px); }
-156	  40%      { transform: translateX(4px); }
-157	  60%      { transform: translateX(-3px); }
-158	  80%      { transform: translateX(2px); }
-159	}
-160	
-161	@keyframes pop {
-162	  0%   { transform: scale(1); }
-163	  50%  { transform: scale(1.08); }
-164	  100% { transform: scale(1); }
-165	}
-166	```
-167	
-168	Added to `src/styles.css` alongside existing `animate-blink`.
-169	
-170	## 3. Skeuomorphic Drag Effect
-171	
-172	### Lift Effect (Both Directions)
-173	
-174	When drag starts (from bank OR slot):
-175	- **Touch ghost**: `boxShadow: 0 12px 32px rgba(0,0,0,0.3)`, `transform: scale(1.08)`, `opacity: 0.95`
-176	- **Desktop**: Custom drag preview via pragmatic DnD `setCustomNativeDragPreview` with matching shadow/scale
-177	
-178	### "Hole" Left Behind
-179	
-180	Where the tile was picked up from:
-181	- **In bank**: tile spot shows `bg-muted/30` + `shadow-inner` + `rounded-xl` — an indent/depression. Uses existing `dragActiveTileId` state (via `SET_DRAG_ACTIVE` action) to keep the tile's spot visible in the bank instead of removing it from the list.
-182	- **In slot**: slot shows dashed border + `bg-muted/20` — slightly darker than normal empty to suggest "something was here"
-183	- Hole disappears when tile is dropped (placed or returned)
-184	
-185	### Consistency
-186	
-187	Same lifted styling regardless of drag direction (bank→slot or slot→bank), same on desktop and mobile.
-188	
-189	## 4. Auto-Eject Return Animation
-190	
-191	### Sequence (~1300ms total)
-192	
-193	| Time | What happens |
-194	|------|-------------|
-195	| 0–300ms | Shake animation plays (wrong feedback from Section 2) |
-196	| 300–1000ms | Tile sits locked in slot with red styling (existing `AUTO_EJECT_DELAY_MS`) |
-197	| 1000–1300ms | Tile animates back: slides toward tile bank center, `scale(0.8)`, `opacity: 0.7`, `ease-in` |
-198	| 1300ms | `EJECT_TILE` dispatched, tile reappears in bank at normal size |
-199	
-200	### Implementation
-201	
-202	- Before ejecting, measure slot position and bank container center
-203	- Apply CSS transition with calculated `translate(deltaX, deltaY)` + scale + opacity
-204	- On `transitionend` event, dispatch `EJECT_TILE`
-205	- **Fallback**: if DOM measurement fails, fade out in place (graceful degradation)
-206	
-207	## 5. Mobile Drag Bug Fix
-208	
-209	### Root Cause
-210	
-211	In `useSlotTileDrag.ts`, `REMOVE_TILE` dispatches immediately on drag start. If the touch gesture is interrupted (cancelled, leaves viewport, multi-touch conflict), the tile is removed from state but the ghost element lingers — creating frozen overlays (visible in the reported iPhone 17 screenshot with tiles 51 and 58).
-212	
-213	### Fix (Three-Part)
-214	
-215	1. **Ghost cleanup on all terminal events**: Register handlers for `pointercancel`, `pointerup`, `contextmenu`, `visibilitychange`, and `touchend` — all trigger ghost removal + pointer capture release.
-216	
-217	2. **Deferred removal**: Instead of dispatching `REMOVE_TILE` on drag start, hold the tile in a visual "dragging" state. Only dispatch removal on successful drop or confirmed drag-end. If cancelled, tile snaps back to its original slot position.
-218	
-219	3. **Safety net timeout**: If ghost element still exists after 5 seconds, force-clean it and restore tile to its slot. Prevents permanent frozen states from edge cases.
-220	
-221	### Files Affected
-222	
-223	- `src/components/answer-game/useTouchDrag.ts` — ghost lifecycle, event cleanup
-224	- `src/components/answer-game/useSlotTileDrag.ts` — deferred removal logic
-225	
-226	## 6. Dynamic Slot Sizing
-227	
-228	Slot sizing is fully controlled by the consumer via `className`. The `<Slot>` component has no internal size opinions.
-229	
-230	### Per-Game Sizing
-231	
-232	| Game | Slot className | When |
-233	|------|---------------|------|
-234	| WordSpell (letters) | `size-14 rounded-lg` | Always |
-235	| WordSpell (syllables/words) | `min-w-14 h-14 px-2 rounded-lg` | Auto-width for longer content |
-236	| SortNumbers | `size-14 rounded-lg` | Always |
-237	| NumberMatch (dice, all ≤ 6) | `size-20 rounded-2xl` | `round.numbers.every(n => n <= 6)` |
-238	| NumberMatch (domino, any > 6) | `h-[72px] w-32 rounded-2xl` | `round.numbers.some(n => n > 6)` |
-239	| Sentence-gap | `inline-block min-w-16 px-2 border-b-2` | Always inline |
-240	
-241	### NumberMatch Dice/Domino Rule
-242	
-243	When **any** number in the round exceeds 6, **all** slots and tiles render in domino (rectangle) format for visual consistency. When all numbers are ≤ 6, all render as dice (square).
-244	
-245	```tsx
-246	const allDice = round.numbers.every(n => n <= 6);
-247	const slotClass = allDice ? 'size-20 rounded-2xl' : 'h-[72px] w-32 rounded-2xl';
-248	```
-249	
-250	## 7. Sentence-Gap Schema
-251	
-252	### Template Syntax
-253	
-254	Numbered placeholders `{0}`, `{1}`, etc. in the sentence string, mapped to a `gaps` array.
-255	
-256	### Types
-257	
-258	```typescript
-259	interface GapDefinition {
-260	  word: string;           // expected answer for this gap
-261	  distractors?: string[]; // extra wrong tile choices, per-gap
-262	}
-263	
-264	interface WordSpellRound {
-265	  word: string;
-266	  emoji?: string;
-267	  image?: string;
-268	  sceneImage?: string;
-269	  sentence?: string;      // "The {0} sat on the {1}."
-270	  gaps?: GapDefinition[]; // one entry per numbered placeholder
-271	  audioOverride?: string;
-272	}
-273	```
-274	
-275	### Single Gap
-276	
-277	```typescript
-278	{
-279	  sentence: "The {0} sat on the mat.",
-280	  gaps: [{ word: "cat", distractors: ["dog", "bat"] }],
-281	}
-282	// → 1 zone (expectedValue: "cat")
-283	// → 3 tiles: ["cat", "dog", "bat"] shuffled
-284	```
-285	
-286	### Multiple Gaps
-287	
-288	```typescript
-289	{
-290	  sentence: "The {0} sat on the {1}.",
-291	  gaps: [
-292	    { word: "cat", distractors: ["dog"] },
-293	    { word: "mat", distractors: ["hat"] },
-294	  ],
-295	}
-296	// → 2 zones (expectedValue: "cat", expectedValue: "mat")
-297	// → 4 tiles: ["cat", "mat", "dog", "hat"] shuffled
-298	```
-299	
-300	### Rendering
-301	
-302	A `<SentenceWithGaps>` helper component parses the template and injects `<Slot>` components:
-303	
-304	```tsx
-305	const SentenceWithGaps = ({ sentence }: { sentence: string }) => {
-306	  const segments = parseSentenceTemplate(sentence);
-307	  // Splits "The {0} sat on the {1}." into:
-308	  // [{ type:'text', value:'The ' }, { type:'gap', index:0 }, ...]
-309	
-310	  return (
-311	    <p className="text-lg leading-relaxed">
-312	      {segments.map((seg, i) =>
-313	        seg.type === 'text' ? (
-314	          <span key={i}>{seg.value}</span>
-315	        ) : (
-316	          <Slot
-317	            key={seg.index}
-318	            index={seg.index}
-319	            as="span"
-320	            className="inline-block min-w-16 border-b-2 border-dashed mx-1"
-321	          >
-322	            {({ label }) => (
-323	              <span className="text-lg font-bold">{label ?? '\u00A0'}</span>
-324	            )}
-325	          </Slot>
-326	        )
-327	      )}
-328	    </p>
-329	  );
-330	};
-331	```
-332	
-333	### Zone Generation
-334	
-335	```typescript
-336	const buildSentenceGapRound = (gaps: GapDefinition[]) => {
-337	  const zones = gaps.map((gap, i) => ({
-338	    id: `z${i}`,
-339	    index: i,
-340	    expectedValue: gap.word,
-341	    placedTileId: null,
-342	    isWrong: false,
-343	    isLocked: false,
-344	  }));
-345	
-346	  const allWords = [
-347	    ...gaps.map(g => g.word),
-348	    ...gaps.flatMap(g => g.distractors ?? []),
-349	  ];
-350	  const tiles = shuffle(allWords).map(word => ({
-351	    id: nanoid(),
-352	    label: word,
-353	    value: word,
-354	  }));
-355	
-356	  return { tiles, zones };
-357	};
-358	```
-359	
-360	### Backward Compatibility
-361	
-362	When `gaps` is undefined, fall back to existing behavior: generate zones from `round.word` and render letter-spelling slots below the sentence text.
-363	
-364	## Migration Strategy
-365	
-366	**Approach A: New component, parallel migration.**
-367	
-368	1. Build `<Slot>`, `<SlotRow>`, and `<SentenceWithGaps>` in `src/components/answer-game/Slot/`
-369	2. Add `slotInteraction` to `AnswerGameConfig` with backward-compatible defaults
-370	3. Migrate games one at a time:
-371	   - SortNumbers first (simplest — same as current OrderedSlots)
-372	   - WordSpell second (adds keyboard/cursor support)
-373	   - NumberMatch third (validates free-swap + dynamic sizing)
-374	   - Sentence-gap last (new feature, validates inline rendering)
-375	4. After all games migrated, delete `OrderedSlots/` and `MatchingPairZones/`
-376	5. Update game-specific re-exports (`OrderedLetterSlots`, `NumberSequenceSlots`) to point to new component or remove
-377	
-378	## Key Files
-379	
-380	| File | Role |
-381	|------|------|
-382	| `src/components/answer-game/Slot/Slot.tsx` | New unified slot component |
-383	| `src/components/answer-game/Slot/SlotRow.tsx` | Row layout wrapper |
-384	| `src/components/answer-game/Slot/SentenceWithGaps.tsx` | Template parser + inline slot renderer |
-385	| `src/components/answer-game/Slot/useSlotBehavior.ts` | Drag/drop/click/keyboard logic hook |
-386	| `src/components/answer-game/Slot/slot-animations.ts` | Shake, pop, auto-eject return animation helpers |
-387	| `src/components/answer-game/types.ts` | Add `slotInteraction` to config, add `GapDefinition` |
-388	| `src/components/answer-game/useTouchDrag.ts` | Bug fix: ghost cleanup + deferred removal |
-389	| `src/components/answer-game/useSlotTileDrag.ts` | Bug fix: deferred removal logic |
-390	| `src/styles.css` | New keyframes: `shake`, `pop` |
-391	| `src/games/word-spell/types.ts` | Add `gaps?: GapDefinition[]` to round type |
+1 # Unified Slot Component Design
+2 
+3 **Date:** 2026-04-07
+4 **Status:** Approved
+5 **Approach:** New component, parallel migration (Approach A)
+6 
+7 ## Context
+8 
+9 The answer-game framework has two slot components that serve nearly identical purposes:
+10 
+11 - `OrderedSlots` (used by WordSpell and SortNumbers) — auto-advancing sequential slots with keyboard input support
+12 - `MatchingPairZones` (used by NumberMatch) — free-swap slots, drag-only
+13 
+14 These components share ~80% of their code (drag source, drop target, click-to-remove, state styling) but diverge on interaction mode and sizing. This duplication blocks reuse for upcoming features (scramble mode, sentence-gap) and makes it harder to deliver consistent animations and drag behavior across games.
+15 
+16 Additionally, the current drag system has a mobile bug (frozen ghost tiles) and lacks visual polish (no feedback animations, inconsistent drag effects between bank↔slot directions).
+17 
+18 ## Goals
+19 
+20 1. **Unify** `OrderedSlots` and `MatchingPairZones` into a single `<Slot>` compound component
+21 2. **Add feedback animations** — shake on wrong, pop/bounce on correct, animated auto-eject return
+22 3. **Fix mobile drag bug** — frozen ghost tiles when touch gestures are interrupted
+23 4. **Skeuomorphic drag** — consistent "lift + hole" effect in both directions (bank→slot, slot→bank)
+24 5. **Dynamic slot sizing** — slots adapt to content (letters, dice, dominoes, words)
+25 6. **Sentence-gap support** — inline droppable gaps within sentence text, with multi-gap support
+26 
+27 ## 1. Unified Slot Component
+28 
+29 ### Location
+30 
+31 `src/components/answer-game/Slot/`
+32 
+33 ### Pattern: Compound Component with Render Prop
+34 
+35 The `<Slot>` component owns all behavior; the consumer controls visual content via a render function.
+36 
+37 ```tsx
+38 // WordSpell — small square letter slots
+39 <SlotRow className="gap-2">
+40   {zones.map((zone, i) => (
+41     <Slot key={zone.id} index={i} className="size-14 rounded-lg">
+42       {({ label }) => <span className="text-2xl font-bold">{label}</span>}
+43     </Slot>
+44   ))}
+45 </SlotRow>
+46 
+47 // NumberMatch — dice content inside larger slots
+48 <SlotRow className="gap-4">
+49   {zones.map((zone, i) => (
+50     <Slot key={zone.id} index={i} className="size-20 rounded-2xl">
+51       {({ label }) =>
+52         label ? <DiceFace value={Number(label)} /> : null
+53       }
+54     </Slot>
+55   ))}
+56 </SlotRow>
+57 
+58 // Sentence-gap — inline slots within text
+59 <p className="text-lg leading-relaxed">
+60   The{' '}
+61   <Slot index={0} as="span" className="inline-block min-w-16 border-b-2 border-dashed mx-1">
+62     {({ label }) => <span className="text-lg font-bold">{label ?? '\u00A0'}</span>}
+63   </Slot>
+64   {' '}sat on the mat.
+65 </p>
+66 ```
+67 
+68 ### What `<Slot>` Owns (Behavior)
+69 
+70 - Drop target registration (pragmatic DnD + touch via `useTouchDrag`)
+71 - Drag source when filled (for removing/swapping)
+72 - Click-to-remove handler
+73 - Keyboard input focus (when `inputMethod` includes `'type'`)
+74 - Correct/wrong state styling (border + background colors)
+75 - Feedback animations (shake, pop, auto-eject return)
+76 - Active slot cursor (blinking underline, only in `ordered` interaction mode)
+77 - Accessibility (aria-labels, roles)
+78 
+79 ### What the Consumer Owns (Rendering)
+80 
+81 - Inner content (letter, number, dice face, word, image) via render prop
+82 - Size and shape via `className` (`size-14`, `size-20`, `h-[72px] w-32`, inline)
+83 - HTML element via `as` prop (`li` default, `span` for inline gaps)
+84 
+85 ### Render Prop Signature
+86 
+87 ```tsx
+88 interface SlotRenderProps {
+89   label: string | null;       // placed tile's label, or null if empty
+90   tileId: string | null;      // placed tile's ID
+91   isActive: boolean;          // this slot is the current auto-advance target
+92   isWrong: boolean;           // placed tile is incorrect
+93   isLocked: boolean;          // tile is locked (wrong + lock mode)
+94   isEmpty: boolean;           // no tile placed
+95   showCursor: boolean;        // should show blinking cursor (type/both mode + ordered)
+96 }
+97 
+98 interface SlotProps {
+99   index: number;
+100   as?: 'li' | 'span' | 'div';
+101   className?: string;
+102   children: (props: SlotRenderProps) => React.ReactNode;
+103 }
+104 ```
+105 
+106 ### `SlotRow` Wrapper
+107 
+108 Optional layout wrapper for row-based slot arrangements:
+109 
+110 ```tsx
+111 interface SlotRowProps {
+112   className?: string;
+113   children: React.ReactNode;
+114 }
+115 
+116 // Renders <ol> with flex layout, role="list"
+117 ```
+118 
+119 ### Config: `slotInteraction` (New Field)
+120 
+121 Added to `AnswerGameConfig`:
+122 
+123 ```typescript
+124 interface AnswerGameConfig {
+125   // ... existing fields ...
+126   slotInteraction: 'ordered' | 'free-swap';
+127 }
+128 ```
+129 
+130 - **`ordered`**: Active slot highlighted, auto-advances on placement. Used for letter-spelling (picture, recall modes).
+131 - **`free-swap`**: No active slot, tiles can be swapped between any slots. Used for scramble, NumberMatch, SortNumbers.
+132 - **Default**: `'free-swap'` when `inputMethod` is `'drag'` or `'both'`; `'ordered'` when `inputMethod` is `'type'`.
+133 
+134 ## 2. Feedback Animations
+135 
+136 ### Wrong Placement — Shake + Red Flash (~400ms)
+137 
+138 1. Tile lands in slot → `wrong.mp3` plays
+139 2. Slot border/bg turns `border-destructive bg-destructive/10 text-destructive`
+140 3. CSS `animate-shake`: horizontal oscillation (±4px, 3 cycles, 300ms)
+141 4. Brief red flash overlay fades out (100ms)
+142 5. Behavior continues per `wrongTileBehavior` setting
+143 
+144 ### Correct Placement — Pop/Bounce (~250ms)
+145 
+146 1. Tile lands in slot → `correct.mp3` plays
+147 2. Slot scales up (`scale(1.08)`) then settles back (`scale(1)`) — spring-like ease
+148 3. Border/bg transitions to `border-primary bg-primary/10 text-primary`
+149 
+150 ### CSS Keyframes
+151 
+152 ```css
+153 @keyframes shake {
+154   0%, 100% { transform: translateX(0); }
+155   20%      { transform: translateX(-4px); }
+156   40%      { transform: translateX(4px); }
+157   60%      { transform: translateX(-3px); }
+158   80%      { transform: translateX(2px); }
+159 }
+160 
+161 @keyframes pop {
+162   0%   { transform: scale(1); }
+163   50%  { transform: scale(1.08); }
+164   100% { transform: scale(1); }
+165 }
+166 ```
+167 
+168 Added to `src/styles.css` alongside existing `animate-blink`.
+169 
+170 ## 3. Skeuomorphic Drag Effect
+171 
+172 ### Lift Effect (Both Directions)
+173 
+174 When drag starts (from bank OR slot):
+175 - **Touch ghost**: `boxShadow: 0 12px 32px rgba(0,0,0,0.3)`, `transform: scale(1.08)`, `opacity: 0.95`
+176 - **Desktop**: Custom drag preview via pragmatic DnD `setCustomNativeDragPreview` with matching shadow/scale
+177 
+178 ### "Hole" Left Behind
+179 
+180 Where the tile was picked up from:
+181 - **In bank**: tile spot shows `bg-muted/30` + `shadow-inner` + `rounded-xl` — an indent/depression. Uses existing `dragActiveTileId` state (via `SET_DRAG_ACTIVE` action) to keep the tile's spot visible in the bank instead of removing it from the list.
+182 - **In slot**: slot shows dashed border + `bg-muted/20` — slightly darker than normal empty to suggest "something was here"
+183 - Hole disappears when tile is dropped (placed or returned)
+184 
+185 ### Consistency
+186 
+187 Same lifted styling regardless of drag direction (bank→slot or slot→bank), same on desktop and mobile.
+188 
+189 ## 4. Auto-Eject Return Animation
+190 
+191 ### Sequence (~1300ms total)
+192 
+193 | Time | What happens |
+194 |------|-------------|
+195 | 0–300ms | Shake animation plays (wrong feedback from Section 2) |
+196 | 300–1000ms | Tile sits locked in slot with red styling (existing `AUTO_EJECT_DELAY_MS`) |
+197 | 1000–1300ms | Tile animates back: slides toward tile bank center, `scale(0.8)`, `opacity: 0.7`, `ease-in` |
+198 | 1300ms | `EJECT_TILE` dispatched, tile reappears in bank at normal size |
+199 
+200 ### Implementation
+201 
+202 - Before ejecting, measure slot position and bank container center
+203 - Apply CSS transition with calculated `translate(deltaX, deltaY)` + scale + opacity
+204 - On `transitionend` event, dispatch `EJECT_TILE`
+205 - **Fallback**: if DOM measurement fails, fade out in place (graceful degradation)
+206 
+207 ## 5. Mobile Drag Bug Fix
+208 
+209 ### Root Cause
+210 
+211 In `useSlotTileDrag.ts`, `REMOVE_TILE` dispatches immediately on drag start. If the touch gesture is interrupted (cancelled, leaves viewport, multi-touch conflict), the tile is removed from state but the ghost element lingers — creating frozen overlays (visible in the reported iPhone 17 screenshot with tiles 51 and 58).
+212 
+213 ### Fix (Three-Part)
+214 
+215 1. **Ghost cleanup on all terminal events**: Register handlers for `pointercancel`, `pointerup`, `contextmenu`, `visibilitychange`, and `touchend` — all trigger ghost removal + pointer capture release.
+216 
+217 2. **Deferred removal**: Instead of dispatching `REMOVE_TILE` on drag start, hold the tile in a visual "dragging" state. Only dispatch removal on successful drop or confirmed drag-end. If cancelled, tile snaps back to its original slot position.
+218 
+219 3. **Safety net timeout**: If ghost element still exists after 5 seconds, force-clean it and restore tile to its slot. Prevents permanent frozen states from edge cases.
+220 
+221 ### Files Affected
+222 
+223 - `src/components/answer-game/useTouchDrag.ts` — ghost lifecycle, event cleanup
+224 - `src/components/answer-game/useSlotTileDrag.ts` — deferred removal logic
+225 
+226 ## 6. Dynamic Slot Sizing
+227 
+228 Slot sizing is fully controlled by the consumer via `className`. The `<Slot>` component has no internal size opinions.
+229 
+230 ### Per-Game Sizing
+231 
+232 | Game | Slot className | When |
+233 |------|---------------|------|
+234 | WordSpell (letters) | `size-14 rounded-lg` | Always |
+235 | WordSpell (syllables/words) | `min-w-14 h-14 px-2 rounded-lg` | Auto-width for longer content |
+236 | SortNumbers | `size-14 rounded-lg` | Always |
+237 | NumberMatch (dice, all ≤ 6) | `size-20 rounded-2xl` | `round.numbers.every(n => n <= 6)` |
+238 | NumberMatch (domino, any > 6) | `h-[72px] w-32 rounded-2xl` | `round.numbers.some(n => n > 6)` |
+239 | Sentence-gap | `inline-block min-w-16 px-2 border-b-2` | Always inline |
+240 
+241 ### NumberMatch Dice/Domino Rule
+242 
+243 When **any** number in the round exceeds 6, **all** slots and tiles render in domino (rectangle) format for visual consistency. When all numbers are ≤ 6, all render as dice (square).
+244 
+245 ```tsx
+246 const allDice = round.numbers.every(n => n <= 6);
+247 const slotClass = allDice ? 'size-20 rounded-2xl' : 'h-[72px] w-32 rounded-2xl';
+248 ```
+249 
+250 ## 7. Sentence-Gap Schema
+251 
+252 ### Template Syntax
+253 
+254 Numbered placeholders `{0}`, `{1}`, etc. in the sentence string, mapped to a `gaps` array.
+255 
+256 ### Types
+257 
+258 ```typescript
+259 interface GapDefinition {
+260   word: string;           // expected answer for this gap
+261   distractors?: string[]; // extra wrong tile choices, per-gap
+262 }
+263 
+264 interface WordSpellRound {
+265   word: string;
+266   emoji?: string;
+267   image?: string;
+268   sceneImage?: string;
+269   sentence?: string;      // "The {0} sat on the {1}."
+270   gaps?: GapDefinition[]; // one entry per numbered placeholder
+271   audioOverride?: string;
+272 }
+273 ```
+274 
+275 ### Single Gap
+276 
+277 ```typescript
+278 {
+279   sentence: "The {0} sat on the mat.",
+280   gaps: [{ word: "cat", distractors: ["dog", "bat"] }],
+281 }
+282 // → 1 zone (expectedValue: "cat")
+283 // → 3 tiles: ["cat", "dog", "bat"] shuffled
+284 ```
+285 
+286 ### Multiple Gaps
+287 
+288 ```typescript
+289 {
+290   sentence: "The {0} sat on the {1}.",
+291   gaps: [
+292     { word: "cat", distractors: ["dog"] },
+293     { word: "mat", distractors: ["hat"] },
+294   ],
+295 }
+296 // → 2 zones (expectedValue: "cat", expectedValue: "mat")
+297 // → 4 tiles: ["cat", "mat", "dog", "hat"] shuffled
+298 ```
+299 
+300 ### Rendering
+301 
+302 A `<SentenceWithGaps>` helper component parses the template and injects `<Slot>` components:
+303 
+304 ```tsx
+305 const SentenceWithGaps = ({ sentence }: { sentence: string }) => {
+306   const segments = parseSentenceTemplate(sentence);
+307   // Splits "The {0} sat on the {1}." into:
+308   // [{ type:'text', value:'The ' }, { type:'gap', index:0 }, ...]
+309 
+310   return (
+311     <p className="text-lg leading-relaxed">
+312       {segments.map((seg, i) =>
+313         seg.type === 'text' ? (
+314           <span key={i}>{seg.value}</span>
+315         ) : (
+316           <Slot
+317             key={seg.index}
+318             index={seg.index}
+319             as="span"
+320             className="inline-block min-w-16 border-b-2 border-dashed mx-1"
+321           >
+322             {({ label }) => (
+323               <span className="text-lg font-bold">{label ?? '\u00A0'}</span>
+324             )}
+325           </Slot>
+326         )
+327       )}
+328     </p>
+329   );
+330 };
+331 ```
+332 
+333 ### Zone Generation
+334 
+335 ```typescript
+336 const buildSentenceGapRound = (gaps: GapDefinition[]) => {
+337   const zones = gaps.map((gap, i) => ({
+338     id: `z${i}`,
+339     index: i,
+340     expectedValue: gap.word,
+341     placedTileId: null,
+342     isWrong: false,
+343     isLocked: false,
+344   }));
+345 
+346   const allWords = [
+347     ...gaps.map(g => g.word),
+348     ...gaps.flatMap(g => g.distractors ?? []),
+349   ];
+350   const tiles = shuffle(allWords).map(word => ({
+351     id: nanoid(),
+352     label: word,
+353     value: word,
+354   }));
+355 
+356   return { tiles, zones };
+357 };
+358 ```
+359 
+360 ### Backward Compatibility
+361 
+362 When `gaps` is undefined, fall back to existing behavior: generate zones from `round.word` and render letter-spelling slots below the sentence text.
+363 
+364 ## Migration Strategy
+365 
+366 **Approach A: New component, parallel migration.**
+367 
+368 1. Build `<Slot>`, `<SlotRow>`, and `<SentenceWithGaps>` in `src/components/answer-game/Slot/`
+369 2. Add `slotInteraction` to `AnswerGameConfig` with backward-compatible defaults
+370 3. Migrate games one at a time:
+371    - SortNumbers first (simplest — same as current OrderedSlots)
+372    - WordSpell second (adds keyboard/cursor support)
+373    - NumberMatch third (validates free-swap + dynamic sizing)
+374    - Sentence-gap last (new feature, validates inline rendering)
+375 4. After all games migrated, delete `OrderedSlots/` and `MatchingPairZones/`
+376 5. Update game-specific re-exports (`OrderedLetterSlots`, `NumberSequenceSlots`) to point to new component or remove
+377 
+378 ## Key Files
+379 
+380 | File | Role |
+381 |------|------|
+382 | `src/components/answer-game/Slot/Slot.tsx` | New unified slot component |
+383 | `src/components/answer-game/Slot/SlotRow.tsx` | Row layout wrapper |
+384 | `src/components/answer-game/Slot/SentenceWithGaps.tsx` | Template parser + inline slot renderer |
+385 | `src/components/answer-game/Slot/useSlotBehavior.ts` | Drag/drop/click/keyboard logic hook |
+386 | `src/components/answer-game/Slot/slot-animations.ts` | Shake, pop, auto-eject return animation helpers |
+387 | `src/components/answer-game/types.ts` | Add `slotInteraction` to config, add `GapDefinition` |
+388 | `src/components/answer-game/useTouchDrag.ts` | Bug fix: ghost cleanup + deferred removal |
+389 | `src/components/answer-game/useSlotTileDrag.ts` | Bug fix: deferred removal logic |
+390 | `src/styles.css` | New keyframes: `shake`, `pop` |
+391 | `src/games/word-spell/types.ts` | Add `gaps?: GapDefinition[]` to round type |
 392
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:40:01Z)**_
@@ -3192,6 +3222,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:40:01Z)**_
 ```text
 File content (17483 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:40:06Z)**_
@@ -3201,87 +3232,88 @@ _**Agent (claude-opus-4-6 2026-04-07 16:40:06Z)**_
  `./.claude/worktrees/bold-chatelet/docs/superpowers/plans/2026-04-07-unified-slot-component.md`
 
 ```text
-1	# Unified Slot Component Implementation Plan
-2	
-3	> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-4	
-5	**Goal:** Replace `OrderedSlots` and `MatchingPairZones` with a single `<Slot>` compound component, add feedback animations, fix the mobile drag bug, and support sentence-gap inline slots.
-6	
-7	**Architecture:** New `<Slot>` component built alongside existing components (parallel migration). A `useSlotBehavior` hook consolidates all drag/drop/click/keyboard logic and reads `slotInteraction` from config to choose between ordered evaluation and free-swap modes. Games migrate one at a time, old components are deleted last.
-8	
-9	**Tech Stack:** React 19, TypeScript, Tailwind CSS v4, @atlaskit/pragmatic-drag-and-drop, Vitest + React Testing Library
-10	
-11	**Spec:** `docs/superpowers/specs/2026-04-07-unified-slot-component-design.md`
-12	
-13	---
-14	
-15	## File Structure
-16	
-17	### New Files
-18	| File | Responsibility |
-19	|------|---------------|
-20	| `src/components/answer-game/Slot/Slot.tsx` | Unified slot component with render prop |
-21	| `src/components/answer-game/Slot/Slot.test.tsx` | Unit tests for Slot |
-22	| `src/components/answer-game/Slot/SlotRow.tsx` | Layout wrapper (`<ol>` with flex) |
-23	| `src/components/answer-game/Slot/SlotRow.test.tsx` | Unit tests for SlotRow |
-24	| `src/components/answer-game/Slot/useSlotBehavior.ts` | Hook: drag/drop/click/keyboard/animation logic |
-25	| `src/components/answer-game/Slot/useSlotBehavior.test.ts` | Hook tests |
-26	| `src/components/answer-game/Slot/slot-animations.ts` | Shake, pop, auto-eject animation helpers |
-27	| `src/components/answer-game/Slot/slot-animations.test.ts` | Animation helper tests |
-28	| `src/components/answer-game/Slot/SentenceWithGaps.tsx` | Template parser + inline slot renderer |
-29	| `src/components/answer-game/Slot/SentenceWithGaps.test.tsx` | Parser + rendering tests |
-30	| `src/components/answer-game/Slot/parse-sentence-template.ts` | Pure function: `"The {0} sat"` → segments |
-31	| `src/components/answer-game/Slot/parse-sentence-template.test.ts` | Parser unit tests |
-32	| `src/games/word-spell/build-sentence-gap-round.ts` | Zone/tile generation from `GapDefinition[]` |
-33	| `src/games/word-spell/build-sentence-gap-round.test.ts` | Round builder tests |
-34	
-35	### Modified Files
-36	| File | Change |
-37	|------|--------|
-38	| `src/components/answer-game/types.ts` | Add `slotInteraction` to config, add `GapDefinition` type |
-39	| `src/components/answer-game/useTouchDrag.ts` | Ghost cleanup on all terminal events, safety timeout |
-40	| `src/components/answer-game/useSlotTileDrag.ts` | Deferred removal (SET_DRAG_ACTIVE on start, REMOVE_TILE on end) |
-41	| `src/styles.css` | Add `shake`, `pop` keyframes and `--animate-shake`, `--animate-pop` |
-42	| `src/games/word-spell/types.ts` | Add `gaps?: GapDefinition[]` to `WordSpellRound` |
-43	| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` | Use `<SlotRow>` + `<Slot>` instead of `<NumberSequenceSlots>` |
-44	| `src/games/word-spell/WordSpell/WordSpell.tsx` | Use `<SlotRow>` + `<Slot>` + `<SentenceWithGaps>` |
-45	| `src/games/number-match/NumberMatch/NumberMatch.tsx` | Use `<SlotRow>` + `<Slot>` with dynamic sizing |
-46	
-47	### Deleted Files (after migration)
-48	| File | Reason |
-49	|------|--------|
-50	| `src/components/answer-game/OrderedSlots/` | Replaced by `Slot/` |
-51	| `src/games/word-spell/OrderedLetterSlots/` | No longer needed |
-52	| `src/games/sort-numbers/NumberSequenceSlots/` | No longer needed |
-53	| `src/games/number-match/MatchingPairZones/` | No longer needed |
-54	
-55	---
-56	
-57	## Phase 0: Foundation
-58	
-59	### Task 1: Add `slotInteraction` to AnswerGameConfig and `GapDefinition` type
-60	
-61	**Files:**
-62	- Modify: `src/components/answer-game/types.ts`
-63	- Modify: `src/games/word-spell/types.ts`
-64	
-65	- [ ] **Step 1: Add `slotInteraction` to `AnswerGameConfig`**
-66	
-67	In `src/components/answer-game/types.ts`, add the new field to the config interface:
-68	
-69	```typescript
-70	export interface AnswerGameConfig {
-71	  gameId: string;
-72	  inputMethod: 'drag' | 'type' | 'both';
-73	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
-74	  tileBankMode: 'exact' | 'distractors';
-75	  distractorCount?: number;
-76	  totalRounds: number;
-77	  roundsInOrder?: boolean;
-78	  ttsEnabled: boolean;
-79	  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
-80	  initialTiles?: TileItem[];
+1 # Unified Slot Component Implementation Plan
+2 
+3 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+4 
+5 **Goal:** Replace `OrderedSlots` and `MatchingPairZones` with a single `<Slot>` compound component, add feedback animations, fix the mobile drag bug, and support sentence-gap inline slots.
+6 
+7 **Architecture:** New `<Slot>` component built alongside existing components (parallel migration). A `useSlotBehavior` hook consolidates all drag/drop/click/keyboard logic and reads `slotInteraction` from config to choose between ordered evaluation and free-swap modes. Games migrate one at a time, old components are deleted last.
+8 
+9 **Tech Stack:** React 19, TypeScript, Tailwind CSS v4, @atlaskit/pragmatic-drag-and-drop, Vitest + React Testing Library
+10 
+11 **Spec:** `docs/superpowers/specs/2026-04-07-unified-slot-component-design.md`
+12 
+13 ---
+14 
+15 ## File Structure
+16 
+17 ### New Files
+18 | File | Responsibility |
+19 |------|---------------|
+20 | `src/components/answer-game/Slot/Slot.tsx` | Unified slot component with render prop |
+21 | `src/components/answer-game/Slot/Slot.test.tsx` | Unit tests for Slot |
+22 | `src/components/answer-game/Slot/SlotRow.tsx` | Layout wrapper (`<ol>` with flex) |
+23 | `src/components/answer-game/Slot/SlotRow.test.tsx` | Unit tests for SlotRow |
+24 | `src/components/answer-game/Slot/useSlotBehavior.ts` | Hook: drag/drop/click/keyboard/animation logic |
+25 | `src/components/answer-game/Slot/useSlotBehavior.test.ts` | Hook tests |
+26 | `src/components/answer-game/Slot/slot-animations.ts` | Shake, pop, auto-eject animation helpers |
+27 | `src/components/answer-game/Slot/slot-animations.test.ts` | Animation helper tests |
+28 | `src/components/answer-game/Slot/SentenceWithGaps.tsx` | Template parser + inline slot renderer |
+29 | `src/components/answer-game/Slot/SentenceWithGaps.test.tsx` | Parser + rendering tests |
+30 | `src/components/answer-game/Slot/parse-sentence-template.ts` | Pure function: `"The {0} sat"` → segments |
+31 | `src/components/answer-game/Slot/parse-sentence-template.test.ts` | Parser unit tests |
+32 | `src/games/word-spell/build-sentence-gap-round.ts` | Zone/tile generation from `GapDefinition[]` |
+33 | `src/games/word-spell/build-sentence-gap-round.test.ts` | Round builder tests |
+34 
+35 ### Modified Files
+36 | File | Change |
+37 |------|--------|
+38 | `src/components/answer-game/types.ts` | Add `slotInteraction` to config, add `GapDefinition` type |
+39 | `src/components/answer-game/useTouchDrag.ts` | Ghost cleanup on all terminal events, safety timeout |
+40 | `src/components/answer-game/useSlotTileDrag.ts` | Deferred removal (SET_DRAG_ACTIVE on start, REMOVE_TILE on end) |
+41 | `src/styles.css` | Add `shake`, `pop` keyframes and `--animate-shake`, `--animate-pop` |
+42 | `src/games/word-spell/types.ts` | Add `gaps?: GapDefinition[]` to `WordSpellRound` |
+43 | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` | Use `<SlotRow>` + `<Slot>` instead of `<NumberSequenceSlots>` |
+44 | `src/games/word-spell/WordSpell/WordSpell.tsx` | Use `<SlotRow>` + `<Slot>` + `<SentenceWithGaps>` |
+45 | `src/games/number-match/NumberMatch/NumberMatch.tsx` | Use `<SlotRow>` + `<Slot>` with dynamic sizing |
+46 
+47 ### Deleted Files (after migration)
+48 | File | Reason |
+49 |------|--------|
+50 | `src/components/answer-game/OrderedSlots/` | Replaced by `Slot/` |
+51 | `src/games/word-spell/OrderedLetterSlots/` | No longer needed |
+52 | `src/games/sort-numbers/NumberSequenceSlots/` | No longer needed |
+53 | `src/games/number-match/MatchingPairZones/` | No longer needed |
+54 
+55 ---
+56 
+57 ## Phase 0: Foundation
+58 
+59 ### Task 1: Add `slotInteraction` to AnswerGameConfig and `GapDefinition` type
+60 
+61 **Files:**
+62 - Modify: `src/components/answer-game/types.ts`
+63 - Modify: `src/games/word-spell/types.ts`
+64 
+65 - [ ] **Step 1: Add `slotInteraction` to `AnswerGameConfig`**
+66 
+67 In `src/components/answer-game/types.ts`, add the new field to the config interface:
+68 
+69 ```typescript
+70 export interface AnswerGameConfig {
+71   gameId: string;
+72   inputMethod: 'drag' | 'type' | 'both';
+73   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+74   tileBankMode: 'exact' | 'distractors';
+75   distractorCount?: number;
+76   totalRounds: number;
+77   roundsInOrder?: boolean;
+78   ttsEnabled: boolean;
+79   touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+80   initialTiles?: TileItem[];
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:40:42Z)**_
@@ -3292,7 +3324,6 @@ OK, I see the bigger picture now. The user has been working on a major refactor 
 Let me revert my partial edit to `useSlotTileDrag.ts` and first understand what's already been done vs what's still broken. The user says the fix in the plan "didn't fix all issues."
 
 Actually wait, I already made the edit. Let me keep it — it's the correct fix for the HTML5 DnD path. But I should also understand the full picture before making more changes.
-
 
 Now I'm focusing on the specific issues the user mentioned — the bank tile fading when dragged out. I think the problem might be related to how pragmatic-drag-and-drop handles the drag start when the draggable element is nested inside a wrapper with visibility styling. The browser's default drag image behavior could be interfering with the intended visual feedback.
 
@@ -3319,6 +3350,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:40:47Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:40:59Z)**_
@@ -3329,6 +3361,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:40:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:41:03Z)**_
@@ -3343,6 +3376,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:41:05Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:41:11Z)**_
@@ -3357,6 +3391,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:41:13Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:41:23Z)**_
@@ -3371,6 +3406,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:41:26Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:41:30Z)**_
@@ -3384,187 +3420,188 @@ _**Agent (claude-opus-4-6 2026-04-07 16:41:31Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
-3	import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
-4	import { useCallback, useEffect, useRef } from 'react';
-5	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-6	import { useTouchDrag } from './useTouchDrag';
-7	import type { TouchDragHandlers } from './useTouchDrag';
-8	import type { RefObject } from 'react';
-9	
-10	export interface SlotTileDrag extends TouchDragHandlers {
-11	  dragRef: RefObject<HTMLButtonElement | null>;
-12	}
-13	
-14	interface UseSlotTileDragOptions {
-15	  /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
-16	  tileId: string | null;
-17	  label: string | null;
-18	  zoneIndex: number;
-19	  /**
-20	   * Called when the dragged tile is dropped on a target zone.
-21	   * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
-22	   * REMOVE_TILE or SWAP_TILES as appropriate.
-23	   */
-24	  onDrop: (tileId: string, targetZoneIndex: number) => void;
-25	  /**
-26	   * Called immediately before REMOVE_TILE is dispatched when the tile
-27	   * is returning to the bank (no valid drop target). Use this to trigger
-28	   * the eject-return animation while the slot button is still in the DOM.
-29	   */
-30	  onBankReturn?: () => void;
-31	}
-32	
-33	/**
-34	 * Enables an occupied slot tile to be dragged back to the bank or to another
-35	 * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
-36	 *
-37	 * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
-38	 * visible in the slot during the drag.
-39	 *
-40	 * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
-41	 * called so the caller can dispatch SWAP_TILES or REMOVE_TILE+PLACE_TILE.
-42	 *
-43	 * On cancel or no valid drop target: onBankReturn is called (for animation),
-44	 * then REMOVE_TILE + SET_DRAG_ACTIVE are dispatched to return the tile to bank.
-45	 */
-46	export const useSlotTileDrag = ({
-47	  tileId,
-48	  label,
-49	  zoneIndex,
-50	  onDrop,
-51	  onBankReturn,
-52	}: UseSlotTileDragOptions): SlotTileDrag => {
-53	  const dispatch = useAnswerGameDispatch();
-54	  const dragRef = useRef<HTMLButtonElement>(null);
-55	
-56	  // Keep stable refs so the HTML5 adapter closure stays current.
-57	  const onDropRef = useRef(onDrop);
-58	  useEffect(() => {
-59	    onDropRef.current = onDrop;
-60	  }, [onDrop]);
-61	
-62	  const onBankReturnRef = useRef(onBankReturn);
-63	  useEffect(() => {
-64	    onBankReturnRef.current = onBankReturn;
-65	  }, [onBankReturn]);
-66	
-67	  // HTML5 DnD — desktop
-68	  useEffect(() => {
-69	    if (!tileId) return;
-70	    const element = dragRef.current;
-71	    if (!element) return;
-72	    const currentTileId = tileId;
-73	    const currentZoneIndex = zoneIndex;
-74	    return draggable({
-75	      element,
-76	      getInitialData: () => ({
-77	        tileId: currentTileId,
-78	        sourceZoneIndex: currentZoneIndex,
-79	      }),
-80	      onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
-81	        setCustomNativeDragPreview({
-82	          nativeSetDragImage,
-83	          getOffset: preserveOffsetOnSource({
-84	            element,
-85	            input: location.current.input,
-86	          }),
-87	          render({ container }) {
-88	            const rect = element.getBoundingClientRect();
-89	            const ghost = document.createElement('div');
-90	            // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
-91	            // inner elements are preserved — avoids the shrunken-font issue
-92	            // that occurs when reading fontSize from the button itself.
-93	            ghost.innerHTML = element.innerHTML;
-94	            Object.assign(ghost.style, {
-95	              width: `${rect.width}px`,
-96	              height: `${rect.height}px`,
-97	              borderRadius: '12px',
-98	              display: 'flex',
-99	              alignItems: 'center',
-100	              justifyContent: 'center',
-101	              background: 'var(--card, #fff)',
-102	              color: 'var(--card-foreground, #000)',
-103	              boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-104	              transform: 'scale(1.08)',
-105	            });
-106	            container.append(ghost);
-107	            return () => ghost.remove();
-108	          },
-109	        });
-110	      },
-111	      onDragStart: () =>
-112	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
-113	      onDrop: ({ location }) => {
-114	        const targets = location.current.dropTargets;
-115	        const targetZoneIndex = targets[0]?.data['zoneIndex'];
-116	
-117	        // Always clear drag state first.
-118	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-119	
-120	        if (targets.length > 0 && typeof targetZoneIndex === 'number') {
-121	          // Confirmed drop on a valid slot — caller handles REMOVE_TILE / SWAP_TILES.
-122	          onDropRef.current(currentTileId, targetZoneIndex);
-123	        } else if (
-124	          targets.some((t) => t.data['isBankTarget'] === true)
-125	        ) {
-126	          // Explicitly dropped on bank — return tile to bank.
-127	          onBankReturnRef.current?.();
-128	          dispatch({
-129	            type: 'REMOVE_TILE',
-130	            zoneIndex: currentZoneIndex,
-131	          });
-132	        }
-133	        // else: dropped outside all targets — tile stays in slot (no-op)
-134	      },
-135	    });
-136	  }, [tileId, zoneIndex, dispatch]);
-137	
-138	  // Wrap onDrop for the touch path: caller handles REMOVE_TILE / SWAP_TILES.
-139	  const handleTouchDrop = useCallback(
-140	    (droppedTileId: string, targetZoneIndex: number) => {
-141	      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-142	      onDrop(droppedTileId, targetZoneIndex);
-143	    },
-144	    [dispatch, onDrop],
-145	  );
-146	
-147	  // Pointer-events drag — touch / mobile
-148	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-149	    useTouchDrag({
-150	      tileId: tileId ?? '',
-151	      label: label ?? '',
-152	      onDragStart: tileId
-153	        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
-154	        : undefined,
-155	      onDragCancel: tileId
-156	        ? () => {
-157	            // Dropped outside all targets — tile stays in slot (no-op).
-158	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-159	          }
-160	        : undefined,
-161	      onBankDrop: tileId
-162	        ? () => {
-163	            // Explicitly dropped on bank — return tile to bank.
-164	            onBankReturnRef.current?.();
-165	            dispatch({ type: 'REMOVE_TILE', zoneIndex });
-166	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-167	          }
-168	        : undefined,
-169	      onDrop: handleTouchDrop,
-170	    });
-171	
-172	  return {
-173	    dragRef,
-174	    onPointerDown,
-175	    onPointerMove,
-176	    onPointerUp,
-177	    onPointerCancel,
-178	  };
-179	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
+3 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
+4 import { useCallback, useEffect, useRef } from 'react';
+5 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+6 import { useTouchDrag } from './useTouchDrag';
+7 import type { TouchDragHandlers } from './useTouchDrag';
+8 import type { RefObject } from 'react';
+9 
+10 export interface SlotTileDrag extends TouchDragHandlers {
+11   dragRef: RefObject<HTMLButtonElement | null>;
+12 }
+13 
+14 interface UseSlotTileDragOptions {
+15   /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
+16   tileId: string | null;
+17   label: string | null;
+18   zoneIndex: number;
+19   /**
+20    * Called when the dragged tile is dropped on a target zone.
+21    * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
+22    * REMOVE_TILE or SWAP_TILES as appropriate.
+23    */
+24   onDrop: (tileId: string, targetZoneIndex: number) => void;
+25   /**
+26    * Called immediately before REMOVE_TILE is dispatched when the tile
+27    * is returning to the bank (no valid drop target). Use this to trigger
+28    * the eject-return animation while the slot button is still in the DOM.
+29    */
+30   onBankReturn?: () => void;
+31 }
+32 
+33 /**
+34  * Enables an occupied slot tile to be dragged back to the bank or to another
+35  * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
+36  *
+37  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
+38  * visible in the slot during the drag.
+39  *
+40  * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
+41  * called so the caller can dispatch SWAP_TILES or REMOVE_TILE+PLACE_TILE.
+42  *
+43  * On cancel or no valid drop target: onBankReturn is called (for animation),
+44  * then REMOVE_TILE + SET_DRAG_ACTIVE are dispatched to return the tile to bank.
+45  */
+46 export const useSlotTileDrag = ({
+47   tileId,
+48   label,
+49   zoneIndex,
+50   onDrop,
+51   onBankReturn,
+52 }: UseSlotTileDragOptions): SlotTileDrag => {
+53   const dispatch = useAnswerGameDispatch();
+54   const dragRef = useRef<HTMLButtonElement>(null);
+55 
+56   // Keep stable refs so the HTML5 adapter closure stays current.
+57   const onDropRef = useRef(onDrop);
+58   useEffect(() => {
+59     onDropRef.current = onDrop;
+60   }, [onDrop]);
+61 
+62   const onBankReturnRef = useRef(onBankReturn);
+63   useEffect(() => {
+64     onBankReturnRef.current = onBankReturn;
+65   }, [onBankReturn]);
+66 
+67   // HTML5 DnD — desktop
+68   useEffect(() => {
+69     if (!tileId) return;
+70     const element = dragRef.current;
+71     if (!element) return;
+72     const currentTileId = tileId;
+73     const currentZoneIndex = zoneIndex;
+74     return draggable({
+75       element,
+76       getInitialData: () => ({
+77         tileId: currentTileId,
+78         sourceZoneIndex: currentZoneIndex,
+79       }),
+80       onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
+81         setCustomNativeDragPreview({
+82           nativeSetDragImage,
+83           getOffset: preserveOffsetOnSource({
+84             element,
+85             input: location.current.input,
+86           }),
+87           render({ container }) {
+88             const rect = element.getBoundingClientRect();
+89             const ghost = document.createElement('div');
+90             // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
+91             // inner elements are preserved — avoids the shrunken-font issue
+92             // that occurs when reading fontSize from the button itself.
+93             ghost.innerHTML = element.innerHTML;
+94             Object.assign(ghost.style, {
+95               width: `${rect.width}px`,
+96               height: `${rect.height}px`,
+97               borderRadius: '12px',
+98               display: 'flex',
+99               alignItems: 'center',
+100               justifyContent: 'center',
+101               background: 'var(--card, #fff)',
+102               color: 'var(--card-foreground, #000)',
+103               boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+104               transform: 'scale(1.08)',
+105             });
+106             container.append(ghost);
+107             return () => ghost.remove();
+108           },
+109         });
+110       },
+111       onDragStart: () =>
+112         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
+113       onDrop: ({ location }) => {
+114         const targets = location.current.dropTargets;
+115         const targetZoneIndex = targets[0]?.data['zoneIndex'];
+116 
+117         // Always clear drag state first.
+118         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+119 
+120         if (targets.length > 0 && typeof targetZoneIndex === 'number') {
+121           // Confirmed drop on a valid slot — caller handles REMOVE_TILE / SWAP_TILES.
+122           onDropRef.current(currentTileId, targetZoneIndex);
+123         } else if (
+124           targets.some((t) => t.data['isBankTarget'] === true)
+125         ) {
+126           // Explicitly dropped on bank — return tile to bank.
+127           onBankReturnRef.current?.();
+128           dispatch({
+129             type: 'REMOVE_TILE',
+130             zoneIndex: currentZoneIndex,
+131           });
+132         }
+133         // else: dropped outside all targets — tile stays in slot (no-op)
+134       },
+135     });
+136   }, [tileId, zoneIndex, dispatch]);
+137 
+138   // Wrap onDrop for the touch path: caller handles REMOVE_TILE / SWAP_TILES.
+139   const handleTouchDrop = useCallback(
+140     (droppedTileId: string, targetZoneIndex: number) => {
+141       dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+142       onDrop(droppedTileId, targetZoneIndex);
+143     },
+144     [dispatch, onDrop],
+145   );
+146 
+147   // Pointer-events drag — touch / mobile
+148   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+149     useTouchDrag({
+150       tileId: tileId ?? '',
+151       label: label ?? '',
+152       onDragStart: tileId
+153         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
+154         : undefined,
+155       onDragCancel: tileId
+156         ? () => {
+157             // Dropped outside all targets — tile stays in slot (no-op).
+158             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+159           }
+160         : undefined,
+161       onBankDrop: tileId
+162         ? () => {
+163             // Explicitly dropped on bank — return tile to bank.
+164             onBankReturnRef.current?.();
+165             dispatch({ type: 'REMOVE_TILE', zoneIndex });
+166             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+167           }
+168         : undefined,
+169       onDrop: handleTouchDrop,
+170     });
+171 
+172   return {
+173     dragRef,
+174     onPointerDown,
+175     onPointerMove,
+176     onPointerUp,
+177     onPointerCancel,
+178   };
+179 };
 180
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:41:31Z)**_
@@ -3574,275 +3611,276 @@ _**Agent (claude-opus-4-6 2026-04-07 16:41:31Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef } from 'react';
-2	import type { PointerEvent } from 'react';
-3	
-4	const DRAG_THRESHOLD_PX = 8;
-5	
-6	interface GhostInfo {
-7	  el: HTMLDivElement;
-8	  halfW: number;
-9	  halfH: number;
-10	}
-11	
-12	const buildGhost = (
-13	  sourceEl: HTMLElement,
-14	  label: string,
-15	  x: number,
-16	  y: number,
-17	): GhostInfo => {
-18	  const rect = sourceEl.getBoundingClientRect();
-19	  const halfW = rect.width / 2;
-20	  const halfH = rect.height / 2;
-21	  const el = document.createElement('div');
-22	  el.textContent = label;
-23	  el.setAttribute('aria-hidden', 'true');
-24	  Object.assign(el.style, {
-25	    position: 'fixed',
-26	    left: `${x - halfW}px`,
-27	    top: `${y - halfH}px`,
-28	    width: `${rect.width}px`,
-29	    height: `${rect.height}px`,
-30	    display: 'flex',
-31	    alignItems: 'center',
-32	    justifyContent: 'center',
-33	    borderRadius: '12px',
-34	    background: 'var(--card, #fff)',
-35	    color: 'var(--card-foreground, #000)',
-36	    fontSize: getComputedStyle(sourceEl).fontSize,
-37	    fontWeight: 'bold',
-38	    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-39	    pointerEvents: 'none',
-40	    zIndex: '9999',
-41	    opacity: '0.95',
-42	    userSelect: 'none',
-43	    transform: 'scale(1.08)',
-44	  });
-45	  document.body.append(el);
-46	  return { el, halfW, halfH };
-47	};
-48	
-49	export interface TouchDragHandlers {
-50	  onPointerDown: (e: PointerEvent<HTMLElement>) => void;
-51	  onPointerMove: (e: PointerEvent<HTMLElement>) => void;
-52	  onPointerUp: (e: PointerEvent<HTMLElement>) => void;
-53	  onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
-54	}
-55	
-56	interface UseTouchDragOptions {
-57	  /** Empty string disables the drag (no pointer capture, no ghost). */
-58	  tileId: string;
-59	  label: string;
-60	  onDragStart?: () => void;
-61	  /** Called when the drag is cancelled (pointer released with no valid drop zone AND no bank). */
-62	  onDragCancel?: () => void;
-63	  /** Called when the tile is dropped on the bank container (detected via `data-tile-bank` attribute). */
-64	  onBankDrop?: () => void;
-65	  onDrop: (tileId: string, zoneIndex: number) => void;
-66	}
-67	
-68	export const useTouchDrag = ({
-69	  tileId,
-70	  label,
-71	  onDragStart,
-72	  onDragCancel,
-73	  onBankDrop,
-74	  onDrop,
-75	}: UseTouchDragOptions): TouchDragHandlers => {
-76	  const onDragCancelRef = useRef(onDragCancel);
-77	  useEffect(() => {
-78	    onDragCancelRef.current = onDragCancel;
-79	  }, [onDragCancel]);
-80	
-81	  const onBankDropRef = useRef(onBankDrop);
-82	  useEffect(() => {
-83	    onBankDropRef.current = onBankDrop;
-84	  }, [onBankDrop]);
-85	
-86	  const ghostRef = useRef<GhostInfo | null>(null);
-87	  const isDragging = useRef(false);
-88	  const startPos = useRef<{ x: number; y: number } | null>(null);
-89	  const capturedElRef = useRef<HTMLElement | null>(null);
-90	  const capturedPointerIdRef = useRef<number | null>(null);
-91	  const safetyTimerRef = useRef<ReturnType<
-92	    typeof globalThis.setTimeout
-93	  > | null>(null);
-94	
-95	  // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
-96	  // → cleanupGhost re-entry.
-97	  const cleanupInProgressRef = useRef(false);
-98	
-99	  const cleanupGhost = useCallback(() => {
-100	    if (cleanupInProgressRef.current) return;
-101	    cleanupInProgressRef.current = true;
-102	
-103	    if (safetyTimerRef.current !== null) {
-104	      globalThis.clearTimeout(safetyTimerRef.current);
-105	      safetyTimerRef.current = null;
-106	    }
-107	
-108	    ghostRef.current?.el.remove();
-109	    ghostRef.current = null;
-110	
-111	    // Clear refs BEFORE releasePointerCapture so that any synchronous
-112	    // lostpointercapture event triggered by it sees null refs and bails out.
-113	    const el = capturedElRef.current;
-114	    const pointerId = capturedPointerIdRef.current;
-115	    capturedElRef.current = null;
-116	    capturedPointerIdRef.current = null;
-117	
-118	    if (el !== null && pointerId !== null) {
-119	      try {
-120	        el.releasePointerCapture(pointerId);
-121	      } catch {
-122	        // Element may no longer be in the DOM — ignore.
-123	      }
-124	    }
-125	
-126	    isDragging.current = false;
-127	    startPos.current = null;
-128	    cleanupInProgressRef.current = false;
-129	  }, []);
-130	
-131	  const cleanup = useCallback(() => {
-132	    cleanupGhost();
-133	  }, [cleanupGhost]);
-134	
-135	  const onPointerDown = useCallback(
-136	    (e: PointerEvent<HTMLElement>) => {
-137	      if (e.pointerType === 'mouse' || !tileId) return;
-138	      e.currentTarget.setPointerCapture(e.pointerId);
-139	      capturedElRef.current = e.currentTarget;
-140	      capturedPointerIdRef.current = e.pointerId;
-141	      startPos.current = { x: e.clientX, y: e.clientY };
-142	      isDragging.current = false;
-143	
-144	      // When the captured element is removed from the DOM (e.g. a slot tile
-145	      // gets auto-ejected while the user is dragging it), the browser fires
-146	      // lostpointercapture and onPointerUp never fires.  Clean up here so the
-147	      // ghost doesn't float for 5 seconds.
-148	      e.currentTarget.addEventListener(
-149	        'lostpointercapture',
-150	        () => {
-151	          if (!cleanupInProgressRef.current && isDragging.current) {
-152	            cleanupGhost();
-153	            onDragCancelRef.current?.();
-154	          }
-155	        },
-156	        { once: true },
-157	      );
-158	    },
-159	    [tileId, cleanupGhost],
-160	  );
-161	
-162	  const onPointerMove = useCallback(
-163	    (e: PointerEvent<HTMLElement>) => {
-164	      if (e.pointerType === 'mouse' || !startPos.current) return;
-165	
-166	      if (!isDragging.current) {
-167	        const dx = e.clientX - startPos.current.x;
-168	        const dy = e.clientY - startPos.current.y;
-169	        if (
-170	          Math.abs(dx) > DRAG_THRESHOLD_PX ||
-171	          Math.abs(dy) > DRAG_THRESHOLD_PX
-172	        ) {
-173	          isDragging.current = true;
-174	          ghostRef.current = buildGhost(
-175	            e.currentTarget,
-176	            label,
-177	            e.clientX,
-178	            e.clientY,
-179	          );
-180	          onDragStart?.();
-181	
-182	          safetyTimerRef.current = globalThis.setTimeout(() => {
-183	            cleanupGhost();
-184	            onDragCancelRef.current?.();
-185	          }, 5000);
-186	
-187	          document.addEventListener('contextmenu', cleanupGhost, {
-188	            once: true,
-189	          });
-190	          document.addEventListener('visibilitychange', cleanupGhost, {
-191	            once: true,
-192	          });
-193	        }
-194	      }
-195	
-196	      if (isDragging.current && ghostRef.current) {
-197	        const { el, halfW, halfH } = ghostRef.current;
-198	        el.style.left = `${e.clientX - halfW}px`;
-199	        el.style.top = `${e.clientY - halfH}px`;
-200	      }
-201	    },
-202	    [label, onDragStart, cleanupGhost],
-203	  );
-204	
-205	  const onPointerUp = useCallback(
-206	    (e: PointerEvent<HTMLElement>) => {
-207	      if (e.pointerType === 'mouse' || !startPos.current) return;
-208	
-209	      if (isDragging.current) {
-210	        // Remove ghost before elementsFromPoint so it doesn't interfere.
-211	        ghostRef.current?.el.remove();
-212	        ghostRef.current = null;
-213	
-214	        const elements = document.elementsFromPoint(
-215	          e.clientX,
-216	          e.clientY,
-217	        );
-218	        let dropped = false;
-219	        for (const el of elements) {
-220	          if (
-221	            el instanceof HTMLElement &&
-222	            el.dataset['zoneIndex'] !== undefined
-223	          ) {
-224	            const zoneIndex = Number.parseInt(
-225	              el.dataset['zoneIndex'],
-226	              10,
-227	            );
-228	            if (!Number.isNaN(zoneIndex)) {
-229	              onDrop(tileId, zoneIndex);
-230	              dropped = true;
-231	              break;
-232	            }
-233	          }
-234	        }
-235	        if (!dropped) {
-236	          // Check if dropped on the bank container.
-237	          const onBank = elements.some(
-238	            (el) =>
-239	              el instanceof HTMLElement &&
-240	              el.dataset['tileBank'] !== undefined,
-241	          );
-242	          if (onBank) {
-243	            onBankDropRef.current?.();
-244	          } else {
-245	            onDragCancelRef.current?.();
-246	          }
-247	        }
-248	      }
-249	
-250	      cleanup();
-251	    },
-252	    [tileId, onDrop, cleanup],
-253	  );
-254	
-255	  const onPointerCancel = useCallback(
-256	    (e: PointerEvent<HTMLElement>) => {
-257	      if (e.pointerType === 'mouse') return;
-258	      if (isDragging.current) {
-259	        onDragCancelRef.current?.();
-260	      }
-261	      cleanupGhost();
-262	    },
-263	    [cleanupGhost],
-264	  );
-265	
-266	  return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
-267	};
+1 import { useCallback, useEffect, useRef } from 'react';
+2 import type { PointerEvent } from 'react';
+3 
+4 const DRAG_THRESHOLD_PX = 8;
+5 
+6 interface GhostInfo {
+7   el: HTMLDivElement;
+8   halfW: number;
+9   halfH: number;
+10 }
+11 
+12 const buildGhost = (
+13   sourceEl: HTMLElement,
+14   label: string,
+15   x: number,
+16   y: number,
+17 ): GhostInfo => {
+18   const rect = sourceEl.getBoundingClientRect();
+19   const halfW = rect.width / 2;
+20   const halfH = rect.height / 2;
+21   const el = document.createElement('div');
+22   el.textContent = label;
+23   el.setAttribute('aria-hidden', 'true');
+24   Object.assign(el.style, {
+25     position: 'fixed',
+26     left: `${x - halfW}px`,
+27     top: `${y - halfH}px`,
+28     width: `${rect.width}px`,
+29     height: `${rect.height}px`,
+30     display: 'flex',
+31     alignItems: 'center',
+32     justifyContent: 'center',
+33     borderRadius: '12px',
+34     background: 'var(--card, #fff)',
+35     color: 'var(--card-foreground, #000)',
+36     fontSize: getComputedStyle(sourceEl).fontSize,
+37     fontWeight: 'bold',
+38     boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+39     pointerEvents: 'none',
+40     zIndex: '9999',
+41     opacity: '0.95',
+42     userSelect: 'none',
+43     transform: 'scale(1.08)',
+44   });
+45   document.body.append(el);
+46   return { el, halfW, halfH };
+47 };
+48 
+49 export interface TouchDragHandlers {
+50   onPointerDown: (e: PointerEvent<HTMLElement>) => void;
+51   onPointerMove: (e: PointerEvent<HTMLElement>) => void;
+52   onPointerUp: (e: PointerEvent<HTMLElement>) => void;
+53   onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
+54 }
+55 
+56 interface UseTouchDragOptions {
+57   /** Empty string disables the drag (no pointer capture, no ghost). */
+58   tileId: string;
+59   label: string;
+60   onDragStart?: () => void;
+61   /** Called when the drag is cancelled (pointer released with no valid drop zone AND no bank). */
+62   onDragCancel?: () => void;
+63   /** Called when the tile is dropped on the bank container (detected via `data-tile-bank` attribute). */
+64   onBankDrop?: () => void;
+65   onDrop: (tileId: string, zoneIndex: number) => void;
+66 }
+67 
+68 export const useTouchDrag = ({
+69   tileId,
+70   label,
+71   onDragStart,
+72   onDragCancel,
+73   onBankDrop,
+74   onDrop,
+75 }: UseTouchDragOptions): TouchDragHandlers => {
+76   const onDragCancelRef = useRef(onDragCancel);
+77   useEffect(() => {
+78     onDragCancelRef.current = onDragCancel;
+79   }, [onDragCancel]);
+80 
+81   const onBankDropRef = useRef(onBankDrop);
+82   useEffect(() => {
+83     onBankDropRef.current = onBankDrop;
+84   }, [onBankDrop]);
+85 
+86   const ghostRef = useRef<GhostInfo | null>(null);
+87   const isDragging = useRef(false);
+88   const startPos = useRef<{ x: number; y: number } | null>(null);
+89   const capturedElRef = useRef<HTMLElement | null>(null);
+90   const capturedPointerIdRef = useRef<number | null>(null);
+91   const safetyTimerRef = useRef<ReturnType<
+92     typeof globalThis.setTimeout
+93   > | null>(null);
+94 
+95   // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
+96   // → cleanupGhost re-entry.
+97   const cleanupInProgressRef = useRef(false);
+98 
+99   const cleanupGhost = useCallback(() => {
+100     if (cleanupInProgressRef.current) return;
+101     cleanupInProgressRef.current = true;
+102 
+103     if (safetyTimerRef.current !== null) {
+104       globalThis.clearTimeout(safetyTimerRef.current);
+105       safetyTimerRef.current = null;
+106     }
+107 
+108     ghostRef.current?.el.remove();
+109     ghostRef.current = null;
+110 
+111     // Clear refs BEFORE releasePointerCapture so that any synchronous
+112     // lostpointercapture event triggered by it sees null refs and bails out.
+113     const el = capturedElRef.current;
+114     const pointerId = capturedPointerIdRef.current;
+115     capturedElRef.current = null;
+116     capturedPointerIdRef.current = null;
+117 
+118     if (el !== null && pointerId !== null) {
+119       try {
+120         el.releasePointerCapture(pointerId);
+121       } catch {
+122         // Element may no longer be in the DOM — ignore.
+123       }
+124     }
+125 
+126     isDragging.current = false;
+127     startPos.current = null;
+128     cleanupInProgressRef.current = false;
+129   }, []);
+130 
+131   const cleanup = useCallback(() => {
+132     cleanupGhost();
+133   }, [cleanupGhost]);
+134 
+135   const onPointerDown = useCallback(
+136     (e: PointerEvent<HTMLElement>) => {
+137       if (e.pointerType === 'mouse' || !tileId) return;
+138       e.currentTarget.setPointerCapture(e.pointerId);
+139       capturedElRef.current = e.currentTarget;
+140       capturedPointerIdRef.current = e.pointerId;
+141       startPos.current = { x: e.clientX, y: e.clientY };
+142       isDragging.current = false;
+143 
+144       // When the captured element is removed from the DOM (e.g. a slot tile
+145       // gets auto-ejected while the user is dragging it), the browser fires
+146       // lostpointercapture and onPointerUp never fires.  Clean up here so the
+147       // ghost doesn't float for 5 seconds.
+148       e.currentTarget.addEventListener(
+149         'lostpointercapture',
+150         () => {
+151           if (!cleanupInProgressRef.current && isDragging.current) {
+152             cleanupGhost();
+153             onDragCancelRef.current?.();
+154           }
+155         },
+156         { once: true },
+157       );
+158     },
+159     [tileId, cleanupGhost],
+160   );
+161 
+162   const onPointerMove = useCallback(
+163     (e: PointerEvent<HTMLElement>) => {
+164       if (e.pointerType === 'mouse' || !startPos.current) return;
+165 
+166       if (!isDragging.current) {
+167         const dx = e.clientX - startPos.current.x;
+168         const dy = e.clientY - startPos.current.y;
+169         if (
+170           Math.abs(dx) > DRAG_THRESHOLD_PX ||
+171           Math.abs(dy) > DRAG_THRESHOLD_PX
+172         ) {
+173           isDragging.current = true;
+174           ghostRef.current = buildGhost(
+175             e.currentTarget,
+176             label,
+177             e.clientX,
+178             e.clientY,
+179           );
+180           onDragStart?.();
+181 
+182           safetyTimerRef.current = globalThis.setTimeout(() => {
+183             cleanupGhost();
+184             onDragCancelRef.current?.();
+185           }, 5000);
+186 
+187           document.addEventListener('contextmenu', cleanupGhost, {
+188             once: true,
+189           });
+190           document.addEventListener('visibilitychange', cleanupGhost, {
+191             once: true,
+192           });
+193         }
+194       }
+195 
+196       if (isDragging.current && ghostRef.current) {
+197         const { el, halfW, halfH } = ghostRef.current;
+198         el.style.left = `${e.clientX - halfW}px`;
+199         el.style.top = `${e.clientY - halfH}px`;
+200       }
+201     },
+202     [label, onDragStart, cleanupGhost],
+203   );
+204 
+205   const onPointerUp = useCallback(
+206     (e: PointerEvent<HTMLElement>) => {
+207       if (e.pointerType === 'mouse' || !startPos.current) return;
+208 
+209       if (isDragging.current) {
+210         // Remove ghost before elementsFromPoint so it doesn't interfere.
+211         ghostRef.current?.el.remove();
+212         ghostRef.current = null;
+213 
+214         const elements = document.elementsFromPoint(
+215           e.clientX,
+216           e.clientY,
+217         );
+218         let dropped = false;
+219         for (const el of elements) {
+220           if (
+221             el instanceof HTMLElement &&
+222             el.dataset['zoneIndex'] !== undefined
+223           ) {
+224             const zoneIndex = Number.parseInt(
+225               el.dataset['zoneIndex'],
+226               10,
+227             );
+228             if (!Number.isNaN(zoneIndex)) {
+229               onDrop(tileId, zoneIndex);
+230               dropped = true;
+231               break;
+232             }
+233           }
+234         }
+235         if (!dropped) {
+236           // Check if dropped on the bank container.
+237           const onBank = elements.some(
+238             (el) =>
+239               el instanceof HTMLElement &&
+240               el.dataset['tileBank'] !== undefined,
+241           );
+242           if (onBank) {
+243             onBankDropRef.current?.();
+244           } else {
+245             onDragCancelRef.current?.();
+246           }
+247         }
+248       }
+249 
+250       cleanup();
+251     },
+252     [tileId, onDrop, cleanup],
+253   );
+254 
+255   const onPointerCancel = useCallback(
+256     (e: PointerEvent<HTMLElement>) => {
+257       if (e.pointerType === 'mouse') return;
+258       if (isDragging.current) {
+259         onDragCancelRef.current?.();
+260       }
+261       cleanupGhost();
+262     },
+263     [cleanupGhost],
+264   );
+265 
+266   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
+267 };
 268
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:41:38Z)**_
@@ -3860,6 +3898,7 @@ Run TypeScript type check
 ```text
 src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx(3,37): error TS2307: Cannot find module './NumberSequenceSlots' or its corresponding type declarations.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:41:49Z)**_
@@ -3873,6 +3912,7 @@ Run TypeScript type check in worktree
 ```text
 src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx(3,37): error TS2307: Cannot find module './NumberSequenceSlots' or its corresponding type declarations.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:41:56Z)**_
@@ -3886,6 +3926,7 @@ Run TypeScript type check in worktree
 ```text
 src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx(3,37): error TS2307: Cannot find module './NumberSequenceSlots' or its corresponding type declarations.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:42:02Z)**_
@@ -3899,6 +3940,7 @@ Run TypeScript type check in worktree
 ```text
 src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx(3,37): error TS2307: Cannot find module './NumberSequenceSlots' or its corresponding type declarations.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:42:06Z)**_
@@ -4026,6 +4068,7 @@ Number of calls: **1**
    Start at  02:42:09
    Duration  664ms (transform 28ms, setup 58ms, collect 98ms, tests 14ms, environment 332ms, prepare 39ms)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:42:15Z)**_
@@ -4039,215 +4082,216 @@ _**Agent (claude-opus-4-6 2026-04-07 16:42:18Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.test.tsx`
 
 ```text
-1	import { render } from '@testing-library/react';
-2	import { describe, expect, it, vi } from 'vitest';
-3	import { useSlotTileDrag } from './useSlotTileDrag';
-4	import type { ReactNode } from 'react';
-5	
-6	vi.mock('@/lib/game-event-bus', () => ({
-7	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-8	}));
-9	
-10	vi.mock('@/lib/audio/AudioFeedback', () => ({
-11	  playSound: vi.fn(),
-12	  queueSound: vi.fn(),
-13	  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
-14	}));
-15	
-16	// Capture the options passed to draggable so tests can invoke the callbacks.
-17	type DraggableDropArgs = {
-18	  location: {
-19	    current: {
-20	      dropTargets: { data: Record<string, unknown> }[];
-21	    };
-22	  };
-23	};
-24	
-25	type DraggableOptions = {
-26	  element: HTMLElement;
-27	  getInitialData?: () => Record<string, unknown>;
-28	  onDragStart?: () => void;
-29	  onDrop?: (args: DraggableDropArgs) => void;
-30	};
-31	
-32	let capturedDraggableOptions: DraggableOptions | null = null;
-33	
-34	const mockCleanup = () => {};
-35	
-36	vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
-37	  draggable: vi.fn().mockImplementation((opts: DraggableOptions) => {
-38	    capturedDraggableOptions = opts;
-39	    return mockCleanup;
-40	  }),
-41	}));
-42	
-43	const mockDispatch = vi.fn();
-44	
-45	vi.mock('./useAnswerGameDispatch', () => ({
-46	  useAnswerGameDispatch: () => mockDispatch,
-47	}));
-48	
-49	// useTouchDrag uses pointer events — mock it to simplify unit tests here.
-50	vi.mock('./useTouchDrag', () => ({
-51	  useTouchDrag: () => ({
-52	    onPointerDown: vi.fn(),
-53	    onPointerMove: vi.fn(),
-54	    onPointerUp: vi.fn(),
-55	    onPointerCancel: vi.fn(),
-56	  }),
-57	}));
-58	
-59	// Test component that attaches the dragRef to an actual button element so the
-60	// useEffect inside useSlotTileDrag can find element !== null and register the
-61	// draggable adapter.
-62	const SlotTileDragHarness = ({
-63	  tileId,
-64	  zoneIndex,
-65	  onDrop,
-66	}: {
-67	  tileId: string | null;
-68	  zoneIndex: number;
-69	  onDrop: (id: string, idx: number) => void;
-70	  children?: ReactNode;
-71	}) => {
-72	  const { dragRef } = useSlotTileDrag({
-73	    tileId,
-74	    label: 'A',
-75	    zoneIndex,
-76	    onDrop,
-77	  });
-78	  return (
-79	    <button type="button" ref={dragRef} data-testid="drag-tile">
-80	      A
-81	    </button>
-82	  );
-83	};
-84	
-85	describe('useSlotTileDrag', () => {
-86	  it('registers draggable on mount when tileId is provided', () => {
-87	    capturedDraggableOptions = null;
-88	    render(
-89	      <SlotTileDragHarness
-90	        tileId="tile-1"
-91	        zoneIndex={0}
-92	        onDrop={vi.fn()}
-93	      />,
-94	    );
-95	    expect(capturedDraggableOptions).not.toBeNull();
-96	  });
-97	
-98	  describe('HTML5 onDrop — no drop targets', () => {
-99	    it('dispatches REMOVE_TILE for the correct zoneIndex and does not call onDrop', () => {
-100	      capturedDraggableOptions = null;
-101	      mockDispatch.mockClear();
-102	      const mockOnDrop = vi.fn();
-103	
-104	      render(
-105	        <SlotTileDragHarness
-106	          tileId="tile-1"
-107	          zoneIndex={0}
-108	          onDrop={mockOnDrop}
-109	        />,
-110	      );
-111	
-112	      expect(capturedDraggableOptions).not.toBeNull();
-113	
-114	      (
-115	        capturedDraggableOptions as unknown as DraggableOptions
-116	      ).onDrop?.({
-117	        location: { current: { dropTargets: [] } },
-118	      });
-119	
-120	      expect(mockDispatch).toHaveBeenCalledWith({
-121	        type: 'REMOVE_TILE',
-122	        zoneIndex: 0,
-123	      });
-124	      expect(mockDispatch).toHaveBeenCalledWith({
-125	        type: 'SET_DRAG_ACTIVE',
-126	        tileId: null,
-127	      });
-128	      expect(mockOnDrop).not.toHaveBeenCalled();
-129	    });
-130	  });
-131	
-132	  describe('HTML5 onDrop — drop target with no zoneIndex', () => {
-133	    it('dispatches REMOVE_TILE but does not call onDrop when target lacks zoneIndex', () => {
-134	      capturedDraggableOptions = null;
-135	      mockDispatch.mockClear();
-136	      const mockOnDrop = vi.fn();
-137	
-138	      render(
-139	        <SlotTileDragHarness
-140	          tileId="tile-1"
-141	          zoneIndex={0}
-142	          onDrop={mockOnDrop}
-143	        />,
-144	      );
-145	
-146	      expect(capturedDraggableOptions).not.toBeNull();
-147	
-148	      (
-149	        capturedDraggableOptions as unknown as DraggableOptions
-150	      ).onDrop?.({
-151	        location: {
-152	          current: {
-153	            dropTargets: [{ data: { someOtherKey: 'value' } }],
-154	          },
-155	        },
-156	      });
-157	
-158	      expect(mockDispatch).toHaveBeenCalledWith({
-159	        type: 'REMOVE_TILE',
-160	        zoneIndex: 0,
-161	      });
-162	      expect(mockDispatch).toHaveBeenCalledWith({
-163	        type: 'SET_DRAG_ACTIVE',
-164	        tileId: null,
-165	      });
-166	      expect(mockOnDrop).not.toHaveBeenCalled();
-167	    });
-168	  });
-169	
-170	  describe('HTML5 onDrop — confirmed drop on valid target', () => {
-171	    it('dispatches SET_DRAG_ACTIVE and calls onDrop — caller owns REMOVE_TILE/SWAP_TILES', () => {
-172	      capturedDraggableOptions = null;
-173	      mockDispatch.mockClear();
-174	      const mockOnDrop = vi.fn();
-175	
-176	      render(
-177	        <SlotTileDragHarness
-178	          tileId="tile-1"
-179	          zoneIndex={0}
-180	          onDrop={mockOnDrop}
-181	        />,
-182	      );
-183	
-184	      expect(capturedDraggableOptions).not.toBeNull();
-185	
-186	      (
-187	        capturedDraggableOptions as unknown as DraggableOptions
-188	      ).onDrop?.({
-189	        location: {
-190	          current: {
-191	            dropTargets: [{ data: { zoneIndex: 2 } }],
-192	          },
-193	        },
-194	      });
-195	
-196	      expect(mockDispatch).toHaveBeenCalledWith({
-197	        type: 'SET_DRAG_ACTIVE',
-198	        tileId: null,
-199	      });
-200	      expect(mockDispatch).not.toHaveBeenCalledWith(
-201	        expect.objectContaining({ type: 'REMOVE_TILE' }),
-202	      );
-203	      expect(mockOnDrop).toHaveBeenCalledOnce();
-204	      expect(mockOnDrop).toHaveBeenCalledWith('tile-1', 2);
-205	    });
-206	  });
-207	});
+1 import { render } from '@testing-library/react';
+2 import { describe, expect, it, vi } from 'vitest';
+3 import { useSlotTileDrag } from './useSlotTileDrag';
+4 import type { ReactNode } from 'react';
+5 
+6 vi.mock('@/lib/game-event-bus', () => ({
+7   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+8 }));
+9 
+10 vi.mock('@/lib/audio/AudioFeedback', () => ({
+11   playSound: vi.fn(),
+12   queueSound: vi.fn(),
+13   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+14 }));
+15 
+16 // Capture the options passed to draggable so tests can invoke the callbacks.
+17 type DraggableDropArgs = {
+18   location: {
+19     current: {
+20       dropTargets: { data: Record<string, unknown> }[];
+21     };
+22   };
+23 };
+24 
+25 type DraggableOptions = {
+26   element: HTMLElement;
+27   getInitialData?: () => Record<string, unknown>;
+28   onDragStart?: () => void;
+29   onDrop?: (args: DraggableDropArgs) => void;
+30 };
+31 
+32 let capturedDraggableOptions: DraggableOptions | null = null;
+33 
+34 const mockCleanup = () => {};
+35 
+36 vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
+37   draggable: vi.fn().mockImplementation((opts: DraggableOptions) => {
+38     capturedDraggableOptions = opts;
+39     return mockCleanup;
+40   }),
+41 }));
+42 
+43 const mockDispatch = vi.fn();
+44 
+45 vi.mock('./useAnswerGameDispatch', () => ({
+46   useAnswerGameDispatch: () => mockDispatch,
+47 }));
+48 
+49 // useTouchDrag uses pointer events — mock it to simplify unit tests here.
+50 vi.mock('./useTouchDrag', () => ({
+51   useTouchDrag: () => ({
+52     onPointerDown: vi.fn(),
+53     onPointerMove: vi.fn(),
+54     onPointerUp: vi.fn(),
+55     onPointerCancel: vi.fn(),
+56   }),
+57 }));
+58 
+59 // Test component that attaches the dragRef to an actual button element so the
+60 // useEffect inside useSlotTileDrag can find element !== null and register the
+61 // draggable adapter.
+62 const SlotTileDragHarness = ({
+63   tileId,
+64   zoneIndex,
+65   onDrop,
+66 }: {
+67   tileId: string | null;
+68   zoneIndex: number;
+69   onDrop: (id: string, idx: number) => void;
+70   children?: ReactNode;
+71 }) => {
+72   const { dragRef } = useSlotTileDrag({
+73     tileId,
+74     label: 'A',
+75     zoneIndex,
+76     onDrop,
+77   });
+78   return (
+79     <button type="button" ref={dragRef} data-testid="drag-tile">
+80       A
+81     </button>
+82   );
+83 };
+84 
+85 describe('useSlotTileDrag', () => {
+86   it('registers draggable on mount when tileId is provided', () => {
+87     capturedDraggableOptions = null;
+88     render(
+89       <SlotTileDragHarness
+90         tileId="tile-1"
+91         zoneIndex={0}
+92         onDrop={vi.fn()}
+93       />,
+94     );
+95     expect(capturedDraggableOptions).not.toBeNull();
+96   });
+97 
+98   describe('HTML5 onDrop — no drop targets', () => {
+99     it('dispatches REMOVE_TILE for the correct zoneIndex and does not call onDrop', () => {
+100       capturedDraggableOptions = null;
+101       mockDispatch.mockClear();
+102       const mockOnDrop = vi.fn();
+103 
+104       render(
+105         <SlotTileDragHarness
+106           tileId="tile-1"
+107           zoneIndex={0}
+108           onDrop={mockOnDrop}
+109         />,
+110       );
+111 
+112       expect(capturedDraggableOptions).not.toBeNull();
+113 
+114       (
+115         capturedDraggableOptions as unknown as DraggableOptions
+116       ).onDrop?.({
+117         location: { current: { dropTargets: [] } },
+118       });
+119 
+120       expect(mockDispatch).toHaveBeenCalledWith({
+121         type: 'REMOVE_TILE',
+122         zoneIndex: 0,
+123       });
+124       expect(mockDispatch).toHaveBeenCalledWith({
+125         type: 'SET_DRAG_ACTIVE',
+126         tileId: null,
+127       });
+128       expect(mockOnDrop).not.toHaveBeenCalled();
+129     });
+130   });
+131 
+132   describe('HTML5 onDrop — drop target with no zoneIndex', () => {
+133     it('dispatches REMOVE_TILE but does not call onDrop when target lacks zoneIndex', () => {
+134       capturedDraggableOptions = null;
+135       mockDispatch.mockClear();
+136       const mockOnDrop = vi.fn();
+137 
+138       render(
+139         <SlotTileDragHarness
+140           tileId="tile-1"
+141           zoneIndex={0}
+142           onDrop={mockOnDrop}
+143         />,
+144       );
+145 
+146       expect(capturedDraggableOptions).not.toBeNull();
+147 
+148       (
+149         capturedDraggableOptions as unknown as DraggableOptions
+150       ).onDrop?.({
+151         location: {
+152           current: {
+153             dropTargets: [{ data: { someOtherKey: 'value' } }],
+154           },
+155         },
+156       });
+157 
+158       expect(mockDispatch).toHaveBeenCalledWith({
+159         type: 'REMOVE_TILE',
+160         zoneIndex: 0,
+161       });
+162       expect(mockDispatch).toHaveBeenCalledWith({
+163         type: 'SET_DRAG_ACTIVE',
+164         tileId: null,
+165       });
+166       expect(mockOnDrop).not.toHaveBeenCalled();
+167     });
+168   });
+169 
+170   describe('HTML5 onDrop — confirmed drop on valid target', () => {
+171     it('dispatches SET_DRAG_ACTIVE and calls onDrop — caller owns REMOVE_TILE/SWAP_TILES', () => {
+172       capturedDraggableOptions = null;
+173       mockDispatch.mockClear();
+174       const mockOnDrop = vi.fn();
+175 
+176       render(
+177         <SlotTileDragHarness
+178           tileId="tile-1"
+179           zoneIndex={0}
+180           onDrop={mockOnDrop}
+181         />,
+182       );
+183 
+184       expect(capturedDraggableOptions).not.toBeNull();
+185 
+186       (
+187         capturedDraggableOptions as unknown as DraggableOptions
+188       ).onDrop?.({
+189         location: {
+190           current: {
+191             dropTargets: [{ data: { zoneIndex: 2 } }],
+192           },
+193         },
+194       });
+195 
+196       expect(mockDispatch).toHaveBeenCalledWith({
+197         type: 'SET_DRAG_ACTIVE',
+198         tileId: null,
+199       });
+200       expect(mockDispatch).not.toHaveBeenCalledWith(
+201         expect.objectContaining({ type: 'REMOVE_TILE' }),
+202       );
+203       expect(mockOnDrop).toHaveBeenCalledOnce();
+204       expect(mockOnDrop).toHaveBeenCalledWith('tile-1', 2);
+205     });
+206   });
+207 });
 208
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:42:25Z)**_
@@ -4266,6 +4310,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:42:39Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:42:44Z)**_
@@ -4286,6 +4331,7 @@ Run updated useSlotTileDrag tests
    Start at  02:42:44
    Duration  565ms (transform 32ms, setup 46ms, collect 80ms, tests 16ms, environment 231ms, prepare 33ms)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:42:47Z)**_
@@ -4380,6 +4426,7 @@ Cannot update a component (`AnswerGameProvider`) while rendering a different com
    Start at  02:42:48
    Duration  1.72s (transform 1.02s, setup 1.74s, collect 5.00s, tests 1.51s, environment 10.58s, prepare 1.43s)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:42:53Z)**_
@@ -4438,6 +4485,7 @@ react-i18next:: useTranslation: You will need to pass in an i18next instance by 
    Start at  02:42:55
    Duration  1.15s (transform 375ms, setup 676ms, collect 1.58s, tests 986ms, environment 3.66s, prepare 537ms)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:43:14Z)**_
@@ -4489,9 +4537,8 @@ The user is describing a specific visual issue with bank tiles:
 The "fadeout" is happening on the original tile in the bank. Let me trace through what happens:
 
 1. User starts dragging a bank tile
-2. `useDraggableTile` `onDragStart` fires → `SET_DRAG_ACTIVE(tileId)` 
+2. `useDraggableTile` `onDragStart` fires → `SET_DRAG_ACTIVE(tileId)`
 3. React re-renders → bank tile gets `invisible` class (visibility: hidden)
-
 
 4. Browser shows the native drag ghost and animates it back when the drop is invalid, fading it out as part of the snap-back animation
 5. Meanwhile `onDrop` fires to clear the drag state, making the tile visible again
@@ -4505,6 +4552,7 @@ The simplest fix: **don't hide the bank tile during HTML5 DnD**. The browser alr
 But we want the "hole" effect. We could keep the hole visible but also keep the tile visible (at reduced opacity). Or we could only apply the hole effect for touch drag, not HTML5 DnD.
 
 Actually, the cleanest approach: instead of `invisible`, use reduced opacity. Like `opacity-40` or similar. This way:
+
 1. User sees the tile at reduced opacity + the drag ghost
 2. When drag ends, tile goes back to full opacity — no jarring appear/disappear
 
@@ -4517,6 +4565,7 @@ The real culprit is the browser's ghost snap-back animation: when the drag is in
 One approach is to use a custom drag preview instead of relying on the browser's default ghost, which would give me control over when and how the preview disappears. But even with `setCustomNativeDragPreview`, the browser still manages the snap-back animation, so I'm not sure that fully solves it. Let me think through how pragmatic-drag-and-drop actually handles the `onDrop` callback and whether it fires consistently regardless of drop validity. corresponds to the `dragend` event, which fires AFTER the drop event (if any), AFTER the browser's snap-back animation.
 
 So the timing is:
+
 1. Drag cancelled
 2. Browser snap-back animation (ghost flies back and fades)
 3. `dragend` fires
@@ -4534,7 +4583,7 @@ For bank tiles using HTML5 drag-and-drop, I'd skip the manual visibility toggle 
 
 Alternatively, I could try not hiding the tile at all and just showing the hole effect behind it using the existing structure...
 
-but then the tile would cover the hole during drag, defeating the purpose. 
+but then the tile would cover the hole during drag, defeating the purpose.
 
 Actually, the cleanest approach is simpler: just skip dispatching `SET_DRAG_ACTIVE` when HTML5 drag starts on bank tiles. Only dispatch it for touch drags. The browser's native drag behavior already provides the visual feedback we need.
 
@@ -4551,7 +4600,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:50:46Z)**_
 
 I understand now. The issue is in the **bank tile drag** (not slot tile). When you drag a bank tile and drop it on nothing:
 
-1. `SET_DRAG_ACTIVE` makes the tile `invisible` 
+1. `SET_DRAG_ACTIVE` makes the tile `invisible`
 2. Browser's native snap-back animation plays — the ghost flies back and **fades out**
 3. Only then does `onDrop` fire, clearing `SET_DRAG_ACTIVE` — tile reappears
 
@@ -4566,6 +4615,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:50:50Z)**_
 ```text
 Wasted call — file unchanged since your last Read. Refer to that earlier tool_result instead.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:50:55Z)**_
@@ -4634,6 +4684,7 @@ export const SortNumbersTileBank = () => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:50:57Z)**_
@@ -4706,6 +4757,7 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
   };
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:51:06Z)**_
@@ -4713,11 +4765,13 @@ _**Agent (claude-opus-4-6 2026-04-07 16:51:06Z)**_
 Now I see the difference clearly.
 
 **On master:**
+
 - `useDraggableTile` does NOT dispatch `SET_DRAG_ACTIVE` at all
 - Bank only renders tiles that are `inBank` — no hole/invisible toggle
 - No `dragActiveTileId` usage in the bank component
 
 **On this branch:**
+
 - `useDraggableTile` dispatches `SET_DRAG_ACTIVE` on drag start → makes tile `invisible` → causes the fadeout
 - Bank always renders all tiles with a hole + invisible overlay structure
 
@@ -4731,6 +4785,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:51:09Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:51:15Z)**_
@@ -4744,28 +4799,29 @@ _**Agent (claude-opus-4-6 2026-04-07 16:51:15Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-116	  // Register as drop target
-117	  useEffect(() => {
-118	    const el = slotRef.current;
-119	    if (!el) return;
-120	    return dropTargetForElements({
-121	      element: el,
-122	      getData: () => ({ zoneIndex: index }),
-123	      onDrop: ({ source }) => {
-124	        // Slot-tile drags (sourceZoneIndex present) handle their own
-125	        // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
-126	        if (typeof source.data['sourceZoneIndex'] === 'number') return;
-127	        const sourceTileId = source.data['tileId'];
-128	        if (typeof sourceTileId === 'string') {
-129	          handleDrop(sourceTileId, index);
-130	          // Clear drag active state here — the draggable component (bank tile)
-131	          // unmounts when PLACE_TILE fires, so its own onDrop may never run.
-132	          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-133	        }
-134	      },
-135	    });
-136	  }, [index, handleDrop, dispatch]);
+116   // Register as drop target
+117   useEffect(() => {
+118     const el = slotRef.current;
+119     if (!el) return;
+120     return dropTargetForElements({
+121       element: el,
+122       getData: () => ({ zoneIndex: index }),
+123       onDrop: ({ source }) => {
+124         // Slot-tile drags (sourceZoneIndex present) handle their own
+125         // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
+126         if (typeof source.data['sourceZoneIndex'] === 'number') return;
+127         const sourceTileId = source.data['tileId'];
+128         if (typeof sourceTileId === 'string') {
+129           handleDrop(sourceTileId, index);
+130           // Clear drag active state here — the draggable component (bank tile)
+131           // unmounts when PLACE_TILE fires, so its own onDrop may never run.
+132           dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+133         }
+134       },
+135     });
+136   }, [index, handleDrop, dispatch]);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:51:19Z)**_
@@ -4779,80 +4835,81 @@ _**Agent (claude-opus-4-6 2026-04-07 16:51:20Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useAutoNextSlot } from './useAutoNextSlot';
-5	import { useGameTTS } from './useGameTTS';
-6	import { useTileEvaluation } from './useTileEvaluation';
-7	import { useTouchDrag } from './useTouchDrag';
-8	import type { TileItem } from './types';
-9	import type { TouchDragHandlers } from './useTouchDrag';
-10	import type { RefObject } from 'react';
-11	
-12	export interface DraggableTile extends TouchDragHandlers {
-13	  ref: RefObject<HTMLButtonElement | null>;
-14	  handleClick: () => void;
-15	}
-16	
-17	export const useDraggableTile = (tile: TileItem): DraggableTile => {
-18	  const ref = useRef<HTMLButtonElement>(null);
-19	  const dispatch = useAnswerGameDispatch();
-20	  const { placeInNextSlot } = useAutoNextSlot();
-21	  const { speakTile } = useGameTTS();
-22	  const speakTileRef = useRef(speakTile);
-23	  const { placeTile } = useTileEvaluation();
-24	
-25	  useEffect(() => {
-26	    speakTileRef.current = speakTile;
-27	  }, [speakTile]);
-28	
-29	  // HTML5 DnD — desktop
-30	  useEffect(() => {
-31	    const element = ref.current;
-32	    if (!element) return;
-33	    return draggable({
-34	      element,
-35	      getInitialData: () => ({ tileId: tile.id }),
-36	      onDragStart: () => {
-37	        speakTileRef.current(tile.label);
-38	      },
-39	    });
-40	  }, [tile.id, tile.label, dispatch]);
-41	
-42	  // Pointer-events drag — touch / mobile
-43	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-44	    useTouchDrag({
-45	      tileId: tile.id,
-46	      label: tile.label,
-47	      onDragStart: () => {
-48	        speakTileRef.current(tile.label);
-49	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-50	      },
-51	      onDragCancel: () =>
-52	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
-53	      onDrop: (droppedTileId, zoneIndex) => {
-54	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-55	        placeTile(droppedTileId, zoneIndex);
-56	      },
-57	    });
-58	
-59	  const handleClick = () => {
-60	    speakTile(tile.label);
-61	    placeInNextSlot(tile.id);
-62	  };
-63	
-64	  return {
-65	    ref,
-66	    handleClick,
-67	    onPointerDown,
-68	    onPointerMove,
-69	    onPointerUp,
-70	    onPointerCancel,
-71	  };
-72	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useAutoNextSlot } from './useAutoNextSlot';
+5 import { useGameTTS } from './useGameTTS';
+6 import { useTileEvaluation } from './useTileEvaluation';
+7 import { useTouchDrag } from './useTouchDrag';
+8 import type { TileItem } from './types';
+9 import type { TouchDragHandlers } from './useTouchDrag';
+10 import type { RefObject } from 'react';
+11 
+12 export interface DraggableTile extends TouchDragHandlers {
+13   ref: RefObject<HTMLButtonElement | null>;
+14   handleClick: () => void;
+15 }
+16 
+17 export const useDraggableTile = (tile: TileItem): DraggableTile => {
+18   const ref = useRef<HTMLButtonElement>(null);
+19   const dispatch = useAnswerGameDispatch();
+20   const { placeInNextSlot } = useAutoNextSlot();
+21   const { speakTile } = useGameTTS();
+22   const speakTileRef = useRef(speakTile);
+23   const { placeTile } = useTileEvaluation();
+24 
+25   useEffect(() => {
+26     speakTileRef.current = speakTile;
+27   }, [speakTile]);
+28 
+29   // HTML5 DnD — desktop
+30   useEffect(() => {
+31     const element = ref.current;
+32     if (!element) return;
+33     return draggable({
+34       element,
+35       getInitialData: () => ({ tileId: tile.id }),
+36       onDragStart: () => {
+37         speakTileRef.current(tile.label);
+38       },
+39     });
+40   }, [tile.id, tile.label, dispatch]);
+41 
+42   // Pointer-events drag — touch / mobile
+43   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+44     useTouchDrag({
+45       tileId: tile.id,
+46       label: tile.label,
+47       onDragStart: () => {
+48         speakTileRef.current(tile.label);
+49         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+50       },
+51       onDragCancel: () =>
+52         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
+53       onDrop: (droppedTileId, zoneIndex) => {
+54         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+55         placeTile(droppedTileId, zoneIndex);
+56       },
+57     });
+58 
+59   const handleClick = () => {
+60     speakTile(tile.label);
+61     placeInNextSlot(tile.id);
+62   };
+63 
+64   return {
+65     ref,
+66     handleClick,
+67     onPointerDown,
+68     onPointerMove,
+69     onPointerUp,
+70     onPointerCancel,
+71   };
+72 };
 73
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:51:27Z)**_
@@ -4869,6 +4926,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:51:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:51:32Z)**_
@@ -4893,6 +4951,7 @@ Run bank tile and slot tile drag tests
    Start at  02:51:34
    Duration  630ms (transform 28ms, setup 53ms, collect 81ms, tests 9ms, environment 329ms, prepare 44ms)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:51:43Z)**_
@@ -4989,6 +5048,7 @@ Cannot update a component (`AnswerGameProvider`) while rendering a different com
    Start at  02:51:45
    Duration  1.62s (transform 951ms, setup 1.74s, collect 4.63s, tests 1.50s, environment 10.23s, prepare 1.27s)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:51:51Z)**_
@@ -5002,93 +5062,94 @@ _**Agent (claude-opus-4-6 2026-04-07 16:51:52Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.test.tsx`
 
 ```text
-1	import { act, renderHook } from '@testing-library/react';
-2	import { describe, expect, it, vi } from 'vitest';
-3	import { useDraggableTile } from './useDraggableTile';
-4	
-5	vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
-6	  draggable: vi.fn().mockReturnValue(() => {}),
-7	}));
-8	
-9	const mockPlaceInNextSlot = vi.fn();
-10	const mockSpeakTile = vi.fn();
-11	
-12	vi.mock('./useAutoNextSlot', () => ({
-13	  useAutoNextSlot: () => ({ placeInNextSlot: mockPlaceInNextSlot }),
-14	}));
-15	
-16	vi.mock('./useGameTTS', () => ({
-17	  useGameTTS: () => ({
-18	    speakTile: mockSpeakTile,
-19	    speakPrompt: vi.fn(),
-20	  }),
-21	}));
-22	
-23	vi.mock('./useAnswerGameContext', () => ({
-24	  useAnswerGameContext: () => ({
-25	    config: {
-26	      inputMethod: 'drag',
-27	      ttsEnabled: true,
-28	      totalRounds: 1,
-29	      gameId: 'test',
-30	      wrongTileBehavior: 'lock-auto-eject',
-31	      tileBankMode: 'exact',
-32	    },
-33	    zones: [],
-34	    allTiles: [],
-35	    bankTileIds: [],
-36	    activeSlotIndex: 0,
-37	    roundIndex: 0,
-38	    retryCount: 0,
-39	    phase: 'playing',
-40	    dragActiveTileId: null,
-41	  }),
-42	}));
-43	
-44	vi.mock('./useAnswerGameDispatch', () => ({
-45	  useAnswerGameDispatch: () => vi.fn(),
-46	}));
-47	
-48	const mockPlaceTile = vi.fn();
-49	
-50	vi.mock('./useTileEvaluation', () => ({
-51	  useTileEvaluation: () => ({ placeTile: mockPlaceTile }),
-52	}));
-53	
-54	describe('useDraggableTile', () => {
-55	  const tile = { id: 't1', label: 'C', value: 'c' };
-56	
-57	  it('returns a ref, handleClick, and touch handlers', () => {
-58	    const { result } = renderHook(() => useDraggableTile(tile));
-59	    expect(result.current.ref).toBeDefined();
-60	    expect(typeof result.current.handleClick).toBe('function');
-61	    expect(typeof result.current.onPointerDown).toBe('function');
-62	    expect(typeof result.current.onPointerMove).toBe('function');
-63	    expect(typeof result.current.onPointerUp).toBe('function');
-64	    expect(typeof result.current.onPointerCancel).toBe('function');
-65	  });
-66	
-67	  it('handleClick does not throw', () => {
-68	    const { result } = renderHook(() => useDraggableTile(tile));
-69	    expect(() => act(() => result.current.handleClick())).not.toThrow();
-70	  });
-71	
-72	  it('handleClick calls speakTile with tile label', () => {
-73	    mockSpeakTile.mockClear();
-74	    const { result } = renderHook(() => useDraggableTile(tile));
-75	    act(() => result.current.handleClick());
-76	    expect(mockSpeakTile).toHaveBeenCalledWith(tile.label);
-77	  });
-78	
-79	  it('handleClick calls placeInNextSlot with tile id', () => {
-80	    mockPlaceInNextSlot.mockClear();
-81	    const { result } = renderHook(() => useDraggableTile(tile));
-82	    act(() => result.current.handleClick());
-83	    expect(mockPlaceInNextSlot).toHaveBeenCalledWith(tile.id);
-84	  });
-85	});
+1 import { act, renderHook } from '@testing-library/react';
+2 import { describe, expect, it, vi } from 'vitest';
+3 import { useDraggableTile } from './useDraggableTile';
+4 
+5 vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
+6   draggable: vi.fn().mockReturnValue(() => {}),
+7 }));
+8 
+9 const mockPlaceInNextSlot = vi.fn();
+10 const mockSpeakTile = vi.fn();
+11 
+12 vi.mock('./useAutoNextSlot', () => ({
+13   useAutoNextSlot: () => ({ placeInNextSlot: mockPlaceInNextSlot }),
+14 }));
+15 
+16 vi.mock('./useGameTTS', () => ({
+17   useGameTTS: () => ({
+18     speakTile: mockSpeakTile,
+19     speakPrompt: vi.fn(),
+20   }),
+21 }));
+22 
+23 vi.mock('./useAnswerGameContext', () => ({
+24   useAnswerGameContext: () => ({
+25     config: {
+26       inputMethod: 'drag',
+27       ttsEnabled: true,
+28       totalRounds: 1,
+29       gameId: 'test',
+30       wrongTileBehavior: 'lock-auto-eject',
+31       tileBankMode: 'exact',
+32     },
+33     zones: [],
+34     allTiles: [],
+35     bankTileIds: [],
+36     activeSlotIndex: 0,
+37     roundIndex: 0,
+38     retryCount: 0,
+39     phase: 'playing',
+40     dragActiveTileId: null,
+41   }),
+42 }));
+43 
+44 vi.mock('./useAnswerGameDispatch', () => ({
+45   useAnswerGameDispatch: () => vi.fn(),
+46 }));
+47 
+48 const mockPlaceTile = vi.fn();
+49 
+50 vi.mock('./useTileEvaluation', () => ({
+51   useTileEvaluation: () => ({ placeTile: mockPlaceTile }),
+52 }));
+53 
+54 describe('useDraggableTile', () => {
+55   const tile = { id: 't1', label: 'C', value: 'c' };
+56 
+57   it('returns a ref, handleClick, and touch handlers', () => {
+58     const { result } = renderHook(() => useDraggableTile(tile));
+59     expect(result.current.ref).toBeDefined();
+60     expect(typeof result.current.handleClick).toBe('function');
+61     expect(typeof result.current.onPointerDown).toBe('function');
+62     expect(typeof result.current.onPointerMove).toBe('function');
+63     expect(typeof result.current.onPointerUp).toBe('function');
+64     expect(typeof result.current.onPointerCancel).toBe('function');
+65   });
+66 
+67   it('handleClick does not throw', () => {
+68     const { result } = renderHook(() => useDraggableTile(tile));
+69     expect(() => act(() => result.current.handleClick())).not.toThrow();
+70   });
+71 
+72   it('handleClick calls speakTile with tile label', () => {
+73     mockSpeakTile.mockClear();
+74     const { result } = renderHook(() => useDraggableTile(tile));
+75     act(() => result.current.handleClick());
+76     expect(mockSpeakTile).toHaveBeenCalledWith(tile.label);
+77   });
+78 
+79   it('handleClick calls placeInNextSlot with tile id', () => {
+80     mockPlaceInNextSlot.mockClear();
+81     const { result } = renderHook(() => useDraggableTile(tile));
+82     act(() => result.current.handleClick());
+83     expect(mockPlaceInNextSlot).toHaveBeenCalledWith(tile.id);
+84   });
+85 });
 86
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:52:02Z)**_
@@ -5122,7 +5183,6 @@ The solution: Use `setCustomNativeDragPreview` in `useDraggableTile.ts` for the 
 2. Allows us to dispatch `SET_DRAG_ACTIVE` to show the hole
 3. The browser won't show its default snap-back animation with the default ghost — instead, `onDrop` fires and we control when the tile becomes visible again
 
-
 4. Even with a custom ghost, the browser still animates it back on cancelled drags, so the real fix is timing: use `opacity-0` instead of `invisible` and make the tile visible again in `onDrop` before the ghost fade completes, rather than waiting for the animation to finish.
 
 The core issue is that `onDrop` in pragmatic-drag-and-drop fires after the browser's snap-back animation completes, not before, so there's an unavoidable delay between when the ghost fades and when the tile reappears.
@@ -5134,6 +5194,7 @@ The user wants the hole effect though, so that won't work. Another angle: use `s
 But here's the key insight — when using `setCustomNativeDragPreview`, the browser captures a screenshot of the temporary container as the drag image, not the original DOM element. So the snap-back animation uses that custom ghost, not the tile itself. This means `dragend` fires after the snap-back completes, and at that point I can show the tile again without any jarring transitions.
 
 The timing gap between snap-back and `onDrop` is minimal — they typically fire in the same event loop iteration. But I'm noticing slot tiles use `setCustomNativeDragPreview` too and don't have the fadeout issue the user reported for bank tiles. Let me figure out why the custom preview might be avoiding this problem by comparing what happens with the default drag preview versus the custom one. opacity (browser default for drag sources)
+
 - When we apply `invisible`, the already-reduced-opacity element disappears
 - On failed drop, snap-back animation plays, ghost fades out
 - The ghost looks exactly like the tile (it was a screenshot)
@@ -5141,6 +5202,7 @@ The timing gap between snap-back and `onDrop` is minimal — they typically fire
 - Then tile suddenly appears when `onDrop` fires
 
 With `setCustomNativeDragPreview`:
+
 - We create a custom ghost in a temporary container
 - Browser captures the custom ghost as the drag image
 - Browser does NOT reduce the source element's opacity (because the drag image is from the custom container, not the source element)
@@ -5172,6 +5234,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:53:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:53:26Z)**_
@@ -5182,6 +5245,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:53:26Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:53:33Z)**_
@@ -5203,6 +5267,7 @@ Run drag-related tests
    Start at  02:53:32
    Duration  553ms (transform 58ms, setup 69ms, collect 159ms, tests 23ms, environment 452ms, prepare 98ms)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:53:37Z)**_
@@ -5216,114 +5281,115 @@ _**Agent (claude-opus-4-6 2026-04-07 16:53:37Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
-3	import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
-4	import { useEffect, useRef } from 'react';
-5	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-6	import { useAutoNextSlot } from './useAutoNextSlot';
-7	import { useGameTTS } from './useGameTTS';
-8	import { useTileEvaluation } from './useTileEvaluation';
-9	import { useTouchDrag } from './useTouchDrag';
-10	import type { TileItem } from './types';
-11	import type { TouchDragHandlers } from './useTouchDrag';
-12	import type { RefObject } from 'react';
-13	
-14	export interface DraggableTile extends TouchDragHandlers {
-15	  ref: RefObject<HTMLButtonElement | null>;
-16	  handleClick: () => void;
-17	}
-18	
-19	export const useDraggableTile = (tile: TileItem): DraggableTile => {
-20	  const ref = useRef<HTMLButtonElement>(null);
-21	  const dispatch = useAnswerGameDispatch();
-22	  const { placeInNextSlot } = useAutoNextSlot();
-23	  const { speakTile } = useGameTTS();
-24	  const speakTileRef = useRef(speakTile);
-25	  const { placeTile } = useTileEvaluation();
-26	
-27	  useEffect(() => {
-28	    speakTileRef.current = speakTile;
-29	  }, [speakTile]);
-30	
-31	  // HTML5 DnD — desktop
-32	  useEffect(() => {
-33	    const element = ref.current;
-34	    if (!element) return;
-35	    return draggable({
-36	      element,
-37	      getInitialData: () => ({ tileId: tile.id }),
-38	      onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
-39	        setCustomNativeDragPreview({
-40	          nativeSetDragImage,
-41	          getOffset: preserveOffsetOnSource({
-42	            element,
-43	            input: location.current.input,
-44	          }),
-45	          render({ container }) {
-46	            const rect = element.getBoundingClientRect();
-47	            const ghost = document.createElement('div');
-48	            ghost.innerHTML = element.innerHTML;
-49	            Object.assign(ghost.style, {
-50	              width: `${rect.width}px`,
-51	              height: `${rect.height}px`,
-52	              borderRadius: '12px',
-53	              display: 'flex',
-54	              alignItems: 'center',
-55	              justifyContent: 'center',
-56	              background: 'var(--card, #fff)',
-57	              color: 'var(--card-foreground, #000)',
-58	              boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-59	              transform: 'scale(1.08)',
-60	            });
-61	            container.append(ghost);
-62	            return () => ghost.remove();
-63	          },
-64	        });
-65	      },
-66	      onDragStart: () => {
-67	        speakTileRef.current(tile.label);
-68	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-69	      },
-70	      onDrop: () => {
-71	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-72	      },
-73	    });
-74	  }, [tile.id, tile.label, dispatch]);
-75	
-76	  // Pointer-events drag — touch / mobile
-77	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-78	    useTouchDrag({
-79	      tileId: tile.id,
-80	      label: tile.label,
-81	      onDragStart: () => {
-82	        speakTileRef.current(tile.label);
-83	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-84	      },
-85	      onDragCancel: () =>
-86	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
-87	      onDrop: (droppedTileId, zoneIndex) => {
-88	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-89	        placeTile(droppedTileId, zoneIndex);
-90	      },
-91	    });
-92	
-93	  const handleClick = () => {
-94	    speakTile(tile.label);
-95	    placeInNextSlot(tile.id);
-96	  };
-97	
-98	  return {
-99	    ref,
-100	    handleClick,
-101	    onPointerDown,
-102	    onPointerMove,
-103	    onPointerUp,
-104	    onPointerCancel,
-105	  };
-106	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
+3 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
+4 import { useEffect, useRef } from 'react';
+5 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+6 import { useAutoNextSlot } from './useAutoNextSlot';
+7 import { useGameTTS } from './useGameTTS';
+8 import { useTileEvaluation } from './useTileEvaluation';
+9 import { useTouchDrag } from './useTouchDrag';
+10 import type { TileItem } from './types';
+11 import type { TouchDragHandlers } from './useTouchDrag';
+12 import type { RefObject } from 'react';
+13 
+14 export interface DraggableTile extends TouchDragHandlers {
+15   ref: RefObject<HTMLButtonElement | null>;
+16   handleClick: () => void;
+17 }
+18 
+19 export const useDraggableTile = (tile: TileItem): DraggableTile => {
+20   const ref = useRef<HTMLButtonElement>(null);
+21   const dispatch = useAnswerGameDispatch();
+22   const { placeInNextSlot } = useAutoNextSlot();
+23   const { speakTile } = useGameTTS();
+24   const speakTileRef = useRef(speakTile);
+25   const { placeTile } = useTileEvaluation();
+26 
+27   useEffect(() => {
+28     speakTileRef.current = speakTile;
+29   }, [speakTile]);
+30 
+31   // HTML5 DnD — desktop
+32   useEffect(() => {
+33     const element = ref.current;
+34     if (!element) return;
+35     return draggable({
+36       element,
+37       getInitialData: () => ({ tileId: tile.id }),
+38       onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
+39         setCustomNativeDragPreview({
+40           nativeSetDragImage,
+41           getOffset: preserveOffsetOnSource({
+42             element,
+43             input: location.current.input,
+44           }),
+45           render({ container }) {
+46             const rect = element.getBoundingClientRect();
+47             const ghost = document.createElement('div');
+48             ghost.innerHTML = element.innerHTML;
+49             Object.assign(ghost.style, {
+50               width: `${rect.width}px`,
+51               height: `${rect.height}px`,
+52               borderRadius: '12px',
+53               display: 'flex',
+54               alignItems: 'center',
+55               justifyContent: 'center',
+56               background: 'var(--card, #fff)',
+57               color: 'var(--card-foreground, #000)',
+58               boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+59               transform: 'scale(1.08)',
+60             });
+61             container.append(ghost);
+62             return () => ghost.remove();
+63           },
+64         });
+65       },
+66       onDragStart: () => {
+67         speakTileRef.current(tile.label);
+68         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+69       },
+70       onDrop: () => {
+71         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+72       },
+73     });
+74   }, [tile.id, tile.label, dispatch]);
+75 
+76   // Pointer-events drag — touch / mobile
+77   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+78     useTouchDrag({
+79       tileId: tile.id,
+80       label: tile.label,
+81       onDragStart: () => {
+82         speakTileRef.current(tile.label);
+83         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+84       },
+85       onDragCancel: () =>
+86         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
+87       onDrop: (droppedTileId, zoneIndex) => {
+88         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+89         placeTile(droppedTileId, zoneIndex);
+90       },
+91     });
+92 
+93   const handleClick = () => {
+94     speakTile(tile.label);
+95     placeInNextSlot(tile.id);
+96   };
+97 
+98   return {
+99     ref,
+100     handleClick,
+101     onPointerDown,
+102     onPointerMove,
+103     onPointerUp,
+104     onPointerCancel,
+105   };
+106 };
 107
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:53:45Z)**_
@@ -5331,6 +5397,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:53:45Z)**_
 Here's what's changed:
 
 **Bank tile (`useDraggableTile.ts`)** now uses `setCustomNativeDragPreview` — same as slot tiles already do. This:
+
 1. Creates our own lifted ghost (shadow, scale 1.08) instead of the browser's default screenshot
 2. Prevents the browser's native snap-back fade animation on the source element
 3. `SET_DRAG_ACTIVE` still fires → hole shows while dragging
@@ -5356,6 +5423,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:55:56Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:56:08Z)**_
@@ -5366,6 +5434,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:56:08Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:56:14Z)**_
@@ -5381,6 +5450,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:56:15Z)**_
 ```text
 Wasted call — file unchanged since your last Read. Refer to that earlier tool_result instead.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:56:16Z)**_
@@ -5390,98 +5460,99 @@ _**Agent (claude-opus-4-6 2026-04-07 16:56:16Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
-5	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-6	
-7	const LetterTile = ({ tile }: { tile: TileItem }) => {
-8	  const {
-9	    ref,
-10	    handleClick,
-11	    onPointerDown,
-12	    onPointerMove,
-13	    onPointerUp,
-14	    onPointerCancel,
-15	  } = useDraggableTile(tile);
-16	
-17	  return (
-18	    <button
-19	      ref={ref}
-20	      type="button"
-21	      aria-label={`Letter ${tile.label}`}
-22	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
-23	      style={skeuoStyle}
-24	      onClick={handleClick}
-25	      onPointerDown={onPointerDown}
-26	      onPointerMove={onPointerMove}
-27	      onPointerUp={onPointerUp}
-28	      onPointerCancel={onPointerCancel}
-29	    >
-30	      {tile.label}
-31	    </button>
-32	  );
-33	};
-34	
-35	export const LetterTileBank = () => {
-36	  const { allTiles, bankTileIds, config, dragActiveTileId } =
-37	    useAnswerGameContext();
-38	  const { bankRef } = useBankDropTarget();
-39	
-40	  if (config.inputMethod === 'type') {
-41	    const isTouch = navigator.maxTouchPoints > 0;
-42	    return (
-43	      <p className="text-sm text-muted-foreground" aria-live="polite">
-44	        {isTouch
-45	          ? 'Tap a slot to type'
-46	          : '⌨️ Type the letters on your keyboard'}
-47	      </p>
-48	    );
-49	  }
-50	
-51	  return (
-52	    <div
-53	      ref={bankRef}
-54	      data-tile-bank=""
-55	      className="flex flex-wrap justify-center gap-3"
-56	    >
-57	      {allTiles.map((tile) => {
-58	        const inBank = bankTileIds.includes(tile.id);
-59	        const isDragging = tile.id === dragActiveTileId;
-60	
-61	        if (inBank) {
-62	          return (
-63	            <div key={tile.id} className="relative size-14">
-64	              <div
-65	                data-tile-bank-hole={tile.id}
-66	                className="size-14 rounded-xl bg-muted/60 shadow-inner"
-67	                aria-hidden="true"
-68	              />
-69	              <div
-70	                className={`absolute inset-0${isDragging ? ' invisible' : ''}`}
-71	                aria-hidden={isDragging || undefined}
-72	              >
-73	                <LetterTile tile={tile} />
-74	              </div>
-75	            </div>
-76	          );
-77	        }
-78	
-79	        return (
-80	          <div
-81	            key={tile.id}
-82	            data-tile-bank-hole={tile.id}
-83	            className="size-14 rounded-xl bg-muted/60 shadow-inner"
-84	            aria-hidden="true"
-85	          />
-86	        );
-87	      })}
-88	    </div>
-89	  );
-90	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
+5 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+6 
+7 const LetterTile = ({ tile }: { tile: TileItem }) => {
+8   const {
+9     ref,
+10     handleClick,
+11     onPointerDown,
+12     onPointerMove,
+13     onPointerUp,
+14     onPointerCancel,
+15   } = useDraggableTile(tile);
+16 
+17   return (
+18     <button
+19       ref={ref}
+20       type="button"
+21       aria-label={`Letter ${tile.label}`}
+22       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+23       style={skeuoStyle}
+24       onClick={handleClick}
+25       onPointerDown={onPointerDown}
+26       onPointerMove={onPointerMove}
+27       onPointerUp={onPointerUp}
+28       onPointerCancel={onPointerCancel}
+29     >
+30       {tile.label}
+31     </button>
+32   );
+33 };
+34 
+35 export const LetterTileBank = () => {
+36   const { allTiles, bankTileIds, config, dragActiveTileId } =
+37     useAnswerGameContext();
+38   const { bankRef } = useBankDropTarget();
+39 
+40   if (config.inputMethod === 'type') {
+41     const isTouch = navigator.maxTouchPoints > 0;
+42     return (
+43       <p className="text-sm text-muted-foreground" aria-live="polite">
+44         {isTouch
+45           ? 'Tap a slot to type'
+46           : '⌨️ Type the letters on your keyboard'}
+47       </p>
+48     );
+49   }
+50 
+51   return (
+52     <div
+53       ref={bankRef}
+54       data-tile-bank=""
+55       className="flex flex-wrap justify-center gap-3"
+56     >
+57       {allTiles.map((tile) => {
+58         const inBank = bankTileIds.includes(tile.id);
+59         const isDragging = tile.id === dragActiveTileId;
+60 
+61         if (inBank) {
+62           return (
+63             <div key={tile.id} className="relative size-14">
+64               <div
+65                 data-tile-bank-hole={tile.id}
+66                 className="size-14 rounded-xl bg-muted/60 shadow-inner"
+67                 aria-hidden="true"
+68               />
+69               <div
+70                 className={`absolute inset-0${isDragging ? ' invisible' : ''}`}
+71                 aria-hidden={isDragging || undefined}
+72               >
+73                 <LetterTile tile={tile} />
+74               </div>
+75             </div>
+76           );
+77         }
+78 
+79         return (
+80           <div
+81             key={tile.id}
+82             data-tile-bank-hole={tile.id}
+83             className="size-14 rounded-xl bg-muted/60 shadow-inner"
+84             aria-hidden="true"
+85           />
+86         );
+87       })}
+88     </div>
+89   );
+90 };
 91
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:56:17Z)**_
@@ -5491,194 +5562,195 @@ _**Agent (claude-opus-4-6 2026-04-07 16:56:17Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
-5	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-6	
-7	type TileStyle = 'dots' | 'objects' | 'fingers';
-8	
-9	const getIsDomino = (tileStyle: TileStyle, numericValue: number) =>
-10	  tileStyle === 'dots' &&
-11	  !Number.isNaN(numericValue) &&
-12	  numericValue > 6 &&
-13	  numericValue <= 12;
-14	
-15	/** Pip positions (0–8) for each die value in a 3×3 grid. */
-16	const DICE_PIPS: Record<number, number[]> = {
-17	  1: [4],
-18	  2: [2, 6],
-19	  3: [2, 4, 6],
-20	  4: [0, 2, 6, 8],
-21	  5: [0, 2, 4, 6, 8],
-22	  6: [0, 2, 3, 5, 6, 8],
-23	};
-24	
-25	/** Which two die values add up to n for values 7–12. */
-26	const DOMINO_SPLIT: Record<number, [number, number]> = {
-27	  7: [4, 3],
-28	  8: [4, 4],
-29	  9: [5, 4],
-30	  10: [6, 4],
-31	  11: [6, 5],
-32	  12: [6, 6],
-33	};
-34	
-35	export const DiceFace = ({ value }: { value: number }) => {
-36	  const pips = DICE_PIPS[value] ?? [];
-37	  return (
-38	    <div
-39	      className="grid grid-cols-3 grid-rows-3 gap-1 p-1"
-40	      aria-hidden="true"
-41	    >
-42	      {Array.from({ length: 9 }, (_, i) => (
-43	        <span
-44	          key={i}
-45	          data-cell=""
-46	          data-pip={pips.includes(i) ? '' : undefined}
-47	          className={[
-48	            'size-2.5 rounded-full',
-49	            pips.includes(i) ? 'bg-current' : 'bg-transparent',
-50	          ].join(' ')}
-51	        />
-52	      ))}
-53	    </div>
-54	  );
-55	};
-56	
-57	export const DominoTile = ({ value }: { value: number }) => {
-58	  const [left, right] = DOMINO_SPLIT[value] ?? [6, value - 6];
-59	  return (
-60	    <div className="flex items-center gap-0" aria-hidden="true">
-61	      <DiceFace value={left} />
-62	      <span
-63	        data-divider=""
-64	        className="h-10 w-px shrink-0 bg-current opacity-30"
-65	      />
-66	      <DiceFace value={right} />
-67	    </div>
-68	  );
-69	};
-70	
-71	const NumeralTile = ({
-72	  tile,
-73	  tileStyle,
-74	}: {
-75	  tile: TileItem;
-76	  tileStyle: TileStyle;
-77	}) => {
-78	  const {
-79	    ref,
-80	    handleClick,
-81	    onPointerDown,
-82	    onPointerMove,
-83	    onPointerUp,
-84	    onPointerCancel,
-85	  } = useDraggableTile(tile);
-86	  const numericValue = Number.parseInt(tile.value, 10);
-87	
-88	  const isDomino = getIsDomino(tileStyle, numericValue);
-89	
-90	  return (
-91	    <button
-92	      ref={ref}
-93	      type="button"
-94	      aria-label={`Number ${tile.label}`}
-95	      className={[
-96	        'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl p-2 transition-transform active:scale-95 active:cursor-grabbing',
-97	        isDomino ? 'h-[72px] w-32' : 'size-20',
-98	      ].join(' ')}
-99	      style={skeuoStyle}
-100	      onClick={handleClick}
-101	      onPointerDown={onPointerDown}
-102	      onPointerMove={onPointerMove}
-103	      onPointerUp={onPointerUp}
-104	      onPointerCancel={onPointerCancel}
-105	    >
-106	      {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
-107	        numericValue <= 6 ? (
-108	          <DiceFace value={numericValue} />
-109	        ) : numericValue <= 12 ? (
-110	          <DominoTile value={numericValue} />
-111	        ) : (
-112	          <span className="text-3xl font-bold tabular-nums leading-none">
-113	            {tile.label}
-114	          </span>
-115	        )
-116	      ) : (
-117	        <span className="text-3xl font-bold tabular-nums leading-none">
-118	          {tile.label}
-119	        </span>
-120	      )}
-121	    </button>
-122	  );
-123	};
-124	
-125	export interface NumeralTileBankProps {
-126	  tileStyle: TileStyle;
-127	}
-128	
-129	export const NumeralTileBank = ({
-130	  tileStyle,
-131	}: NumeralTileBankProps) => {
-132	  const { allTiles, bankTileIds, dragActiveTileId } =
-133	    useAnswerGameContext();
-134	  const { bankRef } = useBankDropTarget();
-135	  return (
-136	    <div
-137	      ref={bankRef}
-138	      data-tile-bank=""
-139	      className="flex flex-wrap justify-center gap-3"
-140	    >
-141	      {allTiles.map((tile) => {
-142	        const inBank = bankTileIds.includes(tile.id);
-143	        const isDragging = tile.id === dragActiveTileId;
-144	        const numericValue = Number.parseInt(tile.value, 10);
-145	        const isDomino = getIsDomino(tileStyle, numericValue);
-146	        const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
-147	
-148	        if (inBank) {
-149	          return (
-150	            <div
-151	              key={tile.id}
-152	              className={['relative', holeSizeClass].join(' ')}
-153	            >
-154	              <div
-155	                data-tile-bank-hole={tile.id}
-156	                className={[
-157	                  'rounded-2xl bg-muted/60 shadow-inner',
-158	                  holeSizeClass,
-159	                ].join(' ')}
-160	                aria-hidden="true"
-161	              />
-162	              <div
-163	                className={`absolute inset-0${isDragging ? ' invisible' : ''}`}
-164	                aria-hidden={isDragging || undefined}
-165	              >
-166	                <NumeralTile tile={tile} tileStyle={tileStyle} />
-167	              </div>
-168	            </div>
-169	          );
-170	        }
-171	
-172	        return (
-173	          <div
-174	            key={tile.id}
-175	            data-tile-bank-hole={tile.id}
-176	            className={[
-177	              'rounded-2xl bg-muted/60 shadow-inner',
-178	              holeSizeClass,
-179	            ].join(' ')}
-180	            aria-hidden="true"
-181	          />
-182	        );
-183	      })}
-184	    </div>
-185	  );
-186	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
+5 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+6 
+7 type TileStyle = 'dots' | 'objects' | 'fingers';
+8 
+9 const getIsDomino = (tileStyle: TileStyle, numericValue: number) =>
+10   tileStyle === 'dots' &&
+11   !Number.isNaN(numericValue) &&
+12   numericValue > 6 &&
+13   numericValue <= 12;
+14 
+15 /** Pip positions (0–8) for each die value in a 3×3 grid. */
+16 const DICE_PIPS: Record<number, number[]> = {
+17   1: [4],
+18   2: [2, 6],
+19   3: [2, 4, 6],
+20   4: [0, 2, 6, 8],
+21   5: [0, 2, 4, 6, 8],
+22   6: [0, 2, 3, 5, 6, 8],
+23 };
+24 
+25 /** Which two die values add up to n for values 7–12. */
+26 const DOMINO_SPLIT: Record<number, [number, number]> = {
+27   7: [4, 3],
+28   8: [4, 4],
+29   9: [5, 4],
+30   10: [6, 4],
+31   11: [6, 5],
+32   12: [6, 6],
+33 };
+34 
+35 export const DiceFace = ({ value }: { value: number }) => {
+36   const pips = DICE_PIPS[value] ?? [];
+37   return (
+38     <div
+39       className="grid grid-cols-3 grid-rows-3 gap-1 p-1"
+40       aria-hidden="true"
+41     >
+42       {Array.from({ length: 9 }, (_, i) => (
+43         <span
+44           key={i}
+45           data-cell=""
+46           data-pip={pips.includes(i) ? '' : undefined}
+47           className={[
+48             'size-2.5 rounded-full',
+49             pips.includes(i) ? 'bg-current' : 'bg-transparent',
+50           ].join(' ')}
+51         />
+52       ))}
+53     </div>
+54   );
+55 };
+56 
+57 export const DominoTile = ({ value }: { value: number }) => {
+58   const [left, right] = DOMINO_SPLIT[value] ?? [6, value - 6];
+59   return (
+60     <div className="flex items-center gap-0" aria-hidden="true">
+61       <DiceFace value={left} />
+62       <span
+63         data-divider=""
+64         className="h-10 w-px shrink-0 bg-current opacity-30"
+65       />
+66       <DiceFace value={right} />
+67     </div>
+68   );
+69 };
+70 
+71 const NumeralTile = ({
+72   tile,
+73   tileStyle,
+74 }: {
+75   tile: TileItem;
+76   tileStyle: TileStyle;
+77 }) => {
+78   const {
+79     ref,
+80     handleClick,
+81     onPointerDown,
+82     onPointerMove,
+83     onPointerUp,
+84     onPointerCancel,
+85   } = useDraggableTile(tile);
+86   const numericValue = Number.parseInt(tile.value, 10);
+87 
+88   const isDomino = getIsDomino(tileStyle, numericValue);
+89 
+90   return (
+91     <button
+92       ref={ref}
+93       type="button"
+94       aria-label={`Number ${tile.label}`}
+95       className={[
+96         'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl p-2 transition-transform active:scale-95 active:cursor-grabbing',
+97         isDomino ? 'h-[72px] w-32' : 'size-20',
+98       ].join(' ')}
+99       style={skeuoStyle}
+100       onClick={handleClick}
+101       onPointerDown={onPointerDown}
+102       onPointerMove={onPointerMove}
+103       onPointerUp={onPointerUp}
+104       onPointerCancel={onPointerCancel}
+105     >
+106       {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
+107         numericValue <= 6 ? (
+108           <DiceFace value={numericValue} />
+109         ) : numericValue <= 12 ? (
+110           <DominoTile value={numericValue} />
+111         ) : (
+112           <span className="text-3xl font-bold tabular-nums leading-none">
+113             {tile.label}
+114           </span>
+115         )
+116       ) : (
+117         <span className="text-3xl font-bold tabular-nums leading-none">
+118           {tile.label}
+119         </span>
+120       )}
+121     </button>
+122   );
+123 };
+124 
+125 export interface NumeralTileBankProps {
+126   tileStyle: TileStyle;
+127 }
+128 
+129 export const NumeralTileBank = ({
+130   tileStyle,
+131 }: NumeralTileBankProps) => {
+132   const { allTiles, bankTileIds, dragActiveTileId } =
+133     useAnswerGameContext();
+134   const { bankRef } = useBankDropTarget();
+135   return (
+136     <div
+137       ref={bankRef}
+138       data-tile-bank=""
+139       className="flex flex-wrap justify-center gap-3"
+140     >
+141       {allTiles.map((tile) => {
+142         const inBank = bankTileIds.includes(tile.id);
+143         const isDragging = tile.id === dragActiveTileId;
+144         const numericValue = Number.parseInt(tile.value, 10);
+145         const isDomino = getIsDomino(tileStyle, numericValue);
+146         const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
+147 
+148         if (inBank) {
+149           return (
+150             <div
+151               key={tile.id}
+152               className={['relative', holeSizeClass].join(' ')}
+153             >
+154               <div
+155                 data-tile-bank-hole={tile.id}
+156                 className={[
+157                   'rounded-2xl bg-muted/60 shadow-inner',
+158                   holeSizeClass,
+159                 ].join(' ')}
+160                 aria-hidden="true"
+161               />
+162               <div
+163                 className={`absolute inset-0${isDragging ? ' invisible' : ''}`}
+164                 aria-hidden={isDragging || undefined}
+165               >
+166                 <NumeralTile tile={tile} tileStyle={tileStyle} />
+167               </div>
+168             </div>
+169           );
+170         }
+171 
+172         return (
+173           <div
+174             key={tile.id}
+175             data-tile-bank-hole={tile.id}
+176             className={[
+177               'rounded-2xl bg-muted/60 shadow-inner',
+178               holeSizeClass,
+179             ].join(' ')}
+180             aria-hidden="true"
+181           />
+182         );
+183       })}
+184     </div>
+185   );
+186 };
 187
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:56:20Z)**_
@@ -5693,6 +5765,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:56:23Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:56:29Z)**_
@@ -5703,6 +5776,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:56:29Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:56:34Z)**_
@@ -5713,6 +5787,7 @@ _**Agent (claude-opus-4-6 2026-04-07 16:56:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/number-match/NumeralTileBank/NumeralTileBank.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:56:43Z)**_
@@ -5734,11 +5809,12 @@ Run all relevant tests
    Start at  02:56:40
    Duration  2.50s (transform 1.02s, setup 3.04s, collect 6.56s, tests 4.10s, environment 17.82s, prepare 2.15s)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 16:56:46Z)**_
 
-All 187 tests pass. 
+All 187 tests pass.
 
 Now the bank tile stays dimmed (`opacity-30`) while dragging instead of disappearing. No more fadeout — the tile is always visible, just ghosted. Try it.
 
@@ -5756,7 +5832,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:03:20Z)**_
 The user is saying the fadeout is STILL happening even with `opacity-30`. This means the fadeout isn't caused by our `invisible` class — it's the browser's native HTML5 DnD behavior. When you drag an element, the browser automatically creates a ghost image (screenshot of the element) and when the drag is cancelled, it plays a snap-back animation where the ghost flies back and fades out.
 
 The browser also makes the source element semi-transparent during drag. So even though we set `opacity-30`, the browser is also applying its own opacity on top.
- 
+
 I need to bypass the browser's HTML5 DnD entirely for bank tiles and use a custom drag implementation instead. The `useTouchDrag` hook already does this for touch events, but it explicitly skips mouse events. The fix is to extend `useTouchDrag` to handle mouse pointer events as well, then disable the pragmatic-drag-and-drop registration for bank tiles so we're only using our custom handler.
 
 The tricky part is that the drop targets are registered via HTML5 DnD events, but our pointer-based drag won't trigger those. However, the touch path already solves this by using `elementsFromPoint` to detect drop zones on pointer up instead of relying on HTML5 DnD events. I can apply the same approach here.
@@ -5769,6 +5845,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:03:20Z)**_
 The fadeout is the browser's native HTML5 DnD snap-back animation — we can't style or disable it. The fix: bypass HTML5 DnD entirely for bank tiles and use the pointer-based drag (like the touch path) for mouse too.
 
 Two changes:
+
 1. `useTouchDrag` — add option to also handle mouse events
 2. `useDraggableTile` — drop the `draggable()` call, use pointer drag for everything
 
@@ -5780,6 +5857,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:03:20Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:03:26Z)**_
@@ -5790,6 +5868,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:03:26Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:03:33Z)**_
@@ -5804,6 +5883,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:03:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:03:41Z)**_
@@ -5814,6 +5894,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:03:41Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:03:47Z)**_
@@ -5824,6 +5905,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:03:47Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:03:53Z)**_
@@ -5834,6 +5916,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:03:53Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:03:57Z)**_
@@ -5848,6 +5931,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:04:01Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:04:13Z)**_
@@ -5858,6 +5942,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:04:13Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:04:24Z)**_
@@ -5875,37 +5960,38 @@ _**Agent (claude-opus-4-6 2026-04-07 17:04:24Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts`
 
 ```text
-135	    cleanupGhost();
-136	  }, [cleanupGhost]);
-137	
-138	  const onPointerDown = useCallback(
-139	    (e: PointerEvent<HTMLElement>) => {
-140	      if ((!handleMouse && e.pointerType === 'mouse') || !tileId) return;
-141	      e.currentTarget.setPointerCapture(e.pointerId);
-142	      capturedElRef.current = e.currentTarget;
-143	      capturedPointerIdRef.current = e.pointerId;
-144	      startPos.current = { x: e.clientX, y: e.clientY };
-145	      isDragging.current = false;
-146	
-147	      // When the captured element is removed from the DOM (e.g. a slot tile
-148	      // gets auto-ejected while the user is dragging it), the browser fires
-149	      // lostpointercapture and onPointerUp never fires.  Clean up here so the
-150	      // ghost doesn't float for 5 seconds.
-151	      e.currentTarget.addEventListener(
-152	        'lostpointercapture',
-153	        () => {
-154	          if (!cleanupInProgressRef.current && isDragging.current) {
-155	            cleanupGhost();
-156	            onDragCancelRef.current?.();
-157	          }
-158	        },
-159	        { once: true },
-160	      );
-161	    },
-162	    [tileId, cleanupGhost],
-163	  );
+135     cleanupGhost();
+136   }, [cleanupGhost]);
+137 
+138   const onPointerDown = useCallback(
+139     (e: PointerEvent<HTMLElement>) => {
+140       if ((!handleMouse && e.pointerType === 'mouse') || !tileId) return;
+141       e.currentTarget.setPointerCapture(e.pointerId);
+142       capturedElRef.current = e.currentTarget;
+143       capturedPointerIdRef.current = e.pointerId;
+144       startPos.current = { x: e.clientX, y: e.clientY };
+145       isDragging.current = false;
+146 
+147       // When the captured element is removed from the DOM (e.g. a slot tile
+148       // gets auto-ejected while the user is dragging it), the browser fires
+149       // lostpointercapture and onPointerUp never fires.  Clean up here so the
+150       // ghost doesn't float for 5 seconds.
+151       e.currentTarget.addEventListener(
+152         'lostpointercapture',
+153         () => {
+154           if (!cleanupInProgressRef.current && isDragging.current) {
+155             cleanupGhost();
+156             onDragCancelRef.current?.();
+157           }
+158         },
+159         { once: true },
+160       );
+161     },
+162     [tileId, cleanupGhost],
+163   );
 164
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:04:28Z)**_
@@ -5920,6 +6006,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:04:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:04:38Z)**_
@@ -5945,6 +6032,7 @@ Run all relevant tests
    Start at  03:04:40
    Duration  2.20s (transform 951ms, setup 2.44s, collect 5.83s, tests 2.88s, environment 16.37s, prepare 1.78s)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:04:49Z)**_
@@ -5954,6 +6042,7 @@ All 187 tests pass (the 1 error is a stale process warning, not a test failure).
 To answer your question — **yes, touch devices still work.** The `handleMouse` flag only changes behavior for `pointerType === 'mouse'`. Touch events (`pointerType === 'touch'` or `'pen'`) were already handled by `useTouchDrag` and continue to work exactly as before. The flag just removes the mouse skip guard.
 
 Summary of what changed:
+
 - **Bank tiles** now use our pointer-based drag for both mouse and touch (no HTML5 DnD at all)
 - **Slot tiles** still use HTML5 DnD on desktop + pointer drag on touch (unchanged)
 - Bank tile dims to `opacity-30` while dragging, with our own floating ghost — no browser animation involved
@@ -5973,7 +6062,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:07:05Z)**_
 <think><details><summary>Thought Process</summary>
 The user is saying that the pointer-based drag is causing tiles to be placed in the active slot even when they're not dropped near it. This makes sense — the `useTouchDrag` `onPointerUp` uses `elementsFromPoint` to detect the drop target, and with pointer capture, the mouse events might be hitting the wrong elements.
 
-The user wants to revert the last change (removing HTML5 DnD from bank tiles) and instead take a different approach: just keep the tile wherever it's dropped. If a bank tile is dragged and dropped on nothing, it stays in the bank (no removal). If a slot tile is dragged and dropped on nothing, it stays in the slot. 
+The user wants to revert the last change (removing HTML5 DnD from bank tiles) and instead take a different approach: just keep the tile wherever it's dropped. If a bank tile is dragged and dropped on nothing, it stays in the bank (no removal). If a slot tile is dragged and dropped on nothing, it stays in the slot.
 
 So the fix is to completely disable returning tiles to the bank via drag — once a tile lands in a slot, it can only leave through the eject effect, not by dragging it back.
 
@@ -5995,289 +6084,290 @@ _**Agent (claude-opus-4-6 2026-04-07 17:07:05Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef } from 'react';
-2	import type { PointerEvent } from 'react';
-3	
-4	const DRAG_THRESHOLD_PX = 8;
-5	
-6	interface GhostInfo {
-7	  el: HTMLDivElement;
-8	  halfW: number;
-9	  halfH: number;
-10	}
-11	
-12	const buildGhost = (
-13	  sourceEl: HTMLElement,
-14	  label: string,
-15	  x: number,
-16	  y: number,
-17	): GhostInfo => {
-18	  const rect = sourceEl.getBoundingClientRect();
-19	  const halfW = rect.width / 2;
-20	  const halfH = rect.height / 2;
-21	  const el = document.createElement('div');
-22	  el.textContent = label;
-23	  el.setAttribute('aria-hidden', 'true');
-24	  Object.assign(el.style, {
-25	    position: 'fixed',
-26	    left: `${x - halfW}px`,
-27	    top: `${y - halfH}px`,
-28	    width: `${rect.width}px`,
-29	    height: `${rect.height}px`,
-30	    display: 'flex',
-31	    alignItems: 'center',
-32	    justifyContent: 'center',
-33	    borderRadius: '12px',
-34	    background: 'var(--card, #fff)',
-35	    color: 'var(--card-foreground, #000)',
-36	    fontSize: getComputedStyle(sourceEl).fontSize,
-37	    fontWeight: 'bold',
-38	    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-39	    pointerEvents: 'none',
-40	    zIndex: '9999',
-41	    opacity: '0.95',
-42	    userSelect: 'none',
-43	    transform: 'scale(1.08)',
-44	  });
-45	  document.body.append(el);
-46	  return { el, halfW, halfH };
-47	};
-48	
-49	export interface TouchDragHandlers {
-50	  onPointerDown: (e: PointerEvent<HTMLElement>) => void;
-51	  onPointerMove: (e: PointerEvent<HTMLElement>) => void;
-52	  onPointerUp: (e: PointerEvent<HTMLElement>) => void;
-53	  onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
-54	}
-55	
-56	interface UseTouchDragOptions {
-57	  /** Empty string disables the drag (no pointer capture, no ghost). */
-58	  tileId: string;
-59	  label: string;
-60	  /** When true, also handle mouse pointer events (bypasses HTML5 DnD). Default: false (touch only). */
-61	  handleMouse?: boolean;
-62	  onDragStart?: () => void;
-63	  /** Called when the drag is cancelled (pointer released with no valid drop zone AND no bank). */
-64	  onDragCancel?: () => void;
-65	  /** Called when the tile is dropped on the bank container (detected via `data-tile-bank` attribute). */
-66	  onBankDrop?: () => void;
-67	  onDrop: (tileId: string, zoneIndex: number) => void;
-68	}
-69	
-70	export const useTouchDrag = ({
-71	  tileId,
-72	  label,
-73	  handleMouse = false,
-74	  onDragStart,
-75	  onDragCancel,
-76	  onBankDrop,
-77	  onDrop,
-78	}: UseTouchDragOptions): TouchDragHandlers => {
-79	  const onDragCancelRef = useRef(onDragCancel);
-80	  useEffect(() => {
-81	    onDragCancelRef.current = onDragCancel;
-82	  }, [onDragCancel]);
-83	
-84	  const onBankDropRef = useRef(onBankDrop);
-85	  useEffect(() => {
-86	    onBankDropRef.current = onBankDrop;
-87	  }, [onBankDrop]);
-88	
-89	  const ghostRef = useRef<GhostInfo | null>(null);
-90	  const isDragging = useRef(false);
-91	  const startPos = useRef<{ x: number; y: number } | null>(null);
-92	  const capturedElRef = useRef<HTMLElement | null>(null);
-93	  const capturedPointerIdRef = useRef<number | null>(null);
-94	  const safetyTimerRef = useRef<ReturnType<
-95	    typeof globalThis.setTimeout
-96	  > | null>(null);
-97	
-98	  // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
-99	  // → cleanupGhost re-entry.
-100	  const cleanupInProgressRef = useRef(false);
-101	
-102	  const cleanupGhost = useCallback(() => {
-103	    if (cleanupInProgressRef.current) return;
-104	    cleanupInProgressRef.current = true;
-105	
-106	    if (safetyTimerRef.current !== null) {
-107	      globalThis.clearTimeout(safetyTimerRef.current);
-108	      safetyTimerRef.current = null;
-109	    }
-110	
-111	    ghostRef.current?.el.remove();
-112	    ghostRef.current = null;
-113	
-114	    // Clear refs BEFORE releasePointerCapture so that any synchronous
-115	    // lostpointercapture event triggered by it sees null refs and bails out.
-116	    const el = capturedElRef.current;
-117	    const pointerId = capturedPointerIdRef.current;
-118	    capturedElRef.current = null;
-119	    capturedPointerIdRef.current = null;
-120	
-121	    if (el !== null && pointerId !== null) {
-122	      try {
-123	        el.releasePointerCapture(pointerId);
-124	      } catch {
-125	        // Element may no longer be in the DOM — ignore.
-126	      }
-127	    }
-128	
-129	    isDragging.current = false;
-130	    startPos.current = null;
-131	    cleanupInProgressRef.current = false;
-132	  }, []);
-133	
-134	  const cleanup = useCallback(() => {
-135	    cleanupGhost();
-136	  }, [cleanupGhost]);
-137	
-138	  const onPointerDown = useCallback(
-139	    (e: PointerEvent<HTMLElement>) => {
-140	      if ((!handleMouse && e.pointerType === 'mouse') || !tileId) return;
-141	      e.currentTarget.setPointerCapture(e.pointerId);
-142	      capturedElRef.current = e.currentTarget;
-143	      capturedPointerIdRef.current = e.pointerId;
-144	      startPos.current = { x: e.clientX, y: e.clientY };
-145	      isDragging.current = false;
-146	
-147	      // Suppress the browser's native HTML5 drag so our pointer-based drag
-148	      // takes over completely (no snap-back fade animation).
-149	      if (handleMouse && e.pointerType === 'mouse') {
-150	        const suppressDrag = (ev: Event) => ev.preventDefault();
-151	        e.currentTarget.addEventListener('dragstart', suppressDrag, {
-152	          once: true,
-153	        });
-154	      }
-155	
-156	      // When the captured element is removed from the DOM (e.g. a slot tile
-157	      // gets auto-ejected while the user is dragging it), the browser fires
-158	      // lostpointercapture and onPointerUp never fires.  Clean up here so the
-159	      // ghost doesn't float for 5 seconds.
-160	      e.currentTarget.addEventListener(
-161	        'lostpointercapture',
-162	        () => {
-163	          if (!cleanupInProgressRef.current && isDragging.current) {
-164	            cleanupGhost();
-165	            onDragCancelRef.current?.();
-166	          }
-167	        },
-168	        { once: true },
-169	      );
-170	    },
-171	    [tileId, handleMouse, cleanupGhost],
-172	  );
-173	
-174	  const onPointerMove = useCallback(
-175	    (e: PointerEvent<HTMLElement>) => {
-176	      if ((!handleMouse && e.pointerType === 'mouse') || !startPos.current)
-177	        return;
-178	
-179	      if (!isDragging.current) {
-180	        const dx = e.clientX - startPos.current.x;
-181	        const dy = e.clientY - startPos.current.y;
-182	        if (
-183	          Math.abs(dx) > DRAG_THRESHOLD_PX ||
-184	          Math.abs(dy) > DRAG_THRESHOLD_PX
-185	        ) {
-186	          isDragging.current = true;
-187	          ghostRef.current = buildGhost(
-188	            e.currentTarget,
-189	            label,
-190	            e.clientX,
-191	            e.clientY,
-192	          );
-193	          onDragStart?.();
-194	
-195	          safetyTimerRef.current = globalThis.setTimeout(() => {
-196	            cleanupGhost();
-197	            onDragCancelRef.current?.();
-198	          }, 5000);
-199	
-200	          document.addEventListener('contextmenu', cleanupGhost, {
-201	            once: true,
-202	          });
-203	          document.addEventListener('visibilitychange', cleanupGhost, {
-204	            once: true,
-205	          });
-206	        }
-207	      }
-208	
-209	      if (isDragging.current && ghostRef.current) {
-210	        const { el, halfW, halfH } = ghostRef.current;
-211	        el.style.left = `${e.clientX - halfW}px`;
-212	        el.style.top = `${e.clientY - halfH}px`;
-213	      }
-214	    },
-215	    [label, onDragStart, cleanupGhost],
-216	  );
-217	
-218	  const onPointerUp = useCallback(
-219	    (e: PointerEvent<HTMLElement>) => {
-220	      if ((!handleMouse && e.pointerType === 'mouse') || !startPos.current)
-221	        return;
-222	
-223	      if (isDragging.current) {
-224	        // Remove ghost before elementsFromPoint so it doesn't interfere.
-225	        ghostRef.current?.el.remove();
-226	        ghostRef.current = null;
-227	
-228	        const elements = document.elementsFromPoint(
-229	          e.clientX,
-230	          e.clientY,
-231	        );
-232	        let dropped = false;
-233	        for (const el of elements) {
-234	          if (
-235	            el instanceof HTMLElement &&
-236	            el.dataset['zoneIndex'] !== undefined
-237	          ) {
-238	            const zoneIndex = Number.parseInt(
-239	              el.dataset['zoneIndex'],
-240	              10,
-241	            );
-242	            if (!Number.isNaN(zoneIndex)) {
-243	              onDrop(tileId, zoneIndex);
-244	              dropped = true;
-245	              break;
-246	            }
-247	          }
-248	        }
-249	        if (!dropped) {
-250	          // Check if dropped on the bank container.
-251	          const onBank = elements.some(
-252	            (el) =>
-253	              el instanceof HTMLElement &&
-254	              el.dataset['tileBank'] !== undefined,
-255	          );
-256	          if (onBank) {
-257	            onBankDropRef.current?.();
-258	          } else {
-259	            onDragCancelRef.current?.();
-260	          }
-261	        }
-262	      }
-263	
-264	      cleanup();
-265	    },
-266	    [tileId, onDrop, cleanup],
-267	  );
-268	
-269	  const onPointerCancel = useCallback(
-270	    (e: PointerEvent<HTMLElement>) => {
-271	      if (!handleMouse && e.pointerType === 'mouse') return;
-272	      if (isDragging.current) {
-273	        onDragCancelRef.current?.();
-274	      }
-275	      cleanupGhost();
-276	    },
-277	    [cleanupGhost],
-278	  );
-279	
-280	  return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
-281	};
+1 import { useCallback, useEffect, useRef } from 'react';
+2 import type { PointerEvent } from 'react';
+3 
+4 const DRAG_THRESHOLD_PX = 8;
+5 
+6 interface GhostInfo {
+7   el: HTMLDivElement;
+8   halfW: number;
+9   halfH: number;
+10 }
+11 
+12 const buildGhost = (
+13   sourceEl: HTMLElement,
+14   label: string,
+15   x: number,
+16   y: number,
+17 ): GhostInfo => {
+18   const rect = sourceEl.getBoundingClientRect();
+19   const halfW = rect.width / 2;
+20   const halfH = rect.height / 2;
+21   const el = document.createElement('div');
+22   el.textContent = label;
+23   el.setAttribute('aria-hidden', 'true');
+24   Object.assign(el.style, {
+25     position: 'fixed',
+26     left: `${x - halfW}px`,
+27     top: `${y - halfH}px`,
+28     width: `${rect.width}px`,
+29     height: `${rect.height}px`,
+30     display: 'flex',
+31     alignItems: 'center',
+32     justifyContent: 'center',
+33     borderRadius: '12px',
+34     background: 'var(--card, #fff)',
+35     color: 'var(--card-foreground, #000)',
+36     fontSize: getComputedStyle(sourceEl).fontSize,
+37     fontWeight: 'bold',
+38     boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+39     pointerEvents: 'none',
+40     zIndex: '9999',
+41     opacity: '0.95',
+42     userSelect: 'none',
+43     transform: 'scale(1.08)',
+44   });
+45   document.body.append(el);
+46   return { el, halfW, halfH };
+47 };
+48 
+49 export interface TouchDragHandlers {
+50   onPointerDown: (e: PointerEvent<HTMLElement>) => void;
+51   onPointerMove: (e: PointerEvent<HTMLElement>) => void;
+52   onPointerUp: (e: PointerEvent<HTMLElement>) => void;
+53   onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
+54 }
+55 
+56 interface UseTouchDragOptions {
+57   /** Empty string disables the drag (no pointer capture, no ghost). */
+58   tileId: string;
+59   label: string;
+60   /** When true, also handle mouse pointer events (bypasses HTML5 DnD). Default: false (touch only). */
+61   handleMouse?: boolean;
+62   onDragStart?: () => void;
+63   /** Called when the drag is cancelled (pointer released with no valid drop zone AND no bank). */
+64   onDragCancel?: () => void;
+65   /** Called when the tile is dropped on the bank container (detected via `data-tile-bank` attribute). */
+66   onBankDrop?: () => void;
+67   onDrop: (tileId: string, zoneIndex: number) => void;
+68 }
+69 
+70 export const useTouchDrag = ({
+71   tileId,
+72   label,
+73   handleMouse = false,
+74   onDragStart,
+75   onDragCancel,
+76   onBankDrop,
+77   onDrop,
+78 }: UseTouchDragOptions): TouchDragHandlers => {
+79   const onDragCancelRef = useRef(onDragCancel);
+80   useEffect(() => {
+81     onDragCancelRef.current = onDragCancel;
+82   }, [onDragCancel]);
+83 
+84   const onBankDropRef = useRef(onBankDrop);
+85   useEffect(() => {
+86     onBankDropRef.current = onBankDrop;
+87   }, [onBankDrop]);
+88 
+89   const ghostRef = useRef<GhostInfo | null>(null);
+90   const isDragging = useRef(false);
+91   const startPos = useRef<{ x: number; y: number } | null>(null);
+92   const capturedElRef = useRef<HTMLElement | null>(null);
+93   const capturedPointerIdRef = useRef<number | null>(null);
+94   const safetyTimerRef = useRef<ReturnType<
+95     typeof globalThis.setTimeout
+96   > | null>(null);
+97 
+98   // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
+99   // → cleanupGhost re-entry.
+100   const cleanupInProgressRef = useRef(false);
+101 
+102   const cleanupGhost = useCallback(() => {
+103     if (cleanupInProgressRef.current) return;
+104     cleanupInProgressRef.current = true;
+105 
+106     if (safetyTimerRef.current !== null) {
+107       globalThis.clearTimeout(safetyTimerRef.current);
+108       safetyTimerRef.current = null;
+109     }
+110 
+111     ghostRef.current?.el.remove();
+112     ghostRef.current = null;
+113 
+114     // Clear refs BEFORE releasePointerCapture so that any synchronous
+115     // lostpointercapture event triggered by it sees null refs and bails out.
+116     const el = capturedElRef.current;
+117     const pointerId = capturedPointerIdRef.current;
+118     capturedElRef.current = null;
+119     capturedPointerIdRef.current = null;
+120 
+121     if (el !== null && pointerId !== null) {
+122       try {
+123         el.releasePointerCapture(pointerId);
+124       } catch {
+125         // Element may no longer be in the DOM — ignore.
+126       }
+127     }
+128 
+129     isDragging.current = false;
+130     startPos.current = null;
+131     cleanupInProgressRef.current = false;
+132   }, []);
+133 
+134   const cleanup = useCallback(() => {
+135     cleanupGhost();
+136   }, [cleanupGhost]);
+137 
+138   const onPointerDown = useCallback(
+139     (e: PointerEvent<HTMLElement>) => {
+140       if ((!handleMouse && e.pointerType === 'mouse') || !tileId) return;
+141       e.currentTarget.setPointerCapture(e.pointerId);
+142       capturedElRef.current = e.currentTarget;
+143       capturedPointerIdRef.current = e.pointerId;
+144       startPos.current = { x: e.clientX, y: e.clientY };
+145       isDragging.current = false;
+146 
+147       // Suppress the browser's native HTML5 drag so our pointer-based drag
+148       // takes over completely (no snap-back fade animation).
+149       if (handleMouse && e.pointerType === 'mouse') {
+150         const suppressDrag = (ev: Event) => ev.preventDefault();
+151         e.currentTarget.addEventListener('dragstart', suppressDrag, {
+152           once: true,
+153         });
+154       }
+155 
+156       // When the captured element is removed from the DOM (e.g. a slot tile
+157       // gets auto-ejected while the user is dragging it), the browser fires
+158       // lostpointercapture and onPointerUp never fires.  Clean up here so the
+159       // ghost doesn't float for 5 seconds.
+160       e.currentTarget.addEventListener(
+161         'lostpointercapture',
+162         () => {
+163           if (!cleanupInProgressRef.current && isDragging.current) {
+164             cleanupGhost();
+165             onDragCancelRef.current?.();
+166           }
+167         },
+168         { once: true },
+169       );
+170     },
+171     [tileId, handleMouse, cleanupGhost],
+172   );
+173 
+174   const onPointerMove = useCallback(
+175     (e: PointerEvent<HTMLElement>) => {
+176       if ((!handleMouse && e.pointerType === 'mouse') || !startPos.current)
+177         return;
+178 
+179       if (!isDragging.current) {
+180         const dx = e.clientX - startPos.current.x;
+181         const dy = e.clientY - startPos.current.y;
+182         if (
+183           Math.abs(dx) > DRAG_THRESHOLD_PX ||
+184           Math.abs(dy) > DRAG_THRESHOLD_PX
+185         ) {
+186           isDragging.current = true;
+187           ghostRef.current = buildGhost(
+188             e.currentTarget,
+189             label,
+190             e.clientX,
+191             e.clientY,
+192           );
+193           onDragStart?.();
+194 
+195           safetyTimerRef.current = globalThis.setTimeout(() => {
+196             cleanupGhost();
+197             onDragCancelRef.current?.();
+198           }, 5000);
+199 
+200           document.addEventListener('contextmenu', cleanupGhost, {
+201             once: true,
+202           });
+203           document.addEventListener('visibilitychange', cleanupGhost, {
+204             once: true,
+205           });
+206         }
+207       }
+208 
+209       if (isDragging.current && ghostRef.current) {
+210         const { el, halfW, halfH } = ghostRef.current;
+211         el.style.left = `${e.clientX - halfW}px`;
+212         el.style.top = `${e.clientY - halfH}px`;
+213       }
+214     },
+215     [label, onDragStart, cleanupGhost],
+216   );
+217 
+218   const onPointerUp = useCallback(
+219     (e: PointerEvent<HTMLElement>) => {
+220       if ((!handleMouse && e.pointerType === 'mouse') || !startPos.current)
+221         return;
+222 
+223       if (isDragging.current) {
+224         // Remove ghost before elementsFromPoint so it doesn't interfere.
+225         ghostRef.current?.el.remove();
+226         ghostRef.current = null;
+227 
+228         const elements = document.elementsFromPoint(
+229           e.clientX,
+230           e.clientY,
+231         );
+232         let dropped = false;
+233         for (const el of elements) {
+234           if (
+235             el instanceof HTMLElement &&
+236             el.dataset['zoneIndex'] !== undefined
+237           ) {
+238             const zoneIndex = Number.parseInt(
+239               el.dataset['zoneIndex'],
+240               10,
+241             );
+242             if (!Number.isNaN(zoneIndex)) {
+243               onDrop(tileId, zoneIndex);
+244               dropped = true;
+245               break;
+246             }
+247           }
+248         }
+249         if (!dropped) {
+250           // Check if dropped on the bank container.
+251           const onBank = elements.some(
+252             (el) =>
+253               el instanceof HTMLElement &&
+254               el.dataset['tileBank'] !== undefined,
+255           );
+256           if (onBank) {
+257             onBankDropRef.current?.();
+258           } else {
+259             onDragCancelRef.current?.();
+260           }
+261         }
+262       }
+263 
+264       cleanup();
+265     },
+266     [tileId, onDrop, cleanup],
+267   );
+268 
+269   const onPointerCancel = useCallback(
+270     (e: PointerEvent<HTMLElement>) => {
+271       if (!handleMouse && e.pointerType === 'mouse') return;
+272       if (isDragging.current) {
+273         onDragCancelRef.current?.();
+274       }
+275       cleanupGhost();
+276     },
+277     [cleanupGhost],
+278   );
+279 
+280   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
+281 };
 282
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:07:31Z)**_
@@ -6287,13 +6377,14 @@ The user is saying my previous `handleMouse` approach had a bug where the tile w
 
 Let me revert `useTouchDrag.ts` and `useDraggableTile.ts` to before the `handleMouse` changes, and implement the simpler approach.
 
-The user said "no no, the tile stays on the mouse point" — this confirms the `handleMouse` pointer drag approach had issues with mouse drag (ghost staying, wrong drop targets, etc.). 
+The user said "no no, the tile stays on the mouse point" — this confirms the `handleMouse` pointer drag approach had issues with mouse drag (ghost staying, wrong drop targets, etc.).
 
 Now I'm switching back to HTML5 drag-and-drop for bank tiles. I need to revert both hook files to remove the `handleMouse` logic and restore the original mouse guards, then revert the draggable tile hook to use the standard HTML5 approach without triggering the drag active state on desktop. Since that state won't be set, I can remove the opacity styling from the bank components.
 
 For the slot tile drag hook, I should strip out the `isBankTarget` check entirely since tiles never actually return to the bank—that else branch is dead code. The `onBankDrop` callback in the touch drag hook can also be removed since it's no longer needed. was only used by `useSlotTileDrag`, and if I simplify that, it won't be called. I should remove it to keep things clean.
 
 Actually, let me be careful. The `onBankDrop` was added for the touch path of `useSlotTileDrag`. If we're saying tiles never return to bank via drag, then:
+
 - `useSlotTileDrag` touch: `onDragCancel` and `onBankDrop` both just clear drag state (no REMOVE_TILE)
 - `useSlotTileDrag` HTML5: else branch just clears drag state (no REMOVE_TILE)
 
@@ -6567,6 +6658,7 @@ export const useTouchDrag = ({
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:07:54Z)**_
@@ -6655,6 +6747,7 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:08:10Z)**_
@@ -6824,6 +6917,7 @@ export const useSlotTileDrag = ({
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:08:41Z)**_
@@ -6837,27 +6931,28 @@ _**Agent (claude-opus-4-6 2026-04-07 17:08:42Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-138	  // Drag source for filled slots
-139	  const {
-140	    dragRef,
-141	    onPointerDown,
-142	    onPointerMove,
-143	    onPointerUp,
-144	    onPointerCancel,
-145	  } = useSlotTileDrag({
-146	    tileId,
-147	    label,
-148	    zoneIndex: index,
-149	    onDrop: handleDrop,
-150	  });
-151	
-152	  // Click handler: remove tile from slot (returns to bank)
-153	  const handleClick = useCallback(() => {
-154	    if (isEmpty) return;
-155	    dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
-156	  }, [isEmpty, dispatch, index]);
+138   // Drag source for filled slots
+139   const {
+140     dragRef,
+141     onPointerDown,
+142     onPointerMove,
+143     onPointerUp,
+144     onPointerCancel,
+145   } = useSlotTileDrag({
+146     tileId,
+147     label,
+148     zoneIndex: index,
+149     onDrop: handleDrop,
+150   });
+151 
+152   // Click handler: remove tile from slot (returns to bank)
+153   const handleClick = useCallback(() => {
+154     if (isEmpty) return;
+155     dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
+156   }, [isEmpty, dispatch, index]);
 157
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:08:54Z)**_
@@ -6865,7 +6960,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:08:54Z)**_
 <think><details><summary>Thought Process</summary>
 The `onBankReturn` was already removed from the `useSlotTileDrag` options, so `useSlotBehavior` no longer passes it. Let me check the current call site — it's at lines 145-150 and it's fine, no `onBankReturn` is passed.
 
-But the click handler at line 152-156 still does `REMOVE_TILE`. Should I remove that? The user said "no going back, unless is triggered by eject effect." Click-to-remove is also a way to return a tile. But maybe the user wants to keep click behavior? Let me not touch the click handler — the user specifically mentioned drag behavior. 
+But the click handler at line 152-156 still does `REMOVE_TILE`. Should I remove that? The user said "no going back, unless is triggered by eject effect." Click-to-remove is also a way to return a tile. But maybe the user wants to keep click behavior? Let me not touch the click handler — the user specifically mentioned drag behavior.
 
 If they want to remove click-to-remove too, they'll tell me. Now I'll update the tests and run them.
 </details></think>
@@ -7091,6 +7186,7 @@ describe('useSlotTileDrag', () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:09:22Z)**_
@@ -7112,6 +7208,7 @@ Run all tests
    Start at  03:09:20
    Duration  2.45s (transform 1.52s, setup 2.41s, collect 8.20s, tests 3.34s, environment 16.27s, prepare 1.92s)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:09:30Z)**_
@@ -7119,6 +7216,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:09:30Z)**_
 All 186 tests pass (one test removed since the two "no targets" scenarios collapsed into one).
 
 Summary:
+
 - **`useTouchDrag`** — reverted to original (touch-only, no `handleMouse`, no `onBankDrop`)
 - **`useDraggableTile`** — back to HTML5 DnD for desktop, no `SET_DRAG_ACTIVE` on HTML5 path (no fadeout), touch path unchanged
 - **`useSlotTileDrag`** — tiles never leave their slot via drag. Only valid slot-to-slot drops call `onDrop`. Everything else is a no-op (just clears drag state). `onBankReturn` removed entirely.
@@ -7149,26 +7247,27 @@ and have 56 and 22 different commits each, respectively.
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   .specstory/statistics.json
-	modified:   src/components/answer-game/useDraggableTile.ts
-	modified:   src/components/answer-game/useSlotTileDrag.test.tsx
-	modified:   src/components/answer-game/useSlotTileDrag.ts
-	modified:   src/games/number-match/NumeralTileBank/NumeralTileBank.tsx
-	modified:   src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx
-	modified:   src/games/word-spell/LetterTileBank/LetterTileBank.tsx
+ modified:   .specstory/statistics.json
+ modified:   src/components/answer-game/useDraggableTile.ts
+ modified:   src/components/answer-game/useSlotTileDrag.test.tsx
+ modified:   src/components/answer-game/useSlotTileDrag.ts
+ modified:   src/games/number-match/NumeralTileBank/NumeralTileBank.tsx
+ modified:   src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx
+ modified:   src/games/word-spell/LetterTileBank/LetterTileBank.tsx
 
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
-	.specstory/history/2026-04-07_03-29-49Z-i-want-to-make.md
-	.specstory/history/2026-04-07_07-08-28Z-this-session-is-being.md
-	.specstory/history/2026-04-07_08-32-53Z-specstory-sync-claude.md
-	.specstory/history/2026-04-07_08-54-17Z-this-session-is-being.md
-	docs/mockups/
-	docs/superpowers/plans/2026-04-07-unified-slot-component.md
-	docs/superpowers/specs/2026-04-07-unified-slot-component-design.md
+ .specstory/history/2026-04-07_03-29-49Z-i-want-to-make.md
+ .specstory/history/2026-04-07_07-08-28Z-this-session-is-being.md
+ .specstory/history/2026-04-07_08-32-53Z-specstory-sync-claude.md
+ .specstory/history/2026-04-07_08-54-17Z-this-session-is-being.md
+ docs/mockups/
+ docs/superpowers/plans/2026-04-07-unified-slot-component.md
+ docs/superpowers/specs/2026-04-07-unified-slot-component-design.md
 
 no changes added to commit (use "git add" and/or "git commit -a")
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:11:40Z)**_
@@ -7474,6 +7573,7 @@ index 1b7beac..04d9b9a 100644
                >
                  <LetterTile tile={tile} />
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:11:40Z)**_
@@ -7491,6 +7591,7 @@ dd2f840 feat(Tile): Skeuomorphic style for the tiles
 6d7aed4 fix(slot): play swap sound once with correct priority
 fda48bb fix(slot): use innerHTML for drag ghost to preserve font size
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:12:04Z)**_
@@ -7540,6 +7641,7 @@ Preview (first 2KB):
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:12:08Z)**_
@@ -7553,6 +7655,7 @@ Verify commit succeeded
 ```text
 8a1fd27 fix(drag): tiles stay in slot on failed drop, only eject returns to bank
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:12:12Z)**_

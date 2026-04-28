@@ -6,20 +6,23 @@
 
 _**User**_
 
-/subagent-driven-development 
-@docs/superpowers/plans/2026-04-02-storybook-setup.md 
+/subagent-driven-development
+@docs/superpowers/plans/2026-04-02-storybook-setup.md
 
 ## Storybook milestone — handoff for next session
 
 ### Where the work lives
+
 - **Branch / worktree:** `milestone-storybook-setup` → `worktrees/milestone-storybook-setup` (do **not** commit on `master`).
 - **Build output:** `storybook-static/` (in `.gitignore`; CI builds fresh).
 
 ### Already in good shape (last verified)
+
 - `yarn typecheck`, `yarn lint`, `yarn test`, and `yarn build-storybook` were passing in that worktree.
 - Playwright **Chromium for 1.59.x** was installed locally (`npx playwright install chromium`) so `test-storybook` can launch the browser.
 
 ### Do next (in order)
+
 1. **Finish Task 25 — Storybook test runner**  
    From the worktree root:
    - `yarn build-storybook --output-dir storybook-static`
@@ -39,10 +42,12 @@ _**User**_
    - Open the PR with the title/body from the plan (Storybook + deploy + CI + MCP).
 
 ### Optional / nice-to-have
+
 - Build warns **“unable to find package.json for radix-ui”** — harmless unless you want to chase it.
 - Confirm **`.mcp.json`** `storybook` entry matches your Cursor MCP schema (HTTP server URL is only valid while `yarn storybook` is running on 6006).
 
 ### Plan deviations to remember
+
 - **Storybook 10:** `@storybook/addon-essentials` was replaced by **`@storybook/addon-docs`** + a11y/themes; **`@storybook/test-runner`** is **0.24.x**, not `^10.3.0`.
 - **MDX docs** were renamed from `*.stories.mdx` → **`*.mdx`** so Storybook 10’s indexer treats them as docs (not CSF).
 - **Knip:** `knip.json` from the plan was folded into **`knip.config.ts`** (entries + `ignoreDependencies`).
@@ -56,15 +61,15 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Parsing handoff instructions**
 
-I'm parsing the user's handoff checklist to understand the specific next steps for the Storybook setup. I'm extracting the specific tasks from the handoff checklist for the Storybook setup. 
+I'm parsing the user's handoff checklist to understand the specific next steps for the Storybook setup. I'm extracting the specific tasks from the handoff checklist for the Storybook setup.
 
 **Aligning with user**
 
-I'm aligning my approach with the user's explicit instructions to work in the `milestone-storybook-setup` worktree. 
+I'm aligning my approach with the user's explicit instructions to work in the `milestone-storybook-setup` worktree.
 
 **Executing checklist**
 
-I'm executing the user's checklist in the worktree rather than dispatching subagents. I'm executing steps 1-4 of the checklist manually, including building storybook and handling yaml validation. 
+I'm executing the user's checklist in the worktree rather than dispatching subagents. I'm executing steps 1-4 of the checklist manually, including building storybook and handling yaml validation.
 
 **Reading plan sections**
 
@@ -72,17 +77,13 @@ I'm reading the plan file to understand tasks 25-29 and their PR requirements. <
 
 _**Agent (composer-2)**_
 
-
 Executing the handoff checklist in `worktrees/milestone-storybook-setup`: reading the plan for Tasks 25–29, then running the Storybook test runner and subsequent steps.
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -93,6 +94,7 @@ Parameters:
   "pattern": "^## Task (25|26|27|29)|Task 25|test-runner|test:storybook|PR title"
 }
 ```
+
 Additional data:
 
 ```json
@@ -111,8 +113,8 @@ Additional data:
   "totalMatches": 13
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -136,11 +138,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -178,17 +175,11 @@ Directory: **/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skil
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="todo_write">
 <details>
 <summary>Tool use: **todo_write**</summary>
-
 
 Parameters:
 
@@ -197,6 +188,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -226,8 +218,8 @@ Result:
   "success": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -332,6 +324,7 @@ $ storybook build --output-dir storybook-static
 Done in 6.16s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -341,11 +334,6 @@ Done in 6.16s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -355,6 +343,7 @@ _**Agent (composer-2)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && npx http-server storybook-static -p 6006 -s
 ```
+
 </details>
 </tool-use>
 
@@ -364,11 +353,6 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && npx
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -382,6 +366,7 @@ sleep 2 && curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6006/
 ```
 200
 ```
+
 </details>
 </tool-use>
 
@@ -391,11 +376,6 @@ sleep 2 && curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6006/
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1311,6 +1291,7 @@ Ran all test suites.
 error Command failed with exit code 1.
 
 ```
+
 </details>
 </tool-use>
 
@@ -1321,11 +1302,6 @@ error Command failed with exit code 1.
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1353,18 +1329,14 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Investigating a naming collision: stories reference `StorybookTestRunnerError` before initialization. Searching the codebase for that identifier and inspecting a story file.
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1375,6 +1347,7 @@ Parameters:
   "pattern": "StorybookTestRunnerError"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1388,8 +1361,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1421,17 +1394,11 @@ The test-runner is reporting incorrect line numbers due to bundling, and the err
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1442,6 +1409,7 @@ Parameters:
   "pattern": "StorybookTestRunnerError"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1455,8 +1423,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1468,17 +1436,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1490,6 +1452,7 @@ Parameters:
   "pattern": "StorybookTestRunnerError"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1503,8 +1466,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1516,17 +1479,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1537,6 +1494,7 @@ Parameters:
   "pattern": "TestRunnerError"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1550,8 +1508,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1563,17 +1521,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1584,6 +1536,7 @@ Parameters:
   "pattern": "StorybookTestRunner"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1602,8 +1555,8 @@ Additional data:
   "totalMatches": 4
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1615,17 +1568,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1636,6 +1583,7 @@ Parameters:
   "pattern": "TestRunnerError"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1649,8 +1597,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1662,17 +1610,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1684,6 +1626,7 @@ Parameters:
   "pattern": "RunnerError"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1697,8 +1640,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1709,11 +1652,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1761,11 +1699,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1781,17 +1714,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1802,6 +1729,7 @@ Parameters:
   "pattern": "StorybookTestRunnerError|class.*Error"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1820,8 +1748,8 @@ Additional data:
   "totalMatches": 11
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1839,11 +1767,6 @@ _**Agent (composer-2)**_
 I found the bug: the error class reference fails inside the class body due to hoisting issues with the let declaration. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1863,18 +1786,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Tracing execution order**
 
-The issue is the execution order within `page.evaluate` - the class initialization might be delayed due to how the script is wrapped, causing `StorybookTestRunnerError` to be undefined when `new StorybookTestRunnerError(...)` is called. 
+The issue is the execution order within `page.evaluate` - the class initialization might be delayed due to how the script is wrapped, causing `StorybookTestRunnerError` to be undefined when `new StorybookTestRunnerError(...)` is called.
 
 **Analyzing error context**
 
 I'm investigating why 'StorybookTestRunnerError' is referenced before initialization in the static block during class evaluation. The class body should be fine since JavaScript evaluates the entire right-hand side of `let StorybookTestRunnerError = class ...` first, but bundling might reorder code and cause issues. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1898,17 +1816,11 @@ The error occurs in an anonymous evaluated script at line 256, matching the `thr
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1919,6 +1831,7 @@ Parameters:
   "pattern": "setup-page-script|evaluate"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1945,8 +1858,8 @@ Additional data:
   "totalMatches": 8
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1957,11 +1870,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1984,11 +1892,6 @@ _**Agent (composer-2)**_
 I'm investigating potential duplicate script injection causing variable declaration conflicts. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2018,11 +1921,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -2041,7 +1939,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Defining global test runner**
 
-I'm defining `StorybookTestRunnerError` globally in the setup script to avoid serialization issues with Playwright. I'm confirming that in classic scripts, `let StorybookTestRunnerError` creates a script-scope binding, not a window property. 
+I'm defining `StorybookTestRunnerError` globally in the setup script to avoid serialization issues with Playwright. I'm confirming that in classic scripts, `let StorybookTestRunnerError` creates a script-scope binding, not a window property.
 
 **Handling error scoping**
 
@@ -2049,17 +1947,11 @@ I'm ensuring `StorybookTestRunnerError` is properly scoped so `__test` can acces
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="web_search">
 <details>
 <summary>Tool use: **web_search**</summary>
-
 
 Parameters:
 
@@ -2068,6 +1960,7 @@ Parameters:
   "searchTerm": "Storybook test-runner StorybookTestRunnerError before initialization"
 }
 ```
+
 Result:
 
 ```json
@@ -2082,10 +1975,10 @@ Result:
   "rejected": false
 }
 ```
+
 User decision: **accepted**
 
 Status: **completed**
-
 
 </details>
 </tool-use>
@@ -2097,17 +1990,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="web_fetch">
 <details>
 <summary>Tool use: **web_fetch**</summary>
-
 
 Parameters:
 
@@ -2116,6 +2003,7 @@ Parameters:
   "url": "https://github.com/storybookjs/test-runner/issues/580"
 }
 ```
+
 Result:
 
 ```json
@@ -2124,10 +2012,10 @@ Result:
   "url": "https://github.com/storybookjs/test-runner/issues/580"
 }
 ```
+
 User decision: **accepted**
 
 Status: **completed**
-
 
 </details>
 </tool-use>
@@ -2146,17 +2034,11 @@ I'm investigating why `StorybookTestRunnerError` is inaccessible from within `__
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2167,6 +2049,7 @@ Parameters:
   "pattern": "__test|globalThis"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2185,8 +2068,8 @@ Additional data:
   "totalMatches": 7
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2205,17 +2088,11 @@ I'm verifying whether the story iframe uses module context, as this affects how 
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2226,6 +2103,7 @@ Parameters:
   "pattern": "addScriptTag|iframe|frame"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2244,8 +2122,8 @@ Additional data:
   "totalMatches": 14
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2256,11 +2134,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2276,11 +2149,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2304,17 +2172,11 @@ I'm investigating whether Playwright bundles function bodies inline, which could
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2325,6 +2187,7 @@ Parameters:
   "pattern": "StorybookTestRunnerError|__test"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2338,8 +2201,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2350,11 +2213,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2370,11 +2228,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2398,17 +2251,11 @@ I'm clarifying how Playwright serializes functions for browser evaluation and wh
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2419,6 +2266,7 @@ Parameters:
   "pattern": "StorybookTestRunnerError"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2432,8 +2280,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2448,34 +2296,29 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Checking error references**
 
-I found that the TDZ error occurs because `StorybookTestRunnerError` is referenced before its declaration in the static block. I'm exploring whether using `addScriptTag` with `content` could isolate script scopes to avoid TDZ errors. I discovered that classic scripts in HTML5 share the same global lexical environment, so let declarations can leak between scripts. 
+I found that the TDZ error occurs because `StorybookTestRunnerError` is referenced before its declaration in the static block. I'm exploring whether using `addScriptTag` with `content` could isolate script scopes to avoid TDZ errors. I discovered that classic scripts in HTML5 share the same global lexical environment, so let declarations can leak between scripts.
 
-The issue is that __test function can be called before line 206 completes due to hoisting, but let declarations aren't initialized until their line. The `__test` function is hoisted and fully initialized, but `StorybookTestRunnerError` enters TDZ until its class RHS completes, potentially causing issues if the class evaluation triggers synchronous code that calls `__test`. 
+The issue is that __test function can be called before line 206 completes due to hoisting, but let declarations aren't initialized until their line. The `__test` function is hoisted and fully initialized, but `StorybookTestRunnerError` enters TDZ until its class RHS completes, potentially causing issues if the class evaluation triggers synchronous code that calls `__test`.
 
 **Analyzing hoisting**
 
-Function declarations are hoisted to the top of their scope, so `__test` exists before the class evaluation completes. I found that `let` declarations are not hoisted above the temporal dead zone, unlike function declarations. I'm examining how TDZ affects function declarations during class evaluation. I found that cyclic initialization could occur if `__name` indirectly triggers code reading `StorybookTestRunnerError`. 
+Function declarations are hoisted to the top of their scope, so `__test` exists before the class evaluation completes. I found that `let` declarations are not hoisted above the temporal dead zone, unlike function declarations. I'm examining how TDZ affects function declarations during class evaluation. I found that cyclic initialization could occur if `__name` indirectly triggers code reading `StorybookTestRunnerError`.
 
-I'm investigating a Playwright Chromium issue where `page.evaluate` might be inlining `__test` and referencing `StorybookTestRunnerError` from the wrong scope, causing a 'Cannot access before initialization' error. The error occurs inside `__test` because it's referencing `StorybookTestRunnerError` from the wrong scope, likely due to a different `__test` function being executed than the one defined in the script. I found that `__test` is referencing `StorybookTestRunnerError` from a different scope, likely due to multiple script injections causing variable shadowing. 
+I'm investigating a Playwright Chromium issue where `page.evaluate` might be inlining `__test` and referencing `StorybookTestRunnerError` from the wrong scope, causing a 'Cannot access before initialization' error. The error occurs inside `__test` because it's referencing `StorybookTestRunnerError` from the wrong scope, likely due to a different `__test` function being executed than the one defined in the script. I found that `__test` is referencing `StorybookTestRunnerError` from a different scope, likely due to multiple script injections causing variable shadowing.
 
-I discovered that duplicate script injections cause SyntaxError from `let StorybookTestRunnerError` redeclaration. I found that SWC target es2015 transforms generated test files to use `var`, causing redeclaration errors in browser execution, with the stack trace pointing to Jest-transformed line numbers in `src/components/ui/alert-dialog.stories.tsx:96:49`. 
+I discovered that duplicate script injections cause SyntaxError from `let StorybookTestRunnerError` redeclaration. I found that SWC target es2015 transforms generated test files to use `var`, causing redeclaration errors in browser execution, with the stack trace pointing to Jest-transformed line numbers in `src/components/ui/alert-dialog.stories.tsx:96:49`.
 
 **Checking module scope**
 
-I'm investigating whether Storybook 10 iframe loads as a module and if our injection uses classic scripts, potentially causing lexical environment conflicts. I found that classic scripts create bindings in the global lexical environment while modules use module environments, which could cause conflicts if Storybook iframe uses modules but our injected content is classic script. 
+I'm investigating whether Storybook 10 iframe loads as a module and if our injection uses classic scripts, potentially causing lexical environment conflicts. I found that classic scripts create bindings in the global lexical environment while modules use module environments, which could cause conflicts if Storybook iframe uses modules but our injected content is classic script.
 
-I discovered that module top-level bindings aren't global object properties in modern browsers, unlike classic scripts which may or may not be on globalThis. I'm investigating whether classic scripts and modules share the same global lexical environment in iframe contexts. 
+I discovered that module top-level bindings aren't global object properties in modern browsers, unlike classic scripts which may or may not be on globalThis. I'm investigating whether classic scripts and modules share the same global lexical environment in iframe contexts.
 
 **Clarifying scope binding**
 
 Classic scripts and modules don't share the same global lexical scope; modules have their own Module Environment while classic scripts bind top-level `let` to the Global Environment Record's declarative record. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2487,11 +2330,6 @@ File not found
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2510,11 +2348,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2539,11 +2372,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -2556,6 +2384,7 @@ curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6006/iframe.html
 ```
 404
 ```
+
 </details>
 </tool-use>
 
@@ -2572,11 +2401,6 @@ _**Agent (composer-2)**_
 The iframe.html endpoint returns 404, causing Storybook to fail to load properly. The iframe.html 404 error likely causes StorybookTestRunnerError and timeout issues in static builds. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2600,17 +2424,11 @@ The iframe loads even with 404 status, but fails to find #root, causing TDZ erro
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2621,6 +2439,7 @@ Parameters:
   "pattern": "StorybookTestRunnerError"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2639,8 +2458,8 @@ Additional data:
   "totalMatches": 11
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2659,17 +2478,11 @@ I'm investigating whether `renderedEvent` contains invalid characters that could
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2680,6 +2493,7 @@ Parameters:
   "pattern": "RENDERED_EVENT|renderedEvent"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2698,8 +2512,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2717,11 +2531,6 @@ _**Agent (composer-2)**_
 I found that the template replacement for `TEST_RUNNER_RENDERED_EVENT` doesn't match due to missing quotes in the source. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2741,14 +2550,9 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Replacing event placeholder**
 
-I'm replacing the double-quoted event placeholder in the source file. I'm replacing the event placeholder with a dynamic expression using globalThis.__STORYBOOK_MODULE_CORE_EVENTS__. </details></think>
+I'm replacing the double-quoted event placeholder in the source file. I'm replacing the event placeholder with a dynamic expression using globalThis.**STORYBOOK_MODULE_CORE_EVENTS**. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2785,6 +2589,7 @@ drwxr-xr-x@  6 leocaseiro  staff    192 Apr  2 08:35 sb-manager
 -rw-r--r--@  1 leocaseiro  staff  28093 Apr  2 08:35 vite-inject-mocker-entry.js
 
 ```
+
 </details>
 </tool-use>
 
@@ -2794,11 +2599,6 @@ drwxr-xr-x@  6 leocaseiro  staff    192 Apr  2 08:35 sb-manager
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2831,11 +2631,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -2852,6 +2647,7 @@ for p in /iframe.html /base-skill/docs/iframe.html /base-skill/docs/ /index.html
 /index.html 200
 
 ```
+
 </details>
 </tool-use>
 
@@ -2869,17 +2665,11 @@ I'm updating the local static serve paths to reflect that the app lives at `/` i
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2890,6 +2680,7 @@ Parameters:
   "pattern": "iframe\\.html"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2903,8 +2694,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2916,17 +2707,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2937,6 +2722,7 @@ Parameters:
   "pattern": "iframe"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2955,8 +2741,8 @@ Additional data:
   "totalMatches": 3
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2967,11 +2753,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2988,11 +2769,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -3001,6 +2777,7 @@ _**Agent (composer-2)**_
 ```bash
 curl -s "http://127.0.0.1:6006/iframe.html" | head -5
 ```
+
 </details>
 </tool-use>
 
@@ -3010,11 +2787,6 @@ curl -s "http://127.0.0.1:6006/iframe.html" | head -5
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3035,6 +2807,7 @@ Keep-Alive: timeout=5
        0
 
 ```
+
 </details>
 </tool-use>
 
@@ -3052,17 +2825,11 @@ I'm investigating why http-server -s doesn't serve iframe.html properly, causing
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -3073,6 +2840,7 @@ Parameters:
   "pattern": "StorybookTestRunnerError"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3086,8 +2854,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3099,17 +2867,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="web_search">
 <details>
 <summary>Tool use: **web_search**</summary>
-
 
 Parameters:
 
@@ -3118,6 +2880,7 @@ Parameters:
   "searchTerm": "Storybook 10 test-runner iframe.html index.html prepare"
 }
 ```
+
 Result:
 
 ```json
@@ -3132,10 +2895,10 @@ Result:
   "rejected": false
 }
 ```
+
 User decision: **accepted**
 
 Status: **completed**
-
 
 </details>
 </tool-use>
@@ -3147,17 +2910,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="web_fetch">
 <details>
 <summary>Tool use: **web_fetch**</summary>
-
 
 Parameters:
 
@@ -3166,6 +2923,7 @@ Parameters:
   "url": "https://github.com/storybookjs/test-runner/pull/569"
 }
 ```
+
 Result:
 
 ```json
@@ -3174,10 +2932,10 @@ Result:
   "url": "https://github.com/storybookjs/test-runner/pull/569"
 }
 ```
+
 User decision: **accepted**
 
 Status: **completed**
-
 
 </details>
 </tool-use>
@@ -3188,11 +2946,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3212,20 +2965,15 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Implementing custom prepare**
 
-I'm implementing a custom `prepare` function that mirrors `defaultPrepare` but uses `index.html` instead of `iframe.html`. 
+I'm implementing a custom `prepare` function that mirrors `defaultPrepare` but uses `index.html` instead of `iframe.html`.
 
 **Updating prepare function**
 
-I'm updating the prepare function to use index.html directly instead of iframe.html for Storybook 10 static builds. I'm switching from iframe.html to index.html for Storybook 10 static builds since iframe.html is not present. 
+I'm updating the prepare function to use index.html directly instead of iframe.html for Storybook 10 static builds. I'm switching from iframe.html to index.html for Storybook 10 static builds since iframe.html is not present.
 
 I'm verifying that `TestRunnerConfig` is properly exported from the package's index.d.ts for the custom `prepare` function. I'm replacing the default prepare function entirely to ensure custom prepare matches its behavior. I'm adjusting the prepare function to handle URL patterns like `https://site/base-skill/docs/index.html`. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3245,11 +2993,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -3263,6 +3006,7 @@ npm view @storybook/test-runner version 2>/dev/null
 0.24.3
 
 ```
+
 </details>
 </tool-use>
 
@@ -3280,17 +3024,11 @@ I'm implementing test-runner.ts to handle custom prepare logic and re-running te
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -3301,6 +3039,7 @@ Parameters:
   "pattern": "viewMode|VIEW_MODE"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3319,8 +3058,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3332,17 +3071,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -3353,6 +3086,7 @@ Parameters:
   "pattern": "replaceAll.*viewMode|viewMode.*replace"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3366,8 +3100,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3378,11 +3112,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3406,11 +3135,8 @@ I found that {{viewMode}} in const declaration causes syntax error in JS, must a
 
 _**Agent (composer-2)**_
 
-
 Identifying the issue: the test runner navigates to `iframe.html`, which Storybook 10's static build doesn't include (only `index.html`). That yields an empty 404 page; the failure path then triggers a confusing TDZ error around `StorybookTestRunnerError`. Adding a custom `prepare` that opens `index.html` and re-running tests.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -3428,11 +3154,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -3449,11 +3170,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3478,6 +3194,7 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 error Command failed with exit code 2.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3488,17 +3205,11 @@ error Command failed with exit code 2.
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="read_lints">
 <details>
 <summary>Tool use: **read_lints**</summary>
-
 
 Parameters:
 
@@ -3509,6 +3220,7 @@ Parameters:
   ]
 }
 ```
+
 Result:
 
 ```json
@@ -3520,8 +3232,8 @@ Result:
   ]
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3623,6 +3335,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3639,11 +3352,6 @@ _**Agent (composer-2)**_
 I found the TDZ bug in setup-page-script.js where const arrow functions are used before initialization. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3663,16 +3371,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Analyzing console spy setup**
 
-I found the issue: the `spiedMethods` object initializer evaluates `blue` before `spyOnConsole` is fully defined, causing a reference error. I found that `blue` is referenced before being defined in the spiedMethods initializer, likely due to temporal dead zone issues in the bundled script context. The test runs during script initialization before the setup completes, causing `blue` to be in TDZ when accessed in spiedMethods. I found a potential circular dependency where `blue` references `__name` which may cause synchronous execution during setup. I'm investigating potential race conditions between Storybook's bundle execution and our setup script injection. I confirmed that setupPage runs synchronously and initializes `blue` before tests execute. 
+I found the issue: the `spiedMethods` object initializer evaluates `blue` before `spyOnConsole` is fully defined, causing a reference error. I found that `blue` is referenced before being defined in the spiedMethods initializer, likely due to temporal dead zone issues in the bundled script context. The test runs during script initialization before the setup completes, causing `blue` to be in TDZ when accessed in spiedMethods. I found a potential circular dependency where `blue` references `__name` which may cause synchronous execution during setup. I'm investigating potential race conditions between Storybook's bundle execution and our setup script injection. I confirmed that setupPage runs synchronously and initializes `blue` before tests execute.
 
 The error suggests 'blue' is accessed before initialization, possibly due to test isolation issues with page resets. I suspect the issue stems from Playwright's isolated evaluation context, where the test runs in a separate realm that doesn't have access to the main script's closure variables like `blue`. Page.evaluate runs in page context, not isolated world, and addScriptTag likely injects into main frame. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3689,17 +3392,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -3711,6 +3408,7 @@ Parameters:
   "pattern": "iframe|preview"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3729,8 +3427,8 @@ Additional data:
   "totalMatches": 163
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3742,17 +3440,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -3763,6 +3455,7 @@ Parameters:
   "pattern": "iframe\\.html"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3785,8 +3478,8 @@ Additional data:
   "totalMatches": 5
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3804,11 +3497,6 @@ _**Agent (composer-2)**_
 The preview iframe is broken with a 404 error, likely because the iframe.html path is incorrect for static builds. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3828,17 +3516,11 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -3849,6 +3531,7 @@ Parameters:
   "pattern": "iframe"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3867,8 +3550,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3879,11 +3562,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3900,11 +3578,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -3913,6 +3586,7 @@ _**Agent (composer-2)**_
 ```bash
 find /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/storybook-static -name '*iframe*' 2>/dev/null
 ```
+
 </details>
 </tool-use>
 
@@ -3923,17 +3597,11 @@ find /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/stor
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="semantic_search_full">
 <details>
 <summary>Tool use: **semantic_search_full**</summary>
-
 
 Parameters:
 
@@ -3945,8 +3613,8 @@ Parameters:
   "topK": 10
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3958,17 +3626,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -3979,6 +3641,7 @@ Parameters:
   "pattern": "iframe"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3997,8 +3660,8 @@ Additional data:
   "totalMatches": 14
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4009,11 +3672,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4037,17 +3695,11 @@ I'm investigating whether vite build outputs index.html or iframe.html as the de
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4058,6 +3710,7 @@ Parameters:
   "pattern": "index\\.html|rollupOptions|input.*html"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4076,8 +3729,8 @@ Additional data:
   "totalMatches": 4
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4089,17 +3742,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4110,6 +3757,7 @@ Parameters:
   "pattern": "manager|buildStart|writeBundle"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4123,8 +3771,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4136,17 +3784,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4158,6 +3800,7 @@ Parameters:
   "pattern": "iframe"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4200,8 +3843,8 @@ Additional data:
   "totalMatches": 78
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4213,17 +3856,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4235,6 +3872,7 @@ Parameters:
   "pattern": "iframe\\.html|preview"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4253,8 +3891,8 @@ Additional data:
   "totalMatches": 3
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4266,17 +3904,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4288,6 +3920,7 @@ Parameters:
   "pattern": "iframe|previewUrl"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4301,8 +3934,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4313,11 +3946,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4337,11 +3965,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -4356,6 +3979,7 @@ find /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/stor
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/storybook-static/manifests/components.html
 
 ```
+
 </details>
 </tool-use>
 
@@ -4373,17 +3997,11 @@ I found that Storybook 10 merged manager and preview into one page, but the mana
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4394,6 +4012,7 @@ Parameters:
   "pattern": "^const blue |^let blue |var blue "
 }
 ```
+
 Additional data:
 
 ```json
@@ -4407,8 +4026,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4426,11 +4045,6 @@ _**Agent (composer-2)**_
 I'm implementing a post-build step to copy iframe.html, as the Storybook build isn't emitting it despite having the correct input configuration. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4454,17 +4068,11 @@ I'm investigating whether Storybook 10 uses a single-page structure with both ma
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4476,6 +4084,7 @@ Parameters:
   "pattern": "iframe|buildStatic"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4489,8 +4098,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4502,17 +4111,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4524,6 +4127,7 @@ Parameters:
   "pattern": "iframe\\.html"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4537,8 +4141,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4550,17 +4154,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4571,6 +4169,7 @@ Parameters:
   "pattern": "iframe"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4589,8 +4188,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4601,11 +4200,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4622,17 +4216,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4643,6 +4231,7 @@ Parameters:
   "pattern": "iframe\\.html|writeFile.*html"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4661,8 +4250,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4674,17 +4263,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4695,6 +4278,7 @@ Parameters:
   "pattern": "iframe"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4708,8 +4292,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4720,11 +4304,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4744,11 +4323,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -4763,11 +4337,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4784,17 +4353,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4805,6 +4368,7 @@ Parameters:
   "pattern": "PREVIEW_URL"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4823,8 +4387,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4839,7 +4403,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Checking preview build**
 
-The vite preview build is missing iframe.html, causing 404 errors in the test runner. 
+The vite preview build is missing iframe.html, causing 404 errors in the test runner.
 
 **Checking vite config**
 
@@ -4847,17 +4411,11 @@ I'm testing if mergeConfig replaces rollupOptions.input instead of merging it. <
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4868,6 +4426,7 @@ Parameters:
   "pattern": "PREVIEW_URL"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4886,8 +4445,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4906,11 +4465,6 @@ I'm tracing how the preview URL is derived from pathname, specifically handling 
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -4919,6 +4473,7 @@ _**Agent (composer-2)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && yarn build-storybook --output-dir storybook-static 2>&1 | rg -i 'iframe|html|writing'
 ```
+
 </details>
 </tool-use>
 
@@ -4928,11 +4483,6 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && yar
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4986,6 +4536,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && yar
 Done in 5.56s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -4995,11 +4546,6 @@ Done in 5.56s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5014,6 +4560,7 @@ ls -la /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/st
 -rw-r--r--@ 1 leocaseiro  staff  3298 Apr  2 08:44 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/storybook-static/index.html
 
 ```
+
 </details>
 </tool-use>
 
@@ -5024,17 +4571,11 @@ ls -la /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/st
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5045,6 +4586,7 @@ Parameters:
   "pattern": "main-BQKc7Kv7"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5127,8 +4669,8 @@ Additional data:
   "totalMatches": 17
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5140,17 +4682,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5162,6 +4698,7 @@ Parameters:
   "pattern": "storybook-root|vite-app"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5180,8 +4717,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5193,17 +4730,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5214,6 +4745,7 @@ Parameters:
   "pattern": "writeFile|iframe"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5232,8 +4764,8 @@ Additional data:
   "totalMatches": 18
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5245,17 +4777,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5267,6 +4793,7 @@ Parameters:
   "pattern": "iframe|index\\.html|write"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5285,8 +4812,8 @@ Additional data:
   "totalMatches": 37
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5298,17 +4825,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5319,6 +4840,7 @@ Parameters:
   "pattern": "closeBundle|generateBundle|build\\.|output"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5337,8 +4859,8 @@ Additional data:
   "totalMatches": 10
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5349,11 +4871,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5377,11 +4894,6 @@ I found that Vite outputs `iframe.html` but it gets overwritten or renamed by th
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search">
@@ -5404,11 +4916,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-se
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -5427,17 +4934,17 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Handling rollup input**
 
-I'm fixing the rollup input override by adjusting `.storybook/main.ts` to prevent tanstackStart from overwriting the iframe input. 
+I'm fixing the rollup input override by adjusting `.storybook/main.ts` to prevent tanstackStart from overwriting the iframe input.
 
 **Adjusting rollup input**
 
-I'm ensuring `build.rollupOptions.input` isn't overridden by clearing or restoring Storybook's iframe entry in `viteFinal`. I'm preventing Storybook's iframe input override by ensuring viteFinal runs after the code generator plugin. 
+I'm ensuring `build.rollupOptions.input` isn't overridden by clearing or restoring Storybook's iframe entry in `viteFinal`. I'm preventing Storybook's iframe input override by ensuring viteFinal runs after the code generator plugin.
 
-I'm investigating whether `tanstackStart` in the loaded config is causing the iframe input override issue. 
+I'm investigating whether `tanstackStart` in the loaded config is causing the iframe input override issue.
 
 **Setting iframe input**
 
-I'm setting the rollup input to the storybook iframe path using importMetaResolve. I'm simplifying the iframe path resolution using `join` and `dirname` from the `path` module. I'm using `createRequire` and `resolve` to dynamically locate the iframe HTML file for the Vite build input. 
+I'm setting the rollup input to the storybook iframe path using importMetaResolve. I'm simplifying the iframe path resolution using `join` and `dirname` from the `path` module. I'm using `createRequire` and `resolve` to dynamically locate the iframe HTML file for the Vite build input.
 
 **Verifying resolve paths**
 
@@ -5445,17 +4952,11 @@ I'm checking if `req.resolve('@storybook/builder-vite/input/iframe.html')` works
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5467,6 +4968,7 @@ Parameters:
   "pattern": "viteFinal"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5480,8 +4982,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5493,17 +4995,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5514,6 +5010,7 @@ Parameters:
   "pattern": "viteFinal"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5527,8 +5024,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5540,17 +5037,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5561,6 +5052,7 @@ Parameters:
   "pattern": "viteFinal"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5574,8 +5066,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5590,7 +5082,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Configuring vite final**
 
-I'm implementing viteFinal with optional chaining to conditionally merge rollupOptions only during production builds. I'm using viteFinal's options parameter to access Storybook's build context for conditional configuration. I'm resolving the iframe.html path using require.resolve with the correct package export mapping. 
+I'm implementing viteFinal with optional chaining to conditionally merge rollupOptions only during production builds. I'm using viteFinal's options parameter to access Storybook's build context for conditional configuration. I'm resolving the iframe.html path using require.resolve with the correct package export mapping.
 
 **Checking vite config**
 
@@ -5598,17 +5090,11 @@ I'm checking if `rollupOptions.input` matters for Vite dev server and will condi
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5620,6 +5106,7 @@ Parameters:
   "pattern": "viteFinal"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5633,8 +5120,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5646,17 +5133,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5667,6 +5148,7 @@ Parameters:
   "pattern": "viteFinal"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5680,8 +5162,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5693,17 +5175,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5714,6 +5190,7 @@ Parameters:
   "pattern": "viteFinal"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5727,8 +5204,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -5743,7 +5220,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Setting env var**
 
-I'm using `NODE_ENV === 'production'` to trigger the env var during Storybook build. 
+I'm using `NODE_ENV === 'production'` to trigger the env var during Storybook build.
 
 **Updating storybook config**
 
@@ -5751,10 +5228,7 @@ I'm updating .storybook/main.ts to use createRequire for resolving iframe.html p
 
 _**Agent (composer-2)**_
 
-
 Identifying root cause: TanStack Start's Vite config merges into Storybook's build and overrides Rollup's `input`, so the preview build emits the wrong HTML and `iframe.html` is never written. Forcing Storybook's iframe entry in `viteFinal` and reverting the test-runner workaround.
-
-
 
 _**Agent (composer-2)**_
 
@@ -5777,11 +5251,6 @@ _**Agent (composer-2)**_
 I'm adding createRequire to resolve Storybook's iframe.html and merging build.rollupOptions.input. I'm checking if the rollup input change affects Storybook dev mode since Vite server mode may ignore rollupOptions during development. I'm adjusting the vite configuration to conditionally set rollupOptions.input only for production builds. I'm setting rollupOptions.input to storybookIframeHtml for production builds only. I'm using `viteConfig.command === 'build'` to safely detect production builds instead of relying on `mode`. I'm switching to `process.env.NODE_ENV === 'production'` for reliable production detection instead of relying on vite's command property. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5818,7 +5287,6 @@ _**Agent (composer-2)**_
 <tool-use data-tool-type="write" data-tool-name="delete_file">
 <details><summary>Tool use: **delete_file**</summary>
 
-
 </details>
 </tool-use>
 
@@ -5828,11 +5296,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5872,6 +5335,7 @@ Done in 5.50s.
 -rw-r--r--@ 1 leocaseiro  staff  3298 Apr  2 08:45 storybook-static/index.html
 
 ```
+
 </details>
 </tool-use>
 
@@ -5882,10 +5346,7 @@ Done in 5.50s.
 
 _**Agent (composer-2)**_
 
-
 Applying the Rollup input unconditionally — `viteConfig.mode` wasn't `production` during `viteFinal`.
-
-
 
 _**Agent (composer-2)**_
 
@@ -5903,11 +5364,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5930,6 +5386,7 @@ Done in 5.62s.
 -rw-r--r--@ 1 leocaseiro  staff  3298 Apr  2 08:46 storybook-static/index.html
 404
 ```
+
 </details>
 </tool-use>
 
@@ -5943,7 +5400,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Checking storybook build order**
 
-The storybook build order might cause the rollupOptions merge to lose to tanstack's inputs. I'm investigating how mergeConfig handles rollupOptions input merging between tanstack and our config. 
+The storybook build order might cause the rollupOptions merge to lose to tanstack's inputs. I'm investigating how mergeConfig handles rollupOptions input merging between tanstack and our config.
 
 **Adjusting vite plugins**
 
@@ -5951,17 +5408,11 @@ I'm adding a post-enforce plugin to force set the storybook preview HTML input i
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -5972,6 +5423,7 @@ Parameters:
   "pattern": "\"vite\":"
 }
 ```
+
 Additional data:
 
 ```json
@@ -5990,8 +5442,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -6002,11 +5454,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6030,11 +5477,6 @@ I'm adding a post plugin to force `build.rollupOptions.input` using `configResol
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -6051,11 +5493,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6072,11 +5509,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -6093,11 +5525,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6124,6 +5551,7 @@ Done in 5.75s.
 -rw-r--r--@ 1 leocaseiro  staff  3298 Apr  2 08:46 storybook-static/index.html
 
 ```
+
 </details>
 </tool-use>
 
@@ -6133,11 +5561,6 @@ Done in 5.75s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6153,6 +5576,7 @@ find /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/stor
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/storybook-static/manifests/components.html
 
 ```
+
 </details>
 </tool-use>
 
@@ -6163,17 +5587,11 @@ find /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup/stor
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -6185,6 +5603,7 @@ Parameters:
   "pattern": "build\\(|iframe|preview"
 }
 ```
+
 Additional data:
 
 ```json
@@ -6203,8 +5622,8 @@ Additional data:
   "totalMatches": 60
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -6215,11 +5634,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6243,11 +5657,6 @@ I'm debugging the vite build process to see if it renames output files. I found 
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -6266,7 +5675,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Merging config**
 
-I'm merging user config with storybook config, where storybook config overrides user config as expected. I discovered that plugins merge by concatenation and deep merging, so user plugins (tanstack) are preserved alongside storybook plugins, but tanstack plugins may modify build config after our merge. 
+I'm merging user config with storybook config, where storybook config overrides user config as expected. I discovered that plugins merge by concatenation and deep merging, so user plugins (tanstack) are preserved alongside storybook plugins, but tanstack plugins may modify build config after our merge.
 
 **Handling config hooks**
 
@@ -6274,17 +5683,11 @@ I'll add a plugin with `configResolved` to mutate `config.build.rollupOptions.in
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -6296,6 +5699,7 @@ Parameters:
   "pattern": "vite-app|type=\\\"module\\\""
 }
 ```
+
 Additional data:
 
 ```json
@@ -6314,8 +5718,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -6333,11 +5737,6 @@ _**Agent (composer-2)**_
 I'm running vite build manually to extract the final resolved config and understand why preview HTML isn't in repo output. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6412,6 +5811,7 @@ vite-plugin-pwa:dev-sw
 vite-plugin-pwa:pwa-assets
 
 ```
+
 </details>
 </tool-use>
 
@@ -6429,11 +5829,8 @@ I'm renaming `withoutVitePwaPlugins` to `withoutAppOnlyPlugins` and expanding th
 
 _**Agent (composer-2)**_
 
-
 Stripping TanStack Start and TanStack Vite plugins from Storybook's merged config — they're overriding the preview Rollup entry and preventing `iframe.html` from being emitted.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -6465,11 +5862,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6503,6 +5895,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -6512,11 +5905,6 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6533,6 +5921,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && yar
 error Command failed with exit code 1.
 
 ```
+
 </details>
 </tool-use>
 
@@ -6542,11 +5931,6 @@ error Command failed with exit code 1.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6611,6 +5995,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -6628,17 +6013,11 @@ I'm reverting the tanstack strip change and trying a narrower approach to remove
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -6649,6 +6028,7 @@ Parameters:
   "pattern": "viteConfigPath|getBuilderOptions"
 }
 ```
+
 Additional data:
 
 ```json
@@ -6662,8 +6042,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -6675,17 +6055,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -6696,6 +6070,7 @@ Parameters:
   "pattern": "getBuilderOptions"
 }
 ```
+
 Additional data:
 
 ```json
@@ -6709,8 +6084,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -6722,17 +6097,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -6743,6 +6112,7 @@ Parameters:
   "pattern": "viteConfigPath"
 }
 ```
+
 Additional data:
 
 ```json
@@ -6756,8 +6126,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -6776,17 +6146,11 @@ I'm reverting `withoutAppOnlyPlugins` to restore the working build for PWA. </de
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -6797,6 +6161,7 @@ Parameters:
   "pattern": "viteConfigPath"
 }
 ```
+
 Additional data:
 
 ```json
@@ -6810,8 +6175,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -6822,11 +6187,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6850,17 +6210,11 @@ I'm reverting to PWA-only filter since the iframe issue remains unresolved. I'm 
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="web_search">
 <details>
 <summary>Tool use: **web_search**</summary>
-
 
 Parameters:
 
@@ -6869,6 +6223,7 @@ Parameters:
   "searchTerm": "Storybook 10 react-vite viteConfigPath separate vite config"
 }
 ```
+
 Result:
 
 ```json
@@ -6883,10 +6238,10 @@ Result:
   "rejected": false
 }
 ```
+
 User decision: **accepted**
 
 Status: **completed**
-
 
 </details>
 </tool-use>
@@ -6901,11 +6256,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Setting up storybook config**
 
-I'm creating a minimal Storybook Vite config with react, tailwind, and tsconfigPaths plugins. 
+I'm creating a minimal Storybook Vite config with react, tailwind, and tsconfigPaths plugins.
 
 **Creating storybook vite config**
 
-I'm creating a `.storybook/vite.config.ts` file that loads the storybook config instead of the root vite config. 
+I'm creating a `.storybook/vite.config.ts` file that loads the storybook config instead of the root vite config.
 
 **Updating storybook config**
 
@@ -6913,17 +6268,11 @@ I'm fixing the tsconfig path in Storybook config to be relative to the root inst
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -6934,6 +6283,7 @@ Parameters:
   "pattern": "viteConfigPath"
 }
 ```
+
 Additional data:
 
 ```json
@@ -6947,8 +6297,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -6960,17 +6310,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -6981,6 +6325,7 @@ Parameters:
   "pattern": "viteConfigPath"
 }
 ```
+
 Additional data:
 
 ```json
@@ -6999,8 +6344,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -7011,11 +6356,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7031,11 +6371,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7068,11 +6403,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7111,6 +6441,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -7120,11 +6451,6 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7141,6 +6467,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && yar
 │  This is most likely unintended because it can break your application
 
 ```
+
 </details>
 </tool-use>
 
@@ -7151,17 +6478,11 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && yar
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -7172,6 +6493,7 @@ Parameters:
   "pattern": "@storybook/blocks"
 }
 ```
+
 Additional data:
 
 ```json
@@ -7185,8 +6507,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -7197,11 +6519,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7217,11 +6534,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7240,6 +6552,7 @@ info Visit https://yarnpkg.com/en/docs/cli/add for documentation about this comm
 error Couldn't find any versions for "@storybook/blocks" that matches "10.3.3"
 
 ```
+
 </details>
 </tool-use>
 
@@ -7249,11 +6562,6 @@ error Couldn't find any versions for "@storybook/blocks" that matches "10.3.3"
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7272,6 +6580,7 @@ npm view @storybook/blocks versions --json 2>/dev/null | tail -5
 ]
 
 ```
+
 </details>
 </tool-use>
 
@@ -7282,17 +6591,11 @@ npm view @storybook/blocks versions --json 2>/dev/null | tail -5
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -7303,6 +6606,7 @@ Parameters:
   "pattern": "blocks"
 }
 ```
+
 Additional data:
 
 ```json
@@ -7316,8 +6620,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -7328,11 +6632,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7349,17 +6648,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -7370,6 +6663,7 @@ Parameters:
   "pattern": "@storybook/blocks"
 }
 ```
+
 Additional data:
 
 ```json
@@ -7420,8 +6714,8 @@ Additional data:
   "totalMatches": 9
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -7432,11 +6726,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7454,11 +6743,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7502,6 +6786,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -7511,11 +6796,6 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7552,11 +6832,6 @@ I'm adding an explicit alias in vite.config to resolve @ imports correctly. </de
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -7588,11 +6863,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7628,6 +6898,7 @@ storybook-static/index.html
 storybook-static/iframe.html
 
 ```
+
 </details>
 </tool-use>
 
@@ -7637,11 +6908,6 @@ storybook-static/iframe.html
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -7651,6 +6917,7 @@ _**Agent (composer-2)**_
 ```bash
 pkill -f "http-server storybook-static" 2>/dev/null; sleep 1; cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && npx http-server storybook-static -p 6006 -s
 ```
+
 </details>
 </tool-use>
 
@@ -7660,11 +6927,6 @@ pkill -f "http-server storybook-static" 2>/dev/null; sleep 1; cd /Users/leocasei
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -8580,6 +7842,7 @@ Ran all test suites.
 error Command failed with exit code 1.
 
 ```
+
 </details>
 </tool-use>
 
@@ -8589,11 +7852,6 @@ error Command failed with exit code 1.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -8630,17 +7888,11 @@ I'm investigating why line 263 still throws a StorybookTestRunnerError, possibly
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -8651,6 +7903,7 @@ Parameters:
   "pattern": "patch-package"
 }
 ```
+
 Additional data:
 
 ```json
@@ -8664,8 +7917,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -8684,11 +7937,6 @@ I'm investigating why the channel is missing in the preview iframe, suspecting b
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -8704,17 +7952,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -8725,6 +7967,7 @@ Parameters:
   "pattern": "script.*src="
 }
 ```
+
 Additional data:
 
 ```json
@@ -8743,8 +7986,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -8759,7 +8002,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing base path**
 
-I'm adjusting the build output to use relative paths for local Storybook serving while keeping absolute paths for GitHub Pages deployment. 
+I'm adjusting the build output to use relative paths for local Storybook serving while keeping absolute paths for GitHub Pages deployment.
 
 **Adjusting base path**
 
@@ -8767,10 +8010,7 @@ I'm setting the Storybook base path to `./` for local development and documentat
 
 _**Agent (composer-2)**_
 
-
 Replacing absolute base `/base-skill/docs/` — it made preview scripts load from `/base-skill/docs/assets/...`, which 404s when serving the static folder at the server root. Using relative `./` so assets resolve under the current URL (works locally and on GitHub Pages under `/base-skill/docs/`).
-
-
 
 _**Agent (composer-2)**_
 
@@ -8788,11 +8028,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -8816,6 +8051,7 @@ Done in 8.11s.
     &lt;script type="module" crossorigin src="./assets/iframe-D4re685d.js"&gt;&lt;/script&gt;
 
 ```
+
 </details>
 </tool-use>
 
@@ -8825,11 +8061,6 @@ Done in 8.11s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -8839,6 +8070,7 @@ _**Agent (composer-2)**_
 ```bash
 pkill -f "http-server storybook-static" 2>/dev/null; sleep 1; cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && npx http-server storybook-static -p 6006 -s
 ```
+
 </details>
 </tool-use>
 
@@ -8848,11 +8080,6 @@ pkill -f "http-server storybook-static" 2>/dev/null; sleep 1; cd /Users/leocasei
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -8942,6 +8169,7 @@ Time:        4.238 s
 Ran all test suites.
 
 ```
+
 </details>
 </tool-use>
 
@@ -8951,11 +8179,6 @@ Ran all test suites.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -8974,6 +8197,7 @@ Traceback (most recent call last):
 ModuleNotFoundError: No module named 'yaml'
 
 ```
+
 </details>
 </tool-use>
 
@@ -8988,7 +8212,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -8996,6 +8219,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -9048,8 +8272,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -9061,17 +8285,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -9082,6 +8300,7 @@ Parameters:
   "pattern": "yaml|js-yaml"
 }
 ```
+
 Additional data:
 
 ```json
@@ -9095,8 +8314,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -9107,11 +8326,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9127,6 +8341,7 @@ YAML OK both
 Ignoring ffi-1.15.0 because its extensions are not built. Try: gem pristine ffi --version 1.15.0
 
 ```
+
 </details>
 </tool-use>
 
@@ -9136,11 +8351,6 @@ Ignoring ffi-1.15.0 because its extensions are not built. Try: gem pristine ffi 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9207,6 +8417,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -9217,11 +8428,6 @@ This ensures that you're testing the behavior the user would see in the browser.
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -9253,11 +8459,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9274,6 +8475,7 @@ $ eslint . --max-warnings 0 &amp;&amp; knip --no-config-hints
 Done in 6.77s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -9283,11 +8485,6 @@ Done in 6.77s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9303,59 +8500,60 @@ On branch milestone-storybook-setup
 Changes not staged for commit:
   (use "git add &lt;file&gt;..." to update what will be committed)
   (use "git restore &lt;file&gt;..." to discard changes in working directory)
-	modified:   .github/workflows/ci.yml
-	modified:   .github/workflows/deploy.yml
-	modified:   .gitignore
-	modified:   eslint.config.js
-	modified:   knip.config.ts
-	modified:   package.json
-	modified:   playwright.config.ts
-	modified:   src/components/Header.tsx
-	modified:   src/routeTree.gen.ts
-	modified:   tsconfig.json
-	modified:   yarn.lock
+ modified:   .github/workflows/ci.yml
+ modified:   .github/workflows/deploy.yml
+ modified:   .gitignore
+ modified:   eslint.config.js
+ modified:   knip.config.ts
+ modified:   package.json
+ modified:   playwright.config.ts
+ modified:   src/components/Header.tsx
+ modified:   src/routeTree.gen.ts
+ modified:   tsconfig.json
+ modified:   yarn.lock
 
 Untracked files:
   (use "git add &lt;file&gt;..." to include in what will be committed)
-	.mcp.json
-	.storybook/
-	debug-storybook.log
-	src/components/Footer.stories.tsx
-	src/components/GameCard.stories.tsx
-	src/components/GameGrid.stories.tsx
-	src/components/Header.stories.tsx
-	src/components/LevelRow.stories.tsx
-	src/components/OfflineIndicator.stories.tsx
-	src/components/ThemeToggle.stories.tsx
-	src/components/ui/alert-dialog.stories.tsx
-	src/components/ui/button.stories.tsx
-	src/components/ui/card.stories.tsx
-	src/components/ui/dropdown-menu.stories.tsx
-	src/components/ui/input.stories.tsx
-	src/components/ui/label.stories.tsx
-	src/components/ui/select.stories.tsx
-	src/components/ui/sheet.stories.tsx
-	src/components/ui/slider.stories.tsx
-	src/components/ui/sonner.stories.tsx
-	src/db/hooks/useBookmarks.demo.tsx
-	src/db/hooks/useBookmarks.mdx
-	src/db/hooks/useRxQuery.demo.tsx
-	src/db/hooks/useRxQuery.mdx
-	src/db/hooks/useSettings.demo.tsx
-	src/db/hooks/useSettings.mdx
-	src/games/catalog-utils.mdx
-	src/lib/game-event-bus.demo.tsx
-	src/lib/game-event-bus.mdx
-	src/lib/i18n/i18n.mdx
-	src/lib/speech/SpeechInput.demo.tsx
-	src/lib/speech/SpeechInput.mdx
-	src/lib/speech/SpeechOutput.demo.tsx
-	src/lib/speech/SpeechOutput.mdx
-	src/lib/theme/css-vars.mdx
+ .mcp.json
+ .storybook/
+ debug-storybook.log
+ src/components/Footer.stories.tsx
+ src/components/GameCard.stories.tsx
+ src/components/GameGrid.stories.tsx
+ src/components/Header.stories.tsx
+ src/components/LevelRow.stories.tsx
+ src/components/OfflineIndicator.stories.tsx
+ src/components/ThemeToggle.stories.tsx
+ src/components/ui/alert-dialog.stories.tsx
+ src/components/ui/button.stories.tsx
+ src/components/ui/card.stories.tsx
+ src/components/ui/dropdown-menu.stories.tsx
+ src/components/ui/input.stories.tsx
+ src/components/ui/label.stories.tsx
+ src/components/ui/select.stories.tsx
+ src/components/ui/sheet.stories.tsx
+ src/components/ui/slider.stories.tsx
+ src/components/ui/sonner.stories.tsx
+ src/db/hooks/useBookmarks.demo.tsx
+ src/db/hooks/useBookmarks.mdx
+ src/db/hooks/useRxQuery.demo.tsx
+ src/db/hooks/useRxQuery.mdx
+ src/db/hooks/useSettings.demo.tsx
+ src/db/hooks/useSettings.mdx
+ src/games/catalog-utils.mdx
+ src/lib/game-event-bus.demo.tsx
+ src/lib/game-event-bus.mdx
+ src/lib/i18n/i18n.mdx
+ src/lib/speech/SpeechInput.demo.tsx
+ src/lib/speech/SpeechInput.mdx
+ src/lib/speech/SpeechOutput.demo.tsx
+ src/lib/speech/SpeechOutput.mdx
+ src/lib/theme/css-vars.mdx
 
 no changes added to commit (use "git add" and/or "git commit -a")
 
 ```
+
 </details>
 </tool-use>
 
@@ -9370,7 +8568,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -9378,6 +8575,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -9430,8 +8628,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -9443,17 +8641,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -9464,6 +8656,7 @@ Parameters:
   "pattern": "debug-storybook"
 }
 ```
+
 Additional data:
 
 ```json
@@ -9477,8 +8670,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -9490,16 +8683,10 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="delete_file">
 <details><summary>Tool use: **delete_file**</summary>
-
 
 </details>
 </tool-use>
@@ -9510,11 +8697,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9577,6 +8759,7 @@ M  tsconfig.json
 M  yarn.lock
 
 ```
+
 </details>
 </tool-use>
 
@@ -9586,11 +8769,6 @@ M  yarn.lock
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9727,6 +8905,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 2.48s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -9736,11 +8915,6 @@ Done in 2.48s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9755,6 +8929,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && git
  M src/routeTree.gen.ts
 
 ```
+
 </details>
 </tool-use>
 
@@ -9764,11 +8939,6 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && git
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9810,6 +8980,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && git
 husky - pre-commit script failed (code 1)
 
 ```
+
 </details>
 </tool-use>
 
@@ -9819,11 +8990,6 @@ husky - pre-commit script failed (code 1)
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9839,7 +9005,7 @@ On branch milestone-storybook-setup
 Changes not staged for commit:
   (use "git add &lt;file&gt;..." to update what will be committed)
   (use "git restore &lt;file&gt;..." to discard changes in working directory)
-	modified:   src/routeTree.gen.ts
+ modified:   src/routeTree.gen.ts
 
 no changes added to commit (use "git add" and/or "git commit -a")
 diff --git a/src/routeTree.gen.ts b/src/routeTree.gen.ts
@@ -9864,6 +9030,7 @@ index 85e6f20..078b12b 100644
 -import { Route as LocaleAppParentOverridesRouteImport } from './routes/$locale/_app/parent/overrides';
 
 ```
+
 </details>
 </tool-use>
 
@@ -9873,11 +9040,6 @@ index 85e6f20..078b12b 100644
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9932,6 +9094,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && git
  create mode 100644 src/lib/theme/css-vars.mdx
 
 ```
+
 </details>
 </tool-use>
 
@@ -9941,11 +9104,6 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/milestone-storybook-setup && git
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9964,6 +9122,7 @@ $ eslint . --max-warnings 0 &amp;&amp; knip --no-config-hints
 Done in 6.83s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -9973,11 +9132,6 @@ Done in 6.83s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -9998,6 +9152,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]      milestone-storybook-setup -&gt; milestone-storybook-setup
 
 ```
+
 </details>
 </tool-use>
 
@@ -10007,11 +9162,6 @@ To github.com:leocaseiro/base-skill.git
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -10078,6 +9228,7 @@ EOF
 (eval):cd:1: too many arguments
 
 ```
+
 </details>
 </tool-use>
 
@@ -10087,11 +9238,6 @@ EOF
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -10110,11 +9256,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -10128,6 +9269,7 @@ gh pr create --repo leocaseiro/base-skill --head milestone-storybook-setup --bas
 (eval):cd:1: too many arguments
 
 ```
+
 </details>
 </tool-use>
 
@@ -10137,11 +9279,6 @@ gh pr create --repo leocaseiro/base-skill --head milestone-storybook-setup --bas
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -10156,6 +9293,7 @@ gh pr create --repo leocaseiro/base-skill --head milestone-storybook-setup --bas
 (eval):cd:1: too many arguments
 
 ```
+
 </details>
 </tool-use>
 
@@ -10165,11 +9303,6 @@ gh pr create --repo leocaseiro/base-skill --head milestone-storybook-setup --bas
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -10184,6 +9317,7 @@ gh pr create --repo leocaseiro/base-skill --head milestone-storybook-setup --bas
 (eval):cd:1: too many arguments
 
 ```
+
 </details>
 </tool-use>
 
@@ -10193,11 +9327,6 @@ gh pr create --repo leocaseiro/base-skill --head milestone-storybook-setup --bas
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -10212,6 +9341,7 @@ gh --version
 (eval):cd:1: no such file or directory: --version
 
 ```
+
 </details>
 </tool-use>
 
@@ -10221,11 +9351,6 @@ gh --version
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -10241,6 +9366,7 @@ pwd && which gh
 gh: aliased to cd "$(git rev-parse --show-toplevel)"
 
 ```
+
 </details>
 </tool-use>
 
@@ -10250,11 +9376,6 @@ gh: aliased to cd "$(git rev-parse --show-toplevel)"
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -10269,6 +9390,7 @@ command gh pr create --repo leocaseiro/base-skill --head milestone-storybook-set
 (eval):1: command not found: gh
 
 ```
+
 </details>
 </tool-use>
 
@@ -10278,11 +9400,6 @@ command gh pr create --repo leocaseiro/base-skill --head milestone-storybook-set
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -10292,6 +9409,7 @@ _**Agent (composer-2)**_
 ```bash
 ls /opt/homebrew/bin/gh /usr/local/bin/gh 2>/dev/null; type gh
 ```
+
 </details>
 </tool-use>
 
@@ -10302,16 +9420,10 @@ ls /opt/homebrew/bin/gh /usr/local/bin/gh 2>/dev/null; type gh
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="delete_file">
 <details><summary>Tool use: **delete_file**</summary>
-
 
 </details>
 </tool-use>
@@ -10327,7 +9439,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -10335,6 +9446,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -10387,8 +9499,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -10399,7 +9511,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Here’s what was going wrong, what we changed, and what’s done.
 
@@ -10435,7 +9546,7 @@ Here’s what was going wrong, what we changed, and what’s done.
 - **Commit:** `605014c` — `feat(storybook): add Storybook 10 with stories, CI, Pages deploy, and MCP`
 - **Pushed:** `origin/milestone-storybook-setup`
 - **PR:** `gh` isn’t usable in this environment (`gh` is **aliased to `cd $(git rev-parse --show-toplevel)`**, and there’s no real `gh` binary on `PATH`). Open the PR from:  
-  **https://github.com/leocaseiro/base-skill/pull/new/milestone-storybook-setup**  
+  **<https://github.com/leocaseiro/base-skill/pull/new/milestone-storybook-setup>**  
   Suggested title (from the plan):  
   `feat(storybook): add Storybook 10.3+ with full component stories, a11y CI, Pages deploy, and Storybook MCP`  
   Use the plan’s PR body from [Task 29 in the plan](file:///Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-02-storybook-setup.md) and tweak for **addon-docs** (not essentials), **test-runner 0.24.x**, **`viteConfigPath` + `./` base**, and **MDX `*.mdx`**.
@@ -10456,17 +9567,18 @@ are we finished?
 
 _**Agent (composer-2)**_
 
-
 **Mostly yes** — the implementation side is done.
 
 **Done**
+
 - Storybook static build emits `iframe.html`, preview scripts load with `base: './'`, and `yarn test:storybook` passes against a served `storybook-static` build.
 - `yarn test` and `yarn lint` pass in the worktree.
 - Work is committed and **pushed** on `milestone-storybook-setup` (`605014c`).
 
 **You may still need to do**
+
 - **Open the PR** in the browser if you haven’t:  
-  https://github.com/leocaseiro/base-skill/pull/new/milestone-storybook-setup  
+  <https://github.com/leocaseiro/base-skill/pull/new/milestone-storybook-setup>  
   (The earlier session couldn’t run `gh` reliably in that environment.)
 - **Optional:** use Ruby (or install PyYAML) if you want the exact `python3 -c "import yaml; …"` check from the handoff.
 
@@ -10497,7 +9609,6 @@ I should clarify that some checklist items are better verified manually rather t
 
 _**Agent (composer-2)**_
 
-
 Yes. Putting that list in the PR description as **Markdown task list items** is normal and useful. Reviewers (and you) can tick boxes as things are verified.
 
 A few practical notes:
@@ -10508,6 +9619,6 @@ A few practical notes:
 
 3. **“No a11y violations”** — Your last run **passed** while still **logging** some a11y findings (addon behavior with `test: 'todo'` / non-error mode). If CI matches that, the checkbox should say something like **“exits 0”** or **“no a11y failures”** rather than implying zero violations in the report, unless you’ve tightened addon config to `test: 'error'` everywhere.
 
-4. **“Ticket” in Jira** — You *can* mirror the same bullets as subtasks on an Epic, but for a single PR it’s usually enough to **one Epic + PR checklist** unless your team requires separate issues per verification step.
+4. **“Ticket” in Jira** — You _can_ mirror the same bullets as subtasks on an Epic, but for a single PR it’s usually enough to **one Epic + PR checklist** unless your team requires separate issues per verification step.
 
 So: **yes, use them as PR checkboxes**; adjust wording for how `test:storybook` is run and how strict a11y is, so the list matches what you actually require to merge.

@@ -28,6 +28,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:23:11Z)**_
 ```text
 Launching skill: superpowers:systematic-debugging
 ```
+
 </details></tool-use>
 
 ---
@@ -57,6 +58,7 @@ If you haven't completed Phase 1, you cannot propose fixes.
 ## When to Use
 
 Use for ANY technical issue:
+
 - Test failures
 - Bugs in production
 - Unexpected behavior
@@ -65,6 +67,7 @@ Use for ANY technical issue:
 - Integration issues
 
 **Use this ESPECIALLY when:**
+
 - Under time pressure (emergencies make guessing tempting)
 - "Just one quick fix" seems obvious
 - You've already tried multiple fixes
@@ -72,6 +75,7 @@ Use for ANY technical issue:
 - You don't fully understand the issue
 
 **Don't skip when:**
+
 - Issue seems simple (simple bugs have root causes too)
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
@@ -107,6 +111,7 @@ You MUST complete each phase before proceeding to the next.
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
+
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -120,6 +125,7 @@ You MUST complete each phase before proceeding to the next.
    ```
 
    **Example (multi-layer system):**
+
    ```bash
    # Layer 1: Workflow
    echo "=== Secrets available in workflow: ==="
@@ -248,6 +254,7 @@ You MUST complete each phase before proceeding to the next.
 ## Red Flags - STOP and Follow Process
 
 If you catch yourself thinking:
+
 - "Quick fix for now, investigate later"
 - "Just try changing X and see if it works"
 - "Add multiple changes, run tests"
@@ -267,6 +274,7 @@ If you catch yourself thinking:
 ## your human partner's Signals You're Doing It Wrong
 
 **Watch for these redirections:**
+
 - "Is that not happening?" - You assumed without verifying
 - "Will it show us...?" - You should have added evidence gathering
 - "Stop guessing" - You're proposing fixes without understanding
@@ -317,17 +325,18 @@ These techniques are part of systematic debugging and available in this director
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+
 - **superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers:verification-before-completion** - Verify fix worked before claiming success
 
 ## Real-World Impact
 
 From debugging sessions:
+
 - Systematic approach: 15-30 minutes to fix
 - Random fixes approach: 2-3 hours of thrashing
 - First-time fix rate: 95% vs 40%
 - New bugs introduced: Near zero vs common
-
 
 ---
 
@@ -456,6 +465,7 @@ Message:
 Ran all test suites**.**
 Done in 9.66s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:23:30Z)**_
@@ -477,6 +487,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:23:30Z)**_
 2534c01 fix(audio): prevent sound and TTS overlap during gameplay
 cb9b6cf fix(sort-numbers): return displaced tile to bank when wrong tile placed on occupied lock-manual slot
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:23:37Z)**_
@@ -485,9 +496,9 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:23:37Z)**_
 The tests are passing overall (99 passed), but there are A11Y violations being reported as warnings. These are not causing test failures - they're just warnings. Let me get more details on what the violations actually are. Let me check which stories have violations and what rule they violate. I need to run the tests with more verbose output or check the `a11y: { test: 'error' }` mode.
 
 Let me look at the A11Y violations more closely. The violations seem to be on:
+
 1. `components/ui/slider > Volume`
 2. `Audio/AudioFeedback Prototype > Correct Sound Effect`
-
 
 3. `components/ui/slider > Speech Rate`
 4. `Audio/AudioFeedback Prototype > Round Complete Sound Effect`
@@ -514,6 +525,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:23:40Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:23:40Z)**_
@@ -526,6 +538,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:23:40Z)**_
 ```text
 Exit code 1
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:23:44Z)**_
@@ -541,6 +554,7 @@ main.ts
 preview.tsx
 vite.config.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:23:55Z)**_
@@ -552,7 +566,6 @@ The user is now asking to fix E2E test failures too, in addition to the A11Y con
 2. E2E test timeout failure - page not loading (home page doesn't have a `<main>` element visible within 30 seconds)
 
 Let me investigate both. First, let me look at what the A11Y violations actually are (I need to understand the rules being violated to fix them), and then look at the E2E issue.
-
 
 Now I'm examining which components are triggering the A11Y warnings - the slider, input, and GameGrid components across various stories - and since the tests pass with warnings rather than failures, they're likely configured to report violations without blocking. I need to check each component for contrast issues, and then tackle the E2E timeout where the main element isn't appearing on the home page.
 </details></think>
@@ -632,6 +645,7 @@ const preview: Preview = {
 
 export default preview;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:23:55Z)**_
@@ -689,6 +703,7 @@ test('NumberMatch numeral-to-group renders numeral question', async ({
   ).toBeVisible();
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:24:01Z)**_
@@ -703,7 +718,7 @@ Let me check the home page / app layout to see if there's a `<main>` element.
 
 Also, let me check the A11Y violations more directly. I need to know what violations are being found in those components. Let me look at the components involved.
 
-Actually, for the E2E tests, let me check if there's a `<main>` element in the app layout. 
+Actually, for the E2E tests, let me check if there's a `<main>` element in the app layout.
 
 I should also look at the Playwright configuration and the visual test spec to understand how the tests are set up.
 </details></think>
@@ -719,6 +734,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:24:01Z)**_
 src/components/game/GameShell.tsx
 src/routes/$locale/_app.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:24:01Z)**_
@@ -781,6 +797,7 @@ export default defineConfig({
   },
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:24:04Z)**_
@@ -790,38 +807,39 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:24:04Z)**_
  `./worktrees/feat-word-spell-number-match/src/routes/$locale/_app.tsx`
 
 ```text
-1	import { Outlet, createFileRoute } from '@tanstack/react-router';
-2	import { I18nextProvider } from 'react-i18next';
-3	import { Footer } from '@/components/Footer';
-4	import { Header } from '@/components/Header';
-5	import { OfflineIndicator } from '@/components/OfflineIndicator';
-6	import { seedThemesOnce } from '@/db/seed-themes';
-7	import { i18n } from '@/lib/i18n/i18n';
-8	import { DbProvider } from '@/providers/DbProvider';
-9	import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
-10	
-11	const AppLayout = () => (
-12	  <DbProvider onDatabaseReady={seedThemesOnce}>
-13	    <I18nextProvider i18n={i18n}>
-14	      <ThemeRuntimeProvider>
-15	        <div className="flex min-h-screen flex-col">
-16	          <Header />
-17	          <OfflineIndicator />
-18	          <main className="flex-1">
-19	            <Outlet />
-20	          </main>
-21	          <Footer />
-22	        </div>
-23	      </ThemeRuntimeProvider>
-24	    </I18nextProvider>
-25	  </DbProvider>
-26	);
-27	
-28	export const Route = createFileRoute('/$locale/_app')({
-29	  component: AppLayout,
-30	});
+1 import { Outlet, createFileRoute } from '@tanstack/react-router';
+2 import { I18nextProvider } from 'react-i18next';
+3 import { Footer } from '@/components/Footer';
+4 import { Header } from '@/components/Header';
+5 import { OfflineIndicator } from '@/components/OfflineIndicator';
+6 import { seedThemesOnce } from '@/db/seed-themes';
+7 import { i18n } from '@/lib/i18n/i18n';
+8 import { DbProvider } from '@/providers/DbProvider';
+9 import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
+10 
+11 const AppLayout = () => (
+12   <DbProvider onDatabaseReady={seedThemesOnce}>
+13     <I18nextProvider i18n={i18n}>
+14       <ThemeRuntimeProvider>
+15         <div className="flex min-h-screen flex-col">
+16           <Header />
+17           <OfflineIndicator />
+18           <main className="flex-1">
+19             <Outlet />
+20           </main>
+21           <Footer />
+22         </div>
+23       </ThemeRuntimeProvider>
+24     </I18nextProvider>
+25   </DbProvider>
+26 );
+27 
+28 export const Route = createFileRoute('/$locale/_app')({
+29   component: AppLayout,
+30 });
 31
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:24:05Z)**_
@@ -831,170 +849,171 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:24:05Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/game/GameShell.tsx`
 
 ```text
-1	// src/components/game/GameShell.tsx
-2	import { useNavigate, useParams } from '@tanstack/react-router';
-3	import { useTranslation } from 'react-i18next';
-4	import type {
-5	  GameEngineState,
-6	  MoveHandler,
-7	  MoveLog,
-8	  ResolvedGameConfig,
-9	  SessionMeta,
-10	} from '@/lib/game-engine/types';
-11	import type { JSX, ReactNode } from 'react';
-12	import { useGameRoundProgress } from '@/lib/game-engine/GameRoundContext';
-13	import {
-14	  GameEngineProvider,
-15	  useGameDispatch,
-16	  useGameState,
-17	} from '@/lib/game-engine/index';
-18	
-19	export interface GameShellProps {
-20	  config: ResolvedGameConfig;
-21	  moves: Record<string, MoveHandler>;
-22	  initialState: GameEngineState;
-23	  sessionId: string;
-24	  meta: SessionMeta;
-25	  initialLog?: MoveLog;
-26	  children: ReactNode;
-27	}
-28	
-29	interface GameShellChromeProps {
-30	  config: ResolvedGameConfig;
-31	  children: ReactNode;
-32	}
-33	
-34	const GameShellChrome = ({
-35	  config,
-36	  children,
-37	}: GameShellChromeProps): JSX.Element => {
-38	  const state = useGameState();
-39	  const dispatch = useGameDispatch();
-40	  const navigate = useNavigate();
-41	  const { t } = useTranslation('games');
-42	  const { locale } = useParams({ from: '/$locale' });
-43	
-44	  const roundOverride = useGameRoundProgress();
-45	  const roundCurrent = roundOverride?.current ?? state.roundIndex + 1;
-46	  const roundTotal = roundOverride?.total ?? config.maxRounds;
-47	  const title =
-48	    config.title[locale] ?? config.title['en'] ?? config.gameId;
-49	
-50	  const handleExit = () => {
-51	    void navigate({ to: '/$locale', params: { locale } });
-52	  };
-53	
-54	  const handleUndo = () => {
-55	    dispatch({
-56	      type: 'UNDO',
-57	      args: { targetStep: Math.max(0, state.roundIndex) },
-58	      timestamp: Date.now(),
-59	    });
-60	  };
-61	
-62	  return (
-63	    <div className="flex h-full flex-col">
-64	      {/* Top bar */}
-65	      <header className="flex items-center justify-between border-b px-4 py-2">
-66	        <button
-67	          className="text-sm text-muted-foreground"
-68	          onClick={handleExit}
-69	          aria-label="Back"
-70	          type="button"
-71	        >
-72	          <span aria-hidden="true">← </span>
-73	          <span>{title}</span>
-74	        </button>
-75	        <span className="text-sm font-medium" data-testid="game-round">
-76	          {t('shell.round', {
-77	            current: roundCurrent,
-78	            total: roundTotal,
-79	          })}
-80	        </span>
-81	      </header>
-82	
-83	      {/* Sub-bar: score + progress + optional timer */}
-84	      <div className="flex items-center gap-4 border-b px-4 py-2 text-sm">
-85	        <span data-testid="game-score">{state.score}</span>
-86	        <div className="flex-1">
-87	          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-88	            <div
-89	              className="h-full rounded-full bg-primary transition-all"
-90	              style={{
-91	                width: `${Math.round((roundCurrent / roundTotal) * 100)}%`,
-92	              }}
-93	            />
-94	          </div>
-95	        </div>
-96	        {config.timerVisible &&
-97	          config.timerDurationSeconds !== null && (
-98	            <span data-testid="game-timer">
-99	              ⏱ {config.timerDurationSeconds}s
-100	            </span>
-101	          )}
-102	      </div>
-103	
-104	      {/* Game area (div, not main — app layout already has a single page <main>) */}
-105	      <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4">
-106	        <div className="flex w-full flex-1 flex-col items-center justify-center">
-107	          {children}
-108	        </div>
-109	      </div>
-110	
-111	      {/* Footer */}
-112	      <footer className="flex items-center justify-around border-t px-4 py-2">
-113	        {config.maxUndoDepth !== 0 && (
-114	          <button
-115	            className="flex items-center gap-1 rounded px-3 py-1 text-sm hover:bg-muted disabled:opacity-40"
-116	            onClick={handleUndo}
-117	            aria-label="Undo"
-118	            type="button"
-119	          >
-120	            ⟲ {t('shell.undo')}
-121	          </button>
-122	        )}
-123	        <button
-124	          className="rounded px-3 py-1 text-sm hover:bg-muted"
-125	          type="button"
-126	          aria-label="Pause"
-127	        >
-128	          II {t('shell.pause')}
-129	        </button>
-130	        <button
-131	          className="rounded px-3 py-1 text-sm hover:bg-muted"
-132	          onClick={handleExit}
-133	          aria-label="Exit"
-134	          type="button"
-135	        >
-136	          ✕ {t('shell.exit')}
-137	        </button>
-138	      </footer>
-139	    </div>
-140	  );
-141	};
-142	
-143	export const GameShell = ({
-144	  config,
-145	  moves,
-146	  initialState,
-147	  sessionId,
-148	  meta,
-149	  initialLog,
-150	  children,
-151	}: GameShellProps): JSX.Element => (
-152	  <GameEngineProvider
-153	    config={config}
-154	    moves={moves}
-155	    initialState={initialState}
-156	    sessionId={sessionId}
-157	    meta={meta}
-158	    initialLog={initialLog}
-159	  >
-160	    <GameShellChrome config={config}>{children}</GameShellChrome>
-161	  </GameEngineProvider>
-162	);
+1 // src/components/game/GameShell.tsx
+2 import { useNavigate, useParams } from '@tanstack/react-router';
+3 import { useTranslation } from 'react-i18next';
+4 import type {
+5   GameEngineState,
+6   MoveHandler,
+7   MoveLog,
+8   ResolvedGameConfig,
+9   SessionMeta,
+10 } from '@/lib/game-engine/types';
+11 import type { JSX, ReactNode } from 'react';
+12 import { useGameRoundProgress } from '@/lib/game-engine/GameRoundContext';
+13 import {
+14   GameEngineProvider,
+15   useGameDispatch,
+16   useGameState,
+17 } from '@/lib/game-engine/index';
+18 
+19 export interface GameShellProps {
+20   config: ResolvedGameConfig;
+21   moves: Record<string, MoveHandler>;
+22   initialState: GameEngineState;
+23   sessionId: string;
+24   meta: SessionMeta;
+25   initialLog?: MoveLog;
+26   children: ReactNode;
+27 }
+28 
+29 interface GameShellChromeProps {
+30   config: ResolvedGameConfig;
+31   children: ReactNode;
+32 }
+33 
+34 const GameShellChrome = ({
+35   config,
+36   children,
+37 }: GameShellChromeProps): JSX.Element => {
+38   const state = useGameState();
+39   const dispatch = useGameDispatch();
+40   const navigate = useNavigate();
+41   const { t } = useTranslation('games');
+42   const { locale } = useParams({ from: '/$locale' });
+43 
+44   const roundOverride = useGameRoundProgress();
+45   const roundCurrent = roundOverride?.current ?? state.roundIndex + 1;
+46   const roundTotal = roundOverride?.total ?? config.maxRounds;
+47   const title =
+48     config.title[locale] ?? config.title['en'] ?? config.gameId;
+49 
+50   const handleExit = () => {
+51     void navigate({ to: '/$locale', params: { locale } });
+52   };
+53 
+54   const handleUndo = () => {
+55     dispatch({
+56       type: 'UNDO',
+57       args: { targetStep: Math.max(0, state.roundIndex) },
+58       timestamp: Date.now(),
+59     });
+60   };
+61 
+62   return (
+63     <div className="flex h-full flex-col">
+64       {/* Top bar */}
+65       <header className="flex items-center justify-between border-b px-4 py-2">
+66         <button
+67           className="text-sm text-muted-foreground"
+68           onClick={handleExit}
+69           aria-label="Back"
+70           type="button"
+71         >
+72           <span aria-hidden="true">← </span>
+73           <span>{title}</span>
+74         </button>
+75         <span className="text-sm font-medium" data-testid="game-round">
+76           {t('shell.round', {
+77             current: roundCurrent,
+78             total: roundTotal,
+79           })}
+80         </span>
+81       </header>
+82 
+83       {/* Sub-bar: score + progress + optional timer */}
+84       <div className="flex items-center gap-4 border-b px-4 py-2 text-sm">
+85         <span data-testid="game-score">{state.score}</span>
+86         <div className="flex-1">
+87           <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+88             <div
+89               className="h-full rounded-full bg-primary transition-all"
+90               style={{
+91                 width: `${Math.round((roundCurrent / roundTotal) * 100)}%`,
+92               }}
+93             />
+94           </div>
+95         </div>
+96         {config.timerVisible &&
+97           config.timerDurationSeconds !== null && (
+98             <span data-testid="game-timer">
+99               ⏱ {config.timerDurationSeconds}s
+100             </span>
+101           )}
+102       </div>
+103 
+104       {/* Game area (div, not main — app layout already has a single page <main>) */}
+105       <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4">
+106         <div className="flex w-full flex-1 flex-col items-center justify-center">
+107           {children}
+108         </div>
+109       </div>
+110 
+111       {/* Footer */}
+112       <footer className="flex items-center justify-around border-t px-4 py-2">
+113         {config.maxUndoDepth !== 0 && (
+114           <button
+115             className="flex items-center gap-1 rounded px-3 py-1 text-sm hover:bg-muted disabled:opacity-40"
+116             onClick={handleUndo}
+117             aria-label="Undo"
+118             type="button"
+119           >
+120             ⟲ {t('shell.undo')}
+121           </button>
+122         )}
+123         <button
+124           className="rounded px-3 py-1 text-sm hover:bg-muted"
+125           type="button"
+126           aria-label="Pause"
+127         >
+128           II {t('shell.pause')}
+129         </button>
+130         <button
+131           className="rounded px-3 py-1 text-sm hover:bg-muted"
+132           onClick={handleExit}
+133           aria-label="Exit"
+134           type="button"
+135         >
+136           ✕ {t('shell.exit')}
+137         </button>
+138       </footer>
+139     </div>
+140   );
+141 };
+142 
+143 export const GameShell = ({
+144   config,
+145   moves,
+146   initialState,
+147   sessionId,
+148   meta,
+149   initialLog,
+150   children,
+151 }: GameShellProps): JSX.Element => (
+152   <GameEngineProvider
+153     config={config}
+154     moves={moves}
+155     initialState={initialState}
+156     sessionId={sessionId}
+157     meta={meta}
+158     initialLog={initialLog}
+159   >
+160     <GameShellChrome config={config}>{children}</GameShellChrome>
+161   </GameEngineProvider>
+162 );
 163
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:24:26Z)**_
@@ -1005,7 +1024,7 @@ Now I have a good understanding. Let me analyze both issues:
 **E2E Tests:**
 The `_app.tsx` layout has `<main className="flex-1">` - so the `<main>` element does exist. The issue is timeout - the page isn't loading within 30 seconds. This is likely because the build needs to complete first. The playwright config has a `webServer` config that builds and serves, but it might be timing out due to database initialization.
 
-Wait, looking at the layout: the `<main>` is inside `<DbProvider onDatabaseReady={seedThemesOnce}>` - so the main element is rendered by the router. 
+Wait, looking at the layout: the `<main>` is inside `<DbProvider onDatabaseReady={seedThemesOnce}>` - so the main element is rendered by the router.
 
 The test navigates to `/en/` and waits for `<main>` to be visible, which should work if the app loads correctly. The timeout could stem from the dev server not running, the database initialization hanging, or a new route failing. But if the test is timing out while waiting for the main element, either the page didn't load at all or the route `/en/` isn't matching properly.
 
@@ -1071,6 +1090,7 @@ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx
 src/components/answer-game/ScoreAnimation/ScoreAnimation.tsx
 src/components/answer-game/answer-game-reducer.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:24:27Z)**_
@@ -1080,75 +1100,75 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:24:27Z)**_
  `./worktrees/feat-word-spell-number-match/e2e/visual.spec.ts`
 
 ```text
-1	import { expect, test } from '@playwright/test';
-2	import { seedMathRandom } from './seed-math-random';
-3	
-4	test.beforeEach(async ({ page }) => {
-5	  await seedMathRandom(page);
-6	});
-7	
-8	test('@visual home page', async ({ page }) => {
-9	  await page.goto('/base-skill/en/');
-10	  await page.getByRole('main').waitFor({ state: 'visible' });
-11	  await page
-12	    .getByRole('group', { name: /filter by grade level/i })
-13	    .waitFor({ state: 'visible' });
-14	  await expect(page).toHaveScreenshot('home.png', { fullPage: true });
-15	});
-16	
-17	test('@visual game shell layout', async ({ page }) => {
-18	  await page.goto('/en/game/word-spell');
-19	  // Wait for the exit button — signals the GameShell chrome is fully mounted
-20	  await page
-21	    .getByRole('button', { name: /exit/i })
-22	    .waitFor({ state: 'visible' });
-23	  await expect(page).toHaveScreenshot('game-shell.png', {
-24	    fullPage: true,
-25	  });
-26	});
-27	
-28	test('@visual WordSpell picture mode mid-game layout', async ({
-29	  page,
-30	}) => {
-31	  await page.goto('/en/game/word-spell');
-32	  await page.getByRole('button', { name: /let's go/i }).click();
-33	  await page
-34	    .getByRole('button', { name: /^Letter /i })
-35	    .first()
-36	    .waitFor({ state: 'visible' });
-37	  await expect(page).toHaveScreenshot('word-spell-picture-mode.png', {
-38	    fullPage: true,
-39	  });
-40	});
-41	
-42	test('@visual NumberMatch numeral-to-group layout', async ({
-43	  page,
-44	}) => {
-45	  await page.goto('/en/game/number-match');
-46	  await page.getByRole('button', { name: /let's go/i }).click();
-47	  await page
-48	    .getByRole('button', { name: 'Hear the question' })
-49	    .waitFor({ state: 'visible' });
-50	  await expect(page).toHaveScreenshot(
-51	    'number-match-numeral-to-group.png',
-52	    {
-53	      fullPage: true,
-54	    },
-55	  );
-56	});
+1 import { expect, test } from '@playwright/test';
+2 import { seedMathRandom } from './seed-math-random';
+3 
+4 test.beforeEach(async ({ page }) => {
+5   await seedMathRandom(page);
+6 });
+7 
+8 test('@visual home page', async ({ page }) => {
+9   await page.goto('/base-skill/en/');
+10   await page.getByRole('main').waitFor({ state: 'visible' });
+11   await page
+12     .getByRole('group', { name: /filter by grade level/i })
+13     .waitFor({ state: 'visible' });
+14   await expect(page).toHaveScreenshot('home.png', { fullPage: true });
+15 });
+16 
+17 test('@visual game shell layout', async ({ page }) => {
+18   await page.goto('/en/game/word-spell');
+19   // Wait for the exit button — signals the GameShell chrome is fully mounted
+20   await page
+21     .getByRole('button', { name: /exit/i })
+22     .waitFor({ state: 'visible' });
+23   await expect(page).toHaveScreenshot('game-shell.png', {
+24     fullPage: true,
+25   });
+26 });
+27 
+28 test('@visual WordSpell picture mode mid-game layout', async ({
+29   page,
+30 }) => {
+31   await page.goto('/en/game/word-spell');
+32   await page.getByRole('button', { name: /let's go/i }).click();
+33   await page
+34     .getByRole('button', { name: /^Letter /i })
+35     .first()
+36     .waitFor({ state: 'visible' });
+37   await expect(page).toHaveScreenshot('word-spell-picture-mode.png', {
+38     fullPage: true,
+39   });
+40 });
+41 
+42 test('@visual NumberMatch numeral-to-group layout', async ({
+43   page,
+44 }) => {
+45   await page.goto('/en/game/number-match');
+46   await page.getByRole('button', { name: /let's go/i }).click();
+47   await page
+48     .getByRole('button', { name: 'Hear the question' })
+49     .waitFor({ state: 'visible' });
+50   await expect(page).toHaveScreenshot(
+51     'number-match-numeral-to-group.png',
+52     {
+53       fullPage: true,
+54     },
+55   );
+56 });
 57
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:24:37Z)**_
 
 <think><details><summary>Thought Process</summary>
-I see something important! In `visual.spec.ts` line 9, the path is `/base-skill/en/` (with the `/base-skill/` prefix), but in `smoke.spec.ts` line 14, the path is `/en/`. 
+I see something important! In `visual.spec.ts` line 9, the path is `/base-skill/en/` (with the `/base-skill/` prefix), but in `smoke.spec.ts` line 14, the path is `/en/`.
 
 And in `playwright.config.ts`, the webServer builds with `APP_BASE_URL=/` (set explicitly), and the baseURL is `http://localhost:3000`.
 
 But wait - the visual.spec.ts uses `/base-skill/en/` which suggests the app was originally configured with a base path of `/base-skill/`. But the smoke.spec.ts uses `/en/` which matches `APP_BASE_URL=/`.
-
 
 So the smoke tests should work with `APP_BASE_URL=/`, but the home page might not be rendering the `<main>` element quickly enough, causing the timeout. The user's test is navigating to `/en/` and waiting for the main element to appear, but something's preventing it from showing up - could be a database hang or rendering issue.
 
@@ -1763,6 +1783,7 @@ index ebc1880..76fd592 100644
    return (
      <div className="mx-auto max-w-md px-4 py-8">
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:24:37Z)**_
@@ -1775,6 +1796,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:24:37Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:25:01Z)**_
@@ -1786,7 +1808,7 @@ The E2E tests are waiting for `getByRole('main')` which should work since `_app.
 
 The reason for the timeout might be that there's an issue with the app loading. Let me check if there's an InstructionsOverlay component that now blocks the home page from loading, or if the app itself is crashing.
 
-Wait, looking more carefully at the issue - the tests that are failing include `home page loads` which navigates to `/en/`. 
+Wait, looking more carefully at the issue - the tests that are failing include `home page loads` which navigates to `/en/`.
 
 The `<main>` element is rendered inside `<DbProvider>`, so if the database initialization is failing, the main element won't appear and the test will timeout. I should actually run the tests to see what's happening, but I need a server running for that. Looking at the different test files, `visual.spec.ts` navigates to `/base-skill/en/` while `smoke.spec.ts` uses `/en/`, and the playwright config sets `APP_BASE_URL=/`. So the routing should be correct, but something else is preventing the main element from rendering. I'm wondering if the issue is actually an error in the new code—maybe the `generateSortRounds` function is crashing on import, or a new component is failing to render, which would prevent the whole app from loading. Let me check what routes are actually defined and whether there's a home page route, and also look at whether something like an InstructionsOverlay might be blocking the main element from being visible to the accessibility tree.
 
@@ -1807,6 +1829,7 @@ _app
 _app.tsx
 route.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:25:01Z)**_
@@ -1819,6 +1842,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:25:01Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:25:04Z)**_
@@ -1836,6 +1860,7 @@ parent
 parent.tsx
 settings.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:25:04Z)**_
@@ -1881,6 +1906,7 @@ export const Route = createFileRoute('/$locale')({
   component: LocaleLayout,
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:25:08Z)**_
@@ -1890,134 +1916,135 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:25:08Z)**_
  `./worktrees/feat-word-spell-number-match/src/routes/$locale/_app/index.tsx`
 
 ```text
-1	import {
-2	  createFileRoute,
-3	  useNavigate,
-4	  useParams,
-5	} from '@tanstack/react-router';
-6	import { useMemo } from 'react';
-7	import { useTranslation } from 'react-i18next';
-8	import type { GameLevel, GameSubject } from '@/games/registry';
-9	import type { ValidatorAdapter } from '@tanstack/react-router';
-10	import { GameGrid } from '@/components/GameGrid';
-11	import { LevelRow } from '@/components/LevelRow';
-12	import { useBookmarks } from '@/db/hooks/useBookmarks';
-13	import { filterCatalog, paginateCatalog } from '@/games/catalog-utils';
-14	import { GAME_CATALOG } from '@/games/registry';
-15	
-16	type CatalogSearchInput = {
-17	  search?: string;
-18	  level?: string;
-19	  subject?: string;
-20	  page?: number | string;
-21	};
-22	
-23	type CatalogSearchOutput = {
-24	  search: string;
-25	  level: string;
-26	  subject: string;
-27	  page: number;
-28	};
-29	
-30	const catalogSearchValidator: ValidatorAdapter<
-31	  CatalogSearchInput,
-32	  CatalogSearchOutput
-33	> = {
-34	  types: {
-35	    input: {} as CatalogSearchInput,
-36	    output: {} as CatalogSearchOutput,
-37	  },
-38	  parse: (input: unknown) => {
-39	    const raw = (input ?? {}) as Record<string, unknown>;
-40	    const pageRaw =
-41	      typeof raw.page === 'number' && Number.isFinite(raw.page)
-42	        ? raw.page
-43	        : Number.parseInt(String(raw.page ?? '1'), 10) || 1;
-44	    return {
-45	      search: typeof raw.search === 'string' ? raw.search : '',
-46	      level: typeof raw.level === 'string' ? raw.level : '',
-47	      subject: typeof raw.subject === 'string' ? raw.subject : '',
-48	      page: Math.max(1, pageRaw),
-49	    };
-50	  },
-51	};
-52	
-53	const PAGE_SIZE = 12;
-54	
-55	const HomeScreen = () => {
-56	  const { t } = useTranslation('common');
-57	  const { level, subject, search, page } = Route.useSearch();
-58	  const { locale } = useParams({ from: '/$locale' });
-59	  const navigate = useNavigate({ from: '/$locale/' });
-60	  const { bookmarkedIds, toggle } = useBookmarks();
-61	
-62	  const filtered = useMemo(
-63	    () =>
-64	      filterCatalog(GAME_CATALOG, {
-65	        search,
-66	        level: level as GameLevel | '',
-67	        subject: subject as GameSubject | '',
-68	      }),
-69	    [search, level, subject],
-70	  );
-71	
-72	  const {
-73	    items,
-74	    page: safePage,
-75	    totalPages,
-76	  } = useMemo(
-77	    () => paginateCatalog(filtered, page, PAGE_SIZE),
-78	    [filtered, page],
-79	  );
-80	
-81	  const updateSearch = (
-82	    patch: Partial<{
-83	      level: string;
-84	      subject: string;
-85	      search: string;
-86	      page: number;
-87	    }>,
-88	  ) => {
-89	    void navigate({
-90	      search: (prev) => ({ ...prev, ...patch }),
-91	    });
-92	  };
-93	
-94	  const handlePlay = (gameId: string) => {
-95	    void navigate({
-96	      to: '/$locale/game/$gameId',
-97	      params: { locale, gameId },
-98	    });
-99	  };
-100	
-101	  return (
-102	    <div className="px-4 py-2">
-103	      <h1 className="sr-only">{t('home.title')}</h1>
-104	      <LevelRow
-105	        currentLevel={level as GameLevel | ''}
-106	        onLevelChange={(l) => updateSearch({ level: l, page: 1 })}
-107	      />
-108	      <div className="mt-4">
-109	        <GameGrid
-110	          entries={items}
-111	          bookmarkedIds={bookmarkedIds}
-112	          onBookmarkToggle={toggle}
-113	          onPlay={handlePlay}
-114	          page={safePage}
-115	          totalPages={totalPages}
-116	          onPageChange={(p) => updateSearch({ page: p })}
-117	        />
-118	      </div>
-119	    </div>
-120	  );
-121	};
-122	
-123	export const Route = createFileRoute('/$locale/_app/')({
-124	  validateSearch: catalogSearchValidator,
-125	  component: HomeScreen,
-126	});
+1 import {
+2   createFileRoute,
+3   useNavigate,
+4   useParams,
+5 } from '@tanstack/react-router';
+6 import { useMemo } from 'react';
+7 import { useTranslation } from 'react-i18next';
+8 import type { GameLevel, GameSubject } from '@/games/registry';
+9 import type { ValidatorAdapter } from '@tanstack/react-router';
+10 import { GameGrid } from '@/components/GameGrid';
+11 import { LevelRow } from '@/components/LevelRow';
+12 import { useBookmarks } from '@/db/hooks/useBookmarks';
+13 import { filterCatalog, paginateCatalog } from '@/games/catalog-utils';
+14 import { GAME_CATALOG } from '@/games/registry';
+15 
+16 type CatalogSearchInput = {
+17   search?: string;
+18   level?: string;
+19   subject?: string;
+20   page?: number | string;
+21 };
+22 
+23 type CatalogSearchOutput = {
+24   search: string;
+25   level: string;
+26   subject: string;
+27   page: number;
+28 };
+29 
+30 const catalogSearchValidator: ValidatorAdapter<
+31   CatalogSearchInput,
+32   CatalogSearchOutput
+33 > = {
+34   types: {
+35     input: {} as CatalogSearchInput,
+36     output: {} as CatalogSearchOutput,
+37   },
+38   parse: (input: unknown) => {
+39     const raw = (input ?? {}) as Record<string, unknown>;
+40     const pageRaw =
+41       typeof raw.page === 'number' && Number.isFinite(raw.page)
+42         ? raw.page
+43         : Number.parseInt(String(raw.page ?? '1'), 10) || 1;
+44     return {
+45       search: typeof raw.search === 'string' ? raw.search : '',
+46       level: typeof raw.level === 'string' ? raw.level : '',
+47       subject: typeof raw.subject === 'string' ? raw.subject : '',
+48       page: Math.max(1, pageRaw),
+49     };
+50   },
+51 };
+52 
+53 const PAGE_SIZE = 12;
+54 
+55 const HomeScreen = () => {
+56   const { t } = useTranslation('common');
+57   const { level, subject, search, page } = Route.useSearch();
+58   const { locale } = useParams({ from: '/$locale' });
+59   const navigate = useNavigate({ from: '/$locale/' });
+60   const { bookmarkedIds, toggle } = useBookmarks();
+61 
+62   const filtered = useMemo(
+63     () =>
+64       filterCatalog(GAME_CATALOG, {
+65         search,
+66         level: level as GameLevel | '',
+67         subject: subject as GameSubject | '',
+68       }),
+69     [search, level, subject],
+70   );
+71 
+72   const {
+73     items,
+74     page: safePage,
+75     totalPages,
+76   } = useMemo(
+77     () => paginateCatalog(filtered, page, PAGE_SIZE),
+78     [filtered, page],
+79   );
+80 
+81   const updateSearch = (
+82     patch: Partial<{
+83       level: string;
+84       subject: string;
+85       search: string;
+86       page: number;
+87     }>,
+88   ) => {
+89     void navigate({
+90       search: (prev) => ({ ...prev, ...patch }),
+91     });
+92   };
+93 
+94   const handlePlay = (gameId: string) => {
+95     void navigate({
+96       to: '/$locale/game/$gameId',
+97       params: { locale, gameId },
+98     });
+99   };
+100 
+101   return (
+102     <div className="px-4 py-2">
+103       <h1 className="sr-only">{t('home.title')}</h1>
+104       <LevelRow
+105         currentLevel={level as GameLevel | ''}
+106         onLevelChange={(l) => updateSearch({ level: l, page: 1 })}
+107       />
+108       <div className="mt-4">
+109         <GameGrid
+110           entries={items}
+111           bookmarkedIds={bookmarkedIds}
+112           onBookmarkToggle={toggle}
+113           onPlay={handlePlay}
+114           page={safePage}
+115           totalPages={totalPages}
+116           onPageChange={(p) => updateSearch({ page: p })}
+117         />
+118       </div>
+119     </div>
+120   );
+121 };
+122 
+123 export const Route = createFileRoute('/$locale/_app/')({
+124   validateSearch: catalogSearchValidator,
+125   component: HomeScreen,
+126 });
 127
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:25:30Z)**_
@@ -2028,6 +2055,7 @@ The home page route looks fine. It renders inside the `_app.tsx` layout which ha
 But the test is timing out on `waitFor('main')`. This is strange.
 
 Wait - let me re-read the error message. The user said:
+
 ```
 Test timeout of 30000ms exceeded.
 Error: locator.waitFor: Test timeout of 30000ms exceeded.
@@ -2037,7 +2065,7 @@ Call log:
 
 ```
 
-This suggests the `<main>` element is NOT visible. In Playwright, `waitFor({ state: 'visible' })` requires the element to be in the DOM AND visible (not hidden). 
+This suggests the `<main>` element is NOT visible. In Playwright, `waitFor({ state: 'visible' })` requires the element to be in the DOM AND visible (not hidden).
 
 Looking at the layout structure, the `<main>` has `flex-1` class but I need to check if something is preventing it from being visible - maybe the parent flex container isn't set up correctly, or there's a CSS issue hiding the main element.
 
@@ -2080,6 +2108,7 @@ export const Route = createFileRoute('/$locale/_app/parent')({
   component: ParentLayout,
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:25:34Z)**_
@@ -2121,6 +2150,7 @@ dist/server/assets/router-DXohab2K.js                      145.04 kB
 [prerender] - /
 Done in 3.94s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:25:55Z)**_
@@ -2129,13 +2159,13 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:25:55Z)**_
 The build succeeds. Now let me check if the server and tests work. But first, let me focus on understanding why `getByRole('main')` might not be visible.
 
 Looking at the build, it prerendered `/` not `/en/`. The routes are:
+
 - `/en/` = home page (inside `/$locale/_app/`)
 - The layout has `<main>`
 
-But the build only prerendered `/` and then the `_shell.html` is copied to `index.html` for SPA mode. 
+But the build only prerendered `/` and then the `_shell.html` is copied to `index.html` for SPA mode.
 
 The build output looks OK - no errors. So the issue might be something else.
-
 
 I'm checking the Playwright configuration to see if there's a CI-specific issue. The test server builds the app, copies the shell HTML to index.html, and serves it on port 3000. In CI mode, it always rebuilds since `reuseExistingServer` is disabled, whereas locally it reuses the existing server if available.
 
@@ -2187,6 +2217,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:25:56Z)**_
 170:    | '/$locale/_app/parent/data'
 171:    | '/$locale/_app/parent/history'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:25:59Z)**_
@@ -2199,6 +2230,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:25:59Z)**_
 ```text
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:26:07Z)**_
@@ -2212,7 +2244,6 @@ Wait, I wonder if maybe the issue is specific to CI and the tests pass locally. 
 
 Let me re-read the user's message:
 > fix all e2e tests
-
 
 So the user wants me to fix E2E test failures. Looking at the error they're showing me, the test is timing out after 30 seconds while waiting for the main element to become visible. This suggests the page isn't loading properly or the element isn't appearing as expected in the test environment.
 </details></think>
@@ -2286,6 +2317,7 @@ name: Visual Regression
 --
           git add e2e/
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:26:07Z)**_
@@ -2438,6 +2470,7 @@ May need further investigation after Storybook passes.
 - `yarn test:storybook` → **29 failed / 70 passed** in 9 suites
 - Every failure: `useRxDB must be used within DbProvider`
 - `WordSpell`/`NumberMatch` also log `useRouter` warnings (non-fatal)
+
 ```
 </details></tool-use>
 
@@ -2550,6 +2583,7 @@ export const DbProvider = ({
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:26:30Z)**_
@@ -2562,6 +2596,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:26:30Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:26:40Z)**_
@@ -2594,79 +2629,82 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:26:40Z)**_
  `./worktrees/feat-word-spell-number-match/.github/workflows/e2e.yml`
 
 ```text
-1	# .github/workflows/e2e.yml
-2	name: E2E Tests
-3	
-4	on:
-5	  push:
-6	    branches: [master]
-7	  pull_request:
-8	    branches: [master]
-9	  schedule:
-10	    - cron: '0 0 * * 0' # weekly — Sunday at 00:00 UTC
-11	  workflow_dispatch:
-12	
-13	concurrency:
-14	  group: e2e-${{ github.ref }}
-15	  cancel-in-progress: true
-16	
-17	jobs:
-18	  e2e:
-19	    name: E2E — ${{ matrix.browser }}
-20	    runs-on: ubuntu-latest
-21	    strategy:
-22	      fail-fast: false
-23	      matrix:
-24	        browser: [chromium]
-25	
-26	    steps:
-27	      - uses: actions/checkout@v6
-28	
-29	      - uses: actions/setup-node@v6
-30	        with:
-31	          node-version-file: '.nvmrc'
-32	          cache: yarn
-33	
-34	      - name: Install dependencies
-35	        run: yarn install --frozen-lockfile
-36	
-37	      - name: Install Playwright browsers
-38	        run: npx playwright install --with-deps ${{ matrix.browser }}
-39	
-40	      - name: Build app
-41	        run: yarn build
-42	
-43	      - name: Copy shell to index.html
-44	        run: cp dist/client/_shell.html dist/client/index.html
-45	
-46	      - name: Run Playwright tests (${{ matrix.browser }})
-47	        run: npx playwright test --project=${{ matrix.browser }}
-48	        env:
-49	          CI: true
-50	
-51	      - name: Run accessibility audit
-52	        run: npx playwright test --project=${{ matrix.browser }} --grep @a11y
-53	        continue-on-error: false
-54	
-55	      - name: Upload Playwright report
-56	        if: failure()
-57	        uses: actions/upload-artifact@v7
-58	        with:
-59	          name: playwright-report-${{ matrix.browser }}
-60	          path: playwright-report/
-61	          retention-days: 14
+1 # .github/workflows/e2e.yml
+2 name: E2E Tests
+3 
+4 on:
+5   push:
+6     branches: [master]
+7   pull_request:
+8     branches: [master]
+9   schedule:
+10     - cron: '0 0 * * 0' # weekly — Sunday at 00:00 UTC
+11   workflow_dispatch:
+12 
+13 concurrency:
+14   group: e2e-${{ github.ref }}
+15   cancel-in-progress: true
+16 
+17 jobs:
+18   e2e:
+19     name: E2E — ${{ matrix.browser }}
+20     runs-on: ubuntu-latest
+21     strategy:
+22       fail-fast: false
+23       matrix:
+24         browser: [chromium]
+25 
+26     steps:
+27       - uses: actions/checkout@v6
+28 
+29       - uses: actions/setup-node@v6
+30         with:
+31           node-version-file: '.nvmrc'
+32           cache: yarn
+33 
+34       - name: Install dependencies
+35         run: yarn install --frozen-lockfile
+36 
+37       - name: Install Playwright browsers
+38         run: npx playwright install --with-deps ${{ matrix.browser }}
+39 
+40       - name: Build app
+41         run: yarn build
+42 
+43       - name: Copy shell to index.html
+44         run: cp dist/client/_shell.html dist/client/index.html
+45 
+46       - name: Run Playwright tests (${{ matrix.browser }})
+47         run: npx playwright test --project=${{ matrix.browser }}
+48         env:
+49           CI: true
+50 
+51       - name: Run accessibility audit
+52         run: npx playwright test --project=${{ matrix.browser }} --grep @a11y
+53         continue-on-error: false
+54 
+55       - name: Upload Playwright report
+56         if: failure()
+57         uses: actions/upload-artifact@v7
+58         with:
+59           name: playwright-report-${{ matrix.browser }}
+60           path: playwright-report/
+61           retention-days: 14
 62
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:27:02Z)**_
 
 <think><details><summary>Thought Process</summary>
 I see it! In the CI workflow (`.github/workflows/e2e.yml`):
+
 - Step 40: `yarn build` - NO `APP_BASE_URL`
 - Step 44: `cp dist/client/_shell.html dist/client/index.html`
 
 Then in `playwright.config.ts`:
+
 ```js
 webServer: {
   command: vrDocker
@@ -2720,6 +2758,7 @@ const pragmaticElementAdapter =
         pragmaticElementAdapter,
     },
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:27:02Z)**_
@@ -2732,6 +2771,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:27:02Z)**_
 ```text
 vite.config.ts:const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:27:23Z)**_
@@ -2744,7 +2784,6 @@ The default `APP_BASE_URL` is `/base-skill/`. Without setting `APP_BASE_URL=/`, 
 In the CI workflow (`e2e.yml`), step 40 runs `yarn build` **without** `APP_BASE_URL`. This builds the app with `base = '/base-skill/'`. Then `cp dist/client/_shell.html dist/client/index.html`.
 
 But Playwright's webServer command runs `APP_BASE_URL=/ yarn build`, which overrides this to build with `base = '/'`. Then `serve dist/client -p 3000 -s`.
-
 
 So when Playwright runs the tests, the app is built with `APP_BASE_URL=/`, and the routes are at `/en/`, which should work. But I'm noticing that visual.spec.ts is navigating to `/base-skill/en/` instead of just `/en/` — that's the inconsistency causing the test failures.
 
@@ -2767,6 +2806,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:27:23Z)**_
 ```text
 e2e/a11y.spec.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:27:23Z)**_
@@ -2789,6 +2829,7 @@ e2e/visual.spec.ts:    .waitFor({ state: 'visible' });
 e2e/visual.spec.ts:    .waitFor({ state: 'visible' });
 e2e/visual.spec.ts:    .waitFor({ state: 'visible' });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:27:26Z)**_
@@ -2798,52 +2839,56 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:27:26Z)**_
  `./worktrees/feat-word-spell-number-match/e2e/a11y.spec.ts`
 
 ```text
-1	import AxeBuilder from '@axe-core/playwright';
-2	import { expect, test } from '@playwright/test';
-3	
-4	test.describe('@a11y accessibility', () => {
-5	  test('home page has no detectable accessibility violations', async ({
-6	    page,
-7	  }) => {
-8	    await page.goto('/base-skill/en/');
-9	    await page.getByRole('main').waitFor({ state: 'visible' });
-10	    await page
-11	    // link to Home page
-12	      .getByRole('link', { name: /BaseSkill/i })
-13	      .waitFor({ state: 'visible' });
-14	    const accessibilityScanResults = await new AxeBuilder({
-15	      page,
-16	    }).analyze();
-17	    expect(accessibilityScanResults.violations).toEqual([]);
-18	  });
-19	});
+1 import AxeBuilder from '@axe-core/playwright';
+2 import { expect, test } from '@playwright/test';
+3 
+4 test.describe('@a11y accessibility', () => {
+5   test('home page has no detectable accessibility violations', async ({
+6     page,
+7   }) => {
+8     await page.goto('/base-skill/en/');
+9     await page.getByRole('main').waitFor({ state: 'visible' });
+10     await page
+11     // link to Home page
+12       .getByRole('link', { name: /BaseSkill/i })
+13       .waitFor({ state: 'visible' });
+14     const accessibilityScanResults = await new AxeBuilder({
+15       page,
+16     }).analyze();
+17     expect(accessibilityScanResults.violations).toEqual([]);
+18   });
+19 });
 20
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:27:49Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I see the issue! In `a11y.spec.ts`:
+
 ```js
 await page.goto('/base-skill/en/');
 ```
 
 But with `APP_BASE_URL=/`, the app is built with base `/` (not `/base-skill/`). So navigating to `/base-skill/en/` won't work because:
+
 1. The SPA router receives the URL `/base-skill/en/`
 2. The router looks for `/$locale` where locale = `base-skill`
 3. `base-skill` is not a valid locale, so it redirects to `/en/`
 
-But actually with SPA mode (`-s` flag in serve), all 404s serve `index.html`. 
+But actually with SPA mode (`-s` flag in serve), all 404s serve `index.html`.
 
 So when the router receives `/base-skill/en/`, it tries to parse `base-skill` as the locale. Since that's not valid, the `beforeLoad` hook redirects to `/en/`. The main element should still render after the redirect, but the test is navigating to the wrong URL in the first place. there's a redirect from `/base-skill/en/` to `/en/`, the `waitFor('main')` should wait for the `<main>` to be visible at the new URL. This should work.
 
 Actually, wait. The issue might be that with `APP_BASE_URL=/`, the assets (JS, CSS) are loaded relative to `/`. But if the page navigates to `/base-skill/en/`, the assets might not load correctly because the base path doesn't match.
 
 Actually no - with SPA mode and `APP_BASE_URL=/`:
+
 - All assets are referenced as `/assets/...`
 - The index.html is served for all paths
-- The router handles `/base-skill/en/` 
+- The router handles `/base-skill/en/`
 
 But the assets would still load because they're at `/assets/...` (absolute paths from root).
 
@@ -2852,6 +2897,7 @@ I'm noticing the test files use different paths - `visual.spec.ts` and `a11y.spe
 But wait, the user reported the timeout in `smoke.spec.ts` at line 15, not `a11y.spec.ts`. Let me re-check...
 
 The user said:
+
 ```
  13 | test('home page loads', async ({ page }) => {
  14 |   await page.goto(localeHomePath('en'));
@@ -2861,6 +2907,7 @@ The user said:
 This is `smoke.spec.ts` line 15. The `localeHomePath('en')` returns `/en/`. So the test navigates to `/en/`.
 
 But the actual issue is:
+
 1. Playwright webServer builds with `APP_BASE_URL=/`
 2. App is at `/en/`
 3. `<main>` should be visible
@@ -2880,6 +2927,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:27:49Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:27:49Z)**_
@@ -2894,6 +2942,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:27:49Z)**_
 528cae8 fix(storybook): add withDb decorator; fix confetti/round-complete timing; fix last-round game-over
 8805f50 fix(VR): update game shell VR tests
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:28:02Z)**_
@@ -2902,11 +2951,11 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:28:02Z)**_
 The `a11y.spec.ts` has not changed from master. And the smoke.spec.ts was changed by commit `8805f50 fix(VR): update game shell VR tests`.
 
 Let me look at what exactly changed in the smoke.spec.ts in that commit. I already have the diff. The changes were:
+
 1. Added `await page.getByRole('button', { name: /let's go/i }).click();` before checking for letter tiles in WordSpell
 2. Added similar for NumberMatch
 
 These seem like valid fixes. The game routes now show an InstructionsOverlay with "Let's go" before showing the game content.
-
 
 So the E2E issue might be that the game routes now require clicking "Let's go" (InstructionsOverlay) before the game content is visible. But the failing test is `home page loads` which navigates to `/en/` - not a game page, so it shouldn't need that click. Let me check the actual error more carefully - it's failing on line 15 where it's waiting for the main element to be visible, but I need to see what the current test file actually looks like to understand the discrepancy.
 
@@ -3022,6 +3071,7 @@ index 5936020..70c9467 100644
 +              </SelectContent>
 +            </Select>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:28:20Z)**_
@@ -3031,7 +3081,7 @@ Looking at the changes, the Header now uses `speechSynthesis` which requires `gl
 
 Looking at the Footer and Header changes, they seem benign. They're just adding locale-aware navigation and voice selection.
 
-But wait, there's a more interesting question: **is the `a11y.spec.ts` test the one that's actually failing?** It uses `/base-skill/en/` which is the old base URL. 
+But wait, there's a more interesting question: **is the `a11y.spec.ts` test the one that's actually failing?** It uses `/base-skill/en/` which is the old base URL.
 
 So the real issue is that the build uses the default `/base-skill/` base URL, but the test server is being started with `APP_BASE_URL=/`, creating a mismatch between where the assets are served and what the router expects to find. I need to step back and figure out what's actually different on this branch that's breaking the tests. Looking at the git diff, I see the smoke test was updated to click "Let's go" before checking for game content, but the home page test doesn't have that button—so that's not the issue there. Let me focus on what changed in the components and routing that could cause the main element to not appear within the timeout.
 </details></think>
@@ -3092,6 +3142,7 @@ export const InstructionsOverlay = ({
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:28:21Z)**_
@@ -3143,16 +3194,18 @@ export const AnswerGame = Object.assign(AnswerGameRoot, {
   Choices,
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:28:54Z)**_
 
 <think><details><summary>Thought Process</summary>
-The `InstructionsOverlay` is a fixed overlay (`className="fixed inset-0 z-40 ..."`). But it's only rendered in game routes, not on the home page. 
+The `InstructionsOverlay` is a fixed overlay (`className="fixed inset-0 z-40 ..."`). But it's only rendered in game routes, not on the home page.
 
 Let me now look at the actual issue differently. Maybe the smoke test failures are happening in CI (on the `fix/storybok-tests-ci` branch currently active) and this is a different branch (`feat-word-spell-number-match` in the worktree). Let me check what branch the user is actually on.
 
 Actually, the git status says:
+
 ```
 Current branch: fix/storybok-tests-ci
 
@@ -3162,6 +3215,7 @@ Current branch: fix/storybok-tests-ci
 But the user says to work on `./worktrees/feat-word-spell-number-match`. So I need to work in that worktree directory.
 
 Let me reconsider everything. The user is asking me to:
+
 1. Fix A11Y contrast issues in the worktree `feat-word-spell-number-match`
 2. Fix E2E test timeout (`getByRole('main')` not visible)
 
@@ -3176,6 +3230,7 @@ I'm realizing the a11y test might be hardcoded with `/base-skill/en/` while the 
 js
 test.describe('@a11y accessibility', () => {
   test('home page has no det
+
 ```
 
 Defining the accessibility test...
@@ -3215,6 +3270,7 @@ const Input = ({
 
 export { Input };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:28:54Z)**_
@@ -3285,6 +3341,7 @@ const Slider = ({
 
 export { Slider };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:29:39Z)**_
@@ -3299,7 +3356,6 @@ Now I can see some potential contrast issues:
 But I need to understand what exactly the violations are. Let me look at the actual violation details more closely.
 
 The storybook tests say "Found 1 a11y violation" but don't show which rule. Let me look at the storybook a11y config.
-
 
 Looking at the slider component more closely, the track uses `bg-muted`, the range uses `bg-primary`, and the thumb is `bg-white border border-ring`. The contrast between these elements and their container might be what's triggering the warnings, though these are showing as warnings rather than hard errors in storybook.
 
@@ -3327,7 +3383,7 @@ But wait—if the server is already running locally on port 3000 with the `/base
 4. Current URL: `/en/`
 5. Router strips base `/base-skill/` from URL → path becomes... hmm, it would be `/en/` without the base stripped (since `/en/` doesn't start with `/base-skill/`)
 
-Actually with TanStack Router, the `base` option in the router config is important. If the router is configured with base `/base-skill/`, then the history pathname would be calculated relative to that base. 
+Actually with TanStack Router, the `base` option in the router config is important. If the router is configured with base `/base-skill/`, then the history pathname would be calculated relative to that base.
 
 If the URL is `/en/` but router base is `/base-skill/`, then after stripping the base, the router would try to match an empty string or something weird, and might not find a matching route. This could cause the app to render without any content, leaving `<main>` blank because no route matches.
 
@@ -3348,6 +3404,7 @@ src/router.tsx:const basepath = viteBaseToRouterBasepath(import.meta.env.BASE_UR
 src/router.tsx:  return basepath === '/' ? '/en/' : `${basepath}/en/`;
 src/router.tsx:    basepath,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:29:39Z)**_
@@ -3361,6 +3418,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:29:39Z)**_
 vite.config.ts:14:const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
 vite.config.ts:21:  base,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:29:44Z)**_
@@ -3419,6 +3477,7 @@ declare module '@tanstack/react-router' {
   }
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:30:22Z)**_
@@ -3426,16 +3485,17 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:30:22Z)**_
 <think><details><summary>Thought Process</summary>
 Now I understand the full picture:
 
-The router uses `basepath` which is derived from `import.meta.env.BASE_URL`. 
+The router uses `basepath` which is derived from `import.meta.env.BASE_URL`.
 
 When built with `APP_BASE_URL=/base-skill/`:
+
 - `import.meta.env.BASE_URL` = `/base-skill/`
 - `basepath` = `/base-skill`
 - Router expects URLs like `/base-skill/en/`, `/base-skill/en/game/word-spell`, etc.
 
 When built with `APP_BASE_URL=/`:
-- `import.meta.env.BASE_URL` = `/`
 
+- `import.meta.env.BASE_URL` = `/`
 
 - `basepath` = `/`
 - Router expects URLs like `/en/`, `/en/game/word-spell`, etc.
@@ -3529,6 +3589,7 @@ export const withTheme: Decorator = (Story, context) => (
   />
 );
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:30:22Z)**_
@@ -3620,20 +3681,22 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:30:22Z)**_
   --bs-error: #ff6b6b;
   --bs-font-weight-default: 600;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:30:37Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I can see the default theme. The light theme has:
+
 - `--bs-primary: #ff6b6b` (a coral/red)
 - `--bs-secondary: #ffd93d` (yellow)
 - `--bs-text: #2d1b00` (dark brown)
 - `--bs-background: #fff9ec` (light cream)
 
 Some potential contrast issues:
-- `--bs-secondary: #ffd93d` on `--bs-background: #fff9ec` or on white - yellow on light = poor contrast
 
+- `--bs-secondary: #ffd93d` on `--bs-background: #fff9ec` or on white - yellow on light = poor contrast
 
 - The muted foreground gray on the muted background light gray also has weak contrast, and the ring color (medium gray) against white backgrounds falls short of the required 3:1 ratio.
 
@@ -3691,6 +3754,7 @@ export const SpeechRate: Story = {
   },
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:30:38Z)**_
@@ -3704,6 +3768,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:30:38Z)**_
 28:export const Invalid: Story = {
 29:  args: { 'aria-invalid': true, defaultValue: 'Bad value' },
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:30:45Z)**_
@@ -3714,7 +3779,6 @@ Let me run the storybook tests with verbose A11Y output to see what specific vio
 Actually, looking at the storybook test output format: "Found 1 a11y violation, run the test with `a11y: { test: 'error' }` parameter to see the full report or debug it directly in Storybook."
 
 To see the full report, I need to run the tests with that parameter or check Storybook directly.
-
 
 I'll execute the tests with error mode enabled to get the detailed violation information.
 </details></think>
@@ -3729,6 +3793,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:30:47Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:30:52Z)**_
@@ -3810,6 +3875,7 @@ Options:
 
 If you'd like this option to be supported, please open an issue at https://github.com/storybookjs/test-runner/issues/new
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:30:55Z)**_
@@ -3827,6 +3893,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:30:55Z)**_
     "lint:md": "markdownlint-cli2 '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees'",
     "format": "prettier --check .",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:30:55Z)**_
@@ -3918,6 +3985,7 @@ export const GameGrid = ({
           <Button variant="outline" size="sm" disabled>
             {t('pagination.previous')}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:31:14Z)**_
@@ -3928,7 +3996,7 @@ Looking at the `GameGrid` component, I can see there's a pagination section with
 Also, `text-sm` for the pagination page info could fail contrast if the text is small.
 
 But the key insight I'm missing is which SPECIFIC rule is being violated. Let me look at the axe rules that these stories might violate.
- 
+
 Now I'm reviewing the common accessibility violations—color contrast issues are the most likely culprit here, especially with the slider components. The slider thumb is white with a light gray border on what's probably a white background in Storybook, which could easily fail contrast requirements.
 
 Looking at the pattern across AudioFeedback and GameGrid stories, they seem to be reporting similar violations, so there's likely a shared component or styling issue causing the problem across multiple stories. Let me trace through what the AudioFeedback component actually renders to see if that's where the contrast issue originates.
@@ -4003,6 +4071,7 @@ const RoundCompleteSoundButton = () => (
     <button
       className="rounded-md bg-sky-600 hover:bg-sky-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95"
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:31:14Z)**_
@@ -4074,6 +4143,7 @@ export const GameCard = ({
           ))}
         </div>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:31:34Z)**_
@@ -4081,7 +4151,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:31:34Z)**_
 <think><details><summary>Thought Process</summary>
 Now I can see some potential contrast issues:
 
-1. **AudioFeedback stories**: 
+1. **AudioFeedback stories**:
    - `text-sm text-muted-foreground` in `ScenarioButton` - `--muted-foreground: oklch(55.6% 0 0deg)` on `bg-card` (white) - this might have contrast issues
    - `CorrectSoundButton`: `hover:bg-green-600/70` - at 70% opacity might lose contrast
    - `WrongSoundButton`: `hover:bg-red-600/70` - at 70% opacity
@@ -4096,6 +4166,7 @@ These are all secondary elements though. The consistent "1 violation" across bot
 Looking at the contrast math: the muted background is nearly white while the foreground text is very dark, which should work fine. But the muted-foreground gray on white is around a 55% lightness, and at 12px that might dip below the 4.5:1 ratio WCAG AA requires for small text. - L of oklch(55.6% 0 0deg): The L value in OKLCH is perceptually linear, so L=55.6% corresponds to roughly... it's hard to convert without exact values.
 
 Actually, let me look at this more practically. In the styles.css, the `--muted-foreground: oklch(55.6% 0 0deg)` value. This was likely from the shadcn default. Let me check:
+
 - oklch(55.6%) roughly corresponds to sRGB around rgb(128, 128, 128) which is #808080
 - Contrast of #808080 on white: (1 + 0.05) / (0.215 + 0.05) = 1.05/0.265 = 3.96:1
 
@@ -4137,6 +4208,7 @@ export const defaultThemeCssVars: Record<string, string> = {
   '--ring': '#FF6B6B',
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:31:34Z)**_
@@ -4186,20 +4258,22 @@ export function applyThemeCssVars(
   }
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:31:57Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I see it clearly! In `default-tokens.ts`, the theme overrides:
+
 - `--secondary: '#FFD93D'` (yellow!)
 - `--secondary-foreground: '#FFFFFF'` (white!)
 
 **A yellow (#FFD93D) background with white (#FFFFFF) text!** That's a terrible contrast:
+
 - Yellow #FFD93D has high luminance (~0.72 relative luminance)
 - White #FFFFFF has luminance 1.0
 - Contrast: (1 + 0.05) / (0.72 + 0.05) = 1.05/0.77 = 1.36:1
-
 
 That's way below the WCAG minimum of 4.5:1 for text. The primary color pairing is similarly problematic—coral red (#FF6B6B) against white also fails accessibility standards.
 
@@ -4234,6 +4308,7 @@ e5daa0e feat(games): add WordSpell and NumberMatch AnswerGame compositions
 9154585 build(vite): alias pragmatic-drag-and-drop element adapter for prerender
 b35d841 feat(answer-game): initialize round from optional initialTiles and initialZones
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:31:58Z)**_
@@ -4267,6 +4342,7 @@ export const defaultThemeCssVars: Record<string, string> = {
   '--ring': '#FF6B6B',
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:32:16Z)**_
@@ -4275,6 +4351,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:32:16Z)**_
 OK so `default-tokens.ts` is the same in both this branch and master. This means the contrast issues were already there on master. Let me check if master has the `fix(a11y): fix contrast ratio` commit.
 
 Looking at `git log --oneline origin/master`, I don't see `fix(a11y): fix contrast ratio`. Looking at `git log --oneline` in the worktree:
+
 ```
 8821fd9 fix(confetti) adjust better duration to match sound effects
 584bec1 fix(Config): margin top 40
@@ -4290,6 +4367,7 @@ Looking at `git log --oneline origin/master`, I don't see `fix(a11y): fix contra
 ```
 
 And on master:
+
 ```
 88a25b8 feat(games): Word Spell and Number Match on AnswerGame (#15)
 859c8f6 fix(number-match): navigate home to locale index, sync route tree
@@ -4321,6 +4399,7 @@ Date:   Sat Apr 4 01:08:33 2026 +1100
  src/styles.css                  | 14 +++++++-------
  2 files changed, 24 insertions(+), 19 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:32:17Z)**_
@@ -4352,6 +4431,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:32:17Z)**_
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:32:19Z)**_
@@ -4413,6 +4493,7 @@ index 6f3ca97..e06e4f9 100644
 +  '--ring': '#0077B6',
  };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:32:28Z)**_
@@ -4421,10 +4502,10 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:32:28Z)**_
 Now I have the full picture!
 
 The `fix(a11y): fix contrast ratio` commit on `fix/storybok-tests-ci` branch (commit `29b6b62`) changed `default-tokens.ts` to:
+
 - Replace the candy red/yellow theme with the ocean theme colors
 - Changed `--primary` from `#FF6B6B` (coral) to `#0077B6` (deep blue)
 - Changed `--secondary` from `#FFD93D` (yellow) to `#00B4D8` (cyan)
-
 
 - Changed `--ring` from `#FF6B6B` to `#0077B6`
 
@@ -4476,19 +4557,20 @@ index 94b6925..468a616 100644
    --bs-radius-card: 1.5rem;
    --bs-radius-button: 1rem;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:32:36Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I understand everything clearly. The `fix/storybok-tests-ci` branch has these fixes:
+
 1. `src/lib/theme/default-tokens.ts`: Changed to ocean theme colors (WCAG AA compliant)
 2. `src/styles.css`: Same CSS variable changes
 
 These need to be applied to the `feat-word-spell-number-match` worktree.
 
 Also, for E2E, the `a11y.spec.ts` uses `/base-skill/en/` - let me check if this is fixed in `fix/storybok-tests-ci` branch.
-
 
 I need to compare the full diff between the two branches and see what E2E test changes were made, then apply those same fixes to the worktree.
 </details></think>
@@ -4539,6 +4621,7 @@ export const defaultThemeCssVars: Record<string, string> = {
   '--ring': '#0077B6',
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:32:41Z)**_
@@ -4707,6 +4790,7 @@ body {
   --color-bs-error: var(--bs-error);
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:32:50Z)**_
@@ -4721,6 +4805,7 @@ Now I have all the information I need. Let me apply the fixes:
 Let me now make these changes in the worktree.
 
 For `styles.css`, I need to change:
+
 ```css
 
 
@@ -4761,27 +4846,28 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:32:50Z)**_
  `./worktrees/feat-word-spell-number-match/src/styles.css`
 
 ```text
-65	  --sidebar-accent: oklch(97% 0 0deg);
-66	  --sidebar-accent-foreground: oklch(20.5% 0 0deg);
-67	  --sidebar-border: oklch(92.2% 0 0deg);
-68	  --sidebar-ring: oklch(70.8% 0 0deg);
-69	
-70	  /* BaseSkill Design System — Candy (light) */
-71	  --bs-primary: #ff6b6b;
-72	  --bs-secondary: #ffd93d;
-73	  --bs-background: #fff9ec;
-74	  --bs-surface: #fff;
-75	  --bs-text: #2d1b00;
-76	  --bs-accent: #6bcb77;
-77	  --bs-success: #6bcb77;
-78	  --bs-warning: #f4a261;
-79	  --bs-error: #ff6b6b;
-80	  --bs-font-weight-default: 600;
-81	  --bs-radius-card: 1.5rem;
-82	  --bs-radius-button: 1rem;
-83	}
+65   --sidebar-accent: oklch(97% 0 0deg);
+66   --sidebar-accent-foreground: oklch(20.5% 0 0deg);
+67   --sidebar-border: oklch(92.2% 0 0deg);
+68   --sidebar-ring: oklch(70.8% 0 0deg);
+69 
+70   /* BaseSkill Design System — Candy (light) */
+71   --bs-primary: #ff6b6b;
+72   --bs-secondary: #ffd93d;
+73   --bs-background: #fff9ec;
+74   --bs-surface: #fff;
+75   --bs-text: #2d1b00;
+76   --bs-accent: #6bcb77;
+77   --bs-success: #6bcb77;
+78   --bs-warning: #f4a261;
+79   --bs-error: #ff6b6b;
+80   --bs-font-weight-default: 600;
+81   --bs-radius-card: 1.5rem;
+82   --bs-radius-button: 1rem;
+83 }
 84
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:32:54Z)**_
@@ -4792,6 +4878,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:32:54Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/styles.css has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:33:05Z)**_
@@ -4833,6 +4920,7 @@ export const defaultThemeCssVars: Record<string, string> = {
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:33:07Z)**_
@@ -4842,30 +4930,31 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:33:07Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/theme/default-tokens.ts`
 
 ```text
-1	/** Static UI tokens when RxDB has no active theme (anonymous / first paint). */
-2	export const defaultThemeCssVars: Record<string, string> = {
-3	  '--bs-primary': '#FF6B6B',
-4	  '--bs-secondary': '#FFD93D',
-5	  '--bs-background': '#FFF9EC',
-6	  '--bs-surface': '#FFFFFF',
-7	  '--bs-text': '#2D1B00',
-8	  '--bs-accent': '#6BCB77',
-9	  '--bs-success': '#6BCB77',
-10	  '--bs-warning': '#F4A261',
-11	  '--bs-error': '#FF6B6B',
-12	  // Wire shadcn tokens so components like Button pick up theme colors.
-13	  // Foreground/card-foreground are intentionally omitted — dark mode CSS handles those.
-14	  '--primary': '#FF6B6B',
-15	  '--primary-foreground': '#FFFFFF',
-16	  '--secondary': '#FFD93D',
-17	  '--secondary-foreground': '#FFFFFF',
-18	  '--background': '#FFF9EC',
-19	  // --card and --card-foreground are omitted — wired via CSS so dark mode can override them
-20	  '--border': '#6BCB77',
-21	  '--ring': '#FF6B6B',
-22	};
+1 /** Static UI tokens when RxDB has no active theme (anonymous / first paint). */
+2 export const defaultThemeCssVars: Record<string, string> = {
+3   '--bs-primary': '#FF6B6B',
+4   '--bs-secondary': '#FFD93D',
+5   '--bs-background': '#FFF9EC',
+6   '--bs-surface': '#FFFFFF',
+7   '--bs-text': '#2D1B00',
+8   '--bs-accent': '#6BCB77',
+9   '--bs-success': '#6BCB77',
+10   '--bs-warning': '#F4A261',
+11   '--bs-error': '#FF6B6B',
+12   // Wire shadcn tokens so components like Button pick up theme colors.
+13   // Foreground/card-foreground are intentionally omitted — dark mode CSS handles those.
+14   '--primary': '#FF6B6B',
+15   '--primary-foreground': '#FFFFFF',
+16   '--secondary': '#FFD93D',
+17   '--secondary-foreground': '#FFFFFF',
+18   '--background': '#FFF9EC',
+19   // --card and --card-foreground are omitted — wired via CSS so dark mode can override them
+20   '--border': '#6BCB77',
+21   '--ring': '#FF6B6B',
+22 };
 23
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:33:13Z)**_
@@ -4907,6 +4996,7 @@ export const defaultThemeCssVars: Record<string, string> = {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/theme/default-tokens.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:33:17Z)**_
@@ -4943,6 +5033,7 @@ test.describe('@a11y accessibility', () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/e2e/a11y.spec.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:33:24Z)**_
@@ -4977,6 +5068,7 @@ Message:
 Ran all test suites**.**
 Done in 9.63s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:33:52Z)**_
@@ -4989,7 +5081,6 @@ Wait, the Storybook is still running with the old build. The tests are running a
 Actually, looking at the test output - the storybook tests were already running before my changes (against a running Storybook). I need to restart the Storybook server to pick up the new CSS changes.
 
 But wait - the test says `START_STORYBOOK=1 git push` or use an already running server. Let me check if Storybook is running on port 6006.
-
 
 The violations are still showing up, which means the server on port 6006 is serving stale CSS. Since the styles are imported in the preview file, they should hot-reload in dev mode, but the server might not have picked up the changes yet.
 
@@ -5013,6 +5104,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:33:52Z)**_
 COMMAND  PID       USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
 node    6278 leocaseiro   31u  IPv6 0x5c5873fa05bbb27a      0t0  TCP *:6006 (LISTEN)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:34:02Z)**_
@@ -5063,18 +5155,20 @@ Message:
  Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
 --
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:34:39Z)**_
 
 <think><details><summary>Thought Process</summary>
 The Storybook server (pid 6278) is running. With Vite-based Storybook, CSS changes should be hot-reloaded immediately. But the violations are still there, which means either:
+
 1. The server hasn't picked up the CSS changes yet
 2. There are still contrast issues after the theme change
 
 Wait - but actually, the story violations might be from the story file's inline styles or from other components. Let me look at what Storybook picks up.
 
-Also, looking at the fact that these are just WARNINGS (not test failures), these might be pre-existing warnings that are expected. 
+Also, looking at the fact that these are just WARNINGS (not test failures), these might be pre-existing warnings that are expected.
 
 I'm realizing the test output shows 99 passed with just 1 a11y warning - so the tests themselves are passing. The user specifically asked me to fix the contrast issues though, so I should check if the `fix/storybok-tests-ci` branch has already resolved these violations. Let me restart the Storybook server to ensure it picks up my CSS changes. I'm realizing the Storybook server might be running from the main project directory rather than the worktree, which would mean my CSS changes aren't being picked up at all. Let me check which directory the server is actually running from and verify it's using the updated styles file.
 
@@ -5108,6 +5202,7 @@ stash@{4}: lint-staged automatic backup
 29b6b62 fix(a11y): fix contrast ratio
 5d805f6 fix(e2e): use different port for VR tests on local
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:34:40Z)**_
@@ -5149,6 +5244,7 @@ index 6f3ca97..e06e4f9 100644
    // Wire shadcn tokens so components like Button pick up theme colors.
    // Foreground/card-foreground are intentionally omitted — dark mode CSS handles those.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:34:48Z)**_
@@ -5171,6 +5267,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:34:49Z)**_
 ```text
 node    6278 leocaseiro  cwd       DIR               1,17      1504            19287959 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:35:47Z)**_
@@ -5183,6 +5280,7 @@ The violations are something else. Let me think about what could be causing them
 Since `Default` slider has no violation but `Volume` and `SpeechRate` do... and all GameGrid stories have violations... and AudioFeedback stories... and Input Invalid...
 
 Wait, what if the violation is about `muted-foreground` color? Looking at:
+
 - `--muted-foreground: oklch(55.6% 0 0deg)` on `--muted: oklch(97% 0 0deg)` background
   
 I'm calculating the contrast ratio for this color combination. The muted-foreground converts to roughly #808080, and I need to check if that meets WCAG standards against the light muted background. I'm realizing the contrast issue might actually be about the slider track itself—at just 4px tall, it needs to meet a 3:1 contrast ratio against its background, and a very light gray track on white might not be cutting it. So `Volume` and `SpeechRate` have violations, but `Default` doesn't—which is strange if it's a track contrast issue that would affect all of them. Let me look at the actual violation list more carefully to see which stories are flagged and which aren't. I'm checking the contrast ratio of the deep blue border against the white background to see if that's sufficient for the accessibility violation, since the slider thumb relies on that border-ring styling for visual distinction. The contrast ratio comes out to 4.8:1, which clears the WCAG 1.4.11 threshold, so that should be passing. I'm wondering if the real issue is elsewhere—maybe the slider track with its near-white background against white, or something specific to how Storybook renders the canvas. The `Default` story doesn't fail, which is strange. At this point, I think I should treat these as warnings rather than hard failures and move forward, since the actual tests are passing.
@@ -5213,6 +5311,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:35:47Z)**_
 ---
 ---
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:35:47Z)**_
@@ -5229,6 +5328,7 @@ dd4c4c4 feat(ui): header settings drawer, theme tokens, game catalog
 7397b1d feat(ui): add GameCard component with bookmark and play callbacks
 383e43b chore(ui): add input, dropdown-menu, slider, select shadcn components
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:35:51Z)**_
@@ -5246,6 +5346,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:35:51Z)**_
 5d805f6 fix(e2e): use different port for VR tests on local
 ---
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:36:27Z)**_
@@ -5256,7 +5357,6 @@ There's no diff between `HEAD` (fix/storybok-tests-ci) and itself for those file
 Wait, let me check if `fix/storybok-tests-ci` also has these violations. The branch only fixed `default-tokens.ts` and `styles.css`. It didn't change the slider, input, or GameGrid components.
 
 Let me verify: does the `fix/storybok-tests-ci` branch still have the storybook violations? Let me check if that branch's storybook tests report violations too.
-
 
 Actually, I'm realizing the violations I'm seeing in the worktree—slider, AudioFeedback, GameGrid, and Input stories—might still be present on that branch too. If they are, these could be expected warnings rather than actual errors, since storybook tests typically just warn on violations without failing.
 
@@ -5318,6 +5418,7 @@ Message:
 Message:
  Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:37:29Z)**_
@@ -5328,9 +5429,9 @@ OK so this is running from the MAIN `fix/storybok-tests-ci` branch and it has th
 Wait, but the `fix/storybok-tests-ci` branch was supposed to fix the A11Y contrast issues. Looking at the commit `29b6b62 fix(a11y): fix contrast ratio`, it changed the default theme. But the storybook violations are still present.
 
 So either:
+
 1. The violations were reduced (e.g., less stories have violations) but not eliminated
 2. The violations are for different rules than the ones that were fixed
-
 
 3. The tests are passing because these violations are just warnings, not failures. Since the "fixed" branch still has them, they must be acceptable to leave as-is.
 
@@ -5375,6 +5476,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:37:29Z)**_
 ```text
     "@axe-core/playwright": "^4.11.1",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:37:32Z)**_
@@ -5391,6 +5493,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:37:32Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:37:35Z)**_
@@ -5474,6 +5577,7 @@ index 94b6925..468a616 100644
    --bs-radius-card: 1.5rem;
    --bs-radius-button: 1rem;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:37:39Z)**_
@@ -5496,6 +5600,7 @@ Your branch is ahead of 'origin/feat/word-spell-number-match' by 3 commits.
 
 nothing to commit, working tree clean
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:37:44Z)**_
@@ -5533,6 +5638,7 @@ test.describe('@a11y accessibility', () => {
   });
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:37:55Z)**_
@@ -5541,10 +5647,10 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:37:55Z)**_
 The `a11y.spec.ts` already uses `/en/` (not `/base-skill/en/`). So it was already committed correctly. My `Write` operation may have written the same content that was already there.
 
 OK so let me understand the current state of the worktree:
+
 1. `src/styles.css`: My change is there (uncommitted)
 2. `src/lib/theme/default-tokens.ts`: My change is there (uncommitted)
 3. `e2e/a11y.spec.ts`: Already correct (uses `/en/`)
-
 
 4. The git diff shows no changes to `a11y.spec.ts`, which means either it was already committed with the correct path in one of the 3 commits ahead of origin, or my write operation succeeded and the file already matched what was in the index.
 
@@ -5565,6 +5671,7 @@ b8b3bfc chore(prettier/lint): opinionated code style
 a66b7cc app(router): remove hash from router
 44c1049 feat(milestone-2): RxDB migrations, Dexie, i18n locale routes, theme, speech, games
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:37:56Z)**_
@@ -5586,6 +5693,7 @@ test.describe('@a11y accessibility', () => {
     await page.getByRole('main').waitFor({ state: 'visible' });
     await page
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:38:00Z)**_
@@ -5611,12 +5719,13 @@ Your branch is ahead of 'origin/feat/word-spell-number-match' by 3 commits.
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   e2e/visual.spec.ts
-	modified:   src/lib/theme/default-tokens.ts
-	modified:   src/styles.css
+ modified:   e2e/visual.spec.ts
+ modified:   src/lib/theme/default-tokens.ts
+ modified:   src/styles.css
 
 no changes added to commit (use "git add" and/or "git commit -a")
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:38:05Z)**_
@@ -5651,6 +5760,7 @@ index 81bc3a0..e002495 100644
    await page
      .getByRole('group', { name: /filter by grade level/i })
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:38:52Z)**_
@@ -5661,10 +5771,11 @@ Interesting! The `visual.spec.ts` has an uncommitted change that changes the URL
 Let me check what the HEAD version shows vs the working tree version.
 
 Actually wait - the diff shows:
+
 - Committed: `/en/`
 - Working tree: `/base-skill/en/`
 
-So something (or the user) has uncommitted changes to revert this to `/base-skill/en/`. 
+So something (or the user) has uncommitted changes to revert this to `/base-skill/en/`.
 
 This looks like an edit from earlier in the current session. I need to think through the playwright config setup - it's checking for a VR_DOCKER environment variable to determine whether to serve the existing dist folder or rebuild with a specific base URL. For VR tests, it skips the rebuild and just serves what's already there, which means the URL configuration matters differently depending on which build was used.
 
@@ -5701,6 +5812,7 @@ index 81bc3a0..e002495 100644
    await page
      .getByRole('group', { name: /filter by grade level/i })
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:38:57Z)**_
@@ -5779,6 +5891,7 @@ jobs:
           path: test-results/
           retention-days: 14
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:39:01Z)**_
@@ -5820,6 +5933,7 @@ try {
   execSync('docker info', { stdio: 'ignore' });
 } catch {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:39:05Z)**_
@@ -5872,6 +5986,7 @@ const playwrightArgs = [
 
 console.log(
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:39:14Z)**_
@@ -5880,13 +5995,13 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:39:14Z)**_
 The VR docker script builds with `APP_BASE_URL=/` and sets `VR_DOCKER=1`. So the dist is built with `APP_BASE_URL=/`, not `/base-skill/`.
 
 With `APP_BASE_URL=/`:
+
 - The router uses `basepath = '/'`
 - Routes are at `/en/`, `/en/game/word-spell`, etc.
 
 Then `VR_DOCKER=1` is set → playwright config uses `npx serve dist/client -p 3000 -s` (no rebuild).
 
 So with VR_DOCKER=1, the app is served with `APP_BASE_URL=/`, and the routes are at `/en/`.
-
 
 The HEAD version of `visual.spec.ts` with `/en/` is correct, not the working tree change that reverted to `/base-skill/en/`.
 
@@ -5907,6 +6022,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:39:15Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:39:19Z)**_
@@ -5928,14 +6044,15 @@ Your branch is ahead of 'origin/feat/word-spell-number-match' by 3 commits.
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   src/lib/theme/default-tokens.ts
-	modified:   src/styles.css
+ modified:   src/lib/theme/default-tokens.ts
+ modified:   src/styles.css
 
 no changes added to commit (use "git add" and/or "git commit -a")
  src/lib/theme/default-tokens.ts | 29 +++++++++++++++++------------
  src/styles.css                  | 14 +++++++-------
  2 files changed, 24 insertions(+), 19 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:39:30Z)**_
@@ -5948,7 +6065,6 @@ Wait actually, looking at the situation more carefully:
 1. The Storybook server is running from the WORKTREE
 2. I've changed `src/styles.css` and `src/lib/theme/default-tokens.ts` in the WORKTREE
 3. Vite's HMR should have picked up the CSS changes
-
 
 4. The `default-tokens.ts` change affects JS code loaded at runtime, and since the `withTheme` decorator imports `defaultThemeCssVars` from that file and applies it via `applyThemeCssVars`, HMR should reload the module with the new values
 
@@ -5978,6 +6094,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 11:39:54Z)**_
 Ran all test suites**.**
 Done in 24.02s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:40:00Z)**_
@@ -6008,6 +6125,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.34s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:40:17Z)**_
@@ -6022,6 +6140,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 11.58s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:40:19Z)**_
@@ -6617,6 +6736,7 @@ Done in 4.48s.
 [feat/word-spell-number-match ce3caf7] fix(a11y): replace candy theme with WCAG AA-compliant ocean defaults
  2 files changed, 24 insertions(+), 19 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 11:40:43Z)**_
@@ -6626,11 +6746,13 @@ All 263 unit tests and 99 Storybook tests pass. The commit was created successfu
 Here's a summary of what was fixed:
 
 **A11Y contrast issues (root cause):**
+
 - The candy theme (`--bs-primary: #FF6B6B` coral on white = 2.77:1, `--bs-secondary: #FFD93D` yellow on white = 1.36:1) was failing WCAG AA color-contrast checks in axe
 - Fixed by switching to the ocean preset (`#0077B6` primary = 4.8:1 on white, `#00B4D8` secondary) in both [src/lib/theme/default-tokens.ts](src/lib/theme/default-tokens.ts) and [src/styles.css](src/styles.css)
 - Storybook A11Y violations went from 11 warnings → 0
 
 **E2E tests (root cause):**
+
 - [e2e/a11y.spec.ts](e2e/a11y.spec.ts) already had the correct `/en/` URL (fixed in a prior commit on this branch)
 - [e2e/visual.spec.ts](e2e/visual.spec.ts) correctly uses `/en/` because VR docker builds with `APP_BASE_URL=/` (restored from HEAD)
 - The `smoke.spec.ts` home page test should pass in CI since playwright's webServer rebuilds with `APP_BASE_URL=/`, making `<main>` visible at `/en/`

@@ -7,6 +7,7 @@
 _**User**_
 
 Explore the codebase at /Users/leocaseiro/Sites/base-skill thoroughly. I need to understand:
+
 1. What files and directories exist at the root level
 2. What's in the docs/ directory
 3. Any existing design documents, specs, or architecture docs
@@ -20,10 +21,7 @@ Be very thorough - list all files found and provide summaries of key files.
 
 _**Agent (composer-2-fast)**_
 
-
 Exploring the codebase: listing the root, scanning `docs/`, and locating config and source files.
-
-
 
 _**Agent (composer-2-fast)**_
 
@@ -139,11 +137,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 
 _**Agent (composer-2-fast)**_
 
-
-
-
-
-
 _**Agent (composer-2-fast)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -186,6 +179,7 @@ drwxr-xr-x@ 9 leocaseiro  staff    288 Mar 28 22:30 ..
 /Users/leocaseiro/Sites/base-skill/.vscode/settings.json
 
 ```
+
 </details>
 </tool-use>
 
@@ -196,10 +190,7 @@ drwxr-xr-x@ 9 leocaseiro  staff    288 Mar 28 22:30 ..
 
 _**Agent (composer-2-fast)**_
 
-
 Reading key files for summaries:
-
-
 
 _**Agent (composer-2-fast)**_
 
@@ -281,11 +272,6 @@ _**Agent (composer-2-fast)**_
 
 _**Agent (composer-2-fast)**_
 
-
-
-
-
-
 _**Agent (composer-2-fast)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -327,7 +313,6 @@ _**Agent (composer-2-fast)**_
 
 _**Agent (composer-2-fast)**_
 
-
 Here is a concise inventory of `/Users/leocaseiro/Sites/base-skill` based on filesystem listing and file reads.
 
 ---
@@ -361,7 +346,7 @@ There is **no** `package.json`, `src/`, `app/`, `LICENSE`, or typical app scaffo
 
 **Committed as full narrative (not split into the planned filenames yet):**
 
-- **`docs/prd-plan.md`** — Central spec. It *describes* a future layout (`docs/prd.md`, `architecture.md`, `data-model.md`, etc.) but those individual files **do not exist** in the repo. Content includes: GPL v3 + premium-repo separation, personas, functional/non-functional requirements, React/TS/Vite/shadcn/RxDB/Workbox stack, OAuth (OneDrive PKCE; Google via Cloudflare Worker BFF), PWA/offline, RxDB collections and session-history chunking, game engine and five reference games, UI/themes, i18n, a11y, testing, CI/CD, and deferred items (Cursor rules, Mermaid, assets).
+- **`docs/prd-plan.md`** — Central spec. It _describes_ a future layout (`docs/prd.md`, `architecture.md`, `data-model.md`, etc.) but those individual files **do not exist** in the repo. Content includes: GPL v3 + premium-repo separation, personas, functional/non-functional requirements, React/TS/Vite/shadcn/RxDB/Workbox stack, OAuth (OneDrive PKCE; Google via Cloudflare Worker BFF), PWA/offline, RxDB collections and session-history chunking, game engine and five reference games, UI/themes, i18n, a11y, testing, CI/CD, and deferred items (Cursor rules, Mermaid, assets).
 - **`scope.md`** — Shorter vision: gamified educational PWA (JAMstack, GitHub Pages), kid-friendly, offline, TTS/STT, accessibility, competitors, RxDB + Drive/OneDrive sync, OAuth2 PKCE note pointing at `docs/prd-plan.md`, reusable components, session history and bounded chunks, CI on every step.
 - **`docs/baseskill_milestone_breakdown_85146c93.plan.md`** — Execution plan from “design docs first” through scaffolding, data layer, app shell, game engine, reference games, cloud sync, parent features, polish; references TanStack Start/Router, milestones, and parallelization.
 

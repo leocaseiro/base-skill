@@ -10,7 +10,7 @@ _**User (2026-04-09 21:32:10Z)**_
 `ordinal-number-to-text`  | "7th"     | "seventh" | `toOrdinal`  |
 | `ordinal-text-to-number`  | "seventh" | "7th"     | `toOrdinal`  |
 | `cardinal-to-ordinal`     | "seven"   | "seventh" | both         |
-| `ordinal-to-cardinal`     | "seventh" | "seven"   | both      
+| `ordinal-to-cardinal`     | "seventh" | "seven"   | both
 
 This may or may not be related to the current task.</ide_selection>
 
@@ -39,6 +39,7 @@ Found 2 files
 .specstory/history/2026-04-09_21-32-10Z-we-are-working-on.md
 .specstory/history/2026-04-09_19-42-10Z-i-want-to-make.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:32:16Z)**_
@@ -48,204 +49,205 @@ _**Agent (claude-opus-4-6 2026-04-09 21:32:16Z)**_
  `./worktrees/match-number-improvements/docs/superpowers/specs/2026-04-10-match-number-improvements-design.md`
 
 ```text
-1	# MatchNumber Game Improvements Design
-2	
-3	## Overview
-4	
-5	Five improvements to the MatchNumber game targeting young readers and fixing
-6	existing mode bugs.
-7	
-8	## 1. Domino Tile Overhaul (Uniform Size + Vertical Orientation + Simpler Splits)
-9	
-10	### Problem
-11	
-12	- Dice tiles (1–6) are square 80×80, domino tiles (7–12) are wide rectangles
-13	  128×72 — inconsistent sizing
-14	- Dominoes render horizontally (left/right halves) — unnatural for a domino
-15	- Splits are not optimised for young readers (e.g. 10 = 6+4 instead of 5+5)
-16	- Pips are too close to the divider line
-17	
-18	### Solution
-19	
-20	Unify all `dots`-style tiles into a single vertical domino shape.
-21	
-22	**New `DOMINO_SPLIT` map (top/bottom, smaller value on top):**
-23	
-24	| Value | Top | Bottom |
-25	| ----- | --- | ------ |
-26	| 1     | 1   | 0      |
-27	| 2     | 2   | 0      |
-28	| 3     | 3   | 0      |
-29	| 4     | 4   | 0      |
-30	| 5     | 5   | 0      |
-31	| 6     | 6   | 0      |
-32	| 7     | 2   | 5      |
-33	| 8     | 4   | 4      |
-34	| 9     | 4   | 5      |
-35	| 10    | 5   | 5      |
-36	| 11    | 5   | 6      |
-37	| 12    | 6   | 6      |
-38	
-39	A bottom value of `0` means blank half (no pips).
-40	
-41	**Component changes:**
-42	
-43	- Replace separate `DiceFace`/`DominoTile` exports with a single `DominoTile`
-44	  component that always renders vertically
-45	- `DiceFace` becomes internal-only (renders one half of the domino)
-46	- All tiles: `w-[72px] h-[136px]` (tall rectangle)
-47	- Horizontal divider line, shorter than tile width (`w-11`), `opacity-30`
-48	- Generous padding (`py-3`) between pip grids and divider
-49	- Remove `allDice` branching logic in `NumberMatch.tsx` and
-50	  `NumeralTileBank.tsx` — when `tileStyle === 'dots'`, every tile/slot/hole
-51	  uses the same domino dimensions
-52	
-53	## 2. Mode Bug Fix + New Modes
-54	
-55	### Problem
-56	
-57	- `group-to-numeral`: tiles render as dominoes instead of plain numerals
-58	- `numeral-to-word` / `word-to-numeral`: tiles show plain numbers, no word
-59	  conversion exists
-60	- `tileStyle` options `objects` and `fingers` are stubs (fall through to numeral
-61	  text) — keep them as stubs for future work
-62	
-63	### Solution
-64	
-65	**Rendering gate:** Introduce a derived boolean `tilesShowGroup` that is `true`
-66	only when `mode === 'numeral-to-group'`. Domino rendering only applies when
-67	`tilesShowGroup && tileStyle === 'dots'`.
-68	
-69	This boolean gates rendering in three places:
-70	
-71	1. `NumeralTile` component
-72	2. `Slot` render callback in `NumberMatch.tsx`
-73	3. Bank hole hover preview
-74	
-75	`NumeralTileBank` receives a new prop `tilesShowGroup: boolean`.
-76	
-77	**Slot dimensions:**
-78	
-79	- `tilesShowGroup && tileStyle === 'dots'` → portrait `w-[72px] h-[136px]`
-80	- All other modes → square `size-20`
-81	
-82	**8 game modes:**
-83	
-84	| Mode                      | Question  | Answer    | Conversion   |
-85	| ------------------------- | --------- | --------- | ------------ |
-86	| `numeral-to-group`        | 7         | Domino    | —            |
-87	| `group-to-numeral`        | Dots      | 7         | —            |
-88	| `cardinal-number-to-text` | 7         | "seven"   | `toCardinal` |
-89	| `cardinal-text-to-number` | "seven"   | 7         | `toCardinal` |
-90	| `ordinal-number-to-text`  | "7th"     | "seventh" | `toOrdinal`  |
-91	| `ordinal-text-to-number`  | "seventh" | "7th"     | `toOrdinal`  |
-92	| `cardinal-to-ordinal`     | "seven"   | "seventh" | both         |
-93	| `ordinal-to-cardinal`     | "seventh" | "seven"   | both         |
-94	
-95	**Dependency:** `n2words` — tree-shakeable per-locale imports, i18n, zero deps.
-96	Provides `toCardinal` and `toOrdinal` per locale.
-97	
-98	**Data flow:** Rounds are always generated with numeric values. At render time,
-99	`n2words` converts to display strings based on the mode. Matching logic always
-100	compares the underlying numeric `value`, never text strings.
-101	
-102	**Locale:** Sourced from the existing `useParams({ from: '/$locale' })` router
-103	param. Map the app locale to `n2words` locale import (e.g. `en` → `en-AU`,
-104	`pt` → `pt-PT`).
-105	
-106	**Word tile UI:**
-107	
-108	- Square tiles with `min-width: 80px`, height 80px
-109	- Font size scales down for longer words
-110	- Long words break at hyphens across two lines
-111	- Slots and bank holes match using `min-width`
-112	
-113	### Types update
-114	
-115	```typescript
-116	type NumberMatchMode =
-117	  | 'numeral-to-group'
-118	  | 'group-to-numeral'
-119	  | 'cardinal-number-to-text'
-120	  | 'cardinal-text-to-number'
-121	  | 'ordinal-number-to-text'
-122	  | 'ordinal-text-to-number'
-123	  | 'cardinal-to-ordinal'
-124	  | 'ordinal-to-cardinal';
-125	```
-126	
-127	## 3. Countable Dots on DotGroupQuestion
-128	
-129	### Problem
-130	
-131	Young kids need to count dots but have no way to track which dots they have
-132	already counted.
-133	
-134	### Solution
-135	
-136	Each dot in `DotGroupQuestion` becomes individually tappable:
-137	
-138	- Tap an unnumbered dot → assigns the next increment (1, 2, 3...)
-139	- The number appears centered on the dot
-140	- Each tap triggers TTS speaking the cardinal word ("one", "two", "three"...)
-141	- Already-tapped dots do nothing on re-tap (no toggle)
-142	- Counts auto-reset when `count` changes (next round)
-143	- Order does not matter — kids can tap dots in any sequence
-144	- TTS for the whole question area stays on the existing `AudioButton`
-145	
-146	**State:** Local `useState` inside `DotGroupQuestion` — array of
-147	`(number | null)` per dot, tracking assigned count values. A `nextCount` ref
-148	tracks the next number to assign.
-149	
-150	**Rendering:** Each dot changes from a plain `<span>` to a `<button>`. When
-151	tapped, the dot shows a white number centered on the primary-colored circle.
-152	
-153	## 4. Hover Preview Fix
-154	
-155	### Problem
-156	
-157	When dragging a tile over a slot or bank hole, the preview shows plain text
-158	label (e.g. "7") instead of the domino face.
-159	
-160	### Solution
-161	
-162	The hover preview renders the same visual as the tile:
-163	
-164	- Domino face when `tilesShowGroup && tileStyle === 'dots'`
-165	- Plain text otherwise
-166	
-167	Affected locations:
-168	
-169	1. **Slot preview** — the `Slot` render callback uses `previewLabel` to render
-170	   a domino or text
-171	2. **Bank hole preview** — the empty hole in `NumeralTileBank` renders domino or
-172	   text during hover
-173	
-174	Both reuse the existing `DominoTile` / `DiceFace` components.
-175	
-176	## Files Affected
-177	
-178	- `src/games/number-match/types.ts` — mode type expansion, config field options
-179	- `src/games/number-match/NumberMatch/NumberMatch.tsx` — rendering logic,
-180	  slot sizing, mode gating
-181	- `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` — domino
-182	  overhaul, tile rendering, hover preview, `tilesShowGroup` prop
-183	- `src/games/number-match/build-numeral-round.ts` — label generation for
-184	  word/ordinal modes
-185	- `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx` — countable
-186	  dots, per-dot tap, TTS
-187	- `src/games/number-match/NumberMatch/NumberMatch.stories.tsx` — new stories
-188	  for all modes
-189	- `src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx` — updated
-190	  stories
-191	- `package.json` — add `n2words` dependency
-192	
-193	## Out of Scope
-194	
-195	- `objects` and `fingers` tile styles — kept as stubs
-196	- Drag preview ghost image (the floating tile during drag) — separate concern
+1 # MatchNumber Game Improvements Design
+2 
+3 ## Overview
+4 
+5 Five improvements to the MatchNumber game targeting young readers and fixing
+6 existing mode bugs.
+7 
+8 ## 1. Domino Tile Overhaul (Uniform Size + Vertical Orientation + Simpler Splits)
+9 
+10 ### Problem
+11 
+12 - Dice tiles (1–6) are square 80×80, domino tiles (7–12) are wide rectangles
+13   128×72 — inconsistent sizing
+14 - Dominoes render horizontally (left/right halves) — unnatural for a domino
+15 - Splits are not optimised for young readers (e.g. 10 = 6+4 instead of 5+5)
+16 - Pips are too close to the divider line
+17 
+18 ### Solution
+19 
+20 Unify all `dots`-style tiles into a single vertical domino shape.
+21 
+22 **New `DOMINO_SPLIT` map (top/bottom, smaller value on top):**
+23 
+24 | Value | Top | Bottom |
+25 | ----- | --- | ------ |
+26 | 1     | 1   | 0      |
+27 | 2     | 2   | 0      |
+28 | 3     | 3   | 0      |
+29 | 4     | 4   | 0      |
+30 | 5     | 5   | 0      |
+31 | 6     | 6   | 0      |
+32 | 7     | 2   | 5      |
+33 | 8     | 4   | 4      |
+34 | 9     | 4   | 5      |
+35 | 10    | 5   | 5      |
+36 | 11    | 5   | 6      |
+37 | 12    | 6   | 6      |
+38 
+39 A bottom value of `0` means blank half (no pips).
+40 
+41 **Component changes:**
+42 
+43 - Replace separate `DiceFace`/`DominoTile` exports with a single `DominoTile`
+44   component that always renders vertically
+45 - `DiceFace` becomes internal-only (renders one half of the domino)
+46 - All tiles: `w-[72px] h-[136px]` (tall rectangle)
+47 - Horizontal divider line, shorter than tile width (`w-11`), `opacity-30`
+48 - Generous padding (`py-3`) between pip grids and divider
+49 - Remove `allDice` branching logic in `NumberMatch.tsx` and
+50   `NumeralTileBank.tsx` — when `tileStyle === 'dots'`, every tile/slot/hole
+51   uses the same domino dimensions
+52 
+53 ## 2. Mode Bug Fix + New Modes
+54 
+55 ### Problem
+56 
+57 - `group-to-numeral`: tiles render as dominoes instead of plain numerals
+58 - `numeral-to-word` / `word-to-numeral`: tiles show plain numbers, no word
+59   conversion exists
+60 - `tileStyle` options `objects` and `fingers` are stubs (fall through to numeral
+61   text) — keep them as stubs for future work
+62 
+63 ### Solution
+64 
+65 **Rendering gate:** Introduce a derived boolean `tilesShowGroup` that is `true`
+66 only when `mode === 'numeral-to-group'`. Domino rendering only applies when
+67 `tilesShowGroup && tileStyle === 'dots'`.
+68 
+69 This boolean gates rendering in three places:
+70 
+71 1. `NumeralTile` component
+72 2. `Slot` render callback in `NumberMatch.tsx`
+73 3. Bank hole hover preview
+74 
+75 `NumeralTileBank` receives a new prop `tilesShowGroup: boolean`.
+76 
+77 **Slot dimensions:**
+78 
+79 - `tilesShowGroup && tileStyle === 'dots'` → portrait `w-[72px] h-[136px]`
+80 - All other modes → square `size-20`
+81 
+82 **8 game modes:**
+83 
+84 | Mode                      | Question  | Answer    | Conversion   |
+85 | ------------------------- | --------- | --------- | ------------ |
+86 | `numeral-to-group`        | 7         | Domino    | —            |
+87 | `group-to-numeral`        | Dots      | 7         | —            |
+88 | `cardinal-number-to-text` | 7         | "seven"   | `toCardinal` |
+89 | `cardinal-text-to-number` | "seven"   | 7         | `toCardinal` |
+90 | `ordinal-number-to-text`  | "7th"     | "seventh" | `toOrdinal`  |
+91 | `ordinal-text-to-number`  | "seventh" | "7th"     | `toOrdinal`  |
+92 | `cardinal-to-ordinal`     | "seven"   | "seventh" | both         |
+93 | `ordinal-to-cardinal`     | "seventh" | "seven"   | both         |
+94 
+95 **Dependency:** `n2words` — tree-shakeable per-locale imports, i18n, zero deps.
+96 Provides `toCardinal` and `toOrdinal` per locale.
+97 
+98 **Data flow:** Rounds are always generated with numeric values. At render time,
+99 `n2words` converts to display strings based on the mode. Matching logic always
+100 compares the underlying numeric `value`, never text strings.
+101 
+102 **Locale:** Sourced from the existing `useParams({ from: '/$locale' })` router
+103 param. Map the app locale to `n2words` locale import (e.g. `en` → `en-AU`,
+104 `pt` → `pt-PT`).
+105 
+106 **Word tile UI:**
+107 
+108 - Square tiles with `min-width: 80px`, height 80px
+109 - Font size scales down for longer words
+110 - Long words break at hyphens across two lines
+111 - Slots and bank holes match using `min-width`
+112 
+113 ### Types update
+114 
+115 ```typescript
+116 type NumberMatchMode =
+117   | 'numeral-to-group'
+118   | 'group-to-numeral'
+119   | 'cardinal-number-to-text'
+120   | 'cardinal-text-to-number'
+121   | 'ordinal-number-to-text'
+122   | 'ordinal-text-to-number'
+123   | 'cardinal-to-ordinal'
+124   | 'ordinal-to-cardinal';
+125 ```
+126 
+127 ## 3. Countable Dots on DotGroupQuestion
+128 
+129 ### Problem
+130 
+131 Young kids need to count dots but have no way to track which dots they have
+132 already counted.
+133 
+134 ### Solution
+135 
+136 Each dot in `DotGroupQuestion` becomes individually tappable:
+137 
+138 - Tap an unnumbered dot → assigns the next increment (1, 2, 3...)
+139 - The number appears centered on the dot
+140 - Each tap triggers TTS speaking the cardinal word ("one", "two", "three"...)
+141 - Already-tapped dots do nothing on re-tap (no toggle)
+142 - Counts auto-reset when `count` changes (next round)
+143 - Order does not matter — kids can tap dots in any sequence
+144 - TTS for the whole question area stays on the existing `AudioButton`
+145 
+146 **State:** Local `useState` inside `DotGroupQuestion` — array of
+147 `(number | null)` per dot, tracking assigned count values. A `nextCount` ref
+148 tracks the next number to assign.
+149 
+150 **Rendering:** Each dot changes from a plain `<span>` to a `<button>`. When
+151 tapped, the dot shows a white number centered on the primary-colored circle.
+152 
+153 ## 4. Hover Preview Fix
+154 
+155 ### Problem
+156 
+157 When dragging a tile over a slot or bank hole, the preview shows plain text
+158 label (e.g. "7") instead of the domino face.
+159 
+160 ### Solution
+161 
+162 The hover preview renders the same visual as the tile:
+163 
+164 - Domino face when `tilesShowGroup && tileStyle === 'dots'`
+165 - Plain text otherwise
+166 
+167 Affected locations:
+168 
+169 1. **Slot preview** — the `Slot` render callback uses `previewLabel` to render
+170    a domino or text
+171 2. **Bank hole preview** — the empty hole in `NumeralTileBank` renders domino or
+172    text during hover
+173 
+174 Both reuse the existing `DominoTile` / `DiceFace` components.
+175 
+176 ## Files Affected
+177 
+178 - `src/games/number-match/types.ts` — mode type expansion, config field options
+179 - `src/games/number-match/NumberMatch/NumberMatch.tsx` — rendering logic,
+180   slot sizing, mode gating
+181 - `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` — domino
+182   overhaul, tile rendering, hover preview, `tilesShowGroup` prop
+183 - `src/games/number-match/build-numeral-round.ts` — label generation for
+184   word/ordinal modes
+185 - `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx` — countable
+186   dots, per-dot tap, TTS
+187 - `src/games/number-match/NumberMatch/NumberMatch.stories.tsx` — new stories
+188   for all modes
+189 - `src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx` — updated
+190   stories
+191 - `package.json` — add `n2words` dependency
+192 
+193 ## Out of Scope
+194 
+195 - `objects` and `fingers` tile styles — kept as stubs
+196 - Drag preview ghost image (the floating tile during drag) — separate concern
 197
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:32:19Z)**_
@@ -270,6 +272,7 @@ Check if n2words is installed in the worktree
 ---
 n2words not installed
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:32:27Z)**_
@@ -302,6 +305,7 @@ latest: 4.0.0
 
 published a month ago by GitHub Actions <npm-oidc-no-reply@github.com>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:32:35Z)**_
@@ -394,6 +398,7 @@ Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /private/tmp
 
 Node.js v24.14.1
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:32:38Z)**_
@@ -469,6 +474,7 @@ Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /private/tmp
 
 Node.js v24.14.1
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:32:47Z)**_
@@ -494,6 +500,7 @@ main: undefined
 module: undefined
 type: module
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:32:51Z)**_
@@ -546,6 +553,7 @@ en-GH.js
 en-IE.d.ts
 en-IE.js
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:32:56Z)**_
@@ -554,7 +562,7 @@ _**Agent (claude-opus-4-6 2026-04-09 21:32:56Z)**_
 <summary>Tool use: **Bash**</summary>
 List English and Portuguese locale files
 
-`ls /tmp/n2words-test/node_modules/n2words/src/ | grep -E "^(en|pt)" `
+`ls /tmp/n2words-test/node_modules/n2words/src/ | grep -E "^(en|pt)"`
 
 ```text
 en-AU.d.ts
@@ -592,6 +600,7 @@ en-ZA.js
 pt-PT.d.ts
 pt-PT.js
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:33:00Z)**_
@@ -601,55 +610,56 @@ _**Agent (claude-opus-4-6 2026-04-09 21:33:00Z)**_
  `/tmp/n2words-test/node_modules/n2words/src/en-AU.d.ts`
 
 ```text
-1	/**
-2	 * Converts a numeric value to Australian English words.
-3	 *
-4	 * @param {number | string | bigint} value - The numeric value to convert
-5	 * @returns {string} The number in English words
-6	 * @throws {TypeError} If value is not a valid numeric type
-7	 * @throws {Error} If value is not a valid number format
-8	 *
-9	 * @example
-10	 * toCardinal(42)           // 'forty-two'
-11	 * toCardinal(101)          // 'one hundred and one'
-12	 * toCardinal(1000000)      // 'one million'
-13	 */
-14	export function toCardinal(value: number | string | bigint): string;
-15	/**
-16	 * Converts a numeric value to Australian English ordinal words.
-17	 *
-18	 * @param {number | string | bigint} value - The numeric value to convert (must be a positive integer)
-19	 * @returns {string} The number as ordinal words
-20	 * @throws {TypeError} If value is not a valid numeric type
-21	 * @throws {RangeError} If value is negative, zero, or has a decimal part
-22	 *
-23	 * @example
-24	 * toOrdinal(1)    // 'first'
-25	 * toOrdinal(42)   // 'forty-second'
-26	 * toOrdinal(100)  // 'one hundredth'
-27	 */
-28	export function toOrdinal(value: number | string | bigint): string;
-29	/**
-30	 * Converts a numeric value to Australian English currency words.
-31	 *
-32	 * @param {number | string | bigint} value - The currency amount to convert
-33	 * @param {Object} [options] - Optional configuration
-34	 * @param {boolean} [options.and=true] - Use "and" between dollars and cents
-35	 * @returns {string} The amount in Australian English currency words
-36	 * @throws {TypeError} If value is not a valid numeric type
-37	 * @throws {Error} If value is not a valid number format
-38	 *
-39	 * @example
-40	 * toCurrency(42.50)                    // 'forty-two dollars and fifty cents'
-41	 * toCurrency(1)                        // 'one dollar'
-42	 * toCurrency(0.99)                     // 'ninety-nine cents'
-43	 * toCurrency(42.50, { and: false })    // 'forty-two dollars fifty cents'
-44	 */
-45	export function toCurrency(value: number | string | bigint, options?: {
-46	    and?: boolean | undefined;
-47	}): string;
+1 /**
+2  * Converts a numeric value to Australian English words.
+3  *
+4  * @param {number | string | bigint} value - The numeric value to convert
+5  * @returns {string} The number in English words
+6  * @throws {TypeError} If value is not a valid numeric type
+7  * @throws {Error} If value is not a valid number format
+8  *
+9  * @example
+10  * toCardinal(42)           // 'forty-two'
+11  * toCardinal(101)          // 'one hundred and one'
+12  * toCardinal(1000000)      // 'one million'
+13  */
+14 export function toCardinal(value: number | string | bigint): string;
+15 /**
+16  * Converts a numeric value to Australian English ordinal words.
+17  *
+18  * @param {number | string | bigint} value - The numeric value to convert (must be a positive integer)
+19  * @returns {string} The number as ordinal words
+20  * @throws {TypeError} If value is not a valid numeric type
+21  * @throws {RangeError} If value is negative, zero, or has a decimal part
+22  *
+23  * @example
+24  * toOrdinal(1)    // 'first'
+25  * toOrdinal(42)   // 'forty-second'
+26  * toOrdinal(100)  // 'one hundredth'
+27  */
+28 export function toOrdinal(value: number | string | bigint): string;
+29 /**
+30  * Converts a numeric value to Australian English currency words.
+31  *
+32  * @param {number | string | bigint} value - The currency amount to convert
+33  * @param {Object} [options] - Optional configuration
+34  * @param {boolean} [options.and=true] - Use "and" between dollars and cents
+35  * @returns {string} The amount in Australian English currency words
+36  * @throws {TypeError} If value is not a valid numeric type
+37  * @throws {Error} If value is not a valid number format
+38  *
+39  * @example
+40  * toCurrency(42.50)                    // 'forty-two dollars and fifty cents'
+41  * toCurrency(1)                        // 'one dollar'
+42  * toCurrency(0.99)                     // 'ninety-nine cents'
+43  * toCurrency(42.50, { and: false })    // 'forty-two dollars fifty cents'
+44  */
+45 export function toCurrency(value: number | string | bigint, options?: {
+46     and?: boolean | undefined;
+47 }): string;
 48
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:33:00Z)**_
@@ -659,57 +669,58 @@ _**Agent (claude-opus-4-6 2026-04-09 21:33:00Z)**_
  `/tmp/n2words-test/node_modules/n2words/src/en-AU.js`
 
 ```text
-1	/**
-2	 * English (Australia) language converter
-3	 *
-4	 * CLDR: en-AU | English as used in Australia
-5	 *
-6	 * Key features:
-7	 * - Western numbering system (short scale: billion = 10^9)
-8	 * - British-style "and" after hundreds
-9	 * - Australian Dollar currency (AUD)
-10	 */
-11	
-12	import { parseCardinalValue } from './utils/parse-cardinal.js'
-13	import { parseCurrencyValue } from './utils/parse-currency.js'
-14	import { parseOrdinalValue } from './utils/parse-ordinal.js'
-15	import { validateOptions } from './utils/validate-options.js'
-16	
-17	// ============================================================================
-18	// Vocabulary (module-level constants)
-19	// ============================================================================
-20	
-21	const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
-22	const TEENS = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen']
-23	const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety']
-24	
-25	const SCALES = [
-26	  'thousand', 'million', 'billion', 'trillion', 'quadrillion',
-27	  'quintillion', 'sextillion', 'septillion', 'octillion', 'nonillion',
-28	  'decillion', 'undecillion', 'duodecillion', 'tredecillion', 'quattuordecillion',
-29	  'quindecillion', 'sexdecillion', 'septendecillion', 'octodecillion', 'novemdecillion',
-30	  'vigintillion'
-31	]
-32	
-33	const HUNDRED = 'hundred'
-34	const ZERO = 'zero'
-35	const NEGATIVE = 'minus'
-36	const DECIMAL_SEP = 'point'
-37	
-38	// Ordinal vocabulary
-39	const ORDINAL_ONES = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth']
-40	const ORDINAL_TEENS = ['tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth', 'eighteenth', 'nineteenth']
-41	const ORDINAL_TENS = ['', '', 'twentieth', 'thirtieth', 'fortieth', 'fiftieth', 'sixtieth', 'seventieth', 'eightieth', 'ninetieth']
-42	
-43	// Currency vocabulary (Australian Dollar)
-44	const DOLLAR = 'dollar'
-45	const DOLLARS = 'dollars'
-46	const CENT = 'cent'
-47	const CENTS = 'cents'
-48	
-49	// ============================================================================
-50	// Segment Building
+1 /**
+2  * English (Australia) language converter
+3  *
+4  * CLDR: en-AU | English as used in Australia
+5  *
+6  * Key features:
+7  * - Western numbering system (short scale: billion = 10^9)
+8  * - British-style "and" after hundreds
+9  * - Australian Dollar currency (AUD)
+10  */
+11 
+12 import { parseCardinalValue } from './utils/parse-cardinal.js'
+13 import { parseCurrencyValue } from './utils/parse-currency.js'
+14 import { parseOrdinalValue } from './utils/parse-ordinal.js'
+15 import { validateOptions } from './utils/validate-options.js'
+16 
+17 // ============================================================================
+18 // Vocabulary (module-level constants)
+19 // ============================================================================
+20 
+21 const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+22 const TEENS = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen']
+23 const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety']
+24 
+25 const SCALES = [
+26   'thousand', 'million', 'billion', 'trillion', 'quadrillion',
+27   'quintillion', 'sextillion', 'septillion', 'octillion', 'nonillion',
+28   'decillion', 'undecillion', 'duodecillion', 'tredecillion', 'quattuordecillion',
+29   'quindecillion', 'sexdecillion', 'septendecillion', 'octodecillion', 'novemdecillion',
+30   'vigintillion'
+31 ]
+32 
+33 const HUNDRED = 'hundred'
+34 const ZERO = 'zero'
+35 const NEGATIVE = 'minus'
+36 const DECIMAL_SEP = 'point'
+37 
+38 // Ordinal vocabulary
+39 const ORDINAL_ONES = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth']
+40 const ORDINAL_TEENS = ['tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth', 'eighteenth', 'nineteenth']
+41 const ORDINAL_TENS = ['', '', 'twentieth', 'thirtieth', 'fortieth', 'fiftieth', 'sixtieth', 'seventieth', 'eightieth', 'ninetieth']
+42 
+43 // Currency vocabulary (Australian Dollar)
+44 const DOLLAR = 'dollar'
+45 const DOLLARS = 'dollars'
+46 const CENT = 'cent'
+47 const CENTS = 'cents'
+48 
+49 // ============================================================================
+50 // Segment Building
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:33:03Z)**_
@@ -769,6 +780,7 @@ for (let i = 1; i <= 12; i++) {
 12 → "twelfth"
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:33:10Z)**_
@@ -824,6 +836,7 @@ for (let i = 1; i <= 12; i++) {
 12 → "décimo segundo"
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:33:26Z)**_
@@ -883,7 +896,7 @@ _**User (2026-04-09 21:44:42Z)**_
 <ide_opened_file>The user opened the file /Users/leocaseiro/Sites/base-skill/.specstory/history/2026-04-09_19-42-10Z-i-want-to-make.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
 
 can you make the utlity?
-In portuguese is just add a https://www.npmjs.com/package/ordinal-pt-br
+In portuguese is just add a <https://www.npmjs.com/package/ordinal-pt-br>
 
  en:
 @naveen-bharathi/ordinal-numbers
@@ -894,6 +907,7 @@ _**Agent (claude-opus-4-6 2026-04-09 21:44:48Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants me to create a utility that handles number-to-text conversions using:
+
 - `n2words` for cardinal/ordinal word text (e.g., "seven", "seventh")
 - `ordinal-pt-br` for Portuguese ordinal suffixes (e.g., "7º")
 - `@naveen-bharathi/ordinal-numbers` for English ordinal suffixes (e.g., "7th")
@@ -918,6 +932,7 @@ Install ordinal suffix packages to test
 ```text
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:44:53Z)**_
@@ -935,6 +950,7 @@ build-numeral-round.test.ts
 build-numeral-round.ts
 types.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:44:59Z)**_
@@ -970,6 +986,7 @@ for (let i = 1; i <= 12; i++) {
 12 → "th"
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:45:03Z)**_
@@ -1005,6 +1022,7 @@ for (let i = 1; i <= 12; i++) {
 12 → "12"
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:45:07Z)**_
@@ -1023,6 +1041,7 @@ package.json
 test.js
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:45:17Z)**_
@@ -1032,54 +1051,55 @@ _**Agent (claude-opus-4-6 2026-04-09 21:45:17Z)**_
  `/tmp/n2words-test/node_modules/ordinal-pt-br/index.js`
 
 ```text
-1	'use strict'
-2	
-3	/**
-4	 * Retorna o número em sua forma ordinal por extenso
-5	 * 
-6	 * @param {Object} [opt] Parâmetro OPCIONAL que contem as opções de "maiuscula" e "genero"
-7	 * @param {string} [opt.genero=o] Usado para difinir o gênero que será aplicado ao número
-8	 * @param {boolean} [opt.maiuscula=false] Define se a string retornada tera CamelCase (true) ou será toda minúscula (false)
-9	 * @returns {string}
-10	 */
-11	function toOrdinal(opt) {
-12	    if(!Number.isInteger(this)) {
-13	        throw new Error("Não implementado para números não inteiros.")
-14	    }
-15	    if(this > 999) {
-16	        throw new Error("Não implementado para números maiores que 999.")
-17	    }
-18	    if(this < 1) {
-19	        throw new Error("Não implementado para números negativos.")
-20	    }
-21	    let g = opt ? ("genero" in opt ? opt["genero"] : "o") : "o"
-22	    let c = opt ? ("maiuscula" in opt ? opt["maiuscula"] : false) : false
-23	    let txt = ""
-24	    if (this < 1000 && this > 99) {
-25	        let t = ["", "cent", "ducent", "trecent", "quadrigent", "quingent", "sexcent",
-26	            "septigent", "octigent", "nongent"]
-27	        let n100 = Math.floor(this/100)
-28	        let l = this - (n100*100)
-29	        txt = `${t[n100]}ésim${g} ${l.toOrdinal(opt)}`
-30	    }
-31	    if (this < 100 && this > 9) {
-32	        let x = ["", "décimo", "vig", "trig", "quadrag", "quinquag", "sexag", "septuag",
-33	            "octog", "nonag"]
-34	        let n10 = Math.floor(this/10)
-35	        let l = this - (n10*10)
-36	        txt = `${x[n10] + (n10 > 1 ? `ésim${g}` : "")} ${l.toOrdinal(opt)}`
-37	    }
-38	    if(this < 10 && this > 0) {
-39	        let u = ["", "primeir", "segund", "terceir", "quart", "quint", "sext", "sétim", "oitav", "non"]
-40	        txt = u[this] + g
-41	    }
-42	    return c ? txt.replace(/((^|\s)\w)/g, (w)=>{return w.toUpperCase()}) : txt
-43	}
-44	
-45	Number.prototype.toOrdinal = toOrdinal
-46	
-47	module.exports = Number
+1 'use strict'
+2 
+3 /**
+4  * Retorna o número em sua forma ordinal por extenso
+5  * 
+6  * @param {Object} [opt] Parâmetro OPCIONAL que contem as opções de "maiuscula" e "genero"
+7  * @param {string} [opt.genero=o] Usado para difinir o gênero que será aplicado ao número
+8  * @param {boolean} [opt.maiuscula=false] Define se a string retornada tera CamelCase (true) ou será toda minúscula (false)
+9  * @returns {string}
+10  */
+11 function toOrdinal(opt) {
+12     if(!Number.isInteger(this)) {
+13         throw new Error("Não implementado para números não inteiros.")
+14     }
+15     if(this > 999) {
+16         throw new Error("Não implementado para números maiores que 999.")
+17     }
+18     if(this < 1) {
+19         throw new Error("Não implementado para números negativos.")
+20     }
+21     let g = opt ? ("genero" in opt ? opt["genero"] : "o") : "o"
+22     let c = opt ? ("maiuscula" in opt ? opt["maiuscula"] : false) : false
+23     let txt = ""
+24     if (this < 1000 && this > 99) {
+25         let t = ["", "cent", "ducent", "trecent", "quadrigent", "quingent", "sexcent",
+26             "septigent", "octigent", "nongent"]
+27         let n100 = Math.floor(this/100)
+28         let l = this - (n100*100)
+29         txt = `${t[n100]}ésim${g} ${l.toOrdinal(opt)}`
+30     }
+31     if (this < 100 && this > 9) {
+32         let x = ["", "décimo", "vig", "trig", "quadrag", "quinquag", "sexag", "septuag",
+33             "octog", "nonag"]
+34         let n10 = Math.floor(this/10)
+35         let l = this - (n10*10)
+36         txt = `${x[n10] + (n10 > 1 ? `ésim${g}` : "")} ${l.toOrdinal(opt)}`
+37     }
+38     if(this < 10 && this > 0) {
+39         let u = ["", "primeir", "segund", "terceir", "quart", "quint", "sext", "sétim", "oitav", "non"]
+40         txt = u[this] + g
+41     }
+42     return c ? txt.replace(/((^|\s)\w)/g, (w)=>{return w.toUpperCase()}) : txt
+43 }
+44 
+45 Number.prototype.toOrdinal = toOrdinal
+46 
+47 module.exports = Number
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:45:20Z)**_
@@ -1141,6 +1161,7 @@ Error: Não implementado para números negativos.
 
 Node.js v24.14.1
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:45:26Z)**_
@@ -1192,6 +1213,7 @@ Error: Não implementado para números negativos.
 
 Node.js v24.14.1
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:46:17Z)**_
@@ -1202,7 +1224,6 @@ The issue is that for 10, it does `10/10 = 1` (n10=1) and `10 - 10 = 0` (l=0), t
 For 10: n10=1, l=0. Then `txt = "décimo " + (0).toOrdinal()` — but 0 throws.
 
 Actually wait, looking at the code again:
-
 
 The logic for numbers between 10 and 99 handles compound ordinals by splitting into tens and ones, but when the ones digit is 0 (like 10, 20, 30), it tries to call `toOrdinal()` on 0, which fails since the function requires values >= 1. This is definitely a bug in the library, though `n2words/pt-PT` already has a working `toOrdinal` implementation I could potentially use instead.
 
@@ -1240,6 +1261,7 @@ for (let i = 1; i <= 9; i++) {
 9 → "nono"
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:46:20Z)**_
@@ -1249,114 +1271,115 @@ _**Agent (claude-opus-4-6 2026-04-09 21:46:20Z)**_
  `./worktrees/match-number-improvements/src/games/number-match/types.ts`
 
 ```text
-1	import type { AnswerGameConfig } from '@/components/answer-game/types';
-2	import type { ConfigField } from '@/lib/config-fields';
-3	
-4	export interface NumberMatchRound {
-5	  value: number;
-6	  /** Fluent Emoji path for object-style tiles (e.g. "fluent-emoji/red-apple.svg") */
-7	  objectImage?: string;
-8	}
-9	
-10	export interface NumberMatchConfig extends AnswerGameConfig {
-11	  component: 'NumberMatch';
-12	  mode:
-13	    | 'numeral-to-group'
-14	    | 'group-to-numeral'
-15	    | 'numeral-to-word'
-16	    | 'word-to-numeral';
-17	  /** Visual style for quantity/group tiles */
-18	  tileStyle: 'dots' | 'objects' | 'fingers';
-19	  range: { min: number; max: number };
-20	  rounds: NumberMatchRound[];
-21	}
-22	
-23	export const numberMatchConfigFields: ConfigField[] = [
-24	  {
-25	    type: 'select',
-26	    key: 'inputMethod',
-27	    label: 'Input method',
-28	    options: [
-29	      { value: 'drag', label: 'drag' },
-30	      { value: 'type', label: 'type' },
-31	      { value: 'both', label: 'both' },
-32	    ],
-33	  },
-34	  {
-35	    type: 'select',
-36	    key: 'wrongTileBehavior',
-37	    label: 'Wrong tile behaviour',
-38	    options: [
-39	      { value: 'reject', label: 'reject' },
-40	      { value: 'lock-manual', label: 'lock-manual' },
-41	      { value: 'lock-auto-eject', label: 'lock-auto-eject' },
-42	    ],
-43	  },
-44	  {
-45	    type: 'select',
-46	    key: 'mode',
-47	    label: 'Mode',
-48	    options: [
-49	      { value: 'numeral-to-group', label: 'numeral → group' },
-50	      { value: 'group-to-numeral', label: 'group → numeral' },
-51	      { value: 'numeral-to-word', label: 'numeral → word' },
-52	      { value: 'word-to-numeral', label: 'word → numeral' },
-53	    ],
-54	  },
-55	  {
-56	    type: 'select',
-57	    key: 'tileStyle',
-58	    label: 'Tile style',
-59	    options: [
-60	      { value: 'dots', label: 'dots' },
-61	      { value: 'objects', label: 'objects' },
-62	      { value: 'fingers', label: 'fingers' },
-63	    ],
-64	  },
-65	  {
-66	    type: 'select',
-67	    key: 'tileBankMode',
-68	    label: 'Tile bank mode',
-69	    options: [
-70	      { value: 'exact', label: 'exact' },
-71	      { value: 'distractors', label: 'distractors' },
-72	    ],
-73	  },
-74	  {
-75	    type: 'number',
-76	    key: 'distractorCount',
-77	    label: 'Distractor count',
-78	    min: 1,
-79	    max: 10,
-80	  },
-81	  {
-82	    type: 'number',
-83	    key: 'totalRounds',
-84	    label: 'Total rounds',
-85	    min: 1,
-86	    max: 50,
-87	  },
-88	  { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
-89	  {
-90	    type: 'nested-number',
-91	    key: 'range',
-92	    subKey: 'min',
-93	    label: 'Range min',
-94	    min: 1,
-95	    max: 100,
-96	  },
-97	  {
-98	    type: 'nested-number',
-99	    key: 'range',
-100	    subKey: 'max',
-101	    label: 'Range max',
-102	    min: 1,
-103	    max: 100,
-104	  },
-105	  { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
-106	];
+1 import type { AnswerGameConfig } from '@/components/answer-game/types';
+2 import type { ConfigField } from '@/lib/config-fields';
+3 
+4 export interface NumberMatchRound {
+5   value: number;
+6   /** Fluent Emoji path for object-style tiles (e.g. "fluent-emoji/red-apple.svg") */
+7   objectImage?: string;
+8 }
+9 
+10 export interface NumberMatchConfig extends AnswerGameConfig {
+11   component: 'NumberMatch';
+12   mode:
+13     | 'numeral-to-group'
+14     | 'group-to-numeral'
+15     | 'numeral-to-word'
+16     | 'word-to-numeral';
+17   /** Visual style for quantity/group tiles */
+18   tileStyle: 'dots' | 'objects' | 'fingers';
+19   range: { min: number; max: number };
+20   rounds: NumberMatchRound[];
+21 }
+22 
+23 export const numberMatchConfigFields: ConfigField[] = [
+24   {
+25     type: 'select',
+26     key: 'inputMethod',
+27     label: 'Input method',
+28     options: [
+29       { value: 'drag', label: 'drag' },
+30       { value: 'type', label: 'type' },
+31       { value: 'both', label: 'both' },
+32     ],
+33   },
+34   {
+35     type: 'select',
+36     key: 'wrongTileBehavior',
+37     label: 'Wrong tile behaviour',
+38     options: [
+39       { value: 'reject', label: 'reject' },
+40       { value: 'lock-manual', label: 'lock-manual' },
+41       { value: 'lock-auto-eject', label: 'lock-auto-eject' },
+42     ],
+43   },
+44   {
+45     type: 'select',
+46     key: 'mode',
+47     label: 'Mode',
+48     options: [
+49       { value: 'numeral-to-group', label: 'numeral → group' },
+50       { value: 'group-to-numeral', label: 'group → numeral' },
+51       { value: 'numeral-to-word', label: 'numeral → word' },
+52       { value: 'word-to-numeral', label: 'word → numeral' },
+53     ],
+54   },
+55   {
+56     type: 'select',
+57     key: 'tileStyle',
+58     label: 'Tile style',
+59     options: [
+60       { value: 'dots', label: 'dots' },
+61       { value: 'objects', label: 'objects' },
+62       { value: 'fingers', label: 'fingers' },
+63     ],
+64   },
+65   {
+66     type: 'select',
+67     key: 'tileBankMode',
+68     label: 'Tile bank mode',
+69     options: [
+70       { value: 'exact', label: 'exact' },
+71       { value: 'distractors', label: 'distractors' },
+72     ],
+73   },
+74   {
+75     type: 'number',
+76     key: 'distractorCount',
+77     label: 'Distractor count',
+78     min: 1,
+79     max: 10,
+80   },
+81   {
+82     type: 'number',
+83     key: 'totalRounds',
+84     label: 'Total rounds',
+85     min: 1,
+86     max: 50,
+87   },
+88   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
+89   {
+90     type: 'nested-number',
+91     key: 'range',
+92     subKey: 'min',
+93     label: 'Range min',
+94     min: 1,
+95     max: 100,
+96   },
+97   {
+98     type: 'nested-number',
+99     key: 'range',
+100     subKey: 'max',
+101     label: 'Range max',
+102     min: 1,
+103     max: 100,
+104   },
+105   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
+106 ];
 107
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:46:20Z)**_
@@ -1366,80 +1389,81 @@ _**Agent (claude-opus-4-6 2026-04-09 21:46:20Z)**_
  `./worktrees/match-number-improvements/src/games/number-match/build-numeral-round.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import type {
-3	  AnswerZone,
-4	  TileItem,
-5	} from '@/components/answer-game/types';
-6	
-7	export type NumeralBankOptions = {
-8	  tileBankMode: 'exact' | 'distractors';
-9	  distractorCount?: number;
-10	  range: { min: number; max: number };
-11	};
-12	
-13	function shuffleInPlace<T>(items: T[]): void {
-14	  for (let i = items.length - 1; i > 0; i--) {
-15	    const j = Math.floor(Math.random() * (i + 1));
-16	    [items[i], items[j]] = [items[j]!, items[i]!];
-17	  }
-18	}
-19	
-20	/** Distinct integers in [min, max] excluding `correct`, up to `count` values. */
-21	export function pickDistractorNumerals(
-22	  correct: number,
-23	  count: number,
-24	  min: number,
-25	  max: number,
-26	): number[] {
-27	  if (count <= 0 || min > max) return [];
-28	  const pool: number[] = [];
-29	  for (let v = min; v <= max; v++) {
-30	    if (v !== correct) pool.push(v);
-31	  }
-32	  if (pool.length === 0) return [];
-33	  shuffleInPlace(pool);
-34	  return pool.slice(0, Math.min(count, pool.length));
-35	}
-36	
-37	/**
-38	 * One answer zone (expected numeral) plus bank tiles: correct only, or correct + distractors.
-39	 */
-40	export function buildNumeralRound(
-41	  value: number,
-42	  bank: NumeralBankOptions,
-43	): { tiles: TileItem[]; zones: AnswerZone[] } {
-44	  const zone: AnswerZone = {
-45	    id: nanoid(),
-46	    index: 0,
-47	    expectedValue: String(value),
-48	    placedTileId: null,
-49	    isWrong: false,
-50	    isLocked: false,
-51	  };
-52	
-53	  const numerals: number[] = [value];
-54	  if (bank.tileBankMode === 'distractors') {
-55	    const extra = pickDistractorNumerals(
-56	      value,
-57	      bank.distractorCount ?? 0,
-58	      bank.range.min,
-59	      bank.range.max,
-60	    );
-61	    numerals.push(...extra);
-62	  }
-63	
-64	  shuffleInPlace(numerals);
-65	  const tiles: TileItem[] = numerals.map((n) => ({
-66	    id: nanoid(),
-67	    label: String(n),
-68	    value: String(n),
-69	  }));
-70	
-71	  return { tiles, zones: [zone] };
-72	}
+1 import { nanoid } from 'nanoid';
+2 import type {
+3   AnswerZone,
+4   TileItem,
+5 } from '@/components/answer-game/types';
+6 
+7 export type NumeralBankOptions = {
+8   tileBankMode: 'exact' | 'distractors';
+9   distractorCount?: number;
+10   range: { min: number; max: number };
+11 };
+12 
+13 function shuffleInPlace<T>(items: T[]): void {
+14   for (let i = items.length - 1; i > 0; i--) {
+15     const j = Math.floor(Math.random() * (i + 1));
+16     [items[i], items[j]] = [items[j]!, items[i]!];
+17   }
+18 }
+19 
+20 /** Distinct integers in [min, max] excluding `correct`, up to `count` values. */
+21 export function pickDistractorNumerals(
+22   correct: number,
+23   count: number,
+24   min: number,
+25   max: number,
+26 ): number[] {
+27   if (count <= 0 || min > max) return [];
+28   const pool: number[] = [];
+29   for (let v = min; v <= max; v++) {
+30     if (v !== correct) pool.push(v);
+31   }
+32   if (pool.length === 0) return [];
+33   shuffleInPlace(pool);
+34   return pool.slice(0, Math.min(count, pool.length));
+35 }
+36 
+37 /**
+38  * One answer zone (expected numeral) plus bank tiles: correct only, or correct + distractors.
+39  */
+40 export function buildNumeralRound(
+41   value: number,
+42   bank: NumeralBankOptions,
+43 ): { tiles: TileItem[]; zones: AnswerZone[] } {
+44   const zone: AnswerZone = {
+45     id: nanoid(),
+46     index: 0,
+47     expectedValue: String(value),
+48     placedTileId: null,
+49     isWrong: false,
+50     isLocked: false,
+51   };
+52 
+53   const numerals: number[] = [value];
+54   if (bank.tileBankMode === 'distractors') {
+55     const extra = pickDistractorNumerals(
+56       value,
+57       bank.distractorCount ?? 0,
+58       bank.range.min,
+59       bank.range.max,
+60     );
+61     numerals.push(...extra);
+62   }
+63 
+64   shuffleInPlace(numerals);
+65   const tiles: TileItem[] = numerals.map((n) => ({
+66     id: nanoid(),
+67     label: String(n),
+68     value: String(n),
+69   }));
+70 
+71   return { tiles, zones: [zone] };
+72 }
 73
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:46:52Z)**_
@@ -1450,7 +1474,6 @@ Now I have a good understanding of the codebase and what's needed. Let me also c
 The `ordinal-pt-br` package has a bug — it crashes for multiples of 10 (10, 20, 30...) because when `this=10`, `l=0`, and `(0).toOrdinal()` fails with "not implemented for negative numbers" (the check is `this < 1`). Also, it mutates `Number.prototype` which is bad practice.
 
 However, `n2words/pt-PT` already provides `toOrdinal` that works fine for 1-12. So we could:
-
 
 1. Use `n2words` for all word forms (cardinal and ordinal) in both locales
 2. Use `@naveen-bharathi/ordinal-numbers` for EN ordinal suffixes ("1st", "2nd", "7th")
@@ -1479,6 +1502,7 @@ worktrees/match-number-improvements/src/games/number-match/NumberMatch/NumberMat
 worktrees/match-number-improvements/src/routes/$locale/_app/index.tsx:65:  const { locale } = useParams({ from: '/$locale' });
 worktrees/match-number-improvements/src/routes/$locale/_app/settings.tsx:27:  const { locale } = useParams({ from: '/$locale' });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:46:52Z)**_
@@ -1501,6 +1525,7 @@ worktrees/match-number-improvements/src/routeTree.gen.ts:103:  '/$locale/parent/
 
 [Showing results with pagination = limit: 10]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:46:58Z)**_
@@ -1528,6 +1553,7 @@ worktrees/match-number-improvements/src/lib/i18n/i18n.ts:5:import enGames from '
 
 [Showing results with pagination = limit: 15]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:47:11Z)**_
@@ -1564,8 +1590,6 @@ why do we need the suffix util if n2words can handle?
 
 _**Agent (claude-opus-4-6 2026-04-09 21:49:31Z)**_
 
-
-
 You're right — we don't. `n2words` already handles everything:
 
 | Need | Function | Example (en-AU) | Example (pt-PT) |
@@ -1576,6 +1600,7 @@ You're right — we don't. `n2words` already handles everything:
 The only thing `n2words` doesn't give is the numeric ordinal suffix format (`"7th"` / `"7º"`), but that's trivial inline logic — no package needed.
 
 So the utility just needs:
+
 - `n2words/en-AU` and `n2words/pt-PT`
 - A locale map (`'en' → en-AU`, `'pt-BR' → pt-PT`)
 - Exported `toCardinalText(n, locale)` and `toOrdinalText(n, locale)`
@@ -1597,6 +1622,7 @@ _**Agent (claude-opus-4-6 2026-04-09 21:50:09Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants me to:
+
 1. Update the spec to document that `n2words` is the only dependency needed (no `ordinal-pt-br` or `@naveen-bharathi/ordinal-numbers`)
 2. Create a separate plan for implementing the number conversion utility
 
@@ -1614,37 +1640,38 @@ _**Agent (claude-opus-4-6 2026-04-09 21:50:11Z)**_
  `./worktrees/match-number-improvements/docs/superpowers/specs/2026-04-10-match-number-improvements-design.md`
 
 ```text
-83	
-84	| Mode                      | Question  | Answer    | Conversion   |
-85	| ------------------------- | --------- | --------- | ------------ |
-86	| `numeral-to-group`        | 7         | Domino    | —            |
-87	| `group-to-numeral`        | Dots      | 7         | —            |
-88	| `cardinal-number-to-text` | 7         | "seven"   | `toCardinal` |
-89	| `cardinal-text-to-number` | "seven"   | 7         | `toCardinal` |
-90	| `ordinal-number-to-text`  | "7th"     | "seventh" | `toOrdinal`  |
-91	| `ordinal-text-to-number`  | "seventh" | "7th"     | `toOrdinal`  |
-92	| `cardinal-to-ordinal`     | "seven"   | "seventh" | both         |
-93	| `ordinal-to-cardinal`     | "seventh" | "seven"   | both         |
-94	
-95	**Dependency:** `n2words` — tree-shakeable per-locale imports, i18n, zero deps.
-96	Provides `toCardinal` and `toOrdinal` per locale.
-97	
-98	**Data flow:** Rounds are always generated with numeric values. At render time,
-99	`n2words` converts to display strings based on the mode. Matching logic always
-100	compares the underlying numeric `value`, never text strings.
-101	
-102	**Locale:** Sourced from the existing `useParams({ from: '/$locale' })` router
-103	param. Map the app locale to `n2words` locale import (e.g. `en` → `en-AU`,
-104	`pt` → `pt-PT`).
-105	
-106	**Word tile UI:**
-107	
-108	- Square tiles with `min-width: 80px`, height 80px
-109	- Font size scales down for longer words
-110	- Long words break at hyphens across two lines
-111	- Slots and bank holes match using `min-width`
+83 
+84 | Mode                      | Question  | Answer    | Conversion   |
+85 | ------------------------- | --------- | --------- | ------------ |
+86 | `numeral-to-group`        | 7         | Domino    | —            |
+87 | `group-to-numeral`        | Dots      | 7         | —            |
+88 | `cardinal-number-to-text` | 7         | "seven"   | `toCardinal` |
+89 | `cardinal-text-to-number` | "seven"   | 7         | `toCardinal` |
+90 | `ordinal-number-to-text`  | "7th"     | "seventh" | `toOrdinal`  |
+91 | `ordinal-text-to-number`  | "seventh" | "7th"     | `toOrdinal`  |
+92 | `cardinal-to-ordinal`     | "seven"   | "seventh" | both         |
+93 | `ordinal-to-cardinal`     | "seventh" | "seven"   | both         |
+94 
+95 **Dependency:** `n2words` — tree-shakeable per-locale imports, i18n, zero deps.
+96 Provides `toCardinal` and `toOrdinal` per locale.
+97 
+98 **Data flow:** Rounds are always generated with numeric values. At render time,
+99 `n2words` converts to display strings based on the mode. Matching logic always
+100 compares the underlying numeric `value`, never text strings.
+101 
+102 **Locale:** Sourced from the existing `useParams({ from: '/$locale' })` router
+103 param. Map the app locale to `n2words` locale import (e.g. `en` → `en-AU`,
+104 `pt` → `pt-PT`).
+105 
+106 **Word tile UI:**
+107 
+108 - Square tiles with `min-width: 80px`, height 80px
+109 - Font size scales down for longer words
+110 - Long words break at hyphens across two lines
+111 - Slots and bank holes match using `min-width`
 112
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:50:20Z)**_
@@ -1655,6 +1682,7 @@ _**Agent (claude-opus-4-6 2026-04-09 21:50:20Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/match-number-improvements/docs/superpowers/specs/2026-04-10-match-number-improvements-design.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:50:24Z)**_
@@ -1668,32 +1696,33 @@ _**Agent (claude-opus-4-6 2026-04-09 21:50:25Z)**_
  `./worktrees/match-number-improvements/docs/superpowers/specs/2026-04-10-match-number-improvements-design.md`
 
 ```text
-185	
-186	Both reuse the existing `DominoTile` / `DiceFace` components.
-187	
-188	## Files Affected
-189	
-190	- `src/games/number-match/types.ts` — mode type expansion, config field options
-191	- `src/games/number-match/NumberMatch/NumberMatch.tsx` — rendering logic,
-192	  slot sizing, mode gating
-193	- `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` — domino
-194	  overhaul, tile rendering, hover preview, `tilesShowGroup` prop
-195	- `src/games/number-match/build-numeral-round.ts` — label generation for
-196	  word/ordinal modes
-197	- `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx` — countable
-198	  dots, per-dot tap, TTS
-199	- `src/games/number-match/NumberMatch/NumberMatch.stories.tsx` — new stories
-200	  for all modes
-201	- `src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx` — updated
-202	  stories
-203	- `package.json` — add `n2words` dependency
-204	
-205	## Out of Scope
-206	
-207	- `objects` and `fingers` tile styles — kept as stubs
-208	- Drag preview ghost image (the floating tile during drag) — separate concern
+185 
+186 Both reuse the existing `DominoTile` / `DiceFace` components.
+187 
+188 ## Files Affected
+189 
+190 - `src/games/number-match/types.ts` — mode type expansion, config field options
+191 - `src/games/number-match/NumberMatch/NumberMatch.tsx` — rendering logic,
+192   slot sizing, mode gating
+193 - `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` — domino
+194   overhaul, tile rendering, hover preview, `tilesShowGroup` prop
+195 - `src/games/number-match/build-numeral-round.ts` — label generation for
+196   word/ordinal modes
+197 - `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx` — countable
+198   dots, per-dot tap, TTS
+199 - `src/games/number-match/NumberMatch/NumberMatch.stories.tsx` — new stories
+200   for all modes
+201 - `src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx` — updated
+202   stories
+203 - `package.json` — add `n2words` dependency
+204 
+205 ## Out of Scope
+206 
+207 - `objects` and `fingers` tile styles — kept as stubs
+208 - Drag preview ghost image (the floating tile during drag) — separate concern
 209
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:50:29Z)**_
@@ -1704,6 +1733,7 @@ _**Agent (claude-opus-4-6 2026-04-09 21:50:29Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/match-number-improvements/docs/superpowers/specs/2026-04-10-match-number-improvements-design.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:50:34Z)**_
@@ -1725,6 +1755,7 @@ scope.md 4ms (unchanged)
 src/lib/game-event-bus.md 1ms (unchanged)
 Done in 2.56s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:50:40Z)**_
@@ -1740,6 +1771,7 @@ _**Agent (claude-opus-4-6 2026-04-09 21:50:41Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:50:44Z)**_
@@ -1754,6 +1786,7 @@ List superpowers docs directory
 plans
 specs
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:50:48Z)**_
@@ -1790,6 +1823,7 @@ List plans directory
 2026-04-08-sort-numbers-skip-config.md
 2026-04-09-level-system.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:50:51Z)**_
@@ -1799,47 +1833,48 @@ _**Agent (claude-opus-4-6 2026-04-09 21:50:51Z)**_
  `./worktrees/match-number-improvements/docs/superpowers/plans/2026-04-09-level-system.md`
 
 ```text
-1	# Level System Implementation Plan
-2	
-3	> **For agentic workers:** REQUIRED SUB-SKILL: Use
-4	> superpowers:subagent-driven-development (recommended) or
-5	> superpowers:executing-plans to implement this plan task-by-task. Steps use
-6	> checkbox (`- [ ]`) syntax for tracking.
-7	
-8	**Goal:** Add a reusable level progression system to AnswerGame, with
-9	SortNumbers as the first adopter.
-10	
-11	**Architecture:** Extend `AnswerGameConfig` with an optional `levelMode` field.
-12	When present, the reducer uses a new `'level-complete'` phase between levels
-13	instead of going straight to `'game-over'`. A new `LevelCompleteOverlay` handles
-14	the "Next Level" / "I'm Done" UX. Each game provides a `generateNextLevel`
-15	callback that produces the next level's tiles and zones.
-16	
-17	**Tech Stack:** React, TypeScript, Vitest, Storybook, canvas-confetti
-18	
-19	**Spec:**
-20	[docs/superpowers/specs/2026-04-09-level-system-design.md](../specs/2026-04-09-level-system-design.md)
-21	
-22	---
-23	
-24	## File Map
-25	
-26	### New files
-27	
-28	- `src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.tsx` —
-29	  overlay shown on level complete
-30	- `src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx` —
-31	  Storybook stories
-32	- `src/games/sort-numbers/sort-numbers-level-generator.ts` — `generateNextLevel`
-33	  for SortNumbers
-34	- `src/games/sort-numbers/sort-numbers-level-generator.test.ts` — tests for
-35	  level generator
-36	- `src/games/level-system.mdx` — docs page for the level system
-37	
-38	### Modified files
-39	
-40	- `src/components/answer-game/types.ts` — add `levelMode` to config,
+1 # Level System Implementation Plan
+2 
+3 > **For agentic workers:** REQUIRED SUB-SKILL: Use
+4 > superpowers:subagent-driven-development (recommended) or
+5 > superpowers:executing-plans to implement this plan task-by-task. Steps use
+6 > checkbox (`- [ ]`) syntax for tracking.
+7 
+8 **Goal:** Add a reusable level progression system to AnswerGame, with
+9 SortNumbers as the first adopter.
+10 
+11 **Architecture:** Extend `AnswerGameConfig` with an optional `levelMode` field.
+12 When present, the reducer uses a new `'level-complete'` phase between levels
+13 instead of going straight to `'game-over'`. A new `LevelCompleteOverlay` handles
+14 the "Next Level" / "I'm Done" UX. Each game provides a `generateNextLevel`
+15 callback that produces the next level's tiles and zones.
+16 
+17 **Tech Stack:** React, TypeScript, Vitest, Storybook, canvas-confetti
+18 
+19 **Spec:**
+20 [docs/superpowers/specs/2026-04-09-level-system-design.md](../specs/2026-04-09-level-system-design.md)
+21 
+22 ---
+23 
+24 ## File Map
+25 
+26 ### New files
+27 
+28 - `src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.tsx` —
+29   overlay shown on level complete
+30 - `src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.stories.tsx` —
+31   Storybook stories
+32 - `src/games/sort-numbers/sort-numbers-level-generator.ts` — `generateNextLevel`
+33   for SortNumbers
+34 - `src/games/sort-numbers/sort-numbers-level-generator.test.ts` — tests for
+35   level generator
+36 - `src/games/level-system.mdx` — docs page for the level system
+37 
+38 ### Modified files
+39 
+40 - `src/components/answer-game/types.ts` — add `levelMode` to config,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:50:54Z)**_
@@ -1948,6 +1983,7 @@ const toOrdinalNumber: (n: number, locale: AppLocale) => string;
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/match-number-improvements/docs/superpowers/plans/2026-04-10-number-words-utility.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:51:20Z)**_
@@ -1965,6 +2001,7 @@ scope.md 4ms (unchanged)
 src/lib/game-event-bus.md 1ms (unchanged)
 Done in 2.28s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-09 21:51:32Z)**_
@@ -1972,10 +2009,12 @@ _**Agent (claude-opus-4-6 2026-04-09 21:51:32Z)**_
 Done. Here's what I did:
 
 **Spec updated** — [2026-04-10-match-number-improvements-design.md](worktrees/match-number-improvements/docs/superpowers/specs/2026-04-10-match-number-improvements-design.md):
+
 - Replaced the generic `n2words` dependency note with a detailed utility module spec (`number-words.ts`) documenting all three functions, the locale map, and that no extra ordinal suffix packages are needed
 - Added `number-words.ts` and `number-words.test.ts` to Files Affected
 
 **Plan created** — [2026-04-10-number-words-utility.md](worktrees/match-number-improvements/docs/superpowers/plans/2026-04-10-number-words-utility.md):
+
 - 4 steps: install `n2words`, create utility, create tests, verify
 - API: `toCardinalText`, `toOrdinalText`, `toOrdinalNumber` — all take `(n, locale)`
 - Full test assertions for both locales across 1–12
@@ -1994,10 +2033,10 @@ _**Agent (claude-opus-4-6 2026-04-09 21:53:19Z)**_
 The user wants a markdown prompt they can use in a future session to continue writing implementation plans for the remaining sections of the match-number-improvements spec. Let me review the spec to identify what sections still need plans.
 
 From the spec:
+
 1. Domino Tile Overhaul — needs a plan
 2. Mode Bug Fix + New Modes — partially covered by the number-words utility plan, but the broader mode implementation (rendering gate, types update, word tile UI) still needs a plan
 3. Countable Dots on DotGroupQuestion — needs a plan
-
 
 4. Hover Preview Fix — needs a plan
 

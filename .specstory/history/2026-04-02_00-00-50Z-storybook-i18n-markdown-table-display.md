@@ -23,8 +23,6 @@ _**Agent (composer-2)**_
 
 Investigating how Storybook loads `docs/i18n.md` and why Markdown tables aren't rendering. Checking the doc file format and Storybook's Markdown pipeline.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -44,7 +42,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -54,6 +51,7 @@ Parameters:
   "pattern": "^\\|"
 }
 ```
+
 Additional data:
 
 ```json
@@ -72,8 +70,8 @@ Additional data:
   "totalMatches": 18
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -139,7 +137,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -150,6 +147,7 @@ Parameters:
   "pattern": "i18n|remark|gfm|mdx"
 }
 ```
+
 Additional data:
 
 ```json
@@ -244,8 +242,8 @@ Additional data:
   "totalMatches": 43
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -261,7 +259,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -271,6 +268,7 @@ Parameters:
   "pattern": "i18n\\.md|docs/i18n"
 }
 ```
+
 Additional data:
 
 ```json
@@ -284,8 +282,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -367,7 +365,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Investigating MDX parsing**
 
-The MDX parser treats `|` at line start specially, which may cause issues with the markdown table formatting in `i18n.mdx`. The MDX parser may break on pipe tables when JSX is present, and blank lines around markdown blocks are required in MDX 2+. Storybook's MDX compiler likely lacks remark-gfm, causing GFM tables to fail in MDX 2+. 
+The MDX parser treats `|` at line start specially, which may cause issues with the markdown table formatting in `i18n.mdx`. The MDX parser may break on pipe tables when JSX is present, and blank lines around markdown blocks are required in MDX 2+. Storybook's MDX compiler likely lacks remark-gfm, causing GFM tables to fail in MDX 2+.
 
 **Configuring MDX parser**
 
@@ -379,7 +377,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -390,6 +387,7 @@ Parameters:
   "pattern": "remarkGfm|remark-gfm|gfm"
 }
 ```
+
 Additional data:
 
 ```json
@@ -403,8 +401,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -420,7 +418,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -431,6 +428,7 @@ Parameters:
   "pattern": "remark-gfm|remarkGfm"
 }
 ```
+
 Additional data:
 
 ```json
@@ -444,8 +442,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -477,7 +475,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -487,6 +484,7 @@ Parameters:
   "pattern": "gfm"
 }
 ```
+
 Additional data:
 
 ```json
@@ -500,8 +498,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -602,7 +600,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-resolve-library-id**</summary>
 
-
 Parameters:
 
 ```json
@@ -616,6 +613,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -623,6 +621,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -630,8 +629,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"Available Libraries:\\n\\n- Title: Storybook\\n- Context7-compatible library ID: /storybookjs/storybook\\n- Description: Storybook is a frontend workshop for building UI components and pages in isolation, used by thousands of teams for development, testing, and documentation.\\n- Code Snippets: 4302\\n- Source Reputation: High\\n- Benchmark Score: 69.07\\n- Versions: v9.0.15, v8_6_14, v6_5_9, v10.2.9\\n----------\\n- Title: Storybook\\n- Context7-compatible library ID: /websites/storybook_js\\n- Description: Storybook is a frontend workshop for building UI components and pages in isolation, used for UI development, testing, and documentation.\\n- Code Snippets: 5561\\n- Source Reputation: High\\n- Benchmark Score: 83.98\\n----------\\n- Title: Storybook\\n- Context7-compatible library ID: /storybookjs/web\\n- Description: The main website and documentation for Storybook, built with Next.js, Tailwind, Turborepo, and Storybook.\\n- Code Snippets: 77\\n- Source Reputation: High\\n- Benchmark Score: 29.43\\n----------\\n- Title: Storybook React Native\\n- Context7-compatible library ID: /storybookjs/react-native\\n- Description: Storybook for React Native allows you to design and develop individual React Native components without running your entire application.\\n- Code Snippets: 263\\n- Source Reputation: High\\n- Benchmark Score: 68.76\\n- Versions: v9.1.4\\n----------\\n- Title: Nuxt Storybook\\n- Context7-compatible library ID: /nuxt-modules/storybook\\n- Description: Integrate Storybook into your Nuxt application with zero configuration, offering features like a Storybook Terminal and Devtools tab.\\n- Code Snippets: 46\\n- Source Reputation: Low\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -647,7 +646,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-query-docs**</summary>
 
-
 Parameters:
 
 ```json
@@ -661,6 +659,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -668,6 +667,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -675,8 +675,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"### Configure Storybook Web Components with MDX Docs and remark-gfm\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/storybook-main-config-remark-options.md\\n\\nSets up Storybook main configuration file for web-components-vite framework with MDX addon and remark-gfm plugin for enhanced markdown rendering. This configuration enables GitHub Flavored Markdown features in MDX documentation files and loads story files from the src directory.\\n\\n&#96;&#96;&#96;javascript\\nimport { defineMain } from '@storybook/web-components-vite/node';\\n\\nimport remarkGfm from 'remark-gfm';\\n\\nexport default defineMain({\\n  framework: '@storybook/web-components-vite',\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],\\n  addons: [\\n    {\\n      name: '@storybook/addon-docs',\\n      options: {\\n        mdxPluginOptions: {\\n          mdxCompileOptions: {\\n            remarkPlugins: [remarkGfm]\\n          }\\n        }\\n      }\\n    }\\n  ]\\n});\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure Storybook main.js with addon-docs and remark-gfm\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/storybook-main-config-remark-options.md\\n\\nSets up Storybook configuration with framework specification, story file patterns, and addon-docs with MDX plugin options including remark-gfm for enhanced markdown rendering. Supports both CSF 3 and CSF Next formats across JavaScript and TypeScript.\\n\\n&#96;&#96;&#96;js\\nimport remarkGfm from 'remark-gfm';\\n\\nexport default {\\n  framework: '@storybook/your-framework',\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],\\n  addons: [\\n    {\\n      name: '@storybook/addon-docs',\\n      options: {\\n        mdxPluginOptions: {\\n          mdxCompileOptions: {\\n            remarkPlugins: [remarkGfm],\\n          },\\n        },\\n      },\\n    },\\n  ],\\n};\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure Storybook CSF Next with defineMain for Web Components\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/_snippets/storybook-main-config-remark-options.md\\n\\nCSF Next format configuration using defineMain for Web Components-vite framework. Configures @storybook/web-components-vite framework, story patterns, and addon-docs with remark-gfm for markdown enhancement.\\n\\n&#96;&#96;&#96;ts\\nimport { defineMain } from '@storybook/web-components-vite/node';\\nimport remarkGfm from 'remark-gfm';\\n\\nexport default defineMain({\\n  framework: '@storybook/web-components-vite',\\n  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],\\n  addons: [\\n    {\\n      name: '@storybook/addon-docs',\\n      options: {\\n        mdxPluginOptions: {\\n          mdxCompileOptions: {\\n            remarkPlugins: [remarkGfm],\\n          },\\n        },\\n      },\\n    },\\n  ],\\n});\\n&#96;&#96;&#96;\\n\\n### Troubleshooting \u003e Markdown tables aren't rendering correctly\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/writing-docs/mdx.mdx\\n\\nIf you're extending your documentation to include specific features like tables or footnotes, you may encounter rendering issues with the current MDX version supported by Storybook. To resolve this, enable the &#96;remark-gfm&#96; plugin in your configuration file (&#96;.storybook/main.js|ts&#96;). Note that the &#96;remark-gfm&#96; package is not included by default with Storybook and must be installed separately as a development dependency.\\n\\n--------------------------------\\n\\n### MDX \u003e Anatomy of MDX \u003e Markdown Support\\n\\nSource: https://github.com/storybookjs/storybook/blob/v10.2.9/docs/writing-docs/mdx.mdx\\n\\nMDX supports standard markdown ([\\\"commonmark\\\"](https://commonmark.org/)) by default and can be extended to support [GitHub Flavored Markdown (GFM)](https://github.github.com/gfm/) and other extensions (see the [Troubleshooting section](#troubleshooting) to learn more about some of the current limitations).\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -697,8 +697,6 @@ _**Agent (composer-2)**_
 
 Identifying the issue: Storybook's MDX uses CommonMark by default; GFM tables require `remark-gfm`. Official docs confirm. Creating a worktree per project rules, then adding `remark-gfm` and configuring `@storybook/addon-docs`.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -713,6 +711,7 @@ HEAD is now at 3856a73 chore(yarn): set correct node version on package.json
 Preparing worktree (new branch 'fix/storybook-mdx-tables')
 
 ```
+
 </details>
 </tool-use>
 
@@ -792,6 +791,7 @@ warning Workspaces can only be enabled in private projects.
 warning Workspaces can only be enabled in private projects.
 
 ```
+
 </details>
 </tool-use>
 
@@ -1026,6 +1026,7 @@ $ storybook build
 Done in 9.84s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -1040,7 +1041,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -1050,6 +1050,7 @@ Parameters:
   "pattern": "\u003ctable|thead"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1068,8 +1069,8 @@ Additional data:
   "totalMatches": 3
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1085,7 +1086,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **read_lints**</summary>
 
-
 Parameters:
 
 ```json
@@ -1095,6 +1095,7 @@ Parameters:
   ]
 }
 ```
+
 Result:
 
 ```json
@@ -1106,8 +1107,8 @@ Result:
   ]
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1138,9 +1139,9 @@ markdown tables render as HTML instead of collapsed plain text."
 On branch fix/storybook-mdx-tables
 Changes to be committed:
   (use "git restore --staged &lt;file&gt;..." to unstage)
-	modified:   .storybook/main.ts
-	modified:   package.json
-	modified:   yarn.lock
+ modified:   .storybook/main.ts
+ modified:   package.json
+ modified:   yarn.lock
 
 [fix/storybook-mdx-tables 98eb7d7] fix(storybook): enable GFM tables in MDX with remark-gfm
  3 files changed, 338 insertions(+), 7 deletions(-)
@@ -1215,6 +1216,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 2.48s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -1308,19 +1310,17 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating storybook config**
 
-I'm extending Storybook MDX configuration to include remark-directive, remark-frontmatter, remark-math, rehype-format, rehype-raw, and rehype-sanitize plugins. I'm installing remark-directive, remark-frontmatter, remark-math, rehype-format, rehype-raw, and rehype-sanitize as dev dependencies. 
+I'm extending Storybook MDX configuration to include remark-directive, remark-frontmatter, remark-math, rehype-format, rehype-raw, and rehype-sanitize plugins. I'm installing remark-directive, remark-frontmatter, remark-math, rehype-format, rehype-raw, and rehype-sanitize as dev dependencies.
 
-I'm adding rehype-katex and rehype-format to the rehype plugins for proper rendering. I'm reordering the rehype plugins to follow the unified ecosystem conventions: rehype-raw first, then rehype-sanitize, then rehype-format. I'm adding rehype-katex for math rendering support in Storybook. 
+I'm adding rehype-katex and rehype-format to the rehype plugins for proper rendering. I'm reordering the rehype plugins to follow the unified ecosystem conventions: rehype-raw first, then rehype-sanitize, then rehype-format. I'm adding rehype-katex for math rendering support in Storybook.
 
-I'm adding remark-math and rehype-katex to support math rendering in Storybook. I'm configuring rehype-katex as a rehype plugin for HTML rendering in Storybook. 
+I'm adding remark-math and rehype-katex to support math rendering in Storybook. I'm configuring rehype-katex as a rehype plugin for HTML rendering in Storybook.
 
 I'm adjusting the rehype plugin order to place rehype-katex between rehypeRaw and rehypeSanitize for proper math rendering. I'm adding `rehype-katex` as a devDependency and including it in rehypePlugins for complete math rendering. </details></think>
 
 _**Agent (composer-2)**_
 
 Adding the requested remark/rehype plugins to Storybook's MDX config. Checking the repo state and Storybook's expected plugin options.
-
-
 
 _**Agent (composer-2)**_
 
@@ -1341,7 +1341,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -1351,6 +1350,7 @@ Parameters:
   "pattern": "remark-gfm"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1364,8 +1364,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1380,19 +1380,19 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Creating feature worktree**
 
-I'm creating a new worktree for the remark-gfm feature branch per CLAUDE.md instructions. 
+I'm creating a new worktree for the remark-gfm feature branch per CLAUDE.md instructions.
 
 **Adding math support**
 
-I'm adding rehype-katex to handle math rendering in the rehype pipeline. I'm testing the MDX build to ensure remark-math works correctly with the rehype pipeline. 
+I'm adding rehype-katex to handle math rendering in the rehype pipeline. I'm testing the MDX build to ensure remark-math works correctly with the rehype pipeline.
 
 **Testing MDX build**
 
-I'm adjusting the rehype plugin order to ensure math renders correctly in the HTML output. 
+I'm adjusting the rehype plugin order to ensure math renders correctly in the HTML output.
 
 **Adjusting rehype plugins**
 
-I'm adjusting the rehype plugin order to prevent custom directive tags from being stripped by rehype-sanitize. I'm adding rehype-katex to the rehype chain between raw and sanitize to fix broken math rendering. I'm removing rehype-katex and only adding what the user requested. I'm adding rehype-raw, rehype-sanitize, and rehype-format with merged schema for raw HTML support. 
+I'm adjusting the rehype plugin order to prevent custom directive tags from being stripped by rehype-sanitize. I'm adding rehype-katex to the rehype chain between raw and sanitize to fix broken math rendering. I'm removing rehype-katex and only adding what the user requested. I'm adding rehype-raw, rehype-sanitize, and rehype-format with merged schema for raw HTML support.
 
 **Adding rehype plugins**
 
@@ -1401,8 +1401,6 @@ I'm installing remark-gfm, remark-math, and rehype-sanitize with rehype-raw for 
 _**Agent (composer-2)**_
 
 Creating a worktree and adding the requested plugins with a safe rehype order (`rehype-raw` → `rehype-sanitize` → `rehype-format`).
-
-
 
 _**Agent (composer-2)**_
 
@@ -1418,6 +1416,7 @@ HEAD is now at 3856a73 chore(yarn): set correct node version on package.json
 Preparing worktree (new branch 'feat/storybook-mdx-plugins')
 
 ```
+
 </details>
 </tool-use>
 
@@ -1529,6 +1528,7 @@ warning Workspaces can only be enabled in private projects.
 warning Workspaces can only be enabled in private projects.
 
 ```
+
 </details>
 </tool-use>
 
@@ -1664,6 +1664,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -1704,7 +1705,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -1715,6 +1715,7 @@ Parameters:
   "pattern": "mdxFlowExpression|passThrough"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1733,8 +1734,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1763,7 +1764,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -1774,6 +1774,7 @@ Parameters:
   "pattern": "mdxFlowExpression|mdxJsxFlowElement|mdxTextExpression"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1796,8 +1797,8 @@ Additional data:
   "totalMatches": 4
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1836,8 +1837,6 @@ _**Agent (composer-2)**_
 _**Agent (composer-2)**_
 
 Configuring `rehype-raw` with MDX `passThrough` node types so it doesn't try to parse MDX expressions as HTML.
-
-
 
 _**Agent (composer-2)**_
 
@@ -2047,6 +2046,7 @@ $ storybook build
 Done in 7.10s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2068,6 +2068,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-storybook-mdx-plugins && es
 (eval):1: command not found: eslint
 
 ```
+
 </details>
 </tool-use>
 
@@ -2091,6 +2092,7 @@ $ /Users/leocaseiro/Sites/base-skill/worktrees/feat-storybook-mdx-plugins/node_m
 Done in 4.22s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2192,6 +2194,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 2.48s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2269,19 +2272,16 @@ I merged botk worktrees, but is ot working still.
 Use the current master folder and branch to fix those
 
 For the code present, we get this error:
+
 ```
 'rehypeFormat' is declared but its value is never read.
 ```
-Fix it, verify, and then give a concise explanation. @.storybook/main.ts:1-3 
+
+Fix it, verify, and then give a concise explanation. @.storybook/main.ts:1-3
 
 ---
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2298,10 +2298,7 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
 Restoring the `@storybook/addon-docs` MDX options lost during the merge — imports exist but the addon config was reverted to a string, leaving those imports unused.
-
-
 
 _**Agent (composer-2)**_
 
@@ -2319,11 +2316,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3875,6 +3867,7 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 error Command failed with exit code 2.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3884,11 +3877,6 @@ error Command failed with exit code 2.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3904,11 +3892,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4090,6 +4073,7 @@ $ storybook build
 Done in 7.47s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -4100,17 +4084,11 @@ Done in 7.47s.
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="read_lints">
 <details>
 <summary>Tool use: **read_lints**</summary>
-
 
 Parameters:
 
@@ -4121,6 +4099,7 @@ Parameters:
   ]
 }
 ```
+
 Result:
 
 ```json
@@ -4132,8 +4111,8 @@ Result:
   ]
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4145,21 +4124,23 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
 Here’s what was wrong and what changed.
 
 ### Fix
-After the merge, `@storybook/addon-docs` was only listed as the string ` '@storybook/addon-docs'`, so the **whole `mdxPluginOptions` block** (remark/rehype plugins) was gone. The imports stayed, so TypeScript correctly reported that **`rehypeFormat` (and the other plugins) were never used**.
+
+After the merge, `@storybook/addon-docs` was only listed as the string `'@storybook/addon-docs'`, so the **whole `mdxPluginOptions` block** (remark/rehype plugins) was gone. The imports stayed, so TypeScript correctly reported that **`rehypeFormat` (and the other plugins) were never used**.
 
 `main.ts` is restored so `addon-docs` is the **object form** again, with `remarkPlugins` and `rehypePlugins` including `rehypeFormat` as the last rehype step.
 
 ### Verification
+
 - `yarn eslint .storybook/main.ts --max-warnings 0` — pass  
 - `yarn build-storybook` — pass  
 
 `yarn typecheck` still fails because **`tsconfig` type-checks files under `worktrees/`** (duplicate `node_modules` / `@types/react`), which is separate from this Storybook config fix.
 
 ### Summary
+
 **Merge conflict / partial merge dropped the addon-docs options while leaving the imports.** Wiring `rehypeFormat` back into `rehypePlugins` fixes the unused import and restores MDX processing (tables, GFM, etc.).
 
 ---
@@ -4179,10 +4160,7 @@ I'm checking .storybook/main.ts for mdxPluginOptions and investigating why table
 
 _**Agent (composer-2)**_
 
-
 Tracing the MDX pipeline and checking whether `rehype-sanitize` or other plugins strip table elements.
-
-
 
 _**Agent (composer-2)**_
 
@@ -4225,11 +4203,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -4249,7 +4222,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -4260,6 +4232,7 @@ Parameters:
   "pattern": "table"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4282,8 +4255,8 @@ Additional data:
   "totalMatches": 10
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4302,17 +4275,11 @@ I'm verifying the correct MDX plugin options for Storybook Docs v10. </details><
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -4324,6 +4291,7 @@ Parameters:
   "pattern": "table|prose|sb-"
 }
 ```
+
 Additional data:
 
 ```json
@@ -4337,8 +4305,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -4362,11 +4330,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 

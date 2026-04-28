@@ -9,18 +9,23 @@ _**User**_
 Implement **Task 5 only** (GameCard) in `/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell`.
 
 ## Step 0
+
 `yarn add -D @testing-library/user-event` if not already in package.json.
 
 ## Step 1: GameCard.test.tsx
+
 Create tests per Milestone 3 plan (GameCard section). **Important:** The plan’s first test uses `getByText('math-addition')`, but `GameCard` uses `useTranslation('games')` and `t(entry.titleKey)` — `en/games.json` maps `math-addition` to **"Addition practice"**. Use `expect(screen.getByText('Addition practice')).toBeInTheDocument()` for the title test so it matches real i18n. All other tests as in the plan.
 
 ## Step 2: Implement GameCard.tsx
+
 Use the plan’s implementation exactly (Card, Button, BookmarkIcon, useTranslation games + common, levels from common, aria-labels from bookmark.add/remove).
 
 ## Step 3
+
 `yarn test src/components/GameCard.test.tsx --run` — all pass.
 
 ## Step 4: Commit
+
 ```
 git add src/components/GameCard.tsx src/components/GameCard.test.tsx package.json yarn.lock
 git commit -m "feat(ui): add GameCard component with bookmark and play callbacks"
@@ -39,10 +44,7 @@ I'm implementing the GameCard component in the specified worktree path following
 
 _**Agent (composer-2)**_
 
-
 Implementing GameCard in the milestone-3 worktree: reading the plan section, checking dependencies, and inspecting existing components.
-
-
 
 _**Agent (composer-2)**_
 
@@ -63,7 +65,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -75,6 +76,7 @@ Parameters:
   "pattern": "GameCard"
 }
 ```
+
 Additional data:
 
 ```json
@@ -93,8 +95,8 @@ Additional data:
   "totalMatches": 25
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -155,11 +157,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell*
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -192,7 +189,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -202,6 +198,7 @@ Parameters:
   "pattern": "GameCatalogEntry"
 }
 ```
+
 Additional data:
 
 ```json
@@ -224,8 +221,8 @@ Additional data:
   "totalMatches": 5
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -254,11 +251,6 @@ File not found
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -309,11 +301,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -355,17 +342,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -377,6 +358,7 @@ Parameters:
   "pattern": "from '@/|from '#/"
 }
 ```
+
 Additional data:
 
 ```json
@@ -451,8 +433,8 @@ Additional data:
   "totalMatches": 27
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -476,11 +458,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -507,11 +484,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell*
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -527,10 +499,7 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
 Installing `@testing-library/user-event` and creating `GameCard.tsx` and `GameCard.test.tsx`.
-
-
 
 _**Agent (composer-2)**_
 
@@ -572,6 +541,7 @@ warning Workspaces can only be enabled in private projects.
 warning Workspaces can only be enabled in private projects.
 
 ```
+
 </details>
 </tool-use>
 
@@ -612,11 +582,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -642,6 +607,7 @@ $ vitest run src/components/GameCard.test.tsx --run
 Done in 1.46s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -656,7 +622,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **read_lints**</summary>
 
-
 Parameters:
 
 ```json
@@ -667,6 +632,7 @@ Parameters:
   ]
 }
 ```
+
 Result:
 
 ```json
@@ -681,8 +647,8 @@ Result:
   ]
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -694,10 +660,7 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
 All tests passed. Committing from the worktree.
-
-
 
 _**Agent (composer-2)**_
 
@@ -777,6 +740,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 2.11s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -786,11 +750,6 @@ Done in 2.11s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -807,6 +766,7 @@ nothing to commit, working tree clean
 7397b1df96a409e012ab1cb81a90ddd50dcaa5a5
 
 ```
+
 </details>
 </tool-use>
 
@@ -816,7 +776,6 @@ nothing to commit, working tree clean
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 ## Report
 

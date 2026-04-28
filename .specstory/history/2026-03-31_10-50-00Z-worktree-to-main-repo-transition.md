@@ -56,6 +56,7 @@ git worktree list && git rev-parse --show-toplevel && git branch --show-current
 master
 
 ```
+
 </details>
 </tool-use>
 
@@ -103,6 +104,7 @@ pwd
 /Users/leocaseiro/Sites/base-skill
 
 ```
+
 </details>
 </tool-use>
 
@@ -199,6 +201,7 @@ git worktree list
 /Users/leocaseiro/Sites/base-skill/.worktrees/milestone-1-scaffolding f488094 [milestone-1-scaffolding]
 
 ```
+
 </details>
 </tool-use>
 

@@ -6,54 +6,42 @@
 
 _**User**_
 
-@docs/prd.md 
+@docs/prd.md
 
 I need to make some adjustments to the PRD. After fixing the PRD, ask me to approve, and we'll adjust the other documents. Be free to ask me or check the @docs/project-scope.md for any extra clarifications.
 
-#1 Added "cloud syncing" as a future premium feature.
-> Future premium features (server-side authentication, multiplayer coordination, paid content gating, cloud syncing) 
+# 1 Added "cloud syncing" as a future premium feature.
+> Future premium features (server-side authentication, multiplayer coordination, paid content gating, cloud syncing)
 
+# 2 - Persona 3 -  we have the scenario "2-4 children", but we don't want to limit that number
 
-#2 - Persona 3 -  we have the scenario "2-4 children", but we don't want to limit that number
+# 3  - Persona 3 - Goals settings can be shared by entire family, optionally
 
-#3  - Persona 3 - Goals settings can be shared by entire family, optionally
+# 4 For C-07. We might need to ask the parent to download each game, depending on the file size. (PS: In the technology, we might want to mention that every code can have its own bundle, so we can lazy load, and it would be faster this way. Maybe a preload could be necessary per each game). Let's also adjust "5.4 Offline-First Gameplay" accordingly.
 
-#4 For C-07. We might need to ask the parent to download each game, depending on the file size. (PS: In the technology, we might want to mention that every code can have its own bundle, so we can lazy load, and it would be faster this way. Maybe a preload could be necessary per each game). Let's also adjust "5.4 Offline-First Gameplay" accordingly.
+# 5 For C-10, even older children could listen to the audio, but parents can remove that if they want to force practising reading.
 
-#5 For C-10, even older children could listen to the audio, but parents can remove that if they want to force practising reading.
+# 6 line 156, shouldn't be "search (text + TTS for younger children)"?
 
-#6 line 156, shouldn't be "search (text + TTS for younger children)"?
+# 7  - "5.2 - Game catalog format." - Not sure how easy would be to add a new game just defined as JSON. Can you breakdown what did you mean by that?
 
-#7  - "5.2 - Game catalog format." - Not sure how easy would be to add a new game just defined as JSON. Can you breakdown what did you mean by that? 
+# 8 Whenever we mention "synced to cloud", it should be cloud storage (such as GDrive or OneDrive), let's be ambiguous.
 
-#8 Whenever we mention "synced to cloud", it should be cloud storage (such as GDrive or OneDrive), let's be ambiguous.
+# 9 - 5.4 - Offline-First Gameplay. We can have a way to trigger to download all games, but this might be an expensive task, and we should avoid at first load.
 
-#9 - 5.4 - Offline-First Gameplay. We can have a way to trigger to download all games, but this might be an expensive task, and we should avoid at first load.
+# 10 We don't need "Visual waveform feedback during listening." We can have a simple GIF to simulate that.
 
-#10 We don't need "Visual waveform feedback during listening." We can have a simple GIF to simulate that.
+# 11 - 5.9 - For typography, we might allow parents to change the font-style. By default we want to use <https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation> . Young children might confund different font-style, so we want to keep the games consistant with those.
 
-#11 - 5.9 - For typography, we might allow parents to change the font-style. By default we want to use https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation . Young children might confund different font-style, so we want to keep the games consistant with those.
-
-#12 - 5.13 and 6.4 - We need to make sure that users can change zoom in/out in case the game UI is not good on their devices.
+# 12 - 5.13 and 6.4 - We need to make sure that users can change zoom in/out in case the game UI is not good on their devices.
 
 # 13 - 6.1 Performance - why not canvas for UI? Isn't canvas faster than CSS?
 
-# 14 - 8 - ABCya has an app that you can play offline. I also think their ads goes away on subscription users.
+# 14 - 8 - ABCya has an app that you can play offline. I also think their ads goes away on subscription users
 
 # 15 - Set a new task to do a proper research (later on) to write properly the table of Competitors. We don't want to "lie"
 
-#16 Cursor rules should be in the initial release
-
-
-
-
-
-
-
-
-
-
-
+# 16 Cursor rules should be in the initial release
 
 ---
 
@@ -101,7 +89,7 @@ Now I have both documents. Let me create a task list and work through each of th
 
 1. **"cloud syncing" as a future premium feature** - Already done in line 29. ✓ Already in the PRD.
 
-2. **Persona 3 - "2-4 children" should not limit the number** - Line 85 says "2–X children" already. Let me check... yes it says "2–X children share one tablet/laptop". Actually, wait - the user says "we have the scenario '2-4 children', but we don't want to limit that number". Looking at the current PRD, it says "2–X children". 
+2. **Persona 3 - "2-4 children" should not limit the number** - Line 85 says "2–X children" already. Let me check... yes it says "2–X children share one tablet/laptop". Actually, wait - the user says "we have the scenario '2-4 children', but we don't want to limit that number". Looking at the current PRD, it says "2–X children".
 
 I'm double-checking line 85 to see if this is already fixed or if I need to clarify the wording to make it clear there's no upper limit on the number of children. Looking at several updates needed across the document: C-07 needs revision for the game download and lazy loading approach, C-10's wording around audio for older children should be clarified, and line 156 has the TTS description backwards—it should specify text plus TTS for younger children, not older ones. I also need to expand section 5.2 to better explain how games are structured through JSON definitions, and verify that all cloud storage references are appropriately generic to cover GDrive and OneDrive without being too vague.
 
@@ -127,7 +115,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -135,6 +122,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -224,8 +212,8 @@ Result:
   "success": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -240,7 +228,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <think><details><summary>Thought Process</summary>
 Let me start making the changes. I'll batch independent changes together.
 
-#1 is already done - "cloud syncing" is already listed in line 29. Let me verify and mark complete.
+# 1 is already done - "cloud syncing" is already listed in line 29. Let me verify and mark complete.
 
 Let me now make changes #2, #3, #5, #6, #10, #14, #16 first as they are simple text replacements.Then I'll tackle the more complex ones.</details></think>
 
@@ -254,7 +242,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -262,6 +249,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -434,8 +422,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -545,7 +533,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -553,6 +540,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -725,8 +713,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -795,7 +783,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -805,6 +792,7 @@ Parameters:
   "pattern": "Google Drive|OneDrive"
 }
 ```
+
 Additional data:
 
 ```json
@@ -823,8 +811,8 @@ Additional data:
   "totalMatches": 4
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -894,7 +882,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -904,6 +891,7 @@ Parameters:
   "pattern": "cloud|Cloud"
 }
 ```
+
 Additional data:
 
 ```json
@@ -922,8 +910,8 @@ Additional data:
   "totalMatches": 18
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -939,9 +927,9 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 The mentions on lines 75, 145, 163, 195, 225 use "cloud" or "cloud storage" which is already generic. Line 357 says "cloud provider" which is fine. Line 378 mentions specific providers but that's a technical constraint about OAuth which needs to stay specific. Line 402 says "cloud sync" which is fine.
 
 Let me update a few that just say "synced to cloud" to be more explicit:
+
 - Line 163: "synced to cloud" → "synced to cloud storage"
 - Line 195: "synced to cloud" → "synced to cloud storage"
-
 
 - Line 225: "synced to cloud" → "synced to cloud storage"
 
@@ -1076,7 +1064,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -1084,6 +1071,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -1256,8 +1244,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1291,7 +1279,7 @@ The document looks good. Let me also verify that #16 is properly reflected - "Cu
 
 Let me also check if C-10 in section 5.6 needs updating for consistency. The TTS section says "TTS is always-on for Pre-K/K; opt-out for older children." This is already consistent with the change we made to C-10, since the new wording says "parents can disable audio to encourage reading practice" which aligns with "opt-out for older children."
 
-Actually, let me reconsider. The user said "even older children could listen to the audio, but parents can remove that if they want to force practising reading." This means TTS should be available for ALL children by default, and parents can disable it for any child. 
+Actually, let me reconsider. The user said "even older children could listen to the audio, but parents can remove that if they want to force practising reading." This means TTS should be available for ALL children by default, and parents can disable it for any child.
 
 I need to update section 5.6 to reflect that TTS is on by default for everyone, with parents able to disable it across all age groups rather than having it off by default for older children.</details></think>
 
@@ -1346,12 +1334,11 @@ _**User**_
 approved, review other documents, and modify accordingly.
 
 GOes on this order:
-1. @docs/architecture.md 
-2. @docs/data-model.md 
-3. @docs/game-engine.md 
-4. @docs/ui-ux.md 
 
-
+1. @docs/architecture.md
+2. @docs/data-model.md
+3. @docs/game-engine.md
+4. @docs/ui-ux.md
 
 (any order for the others)
 
@@ -1427,30 +1414,33 @@ Now I need to read the remaining docs that might need updates.
 
 Let me now plan what changes are needed in each document based on the 16 PRD changes:
 
-### architecture.md changes needed:
+### architecture.md changes needed
+
 1. **#4** - Per-game code splitting / lazy loading for game bundles
 2. **#8** - Cloud storage generic references (line 20: "Google Drive + OneDrive")
 3. **#10** - SpeechInput: remove waveform mention (line 219: "STT with waveform feedback")
 4. **#11** - Typography: mention Edu NSW ACT Foundation as default font
 
-
 5. **#12** - Zoom controls
 6. **#13** - CSS/DOM rationale for UI (verify constraint mentions)
 7. **#16** - Cursor rules now in scope (no mention needed here?)
 
-### data-model.md changes needed:
+### data-model.md changes needed
+
 1. **#3** - Family-shared settings already seems covered
 2. **#8** - Cloud storage generic references
 3. **#11** - Typography: update theme schema default font from "Nunito" to "Edu NSW ACT Foundation"
 4. **#5** - Settings might need a `ttsEnabled` field for parent override
 
-### game-engine.md changes needed:
+### game-engine.md changes needed
+
 1. Looking at what updates are required here...
 2. **#5** - TTS configurable per profile (parent can disable)
 3. **#10** - SpeechInput: replace waveform with animated GIF
 4. **#7** - JSON game config breakdown already detailed here
 
-### ui-ux.md changes needed:
+### ui-ux.md changes needed
+
 1. **#5** - TTS toggle clarification (available for all, parent can disable)
 2. **#10** - SpeechInput: replace waveform reference with animated visual indicator
 3. **#11** - Typography: update default font from Nunito to Edu NSW ACT Foundation
@@ -1528,23 +1518,26 @@ Actually, since these are all independent edits across different files, let me p
 
 Let me now create a comprehensive todo list for all document changes:
 
-### architecture.md changes:
+### architecture.md changes
+
 1. Line 20: "Google Drive + OneDrive" → "cloud storage (initially Google Drive + OneDrive)"
 2. Line 219: `SpeechInput` - "STT with waveform feedback" → "STT with animated visual indicator"
-
 
 3. Line 408: Need to add a note about per-game lazy loading in the cache strategy section
 4. Font update - need to change the default font reference to Edu NSW ACT Foundation (this appears in ui-ux.md, not here)
 
-### data-model.md changes:
+### data-model.md changes
+
 1. Theme examples: update "Nunito" to "Edu NSW ACT Foundation" as default font (lines 580, 599)
 2. Settings schema: add `ttsEnabled` field to allow parent TTS override
 
-### game-engine.md changes:
+### game-engine.md changes
+
 1. Line 929: Replace the SpeechInput description about animated waveform SVG with a note that it's now a GIF-based visual indicator
 2. Add per-game code-splitting and lazy loading documentation
 
-### ui-ux.md changes:
+### ui-ux.md changes
+
 1. Section 2.2 Typography: update default font from Nunito/Fredoka to Edu NSW ACT Foundation
 2. Lines 98, 106-108: Update font family references throughout the font stack
 3. Section 5.4 Child Settings: clarify that any child can toggle TTS but parents can override it
@@ -1563,7 +1556,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -1571,6 +1563,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -1687,8 +1680,8 @@ Result:
   "success": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1776,7 +1769,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -1784,6 +1776,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -1846,8 +1839,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1916,7 +1909,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -1924,6 +1916,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -1986,8 +1979,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2022,7 +2015,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -2030,6 +2022,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -2092,8 +2085,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2200,7 +2193,6 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -2208,6 +2200,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -2270,8 +2263,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2312,6 +2305,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 
 <think><details><summary>Thought Process</summary>
 Now I need to update project-scope.md for:
+
 1. Remove "Cursor rules / `.cursor/rules/`" from deferred items (moved to initial release scope in PRD)
 2. Update cloud storage references to be more generic (line 47, 75, 78)
 3. Update SpeechInput waveform reference (line 139)

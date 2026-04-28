@@ -21,7 +21,6 @@ Let me first check for relevant skills that might apply, then read the spec and 
 
 The user says "without a proper plan" - so they want me to skip the planning phase and just implement directly. They say it's a simple task. Let me check if any skills apply - the brainstorming/TDD/writing-plans skills would normally apply, but the user is explicitly telling me to skip planning and just implement. The user's instructions take precedence.
 
-
 Now I'm looking at the spec and existing code to understand the current implementation.
 </details></think>
 
@@ -36,69 +35,70 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:07:56Z)**_
  `./docs/superpowers/specs/2026-04-03-speech-voice-selection-design.md`
 
 ```text
-1	# Speech Voice Selection Design
-2	
-3	**Date:** 2026-04-03
-4	
-5	## Overview
-6	
-7	Add voice selection to the `speak()` utility so users can choose which TTS voice is used. The selected voice is persisted in user settings. Daniel is the default voice.
-8	
-9	## Architecture
-10	
-11	Three areas of change, all small and self-contained:
-12	
-13	1. **`src/lib/speech/voices.ts`** — new `getVoiceByName` helper
-14	2. **`src/lib/speech/SpeechOutput.ts`** — optional `voiceName` parameter on `speak()`
-15	3. **`src/routes/$locale/_app/settings.tsx`** — voice picker UI
-16	
-17	No new files. No changes to the DB schema (`preferredVoiceURI` already exists in `SettingsDoc`).
-18	
-19	## Components
-20	
-21	### `getVoiceByName(name: string): SpeechSynthesisVoice | undefined`
-22	
-23	Added to `voices.ts` alongside the existing `getVoicesForLanguage`. Calls `synth.getVoices()` and returns the first voice where `v.name === name`, or `undefined` if not found or `speechSynthesis` is unavailable.
-24	
-25	### `speak(text: string, voiceName?: string): void`
-26	
-27	Updated signature. When `voiceName` is provided, calls `getVoiceByName(voiceName)` and assigns the result to `utterance.voice`. If the named voice isn't found, `utterance.voice` is left unset (browser default). Default value for `voiceName` is `'Daniel'`.
-28	
-29	### Settings voice picker
-30	
-31	A new `<Select>` in `settings.tsx` below the existing language picker:
-32	
-33	- Populated by calling `speechSynthesis.getVoices()` on mount (via `useState` + `useEffect`, triggered by the `voiceschanged` event for async loading)
-34	- Pre-selects `settings.preferredVoiceURI ?? 'Daniel'`
-35	- On change: `update({ preferredVoiceURI: selectedVoiceName })`
-36	- Stores the voice **name** (not URI) in `preferredVoiceURI` — the field is reused as-is from the existing schema
-37	
-38	## Data Flow
-39	
-40	```
-41	User picks voice in Settings
-42	  → update({ preferredVoiceURI: voiceName })
-43	  → saved to RxDB
-44	
-45	Component calls speak(text, settings.preferredVoiceURI ?? 'Daniel')
-46	  → getVoiceByName(voiceName)
-47	  → utterance.voice = resolvedVoice ?? null
-48	  → synth.speak(utterance)
-49	```
-50	
-51	## Error Handling
-52	
-53	- `speechSynthesis` unavailable: `speak()` returns early (existing behaviour), voice picker is hidden or disabled
-54	- Named voice not found: `utterance.voice` left unset, browser picks default — no error thrown
-55	- Empty voices list (e.g. voices not yet loaded): picker shows a loading state or is disabled
-56	
-57	## Testing
-58	
-59	- **`voices.test.ts`** (new): unit tests for `getVoiceByName` — found, not found, unavailable `speechSynthesis`
-60	- **`SpeechOutput.test.ts`** (updated): verify `utterance.voice` is set when `voiceName` is provided; verify default falls back to `'Daniel'`; verify graceful fallback when voice not found
-61	- Settings UI: no new tests — `useSettings` is already tested; the voice picker is a straightforward controlled `<Select>`
+1 # Speech Voice Selection Design
+2 
+3 **Date:** 2026-04-03
+4 
+5 ## Overview
+6 
+7 Add voice selection to the `speak()` utility so users can choose which TTS voice is used. The selected voice is persisted in user settings. Daniel is the default voice.
+8 
+9 ## Architecture
+10 
+11 Three areas of change, all small and self-contained:
+12 
+13 1. **`src/lib/speech/voices.ts`** — new `getVoiceByName` helper
+14 2. **`src/lib/speech/SpeechOutput.ts`** — optional `voiceName` parameter on `speak()`
+15 3. **`src/routes/$locale/_app/settings.tsx`** — voice picker UI
+16 
+17 No new files. No changes to the DB schema (`preferredVoiceURI` already exists in `SettingsDoc`).
+18 
+19 ## Components
+20 
+21 ### `getVoiceByName(name: string): SpeechSynthesisVoice | undefined`
+22 
+23 Added to `voices.ts` alongside the existing `getVoicesForLanguage`. Calls `synth.getVoices()` and returns the first voice where `v.name === name`, or `undefined` if not found or `speechSynthesis` is unavailable.
+24 
+25 ### `speak(text: string, voiceName?: string): void`
+26 
+27 Updated signature. When `voiceName` is provided, calls `getVoiceByName(voiceName)` and assigns the result to `utterance.voice`. If the named voice isn't found, `utterance.voice` is left unset (browser default). Default value for `voiceName` is `'Daniel'`.
+28 
+29 ### Settings voice picker
+30 
+31 A new `<Select>` in `settings.tsx` below the existing language picker:
+32 
+33 - Populated by calling `speechSynthesis.getVoices()` on mount (via `useState` + `useEffect`, triggered by the `voiceschanged` event for async loading)
+34 - Pre-selects `settings.preferredVoiceURI ?? 'Daniel'`
+35 - On change: `update({ preferredVoiceURI: selectedVoiceName })`
+36 - Stores the voice **name** (not URI) in `preferredVoiceURI` — the field is reused as-is from the existing schema
+37 
+38 ## Data Flow
+39 
+40 ```
+41 User picks voice in Settings
+42   → update({ preferredVoiceURI: voiceName })
+43   → saved to RxDB
+44 
+45 Component calls speak(text, settings.preferredVoiceURI ?? 'Daniel')
+46   → getVoiceByName(voiceName)
+47   → utterance.voice = resolvedVoice ?? null
+48   → synth.speak(utterance)
+49 ```
+50 
+51 ## Error Handling
+52 
+53 - `speechSynthesis` unavailable: `speak()` returns early (existing behaviour), voice picker is hidden or disabled
+54 - Named voice not found: `utterance.voice` left unset, browser picks default — no error thrown
+55 - Empty voices list (e.g. voices not yet loaded): picker shows a loading state or is disabled
+56 
+57 ## Testing
+58 
+59 - **`voices.test.ts`** (new): unit tests for `getVoiceByName` — found, not found, unavailable `speechSynthesis`
+60 - **`SpeechOutput.test.ts`** (updated): verify `utterance.voice` is set when `voiceName` is provided; verify default falls back to `'Daniel'`; verify graceful fallback when voice not found
+61 - Settings UI: no new tests — `useSettings` is already tested; the voice picker is a straightforward controlled `<Select>`
 62
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:07:57Z)**_
@@ -143,6 +143,7 @@ worktrees/feat-word-spell-number-match/src/lib/speech/SpeechOutput.ts
 worktrees/feat-word-spell-number-match/storybook-static/assets/SpeechOutput-DPBGKWWd.js
 worktrees/feat-word-spell-number-match/storybook-static/assets/SpeechOutput-CbAiyGMA.js
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:00Z)**_
@@ -152,35 +153,36 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:00Z)**_
  `./src/lib/speech/SpeechOutput.ts`
 
 ```text
-1	export function speak(text: string): void {
-2	  const synth = (
-3	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-4	  ).speechSynthesis;
-5	  if (!synth) {
-6	    return;
-7	  }
-8	  synth.cancel();
-9	  const u = new SpeechSynthesisUtterance(text);
-10	  synth.speak(u);
-11	}
-12	
-13	export function cancelSpeech(): void {
-14	  const synth = (
-15	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-16	  ).speechSynthesis;
-17	  if (!synth) {
-18	    return;
-19	  }
-20	  synth.cancel();
-21	}
-22	
-23	export function isSpeechOutputAvailable(): boolean {
-24	  return !!(
-25	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-26	  ).speechSynthesis;
-27	}
+1 export function speak(text: string): void {
+2   const synth = (
+3     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+4   ).speechSynthesis;
+5   if (!synth) {
+6     return;
+7   }
+8   synth.cancel();
+9   const u = new SpeechSynthesisUtterance(text);
+10   synth.speak(u);
+11 }
+12 
+13 export function cancelSpeech(): void {
+14   const synth = (
+15     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+16   ).speechSynthesis;
+17   if (!synth) {
+18     return;
+19   }
+20   synth.cancel();
+21 }
+22 
+23 export function isSpeechOutputAvailable(): boolean {
+24   return !!(
+25     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+26   ).speechSynthesis;
+27 }
 28
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:01Z)**_
@@ -192,6 +194,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:01Z)**_
 ```text
 src/lib/speech/voices.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:03Z)**_
@@ -201,25 +204,26 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:03Z)**_
  `./src/lib/speech/voices.ts`
 
 ```text
-1	export function getVoicesForLanguage(
-2	  lang: string,
-3	): SpeechSynthesisVoice[] {
-4	  const synth = (
-5	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-6	  ).speechSynthesis;
-7	  if (!synth) {
-8	    return [];
-9	  }
-10	  const voices = synth.getVoices();
-11	  const prefix = lang.split('-')[0]?.toLowerCase() ?? lang;
-12	  return voices.filter(
-13	    (v) =>
-14	      v.lang.toLowerCase().startsWith(lang.toLowerCase()) ||
-15	      v.lang.toLowerCase().startsWith(prefix),
-16	  );
-17	}
+1 export function getVoicesForLanguage(
+2   lang: string,
+3 ): SpeechSynthesisVoice[] {
+4   const synth = (
+5     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+6   ).speechSynthesis;
+7   if (!synth) {
+8     return [];
+9   }
+10   const voices = synth.getVoices();
+11   const prefix = lang.split('-')[0]?.toLowerCase() ?? lang;
+12   return voices.filter(
+13     (v) =>
+14       v.lang.toLowerCase().startsWith(lang.toLowerCase()) ||
+15       v.lang.toLowerCase().startsWith(prefix),
+16   );
+17 }
 18
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:03Z)**_
@@ -229,28 +233,29 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:03Z)**_
  `./src/lib/speech/SpeechOutput.test.ts`
 
 ```text
-1	import { afterEach, describe, expect, it, vi } from 'vitest';
-2	import { cancelSpeech, speak } from './SpeechOutput';
-3	
-4	describe('SpeechOutput', () => {
-5	  afterEach(() => {
-6	    vi.unstubAllGlobals();
-7	  });
-8	
-9	  it('speak does not throw when speechSynthesis is undefined', () => {
-10	    // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
-11	    vi.stubGlobal('speechSynthesis', undefined);
-12	    expect(() => speak('hello')).not.toThrow();
-13	  });
-14	
-15	  it('cancelSpeech does not throw when speechSynthesis is undefined', () => {
-16	    // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
-17	    vi.stubGlobal('speechSynthesis', undefined);
-18	    expect(() => cancelSpeech()).not.toThrow();
-19	  });
-20	});
+1 import { afterEach, describe, expect, it, vi } from 'vitest';
+2 import { cancelSpeech, speak } from './SpeechOutput';
+3 
+4 describe('SpeechOutput', () => {
+5   afterEach(() => {
+6     vi.unstubAllGlobals();
+7   });
+8 
+9   it('speak does not throw when speechSynthesis is undefined', () => {
+10     // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
+11     vi.stubGlobal('speechSynthesis', undefined);
+12     expect(() => speak('hello')).not.toThrow();
+13   });
+14 
+15   it('cancelSpeech does not throw when speechSynthesis is undefined', () => {
+16     // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
+17     vi.stubGlobal('speechSynthesis', undefined);
+18     expect(() => cancelSpeech()).not.toThrow();
+19   });
+20 });
 21
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:07Z)**_
@@ -272,6 +277,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:08Z)**_
 ```text
 src/routes/$locale/_app/settings.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:08Z)**_
@@ -284,6 +290,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:08Z)**_
 Found 1 file
 src/db/schemas/settings.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:11Z)**_
@@ -293,108 +300,109 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:11Z)**_
  `./src/routes/$locale/_app/settings.tsx`
 
 ```text
-1	import {
-2	  createFileRoute,
-3	  useNavigate,
-4	  useParams,
-5	} from '@tanstack/react-router';
-6	import { useTranslation } from 'react-i18next';
-7	import { Label } from '@/components/ui/label';
-8	import {
-9	  Select,
-10	  SelectContent,
-11	  SelectItem,
-12	  SelectTrigger,
-13	  SelectValue,
-14	} from '@/components/ui/select';
-15	import { Slider } from '@/components/ui/slider';
-16	import { useSettings } from '@/db/hooks/useSettings';
-17	
-18	const LOCALES = [
-19	  { code: 'en', label: '🇬🇧 English' },
-20	  { code: 'pt-BR', label: '🇧🇷 Português' },
-21	] as const;
-22	
-23	type SettingsLocale = (typeof LOCALES)[number]['code'];
-24	
-25	const SettingsScreen = () => {
-26	  const { t } = useTranslation('settings');
-27	  const { locale } = useParams({ from: '/$locale' });
-28	  const navigate = useNavigate();
-29	  const { settings, update } = useSettings();
-30	
-31	  const handleLocaleChange = (newLocale: string) => {
-32	    void navigate({
-33	      to: '/$locale/settings',
-34	      params: { locale: newLocale as SettingsLocale },
-35	    });
-36	  };
-37	
-38	  const volume = settings.volume ?? 0.8;
-39	  const speechRate = settings.speechRate ?? 1;
-40	
-41	  return (
-42	    <div className="mx-auto max-w-md px-4 py-8">
-43	      <h1 className="mb-6 text-2xl font-bold">{t('title')}</h1>
-44	
-45	      <div className="flex flex-col gap-6">
-46	        <div className="flex flex-col gap-2">
-47	          <Label htmlFor="volume">
-48	            {t('volume', { percent: Math.round(volume * 100) })}
-49	          </Label>
-50	          <Slider
-51	            id="volume"
-52	            min={0}
-53	            max={1}
-54	            step={0.05}
-55	            value={[volume]}
-56	            onValueChange={([v]) => {
-57	              void update({ volume: v });
-58	            }}
-59	          />
-60	        </div>
-61	
-62	        <div className="flex flex-col gap-2">
-63	          <Label htmlFor="speechRate">
-64	            {t('speechRate', { rate: speechRate })}
-65	          </Label>
-66	          <Slider
-67	            id="speechRate"
-68	            min={0.5}
-69	            max={2}
-70	            step={0.1}
-71	            value={[speechRate]}
-72	            onValueChange={([v]) => {
-73	              void update({ speechRate: v });
-74	            }}
-75	          />
-76	        </div>
-77	
-78	        <div className="flex flex-col gap-2">
-79	          <Label htmlFor="language">{t('language')}</Label>
-80	          <Select value={locale} onValueChange={handleLocaleChange}>
-81	            <SelectTrigger id="language">
-82	              <SelectValue />
-83	            </SelectTrigger>
-84	            <SelectContent>
-85	              {LOCALES.map(({ code, label }) => (
-86	                <SelectItem key={code} value={code}>
-87	                  {label}
-88	                </SelectItem>
-89	              ))}
-90	            </SelectContent>
-91	          </Select>
-92	        </div>
-93	      </div>
-94	    </div>
-95	  );
-96	};
-97	
-98	export const Route = createFileRoute('/$locale/_app/settings')({
-99	  component: SettingsScreen,
-100	});
+1 import {
+2   createFileRoute,
+3   useNavigate,
+4   useParams,
+5 } from '@tanstack/react-router';
+6 import { useTranslation } from 'react-i18next';
+7 import { Label } from '@/components/ui/label';
+8 import {
+9   Select,
+10   SelectContent,
+11   SelectItem,
+12   SelectTrigger,
+13   SelectValue,
+14 } from '@/components/ui/select';
+15 import { Slider } from '@/components/ui/slider';
+16 import { useSettings } from '@/db/hooks/useSettings';
+17 
+18 const LOCALES = [
+19   { code: 'en', label: '🇬🇧 English' },
+20   { code: 'pt-BR', label: '🇧🇷 Português' },
+21 ] as const;
+22 
+23 type SettingsLocale = (typeof LOCALES)[number]['code'];
+24 
+25 const SettingsScreen = () => {
+26   const { t } = useTranslation('settings');
+27   const { locale } = useParams({ from: '/$locale' });
+28   const navigate = useNavigate();
+29   const { settings, update } = useSettings();
+30 
+31   const handleLocaleChange = (newLocale: string) => {
+32     void navigate({
+33       to: '/$locale/settings',
+34       params: { locale: newLocale as SettingsLocale },
+35     });
+36   };
+37 
+38   const volume = settings.volume ?? 0.8;
+39   const speechRate = settings.speechRate ?? 1;
+40 
+41   return (
+42     <div className="mx-auto max-w-md px-4 py-8">
+43       <h1 className="mb-6 text-2xl font-bold">{t('title')}</h1>
+44 
+45       <div className="flex flex-col gap-6">
+46         <div className="flex flex-col gap-2">
+47           <Label htmlFor="volume">
+48             {t('volume', { percent: Math.round(volume * 100) })}
+49           </Label>
+50           <Slider
+51             id="volume"
+52             min={0}
+53             max={1}
+54             step={0.05}
+55             value={[volume]}
+56             onValueChange={([v]) => {
+57               void update({ volume: v });
+58             }}
+59           />
+60         </div>
+61 
+62         <div className="flex flex-col gap-2">
+63           <Label htmlFor="speechRate">
+64             {t('speechRate', { rate: speechRate })}
+65           </Label>
+66           <Slider
+67             id="speechRate"
+68             min={0.5}
+69             max={2}
+70             step={0.1}
+71             value={[speechRate]}
+72             onValueChange={([v]) => {
+73               void update({ speechRate: v });
+74             }}
+75           />
+76         </div>
+77 
+78         <div className="flex flex-col gap-2">
+79           <Label htmlFor="language">{t('language')}</Label>
+80           <Select value={locale} onValueChange={handleLocaleChange}>
+81             <SelectTrigger id="language">
+82               <SelectValue />
+83             </SelectTrigger>
+84             <SelectContent>
+85               {LOCALES.map(({ code, label }) => (
+86                 <SelectItem key={code} value={code}>
+87                   {label}
+88                 </SelectItem>
+89               ))}
+90             </SelectContent>
+91           </Select>
+92         </div>
+93       </div>
+94     </div>
+95   );
+96 };
+97 
+98 export const Route = createFileRoute('/$locale/_app/settings')({
+99   component: SettingsScreen,
+100 });
 101
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:11Z)**_
@@ -407,6 +415,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:11Z)**_
 12:  preferredVoiceURI?: string;
 35:    preferredVoiceURI: { type: 'string' },
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:21Z)**_
@@ -421,7 +430,7 @@ Now I have all the context I need. Let me implement:
 
 Let me also check if there's a voices.test.ts already.
 
-The user also said to work on a branch/worktree per CLAUDE.md. But they said "just implement" without a plan. 
+The user also said to work on a branch/worktree per CLAUDE.md. But they said "just implement" without a plan.
 
 I need to follow the git workflow first - CLAUDE.md is clear that all changes go on a branch via worktree, not directly to master. Let me set up a worktree and then check if voices.test.ts exists.
 </details></think>
@@ -435,6 +444,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:22Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:25Z)**_
@@ -453,6 +463,7 @@ Create worktree for voice selection feature
 Preparing worktree (new branch 'feat/speech-voice-selection')
 HEAD is now at 76fc5ab docs: add speech voice selection design spec
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:38Z)**_
@@ -470,6 +481,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 8.43s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:41Z)**_
@@ -484,6 +496,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:44Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:47Z)**_
@@ -494,6 +507,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:47Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:49Z)**_
@@ -503,25 +517,26 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:49Z)**_
  `./worktrees/feat-speech-voice-selection/src/lib/speech/voices.ts`
 
 ```text
-1	export function getVoicesForLanguage(
-2	  lang: string,
-3	): SpeechSynthesisVoice[] {
-4	  const synth = (
-5	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-6	  ).speechSynthesis;
-7	  if (!synth) {
-8	    return [];
-9	  }
-10	  const voices = synth.getVoices();
-11	  const prefix = lang.split('-')[0]?.toLowerCase() ?? lang;
-12	  return voices.filter(
-13	    (v) =>
-14	      v.lang.toLowerCase().startsWith(lang.toLowerCase()) ||
-15	      v.lang.toLowerCase().startsWith(prefix),
-16	  );
-17	}
+1 export function getVoicesForLanguage(
+2   lang: string,
+3 ): SpeechSynthesisVoice[] {
+4   const synth = (
+5     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+6   ).speechSynthesis;
+7   if (!synth) {
+8     return [];
+9   }
+10   const voices = synth.getVoices();
+11   const prefix = lang.split('-')[0]?.toLowerCase() ?? lang;
+12   return voices.filter(
+13     (v) =>
+14       v.lang.toLowerCase().startsWith(lang.toLowerCase()) ||
+15       v.lang.toLowerCase().startsWith(prefix),
+16   );
+17 }
 18
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:49Z)**_
@@ -531,35 +546,36 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:49Z)**_
  `./worktrees/feat-speech-voice-selection/src/lib/speech/SpeechOutput.ts`
 
 ```text
-1	export function speak(text: string): void {
-2	  const synth = (
-3	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-4	  ).speechSynthesis;
-5	  if (!synth) {
-6	    return;
-7	  }
-8	  synth.cancel();
-9	  const u = new SpeechSynthesisUtterance(text);
-10	  synth.speak(u);
-11	}
-12	
-13	export function cancelSpeech(): void {
-14	  const synth = (
-15	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-16	  ).speechSynthesis;
-17	  if (!synth) {
-18	    return;
-19	  }
-20	  synth.cancel();
-21	}
-22	
-23	export function isSpeechOutputAvailable(): boolean {
-24	  return !!(
-25	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-26	  ).speechSynthesis;
-27	}
+1 export function speak(text: string): void {
+2   const synth = (
+3     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+4   ).speechSynthesis;
+5   if (!synth) {
+6     return;
+7   }
+8   synth.cancel();
+9   const u = new SpeechSynthesisUtterance(text);
+10   synth.speak(u);
+11 }
+12 
+13 export function cancelSpeech(): void {
+14   const synth = (
+15     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+16   ).speechSynthesis;
+17   if (!synth) {
+18     return;
+19   }
+20   synth.cancel();
+21 }
+22 
+23 export function isSpeechOutputAvailable(): boolean {
+24   return !!(
+25     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+26   ).speechSynthesis;
+27 }
 28
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:50Z)**_
@@ -569,28 +585,29 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:50Z)**_
  `./worktrees/feat-speech-voice-selection/src/lib/speech/SpeechOutput.test.ts`
 
 ```text
-1	import { afterEach, describe, expect, it, vi } from 'vitest';
-2	import { cancelSpeech, speak } from './SpeechOutput';
-3	
-4	describe('SpeechOutput', () => {
-5	  afterEach(() => {
-6	    vi.unstubAllGlobals();
-7	  });
-8	
-9	  it('speak does not throw when speechSynthesis is undefined', () => {
-10	    // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
-11	    vi.stubGlobal('speechSynthesis', undefined);
-12	    expect(() => speak('hello')).not.toThrow();
-13	  });
-14	
-15	  it('cancelSpeech does not throw when speechSynthesis is undefined', () => {
-16	    // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
-17	    vi.stubGlobal('speechSynthesis', undefined);
-18	    expect(() => cancelSpeech()).not.toThrow();
-19	  });
-20	});
+1 import { afterEach, describe, expect, it, vi } from 'vitest';
+2 import { cancelSpeech, speak } from './SpeechOutput';
+3 
+4 describe('SpeechOutput', () => {
+5   afterEach(() => {
+6     vi.unstubAllGlobals();
+7   });
+8 
+9   it('speak does not throw when speechSynthesis is undefined', () => {
+10     // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
+11     vi.stubGlobal('speechSynthesis', undefined);
+12     expect(() => speak('hello')).not.toThrow();
+13   });
+14 
+15   it('cancelSpeech does not throw when speechSynthesis is undefined', () => {
+16     // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
+17     vi.stubGlobal('speechSynthesis', undefined);
+18     expect(() => cancelSpeech()).not.toThrow();
+19   });
+20 });
 21
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:51Z)**_
@@ -600,108 +617,109 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:51Z)**_
  `./worktrees/feat-speech-voice-selection/src/routes/$locale/_app/settings.tsx`
 
 ```text
-1	import {
-2	  createFileRoute,
-3	  useNavigate,
-4	  useParams,
-5	} from '@tanstack/react-router';
-6	import { useTranslation } from 'react-i18next';
-7	import { Label } from '@/components/ui/label';
-8	import {
-9	  Select,
-10	  SelectContent,
-11	  SelectItem,
-12	  SelectTrigger,
-13	  SelectValue,
-14	} from '@/components/ui/select';
-15	import { Slider } from '@/components/ui/slider';
-16	import { useSettings } from '@/db/hooks/useSettings';
-17	
-18	const LOCALES = [
-19	  { code: 'en', label: '🇬🇧 English' },
-20	  { code: 'pt-BR', label: '🇧🇷 Português' },
-21	] as const;
-22	
-23	type SettingsLocale = (typeof LOCALES)[number]['code'];
-24	
-25	const SettingsScreen = () => {
-26	  const { t } = useTranslation('settings');
-27	  const { locale } = useParams({ from: '/$locale' });
-28	  const navigate = useNavigate();
-29	  const { settings, update } = useSettings();
-30	
-31	  const handleLocaleChange = (newLocale: string) => {
-32	    void navigate({
-33	      to: '/$locale/settings',
-34	      params: { locale: newLocale as SettingsLocale },
-35	    });
-36	  };
-37	
-38	  const volume = settings.volume ?? 0.8;
-39	  const speechRate = settings.speechRate ?? 1;
-40	
-41	  return (
-42	    <div className="mx-auto max-w-md px-4 py-8">
-43	      <h1 className="mb-6 text-2xl font-bold">{t('title')}</h1>
-44	
-45	      <div className="flex flex-col gap-6">
-46	        <div className="flex flex-col gap-2">
-47	          <Label htmlFor="volume">
-48	            {t('volume', { percent: Math.round(volume * 100) })}
-49	          </Label>
-50	          <Slider
-51	            id="volume"
-52	            min={0}
-53	            max={1}
-54	            step={0.05}
-55	            value={[volume]}
-56	            onValueChange={([v]) => {
-57	              void update({ volume: v });
-58	            }}
-59	          />
-60	        </div>
-61	
-62	        <div className="flex flex-col gap-2">
-63	          <Label htmlFor="speechRate">
-64	            {t('speechRate', { rate: speechRate })}
-65	          </Label>
-66	          <Slider
-67	            id="speechRate"
-68	            min={0.5}
-69	            max={2}
-70	            step={0.1}
-71	            value={[speechRate]}
-72	            onValueChange={([v]) => {
-73	              void update({ speechRate: v });
-74	            }}
-75	          />
-76	        </div>
-77	
-78	        <div className="flex flex-col gap-2">
-79	          <Label htmlFor="language">{t('language')}</Label>
-80	          <Select value={locale} onValueChange={handleLocaleChange}>
-81	            <SelectTrigger id="language">
-82	              <SelectValue />
-83	            </SelectTrigger>
-84	            <SelectContent>
-85	              {LOCALES.map(({ code, label }) => (
-86	                <SelectItem key={code} value={code}>
-87	                  {label}
-88	                </SelectItem>
-89	              ))}
-90	            </SelectContent>
-91	          </Select>
-92	        </div>
-93	      </div>
-94	    </div>
-95	  );
-96	};
-97	
-98	export const Route = createFileRoute('/$locale/_app/settings')({
-99	  component: SettingsScreen,
-100	});
+1 import {
+2   createFileRoute,
+3   useNavigate,
+4   useParams,
+5 } from '@tanstack/react-router';
+6 import { useTranslation } from 'react-i18next';
+7 import { Label } from '@/components/ui/label';
+8 import {
+9   Select,
+10   SelectContent,
+11   SelectItem,
+12   SelectTrigger,
+13   SelectValue,
+14 } from '@/components/ui/select';
+15 import { Slider } from '@/components/ui/slider';
+16 import { useSettings } from '@/db/hooks/useSettings';
+17 
+18 const LOCALES = [
+19   { code: 'en', label: '🇬🇧 English' },
+20   { code: 'pt-BR', label: '🇧🇷 Português' },
+21 ] as const;
+22 
+23 type SettingsLocale = (typeof LOCALES)[number]['code'];
+24 
+25 const SettingsScreen = () => {
+26   const { t } = useTranslation('settings');
+27   const { locale } = useParams({ from: '/$locale' });
+28   const navigate = useNavigate();
+29   const { settings, update } = useSettings();
+30 
+31   const handleLocaleChange = (newLocale: string) => {
+32     void navigate({
+33       to: '/$locale/settings',
+34       params: { locale: newLocale as SettingsLocale },
+35     });
+36   };
+37 
+38   const volume = settings.volume ?? 0.8;
+39   const speechRate = settings.speechRate ?? 1;
+40 
+41   return (
+42     <div className="mx-auto max-w-md px-4 py-8">
+43       <h1 className="mb-6 text-2xl font-bold">{t('title')}</h1>
+44 
+45       <div className="flex flex-col gap-6">
+46         <div className="flex flex-col gap-2">
+47           <Label htmlFor="volume">
+48             {t('volume', { percent: Math.round(volume * 100) })}
+49           </Label>
+50           <Slider
+51             id="volume"
+52             min={0}
+53             max={1}
+54             step={0.05}
+55             value={[volume]}
+56             onValueChange={([v]) => {
+57               void update({ volume: v });
+58             }}
+59           />
+60         </div>
+61 
+62         <div className="flex flex-col gap-2">
+63           <Label htmlFor="speechRate">
+64             {t('speechRate', { rate: speechRate })}
+65           </Label>
+66           <Slider
+67             id="speechRate"
+68             min={0.5}
+69             max={2}
+70             step={0.1}
+71             value={[speechRate]}
+72             onValueChange={([v]) => {
+73               void update({ speechRate: v });
+74             }}
+75           />
+76         </div>
+77 
+78         <div className="flex flex-col gap-2">
+79           <Label htmlFor="language">{t('language')}</Label>
+80           <Select value={locale} onValueChange={handleLocaleChange}>
+81             <SelectTrigger id="language">
+82               <SelectValue />
+83             </SelectTrigger>
+84             <SelectContent>
+85               {LOCALES.map(({ code, label }) => (
+86                 <SelectItem key={code} value={code}>
+87                   {label}
+88                 </SelectItem>
+89               ))}
+90             </SelectContent>
+91           </Select>
+92         </div>
+93       </div>
+94     </div>
+95   );
+96 };
+97 
+98 export const Route = createFileRoute('/$locale/_app/settings')({
+99   component: SettingsScreen,
+100 });
 101
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:54Z)**_
@@ -716,6 +734,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-speech-voice-selection/src/lib/speech/voices.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:08:59Z)**_
@@ -726,6 +745,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:08:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-speech-voice-selection/src/lib/speech/SpeechOutput.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:09:02Z)**_
@@ -740,6 +760,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:09:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-speech-voice-selection/src/lib/speech/SpeechOutput.test.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:09:23Z)**_
@@ -783,6 +804,7 @@ describe('getVoiceByName', () => {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/feat-speech-voice-selection/src/lib/speech/voices.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:09:26Z)**_
@@ -797,6 +819,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:09:30Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-speech-voice-selection/src/routes/$locale/_app/settings.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:09:32Z)**_
@@ -807,6 +830,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:09:32Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-speech-voice-selection/src/routes/$locale/_app/settings.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:09:36Z)**_
@@ -821,6 +845,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:09:41Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-speech-voice-selection/src/routes/$locale/_app/settings.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:09:44Z)**_
@@ -840,6 +865,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.50s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:09:53Z)**_
@@ -855,6 +881,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.15s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:10:04Z)**_
@@ -881,6 +908,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:10:31Z)**_
@@ -888,7 +916,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:10:31Z)**_
 <think><details><summary>Thought Process</summary>
 The lint error is in settings.tsx - the condition `voices.length > 0` is being flagged as unnecessary. This might be because TypeScript knows `voices` is an array and the type checker infers the length could be 0. Wait, actually `@typescript-eslint/no-unnecessary-condition` - this can flag `voices.length > 0` if the linter determines it's always falsy... but that doesn't make sense for an array.
 
-Wait, the error says "value is always falsy" - hmm. 
+Wait, the error says "value is always falsy" - hmm.
 
 The voices state starts as an empty array from `useState<SpeechSynthesisVoice[]>([])`, so `voices.length > 0` would be falsy initially, but the effect should populate it. The `@typescript-eslint/no-unnecessary-condition` rule is probably analyzing the type and determining the condition is redundant based on how TypeScript infers the array type.
 
@@ -907,6 +935,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:10:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-speech-voice-selection/src/routes/$locale/_app/settings.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:10:47Z)**_
@@ -930,6 +959,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:10:58Z)**_
@@ -939,7 +969,7 @@ The error is now about `voices.length === 0` being "always falsy". That's line 4
 
 Actually wait, `disabled={voices.length === 0}` - "value is always falsy" means the condition `voices.length === 0` is always false? That would make it always truthy, not falsy. Something strange is happening.
 
-Let me think: if `voices` is `SpeechSynthesisVoice[]` with the initial value `[]`, and the rule is detecting that `voices.length === 0` is always falsy... 
+Let me think: if `voices` is `SpeechSynthesisVoice[]` with the initial value `[]`, and the rule is detecting that `voices.length === 0` is always falsy...
 
 That doesn't make sense logically. The linter is saying `voices.length === 0` is always falsy, which would mean `voices.length` is never zero—but the array starts empty. Maybe the type system is treating `SpeechSynthesisVoice[]` as `never[]` when DOM types aren't available, which could be throwing off the type narrowing.
 
@@ -953,141 +983,142 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:10:58Z)**_
  `./worktrees/feat-speech-voice-selection/src/routes/$locale/_app/settings.tsx`
 
 ```text
-1	import {
-2	  createFileRoute,
-3	  useNavigate,
-4	  useParams,
-5	} from '@tanstack/react-router';
-6	import { useEffect, useState } from 'react';
-7	import { useTranslation } from 'react-i18next';
-8	import { Label } from '@/components/ui/label';
-9	import {
-10	  Select,
-11	  SelectContent,
-12	  SelectItem,
-13	  SelectTrigger,
-14	  SelectValue,
-15	} from '@/components/ui/select';
-16	import { Slider } from '@/components/ui/slider';
-17	import { useSettings } from '@/db/hooks/useSettings';
-18	
-19	const LOCALES = [
-20	  { code: 'en', label: '🇬🇧 English' },
-21	  { code: 'pt-BR', label: '🇧🇷 Português' },
-22	] as const;
-23	
-24	type SettingsLocale = (typeof LOCALES)[number]['code'];
-25	
-26	const SettingsScreen = () => {
-27	  const { t } = useTranslation('settings');
-28	  const { locale } = useParams({ from: '/$locale' });
-29	  const navigate = useNavigate();
-30	  const { settings, update } = useSettings();
-31	
-32	  const handleLocaleChange = (newLocale: string) => {
-33	    void navigate({
-34	      to: '/$locale/settings',
-35	      params: { locale: newLocale as SettingsLocale },
-36	    });
-37	  };
-38	
-39	  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-40	
-41	  useEffect(() => {
-42	    const synth = globalThis.speechSynthesis;
-43	    if (!synth) return;
-44	    const load = () => setVoices(synth.getVoices());
-45	    load();
-46	    synth.addEventListener('voiceschanged', load);
-47	    return () => synth.removeEventListener('voiceschanged', load);
-48	  }, []);
-49	
-50	  const volume = settings.volume ?? 0.8;
-51	  const speechRate = settings.speechRate ?? 1;
-52	  const preferredVoice = settings.preferredVoiceURI ?? 'Daniel';
-53	
-54	  return (
-55	    <div className="mx-auto max-w-md px-4 py-8">
-56	      <h1 className="mb-6 text-2xl font-bold">{t('title')}</h1>
-57	
-58	      <div className="flex flex-col gap-6">
-59	        <div className="flex flex-col gap-2">
-60	          <Label htmlFor="volume">
-61	            {t('volume', { percent: Math.round(volume * 100) })}
-62	          </Label>
-63	          <Slider
-64	            id="volume"
-65	            min={0}
-66	            max={1}
-67	            step={0.05}
-68	            value={[volume]}
-69	            onValueChange={([v]) => {
-70	              void update({ volume: v });
-71	            }}
-72	          />
-73	        </div>
-74	
-75	        <div className="flex flex-col gap-2">
-76	          <Label htmlFor="speechRate">
-77	            {t('speechRate', { rate: speechRate })}
-78	          </Label>
-79	          <Slider
-80	            id="speechRate"
-81	            min={0.5}
-82	            max={2}
-83	            step={0.1}
-84	            value={[speechRate]}
-85	            onValueChange={([v]) => {
-86	              void update({ speechRate: v });
-87	            }}
-88	          />
-89	        </div>
-90	
-91	        <div className="flex flex-col gap-2">
-92	          <Label htmlFor="language">{t('language')}</Label>
-93	          <Select value={locale} onValueChange={handleLocaleChange}>
-94	            <SelectTrigger id="language">
-95	              <SelectValue />
-96	            </SelectTrigger>
-97	            <SelectContent>
-98	              {LOCALES.map(({ code, label }) => (
-99	                <SelectItem key={code} value={code}>
-100	                  {label}
-101	                </SelectItem>
-102	              ))}
-103	            </SelectContent>
-104	          </Select>
-105	        </div>
-106	
-107	        <div className="flex flex-col gap-2">
-108	          <Label htmlFor="voice">{t('voice')}</Label>
-109	          <Select
-110	            value={preferredVoice}
-111	            onValueChange={(v) => void update({ preferredVoiceURI: v })}
-112	            disabled={voices.length === 0}
-113	          >
-114	            <SelectTrigger id="voice">
-115	              <SelectValue />
-116	            </SelectTrigger>
-117	            <SelectContent>
-118	              {voices.map((v) => (
-119	                <SelectItem key={v.name} value={v.name}>
-120	                  {v.name}
-121	                </SelectItem>
-122	              ))}
-123	            </SelectContent>
-124	          </Select>
-125	        </div>
-126	      </div>
-127	    </div>
-128	  );
-129	};
-130	
-131	export const Route = createFileRoute('/$locale/_app/settings')({
-132	  component: SettingsScreen,
-133	});
+1 import {
+2   createFileRoute,
+3   useNavigate,
+4   useParams,
+5 } from '@tanstack/react-router';
+6 import { useEffect, useState } from 'react';
+7 import { useTranslation } from 'react-i18next';
+8 import { Label } from '@/components/ui/label';
+9 import {
+10   Select,
+11   SelectContent,
+12   SelectItem,
+13   SelectTrigger,
+14   SelectValue,
+15 } from '@/components/ui/select';
+16 import { Slider } from '@/components/ui/slider';
+17 import { useSettings } from '@/db/hooks/useSettings';
+18 
+19 const LOCALES = [
+20   { code: 'en', label: '🇬🇧 English' },
+21   { code: 'pt-BR', label: '🇧🇷 Português' },
+22 ] as const;
+23 
+24 type SettingsLocale = (typeof LOCALES)[number]['code'];
+25 
+26 const SettingsScreen = () => {
+27   const { t } = useTranslation('settings');
+28   const { locale } = useParams({ from: '/$locale' });
+29   const navigate = useNavigate();
+30   const { settings, update } = useSettings();
+31 
+32   const handleLocaleChange = (newLocale: string) => {
+33     void navigate({
+34       to: '/$locale/settings',
+35       params: { locale: newLocale as SettingsLocale },
+36     });
+37   };
+38 
+39   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+40 
+41   useEffect(() => {
+42     const synth = globalThis.speechSynthesis;
+43     if (!synth) return;
+44     const load = () => setVoices(synth.getVoices());
+45     load();
+46     synth.addEventListener('voiceschanged', load);
+47     return () => synth.removeEventListener('voiceschanged', load);
+48   }, []);
+49 
+50   const volume = settings.volume ?? 0.8;
+51   const speechRate = settings.speechRate ?? 1;
+52   const preferredVoice = settings.preferredVoiceURI ?? 'Daniel';
+53 
+54   return (
+55     <div className="mx-auto max-w-md px-4 py-8">
+56       <h1 className="mb-6 text-2xl font-bold">{t('title')}</h1>
+57 
+58       <div className="flex flex-col gap-6">
+59         <div className="flex flex-col gap-2">
+60           <Label htmlFor="volume">
+61             {t('volume', { percent: Math.round(volume * 100) })}
+62           </Label>
+63           <Slider
+64             id="volume"
+65             min={0}
+66             max={1}
+67             step={0.05}
+68             value={[volume]}
+69             onValueChange={([v]) => {
+70               void update({ volume: v });
+71             }}
+72           />
+73         </div>
+74 
+75         <div className="flex flex-col gap-2">
+76           <Label htmlFor="speechRate">
+77             {t('speechRate', { rate: speechRate })}
+78           </Label>
+79           <Slider
+80             id="speechRate"
+81             min={0.5}
+82             max={2}
+83             step={0.1}
+84             value={[speechRate]}
+85             onValueChange={([v]) => {
+86               void update({ speechRate: v });
+87             }}
+88           />
+89         </div>
+90 
+91         <div className="flex flex-col gap-2">
+92           <Label htmlFor="language">{t('language')}</Label>
+93           <Select value={locale} onValueChange={handleLocaleChange}>
+94             <SelectTrigger id="language">
+95               <SelectValue />
+96             </SelectTrigger>
+97             <SelectContent>
+98               {LOCALES.map(({ code, label }) => (
+99                 <SelectItem key={code} value={code}>
+100                   {label}
+101                 </SelectItem>
+102               ))}
+103             </SelectContent>
+104           </Select>
+105         </div>
+106 
+107         <div className="flex flex-col gap-2">
+108           <Label htmlFor="voice">{t('voice')}</Label>
+109           <Select
+110             value={preferredVoice}
+111             onValueChange={(v) => void update({ preferredVoiceURI: v })}
+112             disabled={voices.length === 0}
+113           >
+114             <SelectTrigger id="voice">
+115               <SelectValue />
+116             </SelectTrigger>
+117             <SelectContent>
+118               {voices.map((v) => (
+119                 <SelectItem key={v.name} value={v.name}>
+120                   {v.name}
+121                 </SelectItem>
+122               ))}
+123             </SelectContent>
+124           </Select>
+125         </div>
+126       </div>
+127     </div>
+128   );
+129 };
+130 
+131 export const Route = createFileRoute('/$locale/_app/settings')({
+132   component: SettingsScreen,
+133 });
 134
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:11:05Z)**_
@@ -1096,11 +1127,12 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:11:05Z)**_
 Line 43 is `if (!synth) return;`. The error is "Unnecessary conditional, value is always falsy" for `!synth`. This is because `globalThis.speechSynthesis` might be typed as always truthy in the TypeScript lib.dom.d.ts. Let me check what type `globalThis.speechSynthesis` has.
 
 In lib.dom.d.ts, `speechSynthesis` is defined as:
+
 ```
 declare var speechSynthesis: SpeechSynthesis;
 ```
 
-So it's typed as always defined (not undefined). 
+So it's typed as always defined (not undefined).
 
 Since `!synth` would always be `false`, this is a TypeScript typing issue. The existing code in SpeechOutput.ts and voices.ts already handles this by casting `globalThis` to an object with an optional `speechSynthesis` property, so I'll apply that same pattern here to fix the type error.
 </details></think>
@@ -1117,6 +1149,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:11:08Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-speech-voice-selection/src/routes/$locale/_app/settings.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:11:25Z)**_
@@ -1521,6 +1554,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 
 Done in 3.14s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:11:35Z)**_
@@ -1529,7 +1563,6 @@ _**Agent (claude-sonnet-4-6 2026-04-03 07:11:35Z)**_
 The lint passed but the unit tests for `SpeechOutput.test.ts` only shows 2 tests, not 5. This means my new tests might not have been picked up in the root project (since I edited the worktree version). Wait, I see the lint ran on `worktrees/feat-speech-voice-selection`, but the tests ran from the root project (which has the old SpeechOutput.test.ts).
 
 Actually wait - the lint ran from root (`/Users/leocaseiro/Sites/base-skill`) and it passed. And the tests also ran from root and show 2 tests for `SpeechOutput.test.ts` - that's the root version which still has 2 tests. The worktree version has 5 tests.
-
 
 I need to run the tests from within the worktree to see the 5 tests and the new `voices.test.ts` file. The `yarn lint` command picked up both the root and worktree files since the worktrees folder is now part of the project structure, but the test runner seems to be only executing against the root version.
 </details></think>
@@ -1562,6 +1595,7 @@ $ vitest run --run src/lib/speech
 
 Done in 1.49s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:11:41Z)**_
@@ -1580,12 +1614,13 @@ Stage files for commit
 On branch feat/speech-voice-selection
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-	modified:   src/lib/speech/SpeechOutput.test.ts
-	modified:   src/lib/speech/SpeechOutput.ts
-	new file:   src/lib/speech/voices.test.ts
-	modified:   src/lib/speech/voices.ts
-	modified:   src/routes/$locale/_app/settings.tsx
+ modified:   src/lib/speech/SpeechOutput.test.ts
+ modified:   src/lib/speech/SpeechOutput.ts
+ new file:   src/lib/speech/voices.test.ts
+ modified:   src/lib/speech/voices.ts
+ modified:   src/routes/$locale/_app/settings.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:11:58Z)**_
@@ -2027,6 +2062,7 @@ Done in 3.38s.
  5 files changed, 144 insertions(+), 1 deletion(-)
  create mode 100644 src/lib/speech/voices.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:12:05Z)**_

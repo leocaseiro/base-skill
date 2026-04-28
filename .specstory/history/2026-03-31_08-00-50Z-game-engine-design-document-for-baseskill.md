@@ -33,6 +33,7 @@ The document must be comprehensive, self-contained, and actionable for AI agents
    - Opt-in per game config, enabled by default
 
 5. **Game Config JSON Schema** — full JSON Schema definition:
+
    ```
    id, title (localized object with en/pt-BR), subject (enum: letters|reading|math|...), 
    gradeBands (array of: pre-k|k|year1-2|year3-4|year5-6), 
@@ -43,6 +44,7 @@ The document must be comprehensive, self-contained, and actionable for AI agents
    content: { en: {...}, "pt-BR": {...} },
    sessionRecorder: { enabled: boolean }
    ```
+
    Include a complete worked example for the Math Facts game.
 
 6. **Parent Override Merging Logic**:

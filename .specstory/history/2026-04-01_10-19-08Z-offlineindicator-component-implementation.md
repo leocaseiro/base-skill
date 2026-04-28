@@ -14,6 +14,7 @@ Implement **Task 8** (OfflineIndicator) in `/Users/leocaseiro/Sites/base-skill/w
 Run `yarn test src/components/OfflineIndicator.test.tsx --run`.
 
 Commit:
+
 ```
 git add src/components/OfflineIndicator.tsx src/components/OfflineIndicator.test.tsx
 git commit -m "feat(ui): add OfflineIndicator component"
@@ -32,17 +33,13 @@ I'm creating the OfflineIndicator component with online/offline state management
 
 _**Agent (composer-2)**_
 
-
 Implementing OfflineIndicator per the Milestone 3 plan. Reading the plan and similar components for patterns.
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -53,6 +50,7 @@ Parameters:
   "pattern": "OfflineIndicator|Task 8|offline\\.banner"
 }
 ```
+
 Additional data:
 
 ```json
@@ -71,8 +69,8 @@ Additional data:
   "totalMatches": 27
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -114,7 +112,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -124,6 +121,7 @@ Parameters:
   "pattern": "offline"
 }
 ```
+
 Additional data:
 
 ```json
@@ -218,8 +216,8 @@ Additional data:
   "totalMatches": 170
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -230,11 +228,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -267,20 +260,17 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Creating offline indicator**
 
-I'm implementing OfflineIndicator.tsx with role=status and aria-live=polite attributes. 
+I'm implementing OfflineIndicator.tsx with role=status and aria-live=polite attributes.
 
 **Testing offline handler**
 
-I'm testing the offline handler logic and realizing the initial state is true, so I need to ensure the handler correctly sets isOnline to false when offline. I'm verifying the offline handler correctly hides the banner when online event fires. 
+I'm testing the offline handler logic and realizing the initial state is true, so I need to ensure the handler correctly sets isOnline to false when offline. I'm verifying the offline handler correctly hides the banner when online event fires.
 
 I'm adding tests for role=status and aria-live attributes to match the plan. </details></think>
 
 _**Agent (composer-2)**_
 
-
 Creating both files per the plan and running tests.
-
-
 
 _**Agent (composer-2)**_
 
@@ -314,11 +304,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -344,6 +329,7 @@ $ vitest run src/components/OfflineIndicator.test.tsx --run
 Done in 0.90s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -358,7 +344,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **read_lints**</summary>
 
-
 Parameters:
 
 ```json
@@ -369,6 +354,7 @@ Parameters:
   ]
 }
 ```
+
 Result:
 
 ```json
@@ -383,8 +369,8 @@ Result:
   ]
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -396,10 +382,7 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
 All tests passed. Committing from the worktree.
-
-
 
 _**Agent (composer-2)**_
 
@@ -481,6 +464,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 1.96s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -491,14 +475,15 @@ Done in 1.96s.
 
 _**Agent (composer-2)**_
 
-
 ## Status: **Complete**
 
 ### What was added
+
 - **`OfflineIndicator.tsx`** — `useState(navigator.onLine)`, `online` / `offline` listeners with cleanup, `null` when online, banner with `role="status"`, `aria-live="polite"`, `t('offline.banner')`, and the plan’s Tailwind classes.
 - **`OfflineIndicator.test.tsx`** — `I18nextProvider` + `i18n`, `navigator.onLine` getter mocks, **4 tests** including `/you're offline/i` (matches EN copy).
 
 ### Verification
+
 ```text
 yarn test src/components/OfflineIndicator.test.tsx --run
 ✓ 4 tests passed
@@ -507,6 +492,7 @@ yarn test src/components/OfflineIndicator.test.tsx --run
 Pre-commit hook also ran the full suite: **46 tests passed**.
 
 ### Commit
+
 - **Branch:** `milestone-3-app-shell` (worktree)
 - **SHA:** `a923d079f2c404c9368e431ad282b18fc560953d`
 - **Message:** `feat(ui): add OfflineIndicator component`

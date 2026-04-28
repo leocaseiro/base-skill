@@ -115,83 +115,84 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:13:19Z)**_
  `./worktrees/feat-dark-mode-a11y-vr/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx`
 
 ```text
-1	import { withDarkMode } from '../../../../.storybook/decorators';
-2	import { SortNumbersTileBank } from './SortNumbersTileBank';
-3	import type { AnswerGameConfig } from '@/components/answer-game/types';
-4	import type { Meta, StoryObj } from '@storybook/react';
-5	import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
-6	
-7	const config: AnswerGameConfig = {
-8	  gameId: 'sort-numbers-story',
-9	  inputMethod: 'drag',
-10	  wrongTileBehavior: 'lock-auto-eject',
-11	  tileBankMode: 'exact',
-12	  totalRounds: 1,
-13	  ttsEnabled: false,
-14	  initialTiles: [
-15	    { id: 't1', label: '3', value: '3' },
-16	    { id: 't2', label: '7', value: '7' },
-17	    { id: 't3', label: '1', value: '1' },
-18	    { id: 't4', label: '5', value: '5' },
-19	  ],
-20	  initialZones: [
-21	    {
-22	      id: 'z1',
-23	      index: 0,
-24	      expectedValue: '1',
-25	      placedTileId: null,
-26	      isWrong: false,
-27	      isLocked: false,
-28	    },
-29	    {
-30	      id: 'z2',
-31	      index: 1,
-32	      expectedValue: '3',
-33	      placedTileId: null,
-34	      isWrong: false,
-35	      isLocked: false,
-36	    },
-37	    {
-38	      id: 'z3',
-39	      index: 2,
-40	      expectedValue: '5',
-41	      placedTileId: null,
-42	      isWrong: false,
-43	      isLocked: false,
-44	    },
-45	    {
-46	      id: 'z4',
-47	      index: 3,
-48	      expectedValue: '7',
-49	      placedTileId: null,
-50	      isWrong: false,
-51	      isLocked: false,
-52	    },
-53	  ],
-54	};
-55	
-56	const withProvider = (Story: React.ComponentType) => (
-57	  <AnswerGameProvider config={config}>
-58	    <Story />
-59	  </AnswerGameProvider>
-60	);
-61	
-62	const meta: Meta<typeof SortNumbersTileBank> = {
-63	  component: SortNumbersTileBank,
-64	  tags: ['autodocs'],
-65	  decorators: [withProvider],
-66	};
-67	export default meta;
-68	
-69	type Story = StoryObj<typeof SortNumbersTileBank>;
-70	
-71	export const Default: Story = {};
-72	
-73	export const DefaultDark: Story = {
-74	  decorators: [withDarkMode],
-75	};
+1 import { withDarkMode } from '../../../../.storybook/decorators';
+2 import { SortNumbersTileBank } from './SortNumbersTileBank';
+3 import type { AnswerGameConfig } from '@/components/answer-game/types';
+4 import type { Meta, StoryObj } from '@storybook/react';
+5 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+6 
+7 const config: AnswerGameConfig = {
+8   gameId: 'sort-numbers-story',
+9   inputMethod: 'drag',
+10   wrongTileBehavior: 'lock-auto-eject',
+11   tileBankMode: 'exact',
+12   totalRounds: 1,
+13   ttsEnabled: false,
+14   initialTiles: [
+15     { id: 't1', label: '3', value: '3' },
+16     { id: 't2', label: '7', value: '7' },
+17     { id: 't3', label: '1', value: '1' },
+18     { id: 't4', label: '5', value: '5' },
+19   ],
+20   initialZones: [
+21     {
+22       id: 'z1',
+23       index: 0,
+24       expectedValue: '1',
+25       placedTileId: null,
+26       isWrong: false,
+27       isLocked: false,
+28     },
+29     {
+30       id: 'z2',
+31       index: 1,
+32       expectedValue: '3',
+33       placedTileId: null,
+34       isWrong: false,
+35       isLocked: false,
+36     },
+37     {
+38       id: 'z3',
+39       index: 2,
+40       expectedValue: '5',
+41       placedTileId: null,
+42       isWrong: false,
+43       isLocked: false,
+44     },
+45     {
+46       id: 'z4',
+47       index: 3,
+48       expectedValue: '7',
+49       placedTileId: null,
+50       isWrong: false,
+51       isLocked: false,
+52     },
+53   ],
+54 };
+55 
+56 const withProvider = (Story: React.ComponentType) => (
+57   <AnswerGameProvider config={config}>
+58     <Story />
+59   </AnswerGameProvider>
+60 );
+61 
+62 const meta: Meta<typeof SortNumbersTileBank> = {
+63   component: SortNumbersTileBank,
+64   tags: ['autodocs'],
+65   decorators: [withProvider],
+66 };
+67 export default meta;
+68 
+69 type Story = StoryObj<typeof SortNumbersTileBank>;
+70 
+71 export const Default: Story = {};
+72 
+73 export const DefaultDark: Story = {
+74   decorators: [withDarkMode],
+75 };
 76
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:13:19Z)**_
@@ -201,74 +202,75 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:13:19Z)**_
  `./worktrees/feat-dark-mode-a11y-vr/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx`
 
 ```text
-1	import { withDarkMode } from '../../../../.storybook/decorators';
-2	import { NumberSequenceSlots } from './NumberSequenceSlots';
-3	import type { AnswerGameConfig } from '@/components/answer-game/types';
-4	import type { Meta, StoryObj } from '@storybook/react';
-5	import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
-6	
-7	const config: AnswerGameConfig = {
-8	  gameId: 'sort-numbers-slots-story',
-9	  inputMethod: 'drag',
-10	  wrongTileBehavior: 'lock-auto-eject',
-11	  tileBankMode: 'exact',
-12	  totalRounds: 1,
-13	  ttsEnabled: false,
-14	  initialTiles: [
-15	    { id: 't1', label: '1', value: '1' },
-16	    { id: 't2', label: '3', value: '3' },
-17	    { id: 't3', label: '5', value: '5' },
-18	  ],
-19	  initialZones: [
-20	    {
-21	      id: 'z1',
-22	      index: 0,
-23	      expectedValue: '1',
-24	      placedTileId: null,
-25	      isWrong: false,
-26	      isLocked: false,
-27	    },
-28	    {
-29	      id: 'z2',
-30	      index: 1,
-31	      expectedValue: '3',
-32	      placedTileId: null,
-33	      isWrong: false,
-34	      isLocked: false,
-35	    },
-36	    {
-37	      id: 'z3',
-38	      index: 2,
-39	      expectedValue: '5',
-40	      placedTileId: null,
-41	      isWrong: false,
-42	      isLocked: false,
-43	    },
-44	  ],
-45	};
-46	
-47	const withProvider = (Story: React.ComponentType) => (
-48	  <AnswerGameProvider config={config}>
-49	    <Story />
-50	  </AnswerGameProvider>
-51	);
-52	
-53	const meta: Meta<typeof NumberSequenceSlots> = {
-54	  component: NumberSequenceSlots,
-55	  tags: ['autodocs'],
-56	  decorators: [withProvider],
-57	};
-58	export default meta;
-59	
-60	type Story = StoryObj<typeof NumberSequenceSlots>;
-61	
-62	export const Default: Story = {};
-63	
-64	export const DefaultDark: Story = {
-65	  decorators: [withDarkMode],
-66	};
+1 import { withDarkMode } from '../../../../.storybook/decorators';
+2 import { NumberSequenceSlots } from './NumberSequenceSlots';
+3 import type { AnswerGameConfig } from '@/components/answer-game/types';
+4 import type { Meta, StoryObj } from '@storybook/react';
+5 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+6 
+7 const config: AnswerGameConfig = {
+8   gameId: 'sort-numbers-slots-story',
+9   inputMethod: 'drag',
+10   wrongTileBehavior: 'lock-auto-eject',
+11   tileBankMode: 'exact',
+12   totalRounds: 1,
+13   ttsEnabled: false,
+14   initialTiles: [
+15     { id: 't1', label: '1', value: '1' },
+16     { id: 't2', label: '3', value: '3' },
+17     { id: 't3', label: '5', value: '5' },
+18   ],
+19   initialZones: [
+20     {
+21       id: 'z1',
+22       index: 0,
+23       expectedValue: '1',
+24       placedTileId: null,
+25       isWrong: false,
+26       isLocked: false,
+27     },
+28     {
+29       id: 'z2',
+30       index: 1,
+31       expectedValue: '3',
+32       placedTileId: null,
+33       isWrong: false,
+34       isLocked: false,
+35     },
+36     {
+37       id: 'z3',
+38       index: 2,
+39       expectedValue: '5',
+40       placedTileId: null,
+41       isWrong: false,
+42       isLocked: false,
+43     },
+44   ],
+45 };
+46 
+47 const withProvider = (Story: React.ComponentType) => (
+48   <AnswerGameProvider config={config}>
+49     <Story />
+50   </AnswerGameProvider>
+51 );
+52 
+53 const meta: Meta<typeof NumberSequenceSlots> = {
+54   component: NumberSequenceSlots,
+55   tags: ['autodocs'],
+56   decorators: [withProvider],
+57 };
+58 export default meta;
+59 
+60 type Story = StoryObj<typeof NumberSequenceSlots>;
+61 
+62 export const Default: Story = {};
+63 
+64 export const DefaultDark: Story = {
+65   decorators: [withDarkMode],
+66 };
 67
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:13:19Z)**_
@@ -278,17 +280,18 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:13:19Z)**_
  `./worktrees/feat-dark-mode-a11y-vr/.storybook/decorators/withDb.tsx`
 
 ```text
-1	import type { Decorator } from '@storybook/react';
-2	import { createStorybookDatabase } from '@/db/create-database';
-3	import { DbProvider } from '@/providers/DbProvider';
-4	
-5	export const withDb: Decorator = (Story) => (
-6	  <DbProvider openDatabase={createStorybookDatabase}>
-7	    <Story />
-8	  </DbProvider>
-9	);
+1 import type { Decorator } from '@storybook/react';
+2 import { createStorybookDatabase } from '@/db/create-database';
+3 import { DbProvider } from '@/providers/DbProvider';
+4 
+5 export const withDb: Decorator = (Story) => (
+6   <DbProvider openDatabase={createStorybookDatabase}>
+7     <Story />
+8   </DbProvider>
+9 );
 10
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:13:23Z)**_
@@ -303,6 +306,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:13:26Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-dark-mode-a11y-vr/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:13:28Z)**_
@@ -313,6 +317,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:13:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-dark-mode-a11y-vr/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:13:33Z)**_
@@ -327,6 +332,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:13:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-dark-mode-a11y-vr/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:13:35Z)**_
@@ -337,6 +343,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:13:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-dark-mode-a11y-vr/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:13:41Z)**_
@@ -352,6 +359,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:13:42Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:13:45Z)**_
@@ -365,6 +373,7 @@ worktrees/feat-dark-mode-a11y-vr/.storybook/decorators/withDb.tsx
 worktrees/feat-dark-mode-a11y-vr/.storybook/decorators/withRouter.tsx
 worktrees/feat-dark-mode-a11y-vr/.storybook/decorators/withTheme.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:13:49Z)**_
@@ -387,6 +396,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:13:50Z)**_
 Found 1 file
 worktrees/feat-dark-mode-a11y-vr/.storybook/decorators.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:13:54Z)**_
@@ -396,61 +406,63 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:13:54Z)**_
  `./worktrees/feat-dark-mode-a11y-vr/.storybook/decorators.tsx`
 
 ```text
-1	import { useEffect } from 'react';
-2	import type { Decorator } from '@storybook/react';
-3	
-4	/**
-5	 * Wraps the story in a dark-mode container.
-6	 * Use on individual stories that should always render dark,
-7	 * independently of the global Storybook theme switcher.
-8	 *
-9	 * Tailwind v4 @custom-variant dark (&:is(.dark *)) means any
-10	 * .dark ancestor enables dark utility classes on descendants.
-11	 */
-12	export const withDarkMode: Decorator = (Story) => (
-13	  <div
-14	    className="dark"
-15	    style={{ background: 'var(--background)', padding: '1rem' }}
-16	  >
-17	    <Story />
-18	  </div>
-19	);
-20	
-21	/**
-22	 * Inner component that applies document-level dark mode for the duration of the story.
-23	 * Required for portal-based components (e.g. InstructionsOverlay via createPortal)
-24	 * that render outside the .dark wrapper div used by withDarkMode.
-25	 * Cleans up on unmount to prevent leaking dark state to other stories.
-26	 */
-27	const DocumentDarkModeWrapper = ({
-28	  Story,
-29	}: {
-30	  Story: React.ComponentType;
-31	}) => {
-32	  useEffect(() => {
-33	    document.documentElement.classList.add('dark');
-34	    document.documentElement.dataset.theme = 'dark';
-35	    return () => {
-36	      document.documentElement.classList.remove('dark');
-37	      delete document.documentElement.dataset.theme;
-38	    };
-39	  }, []);
-40	  return <Story />;
-41	};
-42	
-43	export const withDocumentDarkMode: Decorator = (Story) => (
-44	  <DocumentDarkModeWrapper Story={Story} />
-45	);
+1 import { useEffect } from 'react';
+2 import type { Decorator } from '@storybook/react';
+3 
+4 /**
+5  * Wraps the story in a dark-mode container.
+6  * Use on individual stories that should always render dark,
+7  * independently of the global Storybook theme switcher.
+8  *
+9  * Tailwind v4 @custom-variant dark (&:is(.dark *)) means any
+10  * .dark ancestor enables dark utility classes on descendants.
+11  */
+12 export const withDarkMode: Decorator = (Story) => (
+13   <div
+14     className="dark"
+15     style={{ background: 'var(--background)', padding: '1rem' }}
+16   >
+17     <Story />
+18   </div>
+19 );
+20 
+21 /**
+22  * Inner component that applies document-level dark mode for the duration of the story.
+23  * Required for portal-based components (e.g. InstructionsOverlay via createPortal)
+24  * that render outside the .dark wrapper div used by withDarkMode.
+25  * Cleans up on unmount to prevent leaking dark state to other stories.
+26  */
+27 const DocumentDarkModeWrapper = ({
+28   Story,
+29 }: {
+30   Story: React.ComponentType;
+31 }) => {
+32   useEffect(() => {
+33     document.documentElement.classList.add('dark');
+34     document.documentElement.dataset.theme = 'dark';
+35     return () => {
+36       document.documentElement.classList.remove('dark');
+37       delete document.documentElement.dataset.theme;
+38     };
+39   }, []);
+40   return <Story />;
+41 };
+42 
+43 export const withDocumentDarkMode: Decorator = (Story) => (
+44   <DocumentDarkModeWrapper Story={Story} />
+45 );
 46
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:14:00Z)**_
 
 <think><details><summary>Thought Process</summary>
-The `withDarkMode` is exported from `.storybook/decorators.tsx` (a file, not a directory). The import path `'../../../../.storybook/decorators'` resolves to this file. But `withDb` is in `.storybook/decorators/withDb.tsx`. 
+The `withDarkMode` is exported from `.storybook/decorators.tsx` (a file, not a directory). The import path `'../../../../.storybook/decorators'` resolves to this file. But `withDb` is in `.storybook/decorators/withDb.tsx`.
 
 I need to either:
+
 1. Export `withDb` from `.storybook/decorators.tsx`
 2. Or change the import in the stories to import `withDb` from its own path
 
@@ -481,6 +493,7 @@ worktrees/feat-dark-mode-a11y-vr/src/components/answer-game/AnswerGame/AnswerGam
 
 [Showing results with pagination = limit: 10]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:14:05Z)**_
@@ -495,6 +508,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:14:07Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-dark-mode-a11y-vr/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:14:08Z)**_
@@ -505,6 +519,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:14:08Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-dark-mode-a11y-vr/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:14:12Z)**_
@@ -524,6 +539,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.13s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:14:28Z)**_
@@ -539,6 +555,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 7.70s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:14:31Z)**_
@@ -566,6 +583,7 @@ More info at https://github.com/storybookjs/test-runner#getting-started
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:14:37Z)**_
@@ -590,6 +608,7 @@ echo "Storybook PID: $!"
 ```text
 Storybook PID: 59819
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:15:12Z)**_
@@ -603,6 +622,7 @@ Wait for Storybook to be ready
 ```text
 Storybook ready
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:15:28Z)**_
@@ -654,6 +674,7 @@ Message:
 Ran all test suites**.**
 Done in 12.44s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:15:31Z)**_
@@ -711,6 +732,7 @@ yarn run v1.22.22
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:15:50Z)**_
@@ -726,6 +748,7 @@ b4b1ce7 fix(storybook): add withDb decorator to SortNumbersTileBank and NumberSe
 1a3391d docs(claude): add markdown authoring rules for markdownlint and Prettier compliance
 60ae21e style: format plan doc with prettier
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:16:14Z)**_
@@ -758,6 +781,7 @@ Done in 4.61s.
 To github.com:leocaseiro/base-skill.git
    1a3391d..b4b1ce7  feat/dark-mode-a11y-vr -> feat/dark-mode-a11y-vr
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:16:20Z)**_
@@ -767,6 +791,7 @@ Done. Here's what was fixed:
 **Root cause:** Both story files were missing `withDb` (which wraps `DbProvider`), causing `useRxDB()` calls inside the components to fail.
 
 **Fix applied to both files:**
+
 - [SortNumbersTileBank.stories.tsx](worktrees/feat-dark-mode-a11y-vr/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx) — added `withDb` import + `decorators: [withDb, withProvider]`
 - [NumberSequenceSlots.stories.tsx](worktrees/feat-dark-mode-a11y-vr/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx) — same
 
@@ -789,6 +814,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:17:11Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants to update the `write-storybook` skill (or another appropriate skill) to add instructions for agents about how to handle Storybook port conflicts when running tests. They want agents to:
+
 1. Not rely on an already-running Storybook they didn't start
 2. Start their own fresh Storybook instance
 3. If port 6006 is taken, use a different port
@@ -805,6 +831,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:17:11Z)**_
 ```text
 Launching skill: write-storybook
 ```
+
 </details></tool-use>
 
 ---
@@ -930,7 +957,6 @@ argTypes: {
 | Forgetting `withDb` for DB/settings hooks             | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
 | Adding `ThemeProvider` decorator                      | Already global — skip                                                                                                                                                            |
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:17:13Z)**_
@@ -1053,7 +1079,6 @@ SKIP_VR=1 SKIP_E2E=1 git push
 | Committing without updating baselines | Run `yarn test:vr:update` after intentional UI changes          |
 | Hardcoding absolute URLs              | Use relative paths like `/en/`; Playwright handles the base URL |
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:17:16Z)**_
@@ -1072,6 +1097,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:17:16Z)**_
 .claude/skills/write-e2e-vr-tests/SKILL.md
 .claude/skills/write-storybook/SKILL.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:17:19Z)**_
@@ -1097,7 +1123,7 @@ Base directory for this skill: /Users/leocaseiro/.claude/plugins/cache/claude-pl
 
 **Writing skills IS Test-Driven Development applied to process documentation.**
 
-**Personal skills live in agent-specific directories (`~/.claude/skills` for Claude Code, `~/.agents/skills/` for Codex)** 
+**Personal skills live in agent-specific directories (`~/.claude/skills` for Claude Code, `~/.agents/skills/` for Codex)**
 
 You write test cases (pressure scenarios with subagents), watch them fail (baseline behavior), write the skill (documentation), watch tests pass (agents comply), and refactor (close loopholes).
 
@@ -1135,12 +1161,14 @@ The entire skill creation process follows RED-GREEN-REFACTOR.
 ## When to Create a Skill
 
 **Create when:**
+
 - Technique wasn't intuitively obvious to you
 - You'd reference this again across projects
 - Pattern applies broadly (not project-specific)
 - Others would benefit
 
 **Don't create for:**
+
 - One-off solutions
 - Standard practices well-documented elsewhere
 - Project-specific conventions (put in CLAUDE.md)
@@ -1149,16 +1177,18 @@ The entire skill creation process follows RED-GREEN-REFACTOR.
 ## Skill Types
 
 ### Technique
+
 Concrete method with steps to follow (condition-based-waiting, root-cause-tracing)
 
 ### Pattern
+
 Way of thinking about problems (flatten-with-flags, test-invariants)
 
 ### Reference
+
 API docs, syntax guides, tool documentation (office docs)
 
 ## Directory Structure
-
 
 ```
 skills/
@@ -1170,10 +1200,12 @@ skills/
 **Flat namespace** - all skills in one searchable namespace
 
 **Separate files for:**
+
 1. **Heavy reference** (100+ lines) - API docs, comprehensive syntax
 2. **Reusable tools** - Scripts, utilities, templates
 
 **Keep inline:**
+
 - Principles and concepts
 - Code patterns (< 50 lines)
 - Everything else
@@ -1181,6 +1213,7 @@ skills/
 ## SKILL.md Structure
 
 **Frontmatter (YAML):**
+
 - Two required fields: `name` and `description` (see [agentskills.io/specification](https://agentskills.io/specification) for all supported fields)
 - Max 1024 characters total
 - `name`: Use letters, numbers, and hyphens only (no parentheses, special chars)
@@ -1224,7 +1257,6 @@ What goes wrong + fixes
 Concrete results
 ```
 
-
 ## Claude Search Optimization (CSO)
 
 **Critical for discovery:** Future Claude needs to FIND your skill
@@ -1260,8 +1292,9 @@ description: Use when implementing any feature or bugfix, before writing impleme
 ```
 
 **Content:**
+
 - Use concrete triggers, symptoms, and situations that signal this skill applies
-- Describe the *problem* (race conditions, inconsistent behavior) not *language-specific symptoms* (setTimeout, sleep)
+- Describe the _problem_ (race conditions, inconsistent behavior) not _language-specific symptoms_ (setTimeout, sleep)
 - Keep triggers technology-agnostic unless the skill itself is technology-specific
 - If skill is technology-specific, make that explicit in the trigger
 - Write in third person (injected into system prompt)
@@ -1287,6 +1320,7 @@ description: Use when using React Router and handling authentication redirects
 ### 2. Keyword Coverage
 
 Use words Claude would search for:
+
 - Error messages: "Hook timed out", "ENOTEMPTY", "race condition"
 - Symptoms: "flaky", "hanging", "zombie", "pollution"
 - Synonyms: "timeout/hang/freeze", "cleanup/teardown/afterEach"
@@ -1295,6 +1329,7 @@ Use words Claude would search for:
 ### 3. Descriptive Naming
 
 **Use active voice, verb-first:**
+
 - ✅ `creating-skills` not `skill-creation`
 - ✅ `condition-based-waiting` not `async-test-helpers`
 
@@ -1303,6 +1338,7 @@ Use words Claude would search for:
 **Problem:** getting-started and frequently-referenced skills load into EVERY conversation. Every token counts.
 
 **Target word counts:**
+
 - getting-started workflows: <150 words each
 - Frequently-loaded skills: <200 words total
 - Other skills: <500 words (still be concise)
@@ -1310,6 +1346,7 @@ Use words Claude would search for:
 **Techniques:**
 
 **Move details to tool help:**
+
 ```bash
 # ❌ BAD: Document all flags in SKILL.md
 search-conversations supports --text, --both, --after DATE, --before DATE, --limit N
@@ -1319,6 +1356,7 @@ search-conversations supports multiple modes and filters. Run --help for details
 ```
 
 **Use cross-references:**
+
 ```markdown
 # ❌ BAD: Repeat workflow details
 When searching, dispatch subagent with template...
@@ -1329,6 +1367,7 @@ Always use subagents (50-100x context savings). REQUIRED: Use [other-skill-name]
 ```
 
 **Compress examples:**
+
 ```markdown
 # ❌ BAD: Verbose example (42 words)
 your human partner: "How did we handle authentication errors in React Router before?"
@@ -1342,11 +1381,13 @@ You: Searching...
 ```
 
 **Eliminate redundancy:**
+
 - Don't repeat what's in cross-referenced skills
 - Don't explain what's obvious from command
 - Don't include multiple examples of same pattern
 
 **Verification:**
+
 ```bash
 wc -w skills/path/SKILL.md
 # getting-started workflows: aim for <150 each
@@ -1354,12 +1395,14 @@ wc -w skills/path/SKILL.md
 ```
 
 **Name by what you DO or core insight:**
+
 - ✅ `condition-based-waiting` > `async-test-helpers`
 - ✅ `using-skills` not `skill-usage`
 - ✅ `flatten-with-flags` > `data-structure-refactoring`
 - ✅ `root-cause-tracing` > `debugging-techniques`
 
 **Gerunds (-ing) work well for processes:**
+
 - `creating-skills`, `testing-skills`, `debugging-with-logs`
 - Active, describes the action you're taking
 
@@ -1368,6 +1411,7 @@ wc -w skills/path/SKILL.md
 **When writing documentation that references other skills:**
 
 Use skill name only, with explicit requirement markers:
+
 - ✅ Good: `**REQUIRED SUB-SKILL:** Use superpowers:test-driven-development`
 - ✅ Good: `**REQUIRED BACKGROUND:** You MUST understand superpowers:systematic-debugging`
 - ❌ Bad: `See skills/testing/test-driven-development` (unclear if required)
@@ -1391,11 +1435,13 @@ digraph when_flowchart {
 ```
 
 **Use flowcharts ONLY for:**
+
 - Non-obvious decision points
 - Process loops where you might stop too early
 - "When to use A vs B" decisions
 
 **Never use flowcharts for:**
+
 - Reference material → Tables, lists
 - Code examples → Markdown blocks
 - Linear instructions → Numbered lists
@@ -1404,6 +1450,7 @@ digraph when_flowchart {
 See @graphviz-conventions.dot for graphviz style rules.
 
 **Visualizing for your human partner:** Use `render-graphs.js` in this directory to render a skill's flowcharts to SVG:
+
 ```bash
 ./render-graphs.js ../some-skill           # Each diagram separately
 ./render-graphs.js ../some-skill --combine # All diagrams in one SVG
@@ -1414,11 +1461,13 @@ See @graphviz-conventions.dot for graphviz style rules.
 **One excellent example beats many mediocre ones**
 
 Choose most relevant language:
+
 - Testing techniques → TypeScript/JavaScript
 - System debugging → Shell/Python
 - Data processing → Python
 
 **Good example:**
+
 - Complete and runnable
 - Well-commented explaining WHY
 - From real scenario
@@ -1426,6 +1475,7 @@ Choose most relevant language:
 - Ready to adapt (not generic template)
 
 **Don't:**
+
 - Implement in 5+ languages
 - Create fill-in-the-blank templates
 - Write contrived examples
@@ -1435,21 +1485,26 @@ You're good at porting - one great example is enough.
 ## File Organization
 
 ### Self-Contained Skill
+
 ```
 defense-in-depth/
   SKILL.md    # Everything inline
 ```
+
 When: All content fits, no heavy reference needed
 
 ### Skill with Reusable Tool
+
 ```
 condition-based-waiting/
   SKILL.md    # Overview + patterns
   example.ts  # Working helpers to adapt
 ```
+
 When: Tool is reusable code, not just narrative
 
 ### Skill with Heavy Reference
+
 ```
 pptx/
   SKILL.md       # Overview + workflows
@@ -1457,6 +1512,7 @@ pptx/
   ooxml.md       # 500 lines XML structure
   scripts/       # Executable tools
 ```
+
 When: Reference material too large for inline
 
 ## The Iron Law (Same as TDD)
@@ -1471,6 +1527,7 @@ Write skill before testing? Delete it. Start over.
 Edit skill without testing? Same violation.
 
 **No exceptions:**
+
 - Not for "simple additions"
 - Not for "just adding a section"
 - Not for "documentation updates"
@@ -1489,6 +1546,7 @@ Different skill types need different test approaches:
 **Examples:** TDD, verification-before-completion, designing-before-coding
 
 **Test with:**
+
 - Academic questions: Do they understand the rules?
 - Pressure scenarios: Do they comply under stress?
 - Multiple pressures combined: time + sunk cost + exhaustion
@@ -1501,6 +1559,7 @@ Different skill types need different test approaches:
 **Examples:** condition-based-waiting, root-cause-tracing, defensive-programming
 
 **Test with:**
+
 - Application scenarios: Can they apply the technique correctly?
 - Variation scenarios: Do they handle edge cases?
 - Missing information tests: Do instructions have gaps?
@@ -1512,6 +1571,7 @@ Different skill types need different test approaches:
 **Examples:** reducing-complexity, information-hiding concepts
 
 **Test with:**
+
 - Recognition scenarios: Do they recognize when pattern applies?
 - Application scenarios: Can they use the mental model?
 - Counter-examples: Do they know when NOT to apply?
@@ -1523,6 +1583,7 @@ Different skill types need different test approaches:
 **Examples:** API documentation, command references, library guides
 
 **Test with:**
+
 - Retrieval scenarios: Can they find the right information?
 - Application scenarios: Can they use what they found correctly?
 - Gap testing: Are common use cases covered?
@@ -1565,10 +1626,12 @@ Write code before test? Delete it.
 Write code before test? Delete it. Start over.
 
 **No exceptions:**
+
 - Don't keep it as "reference"
 - Don't "adapt" it while writing tests
 - Don't look at it
 - Delete means delete
+
 ```
 </Good>
 
@@ -1625,6 +1688,7 @@ Follow the TDD cycle:
 ### RED: Write Failing Test (Baseline)
 
 Run pressure scenario with subagent WITHOUT the skill. Document exact behavior:
+
 - What choices did they make?
 - What rationalizations did they use (verbatim)?
 - Which pressures triggered violations?
@@ -1642,6 +1706,7 @@ Run same scenarios WITH skill. Agent should now comply.
 Agent found new rationalization? Add explicit counter. Re-test until bulletproof.
 
 **Testing methodology:** See @testing-skills-with-subagents.md for the complete testing methodology:
+
 - How to write pressure scenarios
 - Pressure types (time, sunk cost, authority, exhaustion)
 - Plugging holes systematically
@@ -1650,21 +1715,26 @@ Agent found new rationalization? Add explicit counter. Re-test until bulletproof
 ## Anti-Patterns
 
 ### ❌ Narrative Example
+
 "In session 2025-10-03, we found empty projectDir caused..."
 **Why bad:** Too specific, not reusable
 
 ### ❌ Multi-Language Dilution
+
 example-js.js, example-py.py, example-go.go
 **Why bad:** Mediocre quality, maintenance burden
 
 ### ❌ Code in Flowcharts
+
 ```dot
 step1 [label="import fs"];
 step2 [label="read file"];
 ```
+
 **Why bad:** Can't copy-paste, hard to read
 
 ### ❌ Generic Labels
+
 helper1, helper2, step3, pattern4
 **Why bad:** Labels should have semantic meaning
 
@@ -1673,6 +1743,7 @@ helper1, helper2, step3, pattern4
 **After writing ANY skill, you MUST STOP and complete the deployment process.**
 
 **Do NOT:**
+
 - Create multiple skills in batch without testing each
 - Move to next skill before current one is verified
 - Skip testing because "batching is more efficient"
@@ -1686,11 +1757,13 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 **IMPORTANT: Use TodoWrite to create todos for EACH checklist item below.**
 
 **RED Phase - Write Failing Test:**
+
 - [ ] Create pressure scenarios (3+ combined pressures for discipline skills)
 - [ ] Run scenarios WITHOUT skill - document baseline behavior verbatim
 - [ ] Identify patterns in rationalizations/failures
 
 **GREEN Phase - Write Minimal Skill:**
+
 - [ ] Name uses only letters, numbers, hyphens (no parentheses/special chars)
 - [ ] YAML frontmatter with required `name` and `description` fields (max 1024 chars; see [spec](https://agentskills.io/specification))
 - [ ] Description starts with "Use when..." and includes specific triggers/symptoms
@@ -1703,6 +1776,7 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 - [ ] Run scenarios WITH skill - verify agents now comply
 
 **REFACTOR Phase - Close Loopholes:**
+
 - [ ] Identify NEW rationalizations from testing
 - [ ] Add explicit counters (if discipline skill)
 - [ ] Build rationalization table from all test iterations
@@ -1710,6 +1784,7 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 - [ ] Re-test until bulletproof
 
 **Quality Checks:**
+
 - [ ] Small flowchart only if decision non-obvious
 - [ ] Quick reference table
 - [ ] Common mistakes section
@@ -1717,6 +1792,7 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 - [ ] Supporting files only for tools or heavy reference
 
 **Deployment:**
+
 - [ ] Commit skill to git and push to your fork (if configured)
 - [ ] Consider contributing back via PR (if broadly useful)
 
@@ -1725,10 +1801,10 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 How future Claude finds your skill:
 
 1. **Encounters problem** ("tests are flaky")
-3. **Finds SKILL** (description matches)
-4. **Scans overview** (is this relevant?)
-5. **Reads patterns** (quick reference table)
-6. **Loads example** (only when implementing)
+2. **Finds SKILL** (description matches)
+3. **Scans overview** (is this relevant?)
+4. **Reads patterns** (quick reference table)
+5. **Loads example** (only when implementing)
 
 **Optimize for this flow** - put searchable terms early and often.
 
@@ -1742,7 +1818,6 @@ Same benefits: Better quality, fewer surprises, bulletproof results.
 
 If you follow TDD for code, follow it for skills. It's the same discipline applied to documentation.
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:17:48Z)**_
@@ -1751,11 +1826,11 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:17:48Z)**_
 Now I have a clear picture. The user wants to add instructions to an appropriate skill about how to start a fresh Storybook instance when running tests, handle port conflicts, and not rely on existing Storybook instances they didn't start.
 
 Looking at the existing skills:
+
 - `write-storybook` — covers writing story files
 - `write-e2e-vr-tests` — covers E2E and VR tests
 
 The instruction about running Storybook tests (starting Storybook, handling ports) doesn't quite fit in `write-storybook` (which is about authoring stories) or `write-e2e-vr-tests` (which is about Playwright E2E/VR tests).
-
 
 Since `write-e2e-vr-tests` has a "Running VR Tests" section, the `write-storybook` skill should logically have a "Running Storybook Tests" section to cover this workflow, but it currently doesn't address how to start and manage Storybook instances during testing.
 
@@ -1808,129 +1883,130 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:18:37Z)**_
  `./.claude/skills/write-storybook/SKILL.md`
 
 ```text
-1	---
-2	name: write-storybook
-3	description: Use when adding or writing Storybook stories for React components in this project — covers file structure, meta config, named exports, decorators, and required variants
-4	---
-5	
-6	# Write Storybook
-7	
-8	## Overview
-9	
-10	Stories live co-located with their component (`ComponentName.stories.tsx`). Each story file exports a `default` meta object and named `Story` exports for each variant. This project uses `@storybook/react` with TanStack Router and `next-themes`.
-11	
-12	## Rules
-13	
-14	- **Always use `export default meta`** for the meta object (framework config file — the one exception to the named-export rule)
-15	- **All story variants use named exports**: `export const Default: Story = {}`
-16	- Every story file **must include a `Default` story**
-17	- Use `tags: ['autodocs']` in meta unless there's a reason not to
-18	- Do NOT import `React` — JSX transform handles it
-19	
-20	## File Structure
-21	
-22	```
-23	src/components/MyComponent.stories.tsx
-24	```
-25	
-26	## Minimal Template
-27	
-28	```tsx
-29	import { MyComponent } from './MyComponent';
-30	import type { Meta, StoryObj } from '@storybook/react';
-31	
-32	const meta: Meta<typeof MyComponent> = {
-33	  component: MyComponent,
-34	  tags: ['autodocs'],
-35	  args: {
-36	    // shared default props
-37	  },
-38	  argTypes: {
-39	    onSomeAction: { action: 'someAction' },
-40	  },
-41	};
-42	export default meta;
-43	
-44	type Story = StoryObj<typeof MyComponent>;
-45	
-46	export const Default: Story = {};
-47	
-48	export const SomeVariant: Story = {
-49	  args: { propName: value },
-50	};
-51	```
-52	
-53	## Decorators
-54	
-55	Use decorators when the component depends on context providers:
-56	
-57	| Needs                                                   | Decorator                                                  |
-58	| ------------------------------------------------------- | ---------------------------------------------------------- |
-59	| TanStack Router (`useNavigate`, `Link`, params)         | `withRouter` from `../../.storybook/decorators/withRouter` |
-60	| Database / RxDB (`useSettings`, `useRxDB`, any DB hook) | `withDb` from `../../.storybook/decorators/withDb`         |
-61	| Theme toggle                                            | `withTheme` — already applied globally via `preview.tsx`   |
-62	| ThemeProvider                                           | Already applied globally — do NOT add again                |
-63	
-64	When both are needed, put `withDb` first (outermost), then `withRouter`:
-65	
-66	```tsx
-67	import { withDb } from '../../.storybook/decorators/withDb';
-68	import { withRouter } from '../../.storybook/decorators/withRouter';
-69	
-70	const meta: Meta<typeof MyComponent> = {
-71	  component: MyComponent,
-72	  tags: ['autodocs'],
-73	  decorators: [withDb, withRouter],
-74	};
-75	```
-76	
-77	When a story wraps in `AnswerGameProvider`, `withDb` must come **before** the provider wrapper:
-78	
-79	```tsx
-80	decorators: [
-81	  withDb,
-82	  (Story) => (
-83	    <AnswerGameProvider config={storyConfig}>
-84	      <Story />
-85	    </AnswerGameProvider>
-86	  ),
-87	],
-88	```
-89	
-90	## Required Story Variants
-91	
-92	Cover these states to give Storybook meaningful value:
-93	
-94	- **Default** — happy path, all required props
-95	- **Empty / no data** — if component renders a list or optional content
-96	- **Loading / error** — if component has async states
-97	- **Edge case** — long text, zero items, boundary values
-98	- **Interaction states** — selected, bookmarked, disabled, etc.
-99	
-100	## argTypes for Event Handlers
-101	
-102	Any prop starting with `on` should use `{ action: '...' }`:
-103	
-104	```tsx
-105	argTypes: {
-106	  onBookmarkToggle: { action: 'bookmarkToggled' },
-107	  onPlay: { action: 'played' },
-108	},
-109	```
-110	
-111	## Common Mistakes
-112	
-113	| Mistake                                               | Fix                                                                                                                                                                              |
-114	| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-115	| `import React from 'react'` at top                    | Remove — not needed                                                                                                                                                              |
-116	| Named export for meta (`export const meta`)           | Use `export default meta`                                                                                                                                                        |
-117	| Default export for stories (`export default Default`) | Use `export const Default: Story = {}`                                                                                                                                           |
-118	| Missing `Default` story                               | Always add one                                                                                                                                                                   |
-119	| Forgetting `withRouter` for routing components        | Check if component calls `useNavigate`, `Link`, or reads route params                                                                                                            |
-120	| Forgetting `withDb` for DB/settings hooks             | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
-121	| Adding `ThemeProvider` decorator                      | Already global — skip                                                                                                                                                            |
+1 ---
+2 name: write-storybook
+3 description: Use when adding or writing Storybook stories for React components in this project — covers file structure, meta config, named exports, decorators, and required variants
+4 ---
+5 
+6 # Write Storybook
+7 
+8 ## Overview
+9 
+10 Stories live co-located with their component (`ComponentName.stories.tsx`). Each story file exports a `default` meta object and named `Story` exports for each variant. This project uses `@storybook/react` with TanStack Router and `next-themes`.
+11 
+12 ## Rules
+13 
+14 - **Always use `export default meta`** for the meta object (framework config file — the one exception to the named-export rule)
+15 - **All story variants use named exports**: `export const Default: Story = {}`
+16 - Every story file **must include a `Default` story**
+17 - Use `tags: ['autodocs']` in meta unless there's a reason not to
+18 - Do NOT import `React` — JSX transform handles it
+19 
+20 ## File Structure
+21 
+22 ```
+23 src/components/MyComponent.stories.tsx
+24 ```
+25 
+26 ## Minimal Template
+27 
+28 ```tsx
+29 import { MyComponent } from './MyComponent';
+30 import type { Meta, StoryObj } from '@storybook/react';
+31 
+32 const meta: Meta<typeof MyComponent> = {
+33   component: MyComponent,
+34   tags: ['autodocs'],
+35   args: {
+36     // shared default props
+37   },
+38   argTypes: {
+39     onSomeAction: { action: 'someAction' },
+40   },
+41 };
+42 export default meta;
+43 
+44 type Story = StoryObj<typeof MyComponent>;
+45 
+46 export const Default: Story = {};
+47 
+48 export const SomeVariant: Story = {
+49   args: { propName: value },
+50 };
+51 ```
+52 
+53 ## Decorators
+54 
+55 Use decorators when the component depends on context providers:
+56 
+57 | Needs                                                   | Decorator                                                  |
+58 | ------------------------------------------------------- | ---------------------------------------------------------- |
+59 | TanStack Router (`useNavigate`, `Link`, params)         | `withRouter` from `../../.storybook/decorators/withRouter` |
+60 | Database / RxDB (`useSettings`, `useRxDB`, any DB hook) | `withDb` from `../../.storybook/decorators/withDb`         |
+61 | Theme toggle                                            | `withTheme` — already applied globally via `preview.tsx`   |
+62 | ThemeProvider                                           | Already applied globally — do NOT add again                |
+63 
+64 When both are needed, put `withDb` first (outermost), then `withRouter`:
+65 
+66 ```tsx
+67 import { withDb } from '../../.storybook/decorators/withDb';
+68 import { withRouter } from '../../.storybook/decorators/withRouter';
+69 
+70 const meta: Meta<typeof MyComponent> = {
+71   component: MyComponent,
+72   tags: ['autodocs'],
+73   decorators: [withDb, withRouter],
+74 };
+75 ```
+76 
+77 When a story wraps in `AnswerGameProvider`, `withDb` must come **before** the provider wrapper:
+78 
+79 ```tsx
+80 decorators: [
+81   withDb,
+82   (Story) => (
+83     <AnswerGameProvider config={storyConfig}>
+84       <Story />
+85     </AnswerGameProvider>
+86   ),
+87 ],
+88 ```
+89 
+90 ## Required Story Variants
+91 
+92 Cover these states to give Storybook meaningful value:
+93 
+94 - **Default** — happy path, all required props
+95 - **Empty / no data** — if component renders a list or optional content
+96 - **Loading / error** — if component has async states
+97 - **Edge case** — long text, zero items, boundary values
+98 - **Interaction states** — selected, bookmarked, disabled, etc.
+99 
+100 ## argTypes for Event Handlers
+101 
+102 Any prop starting with `on` should use `{ action: '...' }`:
+103 
+104 ```tsx
+105 argTypes: {
+106   onBookmarkToggle: { action: 'bookmarkToggled' },
+107   onPlay: { action: 'played' },
+108 },
+109 ```
+110 
+111 ## Common Mistakes
+112 
+113 | Mistake                                               | Fix                                                                                                                                                                              |
+114 | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+115 | `import React from 'react'` at top                    | Remove — not needed                                                                                                                                                              |
+116 | Named export for meta (`export const meta`)           | Use `export default meta`                                                                                                                                                        |
+117 | Default export for stories (`export default Default`) | Use `export const Default: Story = {}`                                                                                                                                           |
+118 | Missing `Default` story                               | Always add one                                                                                                                                                                   |
+119 | Forgetting `withRouter` for routing components        | Check if component calls `useNavigate`, `Link`, or reads route params                                                                                                            |
+120 | Forgetting `withDb` for DB/settings hooks             | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
+121 | Adding `ThemeProvider` decorator                      | Already global — skip                                                                                                                                                            |
 122
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:18:53Z)**_
@@ -1941,6 +2017,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:18:53Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/skills/write-storybook/SKILL.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:18:56Z)**_
@@ -1955,6 +2032,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:19:16Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/skills/write-storybook/SKILL.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:19:23Z)**_
@@ -1962,6 +2040,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:19:23Z)**_
 Done. Here's what was added to [write-storybook/SKILL.md](.claude/skills/write-storybook/SKILL.md):
 
 **New "Running Storybook Tests" section** with a self-contained shell script that:
+
 1. Scans upward from 6006 to find a free port
 2. Starts Storybook with `--ci` on that port
 3. Polls until it's ready
@@ -1969,6 +2048,7 @@ Done. Here's what was added to [write-storybook/SKILL.md](.claude/skills/write-s
 5. Kills the process on green — leaves it alive on red for debugging
 
 **Two new Common Mistakes rows:**
+
 - `SKIP_STORYBOOK=1` to dodge a port conflict → find a free port instead
 - Running tests without `--url` → may silently target the wrong agent's instance
 
@@ -1987,7 +2067,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:19:40Z)**_
 <think><details><summary>Thought Process</summary>
 The user wants to commit the skill changes to the `feat/dark-mode-a11y-vr` branch. But wait - the skill file is at `/Users/leocaseiro/Sites/base-skill/.claude/skills/write-storybook/SKILL.md`, which is in the main repo, not in the worktree. The CLAUDE.md says never commit directly to master, all changes must be on a branch via a git worktree.
 
-But the worktree for `feat/dark-mode-a11y-vr` is at `/Users/leocaseiro/Sites/base-skill/worktrees/feat-dark-mode-a11y-vr`. 
+But the worktree for `feat/dark-mode-a11y-vr` is at `/Users/leocaseiro/Sites/base-skill/worktrees/feat-dark-mode-a11y-vr`.
 
 So the skill changes are currently uncommitted in the main repo's working directory, which is on the master branch. I need to check the git status to see what's actually been modified and figure out how to get these changes into the worktree branch instead.
 </details></think>
@@ -2005,16 +2085,16 @@ On branch master
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   .claude/skills/write-storybook/SKILL.md
-	modified:   .prettierignore
-	modified:   .specstory/history/2026-04-07_03-09-02Z.md
-	modified:   .specstory/statistics.json
+ modified:   .claude/skills/write-storybook/SKILL.md
+ modified:   .prettierignore
+ modified:   .specstory/history/2026-04-07_03-09-02Z.md
+ modified:   .specstory/statistics.json
 
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
-	.claude/launch.json
-	.specstory/history/2026-04-07_04-59-12Z-implement-the-dark-mode.md
-	.specstory/history/2026-04-07_06-13-12Z-fix-failing-storybook-tests.md
+ .claude/launch.json
+ .specstory/history/2026-04-07_04-59-12Z-implement-the-dark-mode.md
+ .specstory/history/2026-04-07_06-13-12Z-fix-failing-storybook-tests.md
 
 no changes added to commit (use "git add" and/or "git commit -a")
  .claude/skills/write-storybook/SKILL.md    |   39 +
@@ -2023,6 +2103,7 @@ no changes added to commit (use "git add" and/or "git commit -a")
  .specstory/statistics.json                 |  128 +-
  4 files changed, 3231 insertions(+), 58 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:19:44Z)**_
@@ -2048,6 +2129,7 @@ Copy updated skill to worktree
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:19:52Z)**_
@@ -2062,6 +2144,7 @@ Verify the change is present in the worktree
  .claude/skills/write-storybook/SKILL.md | 39 +++++++++++++++++++++++++++++++++
  1 file changed, 39 insertions(+)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:20:02Z)**_
@@ -2126,6 +2209,7 @@ Cannot update a component (`AnswerGameProvider`) while rendering a different com
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:20:05Z)**_
@@ -2141,6 +2225,7 @@ b989638 docs(skill): add Storybook test execution rules to write-storybook skill
 b4b1ce7 fix(storybook): add withDb decorator to SortNumbersTileBank and NumberSequenceSlots stories
 1a3391d docs(claude): add markdown authoring rules for markdownlint and Prettier compliance
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:20:07Z)**_
@@ -2167,6 +2252,7 @@ Done in 5.02s.
 To github.com:leocaseiro/base-skill.git
    b4b1ce7..b989638  feat/dark-mode-a11y-vr -> feat/dark-mode-a11y-vr
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:20:29Z)**_
@@ -2184,6 +2270,7 @@ Restore main repo skill file to master state
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:20:32Z)**_

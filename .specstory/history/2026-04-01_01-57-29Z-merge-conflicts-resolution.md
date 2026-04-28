@@ -6,24 +6,19 @@
 
 _**User**_
 
-Resolve these 3 merge conflicts across 3 files @Branch 
-
+Resolve these 3 merge conflicts across 3 files @Branch
 
 ---
 
 _**Agent (composer-2)**_
 
-
 Searching for merge conflict markers and reading the conflicted files.
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -34,6 +29,7 @@ Parameters:
   "pattern": "^\u003c\u003c\u003c\u003c\u003c\u003c\u003c|^=======|^\u003e\u003e\u003e\u003e\u003e\u003e\u003e"
 }
 ```
+
 Additional data:
 
 ```json
@@ -60,8 +56,8 @@ Additional data:
   "totalMatches": 9
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -72,11 +68,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -126,11 +117,6 @@ I'm merging the .prettierignore patterns from both branches, keeping the comment
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -145,11 +131,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -169,7 +150,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing milestone breakdown**
 
-I found that HEAD incorrectly merged the milestone-breakdown file, closing the thinking block too early on line 1032. I discovered that HEAD prematurely closed the milestone-breakdown thinking block, causing duplicate content in the final output. I'm adjusting the redacted_thinking block boundaries to match origin/master, ensuring proper closure after line 1152. 
+I found that HEAD incorrectly merged the milestone-breakdown file, closing the thinking block too early on line 1032. I discovered that HEAD prematurely closed the milestone-breakdown thinking block, causing duplicate content in the final output. I'm adjusting the redacted_thinking block boundaries to match origin/master, ensuring proper closure after line 1152.
 
 **Adjusting redacted_thinking**
 
@@ -177,11 +158,6 @@ I'm reorganizing the redacted_thinking block boundaries to span from line 1017 t
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -197,11 +173,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -216,18 +187,12 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -239,6 +204,7 @@ Parameters:
   "pattern": "."
 }
 ```
+
 Additional data:
 
 ```json
@@ -257,8 +223,8 @@ Additional data:
   "totalMatches": 809
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -282,11 +248,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -321,6 +282,7 @@ Here is a summary of what changed:
 &gt;&gt;&gt;&gt;&gt;&gt;&gt; origin/master
 
 ```
+
 </details>
 </tool-use>
 
@@ -334,9 +296,9 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Resolving merge conflict**
 
-I'm removing conflict markers and keeping HEAD's content from lines 1028-1152 while preserving the E2E paragraph and agent/tool/summary content. I'm adjusting the merge conflict resolution to correctly place the closing `</details>` tag after the agent's public summary, not within the redacted thinking section. I see that the original merge resolution was structurally incorrect and needs to keep all tool-use blocks outside of the redacted_thinking section. 
+I'm removing conflict markers and keeping HEAD's content from lines 1028-1152 while preserving the E2E paragraph and agent/tool/summary content. I'm adjusting the merge conflict resolution to correctly place the closing `</details>` tag after the agent's public summary, not within the redacted thinking section. I see that the original merge resolution was structurally incorrect and needs to keep all tool-use blocks outside of the redacted_thinking section.
 
-I'm cleaning up the merge conflict by removing the git conflict markers and stray closing tag, keeping only the intended structure. I'm adjusting the test organization plan to co-locate unit tests while keeping E2E tests in a separate directory. 
+I'm cleaning up the merge conflict by removing the git conflict markers and stray closing tag, keeping only the intended structure. I'm adjusting the test organization plan to co-locate unit tests while keeping E2E tests in a separate directory.
 
 **Reorganizing test files**
 
@@ -344,10 +306,7 @@ I'm removing the separate `tests/unit/` and `tests/e2e/` folders, co-locating te
 
 _**Agent (composer-2)**_
 
-
 Resolving conflicts: merging `.prettierignore` (comment + all ignore paths), keeping the milestone transcript’s command output, and keeping HEAD’s specstory narrative while dropping origin’s duplicate closing tags.
-
-
 
 _**Agent (composer-2)**_
 
@@ -411,17 +370,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -432,6 +385,7 @@ Parameters:
   "pattern": "^\u003c\u003c\u003c\u003c\u003c\u003c\u003c|^=======|^\u003e\u003e\u003e\u003e\u003e\u003e\u003e"
 }
 ```
+
 Additional data:
 
 ```json
@@ -445,8 +399,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -471,108 +425,109 @@ All conflicts fixed but you are still merging.
   (use "git commit" to conclude merge)
 
 Changes to be committed:
-	modified:   .github/workflows/deploy.yml
-	modified:   .prettierignore
-	modified:   .specstory/history/2026-03-31_09-53-23Z-milestone-breakdown-plan-discussion.md
-	modified:   .specstory/history/2026-03-31_10-14-41Z-repository-structure-exploration.md
-	modified:   .specstory/history/2026-03-31_10-16-45Z-milestone-1-scaffolding-plan-execution.md
-	modified:   .specstory/history/2026-03-31_10-49-30Z-(1)-milestone-1-scaffolding-plan-execution.md
-	modified:   .specstory/history/2026-03-31_10-50-00Z-worktree-to-main-repo-transition.md
-	modified:   .specstory/history/2026-03-31_12-08-42Z-milestone-2-brainstorming.md
-	modified:   .specstory/history/2026-03-31_12-12-56Z-code-patterns-and-file-search-in-workspace.md
-	new file:   docs/adrs/0001-rxdb-without-tanstack-query.md
-	modified:   docs/architecture.md
-	modified:   docs/ci-cd.md
-	modified:   e2e/a11y.spec.ts
-	modified:   e2e/smoke.spec.ts
-	modified:   package.json
-	modified:   playwright.config.ts
-	modified:   src/components/Header.tsx
-	modified:   src/components/ThemeToggle.tsx
-	new file:   src/db/create-database.test.ts
-	new file:   src/db/create-database.ts
-	new file:   src/db/hooks/useRxDB.ts
-	new file:   src/db/hooks/useRxQuery.test.tsx
-	new file:   src/db/hooks/useRxQuery.ts
-	new file:   src/db/index.ts
-	new file:   src/db/migrations.test.ts
-	new file:   src/db/migrations.ts
-	new file:   src/db/schemas/app-meta.ts
-	new file:   src/db/schemas/bookmarks.ts
-	new file:   src/db/schemas/game_config_overrides.ts
-	new file:   src/db/schemas/index.ts
-	new file:   src/db/schemas/profiles.ts
-	new file:   src/db/schemas/progress.ts
-	new file:   src/db/schemas/session_history.ts
-	new file:   src/db/schemas/session_history_index.ts
-	new file:   src/db/schemas/settings.ts
-	new file:   src/db/schemas/sync_meta.ts
-	new file:   src/db/schemas/themes.ts
-	new file:   src/db/seed-themes.ts
-	new file:   src/db/setup-validation.test.ts
-	new file:   src/db/types.ts
-	new file:   src/games/registry.test.ts
-	new file:   src/games/registry.ts
-	new file:   src/lib/game-event-bus.md
-	new file:   src/lib/game-event-bus.test.ts
-	new file:   src/lib/game-event-bus.ts
-	new file:   src/lib/i18n/i18n.test.ts
-	new file:   src/lib/i18n/i18n.ts
-	new file:   src/lib/i18n/locales/en/common.json
-	new file:   src/lib/i18n/locales/en/encouragements.json
-	new file:   src/lib/i18n/locales/en/games.json
-	new file:   src/lib/i18n/locales/en/settings.json
-	new file:   src/lib/i18n/locales/pt-BR/common.json
-	new file:   src/lib/i18n/locales/pt-BR/encouragements.json
-	new file:   src/lib/i18n/locales/pt-BR/games.json
-	new file:   src/lib/i18n/locales/pt-BR/settings.json
-	new file:   src/lib/speech/SpeechInput.ts
-	new file:   src/lib/speech/SpeechOutput.test.ts
-	new file:   src/lib/speech/SpeechOutput.ts
-	new file:   src/lib/speech/voices.ts
-	new file:   src/lib/theme/css-vars.test.ts
-	new file:   src/lib/theme/css-vars.ts
-	new file:   src/lib/theme/default-tokens.ts
-	new file:   src/providers/DbProvider.test.tsx
-	new file:   src/providers/DbProvider.tsx
-	new file:   src/providers/ThemeRuntimeProvider.tsx
-	modified:   src/routeTree.gen.ts
-	modified:   src/router.tsx
-	new file:   src/routes/$locale/_app.tsx
-	renamed:    src/routes/_app/dashboard.tsx -&gt; src/routes/$locale/_app/dashboard.tsx
-	renamed:    src/routes/_app/game/$gameId.tsx -&gt; src/routes/$locale/_app/game/$gameId.tsx
-	renamed:    src/routes/_app/index.test.tsx -&gt; src/routes/$locale/_app/index.test.tsx
-	new file:   src/routes/$locale/_app/index.tsx
-	renamed:    src/routes/_app/parent.tsx -&gt; src/routes/$locale/_app/parent.tsx
-	renamed:    src/routes/_app/parent/data.tsx -&gt; src/routes/$locale/_app/parent/data.tsx
-	renamed:    src/routes/_app/parent/history.tsx -&gt; src/routes/$locale/_app/parent/history.tsx
-	renamed:    src/routes/_app/parent/index.tsx -&gt; src/routes/$locale/_app/parent/index.tsx
-	renamed:    src/routes/_app/parent/overrides.tsx -&gt; src/routes/$locale/_app/parent/overrides.tsx
-	renamed:    src/routes/_app/parent/sync.tsx -&gt; src/routes/$locale/_app/parent/sync.tsx
-	renamed:    src/routes/_app/parent/voices.tsx -&gt; src/routes/$locale/_app/parent/voices.tsx
-	renamed:    src/routes/_app/settings.tsx -&gt; src/routes/$locale/_app/settings.tsx
-	new file:   src/routes/$locale/route.tsx
-	modified:   src/routes/__root.tsx
-	deleted:    src/routes/_app.tsx
-	deleted:    src/routes/_app/index.tsx
-	new file:   src/routes/index.tsx
-	modified:   src/test-setup.ts
-	new file:   src/types/game-events.ts
-	modified:   tsconfig.json
-	modified:   vitest.config.ts
-	modified:   yarn.lock
+ modified:   .github/workflows/deploy.yml
+ modified:   .prettierignore
+ modified:   .specstory/history/2026-03-31_09-53-23Z-milestone-breakdown-plan-discussion.md
+ modified:   .specstory/history/2026-03-31_10-14-41Z-repository-structure-exploration.md
+ modified:   .specstory/history/2026-03-31_10-16-45Z-milestone-1-scaffolding-plan-execution.md
+ modified:   .specstory/history/2026-03-31_10-49-30Z-(1)-milestone-1-scaffolding-plan-execution.md
+ modified:   .specstory/history/2026-03-31_10-50-00Z-worktree-to-main-repo-transition.md
+ modified:   .specstory/history/2026-03-31_12-08-42Z-milestone-2-brainstorming.md
+ modified:   .specstory/history/2026-03-31_12-12-56Z-code-patterns-and-file-search-in-workspace.md
+ new file:   docs/adrs/0001-rxdb-without-tanstack-query.md
+ modified:   docs/architecture.md
+ modified:   docs/ci-cd.md
+ modified:   e2e/a11y.spec.ts
+ modified:   e2e/smoke.spec.ts
+ modified:   package.json
+ modified:   playwright.config.ts
+ modified:   src/components/Header.tsx
+ modified:   src/components/ThemeToggle.tsx
+ new file:   src/db/create-database.test.ts
+ new file:   src/db/create-database.ts
+ new file:   src/db/hooks/useRxDB.ts
+ new file:   src/db/hooks/useRxQuery.test.tsx
+ new file:   src/db/hooks/useRxQuery.ts
+ new file:   src/db/index.ts
+ new file:   src/db/migrations.test.ts
+ new file:   src/db/migrations.ts
+ new file:   src/db/schemas/app-meta.ts
+ new file:   src/db/schemas/bookmarks.ts
+ new file:   src/db/schemas/game_config_overrides.ts
+ new file:   src/db/schemas/index.ts
+ new file:   src/db/schemas/profiles.ts
+ new file:   src/db/schemas/progress.ts
+ new file:   src/db/schemas/session_history.ts
+ new file:   src/db/schemas/session_history_index.ts
+ new file:   src/db/schemas/settings.ts
+ new file:   src/db/schemas/sync_meta.ts
+ new file:   src/db/schemas/themes.ts
+ new file:   src/db/seed-themes.ts
+ new file:   src/db/setup-validation.test.ts
+ new file:   src/db/types.ts
+ new file:   src/games/registry.test.ts
+ new file:   src/games/registry.ts
+ new file:   src/lib/game-event-bus.md
+ new file:   src/lib/game-event-bus.test.ts
+ new file:   src/lib/game-event-bus.ts
+ new file:   src/lib/i18n/i18n.test.ts
+ new file:   src/lib/i18n/i18n.ts
+ new file:   src/lib/i18n/locales/en/common.json
+ new file:   src/lib/i18n/locales/en/encouragements.json
+ new file:   src/lib/i18n/locales/en/games.json
+ new file:   src/lib/i18n/locales/en/settings.json
+ new file:   src/lib/i18n/locales/pt-BR/common.json
+ new file:   src/lib/i18n/locales/pt-BR/encouragements.json
+ new file:   src/lib/i18n/locales/pt-BR/games.json
+ new file:   src/lib/i18n/locales/pt-BR/settings.json
+ new file:   src/lib/speech/SpeechInput.ts
+ new file:   src/lib/speech/SpeechOutput.test.ts
+ new file:   src/lib/speech/SpeechOutput.ts
+ new file:   src/lib/speech/voices.ts
+ new file:   src/lib/theme/css-vars.test.ts
+ new file:   src/lib/theme/css-vars.ts
+ new file:   src/lib/theme/default-tokens.ts
+ new file:   src/providers/DbProvider.test.tsx
+ new file:   src/providers/DbProvider.tsx
+ new file:   src/providers/ThemeRuntimeProvider.tsx
+ modified:   src/routeTree.gen.ts
+ modified:   src/router.tsx
+ new file:   src/routes/$locale/_app.tsx
+ renamed:    src/routes/_app/dashboard.tsx -&gt; src/routes/$locale/_app/dashboard.tsx
+ renamed:    src/routes/_app/game/$gameId.tsx -&gt; src/routes/$locale/_app/game/$gameId.tsx
+ renamed:    src/routes/_app/index.test.tsx -&gt; src/routes/$locale/_app/index.test.tsx
+ new file:   src/routes/$locale/_app/index.tsx
+ renamed:    src/routes/_app/parent.tsx -&gt; src/routes/$locale/_app/parent.tsx
+ renamed:    src/routes/_app/parent/data.tsx -&gt; src/routes/$locale/_app/parent/data.tsx
+ renamed:    src/routes/_app/parent/history.tsx -&gt; src/routes/$locale/_app/parent/history.tsx
+ renamed:    src/routes/_app/parent/index.tsx -&gt; src/routes/$locale/_app/parent/index.tsx
+ renamed:    src/routes/_app/parent/overrides.tsx -&gt; src/routes/$locale/_app/parent/overrides.tsx
+ renamed:    src/routes/_app/parent/sync.tsx -&gt; src/routes/$locale/_app/parent/sync.tsx
+ renamed:    src/routes/_app/parent/voices.tsx -&gt; src/routes/$locale/_app/parent/voices.tsx
+ renamed:    src/routes/_app/settings.tsx -&gt; src/routes/$locale/_app/settings.tsx
+ new file:   src/routes/$locale/route.tsx
+ modified:   src/routes/__root.tsx
+ deleted:    src/routes/_app.tsx
+ deleted:    src/routes/_app/index.tsx
+ new file:   src/routes/index.tsx
+ modified:   src/test-setup.ts
+ new file:   src/types/game-events.ts
+ modified:   tsconfig.json
+ modified:   vitest.config.ts
+ modified:   yarn.lock
 
 Changes not staged for commit:
   (use "git add &lt;file&gt;..." to update what will be committed)
   (use "git restore &lt;file&gt;..." to discard changes in working directory)
-	modified:   .specstory/statistics.json
+ modified:   .specstory/statistics.json
 
 Untracked files:
   (use "git add &lt;file&gt;..." to include in what will be committed)
-	.specstory/history/2026-04-01_01-57-29Z-merge-conflicts-resolution.md
+ .specstory/history/2026-04-01_01-57-29Z-merge-conflicts-resolution.md
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -583,16 +538,18 @@ Untracked files:
 
 _**Agent (composer-2)**_
 
-
 Here’s what was merged:
 
 ### 1. `.prettierignore`
+
 Combined both sides: kept your **comment** about Cursor session exports and **all ignore paths** — `.specstory/`, `.cursor/`, `.husky/`, `.vscode/`.
 
 ### 2. `.specstory/history/2026-03-31_10-16-45Z-milestone-1-scaffolding-plan-execution.md`
+
 Kept the **shell transcript** (`docs`, `scope.md`, `No CLAUDE.md`) after the `bash` block and removed conflict markers.
 
 ### 3. `.specstory/history/2026-03-31_09-53-23Z-milestone-breakdown-plan-discussion.md`
+
 Kept the full **HEAD** thread (E2E note, plan updates, summary). Dropped the **`origin/master`** tail (`</details></think>` + markers), since the first thought block already closes after the E2E paragraph and a second close would be invalid.
 
 There are **no remaining `<<<<<<<` / `=======` / `>>>>>>>`** markers. The three files are **staged**; Git reports **“All conflicts fixed but you are still merging.”** Finish with:

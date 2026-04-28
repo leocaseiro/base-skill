@@ -19,6 +19,7 @@ All git commands and yarn must run from this path. Branch: `milestone-3-app-shel
 **Task 1: Extend GAME_CATALOG with level and subject**
 
 **Files:**
+
 - Modify: `src/games/registry.ts`
 - Modify: `src/games/registry.test.ts`
 
@@ -102,6 +103,7 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
 **Step 4:** Run tests — expect 3 tests passing.
 
 **Step 5:** Commit:
+
 ```
 git add src/games/registry.ts src/games/registry.test.ts
 git commit -m "feat(catalog): add level and subject fields to GameCatalogEntry"
@@ -133,7 +135,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Implementing task 1**
 
-I'm working in the milestone-3-app-shell directory and replacing the test file and registry.ts as specified. 
+I'm working in the milestone-3-app-shell directory and replacing the test file and registry.ts as specified.
 
 **Checking worktree state**
 
@@ -141,10 +143,7 @@ I'm verifying the worktree setup and reading existing files before replacing the
 
 _**Agent (composer-2)**_
 
-
 Implementing Task 1 in the milestone worktree: checking the repo state and `GAME_CATALOG` usages so we don't break other code.
-
-
 
 _**Agent (composer-2)**_
 
@@ -178,7 +177,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -188,6 +186,7 @@ Parameters:
   "pattern": "GAME_CATALOG|GameCatalogEntry|from ['\\\"].*registry"
 }
 ```
+
 Additional data:
 
 ```json
@@ -238,8 +237,8 @@ Additional data:
   "totalMatches": 70
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -258,10 +257,7 @@ I'm writing the registry and index files as specified, following the TDD approac
 
 _**Agent (composer-2)**_
 
-
 Applying TDD: updating the test first, running it (expect failure), then replacing `registry.ts` and re-running tests.
-
-
 
 _**Agent (composer-2)**_
 
@@ -279,11 +275,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -343,6 +334,7 @@ AssertionError: expected [ 'math', 'reading', 'letters' ] to include undefined
 error Command failed with exit code 1.
 
 ```
+
 </details>
 </tool-use>
 
@@ -353,10 +345,7 @@ error Command failed with exit code 1.
 
 _**Agent (composer-2)**_
 
-
 Implementing `registry.ts` as specified.
-
-
 
 _**Agent (composer-2)**_
 
@@ -374,11 +363,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -405,6 +389,7 @@ $ vitest run src/games/registry.test.ts
 Done in 0.98s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -419,7 +404,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **read_lints**</summary>
 
-
 Parameters:
 
 ```json
@@ -430,6 +414,7 @@ Parameters:
   ]
 }
 ```
+
 Result:
 
 ```json
@@ -444,8 +429,8 @@ Result:
   ]
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -456,11 +441,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -534,6 +514,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 1.82s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -544,31 +525,36 @@ Done in 1.82s.
 
 _**Agent (composer-2)**_
 
-
 ## Report
 
 **Status:** DONE
 
 ### What was implemented
+
 - **`src/games/registry.ts`:** Added `GameLevel` and `GameSubject`, extended `GameCatalogEntry` with `levels` and `subject`, and set those fields on all three catalog entries per the spec.
 - **`src/games/registry.test.ts`:** Replaced tests with the three cases: stable ids/title keys, non-empty valid `levels`, and valid `subject`.
 
 ### TDD / tests
+
 1. After test-only change: `yarn test src/games/registry.test.ts` — **2 failed, 1 passed** (`levels`/`subject` missing on old entries).
 2. After registry update: `yarn test src/games/registry.test.ts` — **3 passed**.
 
 Pre-commit hook also ran full `vitest run`: **12 files, 18 tests passed** (existing `act(...)` stderr in `useRxQuery` test; not from this task).
 
 ### Files changed
+
 - `src/games/registry.ts`
 - `src/games/registry.test.ts`
 
 ### Commit
+
 `1e349a1` — `feat(catalog): add level and subject fields to GameCatalogEntry`
 
 ### Self-review
+
 - Matches the spec verbatim; `src/routes/$locale/_app/index.tsx` still only uses `id` / `titleKey`, so no route changes were required.
 - Lint-staged ran eslint/prettier on the two files; no new linter issues.
 
 ### Concerns
+
 None.

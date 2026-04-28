@@ -6,8 +6,7 @@
 
 _**User**_
 
-Plan @docs/baseskill_milestone_breakdown_85146c93.plan.md:63-64 
-
+Plan @docs/baseskill_milestone_breakdown_85146c93.plan.md:63-64
 
 ---
 
@@ -100,7 +99,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **task_v2**</summary>
 
-
 Parameters:
 
 ```json
@@ -112,6 +110,7 @@ Parameters:
   "subagentType": "explore"
 }
 ```
+
 Additional data:
 
 ```json
@@ -121,6 +120,7 @@ Additional data:
   "terminationReason": "completed"
 }
 ```
+
 Result:
 
 ```json
@@ -128,8 +128,8 @@ Result:
   "agentId": "90481bb8-1e8b-462b-8fe1-371d6d595dbd"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -155,6 +155,7 @@ v20.20.2
 /Users/leocaseiro/.nvm/versions/node/v20.20.2/bin/npx
 
 ```
+
 </details>
 </tool-use>
 
@@ -226,7 +227,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-resolve-library-id**</summary>
 
-
 Parameters:
 
 ```json
@@ -240,6 +240,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -247,6 +248,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -254,8 +256,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"MCP error -32602: Input validation error: Invalid arguments for tool resolve-library-id: [\\n  {\\n    \\\"expected\\\": \\\"string\\\",\\n    \\\"code\\\": \\\"invalid_type\\\",\\n    \\\"path\\\": [\\n      \\\"query\\\"\\n    ],\\n    \\\"message\\\": \\\"Invalid input: expected string, received undefined\\\"\\n  }\\n]\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -305,7 +307,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-resolve-library-id**</summary>
 
-
 Parameters:
 
 ```json
@@ -319,6 +320,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -326,6 +328,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -333,8 +336,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"Available Libraries:\\n\\n- Title: TanStack Start\\n- Context7-compatible library ID: /websites/tanstack_start\\n- Description: TanStack Start is an alpha web development framework that integrates various TanStack libraries such as Router, Query, and Table to provide a comprehensive starting point for building applications.\\n- Code Snippets: 1445\\n- Source Reputation: High\\n- Benchmark Score: 83.1\\n----------\\n- Title: TanStack Start\\n- Context7-compatible library ID: /websites/tanstack_start_framework_react\\n- Description: TanStack Start is a full-stack React framework for building modern web applications with integrated routing, server-side rendering, and data fetching capabilities.\\n- Code Snippets: 788\\n- Source Reputation: High\\n- Benchmark Score: 84.21\\n----------\\n- Title: AuthKit TanStack Start\\n- Context7-compatible library ID: /workos/authkit-tanstack-start\\n- Description: Provides authentication and session management for TanStack Start applications using WorkOS AuthKit.\\n- Code Snippets: 53\\n- Source Reputation: High\\n- Benchmark Score: 77.66\\n----------\\n- Title: Tauri 2.0 + TanStack Start React Template\\n- Context7-compatible library ID: /kvnxiao/tauri-tanstack-start-react-template\\n- Description: A project template combining Tauri 2.0 and TanStack Start with React, featuring type-safe file-based routing, TailwindCSS, Vitest, and opinionated formatting for building desktop applications.\\n- Code Snippets: 38\\n- Source Reputation: High\\n- Benchmark Score: 70.7\\n----------\\n- Title: TanStack Start Convex Clerk Polar.sh Starter\\n- Context7-compatible library ID: /devczero/tanstackstart-convex-clerk-polarsh-starter\\n- Description: A starter template that integrates TanStack Start with Clerk authentication, Convex backend, and Polar.sh for monetization.\\n- Code Snippets: 35\\n- Source Reputation: Medium\\n- Benchmark Score: 67.95\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -350,7 +353,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-query-docs**</summary>
 
-
 Parameters:
 
 ```json
@@ -364,6 +366,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -371,6 +374,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -378,8 +382,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"MCP error -32602: Input validation error: Invalid arguments for tool query-docs: [\\n  {\\n    \\\"expected\\\": \\\"string\\\",\\n    \\\"code\\\": \\\"invalid_type\\\",\\n    \\\"path\\\": [\\n      \\\"libraryId\\\"\\n    ],\\n    \\\"message\\\": \\\"Invalid input: expected string, received undefined\\\"\\n  }\\n]\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -408,7 +412,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-query-docs**</summary>
 
-
 Parameters:
 
 ```json
@@ -422,6 +425,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -429,6 +433,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -436,8 +441,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"### Create a new TanStack Start project using the CLI\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/quick-start.md\\n\\nUse the TanStack CLI to quickly scaffold a new Start project. This command will guide you through configuration options such as integrating Tailwind CSS and ESLint, providing a customized starting point for your application.\\n\\n&#96;&#96;&#96;bash\\nnpx @tanstack/cli@latest create\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Initialize TanStack Start project\\n\\nSource: https://tanstack.com/start/latest/docs/framework/solid/tutorial/reading-writing-file.md\\n\\nCommands to scaffold a new TanStack Start project using the CLI, install necessary dependencies, and add the uuid package for unique identifier generation.\\n\\n&#96;&#96;&#96;bash\\npnpx @tanstack/cli@latest create --framework solid devjokes\\ncd devjokes\\npnpm i\\npnpm dev\\npnpm add uuid\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Enable SPA Mode in TanStack Start Configuration\\n\\nSource: https://tanstack.com/start/latest/docs/framework/solid/guide/spa-mode.md\\n\\nThis configuration snippet demonstrates how to enable SPA mode within your vite.config.ts file. By setting spa.enabled to true in the tanstackStart plugin options, you instruct the build process to generate a static shell for client-side bootstrapping.\\n\\n&#96;&#96;&#96;tsx\\n// vite.config.ts\\nexport default defineConfig({\\n  plugins: [\\n    tanstackStart({\\n      spa: {\\n        enabled: true,\\n      },\\n    }),\\n  ],\\n})\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Configure Prerender Options in Vite Config\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode.md\\n\\nSet custom prerendering options for the SPA shell in the TanStack Start Vite configuration. Allows overriding default settings like outputPath, crawlLinks, and retryCount to control how the shell is prerendered and whether linked pages are automatically prerendered.\\n\\n&#96;&#96;&#96;TypeScript\\n// vite.config.ts\\nexport default defineConfig({\\n  plugins: [\\n    tanstackStart({\\n      spa: {\\n        prerender: {\\n          outputPath: '/custom-shell',\\n          crawlLinks: true,\\n          retryCount: 3,\\n        },\\n      },\\n    }),\\n  ],\\n})\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Integrate Content Collections with Vite in TanStack Start\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/guide/rendering-markdown.md\\n\\nThis configuration snippet demonstrates how to add the &#96;@content-collections/vite&#96; plugin to your Vite setup within a TanStack Start project. This enables content collections to be processed during the build and development phases.\\n\\n&#96;&#96;&#96;tsx\\n// app.config.ts\\nimport { defineConfig } from '@tanstack/react-start/config'\\nimport contentCollections from '@content-collections/vite'\\n\\nexport default defineConfig({\\n  vite: {\\n    plugins: [contentCollections()],\\n  },\\n})\\n&#96;&#96;&#96;\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -453,7 +458,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-query-docs**</summary>
 
-
 Parameters:
 
 ```json
@@ -467,6 +471,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -474,6 +479,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -481,8 +487,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"### Create TanStack Start Project\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/tutorial/reading-writing-file.md\\n\\nSets up a new TanStack Start project using the CLI. It involves running the create command, navigating into the project directory, installing dependencies, and starting the development server. Optionally, add-ons like Shadcn or Clerk can be included.\\n\\n&#96;&#96;&#96;bash\\npnpx @tanstack/cli@latest create devjokes\\ncd devjokes\\npnpm i\\npnpm dev\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Root Application Component and Document Structure\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/build-from-scratch.md\\n\\nCreates the root route component (&#96;__root.tsx&#96;) for the TanStack Start application. It sets up the basic HTML document structure, including head content and script tags, and renders the application's outlet.\\n\\n&#96;&#96;&#96;typescript\\n// src/routes/__root.tsx\\n/// \u003creference types=\\\"vite/client\\\" /\u003e\\nimport type { ReactNode } from 'react'\\nimport {\\n  Outlet,\\n  createRootRoute,\\n  HeadContent,\\n  Scripts,\\n} from '@tanstack/react-router'\\n\\nexport const Route = createRootRoute({\\n  head: () =\u003e ({\\n    meta: [\\n      {\\n        charSet: 'utf-8',\\n      },\\n      {\\n        name: 'viewport',\\n        content: 'width=device-width, initial-scale=1',\\n      },\\n      {\\n        title: 'TanStack Start Starter',\\n      },\\n    ],\\n  }),\\n  component: RootComponent,\\n})\\n\\nfunction RootComponent() {\\n  return (\\n    \u003cRootDocument\u003e\\n      \u003cOutlet /\u003e\\n    \u003c/RootDocument\u003e\\n  )\\n}\\n\\nfunction RootDocument({ children }: Readonly\u003c{ children: ReactNode }\u003e ) {\\n  return (\\n    \u003chtml\u003e\\n      \u003chead\u003e\\n        \u003cHeadContent /\u003e\\n      \u003c/head\u003e\\n      \u003cbody\u003e\\n        {children}\\n        \u003cScripts /\u003e\\n      \u003c/body\u003e\\n    \u003c/html\u003e\\n  )\\n}\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Create and Handle a Basic Route with Server Functions in TanStack Start (TypeScript/React)\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/build-from-scratch.md\\n\\nThis snippet demonstrates creating a file-based route in TanStack Start. It includes server functions to read and update a counter from a file, and a React component to display and increment the counter. It utilizes &#96;fs&#96; for file operations and &#96;@tanstack/react-router&#96; for routing and server function definitions.\\n\\n&#96;&#96;&#96;tsx\\n// src/routes/index.tsx\\nimport * as fs from 'node:fs'\\nimport { createFileRoute, useRouter } from '@tanstack/react-router'\\nimport { createServerFn } from '@tanstack/react-start'\\n\\nconst filePath = 'count.txt'\\n\\nasync function readCount() {\\n  return parseInt(\\n    await fs.promises.readFile(filePath, 'utf-8').catch(() =\u003e '0'),\\n  )\\n}\\n\\nconst getCount = createServerFn({\\n  method: 'GET',\\n}).handler(() =\u003e {\\n  return readCount()\\n})\\n\\nconst updateCount = createServerFn({ method: 'POST' })\\n  .inputValidator((d: number) =\u003e d)\\n  .handler(async ({ data }) =\u003e {\\n    const count = await readCount()\\n    await fs.promises.writeFile(filePath, &#96;${count + data}&#96;)\\n  })\\n\\nexport const Route = createFileRoute('/')({\\n  component: Home,\\n  loader: async () =\u003e await getCount(),\\n})\\n\\nfunction Home() {\\n  const router = useRouter()\\n  const state = Route.useLoaderData()\\n\\n  return (\\n    \u003cbutton\\n      type=\\\"button\\\"\\n      onClick={() =\u003e {\\n        updateCount({ data: 1 }).then(() =\u003e {\\n          router.invalidate()\\n        })\\n      }}\\n    \u003e\\n      Add 1 to {state}?\\n    \u003c/button\u003e\\n  )\\n}\\n\\n&#96;&#96;&#96;\\n\\n### Migrate from Next.js \u003e Step-by-Step (Basics) \u003e Adapt the Root Layout\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/migrate-from-next-js.md\\n\\nTanStack Start uses a routing approach similar to Remix, with some changes to support nested structures and special features using tokens. Instead of &#96;layout.tsx&#96;, you need to create a file named &#96;__root.tsx&#96; in the &#96;src/app&#96; directory. This file will serve as the root layout for your application, handling metadata, global styles, and the main application outlet.\\n\\n--------------------------------\\n\\n### Calling an external API using TanStack Start \u003e Understanding the Project Structure\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/tutorial/fetching-external-api.md\\n\\nAt this point, the project structure should look like this:\\n&#96;&#96;&#96;text\\n/movie-discovery\\n├── src/\\n│   ├── routes/\\n│   │   ├── __root.tsx                    # Root layout\\n│   │   ├── index.tsx                     # Home page\\n│   │   └── fetch-movies.tsx              # Movie fetching route\\n│   ├── types/\\n│   │   └── movie.ts                      # Movie type definitions\\n│   ├── router.tsx                        # Router configuration\\n│   ├── routeTree.gen.ts                  # Generated route tree\\n│   └── styles.css                        # Global styles\\n├── public/                               # Static assets\\n├── vite.config.ts                         # TanStack Start configuration\\n├── package.json                          # Project dependencies\\n└── tsconfig.json                         # TypeScript configuration\\n\\n&#96;&#96;&#96;\\nOnce your project is set up, you can access your app at &#96;localhost:3000&#96;. You should see the default TanStack Start welcome page.\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -507,7 +513,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **mcp-context7-plugin-compound-engineering-context7-query-docs**</summary>
 
-
 Parameters:
 
 ```json
@@ -521,6 +526,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -528,6 +534,7 @@ Additional data:
   "status": "success"
 }
 ```
+
 Result:
 
 ```json
@@ -535,8 +542,8 @@ Result:
   "result": "{\"content\":[{\"type\":\"text\",\"text\":\"### Configure SPA Mode in TanStack Start (Vite)\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode.md\\n\\nThis code snippet demonstrates how to enable Single Page Application (SPA) mode in the TanStack Start framework by configuring the &#96;spa&#96; options within the &#96;vite.config.ts&#96; file. It shows the basic setup for enabling the feature.\\n\\n&#96;&#96;&#96;typescript\\nimport { defineConfig } from 'vite'\\nimport tanstackStart from '@tanstack/start-vite'\\n\\nexport default defineConfig({\\n  plugins: [\\n    tanstackStart({\\n      spa: {\\n        enabled: true,\\n      },\\n    }),\\n  ],\\n})\\n&#96;&#96;&#96;\\n\\n--------------------------------\\n\\n### Netlify Redirects for SPA Mode\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode.md\\n\\nThis example shows how to configure Netlify's &#96;_redirects&#96; file to support SPA mode. It includes rules for serving static assets, routing requests to server functions and server routes, and a catch-all redirect for 404 errors to the SPA shell.\\n\\n&#96;&#96;&#96;plaintext\\n# Allow requests to /_serverFn/* to be routed through to the server (If you have configured your server function base path to be something other than /_serverFn, use that instead)\\n/_serverFn/* /_serverFn/:splat 200\\n\\n# Allow any requests to /api/* to be routed through to the server (Server routes can be created at any path, so you must ensure that any server routes you want to use are under this path, or simply add additional redirects for each server route base you want to expose)\\n/api/* /api/:splat 200\\n\\n# Catch all other 404 requests and rewrite them to the SPA shell\\n/* /_shell.html 200\\n&#96;&#96;&#96;\\n\\n### SPA mode \u003e Configuring SPA mode\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode.md\\n\\nTo configure SPA mode, you can add specific options to your &#96;vite.config.ts&#96; file. By setting &#96;spa.enabled: true&#96; within the &#96;tanstackStart&#96; plugin options, you activate SPA mode for your project.\\n\\n--------------------------------\\n\\n### SPA mode \u003e How does it work?\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode.md\\n\\nWhen SPA mode is enabled, a Start build includes an additional prerendering step to generate the application shell. This involves prerendering only the root route of your application. Instead of rendering matched routes, the router's configured pending fallback component is rendered. The resulting HTML is saved as &#96;/_shell.html&#96; (configurable). Default rewrites are set up to redirect all 404 requests to this SPA mode shell.\\n\\n--------------------------------\\n\\n### Static Prerendering \u003e Prerendering\\n\\nSource: https://tanstack.com/start/latest/docs/framework/react/guide/static-prerendering.md\\n\\nTanStack Start allows you to configure prerendering through the tanstackStart plugin in your vite.config.ts file. Key configuration options include concurrency control for job execution, retry logic for failed renders, and filtering mechanisms to exclude specific paths. You can also enable features like autoSubfolderIndex for directory-style routing and crawlLinks to automatically discover and render linked pages.\"}]}"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -552,11 +559,11 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 Now I have all the information I need. Let me synthesize this into a detailed, actionable plan for Milestone 1.
 
 Key observations:
+
 1. The repo is currently docs-only - no source code, no package.json, no config files
 2. TanStack Start uses `vite.config.ts` (not `app.config.ts` as mentioned in some docs) with `@tanstack/start-vite` plugin
 3. SPA mode is configured via `spa: { enabled: true }` in the tanstackStart plugin options
 4. File-based routing uses `src/routes/` directory with `__root.tsx`
-
 
 5. I have Node.js v20.20.2 and npm 10.8.2 available, and can scaffold the project using the TanStack CLI
 
@@ -573,7 +580,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <tool-use data-tool-type="unknown" data-tool-name="create_plan">
 <details>
 <summary>Tool use: **create_plan**</summary>
-
 
 Parameters:
 
@@ -646,6 +652,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -659,6 +666,7 @@ Additional data:
   }
 }
 ```
+
 Result:
 
 ```json
@@ -666,8 +674,8 @@ Result:
   "rejected": {}
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -705,7 +713,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -713,6 +720,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -782,8 +790,8 @@ Result:
   "success": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -812,6 +820,7 @@ error: unknown option '--add-on'
 (Did you mean --add-ons?)
 
 ```
+
 </details>
 </tool-use>
 
@@ -834,6 +843,7 @@ cd /tmp && rm -rf baseskill-scaffold && npx @tanstack/cli@latest create baseskil
 ■  Add-on tailwind not found. Did you mean "railway"?
 
 ```
+
 </details>
 </tool-use>
 
@@ -889,6 +899,7 @@ Options:
   -h, --help                                       display help for command
 
 ```
+
 </details>
 </tool-use>
 
@@ -944,6 +955,7 @@ npx @tanstack/cli@latest create --list-add-ons 2>&1
 * = has configuration options
 
 ```
+
 </details>
 </tool-use>
 
@@ -979,12 +991,12 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 The user wants to change the test structure from a centralized `tests/` directory to co-located tests alongside their components. This is a common preference in React projects - tests live next to the files they test, not in a separate `tests/` folder.
 
 This affects the plan, which currently specifies:
+
 - `tests/unit/smoke.test.tsx` -- root component smoke test
 - `tests/e2e/smoke.spec.ts` -- page load E2E test
 - `tests/e2e/a11y.spec.ts` -- axe-core accessibility test
 
 The user wants unit/component tests co-located with components (e.g., `app/routes/__root.test.tsx` instead of `tests/unit/__root.test.tsx`).
-
 
 E2E tests are different since they test the whole app rather than individual components. I should probably keep those in a dedicated folder since they're cross-cutting, but I could also organize them by feature if the user prefers. Let me update the plan to reflect co-located unit tests while keeping E2E tests in a separate directory for clarity.
 
@@ -1015,13 +1027,14 @@ The user wants co-located tests - tests live next to their component files, not 
 Here's how this changes things:
 
 **Unit/Component tests (Vitest):**
+
 - Co-located: `app/routes/__root.test.tsx` instead of `tests/unit/smoke.test.tsx`
 - Pattern: `app/**/*.test.{ts,tsx}` in vitest config
 - No separate `tests/unit/` directory
 
 **E2E tests (Playwright):**
-- E2E tests span the whole app and aren't tied to one component - they're typically kept in a dedicated folder since they test user flows, not units
 
+- E2E tests span the whole app and aren't tied to one component - they're typically kept in a dedicated folder since they test user flows, not units
 
 - For e2e, I'm weighing whether to keep a top-level `e2e/` folder separate from app code, or co-locate them with routes using an `.e2e.ts` suffix like `app/routes/_app/index.e2e.ts`
 - The "domain structure" preference suggests tests should live near their code, but e2e tests that span multiple flows across the app don't fit neatly into a single route file
@@ -1098,12 +1111,14 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 Here is a summary of what changed:
 
 **Unit tests (Vitest)** — fully co-located:
+
 - `app/routes/__root.test.tsx` sits next to `__root.tsx`
 - `app/routes/_app/index.test.tsx` sits next to `index.tsx`
 - Every future component/route gets a `.test.tsx` file right beside it
 - `vitest.config.ts` uses `include: ['app/**/*.test.{ts,tsx}']` to find them all
 
 **E2E tests (Playwright)** — single `e2e/` folder at root:
+
 - `e2e/smoke.spec.ts`
 - `e2e/a11y.spec.ts`
 - E2E tests aren't co-locatable because they test full user flows that cross multiple routes and components — keeping them in one place makes them easy to find and run as a group

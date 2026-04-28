@@ -14,12 +14,14 @@ Read and compare implementation in worktree:
 `/Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match`
 
 Against these plans (read from main repo):
+
 - `/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-03-answer-game-primitive.md`
 - `/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-03-word-spell-number-match.md`
 
 Check: file map coverage, reducer/hooks behaviors called out in plans, WordSpell/NumberMatch slot components (prop-free, context, DnD), i18n keys, registry, E2E/VR if present, AnswerGame optional `initialTiles`/`initialZones` if in types/provider.
 
 Output under heading `## Spec compliance`:
+
 - Verdict: PASS or FAIL
 - If FAIL: numbered gaps with (file path, plan section/task, what’s missing or wrong)
 - If PASS: brief checklist of major plan items verified
@@ -29,6 +31,7 @@ Output under heading `## Spec compliance`:
 Same codebase. Review for: correctness risks, test gaps vs risky logic, a11y regressions, unnecessary coupling, lint/type smell, event-bus/sessionId placeholders, duplicate logic.
 
 Output under heading `## Code quality`:
+
 - Verdict: Approve or Changes requested
 - Findings by severity (Blocker / Important / Minor) with file:line when possible
 
@@ -47,10 +50,7 @@ I'm comparing the feat-word-spell-number-match branch against the main repo's pl
 
 _**Agent (composer-2)**_
 
-
 Reading the plan documents and exploring the worktree implementation for spec compliance and code-quality review.
-
-
 
 _**Agent (composer-2)**_
 
@@ -310,10 +310,7 @@ I found an inconsistency between the plan and architecture: Task 7 shows `Numera
 
 _**Agent (composer-2)**_
 
-
 Verifying the worktree against both plans: checking answer-game completeness, `initialTiles`/`initialZones`, slot components, i18n, registry, and E2E/VR.
-
-
 
 _**Agent (composer-2)**_
 
@@ -432,26 +429,21 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Testing useAutoNextSlot**
 
-I need to check the test file for useAutoNextSlot because it's saying 'stays on wrong' for undo. 
+I need to check the test file for useAutoNextSlot because it's saying 'stays on wrong' for undo.
 
 **Checking word-spell types**
 
-I'm examining word-spell types and games.json to understand tile creation logic. I found a potential typo in the plan: 'shuffled for non-scramble modes' likely means 'shuffled for scramble modes'. 
+I'm examining word-spell types and games.json to understand tile creation logic. I found a potential typo in the plan: 'shuffled for non-scramble modes' likely means 'shuffled for scramble modes'.
 
 **Correcting shuffle logic**
 
-I found that the shuffle implementation sorts alphabetically instead of randomly, deviating from the plan and scramble semantics. I'll implement true random shuffling for scramble mode, ignoring the deterministic alphabetical approach from the code sample. 
+I found that the shuffle implementation sorts alphabetically instead of randomly, deviating from the plan and scramble semantics. I'll implement true random shuffling for scramble mode, ignoring the deterministic alphabetical approach from the code sample.
 
 **Implementing sentence gaps**
 
 I'm adjusting the sentence-gap implementation to match the plan by using `<p>` elements for sentences instead of images. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -539,11 +531,6 @@ _**Agent (composer-2)**_
 I'm verifying test coverage for `questions/index.ts` and `useAutoNextSlot.test.tsx`. Found that WordSpell's useMemo depends on roundWord and tileUnit, causing new tile IDs on roundWord changes but maintaining stability when config stays same. The scramble mode implementation doesn't shuffle tiles as expected; it always sorts alphabetically, which is a bug for scramble mode semantics. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -651,11 +638,6 @@ I found that the provider architecture doesn't match the spec since hooks are co
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -717,11 +699,6 @@ I'm checking the OrderedLetterSlots component for missing role attribute, though
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -753,7 +730,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing place tile logic**
 
-I'm adding null check for zone.placedTileId in correct branch reducer to prevent overwriting occupied zones. 
+I'm adding null check for zone.placedTileId in correct branch reducer to prevent overwriting occupied zones.
 
 **Checking zone tile overwrite**
 
@@ -761,17 +738,11 @@ I found a correctness risk in the zone tile overwrite logic where multiple tiles
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -782,6 +753,7 @@ Parameters:
   "pattern": "magneticOffset|magnetic-snap"
 }
 ```
+
 Additional data:
 
 ```json
@@ -812,8 +784,8 @@ Additional data:
   "totalMatches": 42
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -829,7 +801,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -839,6 +810,7 @@ Parameters:
   "pattern": "SET_DRAG_ACTIVE|dragActiveTileId|data-drag"
 }
 ```
+
 Additional data:
 
 ```json
@@ -877,8 +849,8 @@ Additional data:
   "totalMatches": 35
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -893,20 +865,15 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Removing dead code**
 
-I'm removing the magnetic-snap dead code since it's not used anywhere and contradicts the DnD plan. 
+I'm removing the magnetic-snap dead code since it's not used anywhere and contradicts the DnD plan.
 
 **Reviewing E2E plan gaps**
 
-I found a partial gap in the E2E plan where NumberMatch only tests 'Hear the question' instead of 'Drag to zone' during self-review. I identified gaps in the answer game primitive plan where magnetic-snap isn't wired into drag UI and missing tests for auto-next slot behavior. I found that scramble mode doesn't shuffle tiles as planned, instead using a deterministic sort. 
+I found a partial gap in the E2E plan where NumberMatch only tests 'Hear the question' instead of 'Drag to zone' during self-review. I identified gaps in the answer game primitive plan where magnetic-snap isn't wired into drag UI and missing tests for auto-next slot behavior. I found that scramble mode doesn't shuffle tiles as planned, instead using a deterministic sort.
 
 I identified an architecture mismatch where ImageQuestion isn't prop-free despite being labeled as such in the plan, and found that scramble mode uses deterministic sort instead of shuffling. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -939,20 +906,19 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating game over overlay**
 
-I'm adding a minor gap note about the missing 'stars rain' animation in GameOverOverlay. 
+I'm adding a minor gap note about the missing 'stars rain' animation in GameOverOverlay.
 
 **Analyzing ref timing**
 
-The ref assignment happens after commit, so useEffect runs before the ref is attached, potentially causing the listener to never attach. The ref is attached during commit, so useEffect runs after ref assignment, but since they happen in same commit, the effect should see the ref correctly. 
+The ref assignment happens after commit, so useEffect runs before the ref is attached, potentially causing the listener to never attach. The ref is attached during commit, so useEffect runs after ref assignment, but since they happen in same commit, the effect should see the ref correctly.
 
-The ref timing is correct since useEffect runs after ref assignment within the same commit. 
+The ref timing is correct since useEffect runs after ref assignment within the same commit.
 
 **Fixing tile evaluation**
 
 I'm fixing the tile evaluation logic to ensure timers are cleared properly on new placements. </details></think>
 
 _**Agent (composer-2)**_
-
 
 Here is the review markdown.
 
@@ -985,9 +951,11 @@ Here is the review markdown.
 **Verdict: Changes requested**
 
 ### Blocker
+
 - **`src/components/answer-game/useFreeSwap.ts` + `answer-game-reducer.ts` (`PLACE_TILE`)** — When the target zone is already occupied and the dragged tile is still in the bank (`sourceZoneIndex === -1`), `swapOrPlace` calls `placeTile`, which can treat a **correct** tile as placeable into an occupied zone and overwrite `placedTileId` without returning the previous tile to the bank, risking orphaned tiles and invalid bank state in multi-zone layouts.
 
 ### Important
+
 - **`src/components/answer-game/useTileEvaluation.ts` (lines 39–44)** — `game:evaluate` events still use `sessionId: ''` and `profileId: ''`, so analytics/session correlation is incomplete wherever the bus is consumed.
 - **Unused / unfinished primitive surface** — `magnetic-snap` and `SET_DRAG_ACTIVE` are untethered from real drag flows (dead spec surface, confusing for future work).
 - **`src/components/answer-game/useKeyboardDrag.ts`** — No roving focus / arrow navigation between zones and no integration with `placeTile` / `swapOrPlace`, so keyboard parity with pointer DnD is not there.
@@ -996,6 +964,7 @@ Here is the review markdown.
 - **Test gaps vs risky logic** — Narrow `useAutoNextSlot` coverage; no automated test that `useFreeSwap` handles bank→occupied safely; reducer behavior for placing into a non-empty zone is untested.
 
 ### Minor
+
 - **`src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`** — `<ol>` omits the explicit `role="list"` from the plan snippet (native list semantics are still generally OK).
 - **`src/components/answer-game/GameOverOverlay/GameOverOverlay.tsx`** — Plan copy mentions richer celebration (e.g. stars rain); current UI is minimal koala + star row + buttons (acceptable MVP but below the written spec flourish).
 - **`src/components/answer-game/AnswerGameProvider.tsx` (effect deps)** — Effect depends on `config.initialTiles` / `config.initialZones` by reference; safe where parents use `useMemo`, but a caller that passes fresh arrays each render would re-`INIT_ROUND` repeatedly.

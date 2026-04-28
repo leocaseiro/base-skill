@@ -21,8 +21,72 @@ Run specstory sync claude
 `specstory sync claude`
 
 ```text
-Parsing Claude Code sessionsParsing Claude Code sessions [1/61]Parsing Claude Code sessions [2/61]Parsing Claude Code sessions [3/61]Parsing Claude Code sessions [4/61]Parsing Claude Code sessions [5/61]Parsing Claude Code sessions [6/61]Parsing Claude Code sessions [7/61]Parsing Claude Code sessions [8/61]Parsing Claude Code sessions [9/61]Parsing Claude Code sessions [10/61]Parsing Claude Code sessions [11/61]Parsing Claude Code sessions [12/61]Parsing Claude Code sessions [13/61]Parsing Claude Code sessions [14/61]Parsing Claude Code sessions [15/61]Parsing Claude Code sessions [16/61]Parsing Claude Code sessions [17/61]Parsing Claude Code sessions [18/61]Parsing Claude Code sessions [19/61]Parsing Claude Code sessions [20/61]Parsing Claude Code sessions [21/61]Parsing Claude Code sessions [22/61]Parsing Claude Code sessions [23/61]Parsing Claude Code sessions [24/61]Parsing Claude Code sessions [25/61]Parsing Claude Code sessions [26/61]Parsing Claude Code sessions [27/61]Parsing Claude Code sessions [28/61]Parsing Claude Code sessions [29/61]Parsing Claude Code sessions [30/61]Parsing Claude Code sessions [31/61]Parsing Claude Code sessions [32/61]Parsing Claude Code sessions [33/61]Parsing Claude Code sessions [34/61]Parsing Claude Code sessions [35/61]Parsing Claude Code sessions [36/61]Parsing Claude Code sessions [37/61]Parsing Claude Code sessions [38/61]Parsing Claude Code sessions [39/61]Parsing Claude Code sessions [40/61]Parsing Claude Code sessions [41/61]Parsing Claude Code sessions [42/61]Parsing Claude Code sessions [43/61]Parsing Claude Code sessions [44/61]Parsing Claude Code sessions [45/61]Parsing Claude Code sessions [46/61]Parsing Claude Code sessions [47/61]Parsing Claude Code sessions [48/61]Parsing Claude Code sessions [49/61]Parsing Claude Code sessions [50/61]Parsing Claude Code sessions [51/61]Parsing Claude Code sessions [52/61]Parsing Claude Code sessions [53/61]Parsing Claude Code sessions [54/61]Parsing Claude Code sessions [55/61]Parsing Claude Code sessions [56/61]Parsing Claude Code sessions [57/61]Parsing Claude Code sessions [58/61]Parsing Claude Code sessions [59/61]Parsing Claude Code sessions [60/61]Parsing Claude Code sessions [61/61]
-Syncing markdown files for Claude CodeSyncing markdown files for Claude Code [1/3]Syncing markdown files for Claude Code [2/3]Syncing markdown files for Claude Code [3/3]
+Parsing Claude Code sessions
+Parsing Claude Code sessions [1/61]
+Parsing Claude Code sessions [2/61]
+Parsing Claude Code sessions [3/61]
+Parsing Claude Code sessions [4/61]
+Parsing Claude Code sessions [5/61]
+Parsing Claude Code sessions [6/61]
+Parsing Claude Code sessions [7/61]
+Parsing Claude Code sessions [8/61]
+Parsing Claude Code sessions [9/61]
+Parsing Claude Code sessions [10/61]
+Parsing Claude Code sessions [11/61]
+Parsing Claude Code sessions [12/61]
+Parsing Claude Code sessions [13/61]
+Parsing Claude Code sessions [14/61]
+Parsing Claude Code sessions [15/61]
+Parsing Claude Code sessions [16/61]
+Parsing Claude Code sessions [17/61]
+Parsing Claude Code sessions [18/61]
+Parsing Claude Code sessions [19/61]
+Parsing Claude Code sessions [20/61]
+Parsing Claude Code sessions [21/61]
+Parsing Claude Code sessions [22/61]
+Parsing Claude Code sessions [23/61]
+Parsing Claude Code sessions [24/61]
+Parsing Claude Code sessions [25/61]
+Parsing Claude Code sessions [26/61]
+Parsing Claude Code sessions [27/61]
+Parsing Claude Code sessions [28/61]
+Parsing Claude Code sessions [29/61]
+Parsing Claude Code sessions [30/61]
+Parsing Claude Code sessions [31/61]
+Parsing Claude Code sessions [32/61]
+Parsing Claude Code sessions [33/61]
+Parsing Claude Code sessions [34/61]
+Parsing Claude Code sessions [35/61]
+Parsing Claude Code sessions [36/61]
+Parsing Claude Code sessions [37/61]
+Parsing Claude Code sessions [38/61]
+Parsing Claude Code sessions [39/61]
+Parsing Claude Code sessions [40/61]
+Parsing Claude Code sessions [41/61]
+Parsing Claude Code sessions [42/61]
+Parsing Claude Code sessions [43/61]
+Parsing Claude Code sessions [44/61]
+Parsing Claude Code sessions [45/61]
+Parsing Claude Code sessions [46/61]
+Parsing Claude Code sessions [47/61]
+Parsing Claude Code sessions [48/61]
+Parsing Claude Code sessions [49/61]
+Parsing Claude Code sessions [50/61]
+Parsing Claude Code sessions [51/61]
+Parsing Claude Code sessions [52/61]
+Parsing Claude Code sessions [53/61]
+Parsing Claude Code sessions [54/61]
+Parsing Claude Code sessions [55/61]
+Parsing Claude Code sessions [56/61]
+Parsing Claude Code sessions [57/61]
+Parsing Claude Code sessions [58/61]
+Parsing Claude Code sessions [59/61]
+Parsing Claude Code sessions [60/61]
+Parsing Claude Code sessions [61/61]
+Syncing markdown files for Claude Code
+Syncing markdown files for Claude Code [1/3]
+Syncing markdown files for Claude Code [2/3]
+Syncing markdown files for Claude Code [3/3]
 
 ✅ Claude Code sync complete! 📊 3 sessions processed
 
@@ -30,7 +94,21 @@ Syncing markdown files for Claude CodeSyncing markdown files for Claude Code [1
   ♻️ 1 session updated
   ✨ 0 new sessions created
 
-Waiting for cloud sync to complete... 120s until timeoutWaiting for cloud sync to complete... 118s until timeoutWaiting for cloud sync to complete... 117s until timeoutWaiting for cloud sync to complete... 116s until timeoutWaiting for cloud sync to complete... 115s until timeoutWaiting for cloud sync to complete... 114s until timeoutWaiting for cloud sync to complete... 113s until timeoutWaiting for cloud sync to complete... 112s until timeoutWaiting for cloud sync to complete... 111s until timeoutWaiting for cloud sync to complete... 110s until timeoutWaiting for cloud sync to complete... 109s until timeoutWaiting for cloud sync to complete... 108s until timeoutWaiting for cloud sync to complete... 107s until timeout                                                            ────────────
+Waiting for cloud sync to complete... 120s until timeout
+Waiting for cloud sync to complete... 118s until timeout
+Waiting for cloud sync to complete... 117s until timeout
+Waiting for cloud sync to complete... 116s until timeout
+Waiting for cloud sync to complete... 115s until timeout
+Waiting for cloud sync to complete... 114s until timeout
+Waiting for cloud sync to complete... 113s until timeout
+Waiting for cloud sync to complete... 112s until timeout
+Waiting for cloud sync to complete... 111s until timeout
+Waiting for cloud sync to complete... 110s until timeout
+Waiting for cloud sync to complete... 109s until timeout
+Waiting for cloud sync to complete... 108s until timeout
+Waiting for cloud sync to complete... 107s until timeout
+                                                            
+────────────
 ☁️  Cloud sync complete! 📊 3 sessions processed
 
   ⏭️ 1 session up to date (skipped)
@@ -41,6 +119,7 @@ Waiting for cloud sync to complete... 120s until timeoutWaiting for cloud sync 
    https://cloud.specstory.com/projects/94ee-f824-781a-eefa
 [result-id: r1]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:33:19Z)**_
@@ -73,6 +152,7 @@ f9ebd445-8bca-4c63-8e75-9d7094a8cb8b  claude        Apr 07, 2026 13:29  I want .
 4946705f-253f-4952-abb4-f4c8a9656612  claude                           use sup...
 [result-id: r2]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:35:00Z)**_
@@ -111,6 +191,7 @@ Exit code 1
           
   No session found for UUID f9ebd445.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:35:37Z)**_
@@ -130,6 +211,7 @@ The user doesn't want to proceed with this tool use. The tool use was rejected (
 
 Note: The user's next message may contain a correction or preference. Pay close attention — if they explain what went wrong or how they'd prefer you to work, consider saving that to memory for future sessions.
 ```
+
 </details></tool-use>
 
 ---

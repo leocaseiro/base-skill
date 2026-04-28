@@ -17,6 +17,7 @@ Branch: `milestone-3-app-shell`
 ## Task 2: Catalog filter and paginate utilities (full spec)
 
 **Files:**
+
 - Create: `src/games/catalog-utils.ts`
 - Create: `src/games/catalog-utils.test.ts`
 
@@ -182,6 +183,7 @@ export function paginateCatalog<T>(
 **Step 4:** All 9 tests pass.
 
 **Step 5:** Commit:
+
 ```
 git add src/games/catalog-utils.ts src/games/catalog-utils.test.ts
 git commit -m "feat(catalog): add filterCatalog and paginateCatalog utilities"
@@ -198,7 +200,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Implementing task 2**
 
-I'm creating the test file with e. 
+I'm creating the test file with e.
 
 **Creating test file**
 
@@ -206,10 +208,7 @@ I'm creating the test file with exact content for the catalog utils implementati
 
 _**Agent (composer-2)**_
 
-
 Implementing Task 2 in the milestone worktree: checking the games registry for types, then adding the files and running tests.
-
-
 
 _**Agent (composer-2)**_
 
@@ -247,10 +246,7 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/
 
 _**Agent (composer-2)**_
 
-
 Creating both files and running tests.
-
-
 
 _**Agent (composer-2)**_
 
@@ -284,11 +280,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -314,6 +305,7 @@ $ vitest run src/games/catalog-utils.test.ts --run
 Done in 1.32s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -328,7 +320,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **read_lints**</summary>
 
-
 Parameters:
 
 ```json
@@ -339,6 +330,7 @@ Parameters:
   ]
 }
 ```
+
 Result:
 
 ```json
@@ -353,8 +345,8 @@ Result:
   ]
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -366,10 +358,7 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
 All tests passed (10 tests: 6 + 4). Committing.
-
-
 
 _**Agent (composer-2)**_
 
@@ -446,6 +435,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 2.09s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -455,11 +445,6 @@ Done in 2.09s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -476,6 +461,7 @@ nothing to commit, working tree clean
 d03a10a29f55bc9a025450f4e8b47bceb155ac19
 
 ```
+
 </details>
 </tool-use>
 
@@ -486,12 +472,12 @@ d03a10a29f55bc9a025450f4e8b47bceb155ac19
 
 _**Agent (composer-2)**_
 
-
 ## Report
 
 **Status:** DONE
 
 **Files changed**
+
 - `src/games/catalog-utils.ts` (new)
 - `src/games/catalog-utils.test.ts` (new)
 
@@ -508,5 +494,6 @@ Pre-commit hook also ran the full suite: **13 files, 28 tests passed** (includin
 Message: `feat(catalog): add filterCatalog and paginateCatalog utilities`
 
 **Concerns**
+
 - The spec text said “9 tests”; the provided suite is **10** cases (6 for `filterCatalog`, 4 for `paginateCatalog`). All pass.
 - Implementation and tests were added together (no separate “red” run); behavior matches the spec.

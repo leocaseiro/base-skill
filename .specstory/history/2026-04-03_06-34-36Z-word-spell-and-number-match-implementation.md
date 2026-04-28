@@ -13,6 +13,7 @@ You are implementing the plan at `/Users/leocaseiro/Sites/base-skill/docs/superp
 Branch is `feat/word-spell-number-match` (based on AnswerGame primitive). AnswerGame lives under `src/components/answer-game/`.
 
 **Requirements:**
+
 1. Read the full plan file from the main repo path above (docs are outside worktree but readable).
 2. Implement tasks 1–11 in order: WordSpell types → OrderedLetterSlots → LetterTileBank → WordSpell root + stories → NumberMatch types → MatchingPairZones → NumeralTileBank → NumberMatch root + stories → i18n + registry → E2E + VR tests → run final quality gate.
 3. Follow plan code samples and file paths; use `@/` imports; named exports only; no `import React`.
@@ -29,10 +30,7 @@ Return a short summary: files added/changed, test/lint status, commit SHAs.
 
 _**Agent (composer-2)**_
 
-
 Implementing the plan in the worktree: reading the plan file and exploring the worktree structure.
-
-
 
 _**Agent (composer-2)**_
 
@@ -256,7 +254,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -267,6 +264,7 @@ Parameters:
   "pattern": "answer-game"
 }
 ```
+
 Additional data:
 
 ```json
@@ -337,8 +335,8 @@ Additional data:
   "totalMatches": 22
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -357,10 +355,7 @@ I'm reviewing AnswerGameProvider, AnswerGame component, and related question typ
 
 _**Agent (composer-2)**_
 
-
 Reading AnswerGame types, provider, components, game route, and registry to align implementation.
-
-
 
 _**Agent (composer-2)**_
 
@@ -494,11 +489,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -582,22 +572,17 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Wiring game components**
 
-I'm implementing conditional rendering in GameShell to show WordSpell or NumberMatch based on gameId. I'm importing WordSpell and NumberMatch components and creating inline configs for demo/E2E testing. I'm implementing seeded shuffling for test stability while keeping randomization for production. 
+I'm implementing conditional rendering in GameShell to show WordSpell or NumberMatch based on gameId. I'm importing WordSpell and NumberMatch components and creating inline configs for demo/E2E testing. I'm implementing seeded shuffling for test stability while keeping randomization for production.
 
-I'm replacing nondeterministic shuffle with deterministic shuffle based on word to prevent VR flakiness. I'm updating the LetterTileBank test to remove the unused userEvent import. 
+I'm replacing nondeterministic shuffle with deterministic shuffle based on word to prevent VR flakiness. I'm updating the LetterTileBank test to remove the unused userEvent import.
 
 **Updating tests**
 
-I'm adding the missing ReactNode type import to fix the test compilation error. I'm updating the test to include the new useMemo dependency to prevent infinite loops. 
+I'm adding the missing ReactNode type import to fix the test compilation error. I'm updating the test to include the new useMemo dependency to prevent infinite loops.
 
 I'm stabilizing useMemo dependencies in useEffect to prevent unnecessary re-renders. I'm adding initialTiles and initialZones to the types. I'm including initialTiles and initialZones in the useEffect dependency array. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -618,7 +603,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -629,6 +613,7 @@ Parameters:
   "pattern": "dropTargetForElements|draggable"
 }
 ```
+
 Additional data:
 
 ```json
@@ -642,8 +627,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -668,11 +653,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search">
@@ -691,11 +671,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search">
@@ -713,18 +688,12 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -736,6 +705,7 @@ Parameters:
   "pattern": "pragmatic-drag-and-drop"
 }
 ```
+
 Additional data:
 
 ```json
@@ -754,8 +724,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -771,7 +741,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -781,6 +750,7 @@ Parameters:
   "pattern": "dropTargetForElements|draggable"
 }
 ```
+
 Additional data:
 
 ```json
@@ -794,8 +764,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -806,11 +776,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -827,17 +792,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -848,6 +807,7 @@ Parameters:
   "pattern": "element/adapter"
 }
 ```
+
 Additional data:
 
 ```json
@@ -870,8 +830,8 @@ Additional data:
   "totalMatches": 7
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -886,26 +846,21 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Implementing fixes**
 
-I'm implementing the remaining fixes for NumeralTileBank, NumberMatch, and Game route. 
+I'm implementing the remaining fixes for NumeralTileBank, NumberMatch, and Game route.
 
 **Updating game route**
 
-I'm updating GameRoute to properly extract gameId from config and use it for conditional rendering. I'm refactoring GameRoute to handle objectImage extraction and conditional rendering based on gameId. I'm implementing tile splitting logic for letter, syllable, and word modes with basic shuffle functionality. 
+I'm updating GameRoute to properly extract gameId from config and use it for conditional rendering. I'm refactoring GameRoute to handle objectImage extraction and conditional rendering based on gameId. I'm implementing tile splitting logic for letter, syllable, and word modes with basic shuffle functionality.
 
 **Implementing tile splitting**
 
-I'm always shuffling tiles per the plan code, regardless of mode, and will render sentences with blanks using `replace('___', '___')`. 
+I'm always shuffling tiles per the plan code, regardless of mode, and will render sentences with blanks using `replace('___', '___')`.
 
 **Fixing useEffect deps**
 
 I'm adding nullish checks for `config.initialTiles` and `config.initialZones` to prevent dispatching undefined values. I'm adding useMemo to prevent stale closure issues with initialTiles and initialZones. I'm refactoring AnswerGame to avoid unnecessary re-renders by stabilizing the config object passed to AnswerGameProvider. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -951,16 +906,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating games.json structure**
 
-I'm restructuring games.json to match the planned nested UI object format. I'm updating games.json to include nested demo configs for word-spell and number-match games. 
+I'm restructuring games.json to match the planned nested UI object format. I'm updating games.json to include nested demo configs for word-spell and number-match games.
 
 I'm implementing the number-match game config with nested demo configs and ensuring URL gameId matches the config gameId. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -980,16 +930,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating number match**
 
-I'm updating the number match component to handle numeral-to-word and word-to-numeral conversions. I'm adjusting the TextQuestion component to properly display number words for word-to-numeral conversions. 
+I'm updating the number match component to handle numeral-to-word and word-to-numeral conversions. I'm adjusting the TextQuestion component to properly display number words for word-to-numeral conversions.
 
 I'm implementing the numeral tile bank with placeholder images and emoji labels. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1013,10 +958,7 @@ I'm implementing the GameRoute update with conditional JSX rendering for differe
 
 _**Agent (composer-2)**_
 
-
 Implementing: updating core types and provider, then adding game files and route wiring.
-
-
 
 _**Agent (composer-2)**_
 
@@ -1068,30 +1010,25 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing memoization**
 
-I'm adding useMemo to stabilize the config dependencies and prevent infinite loops. 
+I'm adding useMemo to stabilize the config dependencies and prevent infinite loops.
 
 **Adding word-spell types**
 
-I'm implementing word-spell types and component structure for syllable-based tile generation. 
+I'm implementing word-spell types and component structure for syllable-based tile generation.
 
 **Implementing word-spell types**
 
-I'm implementing syllable splitting logic using regex to handle hyphenated words. I'm adjusting tile generation to treat hyphenated words as single units for syllable practice. 
+I'm implementing syllable splitting logic using regex to handle hyphenated words. I'm adjusting tile generation to treat hyphenated words as single units for syllable practice.
 
 **Adjusting tile generation**
 
-I'm normalizing tile values to uppercase for consistent syllable practice. 
+I'm normalizing tile values to uppercase for consistent syllable practice.
 
 **Normalizing tile values**
 
 </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1155,11 +1092,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -1207,11 +1139,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1230,16 +1157,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Writing WordSpell component**
 
-I'm implementing WordSpell with useMemo to optimize tile and zone generation. I'm adding memoized game config for the answer component. 
+I'm implementing WordSpell with useMemo to optimize tile and zone generation. I'm adding memoized game config for the answer component.
 
 I'm adding memoized game config for the answer component with required tileUnit validation. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1291,24 +1213,19 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating numeral tile bank**
 
-I'm updating NumeralTileBank to match the test expectation for aria-label by using 'Number 3' instead of 'Number ${tile.label}'. I'm using tile labels as emoji placeholders from round config for object-style tiles. I'm adding an optional `imageSrc` field to `TileItem` type for numeral tiles, which may impact multiple files. I'm modifying `buildNumeralRound` to handle object images and updating numeral tile rendering to support URL-based labels. 
+I'm updating NumeralTileBank to match the test expectation for aria-label by using 'Number 3' instead of 'Number ${tile.label}'. I'm using tile labels as emoji placeholders from round config for object-style tiles. I'm adding an optional `imageSrc` field to `TileItem` type for numeral tiles, which may impact multiple files. I'm modifying `buildNumeralRound` to handle object images and updating numeral tile rendering to support URL-based labels.
 
-I'm adding optional `iconUrl` field to TileItem type and passing `objectImage` through TileItem to support URL-based labels for object tiles. I'm adding optional `imageSrc` field to TileItem type and passing `objectImage` through TileItem to support URL-based labels for object tiles. I'm implementing objects style with enlarged labels for VR stability, deferring image support for now. 
+I'm adding optional `iconUrl` field to TileItem type and passing `objectImage` through TileItem to support URL-based labels for object tiles. I'm adding optional `imageSrc` field to TileItem type and passing `objectImage` through TileItem to support URL-based labels for object tiles. I'm implementing objects style with enlarged labels for VR stability, deferring image support for now.
 
 **Implementing number-match types**
 
-I'm adding NumberMatch components with useMemo to prevent infinite loops in AnswerGameProvider. 
+I'm adding NumberMatch components with useMemo to prevent infinite loops in AnswerGameProvider.
 
 **Fixing memoization**
 
 I'm fixing the useMemo dependency array to prevent recreating tiles with new nanoid IDs on every render. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1371,11 +1288,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1472,26 +1384,21 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating i18n files**
 
-I'm updating the i18n games.json files and related registry entries. The issue is with timing of effects and initializers in React tests, but RTL's act() should handle effect flushing correctly. I'm fixing the dispatch during render issue in Initializer by using useAnswerGameDispatch properly. 
+I'm updating the i18n games.json files and related registry entries. The issue is with timing of effects and initializers in React tests, but RTL's act() should handle effect flushing correctly. I'm fixing the dispatch during render issue in Initializer by using useAnswerGameDispatch properly.
 
 **Running tests**
 
-I'm running tests to verify the list item length expectation and checking if useLayoutEffect is needed for INIT_ROUND. 
+I'm running tests to verify the list item length expectation and checking if useLayoutEffect is needed for INIT_ROUND.
 
 **Adding word spell config**
 
-I'm adding the WordSpell route configuration with drag input method and lock-auto-eject behavior. I'm defining the WordSpell route configuration with drag input method and lock-auto-eject behavior. 
+I'm adding the WordSpell route configuration with drag input method and lock-auto-eject behavior. I'm defining the WordSpell route configuration with drag input method and lock-auto-eject behavior.
 
 **Configuring routes**
 
 I'm setting up the WordSpell route config with drag input and lock-auto-eject behavior. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1577,11 +1484,6 @@ I'm adding end-to-end tests to `smoke.spec.ts` and `visual.spec.ts`. </details><
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -1613,11 +1515,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2191,6 +2088,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 error Command failed with exit code 1.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2200,11 +2098,6 @@ error Command failed with exit code 1.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2241,6 +2134,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2254,18 +2148,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing word spell hooks**
 
-I'm correcting the WordSpell component to avoid returning null before hooks and properly extract tiles and zones from the round data. I'm updating the hook dependencies to use `round?.word` instead of `round` to prevent unnecessary re-renders. 
+I'm correcting the WordSpell component to avoid returning null before hooks and properly extract tiles and zones from the round data. I'm updating the hook dependencies to use `round?.word` instead of `round` to prevent unnecessary re-renders.
 
 **Updating game config**
 
 I'm adjusting the `answerGameConfig` useMemo to use `config.rounds.length` instead of `round` and adding a null return for empty rounds. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2324,22 +2213,17 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing word spell**
 
-I'm moving hooks before early return in WordSpell and handling empty rounds by returning null after hooks. 
+I'm moving hooks before early return in WordSpell and handling empty rounds by returning null after hooks.
 
 **Handling empty rounds**
 
-I'm returning null for empty rounds to avoid rendering shell components. I'm passing undefined for initialTiles to prevent empty round initialization. 
+I'm returning null for empty rounds to avoid rendering shell components. I'm passing undefined for initialTiles to prevent empty round initialization.
 
-I'm returning null when no round exists to avoid rendering AnswerGame component. I'm ensuring useMemo runs even when no round exists to avoid mounting AnswerGame with empty data. I'm refactoring the WordSpell component to handle empty rounds by ensuring useMemo runs even when no round exists. 
+I'm returning null when no round exists to avoid rendering AnswerGame component. I'm ensuring useMemo runs even when no round exists to avoid mounting AnswerGame with empty data. I'm refactoring the WordSpell component to handle empty rounds by ensuring useMemo runs even when no round exists.
 
 I'm refactoring WordSpell and NumberMatch components to handle empty rounds by using useMemo with proper undefined checks for round values. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2462,11 +2346,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2921,6 +2800,7 @@ Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a diffe
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -2930,11 +2810,6 @@ Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a diffe
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2988,6 +2863,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match && 
 Done in 7.10s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2997,11 +2873,6 @@ Done in 7.10s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3036,8 +2907,8 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match && 
 }
 [prerender] Prerendered 0 pages:
 file:///Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/node_modules/@tanstack/start-plugin-core/dist/esm/prerender.js:103
-						throw new Error(&#96;Failed to fetch ${page.path}: ${res.statusText}&#96;, { cause: res });
-						      ^
+      throw new Error(&#96;Failed to fetch ${page.path}: ${res.statusText}&#96;, { cause: res });
+            ^
 
 Error: Failed to fetch /: Internal Server Error
     at file:///Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/node_modules/@tanstack/start-plugin-core/dist/esm/prerender.js:103:13
@@ -3075,6 +2946,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3084,11 +2956,6 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3109,7 +2976,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -3119,6 +2985,7 @@ Parameters:
   "pattern": "pragmatic|atlaskit"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3132,8 +2999,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3144,11 +3011,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3185,11 +3047,6 @@ I'm aliasing the ESM directory import to a concrete file path in Vite resolve co
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -3204,11 +3061,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3240,17 +3092,11 @@ Directory: **/Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -3261,6 +3107,7 @@ Parameters:
   "pattern": "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3299,8 +3146,8 @@ Additional data:
   "totalMatches": 15
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3312,17 +3159,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -3333,6 +3174,7 @@ Parameters:
   "pattern": "pragmatic-drag-and-drop"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3363,8 +3205,8 @@ Additional data:
   "totalMatches": 4
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3375,11 +3217,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3458,11 +3295,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -3483,6 +3315,7 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 error Command failed with exit code 2.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3500,10 +3333,7 @@ I'm adding a Vite alias to resolve the TS issue with adapter imports instead of 
 
 _**Agent (composer-2)**_
 
-
 Using a Vite resolve alias so we keep the documented import path and fix the prerender build. Reverting the wrapper file and adding the alias.
-
-
 
 _**Agent (composer-2)**_
 
@@ -3527,16 +3357,10 @@ I'm setting up the pragmatic drag-and-drop adapter path for the element. I'm rev
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="delete_file">
 <details><summary>Tool use: **delete_file**</summary>
-
 
 </details>
 </tool-use>
@@ -3623,11 +3447,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -3671,6 +3490,7 @@ dist/server/assets/router-DXS0VyLd.js                      110.13 kB
 Done in 3.71s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3680,11 +3500,6 @@ Done in 3.71s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3711,6 +3526,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3720,11 +3536,6 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3795,6 +3606,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3808,7 +3620,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing VR test failures**
 
-I'm updating the VR tests to use a more specific locator for the main element in the game shell. 
+I'm updating the VR tests to use a more specific locator for the main element in the game shell.
 
 **Updating VR tests**
 
@@ -3816,10 +3628,7 @@ I'm modifying the VR tests to wait for unique elements like 'data-testid="game-p
 
 _**Agent (composer-2)**_
 
-
 Fixing VR tests: replacing ambiguous `getByRole('main')` with stable locators, then updating visual baselines.
-
-
 
 _**Agent (composer-2)**_
 
@@ -3837,11 +3646,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3885,6 +3689,7 @@ Running 4 tests using 1 worker
 Done in 15.50s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3894,11 +3699,6 @@ Done in 15.50s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3932,6 +3732,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match && 
 Done in 19.75s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3945,7 +3746,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Handling flaky tests**
 
-I'm implementing a fixed seed shuffle for test builds to stabilize tile ordering in VR tests. I'm implementing alphabetical sorting for VR tile ordering in WORD_SPELL_ROUTE_CONFIG to stabilize tests. 
+I'm implementing a fixed seed shuffle for test builds to stabilize tile ordering in VR tests. I'm implementing alphabetical sorting for VR tile ordering in WORD_SPELL_ROUTE_CONFIG to stabilize tests.
 
 **Fixing tile ordering**
 
@@ -3953,10 +3754,7 @@ I'm replacing Math.random() with Fisher-Yates shuffle seeded by word+gameId for 
 
 _**Agent (composer-2)**_
 
-
 Replacing random tile shuffling with a deterministic sort so VR screenshots stay stable.
-
-
 
 _**Agent (composer-2)**_
 
@@ -3974,11 +3772,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4019,6 +3812,7 @@ Running 4 tests using 1 worker
 Done in 15.74s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -4032,18 +3826,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Preparing worktree**
 
-I'm setting up the worktree environment and organizing logical commits for the feature branches. 
+I'm setting up the worktree environment and organizing logical commits for the feature branches.
 
 **Organizing feature branches**
 
 I'm restructuring the commit strategy to split the Vite alias change from the answer-game feature. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -4059,23 +3848,23 @@ On branch feat/word-spell-number-match
 Changes not staged for commit:
   (use "git add &lt;file&gt;..." to update what will be committed)
   (use "git restore &lt;file&gt;..." to discard changes in working directory)
-	modified:   e2e/__snapshots__/visual.spec.ts/home-chromium.png
-	modified:   e2e/smoke.spec.ts
-	modified:   e2e/visual.spec.ts
-	modified:   src/components/answer-game/AnswerGameProvider.tsx
-	modified:   src/components/answer-game/types.ts
-	modified:   src/games/registry.ts
-	modified:   src/lib/i18n/locales/en/games.json
-	modified:   src/lib/i18n/locales/pt-BR/games.json
-	modified:   src/routes/$locale/_app/game/$gameId.tsx
-	modified:   vite.config.ts
+ modified:   e2e/__snapshots__/visual.spec.ts/home-chromium.png
+ modified:   e2e/smoke.spec.ts
+ modified:   e2e/visual.spec.ts
+ modified:   src/components/answer-game/AnswerGameProvider.tsx
+ modified:   src/components/answer-game/types.ts
+ modified:   src/games/registry.ts
+ modified:   src/lib/i18n/locales/en/games.json
+ modified:   src/lib/i18n/locales/pt-BR/games.json
+ modified:   src/routes/$locale/_app/game/$gameId.tsx
+ modified:   vite.config.ts
 
 Untracked files:
   (use "git add &lt;file&gt;..." to include in what will be committed)
-	e2e/__snapshots__/visual.spec.ts/number-match-numeral-to-group-chromium.png
-	e2e/__snapshots__/visual.spec.ts/word-spell-picture-mode-chromium.png
-	src/games/number-match/
-	src/games/word-spell/
+ e2e/__snapshots__/visual.spec.ts/number-match-numeral-to-group-chromium.png
+ e2e/__snapshots__/visual.spec.ts/word-spell-picture-mode-chromium.png
+ src/games/number-match/
+ src/games/word-spell/
 
 no changes added to commit (use "git add" and/or "git commit -a")
  e2e/__snapshots__/visual.spec.ts/home-chromium.png | Bin 297678 -&gt; 271887 bytes
@@ -4091,6 +3880,7 @@ no changes added to commit (use "git add" and/or "git commit -a")
  10 files changed, 148 insertions(+), 6 deletions(-)
 
 ```
+
 </details>
 </tool-use>
 
@@ -4104,16 +3894,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Committing changes**
 
-I'm organizing the changes into 3 commits: types, game assets, and routing. I'm splitting the changes into 4 conventional commits with clear scopes and messages. 
+I'm organizing the changes into 3 commits: types, game assets, and routing. I'm splitting the changes into 4 conventional commits with clear scopes and messages.
 
 I'm consolidating games features into a single commit with scoped changes for better readability. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5581,6 +5366,7 @@ $ vitest run
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -5591,10 +5377,20 @@ $ vitest run
 
 _**Agent (composer-2)**_
 
+_**Agent (composer-2)**_
 
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/961141.txt</summary>
 
+</details>
+</tool-use>
 
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
 
+</details></tool-use>
+
+_**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
@@ -5611,11 +5407,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -5630,31 +5421,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
-
-_**Agent (composer-2)**_
-
-<tool-use data-tool-type="read" data-tool-name="read_file_v2">
-<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/961141.txt</summary>
-
-</details>
-</tool-use>
-
-<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2**</summary>
-
-</details></tool-use>
-
-_**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -5677,14 +5443,15 @@ d8ac485 Merge pull request #12 from leocaseiro/fix/e2e-and-vr-tests
 On branch feat/word-spell-number-match
 Changes to be committed:
   (use "git restore --staged &lt;file&gt;..." to unstage)
-	modified:   e2e/__snapshots__/visual.spec.ts/home-chromium.png
-	new file:   e2e/__snapshots__/visual.spec.ts/number-match-numeral-to-group-chromium.png
-	new file:   e2e/__snapshots__/visual.spec.ts/word-spell-picture-mode-chromium.png
-	modified:   e2e/smoke.spec.ts
-	modified:   e2e/visual.spec.ts
+ modified:   e2e/__snapshots__/visual.spec.ts/home-chromium.png
+ new file:   e2e/__snapshots__/visual.spec.ts/number-match-numeral-to-group-chromium.png
+ new file:   e2e/__snapshots__/visual.spec.ts/word-spell-picture-mode-chromium.png
+ modified:   e2e/smoke.spec.ts
+ modified:   e2e/visual.spec.ts
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -5694,11 +5461,6 @@ Changes to be committed:
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6150,6 +5912,7 @@ Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a diffe
 Done in 3.80s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -6159,11 +5922,6 @@ Done in 3.80s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6183,6 +5941,7 @@ ea9ea36 build(vite): alias pragmatic-drag-and-drop element adapter for prerender
 f8cf74a feat(answer-game): AnswerGame primitive, hooks, questions, and Storybook
 
 ```
+
 </details>
 </tool-use>
 
@@ -6192,11 +5951,6 @@ f8cf74a feat(answer-game): AnswerGame primitive, hooks, questions, and Storybook
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -6224,6 +5978,7 @@ Done in 1.84s.
 Done in 4.13s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -6234,10 +5989,10 @@ Done in 4.13s.
 
 _**Agent (composer-2)**_
 
-
 ## Summary
 
 ### What was implemented
+
 - **AnswerGame:** `AnswerGameConfig` now supports optional `initialTiles` / `initialZones`; `AnswerGameProvider` runs `INIT_ROUND` in an effect when both are set (keyed on `gameId` and those arrays).
 - **WordSpell:** `types.ts`, `OrderedLetterSlots`, `LetterTileBank`, `WordSpell` root, tests, and Storybook stories. Question zone supports picture / recall / scramble / sentence-gap (sentence text when `sentence` is set). Tile units: letter (code points), syllable (split on `-`/whitespace), word (single tile). **Bank order is sorted alphabetically** (not random) for stable VR and to satisfy `unicorn/no-array-sort` / flaky screenshots.
 - **NumberMatch:** `types.ts`, `MatchingPairZones`, `NumeralTileBank`, `NumberMatch` root, tests, and stories (four modes, three tile styles).
@@ -6247,6 +6002,7 @@ _**Agent (composer-2)**_
 - **E2E / VR:** Smoke tests for both games; visual tests with waits on letter buttons / “Hear the question”; updated `home` baseline and new PNGs for both games.
 
 ### Verification
+
 - **`yarn typecheck`:** pass  
 - **`yarn test`:** 184 tests pass  
 - **`yarn lint`:** pass (ESLint + Knip)  
@@ -6255,6 +6011,7 @@ _**Agent (composer-2)**_
 - **`yarn test:e2e`:** not run here (needs `yarn dev` in another terminal)
 
 ### Commits (newest first)
+
 | SHA | Message |
 |-----|---------|
 | `9150fca` | test(e2e,vr): add WordSpell and NumberMatch smoke and visual baselines |

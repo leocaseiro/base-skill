@@ -638,7 +638,7 @@ _**User**_
 
 8. users can bookmark games, and see latest games on the top.
 
-9. We want to be able for multiple languages. As initial target, we want Portuguese-Brazilian, and English (default). For TTS, parents can also select what voice to use, (e.g. https://github.com/philnash/web-assistant/blob/master/speech-synthesis/browser-voices.html ). Note that some voices might be available in only one device (need to consider that on cloud sync, which should have the device on the sync too).
+9. We want to be able for multiple languages. As initial target, we want Portuguese-Brazilian, and English (default). For TTS, parents can also select what voice to use, (e.g. <https://github.com/philnash/web-assistant/blob/master/speech-synthesis/browser-voices.html> ). Note that some voices might be available in only one device (need to consider that on cloud sync, which should have the device on the sync too).
 
 10. Is Vitest same as React Testing Library? I would prefer RTL
 
@@ -661,7 +661,7 @@ The user has a lot of great feedback and questions. Let me address each one:
 
 I'm reconsidering whether the pre-reader and early reader split is necessary or if I should organize by grade bands instead and note interaction needs within each, since the distinction really comes down to whether kids can read simple text versus needing everything read aloud.
 
-2. **OAuth2 for Google Drive/OneDrive on GitHub Pages**: This is a critical constraint - OAuth2 requires server-side token exchange, which GitHub Pages can't handle since it's static hosting.
+1. **OAuth2 for Google Drive/OneDrive on GitHub Pages**: This is a critical constraint - OAuth2 requires server-side token exchange, which GitHub Pages can't handle since it's static hosting.
 
 Actually, I'm realizing this might be solvable with PKCE for public clients. Both Google and Microsoft support PKCE-based OAuth flows for single-page apps without needing a client secret, so I could potentially do this entirely client-side. The key is registering the OAuth app and setting the GitHub Pages URL as the redirect URI, then handling the authorization flow directly in the browser.
 
@@ -681,27 +681,27 @@ For themes, I'm planning 4-6 pre-defined options that users can choose from. e.g
 - Users can clone a theme and modify colors/fonts
 - Themes stored in RxDB, synced across devices
 
-7. **Parent game engine customization**:
+1. **Parent game engine customization**:
    - Per-game settings: retries, timer, win/lose mode, difficulty
    - Can be set per grade band or per individual game
    - Defaults provided, parents can override
    - Stored in RxDB per profile
 
-8. **Bookmarks and recent games**:
+2. **Bookmarks and recent games**:
    - Users can bookmark/favorite games
    - Dashboard shows recently played games at the top
    - Both stored in RxDB per profile
 
-9. **Multi-language support (i18n)**:
+3. **Multi-language support (i18n)**:
    - Initial: English (default), Portuguese-Brazilian
    - i18n framework needed (react-i18next or similar)
    - TTS voice selection per language, with device-aware voice preferences synced to the cloud since availability varies across devices
 
-10. **Vitest + React Testing Library**: Vitest handles test running and assertions while React Testing Library provides component rendering and DOM queries—they work together, not as alternatives, so the testing strategy should use both.
+4. **Vitest + React Testing Library**: Vitest handles test running and assertions while React Testing Library provides component rendering and DOM queries—they work together, not as alternatives, so the testing strategy should use both.
 
-11. **Strict TypeScript**: Enforcing `strict: true` and `noImplicitAny: true` with ESLint rules to prevent `any` types across the codebase.
+5. **Strict TypeScript**: Enforcing `strict: true` and `noImplicitAny: true` with ESLint rules to prevent `any` types across the codebase.
 
-12. **Google Analytics for OSS**
+6. **Google Analytics for OSS**
 
 : - GA4 is free but ad blockers significantly interfere with it in 2026 - Privacy-focused alternatives like Plausible Analytics (lightweight, less likely blocked), Umami (self-hosted), PostHog (generous free tier with session recording), and Fathom (paid) are worth considering - For a JAMstack app on GitHub Pages without a server, cloud-hosted solutions are more practical, and Plausible's privacy-respecting script tends to avoid ad blocker interference
 

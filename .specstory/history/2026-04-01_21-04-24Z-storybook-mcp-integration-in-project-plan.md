@@ -6,8 +6,8 @@
 
 _**User**_
 
-I want to make sure we are also using storybook mcp  https://storybook.js.org/blog/storybook-mcp-for-react/ to our plan
-@docs/superpowers/plans/2026-04-02-storybook-setup.md 
+I want to make sure we are also using storybook mcp  <https://storybook.js.org/blog/storybook-mcp-for-react/> to our plan
+@docs/superpowers/plans/2026-04-02-storybook-setup.md
 
 ---
 
@@ -20,17 +20,13 @@ I'm reading the existing storybook setup plan to understand current coverage and
 
 _**Agent (composer-2)**_
 
-
 Reviewing the Storybook setup plan for Storybook version, addons, and where Storybook MCP fits.
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -41,6 +37,7 @@ Parameters:
   "pattern": "MCP|mcp|10\\.|addon"
 }
 ```
+
 Additional data:
 
 ```json
@@ -59,8 +56,8 @@ Additional data:
   "totalMatches": 32
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -105,11 +102,6 @@ I need to add client-side MCP registration for Storybook HTTP endpoint to the pl
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -142,7 +134,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -152,6 +143,7 @@ Parameters:
   "pattern": "MCP|mcp"
 }
 ```
+
 Additional data:
 
 ```json
@@ -170,8 +162,8 @@ Additional data:
   "totalMatches": 13
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -190,11 +182,6 @@ I need to add the missing client registration command for the HTTP MCP server. <
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search">
@@ -228,11 +215,6 @@ Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -252,23 +234,19 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating addon version**
 
-I'm updating the addon version to ^10.3.0 to avoid needing manual MCP client registration. I'm adding HTTP MCP registration for Storybook in `.mcp.json` to align with Cursor requirements. I'm adjusting Task 2 to use `storybook@^10.3.0` to prevent version conflicts with Task 28's version check. I'm adding a second mcpServer entry with valid JSON for HTTP transport in the storybook config. 
+I'm updating the addon version to ^10.3.0 to avoid needing manual MCP client registration. I'm adding HTTP MCP registration for Storybook in `.mcp.json` to align with Cursor requirements. I'm adjusting Task 2 to use `storybook@^10.3.0` to prevent version conflicts with Task 28's version check. I'm adding a second mcpServer entry with valid JSON for HTTP transport in the storybook config.
 
 I'm wiring the IDE/client to the HTTP MCP URL and documenting prerequisites for Storybook dev environment. I'm reordering tasks to ensure addon registration happens before HTTP MCP URL configuration. I'm adjusting task order to ensure Storybook is installed before configuring its URL in `.mcp.json`. I'll extend Task 28 to include configuring the Storybook MCP server in `.mcp.json`. </details></think>
 
 _**Agent (composer-2)**_
 
-
 Confirming the plan already includes `@storybook/addon-mcp` (Task 28) and the design spec documents the `/mcp` endpoint. Gaps: Storybook pinned to `^10.0.0` (may resolve below 10.3), no IDE client registration (`mcp-add`), and Task 9’s `.mcp.json` only lists Playwright.
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="create_plan">
 <details>
 <summary>Tool use: **create_plan**</summary>
-
 
 Parameters:
 
@@ -301,6 +279,7 @@ Parameters:
   ]
 }
 ```
+
 Additional data:
 
 ```json
@@ -314,6 +293,7 @@ Additional data:
   }
 }
 ```
+
 Result:
 
 ```json
@@ -321,8 +301,8 @@ Result:
   "rejected": {}
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -351,17 +331,13 @@ I'm editing the storybook setup task to pin versions to ^10.3.0 and adding mcp-a
 
 _**Agent (composer-2)**_
 
-
 Implementing Storybook MCP plan updates: starting Task 2 version pins and reading the sections we'll edit.
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="todo_write">
 <details>
 <summary>Tool use: **todo_write**</summary>
-
 
 Parameters:
 
@@ -370,6 +346,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -422,8 +399,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -481,17 +458,11 @@ I'm updating storybook package versions from ^10.0.0 to ^10.3.0 and adjusting re
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -502,6 +473,7 @@ Parameters:
   "pattern": "10\\.0\\.0"
 }
 ```
+
 Additional data:
 
 ```json
@@ -520,8 +492,8 @@ Additional data:
   "totalMatches": 8
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -540,11 +512,8 @@ I'm applying Task 2 edits followed by the Task 28 extension and file structure c
 
 _**Agent (composer-2)**_
 
-
 Applying edits: updating Task 2, then extending Task 28 and related sections.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -576,18 +545,12 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="todo_write">
 <details>
 <summary>Tool use: **todo_write**</summary>
-
 
 Parameters:
 
@@ -596,6 +559,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -648,8 +612,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -676,11 +640,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -727,18 +686,12 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -749,6 +702,7 @@ Parameters:
   "pattern": "10\\.0|MCP addon|2390|Summary"
 }
 ```
+
 Additional data:
 
 ```json
@@ -767,8 +721,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -779,11 +733,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -804,7 +753,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -814,6 +762,7 @@ Parameters:
   "pattern": "Storybook 10[^.]"
 }
 ```
+
 Additional data:
 
 ```json
@@ -832,8 +781,8 @@ Additional data:
   "totalMatches": 6
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -845,11 +794,6 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -911,11 +855,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -938,7 +877,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **todo_write**</summary>
 
-
 Parameters:
 
 ```json
@@ -946,6 +884,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -998,8 +937,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1010,11 +949,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1035,7 +969,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -1045,6 +978,7 @@ Parameters:
   "pattern": "2396|Installs Storybook|storybook-test job"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1063,8 +997,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1083,17 +1017,11 @@ I'm adding a brief overview line in the design spec for 10.3+ and MCP to align w
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="todo_write">
 <details>
 <summary>Tool use: **todo_write**</summary>
-
 
 Parameters:
 
@@ -1102,6 +1030,7 @@ Parameters:
   "merge": true
 }
 ```
+
 Result:
 
 ```json
@@ -1154,8 +1083,8 @@ Result:
   "wasMerge": true
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1166,7 +1095,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Here’s what was implemented (the attached plan file was not touched).
 

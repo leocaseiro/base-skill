@@ -136,6 +136,7 @@ The document must be comprehensive and actionable. Cover:
     - `db-factory.ts` — helper that creates an in-memory RxDB instance pre-seeded with fixture data
 
     Fixture format:
+
     ```typescript
     // tests/fixtures/profiles.ts
     export const aliceProfile = {

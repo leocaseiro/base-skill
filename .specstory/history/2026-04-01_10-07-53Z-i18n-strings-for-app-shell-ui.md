@@ -9,11 +9,13 @@ _**User**_
 Implement Task 3 for BaseSkill Milestone 3.
 
 ## Work directory ONLY
+
 `/Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell`
 
 ## Task 3: Add i18n strings for the app shell UI
 
 Replace entire contents of:
+
 - `src/lib/i18n/locales/en/common.json` with:
 
 ```json
@@ -61,6 +63,7 @@ Replace entire contents of:
 ```
 
 Replace entire contents of:
+
 - `src/lib/i18n/locales/pt-BR/common.json` with:
 
 ```json
@@ -110,6 +113,7 @@ Replace entire contents of:
 Run: `yarn test src/lib/i18n/i18n.test.ts --run` — must pass.
 
 Commit:
+
 ```
 git add src/lib/i18n/locales/en/common.json src/lib/i18n/locales/pt-BR/common.json
 git commit -m "feat(i18n): add app shell UI strings to common namespace"
@@ -123,10 +127,7 @@ Report: Status, commit SHA, test output, any merged keys you kept beyond the sni
 
 _**Agent (composer-2)**_
 
-
 Checking current locale files and i18n tests so we merge any required keys before updating.
-
-
 
 _**Agent (composer-2)**_
 
@@ -169,10 +170,7 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
 Existing locale files only contain `appName` and `home.title`; tests only assert `common:appName`. Applying the provided JSON verbatim.
-
-
 
 _**Agent (composer-2)**_
 
@@ -206,11 +204,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -236,6 +229,7 @@ $ vitest run src/lib/i18n/i18n.test.ts --run
 Done in 0.87s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -245,11 +239,6 @@ Done in 0.87s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -322,6 +311,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 1.80s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -338,7 +328,6 @@ _**Agent (composer-2)**_
 I've committed the changes with SHA c2885f8 and verified the test suite passes. </details></think>
 
 _**Agent (composer-2)**_
-
 
 ## Status
 

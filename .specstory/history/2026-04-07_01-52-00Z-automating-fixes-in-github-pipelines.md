@@ -18,7 +18,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Setting up CI automation**
 
-I'm implementing GitHub Actions to automatically run `yarn fix` and commit changes to PR branches. 
+I'm implementing GitHub Actions to automatically run `yarn fix` and commit changes to PR branches.
 
 **Evaluating automation strategies**
 
@@ -28,14 +28,11 @@ _**Agent (composer-2)**_
 
 Checking how `yarn fix` is defined and how CI runs lint so we can give concrete, repo-specific advice.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -47,6 +44,7 @@ Parameters:
   "pattern": "\"fix\""
 }
 ```
+
 Additional data:
 
 ```json
@@ -65,8 +63,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -195,8 +193,6 @@ _**Agent (composer-2)**_
 
 Extending `yarn fix` to run Stylelint and Markdownlint with auto-fix. Checking `package.json` and how those tools are invoked.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -216,7 +212,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -226,6 +221,7 @@ Parameters:
   "pattern": "markdownlint|stylelint"
 }
 ```
+
 Additional data:
 
 ```json
@@ -320,8 +316,8 @@ Additional data:
   "totalMatches": 1154
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -336,7 +332,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Updating fix script**
 
-I'm updating the `yarn fix` command to include CSS and MD formatting, ensuring proper order of operations. I'm refactoring the fix script to avoid redundant prettier runs on CSS by inlining commands and maintaining a single flow. 
+I'm updating the `yarn fix` command to include CSS and MD formatting, ensuring proper order of operations. I'm refactoring the fix script to avoid redundant prettier runs on CSS by inlining commands and maintaining a single flow.
 
 **Refactoring fix script**
 
@@ -345,8 +341,6 @@ I'm restructuring the fix script using npm script composition to avoid prettier 
 _**Agent (composer-2)**_
 
 Noting `fix:css` and `fix:md` already exist. Composing `yarn fix` from them per project rules (no direct edits on `master`). Creating a worktree and updating `package.json`.
-
-
 
 _**Agent (composer-2)**_
 
@@ -362,6 +356,7 @@ Preparing worktree (new branch 'chore/yarn-fix-stylelint-md')
 HEAD is now at a661c2a ai(specstory): sync
 
 ```
+
 </details>
 </tool-use>
 
@@ -814,6 +809,7 @@ src/lib/game-event-bus.md 1ms (unchanged)
 Done in 13.45s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -1440,6 +1436,7 @@ Done in 5.05s.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 ```
+
 </details>
 </tool-use>
 

@@ -6,10 +6,8 @@
 
 _**User**_
 
-I used to have an increment button here, but I no longer can see it. @src/db/hooks/useRxQuery.demo.tsx 
+I used to have an increment button here, but I no longer can see it. @src/db/hooks/useRxQuery.demo.tsx
 make it for me
-
-
 
 ---
 
@@ -18,7 +16,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Reviewing demo file**
 
-I'm examining `useRxQuery.demo.tsx` to understand the current state and identify where the increment button should be restored or added. I'm reading `useRxQuery.demo.tsx` to implement the increment button restoration. 
+I'm examining `useRxQuery.demo.tsx` to understand the current state and identify where the increment button should be restored or added. I'm reading `useRxQuery.demo.tsx` to implement the increment button restoration.
 
 **Reading demo file**
 
@@ -26,10 +24,7 @@ I'm reading the demo file from the workspace path to implement the increment but
 
 _**Agent (composer-2)**_
 
-
 Reading the demo file and `useRxQuery` to restore the increment button.
-
-
 
 _**Agent (composer-2)**_
 
@@ -66,17 +61,13 @@ The CounterDemo might not emit an initial value, causing the increment button to
 
 _**Agent (composer-2)**_
 
-
 Searching for usages of this demo — the file already includes an Increment button; it may be omitted where the demo is rendered.
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -87,6 +78,7 @@ Parameters:
   "pattern": "UseRxQueryDemo|useRxQuery\\.demo"
 }
 ```
+
 Additional data:
 
 ```json
@@ -141,8 +133,8 @@ Additional data:
   "totalMatches": 56
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -157,18 +149,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Reading MDX file**
 
-I'm checking the useRxQuery.mdx file for potential CSS issues affecting button visibility. 
+I'm checking the useRxQuery.mdx file for potential CSS issues affecting button visibility.
 
 **Checking button visibility**
 
 The buttons appear visible in the MDX file, so the issue likely lies in Storybook's preview constraints or local file differences. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -201,11 +188,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Improving UX visibility**
 
-I'm repositioning controls to be more visible and intuitive, placing them next to or below the counter. I'm adjusting button types to follow best practices and ensuring stable observable references in the demo component. 
+I'm repositioning controls to be more visible and intuitive, placing them next to or below the counter. I'm adjusting button types to follow best practices and ensuring stable observable references in the demo component.
 
 **Checking Storybook styles**
 
-I'm investigating why the primary button might be invisible in Storybook's docs theme due to color conflicts. I'm investigating a potential regression where the primary button became invisible in Storybook's docs theme due to color conflicts or layout issues. 
+I'm investigating why the primary button might be invisible in Storybook's docs theme due to color conflicts. I'm investigating a potential regression where the primary button became invisible in Storybook's docs theme due to color conflicts or layout issues.
 
 **Adjusting button layout**
 
@@ -213,10 +200,7 @@ I'm reorganizing the button layout to use flex row with count and buttons togeth
 
 _**Agent (composer-2)**_
 
-
 Noting the file already includes Increment/Reset. Restructuring the demo so the counter and controls are on one visible row (avoids clipped Storybook docs previews) and adding `type="button"`. Creating a branch via a worktree per project rules.
-
-
 
 _**Agent (composer-2)**_
 
@@ -237,6 +221,7 @@ cd /Users/leocaseiro/Sites/base-skill && git worktree list
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine    b0e9418 [milestone-4-game-engine]
 
 ```
+
 </details>
 </tool-use>
 
@@ -246,11 +231,6 @@ cd /Users/leocaseiro/Sites/base-skill && git worktree list
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -266,6 +246,7 @@ HEAD is now at e757d98 Merge branch 'master' of github.com:leocaseiro/base-skill
 Preparing worktree (new branch 'fix/use-rx-query-demo-increment')
 
 ```
+
 </details>
 </tool-use>
 
@@ -275,11 +256,6 @@ Preparing worktree (new branch 'fix/use-rx-query-demo-increment')
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -303,10 +279,7 @@ I'm consolidating the counter demo into a single parent component with flex layo
 
 _**Agent (composer-2)**_
 
-
 Consolidating the count and Increment/Reset into one horizontal row so they stay visible in Storybook docs (short iframes often clip stacked content).
-
-
 
 _**Agent (composer-2)**_
 
@@ -325,11 +298,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -345,6 +313,7 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 error Command "eslint" not found.
 
 ```
+
 </details>
 </tool-use>
 
@@ -354,11 +323,6 @@ error Command "eslint" not found.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -426,6 +390,7 @@ warning Workspaces can only be enabled in private projects.
 warning Workspaces can only be enabled in private projects.
 
 ```
+
 </details>
 </tool-use>
 
@@ -436,11 +401,6 @@ warning Workspaces can only be enabled in private projects.
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -449,6 +409,7 @@ _**Agent (composer-2)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-use-rx-query-demo && ./node_modules/.bin/eslint src/db/hooks/useRxQuery.demo.tsx --max-warnings 0
 ```
+
 </details>
 </tool-use>
 
@@ -465,11 +426,6 @@ _**Agent (composer-2)**_
 I'm committing the changes in the worktree and will ask the user to merge the branch. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -560,6 +516,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 2.34s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -569,11 +526,6 @@ Done in 2.34s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -596,7 +548,6 @@ _**Agent (composer-2)**_
 I reorganized the demo components into a single horizontal row to prevent layout issues in Storybook. </details></think>
 
 _**Agent (composer-2)**_
-
 
 Here’s what was going on and what changed.
 
@@ -642,10 +593,7 @@ do that
 
 _**Agent (composer-2)**_
 
-
 Pushing the branch and opening a PR with a concise description.
-
-
 
 _**Agent (composer-2)**_
 
@@ -884,6 +832,7 @@ Ran all test suites.
 (Use &#96;node --trace-deprecation ...&#96; to show where the warning was created)
 
 ```
+
 </details>
 </tool-use>
 
@@ -893,11 +842,6 @@ Ran all test suites.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -913,11 +857,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -971,6 +910,7 @@ warning Workspaces can only be enabled in private projects.
 warning Workspaces can only be enabled in private projects.
 
 ```
+
 </details>
 </tool-use>
 
@@ -980,11 +920,6 @@ warning Workspaces can only be enabled in private projects.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -997,17 +932,11 @@ Offset 250 is beyond file length (249 lines)
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1018,6 +947,7 @@ Parameters:
   "pattern": "push|error|fatal|E2E|Done|exit"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1036,8 +966,8 @@ Additional data:
   "totalMatches": 19
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1049,11 +979,6 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1081,11 +1006,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1125,6 +1045,7 @@ ended_at: 2026-04-02T18:12:46.396Z
 ---
 
 ```
+
 </details>
 </tool-use>
 
@@ -1134,11 +1055,6 @@ ended_at: 2026-04-02T18:12:46.396Z
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1155,7 +1071,6 @@ The \`useRxQuery\` MDX demo already had Increment and Reset, but Storybook docs 
 ## Verification
 
 - Pre-push gate passed locally (lint, typecheck, unit, Storybook, VR, E2E).
-
 
 Made with [Cursor](https://cursor.com)"</summary>
 
@@ -1181,6 +1096,7 @@ Made with [Cursor](https://cursor.com)"
 https://github.com/leocaseiro/base-skill/pull/7
 
 ```
+
 </details>
 </tool-use>
 
@@ -1190,7 +1106,6 @@ https://github.com/leocaseiro/base-skill/pull/7
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Here’s what ran:
 
@@ -1213,7 +1128,7 @@ You can review and merge from that link.
 _**User**_
 
 I can't see the button still.
-I mean in the https://leocaseiro.github.io/base-skill/docs/?path=/docs/db-hooks-userxquery--docs 
+I mean in the <https://leocaseiro.github.io/base-skill/docs/?path=/docs/db-hooks-userxquery--docs>
 
 ---
 
@@ -1226,10 +1141,7 @@ I need to verify if the fix was actually deployed to gh-pages and compare local 
 
 _**Agent (composer-2)**_
 
-
 Tracing the deployed Storybook setup and the demo markup to determine why buttons don't appear on GitHub Pages.
-
-
 
 _**Agent (composer-2)**_
 
@@ -1273,7 +1185,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -1283,6 +1194,7 @@ Parameters:
   "pattern": "github\\.io|pages|storybook.*build"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1377,8 +1289,8 @@ Additional data:
   "totalMatches": 342
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1396,11 +1308,6 @@ _**Agent (composer-2)**_
 The PR fix for layout issues isn't on the deployed site, causing buttons to be clipped or missing. The deployed site doesn't include the PR fix for layout issues, likely due to Storybook docs mode rendering inside a Preview iframe with fixed min-height causing button clipping. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1450,11 +1357,6 @@ I'm checking how Storybook 7+ renders MDX blocks with custom components like `<U
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -1487,6 +1389,7 @@ cd /Users/leocaseiro/Sites/base-skill && yarn build-storybook --output-dir /tmp/
 Done in 5.93s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -1497,17 +1400,11 @@ Done in 5.93s.
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1518,6 +1415,7 @@ Parameters:
   "pattern": "Increment|UseRxQueryDemo"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1544,8 +1442,8 @@ Additional data:
   "totalMatches": 5
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1556,11 +1454,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1583,11 +1476,6 @@ _**Agent (composer-2)**_
 I found that the MDX compiler is stripping the interactive demo component `<UseRxQueryDemo />` from the rendered output. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1631,11 +1519,6 @@ Directory: **/tmp/sb-out/assets** (1 file)
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1650,11 +1533,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1678,10 +1556,7 @@ I'm adding `UseBookmarksDemo` to the MDX provider components to prevent it from 
 
 _**Agent (composer-2)**_
 
-
 Identifying the issue: the compiled MDX bundle omits `<UseRxQueryDemo />` — only static markdown is emitted. Checking Storybook MDX configuration.
-
-
 
 _**Agent (composer-2)**_
 
@@ -1702,7 +1577,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -1712,6 +1586,7 @@ Parameters:
   "pattern": "mdx|MDX"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1730,8 +1605,8 @@ Additional data:
   "totalMatches": 11
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1746,26 +1621,21 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Fixing sanitize schema**
 
-I'm extending rehype-sanitize's schema to allow custom MDX component tags like `UseRxQueryDemo`. 
+I'm extending rehype-sanitize's schema to allow custom MDX component tags like `UseRxQueryDemo`.
 
 **Extending sanitize schema**
 
-I'm configuring rehype-sanitize's default schema to allow custom MDX component tags like `UseRxQueryDemo` by adding them to `tagNames`. 
+I'm configuring rehype-sanitize's default schema to allow custom MDX component tags like `UseRxQueryDemo` by adding them to `tagNames`.
 
 **Analyzing MDX compilation**
 
-I'm reviewing the MDX compilation process to understand how components like `UseRxQueryDemo` are transformed into JSX calls. The sanitization step in the MDX compilation pipeline appears to remove `mdxJsxFlowElement` nodes with tagName `UseRxQueryDemo`. 
+I'm reviewing the MDX compilation process to understand how components like `UseRxQueryDemo` are transformed into JSX calls. The sanitization step in the MDX compilation pipeline appears to remove `mdxJsxFlowElement` nodes with tagName `UseRxQueryDemo`.
 
 **Updating sanitization rules**
 
 I'm extending the rehype-sanitize schema to permit demo component tags like `UseRxQueryDemo` and `UseBookmarksDemo`. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1786,7 +1656,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -1797,6 +1666,7 @@ Parameters:
   "pattern": "\\.demo"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1835,8 +1705,8 @@ Additional data:
   "totalMatches": 6
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1848,17 +1718,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1870,6 +1734,7 @@ Parameters:
   "pattern": "defaultSchema|tagNames"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1896,8 +1761,8 @@ Additional data:
   "totalMatches": 22
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -1915,11 +1780,6 @@ _**Agent (composer-2)**_
 I'm merging defaultSchema with additional tagNames for demo components and checking if standard React props are supported. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1943,11 +1803,6 @@ I'm adding demo component names to tagNames and checking sanitize behavior for c
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1962,11 +1817,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1990,17 +1840,11 @@ I'm updating the sanitize schema to allow custom MDX components. </details></thi
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2011,6 +1855,7 @@ Parameters:
   "pattern": "hast-util-sanitize|rehype-sanitize"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2029,8 +1874,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2045,20 +1890,17 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Adding dev dependency**
 
-I'm adding `hast-util-sanitize` as a devDependency to avoid Knip warnings. I'm adding `hast-util-sanitize` to devDependencies to satisfy Knip warnings. 
+I'm adding `hast-util-sanitize` as a devDependency to avoid Knip warnings. I'm adding `hast-util-sanitize` to devDependencies to satisfy Knip warnings.
 
 **Creating worktree**
 
-I'm creating a new worktree for the sanitize dependency fix: `git worktree add ./worktrees/fix-mdx-demo-sanitize -b fix/storybook-mdx-allow-demo-tags`. I'm creating a new worktree for the sanitize dependency fix: `git worktree add ./worktrees/fix-mdx-demo-components -b fix/storybook-mdx-sanitize-demo-tags`. 
+I'm creating a new worktree for the sanitize dependency fix: `git worktree add ./worktrees/fix-mdx-demo-sanitize -b fix/storybook-mdx-allow-demo-tags`. I'm creating a new worktree for the sanitize dependency fix: `git worktree add ./worktrees/fix-mdx-demo-components -b fix/storybook-mdx-sanitize-demo-tags`.
 
 I'm adding a worktree for the sanitize dependency fix and will include both the rehype sanitize schema and demo layout fixes. </details></think>
 
 _**Agent (composer-2)**_
 
-
 Identifying root cause: `rehype-sanitize` in `.storybook/main.ts` uses the default GitHub schema, which strips unknown tags — so MDX custom components like `<UseRxQueryDemo />` are removed before codegen. Verifying and fixing by extending the sanitize schema.
-
-
 
 _**Agent (composer-2)**_
 
@@ -2073,6 +1915,7 @@ cd /Users/leocaseiro/Sites/base-skill && git worktree add ./worktrees/fix-mdx-sa
 HEAD is now at e757d98 Merge branch 'master' of github.com:leocaseiro/base-skill
 
 ```
+
 </details>
 </tool-use>
 
@@ -2083,17 +1926,11 @@ HEAD is now at e757d98 Merge branch 'master' of github.com:leocaseiro/base-skill
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2104,6 +1941,7 @@ Parameters:
   "pattern": "hast-util-sanitize@"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2122,8 +1960,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2135,17 +1973,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2156,6 +1988,7 @@ Parameters:
   "pattern": "unlisted|ignore"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2174,8 +2007,8 @@ Additional data:
   "totalMatches": 3
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2193,11 +2026,6 @@ _**Agent (composer-2)**_
 I'm adding hast-util-sanitize as a dev dependency and updating the Storybook config to properly spread the tagNames from defaultSchema. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2221,11 +2049,6 @@ I'm adding hast-util-sanitize to devDependencies in the correct alphabetical pos
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -2241,10 +2064,7 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
 Implementing the fix: `rehype-sanitize` was stripping MDX custom components (not in GitHub's default tag list), so demos never reached the compiled bundle.
-
-
 
 _**Agent (composer-2)**_
 
@@ -2323,11 +2143,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -2369,6 +2184,7 @@ warning Workspaces can only be enabled in private projects.
 error Command failed with exit code 2.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2378,11 +2194,6 @@ error Command failed with exit code 2.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2400,11 +2211,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2428,6 +2234,7 @@ Done in 2.23s.
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -2437,11 +2244,6 @@ Done in 2.23s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2461,6 +2263,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && ./node
 Done in 6.87s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2471,17 +2274,11 @@ Done in 6.87s.
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2493,6 +2290,7 @@ Parameters:
   "pattern": "Increment|UseRxQueryDemo"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2511,8 +2309,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2523,11 +2321,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2544,17 +2337,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2565,6 +2352,7 @@ Parameters:
   "pattern": "UseRxQueryDemo|useRxQuery\\.demo"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2587,8 +2375,8 @@ Additional data:
   "totalMatches": 3
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2600,17 +2388,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2621,6 +2403,7 @@ Parameters:
   "pattern": "Increment|UseRxQueryDemo|useRxQuery\\.demo"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2639,8 +2422,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2658,11 +2441,6 @@ _**Agent (composer-2)**_
 I'm investigating why `useRxQuery.demo` isn't appearing in assets during MDX compile, suspecting it may be represented as `mdxJsxFlowElement` with `name` property `UseRxQueryDemo` in the HAST tree. I'm checking how rehype-sanitize handles `mdxJsxFlowElement` nodes and whether it processes the element itself or its children. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2686,11 +2464,6 @@ I'm investigating why `UseRxQueryDemo` isn't being preserved despite being in `t
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -2706,11 +2479,6 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -2725,18 +2493,12 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2747,6 +2509,7 @@ Parameters:
   "pattern": "function transform"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2765,8 +2528,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2777,11 +2540,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -2801,7 +2559,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Handling MDX nodes**
 
-I need to add a custom rehype plugin before sanitization to handle MDX nodes properly. I'll remove rehypeSanitize for MDX-only paths since the MDX is codebase-owned and the security risk is equivalent to other repo code. I'm removing rehypeSanitize from MDX compile options in Storybook since MDX is a trusted source, and adding a comment to explain this decision. 
+I need to add a custom rehype plugin before sanitization to handle MDX nodes properly. I'll remove rehypeSanitize for MDX-only paths since the MDX is codebase-owned and the security risk is equivalent to other repo code. I'm removing rehypeSanitize from MDX compile options in Storybook since MDX is a trusted source, and adding a comment to explain this decision.
 
 **Removing sanitize**
 
@@ -2809,10 +2567,7 @@ I'm removing rehypeSanitize from the MDX pipeline since MDX authors are trusted,
 
 _**Agent (composer-2)**_
 
-
 Identifying the issue: `hast-util-sanitize` only handles `element` nodes. MDX custom components are `mdxJsxFlowElement` (and similar), which the sanitizer drops in the `default` branch—adding tag names doesn't help. Removing `rehype-sanitize` from the MDX pipeline for trusted first-party docs (or we'd need a plugin that preserves MDX node types). Checking whether we can keep sanitization for raw HTML only:
-
-
 
 _**Agent (composer-2)**_
 
@@ -2829,10 +2584,7 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
 Removing `rehype-sanitize` from the MDX pipeline. `hast-util-sanitize` ignores `mdxJsxFlowElement` nodes, so MDX demos are dropped entirely—not a tag-allowlist issue.
-
-
 
 _**Agent (composer-2)**_
 
@@ -2866,17 +2618,11 @@ _**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2888,6 +2634,7 @@ Parameters:
   "pattern": "rehype-sanitize|rehypeSanitize"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2906,8 +2653,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2919,17 +2666,11 @@ Status: **completed**
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -2940,6 +2681,7 @@ Parameters:
   "pattern": "rehype-sanitize"
 }
 ```
+
 Additional data:
 
 ```json
@@ -2974,8 +2716,8 @@ Additional data:
   "totalMatches": 25
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -2986,11 +2728,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3008,11 +2745,6 @@ _**Agent (composer-2)**_
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3059,6 +2791,7 @@ warning Workspaces can only be enabled in private projects.
 warning Workspaces can only be enabled in private projects.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3068,11 +2801,6 @@ warning Workspaces can only be enabled in private projects.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3097,17 +2825,11 @@ Directory: **/tmp/sb-out3/assets** (2 files)
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -3118,6 +2840,7 @@ Parameters:
   "pattern": "UseRxQueryDemo|Increment|subject"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3131,8 +2854,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3148,7 +2871,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -3158,6 +2880,7 @@ Parameters:
   "pattern": "UseRxQueryDemo|Increment|subject"
 }
 ```
+
 Additional data:
 
 ```json
@@ -3176,8 +2899,8 @@ Additional data:
   "totalMatches": 2
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -3188,11 +2911,6 @@ Status: **completed**
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3209,6 +2927,7 @@ $ eslint . --max-warnings 0 &amp;&amp; knip --no-config-hints
 Done in 7.51s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3218,11 +2937,6 @@ Done in 7.51s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3251,6 +2965,7 @@ cd /Users/leocaseiro/Sites/base-skill/worktrees/fix-mdx-sanitize-demos && yarn t
 Done in 2.20s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3267,11 +2982,6 @@ _**Agent (composer-2)**_
 I'm committing the Storybook fix to preserve MDX demo components by removing rehype-sanitize from the MDX processing chain. </details></think>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3290,14 +3000,15 @@ On branch fix/storybook-mdx-sanitize-allow-demos
 Changes not staged for commit:
   (use "git add &lt;file&gt;..." to update what will be committed)
   (use "git restore &lt;file&gt;..." to discard changes in working directory)
-	modified:   .storybook/main.ts
-	modified:   package.json
-	modified:   src/db/hooks/useRxQuery.demo.tsx
-	modified:   yarn.lock
+ modified:   .storybook/main.ts
+ modified:   package.json
+ modified:   src/db/hooks/useRxQuery.demo.tsx
+ modified:   yarn.lock
 
 no changes added to commit (use "git add" and/or "git commit -a")
 
 ```
+
 </details>
 </tool-use>
 
@@ -3307,11 +3018,6 @@ no changes added to commit (use "git add" and/or "git commit -a")
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3418,6 +3124,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 Done in 1.96s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -3427,11 +3134,6 @@ Done in 1.96s.
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3662,6 +3364,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]      fix/storybook-mdx-sanitize-allow-demos -&gt; fix/storybook-mdx-sanitize-allow-demos
 
 ```
+
 </details>
 </tool-use>
 
@@ -3671,11 +3374,6 @@ To github.com:leocaseiro/base-skill.git
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -3740,6 +3438,7 @@ Made with [Cursor](https://cursor.com)"
 https://github.com/leocaseiro/base-skill/pull/9
 
 ```
+
 </details>
 </tool-use>
 
@@ -3749,7 +3448,6 @@ https://github.com/leocaseiro/base-skill/pull/9
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Here’s what was going wrong and what we did about it.
 
