@@ -100,11 +100,7 @@ const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
   wrongTileBehavior: 'lock-auto-eject',
   tileBankMode: 'exact',
   totalRounds: 8,
-  // Deterministic order by default. `buildRoundOrder` shuffles when this is
-  // false using a nanoid-based seed (crypto.getRandomValues) which VR tests
-  // cannot pin, causing baseline drift. Users can still opt into shuffling
-  // via the settings panel.
-  roundsInOrder: true,
+  roundsInOrder: false,
   ttsEnabled: true,
   mode: 'recall',
   tileUnit: 'letter',
