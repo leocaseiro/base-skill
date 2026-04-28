@@ -1,52 +1,46 @@
+import { fn } from 'storybook/test';
+
 import { GameCard } from './GameCard';
 import { GameGrid } from './GameGrid';
 import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentType } from 'react';
 
-const SAMPLE_CARDS = [
-  <GameCard
-    key="wordspell"
-    variant="default"
-    gameId="word-spell"
-    title="Word Spell"
-    chips={['PK', 'K']}
-    onPlay={() => {}}
-    onOpenCog={() => {}}
-  />,
-  <GameCard
-    key="numbermatch"
-    variant="default"
-    gameId="number-match"
-    title="Match the Number"
-    chips={['1', '2']}
-    onPlay={() => {}}
-    onOpenCog={() => {}}
-  />,
-  <GameCard
-    key="sortnumbers"
-    variant="default"
-    gameId="sort-numbers"
-    title="Sort Numbers"
-    chips={['K', '1']}
-    onPlay={() => {}}
-    onOpenCog={() => {}}
-  />,
-];
+interface StoryArgs {
+  cardCount: number;
+  // Raw GameGrid prop shadowed by the cardCount bridge — hidden from Controls.
+  cards?: never;
+}
 
-const meta: Meta<typeof GameGrid> = {
-  component: GameGrid,
+const meta: Meta<StoryArgs> = {
+  component: GameGrid as unknown as ComponentType<StoryArgs>,
   tags: ['autodocs'],
   args: {
-    cards: SAMPLE_CARDS,
+    cardCount: 3,
   },
+  argTypes: {
+    cardCount: {
+      control: { type: 'range', min: 0, max: 12, step: 1 },
+    },
+    cards: { table: { disable: true } },
+  },
+  render: ({ cardCount }) => (
+    <GameGrid
+      cards={Array.from({ length: cardCount }, (_, i) => (
+        <GameCard
+          key={`card-${String(i)}`}
+          variant="default"
+          gameId="sort-numbers"
+          title={`Card ${String(i + 1)}`}
+          chips={['K', '1', '2']}
+          onPlay={fn()}
+          onOpenCog={fn()}
+        />
+      ))}
+    />
+  ),
 };
 export default meta;
 
-type Story = StoryObj<typeof GameGrid>;
+type Story = StoryObj<StoryArgs>;
 
 export const Default: Story = {};
-
-export const Empty: Story = {
-  args: {
-    cards: [],
-  },
-};
