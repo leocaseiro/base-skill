@@ -6,7 +6,7 @@ export const resolveSimpleConfig = (
   gameId: 'word-spell',
   component: 'WordSpell',
   configMode: 'simple',
-  mode: 'scramble',
+  mode: 'recall',
   tileUnit: 'letter',
   inputMethod: simple.inputMethod,
   wrongTileBehavior: 'lock-manual',
