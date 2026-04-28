@@ -52,6 +52,27 @@ Additional named stories are only added when a scenario genuinely **cannot** be 
 src/components/MyComponent.stories.tsx
 ```
 
+### Per-game previews of generic components
+
+Some generic components (e.g. `ConfigFormFields`, `InstructionsOverlay`) are
+parameterised by per-game fixtures. Their generic story exercises the
+component's abstract rendering branches with synthetic fixtures and **must stay
+game-agnostic**. To preview a specific game's real fixture, add a co-located
+sibling story under that game's directory:
+
+```
+src/components/ConfigFormFields.stories.tsx          ← generic branches only
+src/games/sort-numbers/SortNumbers.config-form.stories.tsx
+src/games/number-match/NumberMatch.config-form.stories.tsx
+src/games/word-spell/WordSpell.config-form.stories.tsx
+```
+
+Pattern precedent: per-game `InstructionsOverlay` stories (#143). Per-game
+files import the game's actual `ConfigField[]` / fixture export — never
+hand-maintained copies — and follow the single-`Playground` pattern with a
+`scenario` select for meaningful presets. Game vocabulary stays out of the
+generic story.
+
 ## Minimal Template
 
 The Playground pattern: a single `Playground` story, with every UI-affecting prop wired as a control on `meta`. Props are set once in `meta.args` so they serve as the Playground's baseline.
