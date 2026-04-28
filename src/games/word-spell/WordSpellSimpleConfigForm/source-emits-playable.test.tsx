@@ -3,13 +3,14 @@ import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 import { WordSpellSimpleConfigForm } from './WordSpellSimpleConfigForm';
+import type { Region } from '@/data/words';
 import { filterWords } from '@/data/words';
 
 type SourceConfig = {
   source?: {
     type: 'word-library';
     filter: {
-      region: string;
+      region: Region;
       level: number;
       phonemesAllowed?: string[];
     };
