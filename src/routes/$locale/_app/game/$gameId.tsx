@@ -232,11 +232,12 @@ export const resolveWordSpellConfig = (
   if (!saved || saved.component !== 'WordSpell') return baseClone;
 
   // Simple-mode: delegate to word-spell's library-source resolver.
-  // Any config with selectedUnits was produced by the picker and must be
-  // re-resolved so source.filter stays in sync with the selection.
+  // Any config with selectedUnits (but not explicitly advanced) was produced
+  // by the picker and must be re-resolved so source.filter stays in sync.
   if (
     saved.configMode === 'simple' ||
-    Array.isArray(saved.selectedUnits)
+    (saved.configMode !== 'advanced' &&
+      Array.isArray(saved.selectedUnits))
   ) {
     const savedInput = saved.inputMethod;
     return resolveWordSpellSimpleConfig({
@@ -257,6 +258,18 @@ export const resolveWordSpellConfig = (
     gameId: 'word-spell',
     component: 'WordSpell',
   };
+
+  // When the picker set selectedUnits, re-derive source.filter so
+  // the filter stays in sync even in advanced mode.
+  if (Array.isArray(merged.selectedUnits) && merged.source) {
+    const derived = resolveWordSpellSimpleConfig({
+      configMode: 'simple',
+      selectedUnits: merged.selectedUnits,
+      region: merged.source.filter.region,
+      inputMethod: merged.inputMethod,
+    });
+    merged.source = derived.source;
+  }
 
   // Mode invariant:
   // recall  ⇒ source defined ∧ rounds undefined
