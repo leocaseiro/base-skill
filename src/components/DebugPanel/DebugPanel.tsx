@@ -25,7 +25,7 @@ export interface DebugPanelProps {
   rawSavedConfig: Record<string, unknown> | null;
   customGame: DebugPanelCustomGame;
   session: DebugPanelSession;
-  rounds: unknown[];
+  rounds: unknown;
 }
 
 const Section = ({
@@ -63,12 +63,12 @@ const RoundsTable = ({
   rounds,
 }: {
   gameId: string;
-  rounds: unknown[];
+  rounds: unknown;
 }): JSX.Element => {
   const { columns, rows } = formatRounds(gameId, rounds);
   if (rows.length === 0) {
     return (
-      <Empty label="(no rounds — library or generator returned 0)" />
+      <Empty label="(no rounds in config — library or generator samples at runtime)" />
     );
   }
   return (
@@ -170,7 +170,9 @@ export const DebugPanel = ({
             <Section title="Session">
               <JsonBlock value={session} />
             </Section>
-            <Section title={`Rounds (${rounds.length})`}>
+            <Section
+              title={`Rounds (${Array.isArray(rounds) ? rounds.length : 0})`}
+            >
               <RoundsTable gameId={gameId} rounds={rounds} />
             </Section>
             <Section title="Storage">
