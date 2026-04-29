@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { filterWords } from './filter';
-import { ALL_REGIONS, GRAPHEMES_BY_LEVEL } from './levels';
+import { ALL_REGIONS, GRAPHEMES_BY_LEVEL, cumulativeGraphemes } from './levels';
+import type { GraphemePairFilter } from './types';
 
 const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
@@ -12,10 +13,21 @@ const unitsThrough = (maxLevel: number) => {
   return out;
 };
 
-const deriveFilter = (units: { g: string; p: string }[]) => ({
-  phonemesAllowed: [...new Set(units.map((u) => u.p))],
-  graphemesAllowed: [...new Set(units.map((u) => u.g))],
-});
+const deriveFilter = (units: { g: string; p: string }[]) => {
+  const seen = new Set<string>();
+  const graphemesAllowed: GraphemePairFilter[] = [];
+  for (const u of units) {
+    const key = `${u.g}|${u.p}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      graphemesAllowed.push({ g: u.g, p: u.p });
+    }
+  }
+  return {
+    phonemesAllowed: [...new Set(units.map((u) => u.p))],
+    graphemesAllowed,
+  };
+};
 
 describe('curriculum invariant: cumulative selection at each level yields ≥ 4 words', () => {
   for (const region of ALL_REGIONS) {
@@ -92,9 +104,7 @@ describe('curriculum invariant: cumulative graphemes + single-phoneme Y filter y
         it(`${region} L${level} chip ${unit.g} /${unit.p}/ → ≥ 1 hit`, async () => {
           const result = await filterWords({
             region,
-            graphemesAllowed: [
-              ...new Set(unitsThrough(level).map((u) => u.g)),
-            ],
+            graphemesAllowed: cumulativeGraphemes(level),
             phonemesRequired: [unit.p],
           });
           expect(
@@ -116,9 +126,7 @@ describe('curriculum invariant: cumulative + Y filter excludes pure-prior-level 
         );
         const result = await filterWords({
           region,
-          graphemesAllowed: [
-            ...new Set(unitsThrough(level).map((u) => u.g)),
-          ],
+          graphemesAllowed: cumulativeGraphemes(level),
           phonemesRequired: [...new Set(phonemes)],
         });
         const l1Phonemes = new Set(
