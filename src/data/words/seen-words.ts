@@ -1,8 +1,18 @@
 import { sampleHits } from './sample';
-import type { WordFilter, WordHit } from './types';
+import type { GraphemePairFilter, WordFilter, WordHit } from './types';
 
 const sortedCsv = (xs: readonly string[] | undefined): string =>
   xs && xs.length > 0 ? xs.toSorted().join(',') : '';
+
+const sortedPairsCsv = (
+  xs: readonly GraphemePairFilter[] | undefined,
+): string =>
+  xs && xs.length > 0
+    ? xs
+        .map((u) => `${u.g}|${u.p}`)
+        .toSorted()
+        .join(',')
+    : '';
 
 /**
  * Stable key derived from a `WordFilter`. Two filters with the same
@@ -27,8 +37,8 @@ export const filterSignature = (filter: WordFilter): string => {
     }`,
     `phonemesAllowed=${sortedCsv(filter.phonemesAllowed)}`,
     `phonemesRequired=${sortedCsv(filter.phonemesRequired)}`,
-    `graphemesAllowed=${sortedCsv(filter.graphemesAllowed)}`,
-    `graphemesRequired=${sortedCsv(filter.graphemesRequired)}`,
+    `graphemesAllowed=${sortedPairsCsv(filter.graphemesAllowed)}`,
+    `graphemesRequired=${sortedPairsCsv(filter.graphemesRequired)}`,
   ];
   return parts.join('|');
 };
