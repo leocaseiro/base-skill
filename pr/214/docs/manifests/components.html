@@ -5904,25 +5904,29 @@ sessionId?: string</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;NumberMatchConfigFormHarness&quot; component.
-  78 | };
-  79 |
-&gt; 80 | const meta: Meta&lt;typeof NumberMatchConfigFormHarness&gt; = {
-     | ^
-  81 |   title: &#39;Games/NumberMatch/ConfigForm&#39;,
-  82 |   component: NumberMatchConfigFormHarness,
-  83 |   tags: [&#39;autodocs&#39;],
+  103 | };
+  104 |
+&gt; 105 | const meta: Meta&lt;typeof NumberMatchConfigFormHarness&gt; = {
+      | ^
+  106 |   title: &#39;Games/NumberMatch/ConfigForm&#39;,
+  107 |   component: NumberMatchConfigFormHarness,
+  108 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/number-match/NumberMatch.config-form.stories.tsx:
 // Co-located preview of the NumberMatch config form, driven by the real
-// `numberMatchConfigFields` registry export.
+// `numberMatchConfigFields` registry export and `NumberMatchSimpleConfigForm`
+// for simple-mode preview.
 //
 // Pattern precedent: per-game `InstructionsOverlay` stories (PR #141).
 import { useState } from &#39;react&#39;;
 import { fn } from &#39;storybook/test&#39;;
+import { NumberMatchSimpleConfigForm } from &#39;./NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm&#39;;
 import { numberMatchConfigFields } from &#39;./types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { JSX } from &#39;react&#39;;
 import { ConfigFormFields } from &#39;@/components/ConfigFormFields&#39;;
+
+type Mode = &#39;simple&#39; | &#39;advanced&#39;;
 
 type Scenario =
   | &#39;numeral-to-group&#39;
@@ -5968,26 +5972,47 @@ const scenarios: Record&lt;Scenario, Record&lt;string, unknown&gt;&gt; = {
   },
 };
 
+const simpleBaseline: Record&lt;string, unknown&gt; = {
+  configMode: &#39;simple&#39;,
+  inputMethod: &#39;drag&#39;,
+  mode: &#39;numeral-to-group&#39;,
+  range: { min: 1, max: 10 },
+  distractorCount: 3,
+};
+
 type HarnessProps = {
+  mode: Mode;
   scenario: Scenario;
   onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
 };
 
 const NumberMatchConfigFormHarness = ({
+  mode,
   scenario,
   onChange,
 }: HarnessProps): JSX.Element =&gt; {
+  const initial =
+    mode === &#39;simple&#39; ? simpleBaseline : scenarios[scenario];
   const [config, setConfig] = useState&lt;Record&lt;string, unknown&gt;&gt;(
-    () =&gt; scenarios[scenario],
+    () =&gt; initial,
   );
+  const handleChange = (next: Record&lt;string, unknown&gt;): void =&gt; {
+    setConfig(next);
+    onChange(next);
+  };
+  if (mode === &#39;simple&#39;) {
+    return (
+      &lt;NumberMatchSimpleConfigForm
+        config={config}
+        onChange={handleChange}
+      /&gt;
+    );
+  }
   return (
     &lt;ConfigFormFields
       fields={numberMatchConfigFields}
       config={config}
-      onChange={(next) =&gt; {
-        setConfig(next);
-        onChange(next);
-      }}
+      onChange={handleChange}
     /&gt;
   );
 };
@@ -5997,10 +6022,17 @@ const meta: Meta&lt;typeof NumberMatchConfigFormHarness&gt; = {
   component: NumberMatchConfigFormHarness,
   tags: [&#39;autodocs&#39;],
   args: {
+    mode: &#39;advanced&#39;,
     scenario: &#39;numeral-to-group&#39;,
     onChange: fn(),
   },
   argTypes: {
+    mode: {
+      control: { type: &#39;radio&#39; },
+      options: [&#39;simple&#39;, &#39;advanced&#39;] satisfies Mode[],
+      description:
+        &#39;Which form variant to preview: the kid-friendly Simple form or the full Advanced field list.&#39;,
+    },
     scenario: {
       control: { type: &#39;radio&#39; },
       options: [
@@ -6009,13 +6041,15 @@ const meta: Meta&lt;typeof NumberMatchConfigFormHarness&gt; = {
         &#39;with-distractors&#39;,
       ] satisfies Scenario[],
       description:
-        &#39;Preset covering NumberMatch modes: numeral↔group, cardinal↔ordinal, and a distractor-enabled config.&#39;,
+        &#39;Advanced-mode preset covering NumberMatch modes: numeral↔group, cardinal↔ordinal, and a distractor-enabled config.&#39;,
+      if: { arg: &#39;mode&#39;, eq: &#39;advanced&#39; },
     },
-    onChange: { control: false },
+    onChange: { table: { disable: true } },
   },
-  render: ({ scenario, onChange }) =&gt; (
+  render: ({ mode, scenario, onChange }) =&gt; (
     &lt;NumberMatchConfigFormHarness
-      key={scenario}
+      key={`${mode}:${scenario}`}
+      mode={mode}
       scenario={scenario}
       onChange={onChange}
     /&gt;
@@ -6047,7 +6081,7 @@ export const Playground: Story = {};
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { ConfigFormFields } from "base-skill";</code></pre>
+                <pre><code>import { ConfigFormFields, NumberMatchSimpleConfigForm } from "base-skill";</code></pre>
               </div>
           
           
@@ -6058,9 +6092,10 @@ export const Playground: Story = {};
               </div>
               
               
-              <pre><code>const Playground = ({ scenario, onChange }) =&gt; (
+              <pre><code>const Playground = ({ mode, scenario, onChange }) =&gt; (
   &lt;NumberMatchConfigFormHarness
-    key={scenario}
+    key={`${mode}:${scenario}`}
+    mode={mode}
     scenario={scenario}
     onChange={onChange}
   /&gt;
@@ -8686,27 +8721,31 @@ sessionId?: string</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SortNumbersConfigFormHarness&quot; component.
-  80 | };
-  81 |
-&gt; 82 | const meta: Meta&lt;typeof SortNumbersConfigFormHarness&gt; = {
-     | ^
-  83 |   title: &#39;Games/SortNumbers/ConfigForm&#39;,
-  84 |   component: SortNumbersConfigFormHarness,
-  85 |   tags: [&#39;autodocs&#39;],
+  106 | };
+  107 |
+&gt; 108 | const meta: Meta&lt;typeof SortNumbersConfigFormHarness&gt; = {
+      | ^
+  109 |   title: &#39;Games/SortNumbers/ConfigForm&#39;,
+  110 |   component: SortNumbersConfigFormHarness,
+  111 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/sort-numbers/SortNumbers.config-form.stories.tsx:
 // Co-located preview of the SortNumbers config form, driven by the real
-// `sortNumbersConfigFields` registry export. The generic
+// `sortNumbersConfigFields` registry export and `SortNumbersSimpleConfigForm`
+// for simple-mode preview. The generic
 // `src/components/ConfigFormFields.stories.tsx` covers abstract rendering
 // branches; this story shows what a real game&#39;s form looks like end-to-end.
 //
 // Pattern precedent: per-game `InstructionsOverlay` stories (PR #141).
 import { useState } from &#39;react&#39;;
 import { fn } from &#39;storybook/test&#39;;
+import { SortNumbersSimpleConfigForm } from &#39;./SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm&#39;;
 import { sortNumbersConfigFields } from &#39;./types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { JSX } from &#39;react&#39;;
 import { ConfigFormFields } from &#39;@/components/ConfigFormFields&#39;;
+
+type Mode = &#39;simple&#39; | &#39;advanced&#39;;
 
 type Scenario = &#39;random&#39; | &#39;by-mode&#39; | &#39;distractors&#39;;
 
@@ -8752,26 +8791,48 @@ const scenarios: Record&lt;Scenario, Record&lt;string, unknown&gt;&gt; = {
   },
 };
 
+const simpleBaseline: Record&lt;string, unknown&gt; = {
+  configMode: &#39;simple&#39;,
+  inputMethod: &#39;drag&#39;,
+  direction: &#39;ascending&#39;,
+  quantity: 5,
+  skip: { mode: &#39;by&#39;, step: 2, start: 2 },
+  distractors: false,
+};
+
 type HarnessProps = {
+  mode: Mode;
   scenario: Scenario;
   onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
 };
 
 const SortNumbersConfigFormHarness = ({
+  mode,
   scenario,
   onChange,
 }: HarnessProps): JSX.Element =&gt; {
+  const initial =
+    mode === &#39;simple&#39; ? simpleBaseline : scenarios[scenario];
   const [config, setConfig] = useState&lt;Record&lt;string, unknown&gt;&gt;(
-    () =&gt; scenarios[scenario],
+    () =&gt; initial,
   );
+  const handleChange = (next: Record&lt;string, unknown&gt;): void =&gt; {
+    setConfig(next);
+    onChange(next);
+  };
+  if (mode === &#39;simple&#39;) {
+    return (
+      &lt;SortNumbersSimpleConfigForm
+        config={config}
+        onChange={handleChange}
+      /&gt;
+    );
+  }
   return (
     &lt;ConfigFormFields
       fields={sortNumbersConfigFields}
       config={config}
-      onChange={(next) =&gt; {
-        setConfig(next);
-        onChange(next);
-      }}
+      onChange={handleChange}
     /&gt;
   );
 };
@@ -8781,10 +8842,17 @@ const meta: Meta&lt;typeof SortNumbersConfigFormHarness&gt; = {
   component: SortNumbersConfigFormHarness,
   tags: [&#39;autodocs&#39;],
   args: {
+    mode: &#39;advanced&#39;,
     scenario: &#39;random&#39;,
     onChange: fn(),
   },
   argTypes: {
+    mode: {
+      control: { type: &#39;radio&#39; },
+      options: [&#39;simple&#39;, &#39;advanced&#39;] satisfies Mode[],
+      description:
+        &#39;Which form variant to preview: the kid-friendly Simple form or the full Advanced field list.&#39;,
+    },
     scenario: {
       control: { type: &#39;radio&#39; },
       options: [
@@ -8793,13 +8861,15 @@ const meta: Meta&lt;typeof SortNumbersConfigFormHarness&gt; = {
         &#39;distractors&#39;,
       ] satisfies Scenario[],
       description:
-        &#39;Preset matching SortNumbers config branches: random skip, by-mode skip (shows step + start), or distractor tile bank (shows source + count).&#39;,
+        &#39;Advanced-mode preset matching SortNumbers config branches: random skip, by-mode skip (shows step + start), or distractor tile bank (shows source + count).&#39;,
+      if: { arg: &#39;mode&#39;, eq: &#39;advanced&#39; },
     },
-    onChange: { control: false },
+    onChange: { table: { disable: true } },
   },
-  render: ({ scenario, onChange }) =&gt; (
+  render: ({ mode, scenario, onChange }) =&gt; (
     &lt;SortNumbersConfigFormHarness
-      key={scenario}
+      key={`${mode}:${scenario}`}
+      mode={mode}
       scenario={scenario}
       onChange={onChange}
     /&gt;
@@ -8831,7 +8901,7 @@ export const Playground: Story = {};
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { ConfigFormFields } from "base-skill";</code></pre>
+                <pre><code>import { ConfigFormFields, SortNumbersSimpleConfigForm } from "base-skill";</code></pre>
               </div>
           
           
@@ -8842,9 +8912,10 @@ export const Playground: Story = {};
               </div>
               
               
-              <pre><code>const Playground = ({ scenario, onChange }) =&gt; (
+              <pre><code>const Playground = ({ mode, scenario, onChange }) =&gt; (
   &lt;SortNumbersConfigFormHarness
-    key={scenario}
+    key={`${mode}:${scenario}`}
+    mode={mode}
     scenario={scenario}
     onChange={onChange}
   /&gt;
@@ -9623,25 +9694,29 @@ sessionId?: string</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;WordSpellConfigFormHarness&quot; component.
-  69 | };
-  70 |
-&gt; 71 | const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
+  93 | };
+  94 |
+&gt; 95 | const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
      | ^
-  72 |   title: &#39;Games/WordSpell/ConfigForm&#39;,
-  73 |   component: WordSpellConfigFormHarness,
-  74 |   tags: [&#39;autodocs&#39;],
+  96 |   title: &#39;Games/WordSpell/ConfigForm&#39;,
+  97 |   component: WordSpellConfigFormHarness,
+  98 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/word-spell/WordSpell.config-form.stories.tsx:
 // Co-located preview of the WordSpell config form, driven by the real
-// `wordSpellConfigFields` registry export.
+// `wordSpellConfigFields` registry export and `WordSpellSimpleConfigForm`
+// for simple-mode preview.
 //
 // Pattern precedent: per-game `InstructionsOverlay` stories (PR #141).
 import { useState } from &#39;react&#39;;
 import { fn } from &#39;storybook/test&#39;;
 import { wordSpellConfigFields } from &#39;./types&#39;;
+import { WordSpellSimpleConfigForm } from &#39;./WordSpellSimpleConfigForm/WordSpellSimpleConfigForm&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { JSX } from &#39;react&#39;;
 import { ConfigFormFields } from &#39;@/components/ConfigFormFields&#39;;
+
+type Mode = &#39;simple&#39; | &#39;advanced&#39;;
 
 type Scenario = &#39;picture&#39; | &#39;scramble&#39; | &#39;sentence-gap&#39;;
 
@@ -9678,26 +9753,46 @@ const scenarios: Record&lt;Scenario, Record&lt;string, unknown&gt;&gt; = {
   },
 };
 
+const simpleBaseline: Record&lt;string, unknown&gt; = {
+  configMode: &#39;simple&#39;,
+  inputMethod: &#39;drag&#39;,
+  level: 1,
+  phonemesAllowed: [],
+};
+
 type HarnessProps = {
+  mode: Mode;
   scenario: Scenario;
   onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
 };
 
 const WordSpellConfigFormHarness = ({
+  mode,
   scenario,
   onChange,
 }: HarnessProps): JSX.Element =&gt; {
+  const initial =
+    mode === &#39;simple&#39; ? simpleBaseline : scenarios[scenario];
   const [config, setConfig] = useState&lt;Record&lt;string, unknown&gt;&gt;(
-    () =&gt; scenarios[scenario],
+    () =&gt; initial,
   );
+  const handleChange = (next: Record&lt;string, unknown&gt;): void =&gt; {
+    setConfig(next);
+    onChange(next);
+  };
+  if (mode === &#39;simple&#39;) {
+    return (
+      &lt;WordSpellSimpleConfigForm
+        config={config}
+        onChange={handleChange}
+      /&gt;
+    );
+  }
   return (
     &lt;ConfigFormFields
       fields={wordSpellConfigFields}
       config={config}
-      onChange={(next) =&gt; {
-        setConfig(next);
-        onChange(next);
-      }}
+      onChange={handleChange}
     /&gt;
   );
 };
@@ -9707,10 +9802,17 @@ const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
   component: WordSpellConfigFormHarness,
   tags: [&#39;autodocs&#39;],
   args: {
+    mode: &#39;advanced&#39;,
     scenario: &#39;picture&#39;,
     onChange: fn(),
   },
   argTypes: {
+    mode: {
+      control: { type: &#39;radio&#39; },
+      options: [&#39;simple&#39;, &#39;advanced&#39;] satisfies Mode[],
+      description:
+        &#39;Which form variant to preview: the kid-friendly Simple form or the full Advanced field list.&#39;,
+    },
     scenario: {
       control: { type: &#39;radio&#39; },
       options: [
@@ -9719,13 +9821,15 @@ const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
         &#39;sentence-gap&#39;,
       ] satisfies Scenario[],
       description:
-        &#39;Preset covering meaningful WordSpell modes: picture (letters), scramble (letters with distractors), sentence-gap (word tiles).&#39;,
+        &#39;Advanced-mode preset covering meaningful WordSpell modes: picture (letters), scramble (letters with distractors), sentence-gap (word tiles).&#39;,
+      if: { arg: &#39;mode&#39;, eq: &#39;advanced&#39; },
     },
-    onChange: { control: false },
+    onChange: { table: { disable: true } },
   },
-  render: ({ scenario, onChange }) =&gt; (
+  render: ({ mode, scenario, onChange }) =&gt; (
     &lt;WordSpellConfigFormHarness
-      key={scenario}
+      key={`${mode}:${scenario}`}
+      mode={mode}
       scenario={scenario}
       onChange={onChange}
     /&gt;
@@ -9757,7 +9861,7 @@ export const Playground: Story = {};
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { ConfigFormFields } from "base-skill";</code></pre>
+                <pre><code>import { ConfigFormFields, WordSpellSimpleConfigForm } from "base-skill";</code></pre>
               </div>
           
           
@@ -9768,9 +9872,10 @@ export const Playground: Story = {};
               </div>
               
               
-              <pre><code>const Playground = ({ scenario, onChange }) =&gt; (
+              <pre><code>const Playground = ({ mode, scenario, onChange }) =&gt; (
   &lt;WordSpellConfigFormHarness
-    key={scenario}
+    key={`${mode}:${scenario}`}
+    mode={mode}
     scenario={scenario}
     onChange={onChange}
   /&gt;
@@ -13925,25 +14030,29 @@ export const Default: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;NumberMatchConfigFormHarness&quot; component.
-  78 | };
-  79 |
-&gt; 80 | const meta: Meta&lt;typeof NumberMatchConfigFormHarness&gt; = {
-     | ^
-  81 |   title: &#39;Games/NumberMatch/ConfigForm&#39;,
-  82 |   component: NumberMatchConfigFormHarness,
-  83 |   tags: [&#39;autodocs&#39;],
+  103 | };
+  104 |
+&gt; 105 | const meta: Meta&lt;typeof NumberMatchConfigFormHarness&gt; = {
+      | ^
+  106 |   title: &#39;Games/NumberMatch/ConfigForm&#39;,
+  107 |   component: NumberMatchConfigFormHarness,
+  108 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/number-match/NumberMatch.config-form.stories.tsx:
 // Co-located preview of the NumberMatch config form, driven by the real
-// `numberMatchConfigFields` registry export.
+// `numberMatchConfigFields` registry export and `NumberMatchSimpleConfigForm`
+// for simple-mode preview.
 //
 // Pattern precedent: per-game `InstructionsOverlay` stories (PR #141).
 import { useState } from &#39;react&#39;;
 import { fn } from &#39;storybook/test&#39;;
+import { NumberMatchSimpleConfigForm } from &#39;./NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm&#39;;
 import { numberMatchConfigFields } from &#39;./types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { JSX } from &#39;react&#39;;
 import { ConfigFormFields } from &#39;@/components/ConfigFormFields&#39;;
+
+type Mode = &#39;simple&#39; | &#39;advanced&#39;;
 
 type Scenario =
   | &#39;numeral-to-group&#39;
@@ -13989,26 +14098,47 @@ const scenarios: Record&lt;Scenario, Record&lt;string, unknown&gt;&gt; = {
   },
 };
 
+const simpleBaseline: Record&lt;string, unknown&gt; = {
+  configMode: &#39;simple&#39;,
+  inputMethod: &#39;drag&#39;,
+  mode: &#39;numeral-to-group&#39;,
+  range: { min: 1, max: 10 },
+  distractorCount: 3,
+};
+
 type HarnessProps = {
+  mode: Mode;
   scenario: Scenario;
   onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
 };
 
 const NumberMatchConfigFormHarness = ({
+  mode,
   scenario,
   onChange,
 }: HarnessProps): JSX.Element =&gt; {
+  const initial =
+    mode === &#39;simple&#39; ? simpleBaseline : scenarios[scenario];
   const [config, setConfig] = useState&lt;Record&lt;string, unknown&gt;&gt;(
-    () =&gt; scenarios[scenario],
+    () =&gt; initial,
   );
+  const handleChange = (next: Record&lt;string, unknown&gt;): void =&gt; {
+    setConfig(next);
+    onChange(next);
+  };
+  if (mode === &#39;simple&#39;) {
+    return (
+      &lt;NumberMatchSimpleConfigForm
+        config={config}
+        onChange={handleChange}
+      /&gt;
+    );
+  }
   return (
     &lt;ConfigFormFields
       fields={numberMatchConfigFields}
       config={config}
-      onChange={(next) =&gt; {
-        setConfig(next);
-        onChange(next);
-      }}
+      onChange={handleChange}
     /&gt;
   );
 };
@@ -14018,10 +14148,17 @@ const meta: Meta&lt;typeof NumberMatchConfigFormHarness&gt; = {
   component: NumberMatchConfigFormHarness,
   tags: [&#39;autodocs&#39;],
   args: {
+    mode: &#39;advanced&#39;,
     scenario: &#39;numeral-to-group&#39;,
     onChange: fn(),
   },
   argTypes: {
+    mode: {
+      control: { type: &#39;radio&#39; },
+      options: [&#39;simple&#39;, &#39;advanced&#39;] satisfies Mode[],
+      description:
+        &#39;Which form variant to preview: the kid-friendly Simple form or the full Advanced field list.&#39;,
+    },
     scenario: {
       control: { type: &#39;radio&#39; },
       options: [
@@ -14030,13 +14167,15 @@ const meta: Meta&lt;typeof NumberMatchConfigFormHarness&gt; = {
         &#39;with-distractors&#39;,
       ] satisfies Scenario[],
       description:
-        &#39;Preset covering NumberMatch modes: numeral↔group, cardinal↔ordinal, and a distractor-enabled config.&#39;,
+        &#39;Advanced-mode preset covering NumberMatch modes: numeral↔group, cardinal↔ordinal, and a distractor-enabled config.&#39;,
+      if: { arg: &#39;mode&#39;, eq: &#39;advanced&#39; },
     },
-    onChange: { control: false },
+    onChange: { table: { disable: true } },
   },
-  render: ({ scenario, onChange }) =&gt; (
+  render: ({ mode, scenario, onChange }) =&gt; (
     &lt;NumberMatchConfigFormHarness
-      key={scenario}
+      key={`${mode}:${scenario}`}
+      mode={mode}
       scenario={scenario}
       onChange={onChange}
     /&gt;
@@ -14068,7 +14207,7 @@ export const Playground: Story = {};
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { ConfigFormFields } from "base-skill";</code></pre>
+                <pre><code>import { ConfigFormFields, NumberMatchSimpleConfigForm } from "base-skill";</code></pre>
               </div>
           
           
@@ -14079,9 +14218,10 @@ export const Playground: Story = {};
               </div>
               
               
-              <pre><code>const Playground = ({ scenario, onChange }) =&gt; (
+              <pre><code>const Playground = ({ mode, scenario, onChange }) =&gt; (
   &lt;NumberMatchConfigFormHarness
-    key={scenario}
+    key={`${mode}:${scenario}`}
+    mode={mode}
     scenario={scenario}
     onChange={onChange}
   /&gt;
@@ -15842,27 +15982,31 @@ export const Playground: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SortNumbersConfigFormHarness&quot; component.
-  80 | };
-  81 |
-&gt; 82 | const meta: Meta&lt;typeof SortNumbersConfigFormHarness&gt; = {
-     | ^
-  83 |   title: &#39;Games/SortNumbers/ConfigForm&#39;,
-  84 |   component: SortNumbersConfigFormHarness,
-  85 |   tags: [&#39;autodocs&#39;],
+  106 | };
+  107 |
+&gt; 108 | const meta: Meta&lt;typeof SortNumbersConfigFormHarness&gt; = {
+      | ^
+  109 |   title: &#39;Games/SortNumbers/ConfigForm&#39;,
+  110 |   component: SortNumbersConfigFormHarness,
+  111 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/sort-numbers/SortNumbers.config-form.stories.tsx:
 // Co-located preview of the SortNumbers config form, driven by the real
-// `sortNumbersConfigFields` registry export. The generic
+// `sortNumbersConfigFields` registry export and `SortNumbersSimpleConfigForm`
+// for simple-mode preview. The generic
 // `src/components/ConfigFormFields.stories.tsx` covers abstract rendering
 // branches; this story shows what a real game&#39;s form looks like end-to-end.
 //
 // Pattern precedent: per-game `InstructionsOverlay` stories (PR #141).
 import { useState } from &#39;react&#39;;
 import { fn } from &#39;storybook/test&#39;;
+import { SortNumbersSimpleConfigForm } from &#39;./SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm&#39;;
 import { sortNumbersConfigFields } from &#39;./types&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { JSX } from &#39;react&#39;;
 import { ConfigFormFields } from &#39;@/components/ConfigFormFields&#39;;
+
+type Mode = &#39;simple&#39; | &#39;advanced&#39;;
 
 type Scenario = &#39;random&#39; | &#39;by-mode&#39; | &#39;distractors&#39;;
 
@@ -15908,26 +16052,48 @@ const scenarios: Record&lt;Scenario, Record&lt;string, unknown&gt;&gt; = {
   },
 };
 
+const simpleBaseline: Record&lt;string, unknown&gt; = {
+  configMode: &#39;simple&#39;,
+  inputMethod: &#39;drag&#39;,
+  direction: &#39;ascending&#39;,
+  quantity: 5,
+  skip: { mode: &#39;by&#39;, step: 2, start: 2 },
+  distractors: false,
+};
+
 type HarnessProps = {
+  mode: Mode;
   scenario: Scenario;
   onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
 };
 
 const SortNumbersConfigFormHarness = ({
+  mode,
   scenario,
   onChange,
 }: HarnessProps): JSX.Element =&gt; {
+  const initial =
+    mode === &#39;simple&#39; ? simpleBaseline : scenarios[scenario];
   const [config, setConfig] = useState&lt;Record&lt;string, unknown&gt;&gt;(
-    () =&gt; scenarios[scenario],
+    () =&gt; initial,
   );
+  const handleChange = (next: Record&lt;string, unknown&gt;): void =&gt; {
+    setConfig(next);
+    onChange(next);
+  };
+  if (mode === &#39;simple&#39;) {
+    return (
+      &lt;SortNumbersSimpleConfigForm
+        config={config}
+        onChange={handleChange}
+      /&gt;
+    );
+  }
   return (
     &lt;ConfigFormFields
       fields={sortNumbersConfigFields}
       config={config}
-      onChange={(next) =&gt; {
-        setConfig(next);
-        onChange(next);
-      }}
+      onChange={handleChange}
     /&gt;
   );
 };
@@ -15937,10 +16103,17 @@ const meta: Meta&lt;typeof SortNumbersConfigFormHarness&gt; = {
   component: SortNumbersConfigFormHarness,
   tags: [&#39;autodocs&#39;],
   args: {
+    mode: &#39;advanced&#39;,
     scenario: &#39;random&#39;,
     onChange: fn(),
   },
   argTypes: {
+    mode: {
+      control: { type: &#39;radio&#39; },
+      options: [&#39;simple&#39;, &#39;advanced&#39;] satisfies Mode[],
+      description:
+        &#39;Which form variant to preview: the kid-friendly Simple form or the full Advanced field list.&#39;,
+    },
     scenario: {
       control: { type: &#39;radio&#39; },
       options: [
@@ -15949,13 +16122,15 @@ const meta: Meta&lt;typeof SortNumbersConfigFormHarness&gt; = {
         &#39;distractors&#39;,
       ] satisfies Scenario[],
       description:
-        &#39;Preset matching SortNumbers config branches: random skip, by-mode skip (shows step + start), or distractor tile bank (shows source + count).&#39;,
+        &#39;Advanced-mode preset matching SortNumbers config branches: random skip, by-mode skip (shows step + start), or distractor tile bank (shows source + count).&#39;,
+      if: { arg: &#39;mode&#39;, eq: &#39;advanced&#39; },
     },
-    onChange: { control: false },
+    onChange: { table: { disable: true } },
   },
-  render: ({ scenario, onChange }) =&gt; (
+  render: ({ mode, scenario, onChange }) =&gt; (
     &lt;SortNumbersConfigFormHarness
-      key={scenario}
+      key={`${mode}:${scenario}`}
+      mode={mode}
       scenario={scenario}
       onChange={onChange}
     /&gt;
@@ -15987,7 +16162,7 @@ export const Playground: Story = {};
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { ConfigFormFields } from "base-skill";</code></pre>
+                <pre><code>import { ConfigFormFields, SortNumbersSimpleConfigForm } from "base-skill";</code></pre>
               </div>
           
           
@@ -15998,9 +16173,10 @@ export const Playground: Story = {};
               </div>
               
               
-              <pre><code>const Playground = ({ scenario, onChange }) =&gt; (
+              <pre><code>const Playground = ({ mode, scenario, onChange }) =&gt; (
   &lt;SortNumbersConfigFormHarness
-    key={scenario}
+    key={`${mode}:${scenario}`}
+    mode={mode}
     scenario={scenario}
     onChange={onChange}
   /&gt;
@@ -16347,25 +16523,29 @@ export const Playground: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;WordSpellConfigFormHarness&quot; component.
-  69 | };
-  70 |
-&gt; 71 | const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
+  93 | };
+  94 |
+&gt; 95 | const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
      | ^
-  72 |   title: &#39;Games/WordSpell/ConfigForm&#39;,
-  73 |   component: WordSpellConfigFormHarness,
-  74 |   tags: [&#39;autodocs&#39;],
+  96 |   title: &#39;Games/WordSpell/ConfigForm&#39;,
+  97 |   component: WordSpellConfigFormHarness,
+  98 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/word-spell/WordSpell.config-form.stories.tsx:
 // Co-located preview of the WordSpell config form, driven by the real
-// `wordSpellConfigFields` registry export.
+// `wordSpellConfigFields` registry export and `WordSpellSimpleConfigForm`
+// for simple-mode preview.
 //
 // Pattern precedent: per-game `InstructionsOverlay` stories (PR #141).
 import { useState } from &#39;react&#39;;
 import { fn } from &#39;storybook/test&#39;;
 import { wordSpellConfigFields } from &#39;./types&#39;;
+import { WordSpellSimpleConfigForm } from &#39;./WordSpellSimpleConfigForm/WordSpellSimpleConfigForm&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { JSX } from &#39;react&#39;;
 import { ConfigFormFields } from &#39;@/components/ConfigFormFields&#39;;
+
+type Mode = &#39;simple&#39; | &#39;advanced&#39;;
 
 type Scenario = &#39;picture&#39; | &#39;scramble&#39; | &#39;sentence-gap&#39;;
 
@@ -16402,26 +16582,46 @@ const scenarios: Record&lt;Scenario, Record&lt;string, unknown&gt;&gt; = {
   },
 };
 
+const simpleBaseline: Record&lt;string, unknown&gt; = {
+  configMode: &#39;simple&#39;,
+  inputMethod: &#39;drag&#39;,
+  level: 1,
+  phonemesAllowed: [],
+};
+
 type HarnessProps = {
+  mode: Mode;
   scenario: Scenario;
   onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
 };
 
 const WordSpellConfigFormHarness = ({
+  mode,
   scenario,
   onChange,
 }: HarnessProps): JSX.Element =&gt; {
+  const initial =
+    mode === &#39;simple&#39; ? simpleBaseline : scenarios[scenario];
   const [config, setConfig] = useState&lt;Record&lt;string, unknown&gt;&gt;(
-    () =&gt; scenarios[scenario],
+    () =&gt; initial,
   );
+  const handleChange = (next: Record&lt;string, unknown&gt;): void =&gt; {
+    setConfig(next);
+    onChange(next);
+  };
+  if (mode === &#39;simple&#39;) {
+    return (
+      &lt;WordSpellSimpleConfigForm
+        config={config}
+        onChange={handleChange}
+      /&gt;
+    );
+  }
   return (
     &lt;ConfigFormFields
       fields={wordSpellConfigFields}
       config={config}
-      onChange={(next) =&gt; {
-        setConfig(next);
-        onChange(next);
-      }}
+      onChange={handleChange}
     /&gt;
   );
 };
@@ -16431,10 +16631,17 @@ const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
   component: WordSpellConfigFormHarness,
   tags: [&#39;autodocs&#39;],
   args: {
+    mode: &#39;advanced&#39;,
     scenario: &#39;picture&#39;,
     onChange: fn(),
   },
   argTypes: {
+    mode: {
+      control: { type: &#39;radio&#39; },
+      options: [&#39;simple&#39;, &#39;advanced&#39;] satisfies Mode[],
+      description:
+        &#39;Which form variant to preview: the kid-friendly Simple form or the full Advanced field list.&#39;,
+    },
     scenario: {
       control: { type: &#39;radio&#39; },
       options: [
@@ -16443,13 +16650,15 @@ const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
         &#39;sentence-gap&#39;,
       ] satisfies Scenario[],
       description:
-        &#39;Preset covering meaningful WordSpell modes: picture (letters), scramble (letters with distractors), sentence-gap (word tiles).&#39;,
+        &#39;Advanced-mode preset covering meaningful WordSpell modes: picture (letters), scramble (letters with distractors), sentence-gap (word tiles).&#39;,
+      if: { arg: &#39;mode&#39;, eq: &#39;advanced&#39; },
     },
-    onChange: { control: false },
+    onChange: { table: { disable: true } },
   },
-  render: ({ scenario, onChange }) =&gt; (
+  render: ({ mode, scenario, onChange }) =&gt; (
     &lt;WordSpellConfigFormHarness
-      key={scenario}
+      key={`${mode}:${scenario}`}
+      mode={mode}
       scenario={scenario}
       onChange={onChange}
     /&gt;
@@ -16481,7 +16690,7 @@ export const Playground: Story = {};
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { ConfigFormFields } from "base-skill";</code></pre>
+                <pre><code>import { ConfigFormFields, WordSpellSimpleConfigForm } from "base-skill";</code></pre>
               </div>
           
           
@@ -16492,9 +16701,10 @@ export const Playground: Story = {};
               </div>
               
               
-              <pre><code>const Playground = ({ scenario, onChange }) =&gt; (
+              <pre><code>const Playground = ({ mode, scenario, onChange }) =&gt; (
   &lt;WordSpellConfigFormHarness
-    key={scenario}
+    key={`${mode}:${scenario}`}
+    mode={mode}
     scenario={scenario}
     onChange={onChange}
   /&gt;
