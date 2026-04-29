@@ -216,3 +216,44 @@ jobs:
         with:
           header: pr-preview
           path: /tmp/pr-comment.md
+
+      - name: Update PR description with preview links
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.version.outputs.pr_number }}
+        run: |
+          set -euo pipefail
+
+          # Find the sticky comment ID for the anchor link
+          COMMENT_ID=$(gh api "repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" \
+            --jq '[.[] | select(.body | contains("<!-- pr-preview -->"))] | last | .id')
+
+          APP_URL="https://leocaseiro.github.io/base-skill/pr/${PR_NUMBER}/app/"
+          DOCS_URL="https://leocaseiro.github.io/base-skill/pr/${PR_NUMBER}/docs/"
+          COMMENT_URL="https://github.com/${{ github.repository }}/pull/${PR_NUMBER}#issuecomment-${COMMENT_ID}"
+
+          # Build the preview section
+          cat > /tmp/preview-section.txt <<EOF
+          <!-- preview-urls -->
+          ---
+          **Preview:** [App](${APP_URL}) · [Storybook](${DOCS_URL}) · [Build details ↓](${COMMENT_URL})
+          <!-- /preview-urls -->
+          EOF
+
+          # Read current PR body (default to empty if null)
+          gh pr view "$PR_NUMBER" --json body --jq '.body // ""' > /tmp/pr-body.txt
+
+          # Replace existing preview section, or append if not present
+          if grep -q '<!-- preview-urls -->' /tmp/pr-body.txt; then
+            awk '
+              /<!-- preview-urls -->/ { skip=1; while ((getline line < "/tmp/preview-section.txt") > 0) print line; next }
+              /<!-- \/preview-urls -->/ { skip=0; next }
+              !skip { print }
+            ' /tmp/pr-body.txt > /tmp/new-body.txt
+          else
+            cp /tmp/pr-body.txt /tmp/new-body.txt
+            echo "" >> /tmp/new-body.txt
+            cat /tmp/preview-section.txt >> /tmp/new-body.txt
+          fi
+
+          gh pr edit "$PR_NUMBER" --body-file /tmp/new-body.txt
