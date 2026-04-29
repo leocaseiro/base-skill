@@ -32,7 +32,7 @@ describe('WordSpellSimpleConfigForm', () => {
       screen.getByRole('button', { name: /m \/m\//i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: /d \/d\//i }),
+      screen.getByRole('button', { name: /^d \/d\/$/i }),
     ).toBeInTheDocument();
   });
 
