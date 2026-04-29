@@ -2,6 +2,8 @@ import { NumberMatchSimpleConfigForm } from './number-match/NumberMatchSimpleCon
 import { numberMatchConfigFields } from './number-match/types';
 import { SortNumbersSimpleConfigForm } from './sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm';
 import { sortNumbersConfigFields } from './sort-numbers/types';
+import { SpotAllConfigForm } from './spot-all/SpotAllConfigForm/SpotAllConfigForm';
+import { spotAllConfigFields } from './spot-all/types';
 import { wordSpellConfigFields } from './word-spell/types';
 import { WordSpellLibrarySource } from './word-spell/WordSpellLibrarySource/WordSpellLibrarySource';
 import { WordSpellSimpleConfigForm } from './word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm';
@@ -18,6 +20,9 @@ export const getConfigFields = (gameId: string): ConfigField[] => {
     }
     case 'sort-numbers': {
       return sortNumbersConfigFields;
+    }
+    case 'spot-all': {
+      return spotAllConfigFields;
     }
     default: {
       return [];
@@ -48,6 +53,9 @@ export const getSimpleConfigFormRenderer = (
     }
     case 'sort-numbers': {
       return SortNumbersSimpleConfigForm;
+    }
+    case 'spot-all': {
+      return SpotAllConfigForm;
     }
     default: {
       return undefined;
