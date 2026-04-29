@@ -1,7 +1,10 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { useFilteredWords } from './useFilteredWords';
-import { __resetChunkCacheForTests, GRAPHEMES_BY_LEVEL } from '@/data/words';
+import {
+  GRAPHEMES_BY_LEVEL,
+  __resetChunkCacheForTests,
+} from '@/data/words';
 
 afterEach(() => {
   __resetChunkCacheForTests();
