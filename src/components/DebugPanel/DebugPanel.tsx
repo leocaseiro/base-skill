@@ -28,6 +28,43 @@ export interface DebugPanelProps {
   rounds: unknown;
 }
 
+const copyToClipboard = (text: string): void => {
+  if (typeof navigator !== 'undefined') {
+    void navigator.clipboard.writeText(text);
+  }
+};
+
+const JsonActions = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: unknown;
+}): JSX.Element => (
+  <div className="mb-1 flex gap-1">
+    <button
+      type="button"
+      onClick={() => copyToClipboard(JSON.stringify(value, null, 2))}
+      className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-700"
+      aria-label={`Copy ${label} to clipboard`}
+      title="Copy JSON to clipboard"
+    >
+      📋 Copy
+    </button>
+    <button
+      type="button"
+      onClick={() => {
+        console.log(`[debug:${label}]`, value);
+      }}
+      className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-700"
+      aria-label={`Log ${label} to console`}
+      title="Dump to browser console"
+    >
+      🖨️ Log
+    </button>
+  </div>
+);
+
 const Section = ({
   title,
   defaultOpen,
@@ -48,10 +85,19 @@ const Section = ({
   </details>
 );
 
-const JsonBlock = ({ value }: { value: unknown }): JSX.Element => (
-  <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-zinc-950 p-2 font-mono text-[11px] leading-snug text-zinc-100">
-    {JSON.stringify(value, null, 2)}
-  </pre>
+const JsonBlock = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: unknown;
+}): JSX.Element => (
+  <>
+    <JsonActions label={label} value={value} />
+    <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-zinc-950 p-2 font-mono text-[11px] leading-snug text-zinc-100">
+      {JSON.stringify(value, null, 2)}
+    </pre>
+  </>
 );
 
 const Empty = ({ label }: { label: string }): JSX.Element => (
@@ -144,11 +190,17 @@ export const DebugPanel = ({
           </div>
           <div className="flex-1 overflow-auto">
             <Section title="Resolved Config" defaultOpen>
-              <JsonBlock value={resolvedConfig} />
+              <JsonBlock
+                label="resolvedConfig"
+                value={resolvedConfig}
+              />
             </Section>
             <Section title="Raw Saved Config">
               {rawSavedConfig ? (
-                <JsonBlock value={rawSavedConfig} />
+                <JsonBlock
+                  label="rawSavedConfig"
+                  value={rawSavedConfig}
+                />
               ) : (
                 <Empty label="(no saved config — using defaults)" />
               )}
@@ -156,6 +208,7 @@ export const DebugPanel = ({
             <Section title="Custom Game">
               {customGame.id ? (
                 <JsonBlock
+                  label="customGame"
                   value={{
                     id: customGame.id,
                     name: customGame.name,
@@ -168,11 +221,14 @@ export const DebugPanel = ({
               )}
             </Section>
             <Section title="Session">
-              <JsonBlock value={session} />
+              <JsonBlock label="session" value={session} />
             </Section>
             <Section
               title={`Rounds (${Array.isArray(rounds) ? rounds.length : 0})`}
             >
+              {Array.isArray(rounds) && rounds.length > 0 ? (
+                <JsonActions label="rounds" value={rounds} />
+              ) : null}
               <RoundsTable gameId={gameId} rounds={rounds} />
             </Section>
             <Section title="Storage">
@@ -180,6 +236,7 @@ export const DebugPanel = ({
                 <Empty label="(loading…)" />
               ) : (
                 <>
+                  <JsonActions label="storage" value={storage} />
                   <p className="mb-1 font-semibold text-zinc-300">
                     IndexedDB collections
                   </p>

@@ -86,6 +86,47 @@ describe('DebugPanel', () => {
     ).toBeInTheDocument();
   });
 
+  it('copies JSON to clipboard when the section copy button is clicked', () => {
+    const writeText = vi
+      .fn()
+      .mockImplementation(() => Promise.resolve());
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    render(<DebugPanel {...baseProps} />);
+    fireEvent.click(
+      screen.getByRole('button', { name: /open debug panel/i }),
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: /copy resolvedConfig to clipboard/i,
+      }),
+    );
+
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText.mock.calls[0]?.[0]).toContain('totalRounds');
+  });
+
+  it('logs to console when the section log button is clicked', () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    render(<DebugPanel {...baseProps} />);
+    fireEvent.click(
+      screen.getByRole('button', { name: /open debug panel/i }),
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /log session to console/i }),
+    );
+
+    expect(log).toHaveBeenCalledWith(
+      '[debug:session]',
+      baseProps.session,
+    );
+
+    log.mockRestore();
+  });
+
   it('collapses back when the close button is clicked', () => {
     render(<DebugPanel {...baseProps} />);
     fireEvent.click(
