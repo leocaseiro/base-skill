@@ -150,15 +150,19 @@
   {
     "word": "beware",
     "level": 8,
-    "ipa": "bjuːeə",
+    "ipa": "beweə",
     "graphemes": [
       {
         "g": "b",
         "p": "b"
       },
       {
-        "g": "ew",
-        "p": "juː"
+        "g": "e",
+        "p": "e"
+      },
+      {
+        "g": "w",
+        "p": "w"
       },
       {
         "g": "are",
@@ -169,7 +173,7 @@
   {
     "word": "blew",
     "level": 8,
-    "ipa": "bljuː",
+    "ipa": "bluː",
     "graphemes": [
       {
         "g": "b",
@@ -181,7 +185,7 @@
       },
       {
         "g": "ew",
-        "p": "juː"
+        "p": "uː"
       }
     ]
   },
@@ -230,7 +234,7 @@
   {
     "word": "cashew",
     "level": 8,
-    "ipa": "kæʃjuː",
+    "ipa": "kæʃuː",
     "graphemes": [
       {
         "g": "c",
@@ -246,7 +250,7 @@
       },
       {
         "g": "ew",
-        "p": "juː"
+        "p": "uː"
       }
     ]
   },
@@ -302,7 +306,7 @@
   {
     "word": "chew",
     "level": 8,
-    "ipa": "tʃjuː",
+    "ipa": "tʃuː",
     "graphemes": [
       {
         "g": "ch",
@@ -310,7 +314,7 @@
       },
       {
         "g": "ew",
-        "p": "juː"
+        "p": "uː"
       }
     ]
   },
@@ -463,7 +467,7 @@
   {
     "word": "crew",
     "level": 8,
-    "ipa": "krjuː",
+    "ipa": "kruː",
     "graphemes": [
       {
         "g": "c",
@@ -475,7 +479,7 @@
       },
       {
         "g": "ew",
-        "p": "juː"
+        "p": "uː"
       }
     ]
   },
@@ -577,7 +581,7 @@
   {
     "word": "drew",
     "level": 8,
-    "ipa": "drjuː",
+    "ipa": "druː",
     "graphemes": [
       {
         "g": "d",
@@ -589,7 +593,7 @@
       },
       {
         "g": "ew",
-        "p": "juː"
+        "p": "uː"
       }
     ]
   },
@@ -729,7 +733,7 @@
   {
     "word": "flew",
     "level": 8,
-    "ipa": "fljuː",
+    "ipa": "fluː",
     "graphemes": [
       {
         "g": "f",
@@ -741,7 +745,7 @@
       },
       {
         "g": "ew",
-        "p": "juː"
+        "p": "uː"
       }
     ]
   },
@@ -809,7 +813,7 @@
   {
     "word": "grew",
     "level": 8,
-    "ipa": "grjuː",
+    "ipa": "gruː",
     "graphemes": [
       {
         "g": "g",
@@ -821,7 +825,7 @@
       },
       {
         "g": "ew",
-        "p": "juː"
+        "p": "uː"
       }
     ]
   },
@@ -1325,7 +1329,7 @@
   {
     "word": "screw",
     "level": 8,
-    "ipa": "skrjuː",
+    "ipa": "skruː",
     "graphemes": [
       {
         "g": "s",
@@ -1341,7 +1345,7 @@
       },
       {
         "g": "ew",
-        "p": "juː"
+        "p": "uː"
       }
     ]
   },
@@ -1637,7 +1641,7 @@
   {
     "word": "threw",
     "level": 8,
-    "ipa": "θrjuː",
+    "ipa": "θruː",
     "graphemes": [
       {
         "g": "th",
@@ -1649,7 +1653,7 @@
       },
       {
         "g": "ew",
-        "p": "juː"
+        "p": "uː"
       }
     ]
   },
