@@ -25,6 +25,7 @@ interface StoryArgs {
 
 const meta: Meta<StoryArgs> = {
   component: Sheet as unknown as ComponentType<StoryArgs>,
+  title: 'UI/Sheet',
   tags: ['autodocs'],
   args: {
     side: 'right',

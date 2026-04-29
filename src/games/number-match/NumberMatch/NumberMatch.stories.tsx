@@ -21,6 +21,7 @@ const baseConfig: NumberMatchConfig = {
 
 const meta: Meta<typeof NumberMatch> = {
   component: NumberMatch,
+  title: 'Games/NumberMatch/NumberMatch',
   tags: ['autodocs'],
   args: { config: baseConfig },
   decorators: [withDb, withRouter],

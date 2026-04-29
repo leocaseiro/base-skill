@@ -20,6 +20,7 @@ const storyConfig: AnswerGameConfig = {
 
 const meta: Meta<StoryArgs> = {
   component: TextQuestion as unknown as ComponentType<StoryArgs>,
+  title: 'Questions/TextQuestion',
   tags: ['autodocs'],
   decorators: [
     withDb,

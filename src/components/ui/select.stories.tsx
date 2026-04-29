@@ -21,6 +21,7 @@ interface StoryArgs {
 
 const meta: Meta<StoryArgs> = {
   component: Select as unknown as ComponentType<StoryArgs>,
+  title: 'UI/Select',
   tags: ['autodocs'],
   args: {
     triggerLabel: 'Select a fruit',

@@ -60,6 +60,7 @@ const InitWordProvider = ({ children }: { children: ReactNode }) => {
 
 const meta: Meta<typeof NumeralTileBank> = {
   component: NumeralTileBank,
+  title: 'Games/NumberMatch/NumeralTileBank',
   tags: ['autodocs'],
   args: { tileStyle: 'dots', tilesShowGroup: true },
   decorators: [
