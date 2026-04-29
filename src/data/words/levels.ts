@@ -54,7 +54,7 @@ export const GRAPHEMES_BY_LEVEL: Record<
     { g: 'e', p: 'e' },
     { g: 'u', p: 'ʌ' },
     { g: 'r', p: 'r' },
-    { g: 's', p: '', name: 'silent doubled s' },
+    { g: 'ss', p: 's' },
   ],
   3: [
     { g: 'b', p: 'b' },
@@ -78,8 +78,8 @@ export const GRAPHEMES_BY_LEVEL: Record<
     { g: 'g', p: 'dʒ', name: 'soft g' },
     { g: 'c', p: 's', name: 'soft c' },
     { g: 'e', p: '', name: 'silent magic-e' },
-    { g: 'f', p: '', name: 'silent doubled f' },
-    { g: 'l', p: '', name: 'silent doubled l' },
+    { g: 'ff', p: 'f' },
+    { g: 'll', p: 'l' },
   ],
   5: [
     { g: 'ai', p: 'eɪ' },
@@ -105,7 +105,7 @@ export const GRAPHEMES_BY_LEVEL: Record<
     { g: 'ar', p: 'ɑː' },
     { g: 'or', p: 'ɔː' },
     { g: 'v', p: 'v' },
-    { g: 'n', p: '', name: 'silent doubled n' },
+    { g: 'nn', p: 'n' },
   ],
   7: [
     { g: 'a_e', p: 'eɪ' },
@@ -115,8 +115,8 @@ export const GRAPHEMES_BY_LEVEL: Record<
     { g: 'u_e', p: 'juː' },
     { g: 'y', p: 'aɪ' },
     { g: 'y', p: 'iː' },
-    { g: 'd', p: '', name: 'silent doubled d' },
-    { g: 'p', p: '', name: 'silent doubled p' },
+    { g: 'dd', p: 'd' },
+    { g: 'pp', p: 'p' },
   ],
   8: [
     { g: 'aw', p: 'ɔː' },
