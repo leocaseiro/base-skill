@@ -125,6 +125,32 @@ describe('DebugPanel', () => {
     expect(screen.getByText('sat')).toBeInTheDocument();
   });
 
+  it('renders Round Pool Preview for sort-numbers using its generator rules', () => {
+    render(
+      <DebugPanel
+        {...baseProps}
+        gameId="sort-numbers"
+        resolvedConfig={{
+          range: { min: 1, max: 20 },
+          quantity: 4,
+          skip: { mode: 'by', step: 2, start: 'range-min' },
+          direction: 'ascending',
+          totalRounds: 1,
+        }}
+        rounds={[]}
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: /open debug panel/i }),
+    );
+
+    expect(
+      screen.getByText(/Round Pool Preview \(12 samples\)/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Sample sequences/i)).toBeInTheDocument();
+    expect(screen.getAllByText('1, 3, 5, 7').length).toBeGreaterThan(0);
+  });
+
   it('renders the Library Source section when resolvedConfig has source.filter', () => {
     render(
       <DebugPanel
