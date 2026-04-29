@@ -141,6 +141,49 @@ describe('resolveWordSpellConfig — mode-driven defaults', () => {
 
     const allowed = resolved.source?.filter.graphemesAllowed ?? [];
     expect(allowed.some((u) => u.g === 'sh' && u.p === 'ʃ')).toBe(true);
+
+    // selectedUnits must survive the round-trip so the picker can read them back.
+    expect(resolved.selectedUnits).toEqual(saved.selectedUnits);
+  });
+
+  it('advanced mode with selectedUnits re-derives source.filter but preserves totalRounds', () => {
+    const units = [
+      { g: 'sh', p: 'ʃ' },
+      { g: 'ch', p: 'tʃ' },
+    ];
+    const saved = {
+      component: 'WordSpell',
+      configMode: 'advanced',
+      mode: 'recall',
+      inputMethod: 'drag',
+      totalRounds: 8,
+      selectedUnits: units,
+      source: {
+        type: 'word-library',
+        filter: {
+          region: 'aus',
+          graphemesAllowed: [{ g: 's', p: 's' }],
+          phonemesRequired: ['s'],
+        },
+      },
+    };
+
+    const resolved = resolveWordSpellConfig(saved);
+
+    expect(resolved.totalRounds).toBe(8);
+    expect(resolved.configMode).toBe('advanced');
+
+    const required = resolved.source?.filter.graphemesRequired ?? [];
+    expect(required.some((u) => u.g === 'sh' && u.p === 'ʃ')).toBe(
+      true,
+    );
+    expect(required.some((u) => u.g === 'ch' && u.p === 'tʃ')).toBe(
+      true,
+    );
+
+    expect(resolved.source?.filter.phonemesRequired).toBeUndefined();
+
+    expect(resolved.selectedUnits).toEqual(units);
   });
 
   it('drops source when picture mode is explicitly chosen', () => {

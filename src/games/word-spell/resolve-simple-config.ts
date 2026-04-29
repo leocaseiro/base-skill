@@ -65,6 +65,7 @@ export const resolveSimpleConfig = (
     gameId: 'word-spell',
     component: 'WordSpell',
     configMode: 'simple',
+    selectedUnits: units,
     mode: 'recall',
     tileUnit: 'letter',
     inputMethod: simple.inputMethod,

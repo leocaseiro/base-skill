@@ -39,6 +39,7 @@ export interface WordSpellRound {
 export interface WordSpellConfig extends AnswerGameConfig {
   component: 'WordSpell';
   configMode?: 'simple' | 'advanced';
+  selectedUnits?: LevelGraphemeUnit[];
   mode: 'picture' | 'recall' | 'sentence-gap';
   /** @default 'letter' */
   tileUnit: 'letter' | 'syllable' | 'word';
