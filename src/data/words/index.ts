@@ -2,6 +2,7 @@ export type {
   CurriculumEntry,
   FilterResult,
   Grapheme,
+  GraphemePairFilter,
   Region,
   ValidationError,
   WordCore,

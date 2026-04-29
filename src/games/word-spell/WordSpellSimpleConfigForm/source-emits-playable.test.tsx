@@ -107,7 +107,9 @@ describe('Simple form supports single-chip selections (cumulative graphemes regr
     expect(simple.selectedUnits).toEqual([{ g: 'sh', p: 'ʃ' }]);
 
     const resolved = resolveSimpleConfig(simple);
-    expect(resolved.source!.filter.phonemesRequired).toEqual(['ʃ']);
+    expect(resolved.source!.filter.graphemesRequired).toEqual([
+      { g: 'sh', p: 'ʃ' },
+    ]);
 
     const result = await filterWords(resolved.source!.filter);
     expect(result.hits.length).toBeGreaterThanOrEqual(4);
