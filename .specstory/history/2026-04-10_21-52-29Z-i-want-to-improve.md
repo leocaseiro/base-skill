@@ -199,7 +199,6 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-opus-4-6 2026-04-10 21:54:11Z)**_
@@ -226,6 +225,7 @@ src/games/sort-numbers/SortNumbers/SortNumbers.tsx
 worktrees/feat-pr-previews-auto-bump/src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
 worktrees/feat-pr-previews-auto-bump/src/games/sort-numbers/SortNumbers/SortNumbers.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:54:13Z)**_
@@ -286,6 +286,7 @@ worktrees/feat-pr-previews-auto-bump/src/games/sort-numbers/sort-numbers-level-g
 worktrees/feat-pr-previews-auto-bump/src/games/sort-numbers/sort-numbers-level-generator.ts
 worktrees/feat-pr-previews-auto-bump/src/games/sort-numbers/types.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:54:15Z)**_
@@ -295,297 +296,298 @@ _**Agent (claude-opus-4-6 2026-04-10 21:54:15Z)**_
  `./src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildSortRound } from '../build-sort-round';
-5	import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
-6	import type { SortNumbersConfig } from '../types';
-7	import type {
-8	  AnswerGameConfig,
-9	  AnswerGameDraftState,
-10	  AnswerZone,
-11	  TileItem,
-12	} from '@/components/answer-game/types';
-13	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-14	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-15	import { LevelCompleteOverlay } from '@/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay';
-16	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-17	import { Slot } from '@/components/answer-game/Slot/Slot';
-18	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-19	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-20	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-21	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-22	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-23	import { buildRoundOrder } from '@/games/build-round-order';
-24	
-25	interface SortNumbersProps {
-26	  config: SortNumbersConfig;
-27	  initialState?: AnswerGameDraftState;
-28	  sessionId?: string;
-29	  seed?: string;
-30	}
-31	
-32	const SortNumbersSession = ({
-33	  sortNumbersConfig,
-34	  roundOrder,
-35	  onRestartSession,
-36	}: {
-37	  sortNumbersConfig: SortNumbersConfig;
-38	  roundOrder: readonly number[];
-39	  onRestartSession: () => void;
-40	}) => {
-41	  const { t } = useTranslation('games');
-42	  const { phase, roundIndex, retryCount, zones, levelIndex } =
-43	    useAnswerGameContext();
-44	  const dispatch = useAnswerGameDispatch();
-45	  const { confettiReady, levelCompleteReady, gameOverReady } =
-46	    useGameSounds();
-47	  const navigate = useNavigate();
-48	  const { locale } = useParams({ from: '/$locale' });
-49	  const completionToken = useRef(0);
-50	
-51	  const configRoundIndex = roundOrder[roundIndex];
-52	  const round =
-53	    configRoundIndex === undefined
-54	      ? undefined
-55	      : sortNumbersConfig.rounds[configRoundIndex];
-56	
-57	  const directionLabel =
-58	    sortNumbersConfig.direction === 'ascending'
-59	      ? t('sort-numbers-ui.ascending-label')
-60	      : t('sort-numbers-ui.descending-label');
-61	
-62	  useRoundTTS(directionLabel);
-63	
-64	  const handleHome = () => {
-65	    void navigate({ to: '/$locale', params: { locale } });
-66	  };
-67	
-68	  const handlePlayAgain = () => {
-69	    onRestartSession();
-70	  };
-71	
-72	  const handleNextLevel = () => {
-73	    const generateNextLevel =
-74	      sortNumbersConfig.levelMode?.generateNextLevel;
-75	    if (!generateNextLevel) return;
-76	
-77	    const nextLevel = generateNextLevel(levelIndex);
-78	    if (nextLevel) {
-79	      dispatch({
-80	        type: 'ADVANCE_LEVEL',
-81	        tiles: nextLevel.tiles,
-82	        zones: nextLevel.zones,
-83	      });
-84	    } else {
-85	      dispatch({ type: 'COMPLETE_GAME' });
-86	    }
-87	  };
-88	
-89	  const handleDone = () => {
-90	    dispatch({ type: 'COMPLETE_GAME' });
-91	  };
-92	
-93	  useEffect(() => {
-94	    if (phase !== 'round-complete' || !confettiReady) return;
-95	
-96	    const token = ++completionToken.current;
-97	    const delayMs = 750;
-98	    const timer = globalThis.setTimeout(() => {
-99	      if (completionToken.current !== token) return;
-100	
-101	      const isLastRound = roundIndex >= roundOrder.length - 1;
-102	      if (isLastRound) {
-103	        dispatch({ type: 'COMPLETE_GAME' });
-104	        return;
-105	      }
-106	
-107	      const nextConfigIndex = roundOrder[roundIndex + 1];
-108	      const nextRound =
-109	        nextConfigIndex === undefined
-110	          ? undefined
-111	          : sortNumbersConfig.rounds[nextConfigIndex];
-112	
-113	      if (!nextRound) {
-114	        dispatch({ type: 'COMPLETE_GAME' });
-115	        return;
-116	      }
-117	
-118	      const distractor =
-119	        sortNumbersConfig.tileBankMode === 'distractors'
-120	          ? {
-121	              config: sortNumbersConfig.distractors,
-122	              range: sortNumbersConfig.range,
-123	            }
-124	          : undefined;
-125	
-126	      const { tiles: nextTiles, zones: nextZones } = buildSortRound(
-127	        nextRound.sequence,
-128	        sortNumbersConfig.direction,
-129	        distractor,
-130	      );
-131	      dispatch({
-132	        type: 'ADVANCE_ROUND',
-133	        tiles: nextTiles,
-134	        zones: nextZones,
-135	      });
-136	    }, delayMs);
-137	
-138	    return () => {
-139	      globalThis.clearTimeout(timer);
-140	    };
-141	  }, [
-142	    phase,
-143	    confettiReady,
-144	    roundIndex,
-145	    dispatch,
-146	    roundOrder,
-147	    sortNumbersConfig.rounds,
-148	    sortNumbersConfig.direction,
-149	    sortNumbersConfig.tileBankMode,
-150	    sortNumbersConfig.distractors,
-151	    sortNumbersConfig.range,
-152	  ]);
-153	
-154	  if (!round) return null;
-155	
-156	  return (
-157	    <>
-158	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-159	        <AnswerGame.Question>
-160	          <p className="text-center text-lg font-semibold text-foreground">
-161	            {directionLabel}
-162	          </p>
-163	        </AnswerGame.Question>
-164	        <AnswerGame.Answer>
-165	          <SlotRow className="gap-2">
-166	            {zones.map((zone, i) => (
-167	              <Slot
-168	                key={zone.id}
-169	                index={i}
-170	                className="size-14 rounded-lg"
-171	              >
-172	                {({ label }) => (
-173	                  <span className="text-2xl font-bold">{label}</span>
-174	                )}
-175	              </Slot>
-176	            ))}
-177	          </SlotRow>
-178	        </AnswerGame.Answer>
-179	        <AnswerGame.Choices>
-180	          <SortNumbersTileBank />
-181	        </AnswerGame.Choices>
-182	      </div>
-183	      <ScoreAnimation visible={confettiReady} />
-184	      {levelCompleteReady ? (
-185	        <LevelCompleteOverlay
-186	          level={levelIndex + 1}
-187	          onNextLevel={handleNextLevel}
-188	          onDone={handleDone}
-189	        />
-190	      ) : null}
-191	      {gameOverReady ? (
-192	        <GameOverOverlay
-193	          retryCount={retryCount}
-194	          onPlayAgain={handlePlayAgain}
-195	          onHome={handleHome}
-196	        />
-197	      ) : null}
-198	    </>
-199	  );
-200	};
-201	
-202	export const SortNumbers = ({
-203	  config,
-204	  initialState,
-205	  sessionId,
-206	  seed,
-207	}: SortNumbersProps) => {
-208	  const roundsInOrder = config.roundsInOrder === true;
-209	  const [sessionEpoch, setSessionEpoch] = useState(0);
-210	
-211	  const roundOrder = useMemo(() => {
-212	    void sessionEpoch;
-213	    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
-214	  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
-215	
-216	  const firstConfigIndex = roundOrder[0];
-217	  const round0 =
-218	    firstConfigIndex === undefined
-219	      ? undefined
-220	      : config.rounds[firstConfigIndex];
-221	
-222	  const { tiles, zones } = useMemo(() => {
-223	    if (!round0) {
-224	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-225	    }
-226	    const distractor =
-227	      config.tileBankMode === 'distractors'
-228	        ? { config: config.distractors, range: config.range }
-229	        : undefined;
-230	    return buildSortRound(
-231	      round0.sequence,
-232	      config.direction,
-233	      distractor,
-234	    );
-235	  }, [
-236	    round0,
-237	    config.direction,
-238	    config.tileBankMode,
-239	    config.distractors,
-240	    config.range,
-241	  ]);
-242	
-243	  const answerGameConfig = useMemo(
-244	    (): AnswerGameConfig => ({
-245	      gameId: config.gameId,
-246	      inputMethod: config.inputMethod,
-247	      wrongTileBehavior: config.wrongTileBehavior,
-248	      tileBankMode: config.tileBankMode,
-249	      totalRounds: config.rounds.length,
-250	      roundsInOrder: config.roundsInOrder,
-251	      ttsEnabled: config.ttsEnabled,
-252	      touchKeyboardInputMode: 'numeric',
-253	      initialTiles: tiles,
-254	      initialZones: zones,
-255	      slotInteraction: 'free-swap' as const,
-256	      levelMode: config.levelMode,
-257	    }),
-258	    [
-259	      config.gameId,
-260	      config.inputMethod,
-261	      config.wrongTileBehavior,
-262	      config.tileBankMode,
-263	      config.rounds.length,
-264	      config.roundsInOrder,
-265	      config.ttsEnabled,
-266	      config.levelMode,
-267	      tiles,
-268	      zones,
-269	    ],
-270	  );
-271	
-272	  if (!round0) return null;
-273	
-274	  return (
-275	    <AnswerGame
-276	      config={answerGameConfig}
-277	      initialState={initialState}
-278	      sessionId={sessionId}
-279	    >
-280	      <SortNumbersSession
-281	        sortNumbersConfig={config}
-282	        roundOrder={roundOrder}
-283	        onRestartSession={() => {
-284	          setSessionEpoch((e) => e + 1);
-285	        }}
-286	      />
-287	    </AnswerGame>
-288	  );
-289	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildSortRound } from '../build-sort-round';
+5 import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+6 import type { SortNumbersConfig } from '../types';
+7 import type {
+8   AnswerGameConfig,
+9   AnswerGameDraftState,
+10   AnswerZone,
+11   TileItem,
+12 } from '@/components/answer-game/types';
+13 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+14 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+15 import { LevelCompleteOverlay } from '@/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay';
+16 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+17 import { Slot } from '@/components/answer-game/Slot/Slot';
+18 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+19 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+20 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+21 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+22 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+23 import { buildRoundOrder } from '@/games/build-round-order';
+24 
+25 interface SortNumbersProps {
+26   config: SortNumbersConfig;
+27   initialState?: AnswerGameDraftState;
+28   sessionId?: string;
+29   seed?: string;
+30 }
+31 
+32 const SortNumbersSession = ({
+33   sortNumbersConfig,
+34   roundOrder,
+35   onRestartSession,
+36 }: {
+37   sortNumbersConfig: SortNumbersConfig;
+38   roundOrder: readonly number[];
+39   onRestartSession: () => void;
+40 }) => {
+41   const { t } = useTranslation('games');
+42   const { phase, roundIndex, retryCount, zones, levelIndex } =
+43     useAnswerGameContext();
+44   const dispatch = useAnswerGameDispatch();
+45   const { confettiReady, levelCompleteReady, gameOverReady } =
+46     useGameSounds();
+47   const navigate = useNavigate();
+48   const { locale } = useParams({ from: '/$locale' });
+49   const completionToken = useRef(0);
+50 
+51   const configRoundIndex = roundOrder[roundIndex];
+52   const round =
+53     configRoundIndex === undefined
+54       ? undefined
+55       : sortNumbersConfig.rounds[configRoundIndex];
+56 
+57   const directionLabel =
+58     sortNumbersConfig.direction === 'ascending'
+59       ? t('sort-numbers-ui.ascending-label')
+60       : t('sort-numbers-ui.descending-label');
+61 
+62   useRoundTTS(directionLabel);
+63 
+64   const handleHome = () => {
+65     void navigate({ to: '/$locale', params: { locale } });
+66   };
+67 
+68   const handlePlayAgain = () => {
+69     onRestartSession();
+70   };
+71 
+72   const handleNextLevel = () => {
+73     const generateNextLevel =
+74       sortNumbersConfig.levelMode?.generateNextLevel;
+75     if (!generateNextLevel) return;
+76 
+77     const nextLevel = generateNextLevel(levelIndex);
+78     if (nextLevel) {
+79       dispatch({
+80         type: 'ADVANCE_LEVEL',
+81         tiles: nextLevel.tiles,
+82         zones: nextLevel.zones,
+83       });
+84     } else {
+85       dispatch({ type: 'COMPLETE_GAME' });
+86     }
+87   };
+88 
+89   const handleDone = () => {
+90     dispatch({ type: 'COMPLETE_GAME' });
+91   };
+92 
+93   useEffect(() => {
+94     if (phase !== 'round-complete' || !confettiReady) return;
+95 
+96     const token = ++completionToken.current;
+97     const delayMs = 750;
+98     const timer = globalThis.setTimeout(() => {
+99       if (completionToken.current !== token) return;
+100 
+101       const isLastRound = roundIndex >= roundOrder.length - 1;
+102       if (isLastRound) {
+103         dispatch({ type: 'COMPLETE_GAME' });
+104         return;
+105       }
+106 
+107       const nextConfigIndex = roundOrder[roundIndex + 1];
+108       const nextRound =
+109         nextConfigIndex === undefined
+110           ? undefined
+111           : sortNumbersConfig.rounds[nextConfigIndex];
+112 
+113       if (!nextRound) {
+114         dispatch({ type: 'COMPLETE_GAME' });
+115         return;
+116       }
+117 
+118       const distractor =
+119         sortNumbersConfig.tileBankMode === 'distractors'
+120           ? {
+121               config: sortNumbersConfig.distractors,
+122               range: sortNumbersConfig.range,
+123             }
+124           : undefined;
+125 
+126       const { tiles: nextTiles, zones: nextZones } = buildSortRound(
+127         nextRound.sequence,
+128         sortNumbersConfig.direction,
+129         distractor,
+130       );
+131       dispatch({
+132         type: 'ADVANCE_ROUND',
+133         tiles: nextTiles,
+134         zones: nextZones,
+135       });
+136     }, delayMs);
+137 
+138     return () => {
+139       globalThis.clearTimeout(timer);
+140     };
+141   }, [
+142     phase,
+143     confettiReady,
+144     roundIndex,
+145     dispatch,
+146     roundOrder,
+147     sortNumbersConfig.rounds,
+148     sortNumbersConfig.direction,
+149     sortNumbersConfig.tileBankMode,
+150     sortNumbersConfig.distractors,
+151     sortNumbersConfig.range,
+152   ]);
+153 
+154   if (!round) return null;
+155 
+156   return (
+157     <>
+158       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+159         <AnswerGame.Question>
+160           <p className="text-center text-lg font-semibold text-foreground">
+161             {directionLabel}
+162           </p>
+163         </AnswerGame.Question>
+164         <AnswerGame.Answer>
+165           <SlotRow className="gap-2">
+166             {zones.map((zone, i) => (
+167               <Slot
+168                 key={zone.id}
+169                 index={i}
+170                 className="size-14 rounded-lg"
+171               >
+172                 {({ label }) => (
+173                   <span className="text-2xl font-bold">{label}</span>
+174                 )}
+175               </Slot>
+176             ))}
+177           </SlotRow>
+178         </AnswerGame.Answer>
+179         <AnswerGame.Choices>
+180           <SortNumbersTileBank />
+181         </AnswerGame.Choices>
+182       </div>
+183       <ScoreAnimation visible={confettiReady} />
+184       {levelCompleteReady ? (
+185         <LevelCompleteOverlay
+186           level={levelIndex + 1}
+187           onNextLevel={handleNextLevel}
+188           onDone={handleDone}
+189         />
+190       ) : null}
+191       {gameOverReady ? (
+192         <GameOverOverlay
+193           retryCount={retryCount}
+194           onPlayAgain={handlePlayAgain}
+195           onHome={handleHome}
+196         />
+197       ) : null}
+198     </>
+199   );
+200 };
+201 
+202 export const SortNumbers = ({
+203   config,
+204   initialState,
+205   sessionId,
+206   seed,
+207 }: SortNumbersProps) => {
+208   const roundsInOrder = config.roundsInOrder === true;
+209   const [sessionEpoch, setSessionEpoch] = useState(0);
+210 
+211   const roundOrder = useMemo(() => {
+212     void sessionEpoch;
+213     return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+214   }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
+215 
+216   const firstConfigIndex = roundOrder[0];
+217   const round0 =
+218     firstConfigIndex === undefined
+219       ? undefined
+220       : config.rounds[firstConfigIndex];
+221 
+222   const { tiles, zones } = useMemo(() => {
+223     if (!round0) {
+224       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+225     }
+226     const distractor =
+227       config.tileBankMode === 'distractors'
+228         ? { config: config.distractors, range: config.range }
+229         : undefined;
+230     return buildSortRound(
+231       round0.sequence,
+232       config.direction,
+233       distractor,
+234     );
+235   }, [
+236     round0,
+237     config.direction,
+238     config.tileBankMode,
+239     config.distractors,
+240     config.range,
+241   ]);
+242 
+243   const answerGameConfig = useMemo(
+244     (): AnswerGameConfig => ({
+245       gameId: config.gameId,
+246       inputMethod: config.inputMethod,
+247       wrongTileBehavior: config.wrongTileBehavior,
+248       tileBankMode: config.tileBankMode,
+249       totalRounds: config.rounds.length,
+250       roundsInOrder: config.roundsInOrder,
+251       ttsEnabled: config.ttsEnabled,
+252       touchKeyboardInputMode: 'numeric',
+253       initialTiles: tiles,
+254       initialZones: zones,
+255       slotInteraction: 'free-swap' as const,
+256       levelMode: config.levelMode,
+257     }),
+258     [
+259       config.gameId,
+260       config.inputMethod,
+261       config.wrongTileBehavior,
+262       config.tileBankMode,
+263       config.rounds.length,
+264       config.roundsInOrder,
+265       config.ttsEnabled,
+266       config.levelMode,
+267       tiles,
+268       zones,
+269     ],
+270   );
+271 
+272   if (!round0) return null;
+273 
+274   return (
+275     <AnswerGame
+276       config={answerGameConfig}
+277       initialState={initialState}
+278       sessionId={sessionId}
+279     >
+280       <SortNumbersSession
+281         sortNumbersConfig={config}
+282         roundOrder={roundOrder}
+283         onRestartSession={() => {
+284           setSessionEpoch((e) => e + 1);
+285         }}
+286       />
+287     </AnswerGame>
+288   );
+289 };
 290
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:54:16Z)**_
@@ -595,114 +597,115 @@ _**Agent (claude-opus-4-6 2026-04-10 21:54:16Z)**_
  `./src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
-5	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-6	
-7	const NumberTile = ({ tile }: { tile: TileItem }) => {
-8	  const {
-9	    ref,
-10	    handleClick,
-11	    onPointerDown,
-12	    onPointerMove,
-13	    onPointerUp,
-14	    onPointerCancel,
-15	  } = useDraggableTile(tile);
-16	
-17	  return (
-18	    <button
-19	      ref={ref}
-20	      type="button"
-21	      aria-label={`Number ${tile.label}`}
-22	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
-23	      style={skeuoStyle}
-24	      onClick={handleClick}
-25	      onPointerDown={onPointerDown}
-26	      onPointerMove={onPointerMove}
-27	      onPointerUp={onPointerUp}
-28	      onPointerCancel={onPointerCancel}
-29	    >
-30	      {tile.label}
-31	    </button>
-32	  );
-33	};
-34	
-35	export const SortNumbersTileBank = () => {
-36	  const {
-37	    allTiles,
-38	    bankTileIds,
-39	    dragActiveTileId,
-40	    dragHoverBankTileId,
-41	  } = useAnswerGameContext();
-42	  const { bankRef, isDragOver } = useBankDropTarget();
-43	
-44	  return (
-45	    <div
-46	      ref={bankRef}
-47	      data-tile-bank=""
-48	      className="flex flex-wrap justify-center gap-3"
-49	    >
-50	      {allTiles
-51	        .filter((t) => !t.id.startsWith('typed-'))
-52	        .map((tile) => {
-53	          const inBank = bankTileIds.includes(tile.id);
-54	          const isDragging = tile.id === dragActiveTileId;
-55	          const isHoverTarget =
-56	            tile.id === dragHoverBankTileId ||
-57	            (!dragHoverBankTileId &&
-58	              isDragOver &&
-59	              !inBank &&
-60	              tile.id === dragActiveTileId);
-61	
-62	          if (inBank) {
-63	            return (
-64	              <div
-65	                key={tile.id}
-66	                className="relative size-14 rounded-xl transition-all"
-67	              >
-68	                <div
-69	                  data-tile-bank-hole={tile.id}
-70	                  className="size-14 rounded-xl bg-muted/60 shadow-inner"
-71	                  aria-hidden="true"
-72	                />
-73	                <div
-74	                  className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
-75	                  aria-hidden={isDragging || undefined}
-76	                >
-77	                  <NumberTile tile={tile} />
-78	                </div>
-79	                {isHoverTarget && (
-80	                  <div
-81	                    className="pointer-events-none absolute inset-0 rounded-xl border-2 border-dashed border-primary"
-82	                    aria-hidden="true"
-83	                  />
-84	                )}
-85	              </div>
-86	            );
-87	          }
-88	
-89	          return (
-90	            <div
-91	              key={tile.id}
-92	              data-tile-bank-hole={tile.id}
-93	              className={`relative size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
-94	              aria-hidden="true"
-95	            >
-96	              {isHoverTarget && (
-97	                <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
-98	                  {tile.label}
-99	                </span>
-100	              )}
-101	            </div>
-102	          );
-103	        })}
-104	    </div>
-105	  );
-106	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
+5 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+6 
+7 const NumberTile = ({ tile }: { tile: TileItem }) => {
+8   const {
+9     ref,
+10     handleClick,
+11     onPointerDown,
+12     onPointerMove,
+13     onPointerUp,
+14     onPointerCancel,
+15   } = useDraggableTile(tile);
+16 
+17   return (
+18     <button
+19       ref={ref}
+20       type="button"
+21       aria-label={`Number ${tile.label}`}
+22       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+23       style={skeuoStyle}
+24       onClick={handleClick}
+25       onPointerDown={onPointerDown}
+26       onPointerMove={onPointerMove}
+27       onPointerUp={onPointerUp}
+28       onPointerCancel={onPointerCancel}
+29     >
+30       {tile.label}
+31     </button>
+32   );
+33 };
+34 
+35 export const SortNumbersTileBank = () => {
+36   const {
+37     allTiles,
+38     bankTileIds,
+39     dragActiveTileId,
+40     dragHoverBankTileId,
+41   } = useAnswerGameContext();
+42   const { bankRef, isDragOver } = useBankDropTarget();
+43 
+44   return (
+45     <div
+46       ref={bankRef}
+47       data-tile-bank=""
+48       className="flex flex-wrap justify-center gap-3"
+49     >
+50       {allTiles
+51         .filter((t) => !t.id.startsWith('typed-'))
+52         .map((tile) => {
+53           const inBank = bankTileIds.includes(tile.id);
+54           const isDragging = tile.id === dragActiveTileId;
+55           const isHoverTarget =
+56             tile.id === dragHoverBankTileId ||
+57             (!dragHoverBankTileId &&
+58               isDragOver &&
+59               !inBank &&
+60               tile.id === dragActiveTileId);
+61 
+62           if (inBank) {
+63             return (
+64               <div
+65                 key={tile.id}
+66                 className="relative size-14 rounded-xl transition-all"
+67               >
+68                 <div
+69                   data-tile-bank-hole={tile.id}
+70                   className="size-14 rounded-xl bg-muted/60 shadow-inner"
+71                   aria-hidden="true"
+72                 />
+73                 <div
+74                   className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
+75                   aria-hidden={isDragging || undefined}
+76                 >
+77                   <NumberTile tile={tile} />
+78                 </div>
+79                 {isHoverTarget && (
+80                   <div
+81                     className="pointer-events-none absolute inset-0 rounded-xl border-2 border-dashed border-primary"
+82                     aria-hidden="true"
+83                   />
+84                 )}
+85               </div>
+86             );
+87           }
+88 
+89           return (
+90             <div
+91               key={tile.id}
+92               data-tile-bank-hole={tile.id}
+93               className={`relative size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+94               aria-hidden="true"
+95             >
+96               {isHoverTarget && (
+97                 <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+98                   {tile.label}
+99                 </span>
+100               )}
+101             </div>
+102           );
+103         })}
+104     </div>
+105   );
+106 };
 107
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:54:20Z)**_
@@ -722,24 +725,25 @@ _**Agent (claude-opus-4-6 2026-04-10 21:54:21Z)**_
  `./src/components/answer-game/Slot/SlotRow.tsx`
 
 ```text
-1	import type { ReactNode } from 'react';
-2	
-3	interface SlotRowProps {
-4	  className?: string;
-5	  children: ReactNode;
-6	}
-7	
-8	export const SlotRow = ({ className, children }: SlotRowProps) => (
-9	  <ol
-10	    className={['flex flex-wrap items-center justify-center', className]
-11	      .filter(Boolean)
-12	      .join(' ')}
-13	  >
-14	    {children}
-15	  </ol>
-16	);
+1 import type { ReactNode } from 'react';
+2 
+3 interface SlotRowProps {
+4   className?: string;
+5   children: ReactNode;
+6 }
+7 
+8 export const SlotRow = ({ className, children }: SlotRowProps) => (
+9   <ol
+10     className={['flex flex-wrap items-center justify-center', className]
+11       .filter(Boolean)
+12       .join(' ')}
+13   >
+14     {children}
+15   </ol>
+16 );
 17
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:54:22Z)**_
@@ -749,170 +753,171 @@ _**Agent (claude-opus-4-6 2026-04-10 21:54:22Z)**_
  `./src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-1	import { skeuoStyle } from '../styles';
-2	import { useSlotBehavior } from './useSlotBehavior';
-3	import type { SlotRenderProps } from './useSlotBehavior';
-4	import type { ReactNode, Ref } from 'react';
-5	
-6	interface SlotProps {
-7	  index: number;
-8	  as?: 'li' | 'span' | 'div';
-9	  className?: string;
-10	  children: (props: SlotRenderProps) => ReactNode;
-11	  /**
-12	   * Optional custom preview renderer. Invoked during drag-hover or swap
-13	   * preview when there is a `previewLabel`. Lets a game render a visual
-14	   * preview (e.g. a domino face) instead of the default bold text. Must
-15	   * apply its own opacity/styling. When omitted, the default
-16	   * `<span>{previewLabel}</span>` is used.
-17	   */
-18	  renderPreview?: (previewLabel: string) => ReactNode;
-19	}
-20	
-21	export const Slot = ({
-22	  index,
-23	  as: Tag = 'li',
-24	  className,
-25	  children,
-26	  renderPreview,
-27	}: SlotProps) => {
-28	  const {
-29	    renderProps,
-30	    outerRef,
-31	    slotRef,
-32	    dragRef,
-33	    handleClick,
-34	    pointerHandlers,
-35	    isBeingDragged,
-36	  } = useSlotBehavior(index);
-37	
-38	  const {
-39	    label,
-40	    isEmpty,
-41	    isWrong,
-42	    showCursor,
-43	    isPreview,
-44	    previewLabel,
-45	  } = renderProps;
-46	
-47	  // When the slot is used inline (as="span", e.g. SentenceWithGaps inside <p>),
-48	  // the inner visual element must also be a <span> to avoid invalid
-49	  // block-in-inline HTML nesting. For list/block contexts, <div> is correct.
-50	  const InnerTag = Tag === 'span' ? 'span' : 'div';
-51	
-52	  const ariaLabel = isEmpty
-53	    ? `Slot ${index + 1}, empty`
-54	    : `Slot ${index + 1}, filled with ${label}`;
-55	
-56	  const stateClasses = [
-57	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-58	    isPreview
-59	      ? 'border-dashed border-primary'
-60	      : isEmpty
-61	        ? 'border-border'
-62	        : isWrong
-63	          ? 'border-destructive bg-destructive/10 text-destructive'
-64	          : 'border-primary bg-primary/10 text-primary',
-65	    // Focus ring on active slot (driven by showCursor, works in all modes)
-66	    showCursor && isWrong
-67	      ? 'ring-2 ring-destructive ring-offset-2'
-68	      : showCursor
-69	        ? 'border-primary ring-2 ring-primary ring-offset-2'
-70	        : '',
-71	  ]
-72	    .filter(Boolean)
-73	    .join(' ');
-74	
-75	  return (
-76	    // Outer wrapper: the drop target. p-1.5 expands the hit area ~6 px beyond
-77	    // the visual slot on all sides (pragmatic-board card pattern). data-zone-index
-78	    // here ensures touch elementsFromPoint also covers the expanded region.
-79	    <Tag
-80	      ref={
-81	        outerRef as Ref<
-82	          HTMLLIElement & HTMLSpanElement & HTMLDivElement
-83	        >
-84	      }
-85	      aria-label={ariaLabel}
-86	      data-zone-index={index}
-87	      className="relative p-1.5"
-88	    >
-89	      {/* Inner visual slot: carries the state-dependent styling. */}
-90	      <InnerTag
-91	        ref={slotRef as Ref<HTMLDivElement>}
-92	        className={[stateClasses, className].filter(Boolean).join(' ')}
-93	        style={
-94	          isPreview
-95	            ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
-96	            : undefined
-97	        }
-98	      >
-99	        {isEmpty ? (
-100	          <>
-101	            {isPreview && previewLabel !== null ? (
-102	              renderPreview ? (
-103	                renderPreview(previewLabel)
-104	              ) : (
-105	                <span className="text-xl font-bold opacity-50">
-106	                  {previewLabel}
-107	                </span>
-108	              )
-109	            ) : (
-110	              children(renderProps)
-111	            )}
-112	            {showCursor ? (
-113	              <span
-114	                aria-hidden="true"
-115	                className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
-116	              />
-117	            ) : null}
-118	          </>
-119	        ) : (
-120	          <>
-121	            <div
-122	              className="absolute inset-0 bg-muted/60 shadow-inner"
-123	              aria-hidden="true"
-124	            />
-125	            <button
-126	              ref={dragRef}
-127	              type="button"
-128	              className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
-129	              aria-hidden={
-130	                isBeingDragged && !isPreview ? 'true' : undefined
-131	              }
-132	              style={skeuoStyle}
-133	              onClick={handleClick}
-134	              onPointerDown={pointerHandlers.onPointerDown}
-135	              onPointerMove={pointerHandlers.onPointerMove}
-136	              onPointerUp={pointerHandlers.onPointerUp}
-137	              onPointerCancel={pointerHandlers.onPointerCancel}
-138	            >
-139	              {isPreview && previewLabel !== null ? (
-140	                renderPreview ? (
-141	                  renderPreview(previewLabel)
-142	                ) : (
-143	                  <span className="text-xl font-bold">
-144	                    {previewLabel}
-145	                  </span>
-146	                )
-147	              ) : (
-148	                children(renderProps)
-149	              )}
-150	            </button>
-151	            {showCursor ? (
-152	              <span
-153	                aria-hidden="true"
-154	                className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-destructive animate-blink"
-155	              />
-156	            ) : null}
-157	          </>
-158	        )}
-159	      </InnerTag>
-160	    </Tag>
-161	  );
-162	};
+1 import { skeuoStyle } from '../styles';
+2 import { useSlotBehavior } from './useSlotBehavior';
+3 import type { SlotRenderProps } from './useSlotBehavior';
+4 import type { ReactNode, Ref } from 'react';
+5 
+6 interface SlotProps {
+7   index: number;
+8   as?: 'li' | 'span' | 'div';
+9   className?: string;
+10   children: (props: SlotRenderProps) => ReactNode;
+11   /**
+12    * Optional custom preview renderer. Invoked during drag-hover or swap
+13    * preview when there is a `previewLabel`. Lets a game render a visual
+14    * preview (e.g. a domino face) instead of the default bold text. Must
+15    * apply its own opacity/styling. When omitted, the default
+16    * `<span>{previewLabel}</span>` is used.
+17    */
+18   renderPreview?: (previewLabel: string) => ReactNode;
+19 }
+20 
+21 export const Slot = ({
+22   index,
+23   as: Tag = 'li',
+24   className,
+25   children,
+26   renderPreview,
+27 }: SlotProps) => {
+28   const {
+29     renderProps,
+30     outerRef,
+31     slotRef,
+32     dragRef,
+33     handleClick,
+34     pointerHandlers,
+35     isBeingDragged,
+36   } = useSlotBehavior(index);
+37 
+38   const {
+39     label,
+40     isEmpty,
+41     isWrong,
+42     showCursor,
+43     isPreview,
+44     previewLabel,
+45   } = renderProps;
+46 
+47   // When the slot is used inline (as="span", e.g. SentenceWithGaps inside <p>),
+48   // the inner visual element must also be a <span> to avoid invalid
+49   // block-in-inline HTML nesting. For list/block contexts, <div> is correct.
+50   const InnerTag = Tag === 'span' ? 'span' : 'div';
+51 
+52   const ariaLabel = isEmpty
+53     ? `Slot ${index + 1}, empty`
+54     : `Slot ${index + 1}, filled with ${label}`;
+55 
+56   const stateClasses = [
+57     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+58     isPreview
+59       ? 'border-dashed border-primary'
+60       : isEmpty
+61         ? 'border-border'
+62         : isWrong
+63           ? 'border-destructive bg-destructive/10 text-destructive'
+64           : 'border-primary bg-primary/10 text-primary',
+65     // Focus ring on active slot (driven by showCursor, works in all modes)
+66     showCursor && isWrong
+67       ? 'ring-2 ring-destructive ring-offset-2'
+68       : showCursor
+69         ? 'border-primary ring-2 ring-primary ring-offset-2'
+70         : '',
+71   ]
+72     .filter(Boolean)
+73     .join(' ');
+74 
+75   return (
+76     // Outer wrapper: the drop target. p-1.5 expands the hit area ~6 px beyond
+77     // the visual slot on all sides (pragmatic-board card pattern). data-zone-index
+78     // here ensures touch elementsFromPoint also covers the expanded region.
+79     <Tag
+80       ref={
+81         outerRef as Ref<
+82           HTMLLIElement & HTMLSpanElement & HTMLDivElement
+83         >
+84       }
+85       aria-label={ariaLabel}
+86       data-zone-index={index}
+87       className="relative p-1.5"
+88     >
+89       {/* Inner visual slot: carries the state-dependent styling. */}
+90       <InnerTag
+91         ref={slotRef as Ref<HTMLDivElement>}
+92         className={[stateClasses, className].filter(Boolean).join(' ')}
+93         style={
+94           isPreview
+95             ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
+96             : undefined
+97         }
+98       >
+99         {isEmpty ? (
+100           <>
+101             {isPreview && previewLabel !== null ? (
+102               renderPreview ? (
+103                 renderPreview(previewLabel)
+104               ) : (
+105                 <span className="text-xl font-bold opacity-50">
+106                   {previewLabel}
+107                 </span>
+108               )
+109             ) : (
+110               children(renderProps)
+111             )}
+112             {showCursor ? (
+113               <span
+114                 aria-hidden="true"
+115                 className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+116               />
+117             ) : null}
+118           </>
+119         ) : (
+120           <>
+121             <div
+122               className="absolute inset-0 bg-muted/60 shadow-inner"
+123               aria-hidden="true"
+124             />
+125             <button
+126               ref={dragRef}
+127               type="button"
+128               className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
+129               aria-hidden={
+130                 isBeingDragged && !isPreview ? 'true' : undefined
+131               }
+132               style={skeuoStyle}
+133               onClick={handleClick}
+134               onPointerDown={pointerHandlers.onPointerDown}
+135               onPointerMove={pointerHandlers.onPointerMove}
+136               onPointerUp={pointerHandlers.onPointerUp}
+137               onPointerCancel={pointerHandlers.onPointerCancel}
+138             >
+139               {isPreview && previewLabel !== null ? (
+140                 renderPreview ? (
+141                   renderPreview(previewLabel)
+142                 ) : (
+143                   <span className="text-xl font-bold">
+144                     {previewLabel}
+145                   </span>
+146                 )
+147               ) : (
+148                 children(renderProps)
+149               )}
+150             </button>
+151             {showCursor ? (
+152               <span
+153                 aria-hidden="true"
+154                 className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-destructive animate-blink"
+155               />
+156             ) : null}
+157           </>
+158         )}
+159       </InnerTag>
+160     </Tag>
+161   );
+162 };
 163
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:54:26Z)**_
@@ -937,6 +942,7 @@ registry.ts
 sort-numbers
 word-spell
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:54:26Z)**_
@@ -955,6 +961,7 @@ src/games/word-spell/WordSpell/WordSpell.tsx
 src/components/answer-game/Slot/Slot.stories.tsx
 src/components/questions/AudioButton/AudioButton.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:54:33Z)**_
@@ -978,6 +985,7 @@ _**Agent (claude-opus-4-6 2026-04-10 21:54:33Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:54:38Z)**_
@@ -1050,6 +1058,7 @@ src/games/number-match/NumberMatch/NumberMatch.tsx
 src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
 src/games/number-match/NumeralTileBank/NumeralTileBank.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:56:15Z)**_
@@ -1059,405 +1068,406 @@ _**Agent (claude-opus-4-6 2026-04-10 21:56:15Z)**_
  `./src/games/number-match/NumberMatch/NumberMatch.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { buildNumeralRound } from '../build-numeral-round';
-4	import {
-5	  toCardinalText,
-6	  toOrdinalNumber,
-7	  toOrdinalText,
-8	} from '../number-words';
-9	import {
-10	  DominoTile,
-11	  NumeralTileBank,
-12	} from '../NumeralTileBank/NumeralTileBank';
-13	import type { NumberMatchConfig, NumberMatchMode } from '../types';
-14	import type {
-15	  AnswerGameConfig,
-16	  AnswerGameDraftState,
-17	  AnswerZone,
-18	  TileItem,
-19	} from '@/components/answer-game/types';
-20	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-21	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-22	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-23	import { Slot } from '@/components/answer-game/Slot/Slot';
-24	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-25	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-26	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-27	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-28	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-29	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-30	import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
-31	import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
-32	import { buildRoundOrder } from '@/games/build-round-order';
-33	
-34	type NumberWordsLocale = 'en' | 'pt-BR';
-35	
-36	const WORD_MODES: ReadonlySet<NumberMatchMode> =
-37	  new Set<NumberMatchMode>([
-38	    'cardinal-number-to-text',
-39	    'cardinal-text-to-number',
-40	    'ordinal-number-to-text',
-41	    'ordinal-text-to-number',
-42	    'cardinal-to-ordinal',
-43	    'ordinal-to-cardinal',
-44	  ]);
-45	
-46	const isWordMode = (mode: NumberMatchMode): boolean =>
-47	  WORD_MODES.has(mode);
-48	
-49	/** Text shown in the question area for word/ordinal modes. */
-50	const questionTextForMode = (
-51	  value: number,
-52	  mode: NumberMatchMode,
-53	  locale: NumberWordsLocale,
-54	): string => {
-55	  switch (mode) {
-56	    case 'cardinal-number-to-text': {
-57	      return String(value);
-58	    }
-59	    case 'cardinal-text-to-number': {
-60	      return toCardinalText(value, locale);
-61	    }
-62	    case 'ordinal-number-to-text': {
-63	      return toOrdinalNumber(value, locale);
-64	    }
-65	    case 'ordinal-text-to-number': {
-66	      return toOrdinalText(value, locale);
-67	    }
-68	    case 'cardinal-to-ordinal': {
-69	      return toCardinalText(value, locale);
-70	    }
-71	    case 'ordinal-to-cardinal': {
-72	      return toOrdinalText(value, locale);
-73	    }
-74	    default: {
-75	      return String(value);
-76	    }
-77	  }
-78	};
-79	
-80	interface NumberMatchProps {
-81	  config: NumberMatchConfig;
-82	  initialState?: AnswerGameDraftState;
-83	  sessionId?: string;
-84	  seed?: string;
-85	}
-86	
-87	const NumberMatchSession = ({
-88	  numberMatchConfig,
-89	  roundOrder,
-90	  onRestartSession,
-91	}: {
-92	  numberMatchConfig: NumberMatchConfig;
-93	  roundOrder: readonly number[];
-94	  onRestartSession: () => void;
-95	}) => {
-96	  const { phase, roundIndex, retryCount, zones } =
-97	    useAnswerGameContext();
-98	  const dispatch = useAnswerGameDispatch();
-99	  const { confettiReady, gameOverReady } = useGameSounds();
-100	  const navigate = useNavigate();
-101	  const { locale } = useParams({ from: '/$locale' });
-102	  const numberWordsLocale: NumberWordsLocale =
-103	    locale === 'pt-BR' ? 'pt-BR' : 'en';
-104	  const completionToken = useRef(0);
-105	
-106	  const configRoundIndex = roundOrder[roundIndex];
-107	  const round =
-108	    configRoundIndex === undefined
-109	      ? undefined
-110	      : numberMatchConfig.rounds[configRoundIndex];
-111	
-112	  useRoundTTS(String(round?.value ?? ''));
-113	
-114	  const handleHome = () => {
-115	    void navigate({ to: '/$locale', params: { locale } });
-116	  };
-117	
-118	  const handlePlayAgain = () => {
-119	    onRestartSession();
-120	  };
-121	
-122	  useEffect(() => {
-123	    if (phase !== 'round-complete' || !confettiReady) return;
-124	
-125	    const token = ++completionToken.current;
-126	    const delayMs = 750;
-127	    const timer = globalThis.setTimeout(() => {
-128	      if (completionToken.current !== token) return;
-129	
-130	      const isLastRound = roundIndex >= roundOrder.length - 1;
-131	      if (isLastRound) {
-132	        dispatch({ type: 'COMPLETE_GAME' });
-133	        return;
-134	      }
-135	
-136	      const nextConfigIndex = roundOrder[roundIndex + 1];
-137	      const nextRound =
-138	        nextConfigIndex === undefined
-139	          ? undefined
-140	          : numberMatchConfig.rounds[nextConfigIndex];
-141	      const value = nextRound?.value;
-142	      if (value === undefined) {
-143	        dispatch({ type: 'COMPLETE_GAME' });
-144	        return;
-145	      }
-146	      const { tiles: nextTiles, zones: nextZones } = buildNumeralRound(
-147	        value,
-148	        {
-149	          tileBankMode: numberMatchConfig.tileBankMode,
-150	          distractorCount: numberMatchConfig.distractorCount,
-151	          range: numberMatchConfig.range,
-152	          mode: numberMatchConfig.mode,
-153	          locale: numberWordsLocale,
-154	        },
-155	      );
-156	      dispatch({
-157	        type: 'ADVANCE_ROUND',
-158	        tiles: nextTiles,
-159	        zones: nextZones,
-160	      });
-161	    }, delayMs);
-162	
-163	    return () => {
-164	      globalThis.clearTimeout(timer);
-165	    };
-166	  }, [
-167	    phase,
-168	    confettiReady,
-169	    roundIndex,
-170	    dispatch,
-171	    roundOrder,
-172	    numberMatchConfig.rounds,
-173	    numberMatchConfig.tileBankMode,
-174	    numberMatchConfig.distractorCount,
-175	    numberMatchConfig.range,
-176	    numberMatchConfig.mode,
-177	    numberWordsLocale,
-178	  ]);
-179	
-180	  if (!round) return null;
-181	
-182	  const { mode, tileStyle } = numberMatchConfig;
-183	  const tilesShowGroup = mode === 'numeral-to-group';
-184	  const dotsDominoMode = tilesShowGroup && tileStyle === 'dots';
-185	  const wordMode = isWordMode(mode);
-186	
-187	  const slotClass = dotsDominoMode
-188	    ? 'h-[136px] w-[72px] rounded-2xl'
-189	    : wordMode
-190	      ? 'min-w-[80px] h-20 rounded-2xl px-2'
-191	      : 'size-20 rounded-2xl';
-192	
-193	  const questionText = questionTextForMode(
-194	    round.value,
-195	    mode,
-196	    numberWordsLocale,
-197	  );
-198	  const ttsPrompt =
-199	    mode === 'group-to-numeral' || mode === 'numeral-to-group'
-200	      ? String(round.value)
-201	      : questionText;
-202	
-203	  return (
-204	    <>
-205	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-206	        <AnswerGame.Question>
-207	          {mode === 'group-to-numeral' ? (
-208	            <DotGroupQuestion
-209	              // Remount per round so per-dot count state fully resets,
-210	              // even when two consecutive rounds share the same value.
-211	              key={`round-${roundIndex}`}
-212	              count={round.value}
-213	              prompt={String(round.value)}
-214	            />
-215	          ) : (
-216	            <TextQuestion text={questionText} />
-217	          )}
-218	          <AudioButton prompt={ttsPrompt} />
-219	        </AnswerGame.Question>
-220	        <AnswerGame.Answer>
-221	          <SlotRow className="gap-4">
-222	            {zones.map((zone, i) => (
-223	              <Slot
-224	                key={zone.id}
-225	                index={i}
-226	                className={slotClass}
-227	                renderPreview={(previewLabel) => {
-228	                  if (dotsDominoMode) {
-229	                    const n = Number.parseInt(previewLabel, 10);
-230	                    if (!Number.isNaN(n)) {
-231	                      return (
-232	                        <div className="opacity-50">
-233	                          <DominoTile value={n} />
-234	                        </div>
-235	                      );
-236	                    }
-237	                  }
-238	                  if (wordMode) {
-239	                    return (
-240	                      <span
-241	                        className={[
-242	                          'block text-center font-bold leading-tight hyphens-auto break-words opacity-50',
-243	                          previewLabel.length > 6
-244	                            ? 'text-sm'
-245	                            : 'text-xl',
-246	                        ].join(' ')}
-247	                      >
-248	                        {previewLabel}
-249	                      </span>
-250	                    );
-251	                  }
-252	                  return (
-253	                    <span className="text-3xl font-bold tabular-nums opacity-50">
-254	                      {previewLabel}
-255	                    </span>
-256	                  );
-257	                }}
-258	              >
-259	                {({ label }) => {
-260	                  if (!label) return null;
-261	                  if (dotsDominoMode) {
-262	                    const n = Number.parseInt(label, 10);
-263	                    if (!Number.isNaN(n)) {
-264	                      return <DominoTile value={n} />;
-265	                    }
-266	                  }
-267	                  if (wordMode) {
-268	                    return (
-269	                      <span
-270	                        className={[
-271	                          'block text-center font-bold leading-tight hyphens-auto break-words',
-272	                          label.length > 6 ? 'text-sm' : 'text-xl',
-273	                        ].join(' ')}
-274	                      >
-275	                        {label}
-276	                      </span>
-277	                    );
-278	                  }
-279	                  return (
-280	                    <span className="text-3xl font-bold tabular-nums">
-281	                      {label}
-282	                    </span>
-283	                  );
-284	                }}
-285	              </Slot>
-286	            ))}
-287	          </SlotRow>
-288	        </AnswerGame.Answer>
-289	        <AnswerGame.Choices>
-290	          <NumeralTileBank
-291	            tileStyle={tileStyle}
-292	            tilesShowGroup={tilesShowGroup}
-293	          />
-294	        </AnswerGame.Choices>
-295	      </div>
-296	      <ScoreAnimation visible={confettiReady} />
-297	      {gameOverReady ? (
-298	        <GameOverOverlay
-299	          retryCount={retryCount}
-300	          onPlayAgain={handlePlayAgain}
-301	          onHome={handleHome}
-302	        />
-303	      ) : null}
-304	    </>
-305	  );
-306	};
-307	
-308	export const NumberMatch = ({
-309	  config,
-310	  initialState,
-311	  sessionId,
-312	  seed,
-313	}: NumberMatchProps) => {
-314	  const roundsInOrder = config.roundsInOrder === true;
-315	  const [sessionEpoch, setSessionEpoch] = useState(0);
-316	  const { locale } = useParams({ from: '/$locale' });
-317	  const numberWordsLocale: NumberWordsLocale =
-318	    locale === 'pt-BR' ? 'pt-BR' : 'en';
-319	
-320	  const roundOrder = useMemo(() => {
-321	    void sessionEpoch;
-322	    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
-323	  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
-324	
-325	  const firstConfigIndex = roundOrder[0];
-326	  const round0 =
-327	    firstConfigIndex === undefined
-328	      ? undefined
-329	      : config.rounds[firstConfigIndex];
-330	  const roundValue = round0?.value;
-331	
-332	  const { tiles, zones } = useMemo(() => {
-333	    if (roundValue === undefined) {
-334	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-335	    }
-336	    return buildNumeralRound(roundValue, {
-337	      tileBankMode: config.tileBankMode,
-338	      distractorCount: config.distractorCount,
-339	      range: config.range,
-340	      mode: config.mode,
-341	      locale: numberWordsLocale,
-342	    });
-343	  }, [
-344	    roundValue,
-345	    config.tileBankMode,
-346	    config.distractorCount,
-347	    config.range,
-348	    config.mode,
-349	    numberWordsLocale,
-350	  ]);
-351	
-352	  const answerGameConfig = useMemo(
-353	    (): AnswerGameConfig => ({
-354	      gameId: config.gameId,
-355	      inputMethod: config.inputMethod,
-356	      wrongTileBehavior: config.wrongTileBehavior,
-357	      tileBankMode: config.tileBankMode,
-358	      distractorCount: config.distractorCount,
-359	      totalRounds: config.rounds.length,
-360	      roundsInOrder: config.roundsInOrder,
-361	      ttsEnabled: config.ttsEnabled,
-362	      initialTiles: tiles,
-363	      initialZones: zones,
-364	      slotInteraction: 'free-swap' as const,
-365	    }),
-366	    [
-367	      config.gameId,
-368	      config.inputMethod,
-369	      config.wrongTileBehavior,
-370	      config.tileBankMode,
-371	      config.distractorCount,
-372	      config.rounds.length,
-373	      config.roundsInOrder,
-374	      config.ttsEnabled,
-375	      tiles,
-376	      zones,
-377	    ],
-378	  );
-379	
-380	  if (!round0) return null;
-381	
-382	  return (
-383	    <AnswerGame
-384	      config={answerGameConfig}
-385	      initialState={initialState}
-386	      sessionId={sessionId}
-387	    >
-388	      <NumberMatchSession
-389	        numberMatchConfig={config}
-390	        roundOrder={roundOrder}
-391	        onRestartSession={() => {
-392	          setSessionEpoch((e) => e + 1);
-393	        }}
-394	      />
-395	    </AnswerGame>
-396	  );
-397	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { buildNumeralRound } from '../build-numeral-round';
+4 import {
+5   toCardinalText,
+6   toOrdinalNumber,
+7   toOrdinalText,
+8 } from '../number-words';
+9 import {
+10   DominoTile,
+11   NumeralTileBank,
+12 } from '../NumeralTileBank/NumeralTileBank';
+13 import type { NumberMatchConfig, NumberMatchMode } from '../types';
+14 import type {
+15   AnswerGameConfig,
+16   AnswerGameDraftState,
+17   AnswerZone,
+18   TileItem,
+19 } from '@/components/answer-game/types';
+20 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+21 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+22 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+23 import { Slot } from '@/components/answer-game/Slot/Slot';
+24 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+25 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+26 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+27 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+28 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+29 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+30 import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
+31 import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
+32 import { buildRoundOrder } from '@/games/build-round-order';
+33 
+34 type NumberWordsLocale = 'en' | 'pt-BR';
+35 
+36 const WORD_MODES: ReadonlySet<NumberMatchMode> =
+37   new Set<NumberMatchMode>([
+38     'cardinal-number-to-text',
+39     'cardinal-text-to-number',
+40     'ordinal-number-to-text',
+41     'ordinal-text-to-number',
+42     'cardinal-to-ordinal',
+43     'ordinal-to-cardinal',
+44   ]);
+45 
+46 const isWordMode = (mode: NumberMatchMode): boolean =>
+47   WORD_MODES.has(mode);
+48 
+49 /** Text shown in the question area for word/ordinal modes. */
+50 const questionTextForMode = (
+51   value: number,
+52   mode: NumberMatchMode,
+53   locale: NumberWordsLocale,
+54 ): string => {
+55   switch (mode) {
+56     case 'cardinal-number-to-text': {
+57       return String(value);
+58     }
+59     case 'cardinal-text-to-number': {
+60       return toCardinalText(value, locale);
+61     }
+62     case 'ordinal-number-to-text': {
+63       return toOrdinalNumber(value, locale);
+64     }
+65     case 'ordinal-text-to-number': {
+66       return toOrdinalText(value, locale);
+67     }
+68     case 'cardinal-to-ordinal': {
+69       return toCardinalText(value, locale);
+70     }
+71     case 'ordinal-to-cardinal': {
+72       return toOrdinalText(value, locale);
+73     }
+74     default: {
+75       return String(value);
+76     }
+77   }
+78 };
+79 
+80 interface NumberMatchProps {
+81   config: NumberMatchConfig;
+82   initialState?: AnswerGameDraftState;
+83   sessionId?: string;
+84   seed?: string;
+85 }
+86 
+87 const NumberMatchSession = ({
+88   numberMatchConfig,
+89   roundOrder,
+90   onRestartSession,
+91 }: {
+92   numberMatchConfig: NumberMatchConfig;
+93   roundOrder: readonly number[];
+94   onRestartSession: () => void;
+95 }) => {
+96   const { phase, roundIndex, retryCount, zones } =
+97     useAnswerGameContext();
+98   const dispatch = useAnswerGameDispatch();
+99   const { confettiReady, gameOverReady } = useGameSounds();
+100   const navigate = useNavigate();
+101   const { locale } = useParams({ from: '/$locale' });
+102   const numberWordsLocale: NumberWordsLocale =
+103     locale === 'pt-BR' ? 'pt-BR' : 'en';
+104   const completionToken = useRef(0);
+105 
+106   const configRoundIndex = roundOrder[roundIndex];
+107   const round =
+108     configRoundIndex === undefined
+109       ? undefined
+110       : numberMatchConfig.rounds[configRoundIndex];
+111 
+112   useRoundTTS(String(round?.value ?? ''));
+113 
+114   const handleHome = () => {
+115     void navigate({ to: '/$locale', params: { locale } });
+116   };
+117 
+118   const handlePlayAgain = () => {
+119     onRestartSession();
+120   };
+121 
+122   useEffect(() => {
+123     if (phase !== 'round-complete' || !confettiReady) return;
+124 
+125     const token = ++completionToken.current;
+126     const delayMs = 750;
+127     const timer = globalThis.setTimeout(() => {
+128       if (completionToken.current !== token) return;
+129 
+130       const isLastRound = roundIndex >= roundOrder.length - 1;
+131       if (isLastRound) {
+132         dispatch({ type: 'COMPLETE_GAME' });
+133         return;
+134       }
+135 
+136       const nextConfigIndex = roundOrder[roundIndex + 1];
+137       const nextRound =
+138         nextConfigIndex === undefined
+139           ? undefined
+140           : numberMatchConfig.rounds[nextConfigIndex];
+141       const value = nextRound?.value;
+142       if (value === undefined) {
+143         dispatch({ type: 'COMPLETE_GAME' });
+144         return;
+145       }
+146       const { tiles: nextTiles, zones: nextZones } = buildNumeralRound(
+147         value,
+148         {
+149           tileBankMode: numberMatchConfig.tileBankMode,
+150           distractorCount: numberMatchConfig.distractorCount,
+151           range: numberMatchConfig.range,
+152           mode: numberMatchConfig.mode,
+153           locale: numberWordsLocale,
+154         },
+155       );
+156       dispatch({
+157         type: 'ADVANCE_ROUND',
+158         tiles: nextTiles,
+159         zones: nextZones,
+160       });
+161     }, delayMs);
+162 
+163     return () => {
+164       globalThis.clearTimeout(timer);
+165     };
+166   }, [
+167     phase,
+168     confettiReady,
+169     roundIndex,
+170     dispatch,
+171     roundOrder,
+172     numberMatchConfig.rounds,
+173     numberMatchConfig.tileBankMode,
+174     numberMatchConfig.distractorCount,
+175     numberMatchConfig.range,
+176     numberMatchConfig.mode,
+177     numberWordsLocale,
+178   ]);
+179 
+180   if (!round) return null;
+181 
+182   const { mode, tileStyle } = numberMatchConfig;
+183   const tilesShowGroup = mode === 'numeral-to-group';
+184   const dotsDominoMode = tilesShowGroup && tileStyle === 'dots';
+185   const wordMode = isWordMode(mode);
+186 
+187   const slotClass = dotsDominoMode
+188     ? 'h-[136px] w-[72px] rounded-2xl'
+189     : wordMode
+190       ? 'min-w-[80px] h-20 rounded-2xl px-2'
+191       : 'size-20 rounded-2xl';
+192 
+193   const questionText = questionTextForMode(
+194     round.value,
+195     mode,
+196     numberWordsLocale,
+197   );
+198   const ttsPrompt =
+199     mode === 'group-to-numeral' || mode === 'numeral-to-group'
+200       ? String(round.value)
+201       : questionText;
+202 
+203   return (
+204     <>
+205       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+206         <AnswerGame.Question>
+207           {mode === 'group-to-numeral' ? (
+208             <DotGroupQuestion
+209               // Remount per round so per-dot count state fully resets,
+210               // even when two consecutive rounds share the same value.
+211               key={`round-${roundIndex}`}
+212               count={round.value}
+213               prompt={String(round.value)}
+214             />
+215           ) : (
+216             <TextQuestion text={questionText} />
+217           )}
+218           <AudioButton prompt={ttsPrompt} />
+219         </AnswerGame.Question>
+220         <AnswerGame.Answer>
+221           <SlotRow className="gap-4">
+222             {zones.map((zone, i) => (
+223               <Slot
+224                 key={zone.id}
+225                 index={i}
+226                 className={slotClass}
+227                 renderPreview={(previewLabel) => {
+228                   if (dotsDominoMode) {
+229                     const n = Number.parseInt(previewLabel, 10);
+230                     if (!Number.isNaN(n)) {
+231                       return (
+232                         <div className="opacity-50">
+233                           <DominoTile value={n} />
+234                         </div>
+235                       );
+236                     }
+237                   }
+238                   if (wordMode) {
+239                     return (
+240                       <span
+241                         className={[
+242                           'block text-center font-bold leading-tight hyphens-auto break-words opacity-50',
+243                           previewLabel.length > 6
+244                             ? 'text-sm'
+245                             : 'text-xl',
+246                         ].join(' ')}
+247                       >
+248                         {previewLabel}
+249                       </span>
+250                     );
+251                   }
+252                   return (
+253                     <span className="text-3xl font-bold tabular-nums opacity-50">
+254                       {previewLabel}
+255                     </span>
+256                   );
+257                 }}
+258               >
+259                 {({ label }) => {
+260                   if (!label) return null;
+261                   if (dotsDominoMode) {
+262                     const n = Number.parseInt(label, 10);
+263                     if (!Number.isNaN(n)) {
+264                       return <DominoTile value={n} />;
+265                     }
+266                   }
+267                   if (wordMode) {
+268                     return (
+269                       <span
+270                         className={[
+271                           'block text-center font-bold leading-tight hyphens-auto break-words',
+272                           label.length > 6 ? 'text-sm' : 'text-xl',
+273                         ].join(' ')}
+274                       >
+275                         {label}
+276                       </span>
+277                     );
+278                   }
+279                   return (
+280                     <span className="text-3xl font-bold tabular-nums">
+281                       {label}
+282                     </span>
+283                   );
+284                 }}
+285               </Slot>
+286             ))}
+287           </SlotRow>
+288         </AnswerGame.Answer>
+289         <AnswerGame.Choices>
+290           <NumeralTileBank
+291             tileStyle={tileStyle}
+292             tilesShowGroup={tilesShowGroup}
+293           />
+294         </AnswerGame.Choices>
+295       </div>
+296       <ScoreAnimation visible={confettiReady} />
+297       {gameOverReady ? (
+298         <GameOverOverlay
+299           retryCount={retryCount}
+300           onPlayAgain={handlePlayAgain}
+301           onHome={handleHome}
+302         />
+303       ) : null}
+304     </>
+305   );
+306 };
+307 
+308 export const NumberMatch = ({
+309   config,
+310   initialState,
+311   sessionId,
+312   seed,
+313 }: NumberMatchProps) => {
+314   const roundsInOrder = config.roundsInOrder === true;
+315   const [sessionEpoch, setSessionEpoch] = useState(0);
+316   const { locale } = useParams({ from: '/$locale' });
+317   const numberWordsLocale: NumberWordsLocale =
+318     locale === 'pt-BR' ? 'pt-BR' : 'en';
+319 
+320   const roundOrder = useMemo(() => {
+321     void sessionEpoch;
+322     return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+323   }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
+324 
+325   const firstConfigIndex = roundOrder[0];
+326   const round0 =
+327     firstConfigIndex === undefined
+328       ? undefined
+329       : config.rounds[firstConfigIndex];
+330   const roundValue = round0?.value;
+331 
+332   const { tiles, zones } = useMemo(() => {
+333     if (roundValue === undefined) {
+334       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+335     }
+336     return buildNumeralRound(roundValue, {
+337       tileBankMode: config.tileBankMode,
+338       distractorCount: config.distractorCount,
+339       range: config.range,
+340       mode: config.mode,
+341       locale: numberWordsLocale,
+342     });
+343   }, [
+344     roundValue,
+345     config.tileBankMode,
+346     config.distractorCount,
+347     config.range,
+348     config.mode,
+349     numberWordsLocale,
+350   ]);
+351 
+352   const answerGameConfig = useMemo(
+353     (): AnswerGameConfig => ({
+354       gameId: config.gameId,
+355       inputMethod: config.inputMethod,
+356       wrongTileBehavior: config.wrongTileBehavior,
+357       tileBankMode: config.tileBankMode,
+358       distractorCount: config.distractorCount,
+359       totalRounds: config.rounds.length,
+360       roundsInOrder: config.roundsInOrder,
+361       ttsEnabled: config.ttsEnabled,
+362       initialTiles: tiles,
+363       initialZones: zones,
+364       slotInteraction: 'free-swap' as const,
+365     }),
+366     [
+367       config.gameId,
+368       config.inputMethod,
+369       config.wrongTileBehavior,
+370       config.tileBankMode,
+371       config.distractorCount,
+372       config.rounds.length,
+373       config.roundsInOrder,
+374       config.ttsEnabled,
+375       tiles,
+376       zones,
+377     ],
+378   );
+379 
+380   if (!round0) return null;
+381 
+382   return (
+383     <AnswerGame
+384       config={answerGameConfig}
+385       initialState={initialState}
+386       sessionId={sessionId}
+387     >
+388       <NumberMatchSession
+389         numberMatchConfig={config}
+390         roundOrder={roundOrder}
+391         onRestartSession={() => {
+392           setSessionEpoch((e) => e + 1);
+393         }}
+394       />
+395     </AnswerGame>
+396   );
+397 };
 398
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:56:15Z)**_
@@ -1467,276 +1477,277 @@ _**Agent (claude-opus-4-6 2026-04-10 21:56:15Z)**_
  `./src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
-5	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-6	
-7	type TileStyle = 'dots' | 'objects' | 'fingers';
-8	
-9	/** Pip positions (0–8) for each die value in a 3×3 grid. */
-10	const DICE_PIPS: Record<number, number[]> = {
-11	  0: [],
-12	  1: [4],
-13	  2: [2, 6],
-14	  3: [2, 4, 6],
-15	  4: [0, 2, 6, 8],
-16	  5: [0, 2, 4, 6, 8],
-17	  6: [0, 2, 3, 5, 6, 8],
-18	};
-19	
-20	/** Top/bottom split for domino tiles (smaller value on top). */
-21	const DOMINO_SPLIT: Record<number, [number, number]> = {
-22	  1: [1, 0],
-23	  2: [2, 0],
-24	  3: [3, 0],
-25	  4: [4, 0],
-26	  5: [5, 0],
-27	  6: [6, 0],
-28	  7: [2, 5],
-29	  8: [4, 4],
-30	  9: [4, 5],
-31	  10: [5, 5],
-32	  11: [5, 6],
-33	  12: [6, 6],
-34	};
-35	
-36	/** Renders one half of a domino (a 3x3 pip grid). Internal only. */
-37	const DiceFace = ({ value }: { value: number }) => {
-38	  const pips = DICE_PIPS[value] ?? [];
-39	  return (
-40	    <div
-41	      className="grid grid-cols-3 grid-rows-3 gap-1 py-3 px-1"
-42	      aria-hidden="true"
-43	    >
-44	      {Array.from({ length: 9 }, (_, i) => (
-45	        <span
-46	          key={i}
-47	          data-cell=""
-48	          data-pip={pips.includes(i) ? '' : undefined}
-49	          className={[
-50	            'size-2.5 rounded-full',
-51	            pips.includes(i) ? 'bg-current' : 'bg-transparent',
-52	          ].join(' ')}
-53	        />
-54	      ))}
-55	    </div>
-56	  );
-57	};
-58	
-59	export const DominoTile = ({ value }: { value: number }) => {
-60	  const [top, bottom] = DOMINO_SPLIT[value] ?? [value, 0];
-61	  return (
-62	    <div className="flex flex-col items-center py-3" aria-hidden="true">
-63	      <DiceFace value={top} />
-64	      <span
-65	        data-divider=""
-66	        className="h-px w-11 shrink-0 bg-current opacity-30"
-67	      />
-68	      <DiceFace value={bottom} />
-69	    </div>
-70	  );
-71	};
-72	
-73	const isLongWord = (label: string): boolean => label.length > 6;
-74	
-75	const NumeralTile = ({
-76	  tile,
-77	  tileStyle,
-78	  tilesShowGroup,
-79	}: {
-80	  tile: TileItem;
-81	  tileStyle: TileStyle;
-82	  tilesShowGroup: boolean;
-83	}) => {
-84	  const {
-85	    ref,
-86	    handleClick,
-87	    onPointerDown,
-88	    onPointerMove,
-89	    onPointerUp,
-90	    onPointerCancel,
-91	  } = useDraggableTile(tile);
-92	  const numericValue = Number.parseInt(tile.value, 10);
-93	
-94	  const showDomino =
-95	    tilesShowGroup &&
-96	    tileStyle === 'dots' &&
-97	    !Number.isNaN(numericValue);
-98	  const isWordTile =
-99	    !tilesShowGroup && Number.isNaN(Number(tile.label));
-100	  const sizeClass = showDomino
-101	    ? 'h-[136px] w-[72px]'
-102	    : isWordTile
-103	      ? 'min-w-[80px] h-20 px-2'
-104	      : 'size-20';
-105	
-106	  return (
-107	    <button
-108	      ref={ref}
-109	      type="button"
-110	      aria-label={`Number ${tile.label}`}
-111	      className={[
-112	        'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl p-2 transition-transform active:scale-95 active:cursor-grabbing',
-113	        sizeClass,
-114	      ].join(' ')}
-115	      style={skeuoStyle}
-116	      onClick={handleClick}
-117	      onPointerDown={onPointerDown}
-118	      onPointerMove={onPointerMove}
-119	      onPointerUp={onPointerUp}
-120	      onPointerCancel={onPointerCancel}
-121	    >
-122	      {showDomino ? (
-123	        <DominoTile value={numericValue} />
-124	      ) : isWordTile ? (
-125	        <span
-126	          className={[
-127	            'block text-center font-bold leading-tight hyphens-auto break-words',
-128	            isLongWord(tile.label) ? 'text-sm' : 'text-xl',
-129	          ].join(' ')}
-130	        >
-131	          {tile.label}
-132	        </span>
-133	      ) : (
-134	        <span className="text-3xl font-bold tabular-nums leading-none">
-135	          {tile.label}
-136	        </span>
-137	      )}
-138	    </button>
-139	  );
-140	};
-141	
-142	export interface NumeralTileBankProps {
-143	  tileStyle: TileStyle;
-144	  tilesShowGroup: boolean;
-145	}
-146	
-147	export const NumeralTileBank = ({
-148	  tileStyle,
-149	  tilesShowGroup,
-150	}: NumeralTileBankProps) => {
-151	  const {
-152	    allTiles,
-153	    bankTileIds,
-154	    dragActiveTileId,
-155	    dragHoverBankTileId,
-156	  } = useAnswerGameContext();
-157	  const { bankRef, isDragOver } = useBankDropTarget();
-158	  return (
-159	    <div
-160	      ref={bankRef}
-161	      data-tile-bank=""
-162	      className="flex flex-wrap justify-center gap-3"
-163	    >
-164	      {allTiles
-165	        .filter((t) => !t.id.startsWith('typed-'))
-166	        .map((tile) => {
-167	          const inBank = bankTileIds.includes(tile.id);
-168	          const isDragging = tile.id === dragActiveTileId;
-169	          const isHoverTarget =
-170	            tile.id === dragHoverBankTileId ||
-171	            (!dragHoverBankTileId &&
-172	              isDragOver &&
-173	              !inBank &&
-174	              tile.id === dragActiveTileId);
-175	          const numericValue = Number.parseInt(tile.value, 10);
-176	          const showDomino =
-177	            tilesShowGroup &&
-178	            tileStyle === 'dots' &&
-179	            !Number.isNaN(numericValue);
-180	          const isWordTile =
-181	            !tilesShowGroup && Number.isNaN(Number(tile.label));
-182	          const holeSizeClass = showDomino
-183	            ? 'h-[136px] w-[72px]'
-184	            : isWordTile
-185	              ? 'min-w-[80px] h-20'
-186	              : 'size-20';
-187	
-188	          if (inBank) {
-189	            return (
-190	              <div
-191	                key={tile.id}
-192	                className={[
-193	                  'relative rounded-2xl transition-all',
-194	                  holeSizeClass,
-195	                ]
-196	                  .filter(Boolean)
-197	                  .join(' ')}
-198	              >
-199	                <div
-200	                  data-tile-bank-hole={tile.id}
-201	                  className={[
-202	                    'rounded-2xl bg-muted/60 shadow-inner',
-203	                    holeSizeClass,
-204	                  ]
-205	                    .filter(Boolean)
-206	                    .join(' ')}
-207	                  aria-hidden="true"
-208	                />
-209	                <div
-210	                  className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
-211	                  aria-hidden={isDragging || undefined}
-212	                >
-213	                  <NumeralTile
-214	                    tile={tile}
-215	                    tileStyle={tileStyle}
-216	                    tilesShowGroup={tilesShowGroup}
-217	                  />
-218	                </div>
-219	                {isHoverTarget && (
-220	                  <div
-221	                    className="pointer-events-none absolute inset-0 rounded-2xl border-2 border-dashed border-primary"
-222	                    aria-hidden="true"
-223	                  />
-224	                )}
-225	              </div>
-226	            );
-227	          }
-228	
-229	          return (
-230	            <div
-231	              key={tile.id}
-232	              data-tile-bank-hole={tile.id}
-233	              className={[
-234	                'relative rounded-2xl bg-muted/60 shadow-inner transition-all',
-235	                holeSizeClass,
-236	                isHoverTarget
-237	                  ? 'border-2 border-dashed border-primary'
-238	                  : '',
-239	              ]
-240	                .filter(Boolean)
-241	                .join(' ')}
-242	              aria-hidden="true"
-243	            >
-244	              {isHoverTarget &&
-245	                (showDomino ? (
-246	                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-50">
-247	                    <DominoTile value={numericValue} />
-248	                  </div>
-249	                ) : isWordTile ? (
-250	                  <span
-251	                    className={[
-252	                      'pointer-events-none absolute inset-0 flex items-center justify-center px-2 text-center font-bold leading-tight hyphens-auto break-words opacity-50',
-253	                      isLongWord(tile.label) ? 'text-sm' : 'text-xl',
-254	                    ].join(' ')}
-255	                  >
-256	                    {tile.label}
-257	                  </span>
-258	                ) : (
-259	                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
-260	                    {tile.label}
-261	                  </span>
-262	                ))}
-263	            </div>
-264	          );
-265	        })}
-266	    </div>
-267	  );
-268	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
+5 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+6 
+7 type TileStyle = 'dots' | 'objects' | 'fingers';
+8 
+9 /** Pip positions (0–8) for each die value in a 3×3 grid. */
+10 const DICE_PIPS: Record<number, number[]> = {
+11   0: [],
+12   1: [4],
+13   2: [2, 6],
+14   3: [2, 4, 6],
+15   4: [0, 2, 6, 8],
+16   5: [0, 2, 4, 6, 8],
+17   6: [0, 2, 3, 5, 6, 8],
+18 };
+19 
+20 /** Top/bottom split for domino tiles (smaller value on top). */
+21 const DOMINO_SPLIT: Record<number, [number, number]> = {
+22   1: [1, 0],
+23   2: [2, 0],
+24   3: [3, 0],
+25   4: [4, 0],
+26   5: [5, 0],
+27   6: [6, 0],
+28   7: [2, 5],
+29   8: [4, 4],
+30   9: [4, 5],
+31   10: [5, 5],
+32   11: [5, 6],
+33   12: [6, 6],
+34 };
+35 
+36 /** Renders one half of a domino (a 3x3 pip grid). Internal only. */
+37 const DiceFace = ({ value }: { value: number }) => {
+38   const pips = DICE_PIPS[value] ?? [];
+39   return (
+40     <div
+41       className="grid grid-cols-3 grid-rows-3 gap-1 py-3 px-1"
+42       aria-hidden="true"
+43     >
+44       {Array.from({ length: 9 }, (_, i) => (
+45         <span
+46           key={i}
+47           data-cell=""
+48           data-pip={pips.includes(i) ? '' : undefined}
+49           className={[
+50             'size-2.5 rounded-full',
+51             pips.includes(i) ? 'bg-current' : 'bg-transparent',
+52           ].join(' ')}
+53         />
+54       ))}
+55     </div>
+56   );
+57 };
+58 
+59 export const DominoTile = ({ value }: { value: number }) => {
+60   const [top, bottom] = DOMINO_SPLIT[value] ?? [value, 0];
+61   return (
+62     <div className="flex flex-col items-center py-3" aria-hidden="true">
+63       <DiceFace value={top} />
+64       <span
+65         data-divider=""
+66         className="h-px w-11 shrink-0 bg-current opacity-30"
+67       />
+68       <DiceFace value={bottom} />
+69     </div>
+70   );
+71 };
+72 
+73 const isLongWord = (label: string): boolean => label.length > 6;
+74 
+75 const NumeralTile = ({
+76   tile,
+77   tileStyle,
+78   tilesShowGroup,
+79 }: {
+80   tile: TileItem;
+81   tileStyle: TileStyle;
+82   tilesShowGroup: boolean;
+83 }) => {
+84   const {
+85     ref,
+86     handleClick,
+87     onPointerDown,
+88     onPointerMove,
+89     onPointerUp,
+90     onPointerCancel,
+91   } = useDraggableTile(tile);
+92   const numericValue = Number.parseInt(tile.value, 10);
+93 
+94   const showDomino =
+95     tilesShowGroup &&
+96     tileStyle === 'dots' &&
+97     !Number.isNaN(numericValue);
+98   const isWordTile =
+99     !tilesShowGroup && Number.isNaN(Number(tile.label));
+100   const sizeClass = showDomino
+101     ? 'h-[136px] w-[72px]'
+102     : isWordTile
+103       ? 'min-w-[80px] h-20 px-2'
+104       : 'size-20';
+105 
+106   return (
+107     <button
+108       ref={ref}
+109       type="button"
+110       aria-label={`Number ${tile.label}`}
+111       className={[
+112         'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl p-2 transition-transform active:scale-95 active:cursor-grabbing',
+113         sizeClass,
+114       ].join(' ')}
+115       style={skeuoStyle}
+116       onClick={handleClick}
+117       onPointerDown={onPointerDown}
+118       onPointerMove={onPointerMove}
+119       onPointerUp={onPointerUp}
+120       onPointerCancel={onPointerCancel}
+121     >
+122       {showDomino ? (
+123         <DominoTile value={numericValue} />
+124       ) : isWordTile ? (
+125         <span
+126           className={[
+127             'block text-center font-bold leading-tight hyphens-auto break-words',
+128             isLongWord(tile.label) ? 'text-sm' : 'text-xl',
+129           ].join(' ')}
+130         >
+131           {tile.label}
+132         </span>
+133       ) : (
+134         <span className="text-3xl font-bold tabular-nums leading-none">
+135           {tile.label}
+136         </span>
+137       )}
+138     </button>
+139   );
+140 };
+141 
+142 export interface NumeralTileBankProps {
+143   tileStyle: TileStyle;
+144   tilesShowGroup: boolean;
+145 }
+146 
+147 export const NumeralTileBank = ({
+148   tileStyle,
+149   tilesShowGroup,
+150 }: NumeralTileBankProps) => {
+151   const {
+152     allTiles,
+153     bankTileIds,
+154     dragActiveTileId,
+155     dragHoverBankTileId,
+156   } = useAnswerGameContext();
+157   const { bankRef, isDragOver } = useBankDropTarget();
+158   return (
+159     <div
+160       ref={bankRef}
+161       data-tile-bank=""
+162       className="flex flex-wrap justify-center gap-3"
+163     >
+164       {allTiles
+165         .filter((t) => !t.id.startsWith('typed-'))
+166         .map((tile) => {
+167           const inBank = bankTileIds.includes(tile.id);
+168           const isDragging = tile.id === dragActiveTileId;
+169           const isHoverTarget =
+170             tile.id === dragHoverBankTileId ||
+171             (!dragHoverBankTileId &&
+172               isDragOver &&
+173               !inBank &&
+174               tile.id === dragActiveTileId);
+175           const numericValue = Number.parseInt(tile.value, 10);
+176           const showDomino =
+177             tilesShowGroup &&
+178             tileStyle === 'dots' &&
+179             !Number.isNaN(numericValue);
+180           const isWordTile =
+181             !tilesShowGroup && Number.isNaN(Number(tile.label));
+182           const holeSizeClass = showDomino
+183             ? 'h-[136px] w-[72px]'
+184             : isWordTile
+185               ? 'min-w-[80px] h-20'
+186               : 'size-20';
+187 
+188           if (inBank) {
+189             return (
+190               <div
+191                 key={tile.id}
+192                 className={[
+193                   'relative rounded-2xl transition-all',
+194                   holeSizeClass,
+195                 ]
+196                   .filter(Boolean)
+197                   .join(' ')}
+198               >
+199                 <div
+200                   data-tile-bank-hole={tile.id}
+201                   className={[
+202                     'rounded-2xl bg-muted/60 shadow-inner',
+203                     holeSizeClass,
+204                   ]
+205                     .filter(Boolean)
+206                     .join(' ')}
+207                   aria-hidden="true"
+208                 />
+209                 <div
+210                   className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
+211                   aria-hidden={isDragging || undefined}
+212                 >
+213                   <NumeralTile
+214                     tile={tile}
+215                     tileStyle={tileStyle}
+216                     tilesShowGroup={tilesShowGroup}
+217                   />
+218                 </div>
+219                 {isHoverTarget && (
+220                   <div
+221                     className="pointer-events-none absolute inset-0 rounded-2xl border-2 border-dashed border-primary"
+222                     aria-hidden="true"
+223                   />
+224                 )}
+225               </div>
+226             );
+227           }
+228 
+229           return (
+230             <div
+231               key={tile.id}
+232               data-tile-bank-hole={tile.id}
+233               className={[
+234                 'relative rounded-2xl bg-muted/60 shadow-inner transition-all',
+235                 holeSizeClass,
+236                 isHoverTarget
+237                   ? 'border-2 border-dashed border-primary'
+238                   : '',
+239               ]
+240                 .filter(Boolean)
+241                 .join(' ')}
+242               aria-hidden="true"
+243             >
+244               {isHoverTarget &&
+245                 (showDomino ? (
+246                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-50">
+247                     <DominoTile value={numericValue} />
+248                   </div>
+249                 ) : isWordTile ? (
+250                   <span
+251                     className={[
+252                       'pointer-events-none absolute inset-0 flex items-center justify-center px-2 text-center font-bold leading-tight hyphens-auto break-words opacity-50',
+253                       isLongWord(tile.label) ? 'text-sm' : 'text-xl',
+254                     ].join(' ')}
+255                   >
+256                     {tile.label}
+257                   </span>
+258                 ) : (
+259                   <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+260                     {tile.label}
+261                   </span>
+262                 ))}
+263             </div>
+264           );
+265         })}
+266     </div>
+267   );
+268 };
 269
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 21:57:04Z)**_
@@ -1898,295 +1909,296 @@ _**Agent (claude-opus-4-6 2026-04-10 22:00:40Z)**_
  `/Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/visual-companion.md`
 
 ```text
-1	# Visual Companion Guide
-2	
-3	Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
-4	
-5	## When to Use
-6	
-7	Decide per-question, not per-session. The test: **would the user understand this better by seeing it than reading it?**
-8	
-9	**Use the browser** when the content itself is visual:
-10	
-11	- **UI mockups** — wireframes, layouts, navigation structures, component designs
-12	- **Architecture diagrams** — system components, data flow, relationship maps
-13	- **Side-by-side visual comparisons** — comparing two layouts, two color schemes, two design directions
-14	- **Design polish** — when the question is about look and feel, spacing, visual hierarchy
-15	- **Spatial relationships** — state machines, flowcharts, entity relationships rendered as diagrams
-16	
-17	**Use the terminal** when the content is text or tabular:
-18	
-19	- **Requirements and scope questions** — "what does X mean?", "which features are in scope?"
-20	- **Conceptual A/B/C choices** — picking between approaches described in words
-21	- **Tradeoff lists** — pros/cons, comparison tables
-22	- **Technical decisions** — API design, data modeling, architectural approach selection
-23	- **Clarifying questions** — anything where the answer is words, not a visual preference
-24	
-25	A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the terminal. "Which of these wizard layouts feels right?" is visual — use the browser.
-26	
-27	## How It Works
-28	
-29	The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, the user sees it in their browser and can click to select options. Selections are recorded to `state_dir/events` that you read on your next turn.
-30	
-31	**Content fragments vs full documents:** If your HTML file starts with `<!DOCTYPE` or `<html`, the server serves it as-is (just injects the helper script). Otherwise, the server automatically wraps your content in the frame template — adding the header, CSS theme, selection indicator, and all interactive infrastructure. **Write content fragments by default.** Only write full documents when you need complete control over the page.
-32	
-33	## Starting a Session
-34	
-35	```bash
-36	# Start server with persistence (mockups saved to project)
-37	scripts/start-server.sh --project-dir /path/to/project
-38	
-39	# Returns: {"type":"server-started","port":52341,"url":"http://localhost:52341",
-40	#           "screen_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/content",
-41	#           "state_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/state"}
-42	```
-43	
-44	Save `screen_dir` and `state_dir` from the response. Tell user to open the URL.
-45	
-46	**Finding connection info:** The server writes its startup JSON to `$STATE_DIR/server-info`. If you launched the server in the background and didn't capture stdout, read that file to get the URL and port. When using `--project-dir`, check `<project>/.superpowers/brainstorm/` for the session directory.
-47	
-48	**Note:** Pass the project root as `--project-dir` so mockups persist in `.superpowers/brainstorm/` and survive server restarts. Without it, files go to `/tmp` and get cleaned up. Remind the user to add `.superpowers/` to `.gitignore` if it's not already there.
-49	
-50	**Launching the server by platform:**
-51	
-52	**Claude Code (macOS / Linux):**
-53	```bash
-54	# Default mode works — the script backgrounds the server itself
-55	scripts/start-server.sh --project-dir /path/to/project
-56	```
-57	
-58	**Claude Code (Windows):**
-59	```bash
-60	# Windows auto-detects and uses foreground mode, which blocks the tool call.
-61	# Use run_in_background: true on the Bash tool call so the server survives
-62	# across conversation turns.
-63	scripts/start-server.sh --project-dir /path/to/project
-64	```
-65	When calling this via the Bash tool, set `run_in_background: true`. Then read `$STATE_DIR/server-info` on the next turn to get the URL and port.
-66	
-67	**Codex:**
-68	```bash
-69	# Codex reaps background processes. The script auto-detects CODEX_CI and
-70	# switches to foreground mode. Run it normally — no extra flags needed.
-71	scripts/start-server.sh --project-dir /path/to/project
-72	```
-73	
-74	**Gemini CLI:**
-75	```bash
-76	# Use --foreground and set is_background: true on your shell tool call
-77	# so the process survives across turns
-78	scripts/start-server.sh --project-dir /path/to/project --foreground
-79	```
-80	
-81	**Other environments:** The server must keep running in the background across conversation turns. If your environment reaps detached processes, use `--foreground` and launch the command with your platform's background execution mechanism.
-82	
-83	If the URL is unreachable from your browser (common in remote/containerized setups), bind a non-loopback host:
-84	
-85	```bash
-86	scripts/start-server.sh \
-87	  --project-dir /path/to/project \
-88	  --host 0.0.0.0 \
-89	  --url-host localhost
-90	```
-91	
-92	Use `--url-host` to control what hostname is printed in the returned URL JSON.
-93	
-94	## The Loop
-95	
-96	1. **Check server is alive**, then **write HTML** to a new file in `screen_dir`:
-97	   - Before each write, check that `$STATE_DIR/server-info` exists. If it doesn't (or `$STATE_DIR/server-stopped` exists), the server has shut down — restart it with `start-server.sh` before continuing. The server auto-exits after 30 minutes of inactivity.
-98	   - Use semantic filenames: `platform.html`, `visual-style.html`, `layout.html`
-99	   - **Never reuse filenames** — each screen gets a fresh file
-100	   - Use Write tool — **never use cat/heredoc** (dumps noise into terminal)
-101	   - Server automatically serves the newest file
-102	
-103	2. **Tell user what to expect and end your turn:**
-104	   - Remind them of the URL (every step, not just first)
-105	   - Give a brief text summary of what's on screen (e.g., "Showing 3 layout options for the homepage")
-106	   - Ask them to respond in the terminal: "Take a look and let me know what you think. Click to select an option if you'd like."
-107	
-108	3. **On your next turn** — after the user responds in the terminal:
-109	   - Read `$STATE_DIR/events` if it exists — this contains the user's browser interactions (clicks, selections) as JSON lines
-110	   - Merge with the user's terminal text to get the full picture
-111	   - The terminal message is the primary feedback; `state_dir/events` provides structured interaction data
-112	
-113	4. **Iterate or advance** — if feedback changes current screen, write a new file (e.g., `layout-v2.html`). Only move to the next question when the current step is validated.
-114	
-115	5. **Unload when returning to terminal** — when the next step doesn't need the browser (e.g., a clarifying question, a tradeoff discussion), push a waiting screen to clear the stale content:
-116	
-117	   ```html
-118	   <!-- filename: waiting.html (or waiting-2.html, etc.) -->
-119	   <div style="display:flex;align-items:center;justify-content:center;min-height:60vh">
-120	     <p class="subtitle">Continuing in terminal...</p>
-121	   </div>
-122	   ```
-123	
-124	   This prevents the user from staring at a resolved choice while the conversation has moved on. When the next visual question comes up, push a new content file as usual.
-125	
-126	6. Repeat until done.
-127	
-128	## Writing Content Fragments
-129	
-130	Write just the content that goes inside the page. The server wraps it in the frame template automatically (header, theme CSS, selection indicator, and all interactive infrastructure).
-131	
-132	**Minimal example:**
-133	
-134	```html
-135	<h2>Which layout works better?</h2>
-136	<p class="subtitle">Consider readability and visual hierarchy</p>
-137	
-138	<div class="options">
-139	  <div class="option" data-choice="a" onclick="toggleSelect(this)">
-140	    <div class="letter">A</div>
-141	    <div class="content">
-142	      <h3>Single Column</h3>
-143	      <p>Clean, focused reading experience</p>
-144	    </div>
-145	  </div>
-146	  <div class="option" data-choice="b" onclick="toggleSelect(this)">
-147	    <div class="letter">B</div>
-148	    <div class="content">
-149	      <h3>Two Column</h3>
-150	      <p>Sidebar navigation with main content</p>
-151	    </div>
-152	  </div>
-153	</div>
-154	```
-155	
-156	That's it. No `<html>`, no CSS, no `<script>` tags needed. The server provides all of that.
-157	
-158	## CSS Classes Available
-159	
-160	The frame template provides these CSS classes for your content:
-161	
-162	### Options (A/B/C choices)
-163	
-164	```html
-165	<div class="options">
-166	  <div class="option" data-choice="a" onclick="toggleSelect(this)">
-167	    <div class="letter">A</div>
-168	    <div class="content">
-169	      <h3>Title</h3>
-170	      <p>Description</p>
-171	    </div>
-172	  </div>
-173	</div>
-174	```
-175	
-176	**Multi-select:** Add `data-multiselect` to the container to let users select multiple options. Each click toggles the item. The indicator bar shows the count.
-177	
-178	```html
-179	<div class="options" data-multiselect>
-180	  <!-- same option markup — users can select/deselect multiple -->
-181	</div>
-182	```
-183	
-184	### Cards (visual designs)
-185	
-186	```html
-187	<div class="cards">
-188	  <div class="card" data-choice="design1" onclick="toggleSelect(this)">
-189	    <div class="card-image"><!-- mockup content --></div>
-190	    <div class="card-body">
-191	      <h3>Name</h3>
-192	      <p>Description</p>
-193	    </div>
-194	  </div>
-195	</div>
-196	```
-197	
-198	### Mockup container
-199	
-200	```html
-201	<div class="mockup">
-202	  <div class="mockup-header">Preview: Dashboard Layout</div>
-203	  <div class="mockup-body"><!-- your mockup HTML --></div>
-204	</div>
-205	```
-206	
-207	### Split view (side-by-side)
-208	
-209	```html
-210	<div class="split">
-211	  <div class="mockup"><!-- left --></div>
-212	  <div class="mockup"><!-- right --></div>
-213	</div>
-214	```
-215	
-216	### Pros/Cons
-217	
-218	```html
-219	<div class="pros-cons">
-220	  <div class="pros"><h4>Pros</h4><ul><li>Benefit</li></ul></div>
-221	  <div class="cons"><h4>Cons</h4><ul><li>Drawback</li></ul></div>
-222	</div>
-223	```
-224	
-225	### Mock elements (wireframe building blocks)
-226	
-227	```html
-228	<div class="mock-nav">Logo | Home | About | Contact</div>
-229	<div style="display: flex;">
-230	  <div class="mock-sidebar">Navigation</div>
-231	  <div class="mock-content">Main content area</div>
-232	</div>
-233	<button class="mock-button">Action Button</button>
-234	<input class="mock-input" placeholder="Input field">
-235	<div class="placeholder">Placeholder area</div>
-236	```
-237	
-238	### Typography and sections
-239	
-240	- `h2` — page title
-241	- `h3` — section heading
-242	- `.subtitle` — secondary text below title
-243	- `.section` — content block with bottom margin
-244	- `.label` — small uppercase label text
-245	
-246	## Browser Events Format
-247	
-248	When the user clicks options in the browser, their interactions are recorded to `$STATE_DIR/events` (one JSON object per line). The file is cleared automatically when you push a new screen.
-249	
-250	```jsonl
-251	{"type":"click","choice":"a","text":"Option A - Simple Layout","timestamp":1706000101}
-252	{"type":"click","choice":"c","text":"Option C - Complex Grid","timestamp":1706000108}
-253	{"type":"click","choice":"b","text":"Option B - Hybrid","timestamp":1706000115}
-254	```
-255	
-256	The full event stream shows the user's exploration path — they may click multiple options before settling. The last `choice` event is typically the final selection, but the pattern of clicks can reveal hesitation or preferences worth asking about.
-257	
-258	If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser — use only their terminal text.
-259	
-260	## Design Tips
-261	
-262	- **Scale fidelity to the question** — wireframes for layout, polish for polish questions
-263	- **Explain the question on each page** — "Which layout feels more professional?" not just "Pick one"
-264	- **Iterate before advancing** — if feedback changes current screen, write a new version
-265	- **2-4 options max** per screen
-266	- **Use real content when it matters** — for a photography portfolio, use actual images (Unsplash). Placeholder content obscures design issues.
-267	- **Keep mockups simple** — focus on layout and structure, not pixel-perfect design
-268	
-269	## File Naming
-270	
-271	- Use semantic names: `platform.html`, `visual-style.html`, `layout.html`
-272	- Never reuse filenames — each screen must be a new file
-273	- For iterations: append version suffix like `layout-v2.html`, `layout-v3.html`
-274	- Server serves newest file by modification time
-275	
-276	## Cleaning Up
-277	
-278	```bash
-279	scripts/stop-server.sh $SESSION_DIR
-280	```
-281	
-282	If the session used `--project-dir`, mockup files persist in `.superpowers/brainstorm/` for later reference. Only `/tmp` sessions get deleted on stop.
-283	
-284	## Reference
-285	
-286	- Frame template (CSS reference): `scripts/frame-template.html`
-287	- Helper script (client-side): `scripts/helper.js`
+1 # Visual Companion Guide
+2 
+3 Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
+4 
+5 ## When to Use
+6 
+7 Decide per-question, not per-session. The test: **would the user understand this better by seeing it than reading it?**
+8 
+9 **Use the browser** when the content itself is visual:
+10 
+11 - **UI mockups** — wireframes, layouts, navigation structures, component designs
+12 - **Architecture diagrams** — system components, data flow, relationship maps
+13 - **Side-by-side visual comparisons** — comparing two layouts, two color schemes, two design directions
+14 - **Design polish** — when the question is about look and feel, spacing, visual hierarchy
+15 - **Spatial relationships** — state machines, flowcharts, entity relationships rendered as diagrams
+16 
+17 **Use the terminal** when the content is text or tabular:
+18 
+19 - **Requirements and scope questions** — "what does X mean?", "which features are in scope?"
+20 - **Conceptual A/B/C choices** — picking between approaches described in words
+21 - **Tradeoff lists** — pros/cons, comparison tables
+22 - **Technical decisions** — API design, data modeling, architectural approach selection
+23 - **Clarifying questions** — anything where the answer is words, not a visual preference
+24 
+25 A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the terminal. "Which of these wizard layouts feels right?" is visual — use the browser.
+26 
+27 ## How It Works
+28 
+29 The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, the user sees it in their browser and can click to select options. Selections are recorded to `state_dir/events` that you read on your next turn.
+30 
+31 **Content fragments vs full documents:** If your HTML file starts with `<!DOCTYPE` or `<html`, the server serves it as-is (just injects the helper script). Otherwise, the server automatically wraps your content in the frame template — adding the header, CSS theme, selection indicator, and all interactive infrastructure. **Write content fragments by default.** Only write full documents when you need complete control over the page.
+32 
+33 ## Starting a Session
+34 
+35 ```bash
+36 # Start server with persistence (mockups saved to project)
+37 scripts/start-server.sh --project-dir /path/to/project
+38 
+39 # Returns: {"type":"server-started","port":52341,"url":"http://localhost:52341",
+40 #           "screen_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/content",
+41 #           "state_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/state"}
+42 ```
+43 
+44 Save `screen_dir` and `state_dir` from the response. Tell user to open the URL.
+45 
+46 **Finding connection info:** The server writes its startup JSON to `$STATE_DIR/server-info`. If you launched the server in the background and didn't capture stdout, read that file to get the URL and port. When using `--project-dir`, check `<project>/.superpowers/brainstorm/` for the session directory.
+47 
+48 **Note:** Pass the project root as `--project-dir` so mockups persist in `.superpowers/brainstorm/` and survive server restarts. Without it, files go to `/tmp` and get cleaned up. Remind the user to add `.superpowers/` to `.gitignore` if it's not already there.
+49 
+50 **Launching the server by platform:**
+51 
+52 **Claude Code (macOS / Linux):**
+53 ```bash
+54 # Default mode works — the script backgrounds the server itself
+55 scripts/start-server.sh --project-dir /path/to/project
+56 ```
+57 
+58 **Claude Code (Windows):**
+59 ```bash
+60 # Windows auto-detects and uses foreground mode, which blocks the tool call.
+61 # Use run_in_background: true on the Bash tool call so the server survives
+62 # across conversation turns.
+63 scripts/start-server.sh --project-dir /path/to/project
+64 ```
+65 When calling this via the Bash tool, set `run_in_background: true`. Then read `$STATE_DIR/server-info` on the next turn to get the URL and port.
+66 
+67 **Codex:**
+68 ```bash
+69 # Codex reaps background processes. The script auto-detects CODEX_CI and
+70 # switches to foreground mode. Run it normally — no extra flags needed.
+71 scripts/start-server.sh --project-dir /path/to/project
+72 ```
+73 
+74 **Gemini CLI:**
+75 ```bash
+76 # Use --foreground and set is_background: true on your shell tool call
+77 # so the process survives across turns
+78 scripts/start-server.sh --project-dir /path/to/project --foreground
+79 ```
+80 
+81 **Other environments:** The server must keep running in the background across conversation turns. If your environment reaps detached processes, use `--foreground` and launch the command with your platform's background execution mechanism.
+82 
+83 If the URL is unreachable from your browser (common in remote/containerized setups), bind a non-loopback host:
+84 
+85 ```bash
+86 scripts/start-server.sh \
+87   --project-dir /path/to/project \
+88   --host 0.0.0.0 \
+89   --url-host localhost
+90 ```
+91 
+92 Use `--url-host` to control what hostname is printed in the returned URL JSON.
+93 
+94 ## The Loop
+95 
+96 1. **Check server is alive**, then **write HTML** to a new file in `screen_dir`:
+97    - Before each write, check that `$STATE_DIR/server-info` exists. If it doesn't (or `$STATE_DIR/server-stopped` exists), the server has shut down — restart it with `start-server.sh` before continuing. The server auto-exits after 30 minutes of inactivity.
+98    - Use semantic filenames: `platform.html`, `visual-style.html`, `layout.html`
+99    - **Never reuse filenames** — each screen gets a fresh file
+100    - Use Write tool — **never use cat/heredoc** (dumps noise into terminal)
+101    - Server automatically serves the newest file
+102 
+103 2. **Tell user what to expect and end your turn:**
+104    - Remind them of the URL (every step, not just first)
+105    - Give a brief text summary of what's on screen (e.g., "Showing 3 layout options for the homepage")
+106    - Ask them to respond in the terminal: "Take a look and let me know what you think. Click to select an option if you'd like."
+107 
+108 3. **On your next turn** — after the user responds in the terminal:
+109    - Read `$STATE_DIR/events` if it exists — this contains the user's browser interactions (clicks, selections) as JSON lines
+110    - Merge with the user's terminal text to get the full picture
+111    - The terminal message is the primary feedback; `state_dir/events` provides structured interaction data
+112 
+113 4. **Iterate or advance** — if feedback changes current screen, write a new file (e.g., `layout-v2.html`). Only move to the next question when the current step is validated.
+114 
+115 5. **Unload when returning to terminal** — when the next step doesn't need the browser (e.g., a clarifying question, a tradeoff discussion), push a waiting screen to clear the stale content:
+116 
+117    ```html
+118    <!-- filename: waiting.html (or waiting-2.html, etc.) -->
+119    <div style="display:flex;align-items:center;justify-content:center;min-height:60vh">
+120      <p class="subtitle">Continuing in terminal...</p>
+121    </div>
+122    ```
+123 
+124    This prevents the user from staring at a resolved choice while the conversation has moved on. When the next visual question comes up, push a new content file as usual.
+125 
+126 6. Repeat until done.
+127 
+128 ## Writing Content Fragments
+129 
+130 Write just the content that goes inside the page. The server wraps it in the frame template automatically (header, theme CSS, selection indicator, and all interactive infrastructure).
+131 
+132 **Minimal example:**
+133 
+134 ```html
+135 <h2>Which layout works better?</h2>
+136 <p class="subtitle">Consider readability and visual hierarchy</p>
+137 
+138 <div class="options">
+139   <div class="option" data-choice="a" onclick="toggleSelect(this)">
+140     <div class="letter">A</div>
+141     <div class="content">
+142       <h3>Single Column</h3>
+143       <p>Clean, focused reading experience</p>
+144     </div>
+145   </div>
+146   <div class="option" data-choice="b" onclick="toggleSelect(this)">
+147     <div class="letter">B</div>
+148     <div class="content">
+149       <h3>Two Column</h3>
+150       <p>Sidebar navigation with main content</p>
+151     </div>
+152   </div>
+153 </div>
+154 ```
+155 
+156 That's it. No `<html>`, no CSS, no `<script>` tags needed. The server provides all of that.
+157 
+158 ## CSS Classes Available
+159 
+160 The frame template provides these CSS classes for your content:
+161 
+162 ### Options (A/B/C choices)
+163 
+164 ```html
+165 <div class="options">
+166   <div class="option" data-choice="a" onclick="toggleSelect(this)">
+167     <div class="letter">A</div>
+168     <div class="content">
+169       <h3>Title</h3>
+170       <p>Description</p>
+171     </div>
+172   </div>
+173 </div>
+174 ```
+175 
+176 **Multi-select:** Add `data-multiselect` to the container to let users select multiple options. Each click toggles the item. The indicator bar shows the count.
+177 
+178 ```html
+179 <div class="options" data-multiselect>
+180   <!-- same option markup — users can select/deselect multiple -->
+181 </div>
+182 ```
+183 
+184 ### Cards (visual designs)
+185 
+186 ```html
+187 <div class="cards">
+188   <div class="card" data-choice="design1" onclick="toggleSelect(this)">
+189     <div class="card-image"><!-- mockup content --></div>
+190     <div class="card-body">
+191       <h3>Name</h3>
+192       <p>Description</p>
+193     </div>
+194   </div>
+195 </div>
+196 ```
+197 
+198 ### Mockup container
+199 
+200 ```html
+201 <div class="mockup">
+202   <div class="mockup-header">Preview: Dashboard Layout</div>
+203   <div class="mockup-body"><!-- your mockup HTML --></div>
+204 </div>
+205 ```
+206 
+207 ### Split view (side-by-side)
+208 
+209 ```html
+210 <div class="split">
+211   <div class="mockup"><!-- left --></div>
+212   <div class="mockup"><!-- right --></div>
+213 </div>
+214 ```
+215 
+216 ### Pros/Cons
+217 
+218 ```html
+219 <div class="pros-cons">
+220   <div class="pros"><h4>Pros</h4><ul><li>Benefit</li></ul></div>
+221   <div class="cons"><h4>Cons</h4><ul><li>Drawback</li></ul></div>
+222 </div>
+223 ```
+224 
+225 ### Mock elements (wireframe building blocks)
+226 
+227 ```html
+228 <div class="mock-nav">Logo | Home | About | Contact</div>
+229 <div style="display: flex;">
+230   <div class="mock-sidebar">Navigation</div>
+231   <div class="mock-content">Main content area</div>
+232 </div>
+233 <button class="mock-button">Action Button</button>
+234 <input class="mock-input" placeholder="Input field">
+235 <div class="placeholder">Placeholder area</div>
+236 ```
+237 
+238 ### Typography and sections
+239 
+240 - `h2` — page title
+241 - `h3` — section heading
+242 - `.subtitle` — secondary text below title
+243 - `.section` — content block with bottom margin
+244 - `.label` — small uppercase label text
+245 
+246 ## Browser Events Format
+247 
+248 When the user clicks options in the browser, their interactions are recorded to `$STATE_DIR/events` (one JSON object per line). The file is cleared automatically when you push a new screen.
+249 
+250 ```jsonl
+251 {"type":"click","choice":"a","text":"Option A - Simple Layout","timestamp":1706000101}
+252 {"type":"click","choice":"c","text":"Option C - Complex Grid","timestamp":1706000108}
+253 {"type":"click","choice":"b","text":"Option B - Hybrid","timestamp":1706000115}
+254 ```
+255 
+256 The full event stream shows the user's exploration path — they may click multiple options before settling. The last `choice` event is typically the final selection, but the pattern of clicks can reveal hesitation or preferences worth asking about.
+257 
+258 If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser — use only their terminal text.
+259 
+260 ## Design Tips
+261 
+262 - **Scale fidelity to the question** — wireframes for layout, polish for polish questions
+263 - **Explain the question on each page** — "Which layout feels more professional?" not just "Pick one"
+264 - **Iterate before advancing** — if feedback changes current screen, write a new version
+265 - **2-4 options max** per screen
+266 - **Use real content when it matters** — for a photography portfolio, use actual images (Unsplash). Placeholder content obscures design issues.
+267 - **Keep mockups simple** — focus on layout and structure, not pixel-perfect design
+268 
+269 ## File Naming
+270 
+271 - Use semantic names: `platform.html`, `visual-style.html`, `layout.html`
+272 - Never reuse filenames — each screen must be a new file
+273 - For iterations: append version suffix like `layout-v2.html`, `layout-v3.html`
+274 - Server serves newest file by modification time
+275 
+276 ## Cleaning Up
+277 
+278 ```bash
+279 scripts/stop-server.sh $SESSION_DIR
+280 ```
+281 
+282 If the session used `--project-dir`, mockup files persist in `.superpowers/brainstorm/` for later reference. Only `/tmp` sessions get deleted on stop.
+283 
+284 ## Reference
+285 
+286 - Frame template (CSS reference): `scripts/frame-template.html`
+287 - Helper script (client-side): `scripts/helper.js`
 288
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:00:43Z)**_
@@ -2204,6 +2216,7 @@ server.cjs
 start-server.sh
 stop-server.sh
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:00:50Z)**_
@@ -2217,6 +2230,7 @@ Start brainstorming visual companion server
 ```text
 {"type":"server-started","port":64371,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:64371","screen_dir":"/Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/86701-1775858447/content","state_dir":"/Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/86701-1775858447/state"}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:01:12Z)**_
@@ -2455,11 +2469,12 @@ _**Agent (claude-opus-4-6 2026-04-10 22:01:52Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/86701-1775858447/content/tile-sizing.html (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:02:00Z)**_
 
-Open **http://localhost:64371** to see it.
+Open **<http://localhost:64371>** to see it.
 
 The mockup shows:
 
@@ -2661,11 +2676,12 @@ _**Agent (claude-opus-4-6 2026-04-10 22:05:21Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/86701-1775858447/content/mixed-lengths.html (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:05:26Z)**_
 
-Refresh **http://localhost:64371** to see the new screen.
+Refresh **<http://localhost:64371>** to see the new screen.
 
 Shows the sequence **10, 80, 900, 2000, 30000** three ways:
 
@@ -2726,6 +2742,7 @@ _**Agent (claude-opus-4-6 2026-04-10 22:07:23Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/86701-1775858447/content/waiting.html (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:07:46Z)**_
@@ -2828,6 +2845,7 @@ Create feature worktree
 Preparing worktree (new branch 'feat/game-tile-auto-font-sizing')
 HEAD is now at bed6bb8 Merge branch 'master' of github.com:leocaseiro/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:47:58Z)**_
@@ -2842,6 +2860,7 @@ Ensure specs dir exists
 plans
 specs
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:48:56Z)**_
@@ -3074,6 +3093,7 @@ tests.
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/specs/2026-04-11-game-tile-auto-font-sizing-design.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:49:00Z)**_
@@ -3091,6 +3111,7 @@ $ markdownlint-cli2 --fix '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#d
 error Command failed with exit code 127.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:49:04Z)**_
@@ -3114,6 +3135,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 11.31s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:49:21Z)**_
@@ -3133,6 +3155,7 @@ Check current directory
 ```text
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-game-tile-auto-font-sizing
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:49:24Z)**_
@@ -3146,6 +3169,7 @@ Check markdownlint-cli2 availability
 ```text
 node_modules/.bin/markdownlint-cli2
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:49:29Z)**_
@@ -3167,6 +3191,7 @@ docs/superpowers/specs/2026-04-11-game-tile-auto-font-sizing-design.md:7 error M
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:49:34Z)**_
@@ -3177,6 +3202,7 @@ _**Agent (claude-opus-4-6 2026-04-10 22:49:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/specs/2026-04-11-game-tile-auto-font-sizing-design.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:49:43Z)**_
@@ -3206,6 +3232,7 @@ Linting: 68 file(s)
 Summary: 0 error(s)
 Done in 0.84s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:49:47Z)**_
@@ -3250,22 +3277,23 @@ _**Agent (claude-opus-4-6 2026-04-10 22:49:59Z)**_
  `./worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/specs/2026-04-11-game-tile-auto-font-sizing-design.md`
 
 ```text
-175	Add long-label stories to `SortNumbers.stories.tsx` and
-176	`NumberMatch.stories.tsx` so the interaction test suite exercises the new
-177	font tiers:
-178	
-179	- SortNumbers: round with sequence `1000, 2000, 3000, 4000, 5000, 6000,
-180	7000, 8000, 9000, 10000` (ten slots, mixed 4- and 5-digit labels).
-181	- NumberMatch: round with numeral mode and `value = 10002` plus
-182	  5-digit distractors.
-183	
-184	### Visual regression
-185	
-186	VR baselines on the updated stories must be refreshed via
-187	`yarn test:vr:update` after implementation. Record the baseline update in
-188	the commit that introduces it.
+175 Add long-label stories to `SortNumbers.stories.tsx` and
+176 `NumberMatch.stories.tsx` so the interaction test suite exercises the new
+177 font tiers:
+178 
+179 - SortNumbers: round with sequence `1000, 2000, 3000, 4000, 5000, 6000,
+180 7000, 8000, 9000, 10000` (ten slots, mixed 4- and 5-digit labels).
+181 - NumberMatch: round with numeral mode and `value = 10002` plus
+182   5-digit distractors.
+183 
+184 ### Visual regression
+185 
+186 VR baselines on the updated stories must be refreshed via
+187 `yarn test:vr:update` after implementation. Record the baseline update in
+188 the commit that introduces it.
 189
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:50:04Z)**_
@@ -3276,6 +3304,7 @@ _**Agent (claude-opus-4-6 2026-04-10 22:50:04Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/specs/2026-04-11-game-tile-auto-font-sizing-design.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:50:13Z)**_
@@ -3300,6 +3329,7 @@ Done in 0.85s.
 Checking formatting...
 All matched files use Prettier code style!
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:50:28Z)**_
@@ -3329,7 +3359,7 @@ Preview (first 2KB):
 On branch feat/game-tile-auto-font-sizing
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-	new file:   docs/superpowers/specs/2026-04-11-game-tile-auto-font-sizing-design.md
+ new file:   docs/superpowers/specs/2026-04-11-game-tile-auto-font-sizing-design.md
 
 [STARTED] Backing up original state...
 [COMPLETED] Backed up original state in git stash (f6cad5a)
@@ -3366,6 +3396,7 @@ stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak sets utteran
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:50:37Z)**_
@@ -3379,6 +3410,7 @@ Verify commit
 ```text
 1e0da26 docs(specs): add game tile auto font sizing design
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 22:50:43Z)**_
@@ -3447,6 +3479,7 @@ _**Agent (claude-opus-4-6 2026-04-10 23:10:56Z)**_
 ```text
 Launching skill: superpowers:writing-plans
 ```
+
 </details></tool-use>
 
 ---
@@ -3468,6 +3501,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -3488,6 +3522,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
+
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -3558,6 +3593,7 @@ git commit -m "feat: add specific feature"
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
@@ -3566,6 +3602,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 
 ## Remember
+
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
@@ -3596,13 +3633,14 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
 - Batch execution with checkpoints for review
-
 
 ---
 
@@ -3658,6 +3696,7 @@ useFreeSwap.ts
 useGameSounds.test.tsx
 useGameSounds.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:11:06Z)**_
@@ -3688,6 +3727,7 @@ SortNumbersTileBank.stories.tsx
 SortNumbersTileBank.test.tsx
 SortNumbersTileBank.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:11:08Z)**_
@@ -3711,6 +3751,7 @@ Check plans dir location
 2026-04-03-group-d-game-settings.md
 2026-04-03-group-e-i18n-routing-bugs.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:11:13Z)**_
@@ -3734,6 +3775,7 @@ Verify worktree plans dir
 2026-04-02-storybook-setup.md
 2026-04-02-vr-docker-baselines.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:11:17Z)**_
@@ -3743,67 +3785,68 @@ _**Agent (claude-opus-4-6 2026-04-10 23:11:17Z)**_
  `./src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx`
 
 ```text
-1	// src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
-2	import { withDb } from '../../../../.storybook/decorators/withDb';
-3	import { withRouter } from '../../../../.storybook/decorators/withRouter';
-4	import { createSortNumbersLevelGenerator } from '../sort-numbers-level-generator';
-5	import { SortNumbers } from './SortNumbers';
-6	import type { SortNumbersConfig } from '../types';
-7	import type { Meta, StoryObj } from '@storybook/react';
-8	
-9	const baseConfig: SortNumbersConfig = {
-10	  gameId: 'sort-numbers',
-11	  component: 'SortNumbers',
-12	  inputMethod: 'drag',
-13	  wrongTileBehavior: 'lock-manual',
-14	  tileBankMode: 'exact',
-15	  totalRounds: 3,
-16	  roundsInOrder: false,
-17	  ttsEnabled: false,
-18	  direction: 'ascending',
-19	  range: { min: 2, max: 20 },
-20	  quantity: 4,
-21	  skip: { mode: 'consecutive' },
-22	  distractors: { source: 'random', count: 2 },
-23	  rounds: [
-24	    { sequence: [3, 4, 5, 6] },
-25	    { sequence: [7, 8, 9, 10] },
-26	    { sequence: [11, 12, 13, 14] },
-27	  ],
-28	};
-29	
-30	const meta: Meta<typeof SortNumbers> = {
-31	  component: SortNumbers,
-32	  tags: ['autodocs'],
-33	  decorators: [withDb, withRouter],
-34	  args: { config: baseConfig },
-35	};
-36	export default meta;
-37	
-38	type Story = StoryObj<typeof SortNumbers>;
-39	
-40	export const Consecutive: Story = {};
-41	
-42	export const SkipByStepRangeMin: Story = {
-43	  args: {
-44	    config: {
-45	      ...baseConfig,
-46	      skip: { mode: 'by', step: 3, start: 'range-min' },
-47	      rounds: [
-48	        { sequence: [2, 5, 8, 11] },
-49	        { sequence: [2, 5, 8, 11] },
-50	        { sequence: [2, 5, 8, 11] },
-51	      ],
-52	    },
-53	  },
-54	};
-55	
-56	export const SkipRandom: Story = {
-57	  args: {
-58	    config: {
-59	      ...baseConfig,
-60	      skip: { mode: 'random' },
+1 // src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
+2 import { withDb } from '../../../../.storybook/decorators/withDb';
+3 import { withRouter } from '../../../../.storybook/decorators/withRouter';
+4 import { createSortNumbersLevelGenerator } from '../sort-numbers-level-generator';
+5 import { SortNumbers } from './SortNumbers';
+6 import type { SortNumbersConfig } from '../types';
+7 import type { Meta, StoryObj } from '@storybook/react';
+8 
+9 const baseConfig: SortNumbersConfig = {
+10   gameId: 'sort-numbers',
+11   component: 'SortNumbers',
+12   inputMethod: 'drag',
+13   wrongTileBehavior: 'lock-manual',
+14   tileBankMode: 'exact',
+15   totalRounds: 3,
+16   roundsInOrder: false,
+17   ttsEnabled: false,
+18   direction: 'ascending',
+19   range: { min: 2, max: 20 },
+20   quantity: 4,
+21   skip: { mode: 'consecutive' },
+22   distractors: { source: 'random', count: 2 },
+23   rounds: [
+24     { sequence: [3, 4, 5, 6] },
+25     { sequence: [7, 8, 9, 10] },
+26     { sequence: [11, 12, 13, 14] },
+27   ],
+28 };
+29 
+30 const meta: Meta<typeof SortNumbers> = {
+31   component: SortNumbers,
+32   tags: ['autodocs'],
+33   decorators: [withDb, withRouter],
+34   args: { config: baseConfig },
+35 };
+36 export default meta;
+37 
+38 type Story = StoryObj<typeof SortNumbers>;
+39 
+40 export const Consecutive: Story = {};
+41 
+42 export const SkipByStepRangeMin: Story = {
+43   args: {
+44     config: {
+45       ...baseConfig,
+46       skip: { mode: 'by', step: 3, start: 'range-min' },
+47       rounds: [
+48         { sequence: [2, 5, 8, 11] },
+49         { sequence: [2, 5, 8, 11] },
+50         { sequence: [2, 5, 8, 11] },
+51       ],
+52     },
+53   },
+54 };
+55 
+56 export const SkipRandom: Story = {
+57   args: {
+58     config: {
+59       ...baseConfig,
+60       skip: { mode: 'random' },
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:11:18Z)**_
@@ -3813,87 +3856,88 @@ _**Agent (claude-opus-4-6 2026-04-10 23:11:18Z)**_
  `./src/games/number-match/NumberMatch/NumberMatch.stories.tsx`
 
 ```text
-1	import { withDb } from '../../../../.storybook/decorators/withDb';
-2	import { withRouter } from '../../../../.storybook/decorators/withRouter';
-3	import { NumberMatch } from './NumberMatch';
-4	import type { NumberMatchConfig } from '../types';
-5	import type { Meta, StoryObj } from '@storybook/react';
-6	
-7	const baseConfig: NumberMatchConfig = {
-8	  gameId: 'number-match-storybook',
-9	  component: 'NumberMatch',
-10	  inputMethod: 'drag',
-11	  wrongTileBehavior: 'lock-auto-eject',
-12	  tileBankMode: 'exact',
-13	  totalRounds: 5,
-14	  roundsInOrder: true,
-15	  ttsEnabled: true,
-16	  mode: 'numeral-to-group',
-17	  tileStyle: 'dots',
-18	  range: { min: 1, max: 5 },
-19	  rounds: [{ value: 3 }, { value: 1 }, { value: 5 }],
-20	};
-21	
-22	const meta: Meta<typeof NumberMatch> = {
-23	  component: NumberMatch,
-24	  tags: ['autodocs'],
-25	  args: { config: baseConfig },
-26	  decorators: [withDb, withRouter],
-27	};
-28	export default meta;
-29	
-30	type Story = StoryObj<typeof NumberMatch>;
-31	
-32	export const NumeralToGroup: Story = {};
-33	
-34	export const GroupToNumeral: Story = {
-35	  args: { config: { ...baseConfig, mode: 'group-to-numeral' } },
-36	};
-37	
-38	export const CardinalNumberToText: Story = {
-39	  args: {
-40	    config: {
-41	      ...baseConfig,
-42	      mode: 'cardinal-number-to-text',
-43	      tileStyle: 'fingers',
-44	    },
-45	  },
-46	};
-47	
-48	export const CardinalTextToNumber: Story = {
-49	  args: {
-50	    config: {
-51	      ...baseConfig,
-52	      mode: 'cardinal-text-to-number',
-53	      tileStyle: 'fingers',
-54	    },
-55	  },
-56	};
-57	
-58	export const OrdinalNumberToText: Story = {
-59	  args: {
-60	    config: {
-61	      ...baseConfig,
-62	      mode: 'ordinal-number-to-text',
-63	      tileStyle: 'fingers',
-64	    },
-65	  },
-66	};
-67	
-68	export const OrdinalTextToNumber: Story = {
-69	  args: {
-70	    config: {
-71	      ...baseConfig,
-72	      mode: 'ordinal-text-to-number',
-73	      tileStyle: 'fingers',
-74	    },
-75	  },
-76	};
-77	
-78	export const CardinalToOrdinal: Story = {
-79	  args: {
-80	    config: {
+1 import { withDb } from '../../../../.storybook/decorators/withDb';
+2 import { withRouter } from '../../../../.storybook/decorators/withRouter';
+3 import { NumberMatch } from './NumberMatch';
+4 import type { NumberMatchConfig } from '../types';
+5 import type { Meta, StoryObj } from '@storybook/react';
+6 
+7 const baseConfig: NumberMatchConfig = {
+8   gameId: 'number-match-storybook',
+9   component: 'NumberMatch',
+10   inputMethod: 'drag',
+11   wrongTileBehavior: 'lock-auto-eject',
+12   tileBankMode: 'exact',
+13   totalRounds: 5,
+14   roundsInOrder: true,
+15   ttsEnabled: true,
+16   mode: 'numeral-to-group',
+17   tileStyle: 'dots',
+18   range: { min: 1, max: 5 },
+19   rounds: [{ value: 3 }, { value: 1 }, { value: 5 }],
+20 };
+21 
+22 const meta: Meta<typeof NumberMatch> = {
+23   component: NumberMatch,
+24   tags: ['autodocs'],
+25   args: { config: baseConfig },
+26   decorators: [withDb, withRouter],
+27 };
+28 export default meta;
+29 
+30 type Story = StoryObj<typeof NumberMatch>;
+31 
+32 export const NumeralToGroup: Story = {};
+33 
+34 export const GroupToNumeral: Story = {
+35   args: { config: { ...baseConfig, mode: 'group-to-numeral' } },
+36 };
+37 
+38 export const CardinalNumberToText: Story = {
+39   args: {
+40     config: {
+41       ...baseConfig,
+42       mode: 'cardinal-number-to-text',
+43       tileStyle: 'fingers',
+44     },
+45   },
+46 };
+47 
+48 export const CardinalTextToNumber: Story = {
+49   args: {
+50     config: {
+51       ...baseConfig,
+52       mode: 'cardinal-text-to-number',
+53       tileStyle: 'fingers',
+54     },
+55   },
+56 };
+57 
+58 export const OrdinalNumberToText: Story = {
+59   args: {
+60     config: {
+61       ...baseConfig,
+62       mode: 'ordinal-number-to-text',
+63       tileStyle: 'fingers',
+64     },
+65   },
+66 };
+67 
+68 export const OrdinalTextToNumber: Story = {
+69   args: {
+70     config: {
+71       ...baseConfig,
+72       mode: 'ordinal-text-to-number',
+73       tileStyle: 'fingers',
+74     },
+75   },
+76 };
+77 
+78 export const CardinalToOrdinal: Story = {
+79   args: {
+80     config: {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:11:22Z)**_
@@ -3908,6 +3952,7 @@ Look at test patterns
 src/components/answer-game/answer-game-reducer.test.ts
 src/components/answer-game/magnetic-snap.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:11:25Z)**_
@@ -3917,37 +3962,38 @@ _**Agent (claude-opus-4-6 2026-04-10 23:11:25Z)**_
  `./src/components/answer-game/magnetic-snap.test.ts`
 
 ```text
-1	import { describe, expect, it } from 'vitest';
-2	import { lerp, magneticOffset } from './magnetic-snap';
-3	
-4	describe('lerp', () => {
-5	  it('returns a at t=0', () => expect(lerp(0, 100, 0)).toBe(0));
-6	  it('returns b at t=1', () => expect(lerp(0, 100, 1)).toBe(100));
-7	  it('returns midpoint at t=0.5', () =>
-8	    expect(lerp(0, 100, 0.5)).toBe(50));
-9	});
-10	
-11	describe('magneticOffset', () => {
-12	  const zoneCenter = { x: 200, y: 300 };
-13	
-14	  it('returns (0, 0) when distance is outside 60 px radius', () => {
-15	    const result = magneticOffset(61, { x: 100, y: 200 }, zoneCenter);
-16	    expect(result).toEqual({ x: 0, y: 0 });
-17	  });
-18	
-19	  it('returns (0, 0) at exactly the boundary (60 px)', () => {
-20	    const result = magneticOffset(60, { x: 100, y: 200 }, zoneCenter);
-21	    expect(result.x).toBeCloseTo(0);
-22	    expect(result.y).toBeCloseTo(0);
-23	  });
-24	
-25	  it('applies lerp pull at 30 px distance', () => {
-26	    const currentPos = { x: 170, y: 300 };
-27	    const result = magneticOffset(30, currentPos, zoneCenter);
-28	    const t = (1 - 30 / 60) * 0.3;
-29	    const expectedX =
-30	      lerp(currentPos.x, zoneCenter.x, t) - currentPos.x;
+1 import { describe, expect, it } from 'vitest';
+2 import { lerp, magneticOffset } from './magnetic-snap';
+3 
+4 describe('lerp', () => {
+5   it('returns a at t=0', () => expect(lerp(0, 100, 0)).toBe(0));
+6   it('returns b at t=1', () => expect(lerp(0, 100, 1)).toBe(100));
+7   it('returns midpoint at t=0.5', () =>
+8     expect(lerp(0, 100, 0.5)).toBe(50));
+9 });
+10 
+11 describe('magneticOffset', () => {
+12   const zoneCenter = { x: 200, y: 300 };
+13 
+14   it('returns (0, 0) when distance is outside 60 px radius', () => {
+15     const result = magneticOffset(61, { x: 100, y: 200 }, zoneCenter);
+16     expect(result).toEqual({ x: 0, y: 0 });
+17   });
+18 
+19   it('returns (0, 0) at exactly the boundary (60 px)', () => {
+20     const result = magneticOffset(60, { x: 100, y: 200 }, zoneCenter);
+21     expect(result.x).toBeCloseTo(0);
+22     expect(result.y).toBeCloseTo(0);
+23   });
+24 
+25   it('applies lerp pull at 30 px distance', () => {
+26     const currentPos = { x: 170, y: 300 };
+27     const result = magneticOffset(30, currentPos, zoneCenter);
+28     const t = (1 - 30 / 60) * 0.3;
+29     const expectedX =
+30       lerp(currentPos.x, zoneCenter.x, t) - currentPos.x;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:12:02Z)**_
@@ -4811,6 +4857,7 @@ Which approach?
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/plans/2026-04-11-game-tile-auto-font-sizing.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:14:01Z)**_
@@ -4833,6 +4880,7 @@ Linting: 69 file(s)
 Summary: 0 error(s)
 Done in 0.93s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:14:13Z)**_
@@ -4854,87 +4902,88 @@ _**Agent (claude-opus-4-6 2026-04-10 23:14:15Z)**_
  `./worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/plans/2026-04-11-game-tile-auto-font-sizing.md`
 
 ```text
-165	### Step 1: Widen the outer container
-166	
-167	- [ ] In `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`, line 158, change:
-168	
-169	```tsx
-170	<div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-171	```
-172	
-173	to:
-174	
-175	```tsx
-176	<div className="flex w-full max-w-4xl flex-col items-center justify-center gap-8 px-4 py-6">
-177	```
-178	
-179	### Step 2: Import the utility
-180	
-181	- [ ] At the top of the same file, add to the imports (alphabetical order within the `@/components/answer-game/*` block):
-182	
-183	```tsx
-184	import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
-185	```
-186	
-187	### Step 3: Auto-size the slot label font
-188	
-189	- [ ] In the same file, replace the Slot children render-prop (currently at lines 172-174):
-190	
-191	```tsx
-192	{
-193	  ({ label }) => <span className="text-2xl font-bold">{label}</span>;
-194	}
-195	```
-196	
-197	with:
-198	
-199	```tsx
-200	{
-201	  ({ label }) => (
-202	    <span
-203	      className={`${getNumericTileFontClass(label.length, 56)} font-bold tabular-nums`}
-204	    >
-205	      {label}
-206	    </span>
-207	  );
-208	}
-209	```
-210	
-211	`tabular-nums` is added so the digit widths are consistent across rounds. `font-bold` is preserved.
-212	
-213	### Step 4: Typecheck
-214	
-215	- [ ] Run:
-216	
-217	```bash
-218	yarn typecheck
-219	```
-220	
-221	Expected: no errors.
-222	
-223	### Step 5: Lint
-224	
-225	- [ ] Run:
-226	
-227	```bash
-228	yarn lint
-229	```
-230	
-231	Expected: no errors.
-232	
-233	### Step 6: Commit
-234	
-235	- [ ] Run:
-236	
-237	```bash
-238	git add src/games/sort-numbers/SortNumbers/SortNumbers.tsx
-239	git commit -m "feat(sort-numbers): auto-size slot font and widen container
-240	
-241	- Outer wrapper max-w-2xl -> max-w-4xl so 10-slot rows fit on one line
-242	  at desktop widths.
-243	- Slot label uses getNumericTileFontClass(label.length, 56) with
-244	  tabular-nums so long labels (1000, 10000) no longer clip."
+165 ### Step 1: Widen the outer container
+166 
+167 - [ ] In `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`, line 158, change:
+168 
+169 ```tsx
+170 <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+171 ```
+172 
+173 to:
+174 
+175 ```tsx
+176 <div className="flex w-full max-w-4xl flex-col items-center justify-center gap-8 px-4 py-6">
+177 ```
+178 
+179 ### Step 2: Import the utility
+180 
+181 - [ ] At the top of the same file, add to the imports (alphabetical order within the `@/components/answer-game/*` block):
+182 
+183 ```tsx
+184 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
+185 ```
+186 
+187 ### Step 3: Auto-size the slot label font
+188 
+189 - [ ] In the same file, replace the Slot children render-prop (currently at lines 172-174):
+190 
+191 ```tsx
+192 {
+193   ({ label }) => <span className="text-2xl font-bold">{label}</span>;
+194 }
+195 ```
+196 
+197 with:
+198 
+199 ```tsx
+200 {
+201   ({ label }) => (
+202     <span
+203       className={`${getNumericTileFontClass(label.length, 56)} font-bold tabular-nums`}
+204     >
+205       {label}
+206     </span>
+207   );
+208 }
+209 ```
+210 
+211 `tabular-nums` is added so the digit widths are consistent across rounds. `font-bold` is preserved.
+212 
+213 ### Step 4: Typecheck
+214 
+215 - [ ] Run:
+216 
+217 ```bash
+218 yarn typecheck
+219 ```
+220 
+221 Expected: no errors.
+222 
+223 ### Step 5: Lint
+224 
+225 - [ ] Run:
+226 
+227 ```bash
+228 yarn lint
+229 ```
+230 
+231 Expected: no errors.
+232 
+233 ### Step 6: Commit
+234 
+235 - [ ] Run:
+236 
+237 ```bash
+238 git add src/games/sort-numbers/SortNumbers/SortNumbers.tsx
+239 git commit -m "feat(sort-numbers): auto-size slot font and widen container
+240 
+241 - Outer wrapper max-w-2xl -> max-w-4xl so 10-slot rows fit on one line
+242   at desktop widths.
+243 - Slot label uses getNumericTileFontClass(label.length, 56) with
+244   tabular-nums so long labels (1000, 10000) no longer clip."
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:14:21Z)**_
@@ -4945,6 +4994,7 @@ _**Agent (claude-opus-4-6 2026-04-10 23:14:21Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/plans/2026-04-11-game-tile-auto-font-sizing.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:14:25Z)**_
@@ -4954,97 +5004,98 @@ _**Agent (claude-opus-4-6 2026-04-10 23:14:25Z)**_
  `./worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/plans/2026-04-11-game-tile-auto-font-sizing.md`
 
 ```text
-240	  at desktop widths.
-241	- Slot label uses getNumericTileFontClass(label.length, 56) with
-242	  tabular-nums so long labels (1000, 10000) no longer clip."
-243	```
-244	
-245	---
-246	
-247	## Task 3: SortNumbersTileBank — auto-size tile and preview font
-248	
-249	**Files:**
-250	
-251	- Modify: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
-252	
-253	### Step 1: Import the utility
-254	
-255	- [ ] At the top of `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`, add:
-256	
-257	```tsx
-258	import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
-259	```
-260	
-261	### Step 2: Auto-size the NumberTile button font
-262	
-263	- [ ] Replace the `NumberTile` component's button `className` (currently at line 22):
-264	
-265	```tsx
-266	className =
-267	  'flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing';
-268	```
-269	
-270	with:
-271	
-272	```tsx
-273	className={`flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums transition-transform active:scale-95 active:cursor-grabbing`}
-274	```
-275	
-276	### Step 3: Auto-size the hover-preview span font
-277	
-278	- [ ] In the same file, replace the hover-target preview span (currently at lines 96-100):
-279	
-280	```tsx
-281	<span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
-282	  {tile.label}
-283	</span>
-284	```
-285	
-286	with:
-287	
-288	```tsx
-289	<span
-290	  className={`absolute inset-0 flex items-center justify-center ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums opacity-50`}
-291	>
-292	  {tile.label}
-293	</span>
-294	```
-295	
-296	### Step 4: Run the existing tile bank tests
-297	
-298	- [ ] Run:
-299	
-300	```bash
-301	yarn test src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx
-302	```
-303	
-304	Expected: PASS (no regressions; tests should not depend on the specific class name).
-305	
-306	### Step 5: Typecheck and lint
-307	
-308	- [ ] Run:
-309	
-310	```bash
-311	yarn typecheck && yarn lint
-312	```
-313	
-314	Expected: no errors.
-315	
-316	### Step 6: Commit
-317	
-318	- [ ] Run:
-319	
-320	```bash
-321	git add src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx
-322	git commit -m "feat(sort-numbers): auto-size tile-bank font by label length
-323	
-324	NumberTile button and hover-preview span both use
-325	getNumericTileFontClass so long numeric labels no longer overflow
-326	the 56 px tile. tabular-nums added for consistent digit widths."
-327	```
-328	
-329	---
+240   at desktop widths.
+241 - Slot label uses getNumericTileFontClass(label.length, 56) with
+242   tabular-nums so long labels (1000, 10000) no longer clip."
+243 ```
+244 
+245 ---
+246 
+247 ## Task 3: SortNumbersTileBank — auto-size tile and preview font
+248 
+249 **Files:**
+250 
+251 - Modify: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
+252 
+253 ### Step 1: Import the utility
+254 
+255 - [ ] At the top of `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`, add:
+256 
+257 ```tsx
+258 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
+259 ```
+260 
+261 ### Step 2: Auto-size the NumberTile button font
+262 
+263 - [ ] Replace the `NumberTile` component's button `className` (currently at line 22):
+264 
+265 ```tsx
+266 className =
+267   'flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing';
+268 ```
+269 
+270 with:
+271 
+272 ```tsx
+273 className={`flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums transition-transform active:scale-95 active:cursor-grabbing`}
+274 ```
+275 
+276 ### Step 3: Auto-size the hover-preview span font
+277 
+278 - [ ] In the same file, replace the hover-target preview span (currently at lines 96-100):
+279 
+280 ```tsx
+281 <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+282   {tile.label}
+283 </span>
+284 ```
+285 
+286 with:
+287 
+288 ```tsx
+289 <span
+290   className={`absolute inset-0 flex items-center justify-center ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums opacity-50`}
+291 >
+292   {tile.label}
+293 </span>
+294 ```
+295 
+296 ### Step 4: Run the existing tile bank tests
+297 
+298 - [ ] Run:
+299 
+300 ```bash
+301 yarn test src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx
+302 ```
+303 
+304 Expected: PASS (no regressions; tests should not depend on the specific class name).
+305 
+306 ### Step 5: Typecheck and lint
+307 
+308 - [ ] Run:
+309 
+310 ```bash
+311 yarn typecheck && yarn lint
+312 ```
+313 
+314 Expected: no errors.
+315 
+316 ### Step 6: Commit
+317 
+318 - [ ] Run:
+319 
+320 ```bash
+321 git add src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx
+322 git commit -m "feat(sort-numbers): auto-size tile-bank font by label length
+323 
+324 NumberTile button and hover-preview span both use
+325 getNumericTileFontClass so long numeric labels no longer overflow
+326 the 56 px tile. tabular-nums added for consistent digit widths."
+327 ```
+328 
+329 ---
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:14:32Z)**_
@@ -5055,6 +5106,7 @@ _**Agent (claude-opus-4-6 2026-04-10 23:14:32Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/plans/2026-04-11-game-tile-auto-font-sizing.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:14:39Z)**_
@@ -5065,6 +5117,7 @@ _**Agent (claude-opus-4-6 2026-04-10 23:14:39Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/plans/2026-04-11-game-tile-auto-font-sizing.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:14:45Z)**_
@@ -5074,97 +5127,98 @@ _**Agent (claude-opus-4-6 2026-04-10 23:14:45Z)**_
  `./worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/plans/2026-04-11-game-tile-auto-font-sizing.md`
 
 ```text
-420	### Step 1: Widen the outer container
-421	
-422	- [ ] In `src/games/number-match/NumberMatch/NumberMatch.tsx`, line 205, change:
-423	
-424	```tsx
-425	<div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-426	```
-427	
-428	to:
-429	
-430	```tsx
-431	<div className="flex w-full max-w-4xl flex-col items-center justify-center gap-8 px-4 py-6">
-432	```
-433	
-434	### Step 2: Import the utility
-435	
-436	- [ ] Add to the imports near the top (alphabetical within the `@/components/answer-game/*` block):
-437	
-438	```tsx
-439	import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
-440	```
-441	
-442	### Step 3: Auto-size the numeric slot children font
-443	
-444	- [ ] Replace the numeric-slot fallback inside the Slot children render-prop (currently at lines 279-283):
-445	
-446	```tsx
-447	return <span className="text-3xl font-bold tabular-nums">{label}</span>;
-448	```
-449	
-450	with:
-451	
-452	```tsx
-453	return (
-454	  <span
-455	    className={`${getNumericTileFontClass(label.length, 80)} font-bold tabular-nums`}
-456	  >
-457	    {label}
-458	  </span>
-459	);
-460	```
-461	
-462	### Step 4: Auto-size the numeric preview span font
-463	
-464	- [ ] In the same file, replace the numeric-slot fallback inside `renderPreview` (currently at lines 252-256):
-465	
-466	```tsx
-467	return (
-468	  <span className="text-3xl font-bold tabular-nums opacity-50">
-469	    {previewLabel}
-470	  </span>
-471	);
-472	```
-473	
-474	with:
-475	
-476	```tsx
-477	return (
-478	  <span
-479	    className={`${getNumericTileFontClass(previewLabel.length, 80)} font-bold tabular-nums opacity-50`}
-480	  >
-481	    {previewLabel}
-482	  </span>
-483	);
-484	```
-485	
-486	### Step 5: Typecheck and lint
-487	
-488	- [ ] Run:
-489	
-490	```bash
-491	yarn typecheck && yarn lint
-492	```
-493	
-494	Expected: no errors.
-495	
-496	### Step 6: Commit
-497	
-498	- [ ] Run:
-499	
-500	```bash
-501	git add src/games/number-match/NumberMatch/NumberMatch.tsx
-502	git commit -m "feat(number-match): auto-size numeric slot font and widen container
-503	
-504	- Outer wrapper max-w-2xl -> max-w-4xl (parity with SortNumbers).
-505	- Numeric slot label and preview use getNumericTileFontClass with
-506	  base 80 so 4/5+-digit numerals stop clipping in the 80 px tile.
-507	- Word-mode and dots-domino branches are untouched."
-508	```
+420 ### Step 1: Widen the outer container
+421 
+422 - [ ] In `src/games/number-match/NumberMatch/NumberMatch.tsx`, line 205, change:
+423 
+424 ```tsx
+425 <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+426 ```
+427 
+428 to:
+429 
+430 ```tsx
+431 <div className="flex w-full max-w-4xl flex-col items-center justify-center gap-8 px-4 py-6">
+432 ```
+433 
+434 ### Step 2: Import the utility
+435 
+436 - [ ] Add to the imports near the top (alphabetical within the `@/components/answer-game/*` block):
+437 
+438 ```tsx
+439 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
+440 ```
+441 
+442 ### Step 3: Auto-size the numeric slot children font
+443 
+444 - [ ] Replace the numeric-slot fallback inside the Slot children render-prop (currently at lines 279-283):
+445 
+446 ```tsx
+447 return <span className="text-3xl font-bold tabular-nums">{label}</span>;
+448 ```
+449 
+450 with:
+451 
+452 ```tsx
+453 return (
+454   <span
+455     className={`${getNumericTileFontClass(label.length, 80)} font-bold tabular-nums`}
+456   >
+457     {label}
+458   </span>
+459 );
+460 ```
+461 
+462 ### Step 4: Auto-size the numeric preview span font
+463 
+464 - [ ] In the same file, replace the numeric-slot fallback inside `renderPreview` (currently at lines 252-256):
+465 
+466 ```tsx
+467 return (
+468   <span className="text-3xl font-bold tabular-nums opacity-50">
+469     {previewLabel}
+470   </span>
+471 );
+472 ```
+473 
+474 with:
+475 
+476 ```tsx
+477 return (
+478   <span
+479     className={`${getNumericTileFontClass(previewLabel.length, 80)} font-bold tabular-nums opacity-50`}
+480   >
+481     {previewLabel}
+482   </span>
+483 );
+484 ```
+485 
+486 ### Step 5: Typecheck and lint
+487 
+488 - [ ] Run:
+489 
+490 ```bash
+491 yarn typecheck && yarn lint
+492 ```
+493 
+494 Expected: no errors.
+495 
+496 ### Step 6: Commit
+497 
+498 - [ ] Run:
+499 
+500 ```bash
+501 git add src/games/number-match/NumberMatch/NumberMatch.tsx
+502 git commit -m "feat(number-match): auto-size numeric slot font and widen container
+503 
+504 - Outer wrapper max-w-2xl -> max-w-4xl (parity with SortNumbers).
+505 - Numeric slot label and preview use getNumericTileFontClass with
+506   base 80 so 4/5+-digit numerals stop clipping in the 80 px tile.
+507 - Word-mode and dots-domino branches are untouched."
+508 ```
 509
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:14:52Z)**_
@@ -5180,137 +5234,138 @@ _**Agent (claude-opus-4-6 2026-04-10 23:14:52Z)**_
  `./worktrees/feat-game-tile-auto-font-sizing/docs/superpowers/plans/2026-04-11-game-tile-auto-font-sizing.md`
 
 ```text
-510	---
-511	
-512	## Task 6: NumeralTileBank — auto-size numeric tile and preview font
-513	
-514	**Files:**
-515	
-516	- Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
-517	
-518	### Step 1: Import the utility
-519	
-520	- [ ] At the top of `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`, add:
-521	
-522	```tsx
-523	import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
-524	```
-525	
-526	### Step 2: Auto-size the numeric tile font
-527	
-528	- [ ] Replace the numeric-tile fallback branch of `NumeralTile` (currently at lines 133-137):
-529	
-530	```tsx
-531	) : (
-532	  <span className="text-3xl font-bold tabular-nums leading-none">
-533	    {tile.label}
-534	  </span>
-535	)}
-536	```
-537	
-538	with:
-539	
-540	```tsx
-541	) : (
-542	  <span
-543	    className={`${getNumericTileFontClass(tile.label.length, 80)} font-bold tabular-nums leading-none`}
-544	  >
-545	    {tile.label}
-546	  </span>
-547	)}
-548	```
-549	
-550	### Step 3: Auto-size the numeric hover-preview span font
-551	
-552	- [ ] In the same file, replace the numeric hover-target preview branch (currently at lines 258-262):
-553	
-554	```tsx
-555	) : (
-556	  <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
-557	    {tile.label}
-558	  </span>
-559	))}
-560	```
-561	
-562	with:
-563	
-564	```tsx
-565	) : (
-566	  <span
-567	    className={`pointer-events-none absolute inset-0 flex items-center justify-center ${getNumericTileFontClass(tile.label.length, 80)} font-bold tabular-nums opacity-50`}
-568	  >
-569	    {tile.label}
-570	  </span>
-571	))}
-572	```
-573	
-574	Note: `tabular-nums` is added so hover-preview digits match the final render.
-575	
-576	### Step 4: Run the existing NumeralTileBank tests
-577	
-578	- [ ] Run:
-579	
-580	```bash
-581	yarn test src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
-582	```
-583	
-584	Expected: PASS.
-585	
-586	### Step 5: Typecheck and lint
-587	
-588	- [ ] Run:
-589	
-590	```bash
-591	yarn typecheck && yarn lint
-592	```
-593	
-594	Expected: no errors.
-595	
-596	### Step 6: Commit
-597	
-598	- [ ] Run:
-599	
-600	```bash
-601	git add src/games/number-match/NumeralTileBank/NumeralTileBank.tsx
-602	git commit -m "feat(number-match): auto-size numeric tile-bank font
-603	
-604	NumeralTile numeric branch and hover-preview both use
-605	getNumericTileFontClass(length, 80). Dots/domino and word branches
-606	are untouched."
-607	```
-608	
-609	---
-610	
-611	## Task 7: NumberMatch long-label Storybook story
-612	
-613	**Files:**
-614	
-615	- Modify: `src/games/number-match/NumberMatch/NumberMatch.stories.tsx`
-616	
-617	### Step 1: Add a long-numeral story
-618	
-619	- [ ] At the bottom of `src/games/number-match/NumberMatch/NumberMatch.stories.tsx`, add a new exported story:
-620	
-621	```tsx
-622	export const NumeralToGroupLongLabels: Story = {
-623	  args: {
-624	    config: {
-625	      ...baseConfig,
-626	      mode: 'numeral-to-group',
-627	      tileStyle: 'dots',
-628	      tileBankMode: 'distractors',
-629	      distractorCount: 3,
-630	      range: { min: 10000, max: 99999 },
-631	      rounds: [{ value: 10002 }, { value: 19467 }, { value: 99999 }],
-632	    },
-633	  },
-634	};
-635	```
-636	
-637	This story renders 5-digit numerals. Numeric tiles and slots should now show them at `text-xl` (20 px) instead of the clipped `text-3xl` (30 px).
-638	
-639	### Step 2: Start Storybook and visually verify
+510 ---
+511 
+512 ## Task 6: NumeralTileBank — auto-size numeric tile and preview font
+513 
+514 **Files:**
+515 
+516 - Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
+517 
+518 ### Step 1: Import the utility
+519 
+520 - [ ] At the top of `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`, add:
+521 
+522 ```tsx
+523 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
+524 ```
+525 
+526 ### Step 2: Auto-size the numeric tile font
+527 
+528 - [ ] Replace the numeric-tile fallback branch of `NumeralTile` (currently at lines 133-137):
+529 
+530 ```tsx
+531 ) : (
+532   <span className="text-3xl font-bold tabular-nums leading-none">
+533     {tile.label}
+534   </span>
+535 )}
+536 ```
+537 
+538 with:
+539 
+540 ```tsx
+541 ) : (
+542   <span
+543     className={`${getNumericTileFontClass(tile.label.length, 80)} font-bold tabular-nums leading-none`}
+544   >
+545     {tile.label}
+546   </span>
+547 )}
+548 ```
+549 
+550 ### Step 3: Auto-size the numeric hover-preview span font
+551 
+552 - [ ] In the same file, replace the numeric hover-target preview branch (currently at lines 258-262):
+553 
+554 ```tsx
+555 ) : (
+556   <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-bold opacity-50">
+557     {tile.label}
+558   </span>
+559 ))}
+560 ```
+561 
+562 with:
+563 
+564 ```tsx
+565 ) : (
+566   <span
+567     className={`pointer-events-none absolute inset-0 flex items-center justify-center ${getNumericTileFontClass(tile.label.length, 80)} font-bold tabular-nums opacity-50`}
+568   >
+569     {tile.label}
+570   </span>
+571 ))}
+572 ```
+573 
+574 Note: `tabular-nums` is added so hover-preview digits match the final render.
+575 
+576 ### Step 4: Run the existing NumeralTileBank tests
+577 
+578 - [ ] Run:
+579 
+580 ```bash
+581 yarn test src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
+582 ```
+583 
+584 Expected: PASS.
+585 
+586 ### Step 5: Typecheck and lint
+587 
+588 - [ ] Run:
+589 
+590 ```bash
+591 yarn typecheck && yarn lint
+592 ```
+593 
+594 Expected: no errors.
+595 
+596 ### Step 6: Commit
+597 
+598 - [ ] Run:
+599 
+600 ```bash
+601 git add src/games/number-match/NumeralTileBank/NumeralTileBank.tsx
+602 git commit -m "feat(number-match): auto-size numeric tile-bank font
+603 
+604 NumeralTile numeric branch and hover-preview both use
+605 getNumericTileFontClass(length, 80). Dots/domino and word branches
+606 are untouched."
+607 ```
+608 
+609 ---
+610 
+611 ## Task 7: NumberMatch long-label Storybook story
+612 
+613 **Files:**
+614 
+615 - Modify: `src/games/number-match/NumberMatch/NumberMatch.stories.tsx`
+616 
+617 ### Step 1: Add a long-numeral story
+618 
+619 - [ ] At the bottom of `src/games/number-match/NumberMatch/NumberMatch.stories.tsx`, add a new exported story:
+620 
+621 ```tsx
+622 export const NumeralToGroupLongLabels: Story = {
+623   args: {
+624     config: {
+625       ...baseConfig,
+626       mode: 'numeral-to-group',
+627       tileStyle: 'dots',
+628       tileBankMode: 'distractors',
+629       distractorCount: 3,
+630       range: { min: 10000, max: 99999 },
+631       rounds: [{ value: 10002 }, { value: 19467 }, { value: 99999 }],
+632     },
+633   },
+634 };
+635 ```
+636 
+637 This story renders 5-digit numerals. Numeric tiles and slots should now show them at `text-xl` (20 px) instead of the clipped `text-3xl` (30 px).
+638 
+639 ### Step 2: Start Storybook and visually verify
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:15:00Z)**_
@@ -5341,6 +5396,7 @@ Done in 0.90s.
 Checking formatting...
 All matched files use Prettier code style!
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:15:11Z)**_
@@ -5390,6 +5446,7 @@ Done in 7.08s.
  1 file changed, 848 insertions(+)
  create mode 100644 docs/superpowers/plans/2026-04-11-game-tile-auto-font-sizing.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 23:15:26Z)**_

@@ -9,6 +9,7 @@ _**User (2026-04-03 12:45:23Z)**_
 This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
+
 1. Primary Request and Intent:
    The user has a WIP PR on branch `feat/word-spell-number-match` (worktree at `./worktrees/feat-word-spell-number-match`) and requested a comprehensive brainstorming session to identify missing features and bugs, then produce implementation plans for all of them. They listed 20 specific issues covering audio/TTS, UI progress, settings, i18n/routing bugs, WordSpell bugs, confetti, a new game (SortNumbers), and bookmarks. The user explicitly wanted all plans created first so they could run them in parallel later. They confirmed they did not need full spec documents — plans only. Additional design decisions made during the session: (1) NumeralTileBank should use dice pips for 1-6 and domino layout for 7-12, numeral above 12; (2) `LetterTile`/`NumeralTile`/`SortNumbersTileBank` drag/TTS/click wiring should be extracted into a `useDraggableTile` hook.
 
@@ -117,6 +118,7 @@ Summary:
    **Plans appended (Tasks added to existing plan):**
 
    - `docs/superpowers/plans/2026-04-03-word-spell-number-match.md` — **Task 11** (domino layout):
+
      ```tsx
      const DICE_PIPS: Record<number, number[]> = {
        1: [4], 2: [2, 6], 3: [2, 4, 6],
@@ -129,9 +131,11 @@ Summary:
      export const DiceFace = ({ value }: { value: number }) => { /* 3×3 grid, data-cell/data-pip */ };
      export const DominoTile = ({ value }: { value: number }) => { /* two DiceFace + data-divider */ };
      ```
+
      - Single die: 80×80 tile; Domino: `h-[72px] w-32` tile; 13+: numeral fallback
 
    - `docs/superpowers/plans/2026-04-03-word-spell-number-match.md` — **Task 12** (useDraggableTile):
+
      ```ts
      export function useDraggableTile(tile: TileItem): DraggableTile {
        const ref = useRef<HTMLButtonElement>(null);
@@ -155,6 +159,7 @@ Summary:
        return { ref, handleClick };
      }
      ```
+
      - Located: `src/components/answer-game/useDraggableTile.ts`
      - Refactors: `LetterTile`, `NumeralTile`, `SortNumbersTileBank` (3 components)
      - Each tile becomes: `const { ref, handleClick } = useDraggableTile(tile)` + own `<button>` markup
@@ -229,7 +234,6 @@ The user said they want to run things in parallel later. Since all plans are now
 
 Wait, re-reading the summary: "The last completed action was appending Task 12 (`useDraggableTile` hook extraction) to `docs/superpowers/plans/2026-04-03-word-spell-number-match.md`."
 
-
 All 7 group plans plus the two additional tasks are finalized and ready to go. The user's already indicated they'll handle the parallel execution themselves, so I should just confirm everything's in place and see what they want to do next.
 </details></think>
 
@@ -274,8 +278,8 @@ The user is asking about adding bookmark-related functionality to the Game Setti
 2. "Settings already marked on the card on the homepage" - When you look at a game card on the homepage, you can see the settings that were saved/bookmarked (e.g., difficulty, level, number range, etc.)
 
 So essentially they want:
-- A way to save a specific game configuration (not just bookmark the game, but bookmark a specific configuration of a game)
 
+- A way to save a specific game configuration (not just bookmark the game, but bookmark a specific configuration of a game)
 
 - Display those saved configurations on the game cards on the homepage
 
@@ -286,11 +290,11 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:50:11Z)**_
 
 Yes, I think I understand — let me confirm:
 
-**"Clone current game"** — While playing (or from a dev config panel), you can save the current game settings as a named preset. Instead of just bookmarking a game, you're bookmarking a *specific configuration* of a game (e.g., "Number Match 1–6, ascending, 5 rounds").
+**"Clone current game"** — While playing (or from a dev config panel), you can save the current game settings as a named preset. Instead of just bookmarking a game, you're bookmarking a _specific configuration_ of a game (e.g., "Number Match 1–6, ascending, 5 rounds").
 
 **"Settings marked on the card"** — On the home screen, when a game has saved configurations, the card shows them as chips/badges (e.g., "Easy · 1–6" or "Hard · 7–12") and you can tap one to launch directly with those settings — instead of always starting with defaults.
 
-So the bookmark system evolves from `Set<gameId>` to a list of saved *game configurations*, each with a name, game ID, and the specific settings snapshot.
+So the bookmark system evolves from `Set<gameId>` to a list of saved _game configurations_, each with a name, game ID, and the specific settings snapshot.
 
 ---
 
@@ -331,7 +335,6 @@ The user is clarifying the design for the "saved game configurations" feature. L
 
 4. **Where to clone**: Small icon during gameplay (hidden), but visible on the home screen cards.
 
-
 5. **Data structure**: I'd replace `useBookmarks` with `useSavedConfigs`, storing each config with an id, gameId, name, the specific game settings, and a creation timestamp. On the home screen, each game card displays badges for its saved configs, and clicking one launches that game with those settings. During gameplay, there's a save icon to create new configs, with duplicate name validation built in.
 
 6. **Integration points**: The existing `sortByBookmarks` logic in Group H can adapt to work with saved configs by using the gameId field instead. The hook would return an array of configs plus save/remove/rename methods rather than just a toggle function.
@@ -346,6 +349,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:53:49Z)**_
 Got it. Let me summarize the full picture before writing the plan:
 
 **Data model change** — Replace `BookmarksDoc` (simple `Set<gameId>`) with `SavedGameConfigDoc`:
+
 ```ts
 type SavedGameConfigDoc = {
   id: string;          // uuid
@@ -361,6 +365,7 @@ type SavedGameConfigDoc = {
 **In-game** — Small icon (e.g., a bookmark/save icon in the corner) opens a modal to name and save the current config. Hidden otherwise.
 
 **Downstream impact:**
+
 - Group H (`sortByBookmarks`) — update to sort by `gameId` has saved configs instead of `bookmarkedIds`
 - Group I (SortNumbers) — needs to expose its config to the save system too
 - Group D (dev config panel) — the "save" icon reuses the same save flow
@@ -384,7 +389,7 @@ Naming LGTM. can be in J
 _**Agent (claude-sonnet-4-6 2026-04-03 12:55:38Z)**_
 
 <think><details><summary>Thought Process</summary>
-The user is asking if we can simplify or merge Group H (bookmarks sort) into Group J (saved game configs). 
+The user is asking if we can simplify or merge Group H (bookmarks sort) into Group J (saved game configs).
 
 Since we're replacing bookmarks entirely with saved configs, Group H becomes redundant - the sorting logic will need to change anyway to use saved configs. So we can either:
 
@@ -392,7 +397,6 @@ Since we're replacing bookmarks entirely with saved configs, Group H becomes red
 2. Simplify Group H to just "sort by whether gameId has any saved configs" and keep it separate
 
 Since Group H is not implemented yet, it makes sense to just merge the sorting logic into Group J. The `sortByBookmarks` function would either be renamed/updated or the sorting would just be part of the home screen logic in Group J.
-
 
 Merging Group H into Group J makes sense since the sorting behavior—prioritizing games with saved configs—is really just part of the saved configs feature itself, not something that needs to exist independently.
 </details></think>
@@ -402,6 +406,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:55:40Z)**_
 Yes — since we're replacing bookmarks entirely, Group H becomes a subset of Group J. The "sort saved-config games to top" logic is just part of the saved configs feature.
 
 Group J will include:
+
 - Replace `BookmarksDoc` → `SavedGameConfigDoc` RxDB schema
 - `useSavedConfigs` hook (replaces `useBookmarks`)
 - Sort games with saved configs to top of catalog (absorbs Group H)
@@ -434,6 +439,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:13Z)**_
 ```text
 Launching skill: superpowers:writing-plans
 ```
+
 </details></tool-use>
 
 ---
@@ -455,6 +461,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -475,6 +482,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
+
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -545,6 +553,7 @@ git commit -m "feat: add specific feature"
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
@@ -553,6 +562,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 
 ## Remember
+
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
@@ -583,13 +593,14 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
 - Batch execution with checkpoints for review
-
 
 ---
 
@@ -614,49 +625,50 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:18Z)**_
  `./worktrees/feat-word-spell-number-match/src/db/schemas/settings.ts`
 
 ```text
-1	import type { RxJsonSchema } from 'rxdb';
-2	
-3	export type SettingsDoc = {
-4	  id: string;
-5	  profileId: string;
-6	  volume?: number;
-7	  speechRate?: number;
-8	  activeLanguage?: string;
-9	  ttsEnabled?: boolean;
-10	  showSubtitles?: boolean;
-11	  themeId?: string;
-12	  preferredVoiceURI?: string;
-13	  preferredVoiceDeviceId?: string;
-14	  updatedAt: string;
-15	};
-16	
-17	export const settingsSchema: RxJsonSchema<SettingsDoc> = {
-18	  version: 0,
-19	  primaryKey: 'id',
-20	  type: 'object',
-21	  properties: {
-22	    id: { type: 'string', maxLength: 36 },
-23	    profileId: { type: 'string', maxLength: 36 },
-24	    volume: { type: 'number', minimum: 0, maximum: 1, default: 0.8 },
-25	    speechRate: {
-26	      type: 'number',
-27	      minimum: 0.5,
-28	      maximum: 2,
-29	      default: 1,
-30	    },
-31	    activeLanguage: { type: 'string' },
-32	    ttsEnabled: { type: 'boolean', default: true },
-33	    showSubtitles: { type: 'boolean', default: true },
-34	    themeId: { type: 'string' },
-35	    preferredVoiceURI: { type: 'string' },
-36	    preferredVoiceDeviceId: { type: 'string' },
-37	    updatedAt: { type: 'string', format: 'date-time' },
-38	  },
-39	  required: ['id', 'profileId', 'updatedAt'],
-40	  additionalProperties: false,
-41	};
+1 import type { RxJsonSchema } from 'rxdb';
+2 
+3 export type SettingsDoc = {
+4   id: string;
+5   profileId: string;
+6   volume?: number;
+7   speechRate?: number;
+8   activeLanguage?: string;
+9   ttsEnabled?: boolean;
+10   showSubtitles?: boolean;
+11   themeId?: string;
+12   preferredVoiceURI?: string;
+13   preferredVoiceDeviceId?: string;
+14   updatedAt: string;
+15 };
+16 
+17 export const settingsSchema: RxJsonSchema<SettingsDoc> = {
+18   version: 0,
+19   primaryKey: 'id',
+20   type: 'object',
+21   properties: {
+22     id: { type: 'string', maxLength: 36 },
+23     profileId: { type: 'string', maxLength: 36 },
+24     volume: { type: 'number', minimum: 0, maximum: 1, default: 0.8 },
+25     speechRate: {
+26       type: 'number',
+27       minimum: 0.5,
+28       maximum: 2,
+29       default: 1,
+30     },
+31     activeLanguage: { type: 'string' },
+32     ttsEnabled: { type: 'boolean', default: true },
+33     showSubtitles: { type: 'boolean', default: true },
+34     themeId: { type: 'string' },
+35     preferredVoiceURI: { type: 'string' },
+36     preferredVoiceDeviceId: { type: 'string' },
+37     updatedAt: { type: 'string', format: 'date-time' },
+38   },
+39   required: ['id', 'profileId', 'updatedAt'],
+40   additionalProperties: false,
+41 };
 42
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:19Z)**_
@@ -668,6 +680,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:19Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:26Z)**_
@@ -702,6 +715,7 @@ src/db/create-database.ts
 src/db/schemas/session_history_index.test.ts
 src/db/schemas/session_history_index.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:30Z)**_
@@ -711,30 +725,31 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:30Z)**_
  `./src/db/schemas/bookmarks.ts`
 
 ```text
-1	import type { RxJsonSchema } from 'rxdb';
-2	
-3	export type BookmarkDoc = {
-4	  id: string;
-5	  profileId: string;
-6	  gameId: string;
-7	  createdAt: string;
-8	};
-9	
-10	export const bookmarksSchema: RxJsonSchema<BookmarkDoc> = {
-11	  version: 0,
-12	  primaryKey: 'id',
-13	  type: 'object',
-14	  properties: {
-15	    id: { type: 'string', maxLength: 36 },
-16	    profileId: { type: 'string', maxLength: 36 },
-17	    gameId: { type: 'string', maxLength: 64 },
-18	    createdAt: { type: 'string', format: 'date-time' },
-19	  },
-20	  required: ['id', 'profileId', 'gameId', 'createdAt'],
-21	  additionalProperties: false,
-22	};
+1 import type { RxJsonSchema } from 'rxdb';
+2 
+3 export type BookmarkDoc = {
+4   id: string;
+5   profileId: string;
+6   gameId: string;
+7   createdAt: string;
+8 };
+9 
+10 export const bookmarksSchema: RxJsonSchema<BookmarkDoc> = {
+11   version: 0,
+12   primaryKey: 'id',
+13   type: 'object',
+14   properties: {
+15     id: { type: 'string', maxLength: 36 },
+16     profileId: { type: 'string', maxLength: 36 },
+17     gameId: { type: 'string', maxLength: 64 },
+18     createdAt: { type: 'string', format: 'date-time' },
+19   },
+20   required: ['id', 'profileId', 'gameId', 'createdAt'],
+21   additionalProperties: false,
+22 };
 23
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:30Z)**_
@@ -744,64 +759,65 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:30Z)**_
  `./src/db/hooks/useBookmarks.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import { useMemo } from 'react';
-3	import { EMPTY } from 'rxjs';
-4	import { useRxDB } from './useRxDB';
-5	import { useRxQuery } from './useRxQuery';
-6	import type { BookmarkDoc } from '@/db/schemas/bookmarks';
-7	
-8	const ANONYMOUS_PROFILE_ID = 'anonymous';
-9	
-10	type UseBookmarksResult = {
-11	  bookmarkedIds: Set<string>;
-12	  toggle: (gameId: string) => Promise<void>;
-13	};
-14	
-15	export function useBookmarks(): UseBookmarksResult {
-16	  const { db } = useRxDB();
-17	
-18	  const query$ = useMemo(
-19	    () =>
-20	      db
-21	        ? db.bookmarks.find({
-22	            selector: { profileId: ANONYMOUS_PROFILE_ID },
-23	          }).$
-24	        : EMPTY,
-25	    [db],
-26	  );
-27	
-28	  const docs = useRxQuery<BookmarkDoc[]>(query$, []);
-29	
-30	  const bookmarkedIds = useMemo(
-31	    () => new Set(docs.map((d) => d.gameId)),
-32	    [docs],
-33	  );
-34	
-35	  const toggle = async (gameId: string): Promise<void> => {
-36	    if (!db) return;
-37	    const existing = await db.bookmarks
-38	      .findOne({
-39	        selector: { profileId: ANONYMOUS_PROFILE_ID, gameId },
-40	      })
-41	      .exec();
-42	    if (existing) {
-43	      await existing.remove();
-44	    } else {
-45	      const doc: BookmarkDoc = {
-46	        id: nanoid(21),
-47	        profileId: ANONYMOUS_PROFILE_ID,
-48	        gameId,
-49	        createdAt: new Date().toISOString(),
-50	      };
-51	      await db.bookmarks.insert(doc);
-52	    }
-53	  };
-54	
-55	  return { bookmarkedIds, toggle };
-56	}
+1 import { nanoid } from 'nanoid';
+2 import { useMemo } from 'react';
+3 import { EMPTY } from 'rxjs';
+4 import { useRxDB } from './useRxDB';
+5 import { useRxQuery } from './useRxQuery';
+6 import type { BookmarkDoc } from '@/db/schemas/bookmarks';
+7 
+8 const ANONYMOUS_PROFILE_ID = 'anonymous';
+9 
+10 type UseBookmarksResult = {
+11   bookmarkedIds: Set<string>;
+12   toggle: (gameId: string) => Promise<void>;
+13 };
+14 
+15 export function useBookmarks(): UseBookmarksResult {
+16   const { db } = useRxDB();
+17 
+18   const query$ = useMemo(
+19     () =>
+20       db
+21         ? db.bookmarks.find({
+22             selector: { profileId: ANONYMOUS_PROFILE_ID },
+23           }).$
+24         : EMPTY,
+25     [db],
+26   );
+27 
+28   const docs = useRxQuery<BookmarkDoc[]>(query$, []);
+29 
+30   const bookmarkedIds = useMemo(
+31     () => new Set(docs.map((d) => d.gameId)),
+32     [docs],
+33   );
+34 
+35   const toggle = async (gameId: string): Promise<void> => {
+36     if (!db) return;
+37     const existing = await db.bookmarks
+38       .findOne({
+39         selector: { profileId: ANONYMOUS_PROFILE_ID, gameId },
+40       })
+41       .exec();
+42     if (existing) {
+43       await existing.remove();
+44     } else {
+45       const doc: BookmarkDoc = {
+46         id: nanoid(21),
+47         profileId: ANONYMOUS_PROFILE_ID,
+48         gameId,
+49         createdAt: new Date().toISOString(),
+50       };
+51       await db.bookmarks.insert(doc);
+52     }
+53   };
+54 
+55   return { bookmarkedIds, toggle };
+56 }
 57
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:30Z)**_
@@ -811,60 +827,61 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:30Z)**_
  `./src/db/schemas/game_config_overrides.ts`
 
 ```text
-1	import type { RxJsonSchema } from 'rxdb';
-2	
-3	export type GameConfigOverridesDoc = {
-4	  id: string;
-5	  profileId: string;
-6	  scope: 'game' | 'grade-band' | 'global';
-7	  scopeValue: string | null;
-8	  retries?: number | null;
-9	  timerDuration?: number | null;
-10	  alwaysWin?: boolean | null;
-11	  difficulty?: 'easy' | 'medium' | 'hard' | null;
-12	  updatedAt: string;
-13	};
-14	
-15	export const gameConfigOverridesSchema: RxJsonSchema<GameConfigOverridesDoc> =
-16	  {
-17	    version: 0,
-18	    primaryKey: 'id',
-19	    type: 'object',
-20	    properties: {
-21	      id: { type: 'string', maxLength: 36 },
-22	      profileId: { type: 'string', maxLength: 36 },
-23	      scope: { type: 'string', enum: ['game', 'grade-band', 'global'] },
-24	      scopeValue: {
-25	        oneOf: [{ type: 'string' }, { type: 'null' }],
-26	      },
-27	      retries: {
-28	        oneOf: [
-29	          { type: 'integer', minimum: 0, maximum: 99, multipleOf: 1 },
-30	          { type: 'null' },
-31	        ],
-32	      },
-33	      timerDuration: {
-34	        oneOf: [
-35	          { type: 'integer', minimum: 0, multipleOf: 1 },
-36	          { type: 'null' },
-37	        ],
-38	      },
-39	      alwaysWin: {
-40	        oneOf: [{ type: 'boolean' }, { type: 'null' }],
-41	      },
-42	      difficulty: {
-43	        oneOf: [
-44	          { type: 'string', enum: ['easy', 'medium', 'hard'] },
-45	          { type: 'null' },
-46	        ],
-47	      },
-48	      updatedAt: { type: 'string', format: 'date-time' },
-49	    },
-50	    required: ['id', 'profileId', 'scope', 'scopeValue', 'updatedAt'],
-51	    additionalProperties: false,
-52	  };
+1 import type { RxJsonSchema } from 'rxdb';
+2 
+3 export type GameConfigOverridesDoc = {
+4   id: string;
+5   profileId: string;
+6   scope: 'game' | 'grade-band' | 'global';
+7   scopeValue: string | null;
+8   retries?: number | null;
+9   timerDuration?: number | null;
+10   alwaysWin?: boolean | null;
+11   difficulty?: 'easy' | 'medium' | 'hard' | null;
+12   updatedAt: string;
+13 };
+14 
+15 export const gameConfigOverridesSchema: RxJsonSchema<GameConfigOverridesDoc> =
+16   {
+17     version: 0,
+18     primaryKey: 'id',
+19     type: 'object',
+20     properties: {
+21       id: { type: 'string', maxLength: 36 },
+22       profileId: { type: 'string', maxLength: 36 },
+23       scope: { type: 'string', enum: ['game', 'grade-band', 'global'] },
+24       scopeValue: {
+25         oneOf: [{ type: 'string' }, { type: 'null' }],
+26       },
+27       retries: {
+28         oneOf: [
+29           { type: 'integer', minimum: 0, maximum: 99, multipleOf: 1 },
+30           { type: 'null' },
+31         ],
+32       },
+33       timerDuration: {
+34         oneOf: [
+35           { type: 'integer', minimum: 0, multipleOf: 1 },
+36           { type: 'null' },
+37         ],
+38       },
+39       alwaysWin: {
+40         oneOf: [{ type: 'boolean' }, { type: 'null' }],
+41       },
+42       difficulty: {
+43         oneOf: [
+44           { type: 'string', enum: ['easy', 'medium', 'hard'] },
+45           { type: 'null' },
+46         ],
+47       },
+48       updatedAt: { type: 'string', format: 'date-time' },
+49     },
+50     required: ['id', 'profileId', 'scope', 'scopeValue', 'updatedAt'],
+51     additionalProperties: false,
+52   };
 53
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:34Z)**_
@@ -874,52 +891,53 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:34Z)**_
  `./src/db/schemas/index.ts`
 
 ```text
-1	import { appMetaSchema } from './app-meta';
-2	import { bookmarksSchema } from './bookmarks';
-3	import { gameConfigOverridesSchema } from './game_config_overrides';
-4	import { profilesSchema } from './profiles';
-5	import { progressSchema } from './progress';
-6	import { sessionHistorySchema } from './session_history';
-7	import { sessionHistoryIndexSchema } from './session_history_index';
-8	import { settingsSchema } from './settings';
-9	import { syncMetaSchema } from './sync_meta';
-10	import { themesSchema } from './themes';
-11	
-12	export { appMetaSchema } from './app-meta';
-13	export type { AppMetaDoc } from './app-meta';
-14	export { bookmarksSchema } from './bookmarks';
-15	export type { BookmarkDoc } from './bookmarks';
-16	export { gameConfigOverridesSchema } from './game_config_overrides';
-17	export type { GameConfigOverridesDoc } from './game_config_overrides';
-18	export { profilesSchema } from './profiles';
-19	export type { ProfileDoc } from './profiles';
-20	export { progressSchema } from './progress';
-21	export type { ProgressDoc } from './progress';
-22	export { sessionHistoryIndexSchema } from './session_history_index';
-23	export type { SessionHistoryIndexDoc } from './session_history_index';
-24	export { sessionHistorySchema } from './session_history';
-25	export type { SessionHistoryDoc } from './session_history';
-26	export { settingsSchema } from './settings';
-27	export type { SettingsDoc } from './settings';
-28	export { syncMetaSchema } from './sync_meta';
-29	export type { SyncMetaDoc } from './sync_meta';
-30	export { themesSchema } from './themes';
-31	export type { ThemeDoc } from './themes';
-32	
-33	export const MAX_SCHEMA_VERSION = Math.max(
-34	  appMetaSchema.version,
-35	  bookmarksSchema.version,
-36	  gameConfigOverridesSchema.version,
-37	  profilesSchema.version,
-38	  progressSchema.version,
-39	  sessionHistoryIndexSchema.version,
-40	  sessionHistorySchema.version,
-41	  settingsSchema.version,
-42	  syncMetaSchema.version,
-43	  themesSchema.version,
-44	);
+1 import { appMetaSchema } from './app-meta';
+2 import { bookmarksSchema } from './bookmarks';
+3 import { gameConfigOverridesSchema } from './game_config_overrides';
+4 import { profilesSchema } from './profiles';
+5 import { progressSchema } from './progress';
+6 import { sessionHistorySchema } from './session_history';
+7 import { sessionHistoryIndexSchema } from './session_history_index';
+8 import { settingsSchema } from './settings';
+9 import { syncMetaSchema } from './sync_meta';
+10 import { themesSchema } from './themes';
+11 
+12 export { appMetaSchema } from './app-meta';
+13 export type { AppMetaDoc } from './app-meta';
+14 export { bookmarksSchema } from './bookmarks';
+15 export type { BookmarkDoc } from './bookmarks';
+16 export { gameConfigOverridesSchema } from './game_config_overrides';
+17 export type { GameConfigOverridesDoc } from './game_config_overrides';
+18 export { profilesSchema } from './profiles';
+19 export type { ProfileDoc } from './profiles';
+20 export { progressSchema } from './progress';
+21 export type { ProgressDoc } from './progress';
+22 export { sessionHistoryIndexSchema } from './session_history_index';
+23 export type { SessionHistoryIndexDoc } from './session_history_index';
+24 export { sessionHistorySchema } from './session_history';
+25 export type { SessionHistoryDoc } from './session_history';
+26 export { settingsSchema } from './settings';
+27 export type { SettingsDoc } from './settings';
+28 export { syncMetaSchema } from './sync_meta';
+29 export type { SyncMetaDoc } from './sync_meta';
+30 export { themesSchema } from './themes';
+31 export type { ThemeDoc } from './themes';
+32 
+33 export const MAX_SCHEMA_VERSION = Math.max(
+34   appMetaSchema.version,
+35   bookmarksSchema.version,
+36   gameConfigOverridesSchema.version,
+37   profilesSchema.version,
+38   progressSchema.version,
+39   sessionHistoryIndexSchema.version,
+40   sessionHistorySchema.version,
+41   settingsSchema.version,
+42   syncMetaSchema.version,
+43   themesSchema.version,
+44 );
 45
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:34Z)**_
@@ -929,122 +947,123 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:34Z)**_
  `./src/db/create-database.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import { addRxPlugin, createRxDatabase } from 'rxdb';
-3	import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
-4	import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-5	import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
-6	import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
-7	import { checkVersionAndMigrate } from './migrations';
-8	import {
-9	  appMetaSchema,
-10	  bookmarksSchema,
-11	  gameConfigOverridesSchema,
-12	  profilesSchema,
-13	  progressSchema,
-14	  sessionHistoryIndexSchema,
-15	  sessionHistorySchema,
-16	  settingsSchema,
-17	  syncMetaSchema,
-18	  themesSchema,
-19	} from './schemas';
-20	import type { BaseSkillCollections, BaseSkillDatabase } from './types';
-21	import type { RxDatabase } from 'rxdb';
-22	
-23	addRxPlugin(RxDBMigrationSchemaPlugin);
-24	
-25	const DB_NAME = 'baseskill-data-test';
-26	const PRODUCTION_DB_NAME = 'baseskill-data';
-27	
-28	const COLLECTIONS = {
-29	  app_meta: { schema: appMetaSchema },
-30	  profiles: { schema: profilesSchema },
-31	  progress: { schema: progressSchema },
-32	  settings: { schema: settingsSchema },
-33	  game_config_overrides: { schema: gameConfigOverridesSchema },
-34	  bookmarks: { schema: bookmarksSchema },
-35	  themes: { schema: themesSchema },
-36	  session_history: { schema: sessionHistorySchema },
-37	  session_history_index: {
-38	    schema: sessionHistoryIndexSchema,
-39	    migrationStrategies: {
-40	      1: (oldDoc: Record<string, unknown>) => ({
-41	        ...oldDoc,
-42	        status: 'completed',
-43	        seed: '',
-44	        initialContent: { rounds: [] },
-45	        initialState: {},
-46	      }),
-47	    },
-48	  },
-49	  sync_meta: { schema: syncMetaSchema },
-50	} as const;
-51	
-52	async function addBaseSkillCollections(
-53	  db: RxDatabase<BaseSkillCollections>,
-54	): Promise<BaseSkillDatabase> {
-55	  await db.addCollections(COLLECTIONS);
-56	  return db as BaseSkillDatabase;
-57	}
-58	
-59	/** Memory storage for unit tests; does not run migrations (call `checkVersionAndMigrate` in tests that need `app_meta`). */
-60	export async function createTestDatabase(): Promise<BaseSkillDatabase> {
-61	  const db = await createRxDatabase<BaseSkillDatabase>({
-62	    name: `${DB_NAME}-${nanoid()}`,
-63	    storage: wrappedValidateAjvStorage({
-64	      storage: getRxStorageMemory(),
-65	    }),
-66	    multiInstance: false,
-67	  });
-68	  return addBaseSkillCollections(db);
-69	}
-70	
-71	const STORYBOOK_DB_PREFIX = 'baseskill-storybook';
-72	
-73	/**
-74	 * Ephemeral in-memory DB for Storybook. Browsers do not allow replacing native
-75	 * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
-76	 */
-77	export async function createStorybookDatabase(): Promise<BaseSkillDatabase> {
-78	  const db = await createRxDatabase<BaseSkillDatabase>({
-79	    name: `${STORYBOOK_DB_PREFIX}-${nanoid()}`,
-80	    storage: getRxStorageMemory(),
-81	    multiInstance: false,
-82	  });
-83	  const withCols = await addBaseSkillCollections(db);
-84	  await checkVersionAndMigrate(withCols);
-85	  return withCols;
-86	}
-87	
-88	let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
-89	
-90	/** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
-91	export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
-92	  if (typeof indexedDB === 'undefined') {
-93	    throw new TypeError(
-94	      'getOrCreateDatabase is only available in a browser with IndexedDB',
-95	    );
-96	  }
-97	  productionDbPromise ??= (async () => {
-98	    const db = await createRxDatabase<BaseSkillDatabase>({
-99	      name: PRODUCTION_DB_NAME,
-100	      storage: getRxStorageDexie(),
-101	      multiInstance: false,
-102	    });
-103	    const withCols = await addBaseSkillCollections(db);
-104	    await checkVersionAndMigrate(withCols);
-105	    return withCols;
-106	  })();
-107	  return productionDbPromise;
-108	}
-109	
-110	export async function destroyTestDatabase(
-111	  db?: BaseSkillDatabase,
-112	): Promise<void> {
-113	  if (db) await db.remove();
-114	}
+1 import { nanoid } from 'nanoid';
+2 import { addRxPlugin, createRxDatabase } from 'rxdb';
+3 import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
+4 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
+5 import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
+6 import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
+7 import { checkVersionAndMigrate } from './migrations';
+8 import {
+9   appMetaSchema,
+10   bookmarksSchema,
+11   gameConfigOverridesSchema,
+12   profilesSchema,
+13   progressSchema,
+14   sessionHistoryIndexSchema,
+15   sessionHistorySchema,
+16   settingsSchema,
+17   syncMetaSchema,
+18   themesSchema,
+19 } from './schemas';
+20 import type { BaseSkillCollections, BaseSkillDatabase } from './types';
+21 import type { RxDatabase } from 'rxdb';
+22 
+23 addRxPlugin(RxDBMigrationSchemaPlugin);
+24 
+25 const DB_NAME = 'baseskill-data-test';
+26 const PRODUCTION_DB_NAME = 'baseskill-data';
+27 
+28 const COLLECTIONS = {
+29   app_meta: { schema: appMetaSchema },
+30   profiles: { schema: profilesSchema },
+31   progress: { schema: progressSchema },
+32   settings: { schema: settingsSchema },
+33   game_config_overrides: { schema: gameConfigOverridesSchema },
+34   bookmarks: { schema: bookmarksSchema },
+35   themes: { schema: themesSchema },
+36   session_history: { schema: sessionHistorySchema },
+37   session_history_index: {
+38     schema: sessionHistoryIndexSchema,
+39     migrationStrategies: {
+40       1: (oldDoc: Record<string, unknown>) => ({
+41         ...oldDoc,
+42         status: 'completed',
+43         seed: '',
+44         initialContent: { rounds: [] },
+45         initialState: {},
+46       }),
+47     },
+48   },
+49   sync_meta: { schema: syncMetaSchema },
+50 } as const;
+51 
+52 async function addBaseSkillCollections(
+53   db: RxDatabase<BaseSkillCollections>,
+54 ): Promise<BaseSkillDatabase> {
+55   await db.addCollections(COLLECTIONS);
+56   return db as BaseSkillDatabase;
+57 }
+58 
+59 /** Memory storage for unit tests; does not run migrations (call `checkVersionAndMigrate` in tests that need `app_meta`). */
+60 export async function createTestDatabase(): Promise<BaseSkillDatabase> {
+61   const db = await createRxDatabase<BaseSkillDatabase>({
+62     name: `${DB_NAME}-${nanoid()}`,
+63     storage: wrappedValidateAjvStorage({
+64       storage: getRxStorageMemory(),
+65     }),
+66     multiInstance: false,
+67   });
+68   return addBaseSkillCollections(db);
+69 }
+70 
+71 const STORYBOOK_DB_PREFIX = 'baseskill-storybook';
+72 
+73 /**
+74  * Ephemeral in-memory DB for Storybook. Browsers do not allow replacing native
+75  * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
+76  */
+77 export async function createStorybookDatabase(): Promise<BaseSkillDatabase> {
+78   const db = await createRxDatabase<BaseSkillDatabase>({
+79     name: `${STORYBOOK_DB_PREFIX}-${nanoid()}`,
+80     storage: getRxStorageMemory(),
+81     multiInstance: false,
+82   });
+83   const withCols = await addBaseSkillCollections(db);
+84   await checkVersionAndMigrate(withCols);
+85   return withCols;
+86 }
+87 
+88 let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
+89 
+90 /** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
+91 export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
+92   if (typeof indexedDB === 'undefined') {
+93     throw new TypeError(
+94       'getOrCreateDatabase is only available in a browser with IndexedDB',
+95     );
+96   }
+97   productionDbPromise ??= (async () => {
+98     const db = await createRxDatabase<BaseSkillDatabase>({
+99       name: PRODUCTION_DB_NAME,
+100       storage: getRxStorageDexie(),
+101       multiInstance: false,
+102     });
+103     const withCols = await addBaseSkillCollections(db);
+104     await checkVersionAndMigrate(withCols);
+105     return withCols;
+106   })();
+107   return productionDbPromise;
+108 }
+109 
+110 export async function destroyTestDatabase(
+111   db?: BaseSkillDatabase,
+112 ): Promise<void> {
+113   if (db) await db.remove();
+114 }
 115
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:39Z)**_
@@ -1054,36 +1073,37 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:39Z)**_
  `./src/db/types.ts`
 
 ```text
-1	import type { AppMetaDoc } from './schemas/app-meta';
-2	import type { BookmarkDoc } from './schemas/bookmarks';
-3	import type { GameConfigOverridesDoc } from './schemas/game_config_overrides';
-4	import type { ProfileDoc } from './schemas/profiles';
-5	import type { ProgressDoc } from './schemas/progress';
-6	import type { SessionHistoryDoc } from './schemas/session_history';
-7	import type { SessionHistoryIndexDoc } from './schemas/session_history_index';
-8	import type { SettingsDoc } from './schemas/settings';
-9	import type { SyncMetaDoc } from './schemas/sync_meta';
-10	import type { ThemeDoc } from './schemas/themes';
-11	import type { RxCollection, RxDatabase } from 'rxdb';
-12	
-13	export type BaseSkillCollections = {
-14	  app_meta: RxCollection<AppMetaDoc>;
-15	  profiles: RxCollection<ProfileDoc>;
-16	  progress: RxCollection<ProgressDoc>;
-17	  settings: RxCollection<SettingsDoc>;
-18	  game_config_overrides: RxCollection<GameConfigOverridesDoc>;
-19	  bookmarks: RxCollection<BookmarkDoc>;
-20	  themes: RxCollection<ThemeDoc>;
-21	  session_history: RxCollection<SessionHistoryDoc>;
-22	  session_history_index: RxCollection<SessionHistoryIndexDoc>;
-23	  sync_meta: RxCollection<SyncMetaDoc>;
-24	};
-25	
-26	export type BaseSkillDatabase = RxDatabase<BaseSkillCollections>;
-27	
-28	export type CollectionName = keyof BaseSkillCollections;
+1 import type { AppMetaDoc } from './schemas/app-meta';
+2 import type { BookmarkDoc } from './schemas/bookmarks';
+3 import type { GameConfigOverridesDoc } from './schemas/game_config_overrides';
+4 import type { ProfileDoc } from './schemas/profiles';
+5 import type { ProgressDoc } from './schemas/progress';
+6 import type { SessionHistoryDoc } from './schemas/session_history';
+7 import type { SessionHistoryIndexDoc } from './schemas/session_history_index';
+8 import type { SettingsDoc } from './schemas/settings';
+9 import type { SyncMetaDoc } from './schemas/sync_meta';
+10 import type { ThemeDoc } from './schemas/themes';
+11 import type { RxCollection, RxDatabase } from 'rxdb';
+12 
+13 export type BaseSkillCollections = {
+14   app_meta: RxCollection<AppMetaDoc>;
+15   profiles: RxCollection<ProfileDoc>;
+16   progress: RxCollection<ProgressDoc>;
+17   settings: RxCollection<SettingsDoc>;
+18   game_config_overrides: RxCollection<GameConfigOverridesDoc>;
+19   bookmarks: RxCollection<BookmarkDoc>;
+20   themes: RxCollection<ThemeDoc>;
+21   session_history: RxCollection<SessionHistoryDoc>;
+22   session_history_index: RxCollection<SessionHistoryIndexDoc>;
+23   sync_meta: RxCollection<SyncMetaDoc>;
+24 };
+25 
+26 export type BaseSkillDatabase = RxDatabase<BaseSkillCollections>;
+27 
+28 export type CollectionName = keyof BaseSkillCollections;
 29
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:39Z)**_
@@ -1093,134 +1113,135 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:39Z)**_
  `./src/routes/$locale/_app/index.tsx`
 
 ```text
-1	import {
-2	  createFileRoute,
-3	  useNavigate,
-4	  useParams,
-5	} from '@tanstack/react-router';
-6	import { useMemo } from 'react';
-7	import { useTranslation } from 'react-i18next';
-8	import type { GameLevel, GameSubject } from '@/games/registry';
-9	import type { ValidatorAdapter } from '@tanstack/react-router';
-10	import { GameGrid } from '@/components/GameGrid';
-11	import { LevelRow } from '@/components/LevelRow';
-12	import { useBookmarks } from '@/db/hooks/useBookmarks';
-13	import { filterCatalog, paginateCatalog } from '@/games/catalog-utils';
-14	import { GAME_CATALOG } from '@/games/registry';
-15	
-16	type CatalogSearchInput = {
-17	  search?: string;
-18	  level?: string;
-19	  subject?: string;
-20	  page?: number | string;
-21	};
-22	
-23	type CatalogSearchOutput = {
-24	  search: string;
-25	  level: string;
-26	  subject: string;
-27	  page: number;
-28	};
-29	
-30	const catalogSearchValidator: ValidatorAdapter<
-31	  CatalogSearchInput,
-32	  CatalogSearchOutput
-33	> = {
-34	  types: {
-35	    input: {} as CatalogSearchInput,
-36	    output: {} as CatalogSearchOutput,
-37	  },
-38	  parse: (input: unknown) => {
-39	    const raw = (input ?? {}) as Record<string, unknown>;
-40	    const pageRaw =
-41	      typeof raw.page === 'number' && Number.isFinite(raw.page)
-42	        ? raw.page
-43	        : Number.parseInt(String(raw.page ?? '1'), 10) || 1;
-44	    return {
-45	      search: typeof raw.search === 'string' ? raw.search : '',
-46	      level: typeof raw.level === 'string' ? raw.level : '',
-47	      subject: typeof raw.subject === 'string' ? raw.subject : '',
-48	      page: Math.max(1, pageRaw),
-49	    };
-50	  },
-51	};
-52	
-53	const PAGE_SIZE = 12;
-54	
-55	const HomeScreen = () => {
-56	  const { t } = useTranslation('common');
-57	  const { level, subject, search, page } = Route.useSearch();
-58	  const { locale } = useParams({ from: '/$locale' });
-59	  const navigate = useNavigate({ from: '/$locale/' });
-60	  const { bookmarkedIds, toggle } = useBookmarks();
-61	
-62	  const filtered = useMemo(
-63	    () =>
-64	      filterCatalog(GAME_CATALOG, {
-65	        search,
-66	        level: level as GameLevel | '',
-67	        subject: subject as GameSubject | '',
-68	      }),
-69	    [search, level, subject],
-70	  );
-71	
-72	  const {
-73	    items,
-74	    page: safePage,
-75	    totalPages,
-76	  } = useMemo(
-77	    () => paginateCatalog(filtered, page, PAGE_SIZE),
-78	    [filtered, page],
-79	  );
-80	
-81	  const updateSearch = (
-82	    patch: Partial<{
-83	      level: string;
-84	      subject: string;
-85	      search: string;
-86	      page: number;
-87	    }>,
-88	  ) => {
-89	    void navigate({
-90	      search: (prev) => ({ ...prev, ...patch }),
-91	    });
-92	  };
-93	
-94	  const handlePlay = (gameId: string) => {
-95	    void navigate({
-96	      to: '/$locale/game/$gameId',
-97	      params: { locale, gameId },
-98	    });
-99	  };
-100	
-101	  return (
-102	    <div className="px-4 py-2">
-103	      <h1 className="sr-only">{t('home.title')}</h1>
-104	      <LevelRow
-105	        currentLevel={level as GameLevel | ''}
-106	        onLevelChange={(l) => updateSearch({ level: l, page: 1 })}
-107	      />
-108	      <div className="mt-4">
-109	        <GameGrid
-110	          entries={items}
-111	          bookmarkedIds={bookmarkedIds}
-112	          onBookmarkToggle={toggle}
-113	          onPlay={handlePlay}
-114	          page={safePage}
-115	          totalPages={totalPages}
-116	          onPageChange={(p) => updateSearch({ page: p })}
-117	        />
-118	      </div>
-119	    </div>
-120	  );
-121	};
-122	
-123	export const Route = createFileRoute('/$locale/_app/')({
-124	  validateSearch: catalogSearchValidator,
-125	  component: HomeScreen,
-126	});
+1 import {
+2   createFileRoute,
+3   useNavigate,
+4   useParams,
+5 } from '@tanstack/react-router';
+6 import { useMemo } from 'react';
+7 import { useTranslation } from 'react-i18next';
+8 import type { GameLevel, GameSubject } from '@/games/registry';
+9 import type { ValidatorAdapter } from '@tanstack/react-router';
+10 import { GameGrid } from '@/components/GameGrid';
+11 import { LevelRow } from '@/components/LevelRow';
+12 import { useBookmarks } from '@/db/hooks/useBookmarks';
+13 import { filterCatalog, paginateCatalog } from '@/games/catalog-utils';
+14 import { GAME_CATALOG } from '@/games/registry';
+15 
+16 type CatalogSearchInput = {
+17   search?: string;
+18   level?: string;
+19   subject?: string;
+20   page?: number | string;
+21 };
+22 
+23 type CatalogSearchOutput = {
+24   search: string;
+25   level: string;
+26   subject: string;
+27   page: number;
+28 };
+29 
+30 const catalogSearchValidator: ValidatorAdapter<
+31   CatalogSearchInput,
+32   CatalogSearchOutput
+33 > = {
+34   types: {
+35     input: {} as CatalogSearchInput,
+36     output: {} as CatalogSearchOutput,
+37   },
+38   parse: (input: unknown) => {
+39     const raw = (input ?? {}) as Record<string, unknown>;
+40     const pageRaw =
+41       typeof raw.page === 'number' && Number.isFinite(raw.page)
+42         ? raw.page
+43         : Number.parseInt(String(raw.page ?? '1'), 10) || 1;
+44     return {
+45       search: typeof raw.search === 'string' ? raw.search : '',
+46       level: typeof raw.level === 'string' ? raw.level : '',
+47       subject: typeof raw.subject === 'string' ? raw.subject : '',
+48       page: Math.max(1, pageRaw),
+49     };
+50   },
+51 };
+52 
+53 const PAGE_SIZE = 12;
+54 
+55 const HomeScreen = () => {
+56   const { t } = useTranslation('common');
+57   const { level, subject, search, page } = Route.useSearch();
+58   const { locale } = useParams({ from: '/$locale' });
+59   const navigate = useNavigate({ from: '/$locale/' });
+60   const { bookmarkedIds, toggle } = useBookmarks();
+61 
+62   const filtered = useMemo(
+63     () =>
+64       filterCatalog(GAME_CATALOG, {
+65         search,
+66         level: level as GameLevel | '',
+67         subject: subject as GameSubject | '',
+68       }),
+69     [search, level, subject],
+70   );
+71 
+72   const {
+73     items,
+74     page: safePage,
+75     totalPages,
+76   } = useMemo(
+77     () => paginateCatalog(filtered, page, PAGE_SIZE),
+78     [filtered, page],
+79   );
+80 
+81   const updateSearch = (
+82     patch: Partial<{
+83       level: string;
+84       subject: string;
+85       search: string;
+86       page: number;
+87     }>,
+88   ) => {
+89     void navigate({
+90       search: (prev) => ({ ...prev, ...patch }),
+91     });
+92   };
+93 
+94   const handlePlay = (gameId: string) => {
+95     void navigate({
+96       to: '/$locale/game/$gameId',
+97       params: { locale, gameId },
+98     });
+99   };
+100 
+101   return (
+102     <div className="px-4 py-2">
+103       <h1 className="sr-only">{t('home.title')}</h1>
+104       <LevelRow
+105         currentLevel={level as GameLevel | ''}
+106         onLevelChange={(l) => updateSearch({ level: l, page: 1 })}
+107       />
+108       <div className="mt-4">
+109         <GameGrid
+110           entries={items}
+111           bookmarkedIds={bookmarkedIds}
+112           onBookmarkToggle={toggle}
+113           onPlay={handlePlay}
+114           page={safePage}
+115           totalPages={totalPages}
+116           onPageChange={(p) => updateSearch({ page: p })}
+117         />
+118       </div>
+119     </div>
+120   );
+121 };
+122 
+123 export const Route = createFileRoute('/$locale/_app/')({
+124   validateSearch: catalogSearchValidator,
+125   component: HomeScreen,
+126 });
 127
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:42Z)**_
@@ -1230,97 +1251,98 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:42Z)**_
  `./src/components/GameGrid.tsx`
 
 ```text
-1	import { useTranslation } from 'react-i18next';
-2	import type { GameCatalogEntry } from '@/games/registry';
-3	import { GameCard } from '@/components/GameCard';
-4	import { Button } from '@/components/ui/button';
-5	
-6	type GameGridProps = {
-7	  entries: GameCatalogEntry[];
-8	  bookmarkedIds: Set<string>;
-9	  onBookmarkToggle: (gameId: string) => void;
-10	  onPlay: (gameId: string) => void;
-11	  page: number;
-12	  totalPages: number;
-13	  onPageChange: (page: number) => void;
-14	};
-15	
-16	export const GameGrid = ({
-17	  entries,
-18	  bookmarkedIds,
-19	  onBookmarkToggle,
-20	  onPlay,
-21	  page,
-22	  totalPages,
-23	  onPageChange,
-24	}: GameGridProps) => {
-25	  const { t } = useTranslation('common');
-26	
-27	  return (
-28	    <div className="flex flex-col gap-6">
-29	      {entries.length === 0 ? (
-30	        <p className="py-16 text-center text-muted-foreground">
-31	          No games found
-32	        </p>
-33	      ) : (
-34	        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-35	          {entries.map((entry) => (
-36	            <GameCard
-37	              key={entry.id}
-38	              entry={entry}
-39	              isBookmarked={bookmarkedIds.has(entry.id)}
-40	              onBookmarkToggle={onBookmarkToggle}
-41	              onPlay={onPlay}
-42	            />
-43	          ))}
-44	        </div>
-45	      )}
-46	
-47	      {totalPages > 1 && (
-48	        <nav
-49	          className="flex items-center justify-center gap-3"
-50	          aria-label="Pagination"
-51	        >
-52	          <Button
-53	            variant="outline"
-54	            size="sm"
-55	            disabled={page <= 1}
-56	            onClick={() => onPageChange(page - 1)}
-57	          >
-58	            {t('pagination.previous')}
-59	          </Button>
-60	          <span className="text-sm text-muted-foreground">
-61	            {t('pagination.pageOf', { page, total: totalPages })}
-62	          </span>
-63	          <Button
-64	            variant="outline"
-65	            size="sm"
-66	            disabled={page >= totalPages}
-67	            onClick={() => onPageChange(page + 1)}
-68	          >
-69	            {t('pagination.next')}
-70	          </Button>
-71	        </nav>
-72	      )}
-73	
-74	      {totalPages <= 1 && (
-75	        <nav
-76	          className="flex items-center justify-center gap-3"
-77	          aria-label="Pagination"
-78	        >
-79	          <Button variant="outline" size="sm" disabled>
-80	            {t('pagination.previous')}
-81	          </Button>
-82	          <Button variant="outline" size="sm" disabled>
-83	            {t('pagination.next')}
-84	          </Button>
-85	        </nav>
-86	      )}
-87	    </div>
-88	  );
-89	};
+1 import { useTranslation } from 'react-i18next';
+2 import type { GameCatalogEntry } from '@/games/registry';
+3 import { GameCard } from '@/components/GameCard';
+4 import { Button } from '@/components/ui/button';
+5 
+6 type GameGridProps = {
+7   entries: GameCatalogEntry[];
+8   bookmarkedIds: Set<string>;
+9   onBookmarkToggle: (gameId: string) => void;
+10   onPlay: (gameId: string) => void;
+11   page: number;
+12   totalPages: number;
+13   onPageChange: (page: number) => void;
+14 };
+15 
+16 export const GameGrid = ({
+17   entries,
+18   bookmarkedIds,
+19   onBookmarkToggle,
+20   onPlay,
+21   page,
+22   totalPages,
+23   onPageChange,
+24 }: GameGridProps) => {
+25   const { t } = useTranslation('common');
+26 
+27   return (
+28     <div className="flex flex-col gap-6">
+29       {entries.length === 0 ? (
+30         <p className="py-16 text-center text-muted-foreground">
+31           No games found
+32         </p>
+33       ) : (
+34         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+35           {entries.map((entry) => (
+36             <GameCard
+37               key={entry.id}
+38               entry={entry}
+39               isBookmarked={bookmarkedIds.has(entry.id)}
+40               onBookmarkToggle={onBookmarkToggle}
+41               onPlay={onPlay}
+42             />
+43           ))}
+44         </div>
+45       )}
+46 
+47       {totalPages > 1 && (
+48         <nav
+49           className="flex items-center justify-center gap-3"
+50           aria-label="Pagination"
+51         >
+52           <Button
+53             variant="outline"
+54             size="sm"
+55             disabled={page <= 1}
+56             onClick={() => onPageChange(page - 1)}
+57           >
+58             {t('pagination.previous')}
+59           </Button>
+60           <span className="text-sm text-muted-foreground">
+61             {t('pagination.pageOf', { page, total: totalPages })}
+62           </span>
+63           <Button
+64             variant="outline"
+65             size="sm"
+66             disabled={page >= totalPages}
+67             onClick={() => onPageChange(page + 1)}
+68           >
+69             {t('pagination.next')}
+70           </Button>
+71         </nav>
+72       )}
+73 
+74       {totalPages <= 1 && (
+75         <nav
+76           className="flex items-center justify-center gap-3"
+77           aria-label="Pagination"
+78         >
+79           <Button variant="outline" size="sm" disabled>
+80             {t('pagination.previous')}
+81           </Button>
+82           <Button variant="outline" size="sm" disabled>
+83             {t('pagination.next')}
+84           </Button>
+85         </nav>
+86       )}
+87     </div>
+88   );
+89 };
 90
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:45Z)**_
@@ -1334,6 +1356,7 @@ src/components/GameCard.test.tsx
 src/components/GameCard.stories.tsx
 src/components/GameCard.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:49Z)**_
@@ -1343,77 +1366,78 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:49Z)**_
  `./src/components/GameCard.tsx`
 
 ```text
-1	import { BookmarkIcon } from 'lucide-react';
-2	import { useTranslation } from 'react-i18next';
-3	import type { GameCatalogEntry } from '@/games/registry';
-4	import { Button } from '@/components/ui/button';
-5	import {
-6	  Card,
-7	  CardContent,
-8	  CardHeader,
-9	  CardTitle,
-10	} from '@/components/ui/card';
-11	
-12	type GameCardProps = {
-13	  entry: GameCatalogEntry;
-14	  isBookmarked: boolean;
-15	  onBookmarkToggle: (gameId: string) => void;
-16	  onPlay: (gameId: string) => void;
-17	};
-18	
-19	export const GameCard = ({
-20	  entry,
-21	  isBookmarked,
-22	  onBookmarkToggle,
-23	  onPlay,
-24	}: GameCardProps) => {
-25	  const { t } = useTranslation('games');
-26	  const { t: tCommon } = useTranslation('common');
-27	
-28	  return (
-29	    <Card className="flex flex-col">
-30	      <CardHeader className="flex-1">
-31	        <div className="flex items-start justify-between gap-2">
-32	          <CardTitle className="text-base leading-snug">
-33	            {t(entry.titleKey)}
-34	          </CardTitle>
-35	          <Button
-36	            variant="ghost"
-37	            size="icon"
-38	            aria-label={
-39	              isBookmarked
-40	                ? tCommon('bookmark.remove')
-41	                : tCommon('bookmark.add')
-42	            }
-43	            onClick={() => onBookmarkToggle(entry.id)}
-44	          >
-45	            <BookmarkIcon
-46	              size={16}
-47	              className={isBookmarked ? 'fill-current' : ''}
-48	            />
-49	          </Button>
-50	        </div>
-51	        <div className="flex flex-wrap gap-1 pt-1">
-52	          {entry.levels.map((level) => (
-53	            <span
-54	              key={level}
-55	              className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground"
-56	            >
-57	              {tCommon(`levels.${level}`)}
-58	            </span>
-59	          ))}
-60	        </div>
-61	      </CardHeader>
-62	      <CardContent>
-63	        <Button className="w-full" onClick={() => onPlay(entry.id)}>
-64	          Play
-65	        </Button>
-66	      </CardContent>
-67	    </Card>
-68	  );
-69	};
+1 import { BookmarkIcon } from 'lucide-react';
+2 import { useTranslation } from 'react-i18next';
+3 import type { GameCatalogEntry } from '@/games/registry';
+4 import { Button } from '@/components/ui/button';
+5 import {
+6   Card,
+7   CardContent,
+8   CardHeader,
+9   CardTitle,
+10 } from '@/components/ui/card';
+11 
+12 type GameCardProps = {
+13   entry: GameCatalogEntry;
+14   isBookmarked: boolean;
+15   onBookmarkToggle: (gameId: string) => void;
+16   onPlay: (gameId: string) => void;
+17 };
+18 
+19 export const GameCard = ({
+20   entry,
+21   isBookmarked,
+22   onBookmarkToggle,
+23   onPlay,
+24 }: GameCardProps) => {
+25   const { t } = useTranslation('games');
+26   const { t: tCommon } = useTranslation('common');
+27 
+28   return (
+29     <Card className="flex flex-col">
+30       <CardHeader className="flex-1">
+31         <div className="flex items-start justify-between gap-2">
+32           <CardTitle className="text-base leading-snug">
+33             {t(entry.titleKey)}
+34           </CardTitle>
+35           <Button
+36             variant="ghost"
+37             size="icon"
+38             aria-label={
+39               isBookmarked
+40                 ? tCommon('bookmark.remove')
+41                 : tCommon('bookmark.add')
+42             }
+43             onClick={() => onBookmarkToggle(entry.id)}
+44           >
+45             <BookmarkIcon
+46               size={16}
+47               className={isBookmarked ? 'fill-current' : ''}
+48             />
+49           </Button>
+50         </div>
+51         <div className="flex flex-wrap gap-1 pt-1">
+52           {entry.levels.map((level) => (
+53             <span
+54               key={level}
+55               className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground"
+56             >
+57               {tCommon(`levels.${level}`)}
+58             </span>
+59           ))}
+60         </div>
+61       </CardHeader>
+62       <CardContent>
+63         <Button className="w-full" onClick={() => onPlay(entry.id)}>
+64           Play
+65         </Button>
+66       </CardContent>
+67     </Card>
+68   );
+69 };
 70
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:49Z)**_
@@ -1423,32 +1447,33 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:49Z)**_
  `./src/games/registry.ts`
 
 ```text
-1	export type GameLevel = 'PK' | 'K' | '1' | '2' | '3' | '4';
-2	export type GameSubject = 'math' | 'reading' | 'letters';
-3	
-4	export type GameCatalogEntry = {
-5	  id: string;
-6	  titleKey: string;
-7	  levels: GameLevel[];
-8	  subject: GameSubject;
-9	};
-10	
-11	export const GAME_CATALOG: GameCatalogEntry[] = [
-12	  {
-13	    id: 'word-spell',
-14	    titleKey: 'word-spell',
-15	    levels: ['PK', 'K', '1'],
-16	    subject: 'reading',
-17	  },
-18	  {
-19	    id: 'number-match',
-20	    titleKey: 'number-match',
-21	    levels: ['1', '2'],
-22	    subject: 'math',
-23	  },
-24	];
+1 export type GameLevel = 'PK' | 'K' | '1' | '2' | '3' | '4';
+2 export type GameSubject = 'math' | 'reading' | 'letters';
+3 
+4 export type GameCatalogEntry = {
+5   id: string;
+6   titleKey: string;
+7   levels: GameLevel[];
+8   subject: GameSubject;
+9 };
+10 
+11 export const GAME_CATALOG: GameCatalogEntry[] = [
+12   {
+13     id: 'word-spell',
+14     titleKey: 'word-spell',
+15     levels: ['PK', 'K', '1'],
+16     subject: 'reading',
+17   },
+18   {
+19     id: 'number-match',
+20     titleKey: 'number-match',
+21     levels: ['1', '2'],
+22     subject: 'math',
+23   },
+24 ];
 25
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:53Z)**_
@@ -1458,30 +1483,31 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:53Z)**_
  `./src/db/hooks/useRxQuery.ts`
 
 ```text
-1	import { useEffect, useState } from 'react';
-2	import type { Observable } from 'rxjs';
-3	
-4	/**
-5	 * Subscribe to an RxJS observable (e.g. RxDB `query.$`) and return the latest value.
-6	 * Unsubscribes on unmount or when `source` changes.
-7	 */
-8	export function useRxQuery<T>(
-9	  source: Observable<T>,
-10	  initialValue: T,
-11	): T {
-12	  const [value, setValue] = useState<T>(initialValue);
-13	
-14	  useEffect(() => {
-15	    const sub = source.subscribe({
-16	      next: (v) => setValue(v),
-17	    });
-18	    return () => sub.unsubscribe();
-19	  }, [source]);
-20	
-21	  return value;
-22	}
+1 import { useEffect, useState } from 'react';
+2 import type { Observable } from 'rxjs';
+3 
+4 /**
+5  * Subscribe to an RxJS observable (e.g. RxDB `query.$`) and return the latest value.
+6  * Unsubscribes on unmount or when `source` changes.
+7  */
+8 export function useRxQuery<T>(
+9   source: Observable<T>,
+10   initialValue: T,
+11 ): T {
+12   const [value, setValue] = useState<T>(initialValue);
+13 
+14   useEffect(() => {
+15     const sub = source.subscribe({
+16       next: (v) => setValue(v),
+17     });
+18     return () => sub.unsubscribe();
+19   }, [source]);
+20 
+21   return value;
+22 }
 23
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:53Z)**_
@@ -1491,57 +1517,58 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:53Z)**_
  `./src/games/catalog-utils.ts`
 
 ```text
-1	import type {
-2	  GameCatalogEntry,
-3	  GameLevel,
-4	  GameSubject,
-5	} from './registry';
-6	
-7	export type CatalogFilter = {
-8	  search: string;
-9	  level: GameLevel | '';
-10	  subject: GameSubject | '';
-11	};
-12	
-13	export function filterCatalog(
-14	  catalog: GameCatalogEntry[],
-15	  filter: CatalogFilter,
-16	): GameCatalogEntry[] {
-17	  return catalog.filter((entry) => {
-18	    if (filter.level && !entry.levels.includes(filter.level))
-19	      return false;
-20	    if (filter.subject && entry.subject !== filter.subject)
-21	      return false;
-22	    if (filter.search) {
-23	      const q = filter.search.toLowerCase();
-24	      if (!entry.titleKey.toLowerCase().includes(q)) return false;
-25	    }
-26	    return true;
-27	  });
-28	}
-29	
-30	export type PaginateResult<T> = {
-31	  items: T[];
-32	  page: number;
-33	  totalPages: number;
-34	};
-35	
-36	export function paginateCatalog<T>(
-37	  items: T[],
-38	  page: number,
-39	  pageSize: number,
-40	): PaginateResult<T> {
-41	  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
-42	  const safePage = Math.min(Math.max(1, page), totalPages);
-43	  const start = (safePage - 1) * pageSize;
-44	  return {
-45	    items: items.slice(start, start + pageSize),
-46	    page: safePage,
-47	    totalPages,
-48	  };
-49	}
+1 import type {
+2   GameCatalogEntry,
+3   GameLevel,
+4   GameSubject,
+5 } from './registry';
+6 
+7 export type CatalogFilter = {
+8   search: string;
+9   level: GameLevel | '';
+10   subject: GameSubject | '';
+11 };
+12 
+13 export function filterCatalog(
+14   catalog: GameCatalogEntry[],
+15   filter: CatalogFilter,
+16 ): GameCatalogEntry[] {
+17   return catalog.filter((entry) => {
+18     if (filter.level && !entry.levels.includes(filter.level))
+19       return false;
+20     if (filter.subject && entry.subject !== filter.subject)
+21       return false;
+22     if (filter.search) {
+23       const q = filter.search.toLowerCase();
+24       if (!entry.titleKey.toLowerCase().includes(q)) return false;
+25     }
+26     return true;
+27   });
+28 }
+29 
+30 export type PaginateResult<T> = {
+31   items: T[];
+32   page: number;
+33   totalPages: number;
+34 };
+35 
+36 export function paginateCatalog<T>(
+37   items: T[],
+38   page: number,
+39   pageSize: number,
+40 ): PaginateResult<T> {
+41   const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+42   const safePage = Math.min(Math.max(1, page), totalPages);
+43   const start = (safePage - 1) * pageSize;
+44   return {
+45     items: items.slice(start, start + pageSize),
+46     page: safePage,
+47     totalPages,
+48   };
+49 }
 50
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:57Z)**_
@@ -1557,104 +1584,105 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:58Z)**_
  `./src/components/GameCard.test.tsx`
 
 ```text
-1	import { render, screen } from '@testing-library/react';
-2	import userEvent from '@testing-library/user-event';
-3	import { I18nextProvider } from 'react-i18next';
-4	import { describe, expect, it, vi } from 'vitest';
-5	import { GameCard } from './GameCard';
-6	import type { GameCatalogEntry } from '@/games/registry';
-7	import { i18n } from '@/lib/i18n/i18n';
-8	
-9	const wrapper = ({ children }: { children: React.ReactNode }) => (
-10	  <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
-11	);
-12	
-13	const mockEntry = {
-14	  id: 'word-spell',
-15	  titleKey: 'word-spell',
-16	  levels: ['1', '2'],
-17	  subject: 'reading',
-18	} satisfies GameCatalogEntry;
-19	
-20	describe('GameCard', () => {
-21	  it('renders the game title key as text', () => {
-22	    render(
-23	      <GameCard
-24	        entry={mockEntry}
-25	        isBookmarked={false}
-26	        onBookmarkToggle={vi.fn()}
-27	        onPlay={vi.fn()}
-28	      />,
-29	      { wrapper },
-30	    );
-31	    expect(screen.getByText('Word spell')).toBeInTheDocument();
-32	  });
-33	
-34	  it('renders level badges', () => {
-35	    render(
-36	      <GameCard
-37	        entry={mockEntry}
-38	        isBookmarked={false}
-39	        onBookmarkToggle={vi.fn()}
-40	        onPlay={vi.fn()}
-41	      />,
-42	      { wrapper },
-43	    );
-44	    expect(screen.getByText('Year 1')).toBeInTheDocument();
-45	    expect(screen.getByText('Year 2')).toBeInTheDocument();
-46	  });
-47	
-48	  it('calls onPlay with gameId when Play is clicked', async () => {
-49	    const onPlay = vi.fn();
-50	    render(
-51	      <GameCard
-52	        entry={mockEntry}
-53	        isBookmarked={false}
-54	        onBookmarkToggle={vi.fn()}
-55	        onPlay={onPlay}
-56	      />,
-57	      { wrapper },
-58	    );
-59	    await userEvent.click(
-60	      screen.getByRole('button', { name: /play/i }),
-61	    );
-62	    expect(onPlay).toHaveBeenCalledWith('word-spell');
-63	  });
-64	
-65	  it('calls onBookmarkToggle with gameId when bookmark button is clicked', async () => {
-66	    const onBookmarkToggle = vi.fn();
-67	    render(
-68	      <GameCard
-69	        entry={mockEntry}
-70	        isBookmarked={false}
-71	        onBookmarkToggle={onBookmarkToggle}
-72	        onPlay={vi.fn()}
-73	      />,
-74	      { wrapper },
-75	    );
-76	    await userEvent.click(
-77	      screen.getByRole('button', { name: /bookmark/i }),
-78	    );
-79	    expect(onBookmarkToggle).toHaveBeenCalledWith('word-spell');
-80	  });
-81	
-82	  it('shows "remove bookmark" aria-label when isBookmarked is true', () => {
-83	    render(
-84	      <GameCard
-85	        entry={mockEntry}
-86	        isBookmarked={true}
-87	        onBookmarkToggle={vi.fn()}
-88	        onPlay={vi.fn()}
-89	      />,
-90	      { wrapper },
-91	    );
-92	    expect(
-93	      screen.getByRole('button', { name: /remove bookmark/i }),
-94	    ).toBeInTheDocument();
-95	  });
-96	});
+1 import { render, screen } from '@testing-library/react';
+2 import userEvent from '@testing-library/user-event';
+3 import { I18nextProvider } from 'react-i18next';
+4 import { describe, expect, it, vi } from 'vitest';
+5 import { GameCard } from './GameCard';
+6 import type { GameCatalogEntry } from '@/games/registry';
+7 import { i18n } from '@/lib/i18n/i18n';
+8 
+9 const wrapper = ({ children }: { children: React.ReactNode }) => (
+10   <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+11 );
+12 
+13 const mockEntry = {
+14   id: 'word-spell',
+15   titleKey: 'word-spell',
+16   levels: ['1', '2'],
+17   subject: 'reading',
+18 } satisfies GameCatalogEntry;
+19 
+20 describe('GameCard', () => {
+21   it('renders the game title key as text', () => {
+22     render(
+23       <GameCard
+24         entry={mockEntry}
+25         isBookmarked={false}
+26         onBookmarkToggle={vi.fn()}
+27         onPlay={vi.fn()}
+28       />,
+29       { wrapper },
+30     );
+31     expect(screen.getByText('Word spell')).toBeInTheDocument();
+32   });
+33 
+34   it('renders level badges', () => {
+35     render(
+36       <GameCard
+37         entry={mockEntry}
+38         isBookmarked={false}
+39         onBookmarkToggle={vi.fn()}
+40         onPlay={vi.fn()}
+41       />,
+42       { wrapper },
+43     );
+44     expect(screen.getByText('Year 1')).toBeInTheDocument();
+45     expect(screen.getByText('Year 2')).toBeInTheDocument();
+46   });
+47 
+48   it('calls onPlay with gameId when Play is clicked', async () => {
+49     const onPlay = vi.fn();
+50     render(
+51       <GameCard
+52         entry={mockEntry}
+53         isBookmarked={false}
+54         onBookmarkToggle={vi.fn()}
+55         onPlay={onPlay}
+56       />,
+57       { wrapper },
+58     );
+59     await userEvent.click(
+60       screen.getByRole('button', { name: /play/i }),
+61     );
+62     expect(onPlay).toHaveBeenCalledWith('word-spell');
+63   });
+64 
+65   it('calls onBookmarkToggle with gameId when bookmark button is clicked', async () => {
+66     const onBookmarkToggle = vi.fn();
+67     render(
+68       <GameCard
+69         entry={mockEntry}
+70         isBookmarked={false}
+71         onBookmarkToggle={onBookmarkToggle}
+72         onPlay={vi.fn()}
+73       />,
+74       { wrapper },
+75     );
+76     await userEvent.click(
+77       screen.getByRole('button', { name: /bookmark/i }),
+78     );
+79     expect(onBookmarkToggle).toHaveBeenCalledWith('word-spell');
+80   });
+81 
+82   it('shows "remove bookmark" aria-label when isBookmarked is true', () => {
+83     render(
+84       <GameCard
+85         entry={mockEntry}
+86         isBookmarked={true}
+87         onBookmarkToggle={vi.fn()}
+88         onPlay={vi.fn()}
+89       />,
+90       { wrapper },
+91     );
+92     expect(
+93       screen.getByRole('button', { name: /remove bookmark/i }),
+94     ).toBeInTheDocument();
+95   });
+96 });
 97
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:56:58Z)**_
@@ -1664,52 +1692,53 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:56:58Z)**_
  `./src/db/migrations.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import { MAX_SCHEMA_VERSION } from './schemas';
-3	import type { BaseSkillDatabase } from './types';
-4	
-5	function getAppVersion(): string {
-6	  const v: string = import.meta.env.VITE_APP_VERSION;
-7	  if (typeof v === 'string' && /^\d+\.\d+\.\d+$/.test(v)) {
-8	    return v;
-9	  }
-10	  return '0.1.0';
-11	}
-12	
-13	export async function ensureAppMetaSingleton(
-14	  db: BaseSkillDatabase,
-15	): Promise<void> {
-16	  const existing = await db.app_meta.findOne('singleton').exec();
-17	  if (existing) {
-18	    return;
-19	  }
-20	  await db.app_meta.insert({
-21	    id: 'singleton',
-22	    appVersion: getAppVersion(),
-23	    rxdbSchemaVersion: MAX_SCHEMA_VERSION,
-24	    lastMigrationAt: null,
-25	    installId: `dev_${nanoid()}`,
-26	  });
-27	}
-28	
-29	export async function checkVersionAndMigrate(
-30	  db: BaseSkillDatabase,
-31	): Promise<void> {
-32	  await ensureAppMetaSingleton(db);
-33	  const meta = await db.app_meta.findOne('singleton').exec();
-34	  if (!meta) {
-35	    return;
-36	  }
-37	  if (meta.rxdbSchemaVersion < MAX_SCHEMA_VERSION) {
-38	    await meta.incrementalPatch({
-39	      rxdbSchemaVersion: MAX_SCHEMA_VERSION,
-40	      lastMigrationAt: new Date().toISOString(),
-41	      appVersion: getAppVersion(),
-42	    });
-43	  }
-44	}
+1 import { nanoid } from 'nanoid';
+2 import { MAX_SCHEMA_VERSION } from './schemas';
+3 import type { BaseSkillDatabase } from './types';
+4 
+5 function getAppVersion(): string {
+6   const v: string = import.meta.env.VITE_APP_VERSION;
+7   if (typeof v === 'string' && /^\d+\.\d+\.\d+$/.test(v)) {
+8     return v;
+9   }
+10   return '0.1.0';
+11 }
+12 
+13 export async function ensureAppMetaSingleton(
+14   db: BaseSkillDatabase,
+15 ): Promise<void> {
+16   const existing = await db.app_meta.findOne('singleton').exec();
+17   if (existing) {
+18     return;
+19   }
+20   await db.app_meta.insert({
+21     id: 'singleton',
+22     appVersion: getAppVersion(),
+23     rxdbSchemaVersion: MAX_SCHEMA_VERSION,
+24     lastMigrationAt: null,
+25     installId: `dev_${nanoid()}`,
+26   });
+27 }
+28 
+29 export async function checkVersionAndMigrate(
+30   db: BaseSkillDatabase,
+31 ): Promise<void> {
+32   await ensureAppMetaSingleton(db);
+33   const meta = await db.app_meta.findOne('singleton').exec();
+34   if (!meta) {
+35     return;
+36   }
+37   if (meta.rxdbSchemaVersion < MAX_SCHEMA_VERSION) {
+38     await meta.incrementalPatch({
+39       rxdbSchemaVersion: MAX_SCHEMA_VERSION,
+40       lastMigrationAt: new Date().toISOString(),
+41       appVersion: getAppVersion(),
+42     });
+43   }
+44 }
 45
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:57:02Z)**_
@@ -1725,67 +1754,68 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:57:02Z)**_
  `./src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-1	// src/routes/$locale/_app/game/$gameId.tsx
-2	import { createFileRoute } from '@tanstack/react-router';
-3	import { nanoid } from 'nanoid';
-4	import type {
-5	  GameEngineState,
-6	  MoveLog,
-7	  ResolvedContent,
-8	  ResolvedGameConfig,
-9	  SessionMeta,
-10	} from '@/lib/game-engine/types';
-11	import type { JSX } from 'react';
-12	import { GameShell } from '@/components/game/GameShell';
-13	import { getOrCreateDatabase } from '@/db/create-database';
-14	import { loadGameConfig } from '@/lib/game-engine/config-loader';
-15	import { findInProgressSession } from '@/lib/game-engine/session-finder';
-16	
-17	// Stub content used until M5 introduces game registrations
-18	const STUB_CONTENT: ResolvedContent = {
-19	  rounds: [
-20	    { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
-21	    { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
-22	    { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
-23	  ],
-24	};
-25	
-26	const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
-27	  gameId,
-28	  title: { en: gameId },
-29	  gradeBand: 'year1-2',
-30	  maxRounds: 3,
-31	  maxRetries: 1,
-32	  maxUndoDepth: 3,
-33	  timerVisible: false,
-34	  timerDurationSeconds: null,
-35	  difficulty: 'medium',
-36	});
-37	
-38	interface GameRouteLoaderData {
-39	  config: ResolvedGameConfig;
-40	  initialLog: MoveLog | null;
-41	  sessionId: string;
-42	  meta: SessionMeta;
-43	}
-44	
-45	// Exported for direct testing — accepts loader data as props
-46	export const GameRoute = ({
-47	  config,
-48	  initialLog,
-49	  sessionId,
-50	  meta,
-51	}: GameRouteLoaderData): JSX.Element => (
-52	  <GameShell
-53	    config={config}
-54	    moves={{}}
-55	    initialState={meta.initialState}
-56	    sessionId={sessionId}
-57	    meta={meta}
-58	    initialLog={initialLog ?? undefined}
-59	  >
-60	    <div className="flex h-full items-center justify-center text-muted-foreground">
+1 // src/routes/$locale/_app/game/$gameId.tsx
+2 import { createFileRoute } from '@tanstack/react-router';
+3 import { nanoid } from 'nanoid';
+4 import type {
+5   GameEngineState,
+6   MoveLog,
+7   ResolvedContent,
+8   ResolvedGameConfig,
+9   SessionMeta,
+10 } from '@/lib/game-engine/types';
+11 import type { JSX } from 'react';
+12 import { GameShell } from '@/components/game/GameShell';
+13 import { getOrCreateDatabase } from '@/db/create-database';
+14 import { loadGameConfig } from '@/lib/game-engine/config-loader';
+15 import { findInProgressSession } from '@/lib/game-engine/session-finder';
+16 
+17 // Stub content used until M5 introduces game registrations
+18 const STUB_CONTENT: ResolvedContent = {
+19   rounds: [
+20     { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
+21     { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
+22     { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
+23   ],
+24 };
+25 
+26 const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
+27   gameId,
+28   title: { en: gameId },
+29   gradeBand: 'year1-2',
+30   maxRounds: 3,
+31   maxRetries: 1,
+32   maxUndoDepth: 3,
+33   timerVisible: false,
+34   timerDurationSeconds: null,
+35   difficulty: 'medium',
+36 });
+37 
+38 interface GameRouteLoaderData {
+39   config: ResolvedGameConfig;
+40   initialLog: MoveLog | null;
+41   sessionId: string;
+42   meta: SessionMeta;
+43 }
+44 
+45 // Exported for direct testing — accepts loader data as props
+46 export const GameRoute = ({
+47   config,
+48   initialLog,
+49   sessionId,
+50   meta,
+51 }: GameRouteLoaderData): JSX.Element => (
+52   <GameShell
+53     config={config}
+54     moves={{}}
+55     initialState={meta.initialState}
+56     sessionId={sessionId}
+57     meta={meta}
+58     initialLog={initialLog ?? undefined}
+59   >
+60     <div className="flex h-full items-center justify-center text-muted-foreground">
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:57:06Z)**_
@@ -1797,6 +1827,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:57:06Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:57:09Z)**_
@@ -1808,6 +1839,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:57:09Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:57:12Z)**_
@@ -1836,6 +1868,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:57:12Z)**_
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/routes/$locale/_app/parent/voices.tsx
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/routes/$locale/_app/parent.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:57:16Z)**_
@@ -1845,201 +1878,202 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:57:16Z)**_
  `./worktrees/feat-word-spell-number-match/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-1	// src/routes/$locale/_app/game/$gameId.tsx
-2	import { createFileRoute } from '@tanstack/react-router';
-3	import { nanoid } from 'nanoid';
-4	import type { NumberMatchConfig } from '@/games/number-match/types';
-5	import type { WordSpellConfig } from '@/games/word-spell/types';
-6	import type {
-7	  GameEngineState,
-8	  MoveLog,
-9	  ResolvedContent,
-10	  ResolvedGameConfig,
-11	  SessionMeta,
-12	} from '@/lib/game-engine/types';
-13	import type { JSX } from 'react';
-14	import { GameShell } from '@/components/game/GameShell';
-15	import { getOrCreateDatabase } from '@/db/create-database';
-16	import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
-17	import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
-18	import { loadGameConfig } from '@/lib/game-engine/config-loader';
-19	import { findInProgressSession } from '@/lib/game-engine/session-finder';
-20	
-21	// Stub content used until M5 introduces game registrations
-22	const STUB_CONTENT: ResolvedContent = {
-23	  rounds: [
-24	    { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
-25	    { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
-26	    { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
-27	  ],
-28	};
-29	
-30	const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
-31	  gameId,
-32	  title: { en: gameId },
-33	  gradeBand: 'year1-2',
-34	  maxRounds: 3,
-35	  maxRetries: 1,
-36	  maxUndoDepth: 3,
-37	  timerVisible: false,
-38	  timerDurationSeconds: null,
-39	  difficulty: 'medium',
-40	});
-41	
-42	interface GameRouteLoaderData {
-43	  config: ResolvedGameConfig;
-44	  initialLog: MoveLog | null;
-45	  sessionId: string;
-46	  meta: SessionMeta;
-47	}
-48	
-49	const WORD_SPELL_ROUTE_CONFIG: WordSpellConfig = {
-50	  gameId: 'word-spell',
-51	  component: 'WordSpell',
-52	  inputMethod: 'drag',
-53	  wrongTileBehavior: 'lock-auto-eject',
-54	  tileBankMode: 'exact',
-55	  totalRounds: 3,
-56	  roundsInOrder: false,
-57	  ttsEnabled: true,
-58	  mode: 'picture',
-59	  tileUnit: 'letter',
-60	  rounds: [
-61	    { word: 'cat', emoji: '🐱' },
-62	    { word: 'dog', emoji: '🐶' },
-63	    { word: 'sun', emoji: '☀️' },
-64	    { word: 'pin', emoji: '📌' },
-65	    { word: 'sad', emoji: '☹️' },
-66	    { word: 'ant', emoji: '🐜' },
-67	    { word: 'can', emoji: '🥫' },
-68	    { word: 'mum', emoji: '🤱' },
-69	  ],
-70	};
-71	
-72	const NUMBER_MATCH_RANGE = { min: 1, max: 12 } as const;
-73	
-74	const generateRandomNumber = (min: number, max: number): number =>
-75	  Math.floor(Math.random() * (max - min + 1)) + min;
-76	
-77	const generateXRounds = (
-78	  min: number,
-79	  max: number,
-80	  x: number,
-81	): number[] =>
-82	  Array.from({ length: x }, () => generateRandomNumber(min, max));
-83	
-84	const NUMBER_MATCH_ROUTE_CONFIG: NumberMatchConfig = {
-85	  gameId: 'number-match',
-86	  component: 'NumberMatch',
-87	  inputMethod: 'drag',
-88	  wrongTileBehavior: 'lock-auto-eject',
-89	  tileBankMode: 'distractors',
-90	  distractorCount: 5,
-91	  totalRounds: 3,
-92	  roundsInOrder: false,
-93	  ttsEnabled: true,
-94	  mode: 'numeral-to-group',
-95	  tileStyle: 'dots',
-96	  range: { min: NUMBER_MATCH_RANGE.min, max: NUMBER_MATCH_RANGE.max },
-97	  rounds: generateXRounds(
-98	    NUMBER_MATCH_RANGE.min,
-99	    NUMBER_MATCH_RANGE.max,
-100	    3,
-101	  ).map((value) => ({ value })),
-102	};
-103	
-104	const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
-105	  if (gameId === 'word-spell') {
-106	    return <WordSpell config={WORD_SPELL_ROUTE_CONFIG} />;
-107	  }
-108	  if (gameId === 'number-match') {
-109	    return <NumberMatch config={NUMBER_MATCH_ROUTE_CONFIG} />;
-110	  }
-111	  return (
-112	    <div className="flex h-full items-center justify-center text-muted-foreground">
-113	      <p>Game component placeholder — real game in M5</p>
-114	    </div>
-115	  );
-116	};
-117	
-118	// Exported for direct testing — accepts loader data as props
-119	export const GameRoute = ({
-120	  config,
-121	  initialLog,
-122	  sessionId,
-123	  meta,
-124	}: GameRouteLoaderData): JSX.Element => (
-125	  <GameShell
-126	    config={config}
-127	    moves={{}}
-128	    initialState={meta.initialState}
-129	    sessionId={sessionId}
-130	    meta={meta}
-131	    initialLog={initialLog ?? undefined}
-132	  >
-133	    <GameBody gameId={config.gameId} />
-134	  </GameShell>
-135	);
-136	
-137	// Thin route component wrapper that reads from loader
-138	const RouteComponent = (): JSX.Element => {
-139	  const data = Route.useLoaderData();
-140	  return <GameRoute {...data} />;
-141	};
-142	
-143	export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-144	  loader: async ({ params }): Promise<GameRouteLoaderData> => {
-145	    const { gameId } = params;
-146	    const profileId = 'default'; // M5: pull from profile context
-147	
-148	    const db = await getOrCreateDatabase();
-149	    const defaultConfig = makeDefaultConfig(gameId);
-150	    const config = await loadGameConfig(
-151	      gameId,
-152	      profileId,
-153	      defaultConfig.gradeBand,
-154	      db,
-155	      defaultConfig,
-156	    );
-157	
-158	    const initialLog = await findInProgressSession(
-159	      profileId,
-160	      gameId,
-161	      db,
-162	    );
-163	
-164	    const sessionId = initialLog?.sessionId ?? nanoid();
-165	    const seed = initialLog?.seed ?? nanoid();
-166	    const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
-167	    const initialState: GameEngineState = initialLog?.initialState ?? {
-168	      phase: 'instructions',
-169	      roundIndex: 0,
-170	      score: 0,
-171	      streak: 0,
-172	      retryCount: 0,
-173	      content: initialContent,
-174	      currentRound: {
-175	        roundId: initialContent.rounds[0]?.id ?? '',
-176	        answer: null,
-177	        hintsUsed: 0,
-178	      },
-179	    };
-180	
-181	    const meta: SessionMeta = {
-182	      profileId,
-183	      gameId,
-184	      gradeBand: config.gradeBand,
-185	      seed,
-186	      initialContent,
-187	      initialState,
-188	    };
-189	
-190	    return { config, initialLog, sessionId, meta };
-191	  },
-192	  component: RouteComponent,
-193	});
+1 // src/routes/$locale/_app/game/$gameId.tsx
+2 import { createFileRoute } from '@tanstack/react-router';
+3 import { nanoid } from 'nanoid';
+4 import type { NumberMatchConfig } from '@/games/number-match/types';
+5 import type { WordSpellConfig } from '@/games/word-spell/types';
+6 import type {
+7   GameEngineState,
+8   MoveLog,
+9   ResolvedContent,
+10   ResolvedGameConfig,
+11   SessionMeta,
+12 } from '@/lib/game-engine/types';
+13 import type { JSX } from 'react';
+14 import { GameShell } from '@/components/game/GameShell';
+15 import { getOrCreateDatabase } from '@/db/create-database';
+16 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+17 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
+18 import { loadGameConfig } from '@/lib/game-engine/config-loader';
+19 import { findInProgressSession } from '@/lib/game-engine/session-finder';
+20 
+21 // Stub content used until M5 introduces game registrations
+22 const STUB_CONTENT: ResolvedContent = {
+23   rounds: [
+24     { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
+25     { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
+26     { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
+27   ],
+28 };
+29 
+30 const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
+31   gameId,
+32   title: { en: gameId },
+33   gradeBand: 'year1-2',
+34   maxRounds: 3,
+35   maxRetries: 1,
+36   maxUndoDepth: 3,
+37   timerVisible: false,
+38   timerDurationSeconds: null,
+39   difficulty: 'medium',
+40 });
+41 
+42 interface GameRouteLoaderData {
+43   config: ResolvedGameConfig;
+44   initialLog: MoveLog | null;
+45   sessionId: string;
+46   meta: SessionMeta;
+47 }
+48 
+49 const WORD_SPELL_ROUTE_CONFIG: WordSpellConfig = {
+50   gameId: 'word-spell',
+51   component: 'WordSpell',
+52   inputMethod: 'drag',
+53   wrongTileBehavior: 'lock-auto-eject',
+54   tileBankMode: 'exact',
+55   totalRounds: 3,
+56   roundsInOrder: false,
+57   ttsEnabled: true,
+58   mode: 'picture',
+59   tileUnit: 'letter',
+60   rounds: [
+61     { word: 'cat', emoji: '🐱' },
+62     { word: 'dog', emoji: '🐶' },
+63     { word: 'sun', emoji: '☀️' },
+64     { word: 'pin', emoji: '📌' },
+65     { word: 'sad', emoji: '☹️' },
+66     { word: 'ant', emoji: '🐜' },
+67     { word: 'can', emoji: '🥫' },
+68     { word: 'mum', emoji: '🤱' },
+69   ],
+70 };
+71 
+72 const NUMBER_MATCH_RANGE = { min: 1, max: 12 } as const;
+73 
+74 const generateRandomNumber = (min: number, max: number): number =>
+75   Math.floor(Math.random() * (max - min + 1)) + min;
+76 
+77 const generateXRounds = (
+78   min: number,
+79   max: number,
+80   x: number,
+81 ): number[] =>
+82   Array.from({ length: x }, () => generateRandomNumber(min, max));
+83 
+84 const NUMBER_MATCH_ROUTE_CONFIG: NumberMatchConfig = {
+85   gameId: 'number-match',
+86   component: 'NumberMatch',
+87   inputMethod: 'drag',
+88   wrongTileBehavior: 'lock-auto-eject',
+89   tileBankMode: 'distractors',
+90   distractorCount: 5,
+91   totalRounds: 3,
+92   roundsInOrder: false,
+93   ttsEnabled: true,
+94   mode: 'numeral-to-group',
+95   tileStyle: 'dots',
+96   range: { min: NUMBER_MATCH_RANGE.min, max: NUMBER_MATCH_RANGE.max },
+97   rounds: generateXRounds(
+98     NUMBER_MATCH_RANGE.min,
+99     NUMBER_MATCH_RANGE.max,
+100     3,
+101   ).map((value) => ({ value })),
+102 };
+103 
+104 const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
+105   if (gameId === 'word-spell') {
+106     return <WordSpell config={WORD_SPELL_ROUTE_CONFIG} />;
+107   }
+108   if (gameId === 'number-match') {
+109     return <NumberMatch config={NUMBER_MATCH_ROUTE_CONFIG} />;
+110   }
+111   return (
+112     <div className="flex h-full items-center justify-center text-muted-foreground">
+113       <p>Game component placeholder — real game in M5</p>
+114     </div>
+115   );
+116 };
+117 
+118 // Exported for direct testing — accepts loader data as props
+119 export const GameRoute = ({
+120   config,
+121   initialLog,
+122   sessionId,
+123   meta,
+124 }: GameRouteLoaderData): JSX.Element => (
+125   <GameShell
+126     config={config}
+127     moves={{}}
+128     initialState={meta.initialState}
+129     sessionId={sessionId}
+130     meta={meta}
+131     initialLog={initialLog ?? undefined}
+132   >
+133     <GameBody gameId={config.gameId} />
+134   </GameShell>
+135 );
+136 
+137 // Thin route component wrapper that reads from loader
+138 const RouteComponent = (): JSX.Element => {
+139   const data = Route.useLoaderData();
+140   return <GameRoute {...data} />;
+141 };
+142 
+143 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+144   loader: async ({ params }): Promise<GameRouteLoaderData> => {
+145     const { gameId } = params;
+146     const profileId = 'default'; // M5: pull from profile context
+147 
+148     const db = await getOrCreateDatabase();
+149     const defaultConfig = makeDefaultConfig(gameId);
+150     const config = await loadGameConfig(
+151       gameId,
+152       profileId,
+153       defaultConfig.gradeBand,
+154       db,
+155       defaultConfig,
+156     );
+157 
+158     const initialLog = await findInProgressSession(
+159       profileId,
+160       gameId,
+161       db,
+162     );
+163 
+164     const sessionId = initialLog?.sessionId ?? nanoid();
+165     const seed = initialLog?.seed ?? nanoid();
+166     const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
+167     const initialState: GameEngineState = initialLog?.initialState ?? {
+168       phase: 'instructions',
+169       roundIndex: 0,
+170       score: 0,
+171       streak: 0,
+172       retryCount: 0,
+173       content: initialContent,
+174       currentRound: {
+175         roundId: initialContent.rounds[0]?.id ?? '',
+176         answer: null,
+177         hintsUsed: 0,
+178       },
+179     };
+180 
+181     const meta: SessionMeta = {
+182       profileId,
+183       gameId,
+184       gradeBand: config.gradeBand,
+185       seed,
+186       initialContent,
+187       initialState,
+188     };
+189 
+190     return { config, initialLog, sessionId, meta };
+191   },
+192   component: RouteComponent,
+193 });
 194
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:58:59Z)**_
@@ -2048,11 +2082,11 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:58:59Z)**_
 Now I have a complete picture of the codebase. Let me write the Group J plan.
 
 Key design decisions:
+
 1. **Replace `BookmarksDoc` with `SavedGameConfigDoc`** - Since the app isn't launched, no migration needed
 2. **`SavedGameConfigDoc`** - stores gameId, name, config snapshot as JSON, createdAt
 3. **`useSavedConfigs(gameId?)`** - replaces `useBookmarks`, returns saved configs, save/remove/rename
 4. **`sortByHasSavedConfigs`** - replaces `sortByBookmarks` in catalog-utils (games with configs sort to top)
-
 
 5. **`GameCard`** - update to show saved config chips + play specific config
 6. **`GameGrid`** - update props to pass saved configs to GameCard
@@ -2122,6 +2156,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:58:59Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:59:03Z)**_
@@ -4099,6 +4134,7 @@ When the user taps a config chip, the URL becomes `/$locale/game/word-spell?conf
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-03-group-j-saved-game-configs.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 13:04:36Z)**_
@@ -4141,6 +4177,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 13:04:37Z)**_
 Let me do the self-review now.
 
 **1. Spec coverage check:**
+
 - ✅ Replace `BookmarksDoc` with `SavedGameConfigDoc` (Task 1)
 - ✅ `useSavedConfigs` with save/remove/rename + duplicate validation (Task 2)
 - ✅ Sort games with configs to top, absorbs Group H (Task 3)
@@ -4161,6 +4198,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 13:04:40Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-03-group-j-saved-game-configs.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 13:04:45Z)**_
@@ -4177,6 +4215,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 13:04:57Z)**_
 Plan complete and saved to `docs/superpowers/plans/2026-04-03-group-j-saved-game-configs.md`.
 
 **8 tasks, covering:**
+
 - Task 1 — Replace `BookmarksDoc` with `SavedGameConfigDoc` in RxDB (schema, types, create-database, delete old files)
 - Task 2 — `useSavedConfigs` hook with save/remove/rename + duplicate validation
 - Task 3 — `sortByHasSavedConfigs` in catalog-utils (absorbs Group H — Group H plan can be skipped)
@@ -4243,11 +4282,11 @@ _**Agent (claude-sonnet-4-6 2026-04-03 13:09:08Z)**_
 The user wants a quick prompt to execute all plans from A through I (not just J). Let me provide a prompt that covers all the plans.
 
 The plans are:
+
 - Group A+B: `docs/superpowers/plans/2026-04-03-group-ab-sound-tts.md`
 - Group C: `docs/superpowers/plans/2026-04-03-group-c-progress-confetti.md`
 - Group D: `docs/superpowers/plans/2026-04-03-group-d-game-settings.md`
 - Group E: `docs/superpowers/plans/2026-04-03-group-e-i18n-routing-bugs.md`
-
 
 - Group F+G: `docs/superpowers/plans/2026-04-03-group-fg-wordspell-bug-instructions.md`
 - Group I: `docs/superpowers/plans/2026-04-03-group-i-sort-numbers-game.md`

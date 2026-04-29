@@ -31,82 +31,83 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:32:25Z)**_
  `./.claude/worktrees/bold-chatelet/docs/context-handoff.md`
 
 ```text
-1	# Context Handoff — Drag Improvements
-2	
-3	## Branch
-4	
-5	`claude/bold-chatelet` (worktree at `.claude/worktrees/bold-chatelet`)
-6	
-7	## What was just fixed (committed, tests pass)
-8	
-9	- **Swap preview bug** (`5f61208`): When dragging tile A from slot A over slot C,
-10	  the source slot A was hidden (`invisible`) even when `isPreview=true`. Fixed by
-11	  changing the button's class condition from `isBeingDragged` to
-12	  `isBeingDragged && !isPreview` in `Slot.tsx`.
-13	
-14	## What still needs to be designed and built
-15	
-16	Three UX improvements to the drag system (brainstorming was in progress, not completed):
-17	
-18	### 1. Preview from any tile (bank tiles not showing preview)
-19	
-20	Currently `SET_DRAG_ACTIVE` is dispatched when dragging from a **slot**, so the
-21	slot preview works. But dragging from the **tile bank** never dispatches
-22	`SET_DRAG_ACTIVE` on the HTML5 DnD path (there's a comment in
-23	`useDraggableTile.ts`: "no SET_DRAG_ACTIVE to avoid browser snap-back fadeout").
-24	Also, `onHoverZone` is not passed to `useTouchDrag` in `useDraggableTile.ts`.
-25	
-26	Fix needed in `useDraggableTile.ts`:
-27	
-28	- HTML5: add `onDragStart` → `dispatch SET_DRAG_ACTIVE(tile.id)` and `onDrop`
-29	  → `dispatch SET_DRAG_ACTIVE(null)`
-30	- Touch: pass `onHoverZone: (zoneIndex) => dispatch SET_DRAG_HOVER(zoneIndex)`
-31	
-32	### 2. Expanded drop zone / ghost overlap (both desktop and touch)
-33	
-34	User wants the drop to trigger as soon as the ghost tile visually overlaps a slot
-35	("just touching"), not just when the pointer is directly over it.
-36	
-37	**Touch** (`useTouchDrag.ts`): Currently uses a single `elementsFromPoint(x, y)`.
-38	Change to sample 5 points — the pointer center plus the 4 ghost corners at
-39	`±halfW, ±halfH` — and use the first zone found.
-40	
-41	**Desktop HTML5 DnD**: Slots use `dropTargetForElements` from
-42	`@atlaskit/pragmatic-drag-and-drop`. The drop only fires when the **pointer** is
-43	over the registered element. To expand: wrap the slot's inner content with an
-44	invisible absolutely-positioned `div` that extends ~24–28 px beyond the visual
-45	slot bounds, and register THAT as the drop target. Alternatively use
-46	`monitorForElements` with expanded bounding-box checks.
-47	
-48	There is an existing `magnetic-snap.ts` utility (`MAGNETIC_RADIUS=60`,
-49	`MAGNETIC_STRENGTH=0.3`) that computes a lerp pull — could optionally be wired in
-50	to visually pull the ghost toward the nearest slot during touch drag.
-51	
-52	### 3. Bank hover display
-53	
-54	When the ghost is dragged over the bank area, show visual feedback (subtle ring or
-55	highlight) on the bank container.
-56	
-57	State: add `dragHoverBankTarget: boolean` to `AnswerGameState`.
-58	
-59	- Touch (`useTouchDrag.ts`): detect `data-tile-bank` in `elementsFromPoint` during
-60	  `onPointerMove` and fire a new `onHoverBank` callback.
-61	- Desktop: `useBankDropTarget` hook (find it or check `LetterTileBank.tsx`)—add
-62	  `onDragEnter`/`onDragLeave`.
-63	
-64	## Key files
-65	
-66	- `src/components/answer-game/useDraggableTile.ts` — bank tile drag hook
-67	- `src/components/answer-game/useTouchDrag.ts` — touch drag engine
-68	- `src/components/answer-game/useSlotTileDrag.ts` — slot tile drag hook
-69	- `src/components/answer-game/Slot/useSlotBehavior.ts` — slot state + drop registration
-70	- `src/components/answer-game/Slot/Slot.tsx` — slot rendering
-71	- `src/components/answer-game/types.ts` — state types
-72	- `src/components/answer-game/answer-game-reducer.ts` — reducer
-73	- `src/components/answer-game/magnetic-snap.ts` — existing (unused) snap utility
-74	- `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` — bank rendering
+1 # Context Handoff — Drag Improvements
+2 
+3 ## Branch
+4 
+5 `claude/bold-chatelet` (worktree at `.claude/worktrees/bold-chatelet`)
+6 
+7 ## What was just fixed (committed, tests pass)
+8 
+9 - **Swap preview bug** (`5f61208`): When dragging tile A from slot A over slot C,
+10   the source slot A was hidden (`invisible`) even when `isPreview=true`. Fixed by
+11   changing the button's class condition from `isBeingDragged` to
+12   `isBeingDragged && !isPreview` in `Slot.tsx`.
+13 
+14 ## What still needs to be designed and built
+15 
+16 Three UX improvements to the drag system (brainstorming was in progress, not completed):
+17 
+18 ### 1. Preview from any tile (bank tiles not showing preview)
+19 
+20 Currently `SET_DRAG_ACTIVE` is dispatched when dragging from a **slot**, so the
+21 slot preview works. But dragging from the **tile bank** never dispatches
+22 `SET_DRAG_ACTIVE` on the HTML5 DnD path (there's a comment in
+23 `useDraggableTile.ts`: "no SET_DRAG_ACTIVE to avoid browser snap-back fadeout").
+24 Also, `onHoverZone` is not passed to `useTouchDrag` in `useDraggableTile.ts`.
+25 
+26 Fix needed in `useDraggableTile.ts`:
+27 
+28 - HTML5: add `onDragStart` → `dispatch SET_DRAG_ACTIVE(tile.id)` and `onDrop`
+29   → `dispatch SET_DRAG_ACTIVE(null)`
+30 - Touch: pass `onHoverZone: (zoneIndex) => dispatch SET_DRAG_HOVER(zoneIndex)`
+31 
+32 ### 2. Expanded drop zone / ghost overlap (both desktop and touch)
+33 
+34 User wants the drop to trigger as soon as the ghost tile visually overlaps a slot
+35 ("just touching"), not just when the pointer is directly over it.
+36 
+37 **Touch** (`useTouchDrag.ts`): Currently uses a single `elementsFromPoint(x, y)`.
+38 Change to sample 5 points — the pointer center plus the 4 ghost corners at
+39 `±halfW, ±halfH` — and use the first zone found.
+40 
+41 **Desktop HTML5 DnD**: Slots use `dropTargetForElements` from
+42 `@atlaskit/pragmatic-drag-and-drop`. The drop only fires when the **pointer** is
+43 over the registered element. To expand: wrap the slot's inner content with an
+44 invisible absolutely-positioned `div` that extends ~24–28 px beyond the visual
+45 slot bounds, and register THAT as the drop target. Alternatively use
+46 `monitorForElements` with expanded bounding-box checks.
+47 
+48 There is an existing `magnetic-snap.ts` utility (`MAGNETIC_RADIUS=60`,
+49 `MAGNETIC_STRENGTH=0.3`) that computes a lerp pull — could optionally be wired in
+50 to visually pull the ghost toward the nearest slot during touch drag.
+51 
+52 ### 3. Bank hover display
+53 
+54 When the ghost is dragged over the bank area, show visual feedback (subtle ring or
+55 highlight) on the bank container.
+56 
+57 State: add `dragHoverBankTarget: boolean` to `AnswerGameState`.
+58 
+59 - Touch (`useTouchDrag.ts`): detect `data-tile-bank` in `elementsFromPoint` during
+60   `onPointerMove` and fire a new `onHoverBank` callback.
+61 - Desktop: `useBankDropTarget` hook (find it or check `LetterTileBank.tsx`)—add
+62   `onDragEnter`/`onDragLeave`.
+63 
+64 ## Key files
+65 
+66 - `src/components/answer-game/useDraggableTile.ts` — bank tile drag hook
+67 - `src/components/answer-game/useTouchDrag.ts` — touch drag engine
+68 - `src/components/answer-game/useSlotTileDrag.ts` — slot tile drag hook
+69 - `src/components/answer-game/Slot/useSlotBehavior.ts` — slot state + drop registration
+70 - `src/components/answer-game/Slot/Slot.tsx` — slot rendering
+71 - `src/components/answer-game/types.ts` — state types
+72 - `src/components/answer-game/answer-game-reducer.ts` — reducer
+73 - `src/components/answer-game/magnetic-snap.ts` — existing (unused) snap utility
+74 - `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` — bank rendering
 75
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:32:32Z)**_
@@ -117,10 +118,10 @@ The user wants me to focus on item #2: "Expanded drop zone / ghost overlap" - th
 The user says "finish the investigation, and lets find a solution" - this suggests they want me to investigate the current code and then propose a solution. Let me read the key files.
 
 I should check:
+
 1. `useTouchDrag.ts` - for the touch path
 2. `useSlotBehavior.ts` - for the desktop drop registration
 3. Maybe `useDraggableTile.ts` and `useSlotTileDrag.ts`
-
 
 Now I'm examining these files in parallel to understand how the drag and drop system currently works.
 </details></think>
@@ -136,307 +137,308 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:32:33Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef } from 'react';
-2	import type { PointerEvent } from 'react';
-3	
-4	const DRAG_THRESHOLD_PX = 8;
-5	
-6	interface GhostInfo {
-7	  el: HTMLDivElement;
-8	  halfW: number;
-9	  halfH: number;
-10	}
-11	
-12	const buildGhost = (
-13	  sourceEl: HTMLElement,
-14	  label: string,
-15	  x: number,
-16	  y: number,
-17	): GhostInfo => {
-18	  const rect = sourceEl.getBoundingClientRect();
-19	  const halfW = rect.width / 2;
-20	  const halfH = rect.height / 2;
-21	  const el = document.createElement('div');
-22	  el.textContent = label;
-23	  el.setAttribute('aria-hidden', 'true');
-24	  Object.assign(el.style, {
-25	    position: 'fixed',
-26	    left: `${x - halfW}px`,
-27	    top: `${y - halfH}px`,
-28	    width: `${rect.width}px`,
-29	    height: `${rect.height}px`,
-30	    display: 'flex',
-31	    alignItems: 'center',
-32	    justifyContent: 'center',
-33	    borderRadius: '12px',
-34	    background: 'var(--card, #fff)',
-35	    color: 'var(--card-foreground, #000)',
-36	    fontSize: getComputedStyle(sourceEl).fontSize,
-37	    fontWeight: 'bold',
-38	    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-39	    pointerEvents: 'none',
-40	    zIndex: '9999',
-41	    opacity: '0.95',
-42	    userSelect: 'none',
-43	    transform: 'scale(1.08)',
-44	  });
-45	  document.body.append(el);
-46	  return { el, halfW, halfH };
-47	};
-48	
-49	export interface TouchDragHandlers {
-50	  onPointerDown: (e: PointerEvent<HTMLElement>) => void;
-51	  onPointerMove: (e: PointerEvent<HTMLElement>) => void;
-52	  onPointerUp: (e: PointerEvent<HTMLElement>) => void;
-53	  onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
-54	}
-55	
-56	interface UseTouchDragOptions {
-57	  /** Empty string disables the drag (no pointer capture, no ghost). */
-58	  tileId: string;
-59	  label: string;
-60	  onDragStart?: () => void;
-61	  /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
-62	  onDragCancel?: () => void;
-63	  onDrop: (tileId: string, zoneIndex: number) => void;
-64	  /** Called when the tile is dropped on the bank container. */
-65	  onDropOnBank?: () => void;
-66	  onHoverZone?: (zoneIndex: number | null) => void;
-67	}
-68	
-69	export const useTouchDrag = ({
-70	  tileId,
-71	  label,
-72	  onDragStart,
-73	  onDragCancel,
-74	  onDrop,
-75	  onDropOnBank,
-76	  onHoverZone,
-77	}: UseTouchDragOptions): TouchDragHandlers => {
-78	  const onDragCancelRef = useRef(onDragCancel);
-79	  useEffect(() => {
-80	    onDragCancelRef.current = onDragCancel;
-81	  }, [onDragCancel]);
-82	
-83	  const onHoverZoneRef = useRef(onHoverZone);
-84	  useEffect(() => {
-85	    onHoverZoneRef.current = onHoverZone;
-86	  }, [onHoverZone]);
-87	
-88	  const ghostRef = useRef<GhostInfo | null>(null);
-89	  const isDragging = useRef(false);
-90	  const startPos = useRef<{ x: number; y: number } | null>(null);
-91	  const capturedElRef = useRef<HTMLElement | null>(null);
-92	  const capturedPointerIdRef = useRef<number | null>(null);
-93	  const safetyTimerRef = useRef<ReturnType<
-94	    typeof globalThis.setTimeout
-95	  > | null>(null);
-96	
-97	  // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
-98	  // → cleanupGhost re-entry.
-99	  const cleanupInProgressRef = useRef(false);
-100	  const lastHoverZoneRef = useRef<number | null>(null);
-101	
-102	  const cleanupGhost = useCallback(() => {
-103	    if (cleanupInProgressRef.current) return;
-104	    cleanupInProgressRef.current = true;
-105	
-106	    if (safetyTimerRef.current !== null) {
-107	      globalThis.clearTimeout(safetyTimerRef.current);
-108	      safetyTimerRef.current = null;
-109	    }
-110	
-111	    ghostRef.current?.el.remove();
-112	    ghostRef.current = null;
-113	
-114	    // Clear refs BEFORE releasePointerCapture so that any synchronous
-115	    // lostpointercapture event triggered by it sees null refs and bails out.
-116	    const el = capturedElRef.current;
-117	    const pointerId = capturedPointerIdRef.current;
-118	    capturedElRef.current = null;
-119	    capturedPointerIdRef.current = null;
-120	
-121	    if (el !== null && pointerId !== null) {
-122	      try {
-123	        el.releasePointerCapture(pointerId);
-124	      } catch {
-125	        // Element may no longer be in the DOM — ignore.
-126	      }
-127	    }
-128	
-129	    isDragging.current = false;
-130	    lastHoverZoneRef.current = null;
-131	    startPos.current = null;
-132	    cleanupInProgressRef.current = false;
-133	  }, []);
-134	
-135	  const cleanup = useCallback(() => {
-136	    cleanupGhost();
-137	  }, [cleanupGhost]);
-138	
-139	  const onPointerDown = useCallback(
-140	    (e: PointerEvent<HTMLElement>) => {
-141	      if (e.pointerType === 'mouse' || !tileId) return;
-142	      e.currentTarget.setPointerCapture(e.pointerId);
-143	      capturedElRef.current = e.currentTarget;
-144	      capturedPointerIdRef.current = e.pointerId;
-145	      startPos.current = { x: e.clientX, y: e.clientY };
-146	      isDragging.current = false;
-147	
-148	      // When the captured element is removed from the DOM (e.g. a slot tile
-149	      // gets auto-ejected while the user is dragging it), the browser fires
-150	      // lostpointercapture and onPointerUp never fires.  Clean up here so the
-151	      // ghost doesn't float for 5 seconds.
-152	      e.currentTarget.addEventListener(
-153	        'lostpointercapture',
-154	        () => {
-155	          if (!cleanupInProgressRef.current && isDragging.current) {
-156	            cleanupGhost();
-157	            onDragCancelRef.current?.();
-158	          }
-159	        },
-160	        { once: true },
-161	      );
-162	    },
-163	    [tileId, cleanupGhost],
-164	  );
-165	
-166	  const onPointerMove = useCallback(
-167	    (e: PointerEvent<HTMLElement>) => {
-168	      if (e.pointerType === 'mouse' || !startPos.current) return;
-169	
-170	      if (!isDragging.current) {
-171	        const dx = e.clientX - startPos.current.x;
-172	        const dy = e.clientY - startPos.current.y;
-173	        if (
-174	          Math.abs(dx) > DRAG_THRESHOLD_PX ||
-175	          Math.abs(dy) > DRAG_THRESHOLD_PX
-176	        ) {
-177	          isDragging.current = true;
-178	          ghostRef.current = buildGhost(
-179	            e.currentTarget,
-180	            label,
-181	            e.clientX,
-182	            e.clientY,
-183	          );
-184	          onDragStart?.();
-185	
-186	          safetyTimerRef.current = globalThis.setTimeout(() => {
-187	            cleanupGhost();
-188	            onDragCancelRef.current?.();
-189	          }, 5000);
-190	
-191	          document.addEventListener('contextmenu', cleanupGhost, {
-192	            once: true,
-193	          });
-194	          document.addEventListener('visibilitychange', cleanupGhost, {
-195	            once: true,
-196	          });
-197	        }
-198	      }
-199	
-200	      if (isDragging.current && ghostRef.current) {
-201	        const { el, halfW, halfH } = ghostRef.current;
-202	        el.style.left = `${e.clientX - halfW}px`;
-203	        el.style.top = `${e.clientY - halfH}px`;
-204	
-205	        // Detect zone under pointer for hover preview.
-206	        // Temporarily hide the ghost so it doesn't intercept elementsFromPoint.
-207	        el.style.visibility = 'hidden';
-208	        const elements = document.elementsFromPoint(
-209	          e.clientX,
-210	          e.clientY,
-211	        );
-212	        el.style.visibility = 'visible';
-213	        let detectedZone: number | null = null;
-214	        for (const elem of elements) {
-215	          if (
-216	            elem instanceof HTMLElement &&
-217	            elem.dataset['zoneIndex'] !== undefined
-218	          ) {
-219	            const parsed = Number.parseInt(
-220	              elem.dataset['zoneIndex'],
-221	              10,
-222	            );
-223	            if (!Number.isNaN(parsed)) {
-224	              detectedZone = parsed;
-225	              break;
-226	            }
-227	          }
-228	        }
-229	        if (detectedZone !== lastHoverZoneRef.current) {
-230	          lastHoverZoneRef.current = detectedZone;
-231	          onHoverZoneRef.current?.(detectedZone);
-232	        }
-233	      }
-234	    },
-235	    [label, onDragStart, cleanupGhost],
-236	  );
-237	
-238	  const onPointerUp = useCallback(
-239	    (e: PointerEvent<HTMLElement>) => {
-240	      if (e.pointerType === 'mouse' || !startPos.current) return;
-241	
-242	      if (isDragging.current) {
-243	        // Remove ghost before elementsFromPoint so it doesn't interfere.
-244	        ghostRef.current?.el.remove();
-245	        ghostRef.current = null;
-246	
-247	        const elements = document.elementsFromPoint(
-248	          e.clientX,
-249	          e.clientY,
-250	        );
-251	        let dropped = false;
-252	        for (const el of elements) {
-253	          if (
-254	            el instanceof HTMLElement &&
-255	            el.dataset['zoneIndex'] !== undefined
-256	          ) {
-257	            const zoneIndex = Number.parseInt(
-258	              el.dataset['zoneIndex'],
-259	              10,
-260	            );
-261	            if (!Number.isNaN(zoneIndex)) {
-262	              onDrop(tileId, zoneIndex);
-263	              dropped = true;
-264	              break;
-265	            }
-266	          }
-267	          // Dropped on the tile bank container — return tile to bank.
-268	          if (
-269	            el instanceof HTMLElement &&
-270	            el.dataset['tileBank'] !== undefined
-271	          ) {
-272	            onDropOnBank?.();
-273	            dropped = true;
-274	            break;
-275	          }
-276	        }
-277	        if (!dropped) {
-278	          onDragCancelRef.current?.();
-279	        }
-280	      }
-281	
-282	      cleanup();
-283	    },
-284	    [tileId, onDrop, onDropOnBank, cleanup],
-285	  );
-286	
-287	  const onPointerCancel = useCallback(
-288	    (e: PointerEvent<HTMLElement>) => {
-289	      if (e.pointerType === 'mouse') return;
-290	      if (isDragging.current) {
-291	        onDragCancelRef.current?.();
-292	      }
-293	      cleanupGhost();
-294	    },
-295	    [cleanupGhost],
-296	  );
-297	
-298	  return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
-299	};
+1 import { useCallback, useEffect, useRef } from 'react';
+2 import type { PointerEvent } from 'react';
+3 
+4 const DRAG_THRESHOLD_PX = 8;
+5 
+6 interface GhostInfo {
+7   el: HTMLDivElement;
+8   halfW: number;
+9   halfH: number;
+10 }
+11 
+12 const buildGhost = (
+13   sourceEl: HTMLElement,
+14   label: string,
+15   x: number,
+16   y: number,
+17 ): GhostInfo => {
+18   const rect = sourceEl.getBoundingClientRect();
+19   const halfW = rect.width / 2;
+20   const halfH = rect.height / 2;
+21   const el = document.createElement('div');
+22   el.textContent = label;
+23   el.setAttribute('aria-hidden', 'true');
+24   Object.assign(el.style, {
+25     position: 'fixed',
+26     left: `${x - halfW}px`,
+27     top: `${y - halfH}px`,
+28     width: `${rect.width}px`,
+29     height: `${rect.height}px`,
+30     display: 'flex',
+31     alignItems: 'center',
+32     justifyContent: 'center',
+33     borderRadius: '12px',
+34     background: 'var(--card, #fff)',
+35     color: 'var(--card-foreground, #000)',
+36     fontSize: getComputedStyle(sourceEl).fontSize,
+37     fontWeight: 'bold',
+38     boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+39     pointerEvents: 'none',
+40     zIndex: '9999',
+41     opacity: '0.95',
+42     userSelect: 'none',
+43     transform: 'scale(1.08)',
+44   });
+45   document.body.append(el);
+46   return { el, halfW, halfH };
+47 };
+48 
+49 export interface TouchDragHandlers {
+50   onPointerDown: (e: PointerEvent<HTMLElement>) => void;
+51   onPointerMove: (e: PointerEvent<HTMLElement>) => void;
+52   onPointerUp: (e: PointerEvent<HTMLElement>) => void;
+53   onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
+54 }
+55 
+56 interface UseTouchDragOptions {
+57   /** Empty string disables the drag (no pointer capture, no ghost). */
+58   tileId: string;
+59   label: string;
+60   onDragStart?: () => void;
+61   /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
+62   onDragCancel?: () => void;
+63   onDrop: (tileId: string, zoneIndex: number) => void;
+64   /** Called when the tile is dropped on the bank container. */
+65   onDropOnBank?: () => void;
+66   onHoverZone?: (zoneIndex: number | null) => void;
+67 }
+68 
+69 export const useTouchDrag = ({
+70   tileId,
+71   label,
+72   onDragStart,
+73   onDragCancel,
+74   onDrop,
+75   onDropOnBank,
+76   onHoverZone,
+77 }: UseTouchDragOptions): TouchDragHandlers => {
+78   const onDragCancelRef = useRef(onDragCancel);
+79   useEffect(() => {
+80     onDragCancelRef.current = onDragCancel;
+81   }, [onDragCancel]);
+82 
+83   const onHoverZoneRef = useRef(onHoverZone);
+84   useEffect(() => {
+85     onHoverZoneRef.current = onHoverZone;
+86   }, [onHoverZone]);
+87 
+88   const ghostRef = useRef<GhostInfo | null>(null);
+89   const isDragging = useRef(false);
+90   const startPos = useRef<{ x: number; y: number } | null>(null);
+91   const capturedElRef = useRef<HTMLElement | null>(null);
+92   const capturedPointerIdRef = useRef<number | null>(null);
+93   const safetyTimerRef = useRef<ReturnType<
+94     typeof globalThis.setTimeout
+95   > | null>(null);
+96 
+97   // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
+98   // → cleanupGhost re-entry.
+99   const cleanupInProgressRef = useRef(false);
+100   const lastHoverZoneRef = useRef<number | null>(null);
+101 
+102   const cleanupGhost = useCallback(() => {
+103     if (cleanupInProgressRef.current) return;
+104     cleanupInProgressRef.current = true;
+105 
+106     if (safetyTimerRef.current !== null) {
+107       globalThis.clearTimeout(safetyTimerRef.current);
+108       safetyTimerRef.current = null;
+109     }
+110 
+111     ghostRef.current?.el.remove();
+112     ghostRef.current = null;
+113 
+114     // Clear refs BEFORE releasePointerCapture so that any synchronous
+115     // lostpointercapture event triggered by it sees null refs and bails out.
+116     const el = capturedElRef.current;
+117     const pointerId = capturedPointerIdRef.current;
+118     capturedElRef.current = null;
+119     capturedPointerIdRef.current = null;
+120 
+121     if (el !== null && pointerId !== null) {
+122       try {
+123         el.releasePointerCapture(pointerId);
+124       } catch {
+125         // Element may no longer be in the DOM — ignore.
+126       }
+127     }
+128 
+129     isDragging.current = false;
+130     lastHoverZoneRef.current = null;
+131     startPos.current = null;
+132     cleanupInProgressRef.current = false;
+133   }, []);
+134 
+135   const cleanup = useCallback(() => {
+136     cleanupGhost();
+137   }, [cleanupGhost]);
+138 
+139   const onPointerDown = useCallback(
+140     (e: PointerEvent<HTMLElement>) => {
+141       if (e.pointerType === 'mouse' || !tileId) return;
+142       e.currentTarget.setPointerCapture(e.pointerId);
+143       capturedElRef.current = e.currentTarget;
+144       capturedPointerIdRef.current = e.pointerId;
+145       startPos.current = { x: e.clientX, y: e.clientY };
+146       isDragging.current = false;
+147 
+148       // When the captured element is removed from the DOM (e.g. a slot tile
+149       // gets auto-ejected while the user is dragging it), the browser fires
+150       // lostpointercapture and onPointerUp never fires.  Clean up here so the
+151       // ghost doesn't float for 5 seconds.
+152       e.currentTarget.addEventListener(
+153         'lostpointercapture',
+154         () => {
+155           if (!cleanupInProgressRef.current && isDragging.current) {
+156             cleanupGhost();
+157             onDragCancelRef.current?.();
+158           }
+159         },
+160         { once: true },
+161       );
+162     },
+163     [tileId, cleanupGhost],
+164   );
+165 
+166   const onPointerMove = useCallback(
+167     (e: PointerEvent<HTMLElement>) => {
+168       if (e.pointerType === 'mouse' || !startPos.current) return;
+169 
+170       if (!isDragging.current) {
+171         const dx = e.clientX - startPos.current.x;
+172         const dy = e.clientY - startPos.current.y;
+173         if (
+174           Math.abs(dx) > DRAG_THRESHOLD_PX ||
+175           Math.abs(dy) > DRAG_THRESHOLD_PX
+176         ) {
+177           isDragging.current = true;
+178           ghostRef.current = buildGhost(
+179             e.currentTarget,
+180             label,
+181             e.clientX,
+182             e.clientY,
+183           );
+184           onDragStart?.();
+185 
+186           safetyTimerRef.current = globalThis.setTimeout(() => {
+187             cleanupGhost();
+188             onDragCancelRef.current?.();
+189           }, 5000);
+190 
+191           document.addEventListener('contextmenu', cleanupGhost, {
+192             once: true,
+193           });
+194           document.addEventListener('visibilitychange', cleanupGhost, {
+195             once: true,
+196           });
+197         }
+198       }
+199 
+200       if (isDragging.current && ghostRef.current) {
+201         const { el, halfW, halfH } = ghostRef.current;
+202         el.style.left = `${e.clientX - halfW}px`;
+203         el.style.top = `${e.clientY - halfH}px`;
+204 
+205         // Detect zone under pointer for hover preview.
+206         // Temporarily hide the ghost so it doesn't intercept elementsFromPoint.
+207         el.style.visibility = 'hidden';
+208         const elements = document.elementsFromPoint(
+209           e.clientX,
+210           e.clientY,
+211         );
+212         el.style.visibility = 'visible';
+213         let detectedZone: number | null = null;
+214         for (const elem of elements) {
+215           if (
+216             elem instanceof HTMLElement &&
+217             elem.dataset['zoneIndex'] !== undefined
+218           ) {
+219             const parsed = Number.parseInt(
+220               elem.dataset['zoneIndex'],
+221               10,
+222             );
+223             if (!Number.isNaN(parsed)) {
+224               detectedZone = parsed;
+225               break;
+226             }
+227           }
+228         }
+229         if (detectedZone !== lastHoverZoneRef.current) {
+230           lastHoverZoneRef.current = detectedZone;
+231           onHoverZoneRef.current?.(detectedZone);
+232         }
+233       }
+234     },
+235     [label, onDragStart, cleanupGhost],
+236   );
+237 
+238   const onPointerUp = useCallback(
+239     (e: PointerEvent<HTMLElement>) => {
+240       if (e.pointerType === 'mouse' || !startPos.current) return;
+241 
+242       if (isDragging.current) {
+243         // Remove ghost before elementsFromPoint so it doesn't interfere.
+244         ghostRef.current?.el.remove();
+245         ghostRef.current = null;
+246 
+247         const elements = document.elementsFromPoint(
+248           e.clientX,
+249           e.clientY,
+250         );
+251         let dropped = false;
+252         for (const el of elements) {
+253           if (
+254             el instanceof HTMLElement &&
+255             el.dataset['zoneIndex'] !== undefined
+256           ) {
+257             const zoneIndex = Number.parseInt(
+258               el.dataset['zoneIndex'],
+259               10,
+260             );
+261             if (!Number.isNaN(zoneIndex)) {
+262               onDrop(tileId, zoneIndex);
+263               dropped = true;
+264               break;
+265             }
+266           }
+267           // Dropped on the tile bank container — return tile to bank.
+268           if (
+269             el instanceof HTMLElement &&
+270             el.dataset['tileBank'] !== undefined
+271           ) {
+272             onDropOnBank?.();
+273             dropped = true;
+274             break;
+275           }
+276         }
+277         if (!dropped) {
+278           onDragCancelRef.current?.();
+279         }
+280       }
+281 
+282       cleanup();
+283     },
+284     [tileId, onDrop, onDropOnBank, cleanup],
+285   );
+286 
+287   const onPointerCancel = useCallback(
+288     (e: PointerEvent<HTMLElement>) => {
+289       if (e.pointerType === 'mouse') return;
+290       if (isDragging.current) {
+291         onDragCancelRef.current?.();
+292       }
+293       cleanupGhost();
+294     },
+295     [cleanupGhost],
+296   );
+297 
+298   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
+299 };
 300
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:32:34Z)**_
@@ -446,321 +448,322 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:32:34Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useCallback, useEffect, useRef } from 'react';
-3	import { useAnswerGameContext } from '../useAnswerGameContext';
-4	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
-5	import { useSlotTileDrag } from '../useSlotTileDrag';
-6	import { useTileEvaluation } from '../useTileEvaluation';
-7	import {
-8	  triggerEjectReturn,
-9	  triggerPop,
-10	  triggerShake,
-11	} from './slot-animations';
-12	import type { RefObject } from 'react';
-13	import { playSound } from '@/lib/audio/AudioFeedback';
-14	
-15	export interface SlotRenderProps {
-16	  label: string | null;
-17	  tileId: string | null;
-18	  isActive: boolean;
-19	  isWrong: boolean;
-20	  isLocked: boolean;
-21	  isEmpty: boolean;
-22	  showCursor: boolean;
-23	  isPreview: boolean;
-24	  previewLabel: string | null;
-25	}
-26	
-27	export interface UseSlotBehaviorReturn {
-28	  renderProps: SlotRenderProps;
-29	  slotRef: RefObject<HTMLElement | null>;
-30	  dragRef: RefObject<HTMLButtonElement | null>;
-31	  handleClick: () => void;
-32	  isBeingDragged: boolean;
-33	  pointerHandlers: {
-34	    onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
-35	    onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
-36	    onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
-37	    onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
-38	  };
-39	}
-40	
-41	export const useSlotBehavior = (
-42	  index: number,
-43	): UseSlotBehaviorReturn => {
-44	  const {
-45	    zones,
-46	    allTiles,
-47	    activeSlotIndex,
-48	    config,
-49	    dragActiveTileId,
-50	    dragHoverZoneIndex,
-51	  } = useAnswerGameContext();
-52	  const dispatch = useAnswerGameDispatch();
-53	  const { placeTile } = useTileEvaluation();
-54	
-55	  const zone = zones[index];
-56	  const tileId = zone?.placedTileId ?? null;
-57	  const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
-58	  const label = tile?.label ?? null;
-59	  const isWrong = zone?.isWrong ?? false;
-60	  const isLocked = zone?.isLocked ?? false;
-61	  const isEmpty = tileId === null;
-62	
-63	  // Resolve interaction mode: explicit config or inferred from inputMethod
-64	  const slotInteraction =
-65	    config.slotInteraction ??
-66	    (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
-67	  const isOrdered = slotInteraction === 'ordered';
-68	
-69	  const isActive = isOrdered && activeSlotIndex === index;
-70	  const showCursor =
-71	    isActive && isEmpty && config.inputMethod !== 'drag';
-72	  const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
-73	
-74	  // Preview derivation
-75	  const isPreviewTarget =
-76	    dragHoverZoneIndex === index && dragActiveTileId !== null;
-77	
-78	  const draggedTile = dragActiveTileId
-79	    ? allTiles.find((t) => t.id === dragActiveTileId)
-80	    : null;
-81	
-82	  let isPreview = false;
-83	  let previewLabel: string | null = null;
-84	
-85	  if (isPreviewTarget) {
-86	    isPreview = true;
-87	    previewLabel = draggedTile?.label ?? null;
-88	  } else if (isBeingDragged && dragHoverZoneIndex !== null) {
-89	    // This slot is the source of the active drag AND the drag is hovering over some target.
-90	    isPreview = true;
-91	    // Source slot shows what it will receive: the target's current tile label.
-92	    const targetZone = zones[dragHoverZoneIndex];
-93	    const targetTile = targetZone?.placedTileId
-94	      ? allTiles.find((t) => t.id === targetZone.placedTileId)
-95	      : null;
-96	    previewLabel = targetTile?.label ?? null; // null means source will become empty
-97	  }
-98	
-99	  const slotRef = useRef<HTMLElement | null>(null);
-100	  const prevIsWrongRef = useRef(isWrong);
-101	  const prevTileIdRef = useRef(tileId);
-102	  const prevDragActiveTileIdRef = useRef(dragActiveTileId);
-103	  // Holds the startFade handle returned by triggerEjectReturn so we can call
-104	  // it when EJECT_TILE fires and the tile is back in the bank.
-105	  const startFadeRef = useRef<(() => void) | null>(null);
-106	
-107	  // Drop target handler — choose evaluation or swap based on interaction mode
-108	  const handleDrop = useCallback(
-109	    (droppedTileId: string, targetZoneIndex: number) => {
-110	      const targetZone = zones[targetZoneIndex];
-111	      if (!targetZone) return;
-112	
-113	      // Always check for slot-to-slot drag first (regardless of interaction
-114	      // mode) so that SWAP_TILES clears the source slot. Falling through to
-115	      // placeTile for slot-to-slot would leave the source unchanged and
-116	      // duplicate the tile.
-117	      const sourceZoneIndex = zones.findIndex(
-118	        (z) => z.placedTileId === droppedTileId,
-119	      );
-120	      if (sourceZoneIndex !== -1) {
-121	        const droppedTile = allTiles.find(
-122	          (t) => t.id === droppedTileId,
-123	        );
-124	        const displacedTile = targetZone.placedTileId
-125	          ? allTiles.find((t) => t.id === targetZone.placedTileId)
-126	          : null;
-127	        const sourceZone = zones[sourceZoneIndex];
-128	        const droppedCorrect =
-129	          droppedTile?.value === targetZone.expectedValue;
-130	
-131	        if (displacedTile) {
-132	          // True swap: correct if either tile lands correctly
-133	          const displacedCorrect =
-134	            displacedTile.value === sourceZone?.expectedValue;
-135	          playSound(
-136	            droppedCorrect || displacedCorrect ? 'correct' : 'wrong',
-137	          );
-138	        } else {
-139	          // Move to empty slot: evaluate only the moved tile
-140	          playSound(droppedCorrect ? 'correct' : 'wrong');
-141	        }
-142	
-143	        dispatch({
-144	          type: 'SWAP_TILES',
-145	          fromZoneIndex: sourceZoneIndex,
-146	          toZoneIndex: targetZoneIndex,
-147	        });
-148	        return;
-149	      }
-150	      placeTile(droppedTileId, targetZoneIndex);
-151	    },
-152	    [placeTile, zones, dispatch, allTiles],
-153	  );
-154	
-155	  // Register as drop target
-156	  useEffect(() => {
-157	    const el = slotRef.current;
-158	    if (!el) return;
-159	    return dropTargetForElements({
-160	      element: el,
-161	      getData: () => ({ zoneIndex: index }),
-162	      onDragEnter: () => {
-163	        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: index });
-164	      },
-165	      onDragLeave: () => {
-166	        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
-167	      },
-168	      onDrop: ({ source }) => {
-169	        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
-170	        // Slot-tile drags (sourceZoneIndex present) handle their own
-171	        // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
-172	        if (typeof source.data['sourceZoneIndex'] === 'number') return;
-173	        const sourceTileId = source.data['tileId'];
-174	        if (typeof sourceTileId === 'string') {
-175	          handleDrop(sourceTileId, index);
-176	          // Clear drag active state here — the draggable component (bank tile)
-177	          // unmounts when PLACE_TILE fires, so its own onDrop may never run.
-178	          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-179	        }
-180	      },
-181	    });
-182	  }, [index, handleDrop, dispatch]);
-183	
-184	  const handleHoverZone = useCallback(
-185	    (zoneIndex: number | null) => {
-186	      dispatch({ type: 'SET_DRAG_HOVER', zoneIndex });
-187	    },
-188	    [dispatch],
-189	  );
-190	
-191	  // Drag source for filled slots
-192	  const {
-193	    dragRef,
-194	    onPointerDown,
-195	    onPointerMove,
-196	    onPointerUp,
-197	    onPointerCancel,
-198	  } = useSlotTileDrag({
-199	    tileId,
-200	    label,
-201	    zoneIndex: index,
-202	    onDrop: handleDrop,
-203	    onHoverZone: handleHoverZone,
-204	  });
-205	
-206	  // Click handler: remove tile from slot (returns to bank)
-207	  const handleClick = useCallback(() => {
-208	    if (isEmpty) return;
-209	    dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
-210	  }, [isEmpty, dispatch, index]);
-211	
-212	  // Feedback animations: trigger on state transitions
-213	  useEffect(() => {
-214	    const el = slotRef.current;
-215	    if (!el) return;
-216	
-217	    const prevDragActiveTileId = prevDragActiveTileIdRef.current;
-218	    prevDragActiveTileIdRef.current = dragActiveTileId;
-219	
-220	    const wasWrong = prevIsWrongRef.current;
-221	    prevIsWrongRef.current = isWrong;
-222	
-223	    const prevTileId = prevTileIdRef.current;
-224	    prevTileIdRef.current = tileId;
-225	    const freshlyPlaced = tileId !== null && prevTileId === null;
-226	
-227	    if (
-228	      tileId !== null &&
-229	      prevTileId !== null &&
-230	      tileId !== prevTileId
-231	    ) {
-232	      // Tile swapped between slots — animate per zone; sound played once in handleDrop.
-233	      if (isWrong) {
-234	        triggerShake(el);
-235	      } else {
-236	        triggerPop(el);
-237	      }
-238	    } else if (isWrong && !wasWrong) {
-239	      // Newly wrong via PLACE_TILE (sound already played by useTileEvaluation).
-240	      triggerShake(el);
-241	
-242	      if (config.wrongTileBehavior === 'lock-auto-eject') {
-243	        // Start the eject animation after the shake settles.
-244	        const animationTimerId = setTimeout(() => {
-245	          const tileEl = dragRef.current;
-246	          if (!tileEl) return;
-247	          const { startFade } = triggerEjectReturn(
-248	            tileEl,
-249	            tileId,
-250	            () => {},
-251	          );
-252	          startFadeRef.current = startFade;
-253	        }, 350);
-254	        return () => clearTimeout(animationTimerId);
-255	      }
-256	    } else if (freshlyPlaced && !isWrong) {
-257	      // Correctly placed from bank (sound already played by useTileEvaluation).
-258	      triggerPop(el);
-259	    } else if (tileId === null && prevTileId !== null) {
-260	      // Tile left this slot.
-261	      // If the tile that left matches the previously-active drag tile, this is
-262	      // a swap/move — the sound was already played in handleDrop.
-263	      const wasSwapOrMove = prevTileId === prevDragActiveTileId;
-264	      if (!wasSwapOrMove) {
-265	        playSound('tile-place');
-266	      }
-267	      startFadeRef.current?.();
-268	      startFadeRef.current = null;
-269	    }
-270	  }, [
-271	    isWrong,
-272	    tileId,
-273	    config.wrongTileBehavior,
-274	    dragRef,
-275	    dragActiveTileId,
-276	  ]);
-277	
-278	  // EJECT_TILE dispatch lives in its own effect (no DOM ref needed) so the
-279	  // timer survives when the bank tile unmounts after PLACE_TILE. The animation
-280	  // effect above also uses isWrong/tileId so both fire on the same transition.
-281	  useEffect(() => {
-282	    if (!isWrong || config.wrongTileBehavior !== 'lock-auto-eject')
-283	      return;
-284	    const timerId = setTimeout(() => {
-285	      dispatch({ type: 'EJECT_TILE', zoneIndex: index });
-286	    }, 1000);
-287	    return () => clearTimeout(timerId);
-288	  }, [isWrong, config.wrongTileBehavior, dispatch, index]);
-289	
-290	  return {
-291	    renderProps: {
-292	      label,
-293	      tileId,
-294	      isActive,
-295	      isWrong,
-296	      isLocked,
-297	      isEmpty,
-298	      showCursor,
-299	      isPreview,
-300	      previewLabel,
-301	    },
-302	    slotRef,
-303	    dragRef,
-304	    handleClick,
-305	    isBeingDragged,
-306	    pointerHandlers: {
-307	      onPointerDown,
-308	      onPointerMove,
-309	      onPointerUp,
-310	      onPointerCancel,
-311	    },
-312	  };
-313	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useCallback, useEffect, useRef } from 'react';
+3 import { useAnswerGameContext } from '../useAnswerGameContext';
+4 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+5 import { useSlotTileDrag } from '../useSlotTileDrag';
+6 import { useTileEvaluation } from '../useTileEvaluation';
+7 import {
+8   triggerEjectReturn,
+9   triggerPop,
+10   triggerShake,
+11 } from './slot-animations';
+12 import type { RefObject } from 'react';
+13 import { playSound } from '@/lib/audio/AudioFeedback';
+14 
+15 export interface SlotRenderProps {
+16   label: string | null;
+17   tileId: string | null;
+18   isActive: boolean;
+19   isWrong: boolean;
+20   isLocked: boolean;
+21   isEmpty: boolean;
+22   showCursor: boolean;
+23   isPreview: boolean;
+24   previewLabel: string | null;
+25 }
+26 
+27 export interface UseSlotBehaviorReturn {
+28   renderProps: SlotRenderProps;
+29   slotRef: RefObject<HTMLElement | null>;
+30   dragRef: RefObject<HTMLButtonElement | null>;
+31   handleClick: () => void;
+32   isBeingDragged: boolean;
+33   pointerHandlers: {
+34     onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
+35     onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
+36     onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
+37     onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
+38   };
+39 }
+40 
+41 export const useSlotBehavior = (
+42   index: number,
+43 ): UseSlotBehaviorReturn => {
+44   const {
+45     zones,
+46     allTiles,
+47     activeSlotIndex,
+48     config,
+49     dragActiveTileId,
+50     dragHoverZoneIndex,
+51   } = useAnswerGameContext();
+52   const dispatch = useAnswerGameDispatch();
+53   const { placeTile } = useTileEvaluation();
+54 
+55   const zone = zones[index];
+56   const tileId = zone?.placedTileId ?? null;
+57   const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
+58   const label = tile?.label ?? null;
+59   const isWrong = zone?.isWrong ?? false;
+60   const isLocked = zone?.isLocked ?? false;
+61   const isEmpty = tileId === null;
+62 
+63   // Resolve interaction mode: explicit config or inferred from inputMethod
+64   const slotInteraction =
+65     config.slotInteraction ??
+66     (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
+67   const isOrdered = slotInteraction === 'ordered';
+68 
+69   const isActive = isOrdered && activeSlotIndex === index;
+70   const showCursor =
+71     isActive && isEmpty && config.inputMethod !== 'drag';
+72   const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
+73 
+74   // Preview derivation
+75   const isPreviewTarget =
+76     dragHoverZoneIndex === index && dragActiveTileId !== null;
+77 
+78   const draggedTile = dragActiveTileId
+79     ? allTiles.find((t) => t.id === dragActiveTileId)
+80     : null;
+81 
+82   let isPreview = false;
+83   let previewLabel: string | null = null;
+84 
+85   if (isPreviewTarget) {
+86     isPreview = true;
+87     previewLabel = draggedTile?.label ?? null;
+88   } else if (isBeingDragged && dragHoverZoneIndex !== null) {
+89     // This slot is the source of the active drag AND the drag is hovering over some target.
+90     isPreview = true;
+91     // Source slot shows what it will receive: the target's current tile label.
+92     const targetZone = zones[dragHoverZoneIndex];
+93     const targetTile = targetZone?.placedTileId
+94       ? allTiles.find((t) => t.id === targetZone.placedTileId)
+95       : null;
+96     previewLabel = targetTile?.label ?? null; // null means source will become empty
+97   }
+98 
+99   const slotRef = useRef<HTMLElement | null>(null);
+100   const prevIsWrongRef = useRef(isWrong);
+101   const prevTileIdRef = useRef(tileId);
+102   const prevDragActiveTileIdRef = useRef(dragActiveTileId);
+103   // Holds the startFade handle returned by triggerEjectReturn so we can call
+104   // it when EJECT_TILE fires and the tile is back in the bank.
+105   const startFadeRef = useRef<(() => void) | null>(null);
+106 
+107   // Drop target handler — choose evaluation or swap based on interaction mode
+108   const handleDrop = useCallback(
+109     (droppedTileId: string, targetZoneIndex: number) => {
+110       const targetZone = zones[targetZoneIndex];
+111       if (!targetZone) return;
+112 
+113       // Always check for slot-to-slot drag first (regardless of interaction
+114       // mode) so that SWAP_TILES clears the source slot. Falling through to
+115       // placeTile for slot-to-slot would leave the source unchanged and
+116       // duplicate the tile.
+117       const sourceZoneIndex = zones.findIndex(
+118         (z) => z.placedTileId === droppedTileId,
+119       );
+120       if (sourceZoneIndex !== -1) {
+121         const droppedTile = allTiles.find(
+122           (t) => t.id === droppedTileId,
+123         );
+124         const displacedTile = targetZone.placedTileId
+125           ? allTiles.find((t) => t.id === targetZone.placedTileId)
+126           : null;
+127         const sourceZone = zones[sourceZoneIndex];
+128         const droppedCorrect =
+129           droppedTile?.value === targetZone.expectedValue;
+130 
+131         if (displacedTile) {
+132           // True swap: correct if either tile lands correctly
+133           const displacedCorrect =
+134             displacedTile.value === sourceZone?.expectedValue;
+135           playSound(
+136             droppedCorrect || displacedCorrect ? 'correct' : 'wrong',
+137           );
+138         } else {
+139           // Move to empty slot: evaluate only the moved tile
+140           playSound(droppedCorrect ? 'correct' : 'wrong');
+141         }
+142 
+143         dispatch({
+144           type: 'SWAP_TILES',
+145           fromZoneIndex: sourceZoneIndex,
+146           toZoneIndex: targetZoneIndex,
+147         });
+148         return;
+149       }
+150       placeTile(droppedTileId, targetZoneIndex);
+151     },
+152     [placeTile, zones, dispatch, allTiles],
+153   );
+154 
+155   // Register as drop target
+156   useEffect(() => {
+157     const el = slotRef.current;
+158     if (!el) return;
+159     return dropTargetForElements({
+160       element: el,
+161       getData: () => ({ zoneIndex: index }),
+162       onDragEnter: () => {
+163         dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: index });
+164       },
+165       onDragLeave: () => {
+166         dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+167       },
+168       onDrop: ({ source }) => {
+169         dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+170         // Slot-tile drags (sourceZoneIndex present) handle their own
+171         // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
+172         if (typeof source.data['sourceZoneIndex'] === 'number') return;
+173         const sourceTileId = source.data['tileId'];
+174         if (typeof sourceTileId === 'string') {
+175           handleDrop(sourceTileId, index);
+176           // Clear drag active state here — the draggable component (bank tile)
+177           // unmounts when PLACE_TILE fires, so its own onDrop may never run.
+178           dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+179         }
+180       },
+181     });
+182   }, [index, handleDrop, dispatch]);
+183 
+184   const handleHoverZone = useCallback(
+185     (zoneIndex: number | null) => {
+186       dispatch({ type: 'SET_DRAG_HOVER', zoneIndex });
+187     },
+188     [dispatch],
+189   );
+190 
+191   // Drag source for filled slots
+192   const {
+193     dragRef,
+194     onPointerDown,
+195     onPointerMove,
+196     onPointerUp,
+197     onPointerCancel,
+198   } = useSlotTileDrag({
+199     tileId,
+200     label,
+201     zoneIndex: index,
+202     onDrop: handleDrop,
+203     onHoverZone: handleHoverZone,
+204   });
+205 
+206   // Click handler: remove tile from slot (returns to bank)
+207   const handleClick = useCallback(() => {
+208     if (isEmpty) return;
+209     dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
+210   }, [isEmpty, dispatch, index]);
+211 
+212   // Feedback animations: trigger on state transitions
+213   useEffect(() => {
+214     const el = slotRef.current;
+215     if (!el) return;
+216 
+217     const prevDragActiveTileId = prevDragActiveTileIdRef.current;
+218     prevDragActiveTileIdRef.current = dragActiveTileId;
+219 
+220     const wasWrong = prevIsWrongRef.current;
+221     prevIsWrongRef.current = isWrong;
+222 
+223     const prevTileId = prevTileIdRef.current;
+224     prevTileIdRef.current = tileId;
+225     const freshlyPlaced = tileId !== null && prevTileId === null;
+226 
+227     if (
+228       tileId !== null &&
+229       prevTileId !== null &&
+230       tileId !== prevTileId
+231     ) {
+232       // Tile swapped between slots — animate per zone; sound played once in handleDrop.
+233       if (isWrong) {
+234         triggerShake(el);
+235       } else {
+236         triggerPop(el);
+237       }
+238     } else if (isWrong && !wasWrong) {
+239       // Newly wrong via PLACE_TILE (sound already played by useTileEvaluation).
+240       triggerShake(el);
+241 
+242       if (config.wrongTileBehavior === 'lock-auto-eject') {
+243         // Start the eject animation after the shake settles.
+244         const animationTimerId = setTimeout(() => {
+245           const tileEl = dragRef.current;
+246           if (!tileEl) return;
+247           const { startFade } = triggerEjectReturn(
+248             tileEl,
+249             tileId,
+250             () => {},
+251           );
+252           startFadeRef.current = startFade;
+253         }, 350);
+254         return () => clearTimeout(animationTimerId);
+255       }
+256     } else if (freshlyPlaced && !isWrong) {
+257       // Correctly placed from bank (sound already played by useTileEvaluation).
+258       triggerPop(el);
+259     } else if (tileId === null && prevTileId !== null) {
+260       // Tile left this slot.
+261       // If the tile that left matches the previously-active drag tile, this is
+262       // a swap/move — the sound was already played in handleDrop.
+263       const wasSwapOrMove = prevTileId === prevDragActiveTileId;
+264       if (!wasSwapOrMove) {
+265         playSound('tile-place');
+266       }
+267       startFadeRef.current?.();
+268       startFadeRef.current = null;
+269     }
+270   }, [
+271     isWrong,
+272     tileId,
+273     config.wrongTileBehavior,
+274     dragRef,
+275     dragActiveTileId,
+276   ]);
+277 
+278   // EJECT_TILE dispatch lives in its own effect (no DOM ref needed) so the
+279   // timer survives when the bank tile unmounts after PLACE_TILE. The animation
+280   // effect above also uses isWrong/tileId so both fire on the same transition.
+281   useEffect(() => {
+282     if (!isWrong || config.wrongTileBehavior !== 'lock-auto-eject')
+283       return;
+284     const timerId = setTimeout(() => {
+285       dispatch({ type: 'EJECT_TILE', zoneIndex: index });
+286     }, 1000);
+287     return () => clearTimeout(timerId);
+288   }, [isWrong, config.wrongTileBehavior, dispatch, index]);
+289 
+290   return {
+291     renderProps: {
+292       label,
+293       tileId,
+294       isActive,
+295       isWrong,
+296       isLocked,
+297       isEmpty,
+298       showCursor,
+299       isPreview,
+300       previewLabel,
+301     },
+302     slotRef,
+303     dragRef,
+304     handleClick,
+305     isBeingDragged,
+306     pointerHandlers: {
+307       onPointerDown,
+308       onPointerMove,
+309       onPointerUp,
+310       onPointerCancel,
+311     },
+312   };
+313 };
 314
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:32:36Z)**_
@@ -780,125 +783,126 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:32:38Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-1	import { skeuoStyle } from '../styles';
-2	import { useSlotBehavior } from './useSlotBehavior';
-3	import type { SlotRenderProps } from './useSlotBehavior';
-4	import type { ReactNode, Ref } from 'react';
-5	
-6	interface SlotProps {
-7	  index: number;
-8	  as?: 'li' | 'span' | 'div';
-9	  className?: string;
-10	  children: (props: SlotRenderProps) => ReactNode;
-11	}
-12	
-13	export const Slot = ({
-14	  index,
-15	  as: Tag = 'li',
-16	  className,
-17	  children,
-18	}: SlotProps) => {
-19	  const {
-20	    renderProps,
-21	    slotRef,
-22	    dragRef,
-23	    handleClick,
-24	    pointerHandlers,
-25	    isBeingDragged,
-26	  } = useSlotBehavior(index);
-27	
-28	  const {
-29	    label,
-30	    isEmpty,
-31	    isWrong,
-32	    isActive,
-33	    showCursor,
-34	    isPreview,
-35	    previewLabel,
-36	  } = renderProps;
-37	
-38	  const ariaLabel = isEmpty
-39	    ? `Slot ${index + 1}, empty`
-40	    : `Slot ${index + 1}, filled with ${label}`;
-41	
-42	  const stateClasses = [
-43	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-44	    isPreview
-45	      ? 'border-dashed border-primary'
-46	      : isEmpty && !isActive
-47	        ? 'border-border'
-48	        : isEmpty && isActive
-49	          ? 'border-primary ring-2 ring-primary ring-offset-2'
-50	          : isWrong
-51	            ? 'border-destructive bg-destructive/10 text-destructive'
-52	            : 'border-primary bg-primary/10 text-primary',
-53	  ]
-54	    .filter(Boolean)
-55	    .join(' ');
-56	
-57	  return (
-58	    <Tag
-59	      ref={
-60	        slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
-61	      }
-62	      aria-label={ariaLabel}
-63	      data-zone-index={index}
-64	      className={[stateClasses, className].filter(Boolean).join(' ')}
-65	      style={
-66	        isPreview
-67	          ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
-68	          : undefined
-69	      }
-70	    >
-71	      {isEmpty ? (
-72	        <>
-73	          {isPreview && previewLabel !== null ? (
-74	            <span className="text-xl font-bold opacity-50">
-75	              {previewLabel}
-76	            </span>
-77	          ) : (
-78	            children(renderProps)
-79	          )}
-80	          {showCursor ? (
-81	            <span
-82	              aria-hidden="true"
-83	              className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
-84	            />
-85	          ) : null}
-86	        </>
-87	      ) : (
-88	        <>
-89	          <div
-90	            className="absolute inset-0 bg-muted/60 shadow-inner"
-91	            aria-hidden="true"
-92	          />
-93	          <button
-94	            ref={dragRef}
-95	            type="button"
-96	            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
-97	            aria-hidden={
-98	              isBeingDragged && !isPreview ? 'true' : undefined
-99	            }
-100	            style={skeuoStyle}
-101	            onClick={handleClick}
-102	            onPointerDown={pointerHandlers.onPointerDown}
-103	            onPointerMove={pointerHandlers.onPointerMove}
-104	            onPointerUp={pointerHandlers.onPointerUp}
-105	            onPointerCancel={pointerHandlers.onPointerCancel}
-106	          >
-107	            {isPreview && previewLabel !== null ? (
-108	              <span className="text-xl font-bold">{previewLabel}</span>
-109	            ) : (
-110	              children(renderProps)
-111	            )}
-112	          </button>
-113	        </>
-114	      )}
-115	    </Tag>
-116	  );
-117	};
+1 import { skeuoStyle } from '../styles';
+2 import { useSlotBehavior } from './useSlotBehavior';
+3 import type { SlotRenderProps } from './useSlotBehavior';
+4 import type { ReactNode, Ref } from 'react';
+5 
+6 interface SlotProps {
+7   index: number;
+8   as?: 'li' | 'span' | 'div';
+9   className?: string;
+10   children: (props: SlotRenderProps) => ReactNode;
+11 }
+12 
+13 export const Slot = ({
+14   index,
+15   as: Tag = 'li',
+16   className,
+17   children,
+18 }: SlotProps) => {
+19   const {
+20     renderProps,
+21     slotRef,
+22     dragRef,
+23     handleClick,
+24     pointerHandlers,
+25     isBeingDragged,
+26   } = useSlotBehavior(index);
+27 
+28   const {
+29     label,
+30     isEmpty,
+31     isWrong,
+32     isActive,
+33     showCursor,
+34     isPreview,
+35     previewLabel,
+36   } = renderProps;
+37 
+38   const ariaLabel = isEmpty
+39     ? `Slot ${index + 1}, empty`
+40     : `Slot ${index + 1}, filled with ${label}`;
+41 
+42   const stateClasses = [
+43     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+44     isPreview
+45       ? 'border-dashed border-primary'
+46       : isEmpty && !isActive
+47         ? 'border-border'
+48         : isEmpty && isActive
+49           ? 'border-primary ring-2 ring-primary ring-offset-2'
+50           : isWrong
+51             ? 'border-destructive bg-destructive/10 text-destructive'
+52             : 'border-primary bg-primary/10 text-primary',
+53   ]
+54     .filter(Boolean)
+55     .join(' ');
+56 
+57   return (
+58     <Tag
+59       ref={
+60         slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
+61       }
+62       aria-label={ariaLabel}
+63       data-zone-index={index}
+64       className={[stateClasses, className].filter(Boolean).join(' ')}
+65       style={
+66         isPreview
+67           ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
+68           : undefined
+69       }
+70     >
+71       {isEmpty ? (
+72         <>
+73           {isPreview && previewLabel !== null ? (
+74             <span className="text-xl font-bold opacity-50">
+75               {previewLabel}
+76             </span>
+77           ) : (
+78             children(renderProps)
+79           )}
+80           {showCursor ? (
+81             <span
+82               aria-hidden="true"
+83               className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+84             />
+85           ) : null}
+86         </>
+87       ) : (
+88         <>
+89           <div
+90             className="absolute inset-0 bg-muted/60 shadow-inner"
+91             aria-hidden="true"
+92           />
+93           <button
+94             ref={dragRef}
+95             type="button"
+96             className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
+97             aria-hidden={
+98               isBeingDragged && !isPreview ? 'true' : undefined
+99             }
+100             style={skeuoStyle}
+101             onClick={handleClick}
+102             onPointerDown={pointerHandlers.onPointerDown}
+103             onPointerMove={pointerHandlers.onPointerMove}
+104             onPointerUp={pointerHandlers.onPointerUp}
+105             onPointerCancel={pointerHandlers.onPointerCancel}
+106           >
+107             {isPreview && previewLabel !== null ? (
+108               <span className="text-xl font-bold">{previewLabel}</span>
+109             ) : (
+110               children(renderProps)
+111             )}
+112           </button>
+113         </>
+114       )}
+115     </Tag>
+116   );
+117 };
 118
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:32:38Z)**_
@@ -908,28 +912,29 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:32:38Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/magnetic-snap.ts`
 
 ```text
-1	export function lerp(a: number, b: number, t: number): number {
-2	  return a + (b - a) * t;
-3	}
-4	
-5	const MAGNETIC_RADIUS = 60;
-6	const MAGNETIC_STRENGTH = 0.3;
-7	
-8	export function magneticOffset(
-9	  distance: number,
-10	  currentPos: { x: number; y: number },
-11	  zoneCenter: { x: number; y: number },
-12	): { x: number; y: number } {
-13	  if (distance >= MAGNETIC_RADIUS) return { x: 0, y: 0 };
-14	
-15	  const t = (1 - distance / MAGNETIC_RADIUS) * MAGNETIC_STRENGTH;
-16	  return {
-17	    x: lerp(currentPos.x, zoneCenter.x, t) - currentPos.x,
-18	    y: lerp(currentPos.y, zoneCenter.y, t) - currentPos.y,
-19	  };
-20	}
+1 export function lerp(a: number, b: number, t: number): number {
+2   return a + (b - a) * t;
+3 }
+4 
+5 const MAGNETIC_RADIUS = 60;
+6 const MAGNETIC_STRENGTH = 0.3;
+7 
+8 export function magneticOffset(
+9   distance: number,
+10   currentPos: { x: number; y: number },
+11   zoneCenter: { x: number; y: number },
+12 ): { x: number; y: number } {
+13   if (distance >= MAGNETIC_RADIUS) return { x: 0, y: 0 };
+14 
+15   const t = (1 - distance / MAGNETIC_RADIUS) * MAGNETIC_STRENGTH;
+16   return {
+17     x: lerp(currentPos.x, zoneCenter.x, t) - currentPos.x,
+18     y: lerp(currentPos.y, zoneCenter.y, t) - currentPos.y,
+19   };
+20 }
 21
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:34:59Z)**_
@@ -946,7 +951,6 @@ The user wants the drop to trigger as soon as the ghost tile visually overlaps a
 Currently, zone detection uses `document.elementsFromPoint(e.clientX, e.clientY)` - which only checks the single pointer point. This means you need the pointer (finger) to be directly over the slot.
 
 ### Current Desktop HTML5 DnD Behavior (`useSlotBehavior.ts`)
-
 
 The desktop implementation relies on `dropTargetForElements` from `@atlaskit/pragmatic-drag-and-drop`, which only triggers when the pointer itself is positioned over the registered element.
 
@@ -1001,17 +1005,20 @@ Actually, I realize the `<Tag>` component is already serving as that outer conta
 Wait, I need to reconsider—the `overflow-hidden` on the slot is actually what clips the background div to the rounded corners. Without it, those elements would visually overflow past the border-radius. So I either need to keep `overflow-hidden` and find another expansion method, or add both `overflow-hidden` and `rounded-[inherit]` to the background div and button themselves to maintain the clipping. The button already has `rounded-[inherit]`, so I'd just need to add `overflow-hidden` there too.
 
 Let me settle on the clean approach: add `overflow-hidden rounded-[inherit]` to both the background div and button, then implement the 5-point touch sampling in `useTouchDrag.ts` with a helper function. ZoneFromPoints` that hides ghost, samples multiple points, shows ghost, returns first zone found
+
 - Use it in both `onPointerMove` and `onPointerUp`
 
 ### Desktop: Expand drop zone using CSS
 
 In `Slot.tsx`:
+
 - Remove `overflow-hidden` from outer stateClasses
 - Add `overflow-hidden` to the bg div and ensure button has `overflow-hidden`
-- Add an expanded transparent div with `inset: -16px` 
+- Add an expanded transparent div with `inset: -16px`
 - Pass a `expandedDropRef` to this div
 
 In `useSlotBehavior.ts`:
+
 - Add `expandedDropRef = useRef<HTMLDivElement | null>(null)`
 - Register `dropTargetForElements` on `expandedDropRef` instead of (or in addition to) `slotRef`
 - Expose `expandedDropRef` in return
@@ -1027,23 +1034,27 @@ Now I have a good understanding of the current implementation. Let me summarize 
 ## Current State
 
 ### Touch (useTouchDrag.ts)
+
 **onPointerMove** (hover detection): Uses a single `document.elementsFromPoint(e.clientX, e.clientY)` - only the pointer position.
 
 **onPointerUp** (drop detection): Also uses a single `document.elementsFromPoint(e.clientX, e.clientY)` - only the pointer position.
 
 ### Desktop (useSlotBehavior.ts)
-Uses `dropTargetForElements` from `@atlaskit/pragmatic-drag-and-drop`. 
+
+Uses `dropTargetForElements` from `@atlaskit/pragmatic-drag-and-drop`.
 
 The `<li>` element is registered as a drop target with `data-zone-index` set on it, so drops only trigger when the pointer is directly over that element.
 
 ## Proposed Solutions
 
 ### Touch (5-point sampling)
+
 I'll modify both `onPointerMove` and `onPointerUp` in `useTouchDrag.ts` to sample 5 points instead of just the pointer center—the pointer position plus 4 ghost corners at `±halfW, ±halfH` offsets. For each point, I'll call `elementsFromPoint` and use the first zone element found.
 
 This way the drop zone activates as soon as the ghost tile visually overlaps a slot.
 
 ### Desktop (expanded hit area)
+
 The handoff doc suggests either wrapping the slot's inner content with an absolutely-positioned div that extends 24-28px beyond the visual bounds and registering that as the drop target, or using the monitor to check drag position against each slot's bounding box. The expanded invisible div approach seems cleaner—I'd create it inside `Slot.tsx` positioned absolutely with negative inset values to extend beyond the visual slot bounds, then register that as the drop target instead of the `<li>` element itself.
 
 The tricky part is that `dropTargetForElements` is currently registered to `slotRef` in `useSlotBehavior.ts`, so I'd need to either register to a separate `dropRef` or expand the `<Tag>` element itself while keeping the visual styling intact. The simplest solution is probably to add an `overflow-visible` container with a negative margin on the slot, using a separate inner div for visual styling while the outer element handles the expanded hit area.
@@ -1067,6 +1078,7 @@ Let me think about the simplest possible implementation:
 Actually, for the touch path, the solution is very clean. For the desktop path, let me think of the cleanest minimal approach.
 
 For desktop, the simplest thing that won't break layout:
+
 - Keep the `<Tag>` element as the visual container with `overflow-hidden`  
 - Add a parent wrapper with `overflow-visible` that's used as the drop target
 - But this would require changing how `slotRef` is used...
@@ -1100,11 +1112,13 @@ For touch, I'll add a 5-point sampling approach in the drag handler—instead of
 On desktop, I need to restructure the Slot component to include an expanded hit zone div, then wire that up through the slot behavior hook so it receives the drag events. It's a moderate refactor but necessary to make the expanded hit area work properly. the concrete changes:
 
 **`useSlotBehavior.ts`:**
-- Add `dropRef = useRef<HTMLDivElement | null>(null)` 
+
+- Add `dropRef = useRef<HTMLDivElement | null>(null)`
 - Change `dropTargetForElements({ element: el })` to use `dropRef.current`
 - Return `dropRef` in the return value
 
 **`Slot.tsx`:**
+
 - Accept `dropRef` from `useSlotBehavior`
 - Remove `overflow-hidden` from `stateClasses` (or keep it and find another way)
 - Add `<div ref={dropRef} className="absolute inset-[-12px] z-0 pointer-events-none" />` as the expanded hit zone
@@ -1206,6 +1220,7 @@ Found 5 files
 .claude/worktrees/bold-chatelet/src/components/answer-game/Slot/SentenceWithGaps.test.tsx
 .claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:38:33Z)**_
@@ -1219,8 +1234,8 @@ Summary of changes:
 2. **`useSlotBehavior.ts`** - add `dropRef`, register drop target to it, return `dropRef` + `isDragActive`  
 3. **`Slot.tsx`** - use `dropRef`, remove `overflow-hidden` from stateClasses, add `rounded-[inherit]` to bg div, add expanded hit zone div
 
-
 4. Starting with the implementation...
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:38:36Z)**_
@@ -1241,6 +1256,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:38:46Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:38:49Z)**_
@@ -1255,6 +1271,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:39:00Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:39:04Z)**_
@@ -1269,6 +1286,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:39:08Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:39:12Z)**_
@@ -1289,12 +1307,14 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:39:14Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:39:17Z)**_
 
 <think><details><summary>Thought Process</summary>
 I need to:
+
 1. Change the drop target registration to use `dropRef.current` instead of `slotRef.current`
 2. Return `dropRef` and `isDragActive` from the hook
 
@@ -1313,6 +1333,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:39:20Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:39:27Z)**_
@@ -1323,6 +1344,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:39:27Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:39:31Z)**_
@@ -1337,6 +1359,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:39:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:39:39Z)**_
@@ -1353,6 +1376,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:39:40Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:39:43Z)**_
@@ -1367,6 +1391,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:39:47Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:39:50Z)**_
@@ -1381,6 +1406,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:39:52Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:39:58Z)**_
@@ -1391,6 +1417,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:39:58Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:01Z)**_
@@ -1405,6 +1432,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:40:03Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:07Z)**_
@@ -1418,135 +1446,136 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:40:07Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-1	import { skeuoStyle } from '../styles';
-2	import { useSlotBehavior } from './useSlotBehavior';
-3	import type { SlotRenderProps } from './useSlotBehavior';
-4	import type { ReactNode, Ref } from 'react';
-5	
-6	interface SlotProps {
-7	  index: number;
-8	  as?: 'li' | 'span' | 'div';
-9	  className?: string;
-10	  children: (props: SlotRenderProps) => ReactNode;
-11	}
-12	
-13	export const Slot = ({
-14	  index,
-15	  as: Tag = 'li',
-16	  className,
-17	  children,
-18	}: SlotProps) => {
-19	  const {
-20	    renderProps,
-21	    slotRef,
-22	    dropRef,
-23	    dragRef,
-24	    handleClick,
-25	    pointerHandlers,
-26	    isBeingDragged,
-27	    isDragActive,
-28	  } = useSlotBehavior(index);
-29	
-30	  const {
-31	    label,
-32	    isEmpty,
-33	    isWrong,
-34	    isActive,
-35	    showCursor,
-36	    isPreview,
-37	    previewLabel,
-38	  } = renderProps;
-39	
-40	  const ariaLabel = isEmpty
-41	    ? `Slot ${index + 1}, empty`
-42	    : `Slot ${index + 1}, filled with ${label}`;
-43	
-44	  const stateClasses = [
-45	    'relative flex items-center justify-center border-2 transition-all',
-46	    isPreview
-47	      ? 'border-dashed border-primary'
-48	      : isEmpty && !isActive
-49	        ? 'border-border'
-50	        : isEmpty && isActive
-51	          ? 'border-primary ring-2 ring-primary ring-offset-2'
-52	          : isWrong
-53	            ? 'border-destructive bg-destructive/10 text-destructive'
-54	            : 'border-primary bg-primary/10 text-primary',
-55	  ]
-56	    .filter(Boolean)
-57	    .join(' ');
-58	
-59	  return (
-60	    <Tag
-61	      ref={
-62	        slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
-63	      }
-64	      aria-label={ariaLabel}
-65	      data-zone-index={index}
-66	      className={[stateClasses, className].filter(Boolean).join(' ')}
-67	      style={
-68	        isPreview
-69	          ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
-70	          : undefined
-71	      }
-72	    >
-73	      {/* Expanded drop hit zone — extends ~12 px beyond visual bounds so the
-74	          desktop HTML5 drop fires before the pointer is exactly over the slot.
-75	          pointer-events-none during non-drag prevents blocking adjacent clicks. */}
-76	      <div
-77	        ref={dropRef as Ref<HTMLDivElement>}
-78	        className={`absolute -inset-3 z-10${isDragActive ? '' : ' pointer-events-none'}`}
-79	        aria-hidden="true"
-80	      />
-81	      {isEmpty ? (
-82	        <>
-83	          {isPreview && previewLabel !== null ? (
-84	            <span className="text-xl font-bold opacity-50">
-85	              {previewLabel}
-86	            </span>
-87	          ) : (
-88	            children(renderProps)
-89	          )}
-90	          {showCursor ? (
-91	            <span
-92	              aria-hidden="true"
-93	              className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
-94	            />
-95	          ) : null}
-96	        </>
-97	      ) : (
-98	        <>
-99	          <div
-100	            className="absolute inset-0 rounded-[inherit] bg-muted/60 shadow-inner"
-101	            aria-hidden="true"
-102	          />
-103	          <button
-104	            ref={dragRef}
-105	            type="button"
-106	            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
-107	            aria-hidden={
-108	              isBeingDragged && !isPreview ? 'true' : undefined
-109	            }
-110	            style={skeuoStyle}
-111	            onClick={handleClick}
-112	            onPointerDown={pointerHandlers.onPointerDown}
-113	            onPointerMove={pointerHandlers.onPointerMove}
-114	            onPointerUp={pointerHandlers.onPointerUp}
-115	            onPointerCancel={pointerHandlers.onPointerCancel}
-116	          >
-117	            {isPreview && previewLabel !== null ? (
-118	              <span className="text-xl font-bold">{previewLabel}</span>
-119	            ) : (
-120	              children(renderProps)
-121	            )}
-122	          </button>
-123	        </>
-124	      )}
-125	    </Tag>
-126	  );
-127	};
+1 import { skeuoStyle } from '../styles';
+2 import { useSlotBehavior } from './useSlotBehavior';
+3 import type { SlotRenderProps } from './useSlotBehavior';
+4 import type { ReactNode, Ref } from 'react';
+5 
+6 interface SlotProps {
+7   index: number;
+8   as?: 'li' | 'span' | 'div';
+9   className?: string;
+10   children: (props: SlotRenderProps) => ReactNode;
+11 }
+12 
+13 export const Slot = ({
+14   index,
+15   as: Tag = 'li',
+16   className,
+17   children,
+18 }: SlotProps) => {
+19   const {
+20     renderProps,
+21     slotRef,
+22     dropRef,
+23     dragRef,
+24     handleClick,
+25     pointerHandlers,
+26     isBeingDragged,
+27     isDragActive,
+28   } = useSlotBehavior(index);
+29 
+30   const {
+31     label,
+32     isEmpty,
+33     isWrong,
+34     isActive,
+35     showCursor,
+36     isPreview,
+37     previewLabel,
+38   } = renderProps;
+39 
+40   const ariaLabel = isEmpty
+41     ? `Slot ${index + 1}, empty`
+42     : `Slot ${index + 1}, filled with ${label}`;
+43 
+44   const stateClasses = [
+45     'relative flex items-center justify-center border-2 transition-all',
+46     isPreview
+47       ? 'border-dashed border-primary'
+48       : isEmpty && !isActive
+49         ? 'border-border'
+50         : isEmpty && isActive
+51           ? 'border-primary ring-2 ring-primary ring-offset-2'
+52           : isWrong
+53             ? 'border-destructive bg-destructive/10 text-destructive'
+54             : 'border-primary bg-primary/10 text-primary',
+55   ]
+56     .filter(Boolean)
+57     .join(' ');
+58 
+59   return (
+60     <Tag
+61       ref={
+62         slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
+63       }
+64       aria-label={ariaLabel}
+65       data-zone-index={index}
+66       className={[stateClasses, className].filter(Boolean).join(' ')}
+67       style={
+68         isPreview
+69           ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
+70           : undefined
+71       }
+72     >
+73       {/* Expanded drop hit zone — extends ~12 px beyond visual bounds so the
+74           desktop HTML5 drop fires before the pointer is exactly over the slot.
+75           pointer-events-none during non-drag prevents blocking adjacent clicks. */}
+76       <div
+77         ref={dropRef as Ref<HTMLDivElement>}
+78         className={`absolute -inset-3 z-10${isDragActive ? '' : ' pointer-events-none'}`}
+79         aria-hidden="true"
+80       />
+81       {isEmpty ? (
+82         <>
+83           {isPreview && previewLabel !== null ? (
+84             <span className="text-xl font-bold opacity-50">
+85               {previewLabel}
+86             </span>
+87           ) : (
+88             children(renderProps)
+89           )}
+90           {showCursor ? (
+91             <span
+92               aria-hidden="true"
+93               className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+94             />
+95           ) : null}
+96         </>
+97       ) : (
+98         <>
+99           <div
+100             className="absolute inset-0 rounded-[inherit] bg-muted/60 shadow-inner"
+101             aria-hidden="true"
+102           />
+103           <button
+104             ref={dragRef}
+105             type="button"
+106             className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
+107             aria-hidden={
+108               isBeingDragged && !isPreview ? 'true' : undefined
+109             }
+110             style={skeuoStyle}
+111             onClick={handleClick}
+112             onPointerDown={pointerHandlers.onPointerDown}
+113             onPointerMove={pointerHandlers.onPointerMove}
+114             onPointerUp={pointerHandlers.onPointerUp}
+115             onPointerCancel={pointerHandlers.onPointerCancel}
+116           >
+117             {isPreview && previewLabel !== null ? (
+118               <span className="text-xl font-bold">{previewLabel}</span>
+119             ) : (
+120               children(renderProps)
+121             )}
+122           </button>
+123         </>
+124       )}
+125     </Tag>
+126   );
+127 };
 128
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:31Z)**_
@@ -1555,7 +1584,6 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:40:31Z)**_
 The Slot.tsx looks good. The `dropRef` expanded hit zone div is there with `z-10`, `-inset-3`, and conditional `pointer-events-none`.
 
 One concern: the hit zone div has `z-10`, which means it's above the button (`z-10` would be above the button which has no explicit z-index). During drag, the hit zone would be above the button, blocking the button's click events. But since the button's `onPointerDown` handler is for touch (and it ignores mouse events), and during drag the `pointer-events-none` class is toggled off only during drag (when `isDragActive` is true), the button is already hidden (`invisible pointer-events-none`) when `isBeingDragged` is true.
-
 
 Actually, `isDragActive` is true whenever any tile is being dragged, not just this one, so the expanded hit zone stays interactive across all slots during a drag. The `z-10` layering could theoretically intercept events, but since the user's pointer is following the ghost or drag image during the operation, the slot button itself isn't being directly interacted with anyway.
 
@@ -1584,6 +1612,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:40:36Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:46Z)**_
@@ -1614,7 +1643,7 @@ The ghost is hidden once before sampling all 5 points (not 5 times). In `onPoint
 
 _**User (2026-04-07 19:43:03Z)**_
 
-Something is off, I no longer can drag from bank to slots (I can tap, but not drag). 
+Something is off, I no longer can drag from bank to slots (I can tap, but not drag).
 I can drag only from slot to bank, and i can't see the preview anyway.
 
 ---
@@ -1624,10 +1653,10 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:45:08Z)**_
 <think><details><summary>Thought Process</summary>
 The user is reporting that dragging from bank to slots is broken after our changes. Let me think about what could have caused this.
 
-The expanded hit zone div has `z-10` and `pointer-events-auto` during drag. This means when a drag starts from the bank, `isDragActive` becomes true, and the expanded hit zone divs on all slots become `pointer-events-auto` with `z-10`. 
+The expanded hit zone div has `z-10` and `pointer-events-auto` during drag. This means when a drag starts from the bank, `isDragActive` becomes true, and the expanded hit zone divs on all slots become `pointer-events-auto` with `z-10`.
 
 But here's the problem: the expanded hit zone div is on TOP of the button (z-10), and it's also on top of the slot's visual content. When dragging from the bank (HTML5 DnD), the drop zone IS the expanded div (dropRef). So that should work.
- 
+
 Actually, I think I see the real issue now. The expanded hit zones are positioned absolutely with negative insets, making them much larger than the slots themselves. When `isDragActive` is true, these zones become `pointer-events-auto` and intercept all pointer events in their expanded area. For touch drags from the bank, even though pointer capture is set on the source element, the expanded slot hit zones being interactive might be interfering with the drag operation reaching the correct drop target.
 
 The core problem seems to be that `dragActiveTileId` isn't being set when dragging from the bank, which is why there's no preview. Looking at the handoff notes, it mentions that `SET_DRAG_ACTIVE` should be dispatched in `onDragStart` for bank tiles, but I need to check if that's actually happening in the current implementation.
@@ -1698,6 +1727,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:45:08Z)**_
 ```text
 Launching skill: superpowers:systematic-debugging
 ```
+
 </details></tool-use>
 
 ---
@@ -1727,6 +1757,7 @@ If you haven't completed Phase 1, you cannot propose fixes.
 ## When to Use
 
 Use for ANY technical issue:
+
 - Test failures
 - Bugs in production
 - Unexpected behavior
@@ -1735,6 +1766,7 @@ Use for ANY technical issue:
 - Integration issues
 
 **Use this ESPECIALLY when:**
+
 - Under time pressure (emergencies make guessing tempting)
 - "Just one quick fix" seems obvious
 - You've already tried multiple fixes
@@ -1742,6 +1774,7 @@ Use for ANY technical issue:
 - You don't fully understand the issue
 
 **Don't skip when:**
+
 - Issue seems simple (simple bugs have root causes too)
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
@@ -1777,6 +1810,7 @@ You MUST complete each phase before proceeding to the next.
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
+
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -1790,6 +1824,7 @@ You MUST complete each phase before proceeding to the next.
    ```
 
    **Example (multi-layer system):**
+
    ```bash
    # Layer 1: Workflow
    echo "=== Secrets available in workflow: ==="
@@ -1918,6 +1953,7 @@ You MUST complete each phase before proceeding to the next.
 ## Red Flags - STOP and Follow Process
 
 If you catch yourself thinking:
+
 - "Quick fix for now, investigate later"
 - "Just try changing X and see if it works"
 - "Add multiple changes, run tests"
@@ -1937,6 +1973,7 @@ If you catch yourself thinking:
 ## your human partner's Signals You're Doing It Wrong
 
 **Watch for these redirections:**
+
 - "Is that not happening?" - You assumed without verifying
 - "Will it show us...?" - You should have added evidence gathering
 - "Stop guessing" - You're proposing fixes without understanding
@@ -1987,17 +2024,18 @@ These techniques are part of systematic debugging and available in this director
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+
 - **superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers:verification-before-completion** - Verify fix worked before claiming success
 
 ## Real-World Impact
 
 From debugging sessions:
+
 - Systematic approach: 15-30 minutes to fix
 - Random fixes approach: 2-3 hours of thrashing
 - First-time fix rate: 95% vs 40%
 - New bugs introduced: Near zero vs common
-
 
 ---
 
@@ -2005,12 +2043,13 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:47:33Z)**_
 
 <think><details><summary>Thought Process</summary>
 Let me apply systematic debugging. The user reports two issues:
+
 1. Can't drag from bank to slots (drag doesn't work, only tap works)
 2. Preview doesn't show (even for slot-to-slot swap which the user just said "expand and preview only work between swap" - wait, actually the user now says "expand and preview only work between swap" - so swap works but bank-to-slot drag doesn't)
 
-Wait, re-reading: 
-- First message: "I no longer can drag from bank to slots (I can tap, but not drag). I can drag only from slot to bank, and i can't see the preview anyway."
+Wait, re-reading:
 
+- First message: "I no longer can drag from bank to slots (I can tap, but not drag). I can drag only from slot to bank, and i can't see the preview anyway."
 
 - Follow-up: "Currently, the expand and preview only work between swap."
 
@@ -2029,12 +2068,13 @@ For the touch drag path in `useTouchDrag`, the `onPointerUp` handler samples 5 p
 Now I'm checking whether `SET_DRAG_ACTIVE` actually gets dispatched during bank tile touch drag, since the handoff doc only mentions it for HTML5 drag events, not for the pointer-based touch flow. passed to `useTouchDrag` in `useDraggableTile.ts`.
 
 So for bank tiles:
+
 - HTML5 path: `SET_DRAG_ACTIVE` NOT dispatched
 - Touch path: `SET_DRAG_ACTIVE` NOT dispatched (comment: "no SET_DRAG_ACTIVE to avoid browser snap-back fadeout")
 
 So during bank tile drag: `dragActiveTileId` is null, `isDragActive` is false, the expanded hit zone div has `pointer-events-none`.
 
-But the expanded hit zone div is `absolute -inset-3 z-10`. With `-inset-3`, it extends 12px BEYOND the slot's bounds. But the slot's `<Tag>` element no longer has `overflow-hidden`. 
+But the expanded hit zone div is `absolute -inset-3 z-10`. With `-inset-3`, it extends 12px BEYOND the slot's bounds. But the slot's `<Tag>` element no longer has `overflow-hidden`.
 
 So the expanded hit zone div (which is 12px larger than the slot on each side, z-10) is rendered and visible (transparent, but in the DOM). Even with `pointer-events-none`, it's still there at `z-10`. When I check `elementsFromPoint`, the spec says `pointer-events: none` doesn't actually exclude elements from that query, so the expanded hit zone div would show up. But here's the thing—the expanded div doesn't have the `data-zone-index` attribute that I'm searching for. Only the `<Tag>` itself has that attribute, so when `elementsFromPoint` returns elements from top to bottom, the expanded hit zone div comes first but won't match my selector.
 
@@ -2061,6 +2101,7 @@ Now I'm thinking through how this affects drag-and-drop: the `dragenter` event w
 The tricky part is getting the z-index layering right in CSS—the expanded div needs to sit below the button so it doesn't intercept clicks, but the button's z-index needs to be explicit enough to guarantee it stays on top. stacking context, `z-0` creates a stacking context... actually `z-index: 0` makes the element establish a stacking context and be at z-level 0 within the parent's stacking context.
 
 In the `<Tag>` stacking context:
+
 - Expanded div: z-0 (renders first in z-order)
 - Button: z-auto (no z-index, follows DOM order but... since expanded div establishes z-context with z=0)
 
@@ -2069,6 +2110,7 @@ Actually, elements with `position: absolute` and no `z-index` (z-auto) are paint
 Let me think about CSS stacking more carefully. When the expanded div gets `z-0`, it creates a new stacking context. The button has no z-index, so it follows the standard stacking order where positioned elements with explicit z-index values (like the expanded div at z-0) paint after positioned elements without z-index.
 
 So the button should paint on top of the expanded div because it has no explicit z-index and comes later in DOM order. acking context:
+
 1. z-index < 0: behind
 2. Non-positioned block descendants
 3. Floating descendants
@@ -2076,9 +2118,10 @@ So the button should paint on top of the expanded div because it has no explicit
 5. Positioned with z-index: 0 (or auto) — within this group, DOM order determines order
 6. z-index > 0
 
-So `z-index: 0` and `z-index: auto` are both in group 5, and DOM order determines which is on top. Since the button comes after the expanded div in DOM order, the button would be on top. 
+So `z-index: 0` and `z-index: auto` are both in group 5, and DOM order determines which is on top. Since the button comes after the expanded div in DOM order, the button would be on top.
 
 So with expanded div (z-0, first in DOM) and button (z-auto, after in DOM):
+
 - In the slot interior: button is on top → clicks go to button ✓
 - In the 12px border zone: only expanded div → pointer-events-auto captures events
 
@@ -2121,14 +2164,15 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:48:34Z)**_
 Let me apply systematic debugging. Phase 1: Root Cause Investigation.
 
 The user reports two bugs after our changes:
+
 1. Can't drag from bank to slots (can tap but not drag)
 2. Preview doesn't show
 3. User's additional message: "expand and preview only work between swap" (slot-to-slot)
 
 **Recent changes we made:**
+
 1. `useTouchDrag.ts` - 5-point sampling for onPointerMove and onPointerUp
 2. `useSlotBehavior.ts` - Added `dropRef`, changed `dropTargetForElements` from `slotRef.current` to `dropRef.current`, added `isDragActive` return
-
 
 3. `Slot.tsx` - Added an expanded hit zone div with the drop ref, removed overflow constraints, and adjusted border radius styling
 
@@ -2167,6 +2211,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:48:38Z)**_
 **Phase 1: Root Cause Investigation**
 
 The user says:
+
 - Drag from bank → slot is broken (tap works, drag doesn't)
 - Preview doesn't show
 - "expand and preview only work between swap" (slot-to-slot)
@@ -2186,6 +2231,7 @@ During slot-to-slot: `isDragActive = true` → div is `pointer-events-auto` → 
 This exactly matches the observed behavior. **Root cause confirmed.**
 
 **Fix:**
+
 1. Revert `dropTargetForElements` back to `slotRef` (the `<Tag>` element, which always receives drag events)
 2. Keep the expanded div but always `pointer-events-auto` (no toggle, no `z-10`) — the button is later in DOM order so it wins in the slot interior; the expanded div covers only the 12px border zone where it bubbles drag events up to `slotRef`
 3. Remove `isDragActive` (no longer needed)
@@ -2198,6 +2244,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:48:42Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:48:46Z)**_
@@ -2215,57 +2262,58 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:48:48Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-155	  );
-156	
-157	  // Register as drop target — use dropRef (the expanded hit zone div) so the
-158	  // drop fires when the pointer enters ~12 px beyond the visual slot bounds.
-159	  useEffect(() => {
-160	    const el = dropRef.current;
-161	    if (!el) return;
-162	    return dropTargetForElements({
-163	      element: el,
-164	      getData: () => ({ zoneIndex: index }),
-165	      onDragEnter: () => {
-166	        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: index });
-167	      },
-168	      onDragLeave: () => {
-169	        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
-170	      },
-171	      onDrop: ({ source }) => {
-172	        dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
-173	        // Slot-tile drags (sourceZoneIndex present) handle their own
-174	        // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
-175	        if (typeof source.data['sourceZoneIndex'] === 'number') return;
-176	        const sourceTileId = source.data['tileId'];
-177	        if (typeof sourceTileId === 'string') {
-178	          handleDrop(sourceTileId, index);
-179	          // Clear drag active state here — the draggable component (bank tile)
-180	          // unmounts when PLACE_TILE fires, so its own onDrop may never run.
-181	          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-182	        }
-183	      },
-184	    });
-185	  }, [index, handleDrop, dispatch]);
-186	
-187	  const handleHoverZone = useCallback(
-188	    (zoneIndex: number | null) => {
-189	      dispatch({ type: 'SET_DRAG_HOVER', zoneIndex });
-190	    },
-191	    [dispatch],
-192	  );
-193	
-194	  // Drag source for filled slots
-195	  const {
-196	    dragRef,
-197	    onPointerDown,
-198	    onPointerMove,
-199	    onPointerUp,
-200	    onPointerCancel,
-201	  } = useSlotTileDrag({
-202	    tileId,
-203	    label,
-204	    zoneIndex: index,
+155   );
+156 
+157   // Register as drop target — use dropRef (the expanded hit zone div) so the
+158   // drop fires when the pointer enters ~12 px beyond the visual slot bounds.
+159   useEffect(() => {
+160     const el = dropRef.current;
+161     if (!el) return;
+162     return dropTargetForElements({
+163       element: el,
+164       getData: () => ({ zoneIndex: index }),
+165       onDragEnter: () => {
+166         dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: index });
+167       },
+168       onDragLeave: () => {
+169         dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+170       },
+171       onDrop: ({ source }) => {
+172         dispatch({ type: 'SET_DRAG_HOVER', zoneIndex: null });
+173         // Slot-tile drags (sourceZoneIndex present) handle their own
+174         // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
+175         if (typeof source.data['sourceZoneIndex'] === 'number') return;
+176         const sourceTileId = source.data['tileId'];
+177         if (typeof sourceTileId === 'string') {
+178           handleDrop(sourceTileId, index);
+179           // Clear drag active state here — the draggable component (bank tile)
+180           // unmounts when PLACE_TILE fires, so its own onDrop may never run.
+181           dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+182         }
+183       },
+184     });
+185   }, [index, handleDrop, dispatch]);
+186 
+187   const handleHoverZone = useCallback(
+188     (zoneIndex: number | null) => {
+189       dispatch({ type: 'SET_DRAG_HOVER', zoneIndex });
+190     },
+191     [dispatch],
+192   );
+193 
+194   // Drag source for filled slots
+195   const {
+196     dragRef,
+197     onPointerDown,
+198     onPointerMove,
+199     onPointerUp,
+200     onPointerCancel,
+201   } = useSlotTileDrag({
+202     tileId,
+203     label,
+204     zoneIndex: index,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:48:50Z)**_
@@ -2275,37 +2323,38 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:48:50Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-290	    return () => clearTimeout(timerId);
-291	  }, [isWrong, config.wrongTileBehavior, dispatch, index]);
-292	
-293	  return {
-294	    renderProps: {
-295	      label,
-296	      tileId,
-297	      isActive,
-298	      isWrong,
-299	      isLocked,
-300	      isEmpty,
-301	      showCursor,
-302	      isPreview,
-303	      previewLabel,
-304	    },
-305	    slotRef,
-306	    dropRef,
-307	    dragRef,
-308	    handleClick,
-309	    isBeingDragged,
-310	    isDragActive: dragActiveTileId !== null,
-311	    pointerHandlers: {
-312	      onPointerDown,
-313	      onPointerMove,
-314	      onPointerUp,
-315	      onPointerCancel,
-316	    },
-317	  };
-318	};
+290     return () => clearTimeout(timerId);
+291   }, [isWrong, config.wrongTileBehavior, dispatch, index]);
+292 
+293   return {
+294     renderProps: {
+295       label,
+296       tileId,
+297       isActive,
+298       isWrong,
+299       isLocked,
+300       isEmpty,
+301       showCursor,
+302       isPreview,
+303       previewLabel,
+304     },
+305     slotRef,
+306     dropRef,
+307     dragRef,
+308     handleClick,
+309     isBeingDragged,
+310     isDragActive: dragActiveTileId !== null,
+311     pointerHandlers: {
+312       onPointerDown,
+313       onPointerMove,
+314       onPointerUp,
+315       onPointerCancel,
+316     },
+317   };
+318 };
 319
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:48:53Z)**_
@@ -2320,6 +2369,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:48:56Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:49:00Z)**_
@@ -2330,6 +2380,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:49:00Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:49:04Z)**_
@@ -2344,6 +2395,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:49:06Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:49:09Z)**_
@@ -2360,6 +2412,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:49:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:49:21Z)**_
@@ -2372,6 +2425,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:49:21Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:49:25Z)**_
@@ -2389,173 +2443,174 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:49:25Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
-3	import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
-4	import { useCallback, useEffect, useRef } from 'react';
-5	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-6	import { useTouchDrag } from './useTouchDrag';
-7	import type { TouchDragHandlers } from './useTouchDrag';
-8	import type { RefObject } from 'react';
-9	
-10	export interface SlotTileDrag extends TouchDragHandlers {
-11	  dragRef: RefObject<HTMLButtonElement | null>;
-12	}
-13	
-14	interface UseSlotTileDragOptions {
-15	  /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
-16	  tileId: string | null;
-17	  label: string | null;
-18	  zoneIndex: number;
-19	  /**
-20	   * Called when the dragged tile is dropped on a target zone.
-21	   * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
-22	   * SWAP_TILES as appropriate.
-23	   */
-24	  onDrop: (tileId: string, targetZoneIndex: number) => void;
-25	  onHoverZone?: (zoneIndex: number | null) => void;
-26	}
-27	
-28	/**
-29	 * Enables an occupied slot tile to be dragged to another slot.
-30	 * Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
-31	 *
-32	 * Tiles can return to the bank by dropping on the bank container (REMOVE_TILE).
-33	 *
-34	 * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
-35	 * visible in the slot during the drag.
-36	 *
-37	 * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
-38	 * called so the caller can dispatch SWAP_TILES.
-39	 *
-40	 * On cancel or no valid drop target: SET_DRAG_ACTIVE is cleared and the tile
-41	 * stays in its current slot (no-op).
-42	 */
-43	export const useSlotTileDrag = ({
-44	  tileId,
-45	  label,
-46	  zoneIndex,
-47	  onDrop,
-48	  onHoverZone,
-49	}: UseSlotTileDragOptions): SlotTileDrag => {
-50	  const dispatch = useAnswerGameDispatch();
-51	  const dragRef = useRef<HTMLButtonElement>(null);
-52	
-53	  // Keep stable refs so the HTML5 adapter closure stays current.
-54	  const onDropRef = useRef(onDrop);
-55	  useEffect(() => {
-56	    onDropRef.current = onDrop;
-57	  }, [onDrop]);
-58	
-59	  // HTML5 DnD — desktop
-60	  useEffect(() => {
-61	    if (!tileId) return;
-62	    const element = dragRef.current;
-63	    if (!element) return;
-64	    const currentTileId = tileId;
-65	    return draggable({
-66	      element,
-67	      getInitialData: () => ({
-68	        tileId: currentTileId,
-69	        sourceZoneIndex: zoneIndex,
-70	      }),
-71	      onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
-72	        setCustomNativeDragPreview({
-73	          nativeSetDragImage,
-74	          getOffset: preserveOffsetOnSource({
-75	            element,
-76	            input: location.current.input,
-77	          }),
-78	          render({ container }) {
-79	            const rect = element.getBoundingClientRect();
-80	            const ghost = document.createElement('div');
-81	            // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
-82	            // inner elements are preserved — avoids the shrunken-font issue
-83	            // that occurs when reading fontSize from the button itself.
-84	            ghost.innerHTML = element.innerHTML;
-85	            Object.assign(ghost.style, {
-86	              width: `${rect.width}px`,
-87	              height: `${rect.height}px`,
-88	              borderRadius: '12px',
-89	              display: 'flex',
-90	              alignItems: 'center',
-91	              justifyContent: 'center',
-92	              background: 'var(--card, #fff)',
-93	              color: 'var(--card-foreground, #000)',
-94	              boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-95	              transform: 'scale(1.08)',
-96	            });
-97	            container.append(ghost);
-98	            return () => ghost.remove();
-99	          },
-100	        });
-101	      },
-102	      onDragStart: () =>
-103	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
-104	      onDrop: ({ location }) => {
-105	        const targets = location.current.dropTargets;
-106	        const targetZoneIndex = targets[0]?.data['zoneIndex'];
-107	        const isBankTarget = targets[0]?.data['isBankTarget'];
-108	
-109	        // Always clear drag state first.
-110	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-111	
-112	        if (targets.length > 0 && typeof targetZoneIndex === 'number') {
-113	          // Confirmed drop on a valid slot — caller handles SWAP_TILES.
-114	          onDropRef.current(currentTileId, targetZoneIndex);
-115	        } else if (isBankTarget === true) {
-116	          // Dropped on the tile bank — return tile to bank.
-117	          dispatch({ type: 'REMOVE_TILE', zoneIndex });
-118	        }
-119	        // else: dropped outside a slot — tile stays put (no-op)
-120	      },
-121	    });
-122	  }, [tileId, zoneIndex, dispatch]);
-123	
-124	  // Wrap onDrop for the touch path: caller handles SWAP_TILES.
-125	  const handleTouchDrop = useCallback(
-126	    (droppedTileId: string, targetZoneIndex: number) => {
-127	      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-128	      onDrop(droppedTileId, targetZoneIndex);
-129	    },
-130	    [dispatch, onDrop],
-131	  );
-132	
-133	  // Touch: dropped on the tile bank — return tile to bank.
-134	  const handleTouchDropOnBank = useCallback(() => {
-135	    dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-136	    dispatch({ type: 'REMOVE_TILE', zoneIndex });
-137	  }, [dispatch, zoneIndex]);
-138	
-139	  // Pointer-events drag — touch / mobile
-140	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-141	    useTouchDrag({
-142	      tileId: tileId ?? '',
-143	      label: label ?? '',
-144	      onDragStart: tileId
-145	        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
-146	        : undefined,
-147	      onDragCancel: tileId
-148	        ? () => {
-149	            // Dropped outside all targets — tile stays in slot (no-op).
-150	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-151	          }
-152	        : undefined,
-153	      onDrop: handleTouchDrop,
-154	      onDropOnBank: handleTouchDropOnBank,
-155	      onHoverZone,
-156	    });
-157	
-158	  return {
-159	    dragRef,
-160	    onPointerDown,
-161	    onPointerMove,
-162	    onPointerUp,
-163	    onPointerCancel,
-164	  };
-165	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
+3 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
+4 import { useCallback, useEffect, useRef } from 'react';
+5 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+6 import { useTouchDrag } from './useTouchDrag';
+7 import type { TouchDragHandlers } from './useTouchDrag';
+8 import type { RefObject } from 'react';
+9 
+10 export interface SlotTileDrag extends TouchDragHandlers {
+11   dragRef: RefObject<HTMLButtonElement | null>;
+12 }
+13 
+14 interface UseSlotTileDragOptions {
+15   /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
+16   tileId: string | null;
+17   label: string | null;
+18   zoneIndex: number;
+19   /**
+20    * Called when the dragged tile is dropped on a target zone.
+21    * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
+22    * SWAP_TILES as appropriate.
+23    */
+24   onDrop: (tileId: string, targetZoneIndex: number) => void;
+25   onHoverZone?: (zoneIndex: number | null) => void;
+26 }
+27 
+28 /**
+29  * Enables an occupied slot tile to be dragged to another slot.
+30  * Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
+31  *
+32  * Tiles can return to the bank by dropping on the bank container (REMOVE_TILE).
+33  *
+34  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
+35  * visible in the slot during the drag.
+36  *
+37  * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
+38  * called so the caller can dispatch SWAP_TILES.
+39  *
+40  * On cancel or no valid drop target: SET_DRAG_ACTIVE is cleared and the tile
+41  * stays in its current slot (no-op).
+42  */
+43 export const useSlotTileDrag = ({
+44   tileId,
+45   label,
+46   zoneIndex,
+47   onDrop,
+48   onHoverZone,
+49 }: UseSlotTileDragOptions): SlotTileDrag => {
+50   const dispatch = useAnswerGameDispatch();
+51   const dragRef = useRef<HTMLButtonElement>(null);
+52 
+53   // Keep stable refs so the HTML5 adapter closure stays current.
+54   const onDropRef = useRef(onDrop);
+55   useEffect(() => {
+56     onDropRef.current = onDrop;
+57   }, [onDrop]);
+58 
+59   // HTML5 DnD — desktop
+60   useEffect(() => {
+61     if (!tileId) return;
+62     const element = dragRef.current;
+63     if (!element) return;
+64     const currentTileId = tileId;
+65     return draggable({
+66       element,
+67       getInitialData: () => ({
+68         tileId: currentTileId,
+69         sourceZoneIndex: zoneIndex,
+70       }),
+71       onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
+72         setCustomNativeDragPreview({
+73           nativeSetDragImage,
+74           getOffset: preserveOffsetOnSource({
+75             element,
+76             input: location.current.input,
+77           }),
+78           render({ container }) {
+79             const rect = element.getBoundingClientRect();
+80             const ghost = document.createElement('div');
+81             // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
+82             // inner elements are preserved — avoids the shrunken-font issue
+83             // that occurs when reading fontSize from the button itself.
+84             ghost.innerHTML = element.innerHTML;
+85             Object.assign(ghost.style, {
+86               width: `${rect.width}px`,
+87               height: `${rect.height}px`,
+88               borderRadius: '12px',
+89               display: 'flex',
+90               alignItems: 'center',
+91               justifyContent: 'center',
+92               background: 'var(--card, #fff)',
+93               color: 'var(--card-foreground, #000)',
+94               boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+95               transform: 'scale(1.08)',
+96             });
+97             container.append(ghost);
+98             return () => ghost.remove();
+99           },
+100         });
+101       },
+102       onDragStart: () =>
+103         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
+104       onDrop: ({ location }) => {
+105         const targets = location.current.dropTargets;
+106         const targetZoneIndex = targets[0]?.data['zoneIndex'];
+107         const isBankTarget = targets[0]?.data['isBankTarget'];
+108 
+109         // Always clear drag state first.
+110         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+111 
+112         if (targets.length > 0 && typeof targetZoneIndex === 'number') {
+113           // Confirmed drop on a valid slot — caller handles SWAP_TILES.
+114           onDropRef.current(currentTileId, targetZoneIndex);
+115         } else if (isBankTarget === true) {
+116           // Dropped on the tile bank — return tile to bank.
+117           dispatch({ type: 'REMOVE_TILE', zoneIndex });
+118         }
+119         // else: dropped outside a slot — tile stays put (no-op)
+120       },
+121     });
+122   }, [tileId, zoneIndex, dispatch]);
+123 
+124   // Wrap onDrop for the touch path: caller handles SWAP_TILES.
+125   const handleTouchDrop = useCallback(
+126     (droppedTileId: string, targetZoneIndex: number) => {
+127       dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+128       onDrop(droppedTileId, targetZoneIndex);
+129     },
+130     [dispatch, onDrop],
+131   );
+132 
+133   // Touch: dropped on the tile bank — return tile to bank.
+134   const handleTouchDropOnBank = useCallback(() => {
+135     dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+136     dispatch({ type: 'REMOVE_TILE', zoneIndex });
+137   }, [dispatch, zoneIndex]);
+138 
+139   // Pointer-events drag — touch / mobile
+140   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+141     useTouchDrag({
+142       tileId: tileId ?? '',
+143       label: label ?? '',
+144       onDragStart: tileId
+145         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
+146         : undefined,
+147       onDragCancel: tileId
+148         ? () => {
+149             // Dropped outside all targets — tile stays in slot (no-op).
+150             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+151           }
+152         : undefined,
+153       onDrop: handleTouchDrop,
+154       onDropOnBank: handleTouchDropOnBank,
+155       onHoverZone,
+156     });
+157 
+158   return {
+159     dragRef,
+160     onPointerDown,
+161     onPointerMove,
+162     onPointerUp,
+163     onPointerCancel,
+164   };
+165 };
 166
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:49:28Z)**_
@@ -2565,37 +2620,38 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:49:28Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useBankDropTarget.ts`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import type { RefObject } from 'react';
-4	
-5	/**
-6	 * Registers a container element as a drop target for the tile bank.
-7	 *
-8	 * This makes the bank an accepted HTML5 drop zone so the browser shows
-9	 * a "move" cursor (instead of the "no drop" reject animation) when a slot
-10	 * tile is dragged over it. The actual REMOVE_TILE dispatch is handled by
-11	 * useSlotTileDrag's onDrop — the bank target intentionally carries no
-12	 * zoneIndex so that path treats it as "return to bank".
-13	 */
-14	export const useBankDropTarget = (): {
-15	  bankRef: RefObject<HTMLDivElement | null>;
-16	} => {
-17	  const bankRef = useRef<HTMLDivElement>(null);
-18	
-19	  useEffect(() => {
-20	    const el = bankRef.current;
-21	    if (!el) return;
-22	    return dropTargetForElements({
-23	      element: el,
-24	      getData: () => ({ isBankTarget: true }),
-25	    });
-26	  }, []);
-27	
-28	  return { bankRef };
-29	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import type { RefObject } from 'react';
+4 
+5 /**
+6  * Registers a container element as a drop target for the tile bank.
+7  *
+8  * This makes the bank an accepted HTML5 drop zone so the browser shows
+9  * a "move" cursor (instead of the "no drop" reject animation) when a slot
+10  * tile is dragged over it. The actual REMOVE_TILE dispatch is handled by
+11  * useSlotTileDrag's onDrop — the bank target intentionally carries no
+12  * zoneIndex so that path treats it as "return to bank".
+13  */
+14 export const useBankDropTarget = (): {
+15   bankRef: RefObject<HTMLDivElement | null>;
+16 } => {
+17   const bankRef = useRef<HTMLDivElement>(null);
+18 
+19   useEffect(() => {
+20     const el = bankRef.current;
+21     if (!el) return;
+22     return dropTargetForElements({
+23       element: el,
+24       getData: () => ({ isBankTarget: true }),
+25     });
+26   }, []);
+27 
+28   return { bankRef };
+29 };
 30
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:49:37Z)**_
@@ -2604,7 +2660,6 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:49:37Z)**_
 Now I understand the issue with slot-to-bank drag. The bank has a single `bankRef` registered as a drop target. When a slot tile is dragged to the bank, `isBankTarget: true` is in the drop target data. The `useSlotTileDrag` `onDrop` handler checks for `isBankTarget === true` and dispatches `REMOVE_TILE`.
 
 This means the drop detection is based on the HTML5 DnD target (the bank container element). The user is saying they need to drop on a specific spot in the bank.
-
 
 I'm re-reading the complaint more carefully—it sounds like the user can't drop anywhere in the bank freely, but instead needs to hit a specific position or tile. Let me check how the bank is structured in the code to see whether individual tiles are registered as drop targets or if there's a single container handling all drops.
 </details></think>
@@ -2616,109 +2671,111 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:49:37Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
-5	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-6	
-7	const LetterTile = ({ tile }: { tile: TileItem }) => {
-8	  const {
-9	    ref,
-10	    handleClick,
-11	    onPointerDown,
-12	    onPointerMove,
-13	    onPointerUp,
-14	    onPointerCancel,
-15	  } = useDraggableTile(tile);
-16	
-17	  return (
-18	    <button
-19	      ref={ref}
-20	      type="button"
-21	      aria-label={`Letter ${tile.label}`}
-22	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
-23	      style={skeuoStyle}
-24	      onClick={handleClick}
-25	      onPointerDown={onPointerDown}
-26	      onPointerMove={onPointerMove}
-27	      onPointerUp={onPointerUp}
-28	      onPointerCancel={onPointerCancel}
-29	    >
-30	      {tile.label}
-31	    </button>
-32	  );
-33	};
-34	
-35	export const LetterTileBank = () => {
-36	  const { allTiles, bankTileIds, config, dragActiveTileId } =
-37	    useAnswerGameContext();
-38	  const { bankRef } = useBankDropTarget();
-39	
-40	  if (config.inputMethod === 'type') {
-41	    const isTouch = navigator.maxTouchPoints > 0;
-42	    return (
-43	      <p className="text-sm text-muted-foreground" aria-live="polite">
-44	        {isTouch
-45	          ? 'Tap a slot to type'
-46	          : '⌨️ Type the letters on your keyboard'}
-47	      </p>
-48	    );
-49	  }
-50	
-51	  return (
-52	    <div
-53	      ref={bankRef}
-54	      data-tile-bank=""
-55	      className="flex flex-wrap justify-center gap-3"
-56	    >
-57	      {allTiles.map((tile) => {
-58	        const inBank = bankTileIds.includes(tile.id);
-59	        const isDragging = tile.id === dragActiveTileId;
-60	
-61	        if (inBank) {
-62	          return (
-63	            <div key={tile.id} className="relative size-14">
-64	              <div
-65	                data-tile-bank-hole={tile.id}
-66	                className="size-14 rounded-xl bg-muted/60 shadow-inner"
-67	                aria-hidden="true"
-68	              />
-69	              <div
-70	                className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
-71	                aria-hidden={isDragging || undefined}
-72	              >
-73	                <LetterTile tile={tile} />
-74	              </div>
-75	            </div>
-76	          );
-77	        }
-78	
-79	        return (
-80	          <div
-81	            key={tile.id}
-82	            data-tile-bank-hole={tile.id}
-83	            className="size-14 rounded-xl bg-muted/60 shadow-inner"
-84	            aria-hidden="true"
-85	          />
-86	        );
-87	      })}
-88	    </div>
-89	  );
-90	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
+5 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+6 
+7 const LetterTile = ({ tile }: { tile: TileItem }) => {
+8   const {
+9     ref,
+10     handleClick,
+11     onPointerDown,
+12     onPointerMove,
+13     onPointerUp,
+14     onPointerCancel,
+15   } = useDraggableTile(tile);
+16 
+17   return (
+18     <button
+19       ref={ref}
+20       type="button"
+21       aria-label={`Letter ${tile.label}`}
+22       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+23       style={skeuoStyle}
+24       onClick={handleClick}
+25       onPointerDown={onPointerDown}
+26       onPointerMove={onPointerMove}
+27       onPointerUp={onPointerUp}
+28       onPointerCancel={onPointerCancel}
+29     >
+30       {tile.label}
+31     </button>
+32   );
+33 };
+34 
+35 export const LetterTileBank = () => {
+36   const { allTiles, bankTileIds, config, dragActiveTileId } =
+37     useAnswerGameContext();
+38   const { bankRef } = useBankDropTarget();
+39 
+40   if (config.inputMethod === 'type') {
+41     const isTouch = navigator.maxTouchPoints > 0;
+42     return (
+43       <p className="text-sm text-muted-foreground" aria-live="polite">
+44         {isTouch
+45           ? 'Tap a slot to type'
+46           : '⌨️ Type the letters on your keyboard'}
+47       </p>
+48     );
+49   }
+50 
+51   return (
+52     <div
+53       ref={bankRef}
+54       data-tile-bank=""
+55       className="flex flex-wrap justify-center gap-3"
+56     >
+57       {allTiles.map((tile) => {
+58         const inBank = bankTileIds.includes(tile.id);
+59         const isDragging = tile.id === dragActiveTileId;
+60 
+61         if (inBank) {
+62           return (
+63             <div key={tile.id} className="relative size-14">
+64               <div
+65                 data-tile-bank-hole={tile.id}
+66                 className="size-14 rounded-xl bg-muted/60 shadow-inner"
+67                 aria-hidden="true"
+68               />
+69               <div
+70                 className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
+71                 aria-hidden={isDragging || undefined}
+72               >
+73                 <LetterTile tile={tile} />
+74               </div>
+75             </div>
+76           );
+77         }
+78 
+79         return (
+80           <div
+81             key={tile.id}
+82             data-tile-bank-hole={tile.id}
+83             className="size-14 rounded-xl bg-muted/60 shadow-inner"
+84             aria-hidden="true"
+85           />
+86         );
+87       })}
+88     </div>
+89   );
+90 };
 91
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:52:05Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I understand the bank structure. The bank renders:
+
 1. A container div with `ref={bankRef}` and `data-tile-bank=""` - this is the drop target for HTML5 DnD
 2. For each tile that's in the bank: a wrapper div with a "hole" div and the tile button
 3. For each tile that's NOT in the bank (placed in a slot): just a "hole" div with `data-tile-bank-hole={tile.id}`
 
-The bank holes are placeholder elements that show where tiles were. When a slot tile is dropped on the bank, the bank container (`bankRef`) acts as the drop target. 
+The bank holes are placeholder elements that show where tiles were. When a slot tile is dropped on the bank, the bank container (`bankRef`) acts as the drop target.
 
 When a tile is dropped back to the bank, `REMOVE_TILE` gets dispatched to return it to its original position. But the user is saying they can only drop tiles back to the bank if they hit the exact right spot—which suggests the drop target might be too narrow or the holes themselves are acting as separate drop targets instead of the whole bank container accepting drops. I'm realizing the issue might be with the touch drag implementation—it uses `elementsFromPoint` to detect drop targets rather than relying on event bubbling, so it's checking for specific data attributes on elements directly beneath the pointer. The hole divs might not have the right attributes for this detection to work properly. I see the issue now—with the 5-point sampling approach, the code loops through multiple sample points and checks `elementsFromPoint` at each location, looking for either a zone or the bank container. The logic should still work because eventually one of those sample points will hit the bank container and trigger the drop handler.
 
@@ -2765,16 +2822,19 @@ I could remove the expanded div entirely since it's causing more trouble than it
 The real issue is whether this expanded div is actually overlapping the bank element—that depends entirely on the page layout, which I can't verify without seeing the actual UI. Since the user is reporting problems and I can't inspect the layout directly, the safest move is probably to remove the expanded div for now and see if that resolves the conflicts.
 
 But wait, let me reconsider what the user is actually asking for. They want to drag tiles from slots to any available space in the bank, and even swap tiles between slots and the bank. The expanded slot divs might be blocking access to parts of the bank, which would explain why they can only drop in specific places. The real fix might be ensuring the bank is the proper drop target and that the slot expansion isn't interfering with that. between slot and bank" feature is more complex - it requires:
+
 1. Bank knows which tile is being dragged there (to place the slot tile in the bank)
 2. If there's a bank tile where the user drops, that bank tile goes to the slot
 
 This is a FEATURE REQUEST, not just a bug fix. Currently:
+
 - Slot tile dropped on bank → `REMOVE_TILE` (return tile to bank)
 - Bank tile dropped on slot → `PLACE_TILE` or `SWAP_TILES` if slot is filled
 
 "Swap between slot and bank" would mean: slot tile dropped near a bank tile → that bank tile goes to the slot, and the slot tile returns to the bank. This requires more complex interaction.
 
 OK I think I need to:
+
 1. First, focus on fixing the critical bug (bank-to-slot drag)
 2. Then address the "correct bank place" complaint
 3. Then think about swap between slot and bank as a feature
@@ -2807,8 +2867,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:52:27Z)**_
 <think><details><summary>Thought Process</summary>
 Now I can see the issue clearly. The bank renders tiles in a fixed order — each tile has its "hole" (a placeholder div with `data-tile-bank-hole`). When a tile is placed in a slot, its hole remains in the bank (the `div.size-14.bg-muted/60` placeholder). When the slot tile is dragged back to the bank, it should return to the bank.
 
-The bank container has `data-tile-bank=""` and `bankRef` with `dropTargetForElements({ getData: () => ({ isBankTarget: true }) })`. 
-
+The bank container has `data-tile-bank=""` and `bankRef` with `dropTargetForElements({ getData: () => ({ isBankTarget: true }) })`.
 
 When dragging a slot tile over the bank with HTML5 DnD, the `isBankTarget: true` condition should trigger and dispatch `REMOVE_TILE`, but the user can only drop successfully at specific positions within the bank — which suggests the drop target might be too narrow or the holes themselves are interfering with the drop zone detection. I'm realizing the issue might be with how HTML5 drag-and-drop events propagate when dragging over nested elements—if a slot tile is dragged over a bank tile button, the `dragenter` event fires on that button first, but it should still bubble up to the bank container where the drop target is registered. Let me check if `useDraggableTile` has any conflicting drop target logic that might be intercepting these events. I need to check whether `useDraggableTile` is accidentally registering bank tile buttons as drop targets, since in pragmatic DnD the innermost drop target takes precedence. Let me look at that hook to see what's actually being registered.
 </details></think>
@@ -2820,78 +2879,79 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:52:27Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useAutoNextSlot } from './useAutoNextSlot';
-5	import { useGameTTS } from './useGameTTS';
-6	import { useTileEvaluation } from './useTileEvaluation';
-7	import { useTouchDrag } from './useTouchDrag';
-8	import type { TileItem } from './types';
-9	import type { TouchDragHandlers } from './useTouchDrag';
-10	import type { RefObject } from 'react';
-11	
-12	export interface DraggableTile extends TouchDragHandlers {
-13	  ref: RefObject<HTMLButtonElement | null>;
-14	  handleClick: () => void;
-15	}
-16	
-17	export const useDraggableTile = (tile: TileItem): DraggableTile => {
-18	  const ref = useRef<HTMLButtonElement>(null);
-19	  const dispatch = useAnswerGameDispatch();
-20	  const { placeInNextSlot } = useAutoNextSlot();
-21	  const { speakTile } = useGameTTS();
-22	  const speakTileRef = useRef(speakTile);
-23	  const { placeTile } = useTileEvaluation();
-24	
-25	  useEffect(() => {
-26	    speakTileRef.current = speakTile;
-27	  }, [speakTile]);
-28	
-29	  // HTML5 DnD — desktop (no SET_DRAG_ACTIVE to avoid browser snap-back fadeout)
-30	  useEffect(() => {
-31	    const element = ref.current;
-32	    if (!element) return;
-33	    return draggable({
-34	      element,
-35	      getInitialData: () => ({ tileId: tile.id }),
-36	      onDragStart: () => speakTileRef.current(tile.label),
-37	    });
-38	  }, [tile.id, tile.label]);
-39	
-40	  // Pointer-events drag — touch / mobile
-41	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-42	    useTouchDrag({
-43	      tileId: tile.id,
-44	      label: tile.label,
-45	      onDragStart: () => {
-46	        speakTileRef.current(tile.label);
-47	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-48	      },
-49	      onDragCancel: () =>
-50	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
-51	      onDrop: (droppedTileId, zoneIndex) => {
-52	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-53	        placeTile(droppedTileId, zoneIndex);
-54	      },
-55	    });
-56	
-57	  const handleClick = () => {
-58	    speakTile(tile.label);
-59	    placeInNextSlot(tile.id);
-60	  };
-61	
-62	  return {
-63	    ref,
-64	    handleClick,
-65	    onPointerDown,
-66	    onPointerMove,
-67	    onPointerUp,
-68	    onPointerCancel,
-69	  };
-70	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useAutoNextSlot } from './useAutoNextSlot';
+5 import { useGameTTS } from './useGameTTS';
+6 import { useTileEvaluation } from './useTileEvaluation';
+7 import { useTouchDrag } from './useTouchDrag';
+8 import type { TileItem } from './types';
+9 import type { TouchDragHandlers } from './useTouchDrag';
+10 import type { RefObject } from 'react';
+11 
+12 export interface DraggableTile extends TouchDragHandlers {
+13   ref: RefObject<HTMLButtonElement | null>;
+14   handleClick: () => void;
+15 }
+16 
+17 export const useDraggableTile = (tile: TileItem): DraggableTile => {
+18   const ref = useRef<HTMLButtonElement>(null);
+19   const dispatch = useAnswerGameDispatch();
+20   const { placeInNextSlot } = useAutoNextSlot();
+21   const { speakTile } = useGameTTS();
+22   const speakTileRef = useRef(speakTile);
+23   const { placeTile } = useTileEvaluation();
+24 
+25   useEffect(() => {
+26     speakTileRef.current = speakTile;
+27   }, [speakTile]);
+28 
+29   // HTML5 DnD — desktop (no SET_DRAG_ACTIVE to avoid browser snap-back fadeout)
+30   useEffect(() => {
+31     const element = ref.current;
+32     if (!element) return;
+33     return draggable({
+34       element,
+35       getInitialData: () => ({ tileId: tile.id }),
+36       onDragStart: () => speakTileRef.current(tile.label),
+37     });
+38   }, [tile.id, tile.label]);
+39 
+40   // Pointer-events drag — touch / mobile
+41   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+42     useTouchDrag({
+43       tileId: tile.id,
+44       label: tile.label,
+45       onDragStart: () => {
+46         speakTileRef.current(tile.label);
+47         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+48       },
+49       onDragCancel: () =>
+50         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
+51       onDrop: (droppedTileId, zoneIndex) => {
+52         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+53         placeTile(droppedTileId, zoneIndex);
+54       },
+55     });
+56 
+57   const handleClick = () => {
+58     speakTile(tile.label);
+59     placeInNextSlot(tile.id);
+60   };
+61 
+62   return {
+63     ref,
+64     handleClick,
+65     onPointerDown,
+66     onPointerMove,
+67     onPointerUp,
+68     onPointerCancel,
+69   };
+70 };
 71
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:53:46Z)**_
@@ -2902,7 +2962,6 @@ Now I see: the touch path in `useDraggableTile` does pass `onDropOnBank` to `use
 Wait, the user's complaint is about **slot to bank** drag. Let me understand the full picture:
 
 For **slot to bank** drag on desktop (HTML5 DnD):
-
 
 When a slot tile is dragged over the bank, the browser fires `dragenter` events on whatever element is under the cursor. If that's an empty hole, the event bubbles up to the bank container and triggers the drop handler. But if the cursor lands on an existing bank tile button, the `dragenter` fires on that button instead and might not bubble correctly to register as a valid bank drop target.
 
@@ -2953,6 +3012,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:53:54Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:53:58Z)**_
@@ -2968,17 +3028,18 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:53:59Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-99	  const slotRef = useRef<HTMLElement | null>(null);
-100	  const dropRef = useRef<HTMLDivElement | null>(null);
-101	  const prevIsWrongRef = useRef(isWrong);
-102	  const prevTileIdRef = useRef(tileId);
-103	  const prevDragActiveTileIdRef = useRef(dragActiveTileId);
-104	  // Holds the startFade handle returned by triggerEjectReturn so we can call
-105	  // it when EJECT_TILE fires and the tile is back in the bank.
-106	  const startFadeRef = useRef<(() => void) | null>(null);
-107	
-108	  // Drop target handler — choose evaluation or swap based on interaction mode
+99   const slotRef = useRef<HTMLElement | null>(null);
+100   const dropRef = useRef<HTMLDivElement | null>(null);
+101   const prevIsWrongRef = useRef(isWrong);
+102   const prevTileIdRef = useRef(tileId);
+103   const prevDragActiveTileIdRef = useRef(dragActiveTileId);
+104   // Holds the startFade handle returned by triggerEjectReturn so we can call
+105   // it when EJECT_TILE fires and the tile is back in the bank.
+106   const startFadeRef = useRef<(() => void) | null>(null);
+107 
+108   // Drop target handler — choose evaluation or swap based on interaction mode
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:54:03Z)**_
@@ -2989,6 +3050,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:54:03Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:54:07Z)**_
@@ -2999,6 +3061,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:54:07Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:54:11Z)**_
@@ -3013,6 +3076,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:54:13Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:54:21Z)**_
@@ -3023,6 +3087,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:54:21Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:54:26Z)**_
@@ -3037,6 +3102,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:54:27Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:54:31Z)**_
@@ -3047,6 +3113,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:54:31Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:54:35Z)**_
@@ -3063,6 +3130,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:54:38Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:54:41Z)**_
@@ -3079,6 +3147,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:54:41Z)**_
 60:        slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
 94:            ref={dragRef}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:54:52Z)**_
@@ -3104,87 +3173,88 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:54:52Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/answer-game-reducer.ts`
 
 ```text
-1	import type {
-2	  AnswerGameAction,
-3	  AnswerGameConfig,
-4	  AnswerGameState,
-5	  AnswerZone,
-6	  TileItem,
-7	} from './types';
-8	
-9	export function makeInitialState(
-10	  config: AnswerGameConfig,
-11	): AnswerGameState {
-12	  return {
-13	    config,
-14	    allTiles: [],
-15	    bankTileIds: [],
-16	    zones: [],
-17	    activeSlotIndex: 0,
-18	    dragActiveTileId: null,
-19	    dragHoverZoneIndex: null,
-20	    phase: 'playing',
-21	    roundIndex: 0,
-22	    retryCount: 0,
-23	  };
-24	}
-25	
-26	export function answerGameReducer(
-27	  state: AnswerGameState,
-28	  action: AnswerGameAction,
-29	): AnswerGameState {
-30	  switch (action.type) {
-31	    case 'INIT_ROUND': {
-32	      return {
-33	        ...state,
-34	        allTiles: action.tiles,
-35	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-36	        zones: action.zones,
-37	        activeSlotIndex: 0,
-38	        phase: 'playing',
-39	        roundIndex: 0,
-40	        retryCount: 0,
-41	      };
-42	    }
-43	
-44	    case 'PLACE_TILE': {
-45	      const tile = state.allTiles.find((t) => t.id === action.tileId);
-46	      const zone = state.zones[action.zoneIndex];
-47	      if (!tile || !zone) return state;
-48	
-49	      const correct = tile.value === zone.expectedValue;
-50	
-51	      // A tile placement always ends any active drag for that tile.
-52	      const dragActiveTileId =
-53	        state.dragActiveTileId === action.tileId
-54	          ? null
-55	          : state.dragActiveTileId;
-56	
-57	      if (!correct && state.config.wrongTileBehavior === 'reject') {
-58	        return {
-59	          ...state,
-60	          dragActiveTileId,
-61	          retryCount: state.retryCount + 1,
-62	        };
-63	      }
-64	
-65	      if (correct) {
-66	        const previousId = zone.placedTileId;
-67	        let newBankTileIds = state.bankTileIds.filter(
-68	          (id) => id !== action.tileId,
-69	        );
-70	        if (previousId !== null && previousId !== action.tileId) {
-71	          // Bank tile dropped on an occupied slot: previous occupant returns to bank.
-72	          newBankTileIds = [...newBankTileIds, previousId];
-73	        }
-74	        const newZone: AnswerZone = {
-75	          ...zone,
-76	          placedTileId: action.tileId,
-77	          isWrong: false,
-78	          isLocked: false,
-79	        };
-80	        const newZones = state.zones.map((z, i) =>
+1 import type {
+2   AnswerGameAction,
+3   AnswerGameConfig,
+4   AnswerGameState,
+5   AnswerZone,
+6   TileItem,
+7 } from './types';
+8 
+9 export function makeInitialState(
+10   config: AnswerGameConfig,
+11 ): AnswerGameState {
+12   return {
+13     config,
+14     allTiles: [],
+15     bankTileIds: [],
+16     zones: [],
+17     activeSlotIndex: 0,
+18     dragActiveTileId: null,
+19     dragHoverZoneIndex: null,
+20     phase: 'playing',
+21     roundIndex: 0,
+22     retryCount: 0,
+23   };
+24 }
+25 
+26 export function answerGameReducer(
+27   state: AnswerGameState,
+28   action: AnswerGameAction,
+29 ): AnswerGameState {
+30   switch (action.type) {
+31     case 'INIT_ROUND': {
+32       return {
+33         ...state,
+34         allTiles: action.tiles,
+35         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+36         zones: action.zones,
+37         activeSlotIndex: 0,
+38         phase: 'playing',
+39         roundIndex: 0,
+40         retryCount: 0,
+41       };
+42     }
+43 
+44     case 'PLACE_TILE': {
+45       const tile = state.allTiles.find((t) => t.id === action.tileId);
+46       const zone = state.zones[action.zoneIndex];
+47       if (!tile || !zone) return state;
+48 
+49       const correct = tile.value === zone.expectedValue;
+50 
+51       // A tile placement always ends any active drag for that tile.
+52       const dragActiveTileId =
+53         state.dragActiveTileId === action.tileId
+54           ? null
+55           : state.dragActiveTileId;
+56 
+57       if (!correct && state.config.wrongTileBehavior === 'reject') {
+58         return {
+59           ...state,
+60           dragActiveTileId,
+61           retryCount: state.retryCount + 1,
+62         };
+63       }
+64 
+65       if (correct) {
+66         const previousId = zone.placedTileId;
+67         let newBankTileIds = state.bankTileIds.filter(
+68           (id) => id !== action.tileId,
+69         );
+70         if (previousId !== null && previousId !== action.tileId) {
+71           // Bank tile dropped on an occupied slot: previous occupant returns to bank.
+72           newBankTileIds = [...newBankTileIds, previousId];
+73         }
+74         const newZone: AnswerZone = {
+75           ...zone,
+76           placedTileId: action.tileId,
+77           isWrong: false,
+78           isLocked: false,
+79         };
+80         const newZones = state.zones.map((z, i) =>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:54:55Z)**_
@@ -3194,67 +3264,68 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:54:55Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/answer-game-reducer.ts`
 
 ```text
-80	        const newZones = state.zones.map((z, i) =>
-81	          i === action.zoneIndex ? newZone : z,
-82	        );
-83	        const nextActiveSlot = newZones.findIndex(
-84	          (z, i) => i > action.zoneIndex && z.placedTileId === null,
-85	        );
-86	        const allFilledCorrectly = newZones.every(
-87	          (z) => z.placedTileId !== null && !z.isWrong,
-88	        );
-89	        const isLastRound =
-90	          state.roundIndex >= state.config.totalRounds - 1;
-91	        return {
-92	          ...state,
-93	          dragActiveTileId,
-94	          zones: newZones,
-95	          bankTileIds: newBankTileIds,
-96	          activeSlotIndex:
-97	            nextActiveSlot === -1
-98	              ? state.activeSlotIndex
-99	              : nextActiveSlot,
-100	          retryCount: state.retryCount,
-101	          phase: allFilledCorrectly
-102	            ? isLastRound
-103	              ? 'game-over'
-104	              : 'round-complete'
-105	            : 'playing',
-106	        };
-107	      }
-108	
-109	      const shouldLock =
-110	        state.config.wrongTileBehavior === 'lock-manual' ||
-111	        state.config.wrongTileBehavior === 'lock-auto-eject';
-112	      const newZone: AnswerZone = {
-113	        ...zone,
-114	        placedTileId: shouldLock ? action.tileId : zone.placedTileId,
-115	        isWrong: true,
-116	        isLocked: true,
-117	      };
-118	      const newZones = state.zones.map((z, i) =>
-119	        i === action.zoneIndex ? newZone : z,
-120	      );
-121	      let newBankTileIds = shouldLock
-122	        ? state.bankTileIds.filter((id) => id !== action.tileId)
-123	        : state.bankTileIds;
-124	      if (
-125	        shouldLock &&
-126	        zone.placedTileId &&
-127	        zone.placedTileId !== action.tileId
-128	      ) {
-129	        newBankTileIds = [...newBankTileIds, zone.placedTileId];
-130	      }
-131	
-132	      return {
-133	        ...state,
-134	        dragActiveTileId,
-135	        zones: newZones,
-136	        bankTileIds: newBankTileIds,
-137	        activeSlotIndex: state.activeSlotIndex,
-138	        retryCount: state.retryCount + 1,
-139	        phase: 'playing',
+80         const newZones = state.zones.map((z, i) =>
+81           i === action.zoneIndex ? newZone : z,
+82         );
+83         const nextActiveSlot = newZones.findIndex(
+84           (z, i) => i > action.zoneIndex && z.placedTileId === null,
+85         );
+86         const allFilledCorrectly = newZones.every(
+87           (z) => z.placedTileId !== null && !z.isWrong,
+88         );
+89         const isLastRound =
+90           state.roundIndex >= state.config.totalRounds - 1;
+91         return {
+92           ...state,
+93           dragActiveTileId,
+94           zones: newZones,
+95           bankTileIds: newBankTileIds,
+96           activeSlotIndex:
+97             nextActiveSlot === -1
+98               ? state.activeSlotIndex
+99               : nextActiveSlot,
+100           retryCount: state.retryCount,
+101           phase: allFilledCorrectly
+102             ? isLastRound
+103               ? 'game-over'
+104               : 'round-complete'
+105             : 'playing',
+106         };
+107       }
+108 
+109       const shouldLock =
+110         state.config.wrongTileBehavior === 'lock-manual' ||
+111         state.config.wrongTileBehavior === 'lock-auto-eject';
+112       const newZone: AnswerZone = {
+113         ...zone,
+114         placedTileId: shouldLock ? action.tileId : zone.placedTileId,
+115         isWrong: true,
+116         isLocked: true,
+117       };
+118       const newZones = state.zones.map((z, i) =>
+119         i === action.zoneIndex ? newZone : z,
+120       );
+121       let newBankTileIds = shouldLock
+122         ? state.bankTileIds.filter((id) => id !== action.tileId)
+123         : state.bankTileIds;
+124       if (
+125         shouldLock &&
+126         zone.placedTileId &&
+127         zone.placedTileId !== action.tileId
+128       ) {
+129         newBankTileIds = [...newBankTileIds, zone.placedTileId];
+130       }
+131 
+132       return {
+133         ...state,
+134         dragActiveTileId,
+135         zones: newZones,
+136         bankTileIds: newBankTileIds,
+137         activeSlotIndex: state.activeSlotIndex,
+138         retryCount: state.retryCount + 1,
+139         phase: 'playing',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:56:21Z)**_
@@ -3263,9 +3334,9 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:56:21Z)**_
 Let me look at `SWAP_TILES` in the reducer to understand how slot-to-slot swap works, and also check if there's any support for bank-to-slot swap when the slot is occupied.
 
 Actually, the key insight here is:
+
 1. When a bank tile (via `PLACE_TILE`) is dropped on an occupied slot, the previous occupant returns to the bank (line 70-72: `newBankTileIds = [...newBankTileIds, previousId]`)
 2. But this only works for CORRECT drops (line 65: `if (correct)`)
-
 
 3. For wrong tiles, the displaced tile also goes back to the bank (line 126-129)
 
@@ -3282,6 +3353,7 @@ Hmm, but the user's complaint is: "I can only drop from slot to bank, if I choos
 This could be a different issue - maybe the bank container's drop detection only works in certain areas. Let me check if perhaps there's something blocking the bank drop events.
 
 Actually, I think I understand now. For DESKTOP HTML5 DnD:
+
 - `useBankDropTarget` registers `bankRef` as a drop target with `{ isBankTarget: true }`
 - `useSlotTileDrag`'s `onDrop` checks `isBankTarget === true` to detect bank drops
 - The bank container should cover the whole area
@@ -3322,78 +3394,80 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:56:22Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts`
 
 ```text
-238	        }
-239	      }
-240	    },
-241	    [label, onDragStart, cleanupGhost],
-242	  );
-243	
-244	  const onPointerUp = useCallback(
-245	    (e: PointerEvent<HTMLElement>) => {
-246	      if (e.pointerType === 'mouse' || !startPos.current) return;
-247	
-248	      if (isDragging.current) {
-249	        // Capture ghost dimensions before removing.
-250	        const ghostHalfW = ghostRef.current?.halfW ?? 0;
-251	        const ghostHalfH = ghostRef.current?.halfH ?? 0;
-252	
-253	        // Remove ghost before elementsFromPoint so it doesn't interfere.
-254	        ghostRef.current?.el.remove();
-255	        ghostRef.current = null;
-256	
-257	        // Sample 5 points (pointer center + 4 ghost corners) so the drop fires
-258	        // as soon as the ghost tile visually overlaps a slot.
-259	        // Zones take priority over the bank: check all points for a zone first.
-260	        const samplePoints: [number, number][] = [
-261	          [e.clientX, e.clientY],
-262	          [e.clientX - ghostHalfW, e.clientY - ghostHalfH],
-263	          [e.clientX + ghostHalfW, e.clientY - ghostHalfH],
-264	          [e.clientX - ghostHalfW, e.clientY + ghostHalfH],
-265	          [e.clientX + ghostHalfW, e.clientY + ghostHalfH],
-266	        ];
-267	
-268	        let droppedZoneIndex: number | null = null;
-269	        outer: for (const [px, py] of samplePoints) {
-270	          for (const el of document.elementsFromPoint(px, py)) {
-271	            if (
-272	              el instanceof HTMLElement &&
-273	              el.dataset['zoneIndex'] !== undefined
-274	            ) {
-275	              const parsed = Number.parseInt(
-276	                el.dataset['zoneIndex'],
-277	                10,
-278	              );
-279	              if (!Number.isNaN(parsed)) {
-280	                droppedZoneIndex = parsed;
-281	                break outer;
-282	              }
-283	            }
-284	          }
-285	        }
-286	
-287	        if (droppedZoneIndex !== null) {
-288	          onDrop(tileId, droppedZoneIndex);
-289	        } else {
-290	          // No zone found — check for bank drop.
-291	          let hitBank = false;
-292	          bank: for (const [px, py] of samplePoints) {
-293	            for (const el of document.elementsFromPoint(px, py)) {
-294	              if (
-295	                el instanceof HTMLElement &&
-296	                el.dataset['tileBank'] !== undefined
-297	              ) {
-298	                hitBank = true;
-299	                break bank;
-300	              }
-301	            }
-302	          }
+238         }
+239       }
+240     },
+241     [label, onDragStart, cleanupGhost],
+242   );
+243 
+244   const onPointerUp = useCallback(
+245     (e: PointerEvent<HTMLElement>) => {
+246       if (e.pointerType === 'mouse' || !startPos.current) return;
+247 
+248       if (isDragging.current) {
+249         // Capture ghost dimensions before removing.
+250         const ghostHalfW = ghostRef.current?.halfW ?? 0;
+251         const ghostHalfH = ghostRef.current?.halfH ?? 0;
+252 
+253         // Remove ghost before elementsFromPoint so it doesn't interfere.
+254         ghostRef.current?.el.remove();
+255         ghostRef.current = null;
+256 
+257         // Sample 5 points (pointer center + 4 ghost corners) so the drop fires
+258         // as soon as the ghost tile visually overlaps a slot.
+259         // Zones take priority over the bank: check all points for a zone first.
+260         const samplePoints: [number, number][] = [
+261           [e.clientX, e.clientY],
+262           [e.clientX - ghostHalfW, e.clientY - ghostHalfH],
+263           [e.clientX + ghostHalfW, e.clientY - ghostHalfH],
+264           [e.clientX - ghostHalfW, e.clientY + ghostHalfH],
+265           [e.clientX + ghostHalfW, e.clientY + ghostHalfH],
+266         ];
+267 
+268         let droppedZoneIndex: number | null = null;
+269         outer: for (const [px, py] of samplePoints) {
+270           for (const el of document.elementsFromPoint(px, py)) {
+271             if (
+272               el instanceof HTMLElement &&
+273               el.dataset['zoneIndex'] !== undefined
+274             ) {
+275               const parsed = Number.parseInt(
+276                 el.dataset['zoneIndex'],
+277                 10,
+278               );
+279               if (!Number.isNaN(parsed)) {
+280                 droppedZoneIndex = parsed;
+281                 break outer;
+282               }
+283             }
+284           }
+285         }
+286 
+287         if (droppedZoneIndex !== null) {
+288           onDrop(tileId, droppedZoneIndex);
+289         } else {
+290           // No zone found — check for bank drop.
+291           let hitBank = false;
+292           bank: for (const [px, py] of samplePoints) {
+293             for (const el of document.elementsFromPoint(px, py)) {
+294               if (
+295                 el instanceof HTMLElement &&
+296                 el.dataset['tileBank'] !== undefined
+297               ) {
+298                 hitBank = true;
+299                 break bank;
+300               }
+301             }
+302           }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:56:31Z)**_
 
 <think><details><summary>Thought Process</summary>
 I see the problem clearly now. The current logic:
+
 1. Checks ALL 5 points for a zone (center first)
 2. If ANY point hits a zone, it's a zone drop
 3. Only if no zones found, check for bank
@@ -3401,8 +3475,8 @@ I see the problem clearly now. The current logic:
 So if the user drags a slot tile over the bank, but the ghost corners extend back over a slot, the corner finds a zone and it's treated as a slot drop instead of a bank drop. The user has to position the ghost such that NO corners are over any slot.
 
 The fix: Change the priority to:
-1. Check CENTER only for a zone → zone drop (precise intent)
 
+1. Check CENTER only for a zone → zone drop (precise intent)
 
 2. Check CENTER for bank → bank drop (precise intent, takes priority over corner zones)
 3. Check CORNERS for a zone → zone drop (expanded zone)
@@ -3432,6 +3506,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:56:46Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:56:49Z)**_
@@ -3445,97 +3520,98 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:56:50Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts`
 
 ```text
-244	  const onPointerUp = useCallback(
-245	    (e: PointerEvent<HTMLElement>) => {
-246	      if (e.pointerType === 'mouse' || !startPos.current) return;
-247	
-248	      if (isDragging.current) {
-249	        // Capture ghost dimensions before removing.
-250	        const ghostHalfW = ghostRef.current?.halfW ?? 0;
-251	        const ghostHalfH = ghostRef.current?.halfH ?? 0;
-252	
-253	        // Remove ghost before elementsFromPoint so it doesn't interfere.
-254	        ghostRef.current?.el.remove();
-255	        ghostRef.current = null;
-256	
-257	        // Priority order (honours explicit pointer intent before ghost expansion):
-258	        //   1. Center → zone   (precise slot aim)
-259	        //   2. Center → bank   (explicit bank aim beats corner zone hits)
-260	        //   3. Corners → zone  (expanded zone — ghost visually overlaps slot)
-261	        //   4. Corners → bank  (expanded bank)
-262	        //   5. Cancel
-263	        const centerX = e.clientX;
-264	        const centerY = e.clientY;
-265	        const cornerPoints: [number, number][] = [
-266	          [centerX - ghostHalfW, centerY - ghostHalfH],
-267	          [centerX + ghostHalfW, centerY - ghostHalfH],
-268	          [centerX - ghostHalfW, centerY + ghostHalfH],
-269	          [centerX + ghostHalfW, centerY + ghostHalfH],
-270	        ];
-271	
-272	        const findZoneAt = (px: number, py: number): number | null => {
-273	          for (const el of document.elementsFromPoint(px, py)) {
-274	            if (el instanceof HTMLElement && el.dataset['zoneIndex'] !== undefined) {
-275	              const parsed = Number.parseInt(el.dataset['zoneIndex'], 10);
-276	              if (!Number.isNaN(parsed)) return parsed;
-277	            }
-278	          }
-279	          return null;
-280	        };
-281	        const isBankAt = (px: number, py: number): boolean =>
-282	          document
-283	            .elementsFromPoint(px, py)
-284	            .some(
-285	              (el) =>
-286	                el instanceof HTMLElement &&
-287	                el.dataset['tileBank'] !== undefined,
-288	            );
-289	
-290	        // 1. Center → zone
-291	        const centerZone = findZoneAt(centerX, centerY);
-292	        if (centerZone !== null) {
-293	          onDrop(tileId, centerZone);
-294	          cleanup();
-295	          return;
-296	        }
-297	        // 2. Center → bank
-298	        if (isBankAt(centerX, centerY)) {
-299	          onDropOnBank?.();
-300	          cleanup();
-301	          return;
-302	        }
-303	        // 3. Corners → zone
-304	        let droppedZoneIndex: number | null = null;
-305	        for (const [px, py] of cornerPoints) {
-306	          const z = findZoneAt(px, py);
-307	          if (z !== null) { droppedZoneIndex = z; break; }
-308	        }
-309	        if (droppedZoneIndex !== null) {
-310	          onDrop(tileId, droppedZoneIndex);
-311	        } else {
-312	          // 4. Corners → bank
-313	          let hitBank = false;
-314	          for (const [px, py] of cornerPoints) {
-315	            if (isBankAt(px, py)) { hitBank = true; break; }
-316	          }
-317	          if (hitBank) {
-318	            onDropOnBank?.();
-319	          } else {
-320	            onDragCancelRef.current?.();
-321	          }
-322	        }
-323	      }
-324	
-325	      cleanup();
-326	    },
-327	    [tileId, onDrop, onDropOnBank, cleanup],
-328	  );
-329	
-330	  const onPointerCancel = useCallback(
-331	    (e: PointerEvent<HTMLElement>) => {
-332	      if (e.pointerType === 'mouse') return;
-333	      if (isDragging.current) {
+244   const onPointerUp = useCallback(
+245     (e: PointerEvent<HTMLElement>) => {
+246       if (e.pointerType === 'mouse' || !startPos.current) return;
+247 
+248       if (isDragging.current) {
+249         // Capture ghost dimensions before removing.
+250         const ghostHalfW = ghostRef.current?.halfW ?? 0;
+251         const ghostHalfH = ghostRef.current?.halfH ?? 0;
+252 
+253         // Remove ghost before elementsFromPoint so it doesn't interfere.
+254         ghostRef.current?.el.remove();
+255         ghostRef.current = null;
+256 
+257         // Priority order (honours explicit pointer intent before ghost expansion):
+258         //   1. Center → zone   (precise slot aim)
+259         //   2. Center → bank   (explicit bank aim beats corner zone hits)
+260         //   3. Corners → zone  (expanded zone — ghost visually overlaps slot)
+261         //   4. Corners → bank  (expanded bank)
+262         //   5. Cancel
+263         const centerX = e.clientX;
+264         const centerY = e.clientY;
+265         const cornerPoints: [number, number][] = [
+266           [centerX - ghostHalfW, centerY - ghostHalfH],
+267           [centerX + ghostHalfW, centerY - ghostHalfH],
+268           [centerX - ghostHalfW, centerY + ghostHalfH],
+269           [centerX + ghostHalfW, centerY + ghostHalfH],
+270         ];
+271 
+272         const findZoneAt = (px: number, py: number): number | null => {
+273           for (const el of document.elementsFromPoint(px, py)) {
+274             if (el instanceof HTMLElement && el.dataset['zoneIndex'] !== undefined) {
+275               const parsed = Number.parseInt(el.dataset['zoneIndex'], 10);
+276               if (!Number.isNaN(parsed)) return parsed;
+277             }
+278           }
+279           return null;
+280         };
+281         const isBankAt = (px: number, py: number): boolean =>
+282           document
+283             .elementsFromPoint(px, py)
+284             .some(
+285               (el) =>
+286                 el instanceof HTMLElement &&
+287                 el.dataset['tileBank'] !== undefined,
+288             );
+289 
+290         // 1. Center → zone
+291         const centerZone = findZoneAt(centerX, centerY);
+292         if (centerZone !== null) {
+293           onDrop(tileId, centerZone);
+294           cleanup();
+295           return;
+296         }
+297         // 2. Center → bank
+298         if (isBankAt(centerX, centerY)) {
+299           onDropOnBank?.();
+300           cleanup();
+301           return;
+302         }
+303         // 3. Corners → zone
+304         let droppedZoneIndex: number | null = null;
+305         for (const [px, py] of cornerPoints) {
+306           const z = findZoneAt(px, py);
+307           if (z !== null) { droppedZoneIndex = z; break; }
+308         }
+309         if (droppedZoneIndex !== null) {
+310           onDrop(tileId, droppedZoneIndex);
+311         } else {
+312           // 4. Corners → bank
+313           let hitBank = false;
+314           for (const [px, py] of cornerPoints) {
+315             if (isBankAt(px, py)) { hitBank = true; break; }
+316           }
+317           if (hitBank) {
+318             onDropOnBank?.();
+319           } else {
+320             onDragCancelRef.current?.();
+321           }
+322         }
+323       }
+324 
+325       cleanup();
+326     },
+327     [tileId, onDrop, onDropOnBank, cleanup],
+328   );
+329 
+330   const onPointerCancel = useCallback(
+331     (e: PointerEvent<HTMLElement>) => {
+332       if (e.pointerType === 'mouse') return;
+333       if (isDragging.current) {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:56:58Z)**_
@@ -3546,7 +3622,6 @@ The code looks fine. But I notice there's now a problem: in cases 1 and 2, we ca
 This looks correct. Let me check if TypeScript is happy with the code.
 
 Actually wait - looking at the structure again:
-
 
 The drag handler checks if we're currently dragging, then handles the different drop scenarios: center to zone or bank return early with cleanup, while corner drops either go to zone or fall through to bank handling before reaching the final cleanup call. Let me run the type checker.
 </details></think>
@@ -3561,6 +3636,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:57:00Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:57:07Z)**_
@@ -3568,6 +3644,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:57:07Z)**_
 Clean. Now on the **"swap between slot and bank"** request — this is a new feature, not a bug. The user wants dragging a slot tile onto a bank tile to swap them (slot tile goes to bank, bank tile goes to the slot). Currently dropping on the bank always does `REMOVE_TILE` regardless of what bank tile is under the ghost.
 
 This needs:
+
 1. Detecting which specific bank tile the ghost is dropped onto (via `data-tile-bank-hole` attribute in the bank)
 2. A new `SWAP_SLOT_BANK` action in the reducer
 
@@ -3595,7 +3672,6 @@ Let me plan the implementation:
 
 2. **Bank rendering**: Add `data-tile-bank-hole` detection to know which bank tile is being targeted
 
-
 3. **Touch path** (`useTouchDrag.ts`): When dropping, detect if there's a `data-tile-bank-hole` element under the ghost and call `onSwapWithBankTile` with the bank tile's ID.
 
 4. **Desktop HTML5 DnD path** (`useSlotTileDrag.ts`): The bank tiles need to become drop targets too, so I'll register them with `dropTargetForElements` to handle the swap interaction.
@@ -3622,86 +3698,87 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:00:13Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/types.ts`
 
 ```text
-1	export interface AnswerGameConfig {
-2	  gameId: string;
-3	  /** @default 'drag' */
-4	  inputMethod: 'drag' | 'type' | 'both';
-5	  /** @default 'lock-auto-eject' */
-6	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
-7	  tileBankMode: 'exact' | 'distractors';
-8	  distractorCount?: number;
-9	  /** Total number of rounds in this session */
-10	  totalRounds: number;
-11	  /**
-12	   * When `true`, rounds follow the order of `rounds` in config.
-13	   * When `false` or omitted, order is shuffled once per session (again after Play again).
-14	   */
-15	  roundsInOrder?: boolean;
-16	  /** Whether TTS is enabled for this profile */
-17	  ttsEnabled: boolean;
-18	  /**
-19	   * Controls the OS keyboard type shown on touch devices in type/both mode.
-20	   * @default 'text'
-21	   */
-22	  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
-23	  /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
-24	  initialTiles?: TileItem[];
-25	  initialZones?: AnswerZone[];
-26	  /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
-27	  slotInteraction?: 'ordered' | 'free-swap';
-28	}
-29	
-30	export interface TileItem {
-31	  id: string;
-32	  /** Display label shown on the tile (e.g. "A", "cat", "3") */
-33	  label: string;
-34	  /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
-35	  value: string;
-36	}
-37	
-38	export interface AnswerZone {
-39	  id: string;
-40	  index: number;
-41	  /** Correct tile value for this slot; matched against `TileItem.value` */
-42	  expectedValue: string;
-43	  placedTileId: string | null;
-44	  isWrong: boolean;
-45	  isLocked: boolean;
-46	}
-47	
-48	export type AnswerGamePhase =
-49	  | 'playing'
-50	  | 'round-complete'
-51	  | 'game-over';
-52	
-53	export interface AnswerGameState {
-54	  config: AnswerGameConfig;
-55	  /** Full tile list for the current round — never mutated mid-round */
-56	  allTiles: TileItem[];
-57	  /** IDs of tiles currently visible in the choice bank */
-58	  bankTileIds: string[];
-59	  zones: AnswerZone[];
-60	  /** Index of next slot to fill in auto-next-slot mode */
-61	  activeSlotIndex: number;
-62	  dragActiveTileId: string | null;
-63	  dragHoverZoneIndex: number | null;
-64	  phase: AnswerGamePhase;
-65	  roundIndex: number;
-66	  retryCount: number;
-67	}
-68	
-69	export type AnswerGameAction =
-70	  | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-71	  | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
-72	  | { type: 'REMOVE_TILE'; zoneIndex: number }
-73	  | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
-74	  | { type: 'EJECT_TILE'; zoneIndex: number }
-75	  | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-76	  | { type: 'COMPLETE_GAME' }
-77	  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
-78	  | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null };
+1 export interface AnswerGameConfig {
+2   gameId: string;
+3   /** @default 'drag' */
+4   inputMethod: 'drag' | 'type' | 'both';
+5   /** @default 'lock-auto-eject' */
+6   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+7   tileBankMode: 'exact' | 'distractors';
+8   distractorCount?: number;
+9   /** Total number of rounds in this session */
+10   totalRounds: number;
+11   /**
+12    * When `true`, rounds follow the order of `rounds` in config.
+13    * When `false` or omitted, order is shuffled once per session (again after Play again).
+14    */
+15   roundsInOrder?: boolean;
+16   /** Whether TTS is enabled for this profile */
+17   ttsEnabled: boolean;
+18   /**
+19    * Controls the OS keyboard type shown on touch devices in type/both mode.
+20    * @default 'text'
+21    */
+22   touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+23   /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
+24   initialTiles?: TileItem[];
+25   initialZones?: AnswerZone[];
+26   /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
+27   slotInteraction?: 'ordered' | 'free-swap';
+28 }
+29 
+30 export interface TileItem {
+31   id: string;
+32   /** Display label shown on the tile (e.g. "A", "cat", "3") */
+33   label: string;
+34   /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
+35   value: string;
+36 }
+37 
+38 export interface AnswerZone {
+39   id: string;
+40   index: number;
+41   /** Correct tile value for this slot; matched against `TileItem.value` */
+42   expectedValue: string;
+43   placedTileId: string | null;
+44   isWrong: boolean;
+45   isLocked: boolean;
+46 }
+47 
+48 export type AnswerGamePhase =
+49   | 'playing'
+50   | 'round-complete'
+51   | 'game-over';
+52 
+53 export interface AnswerGameState {
+54   config: AnswerGameConfig;
+55   /** Full tile list for the current round — never mutated mid-round */
+56   allTiles: TileItem[];
+57   /** IDs of tiles currently visible in the choice bank */
+58   bankTileIds: string[];
+59   zones: AnswerZone[];
+60   /** Index of next slot to fill in auto-next-slot mode */
+61   activeSlotIndex: number;
+62   dragActiveTileId: string | null;
+63   dragHoverZoneIndex: number | null;
+64   phase: AnswerGamePhase;
+65   roundIndex: number;
+66   retryCount: number;
+67 }
+68 
+69 export type AnswerGameAction =
+70   | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+71   | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+72   | { type: 'REMOVE_TILE'; zoneIndex: number }
+73   | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
+74   | { type: 'EJECT_TILE'; zoneIndex: number }
+75   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+76   | { type: 'COMPLETE_GAME' }
+77   | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
+78   | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null };
 79
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:02:22Z)**_
@@ -3710,9 +3787,11 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:02:22Z)**_
 Now I have a clear picture. Let me plan the implementation:
 
 1. **`types.ts`**: Add `SWAP_SLOT_BANK` action:
+
    ```
    | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string }
    ```
+
    The `zoneIndex` identifies the slot (which holds the slot tile), and `bankTileId` identifies which bank tile to put in the slot.
 
 2. **`answer-game-reducer.ts`**: Add `SWAP_SLOT_BANK` case:
@@ -3770,7 +3849,6 @@ Now I understand the full picture. Let me plan the implementation:
    - `bankTileId`: the specific bank tile being swapped with
    - The slot tile ID is derivable from `zones[zoneIndex].placedTileId`
 
-
 2. **`answer-game-reducer.ts`**: In the `SWAP_SLOT_BANK` case, I'll swap the tiles by removing the bank tile from the bank, adding the slot tile back to the bank, updating the zone with the new bank tile, and resetting the wrong and locked states.
 3. **`useDraggableTile.ts`**: I need to register a drop target on bank tile buttons that identifies them as valid drop zones for slot tiles.
 4. **`useSlotTileDrag.ts`**: When a slot tile is dropped, I'll check if it landed on a specific bank tile and dispatch the swap action, while keeping the existing fallback for dropping on empty zones.
@@ -3789,7 +3867,7 @@ Now I'm realizing the tricky part: I need to verify the tile is actually visible
 
 For the touch interaction, I'll simplify by using the `data-tile-bank-hole` attribute to identify which bank tile was touched, then have the `useTouchDrag` hook call the swap handler.
 
-To verify the tile is actually in the bank rather than just a hole placeholder, I can check the DOM structure—if the `data-tile-bank-hole` element is nested inside the button wrapper (the `relative size-14` div with its button sibling), then it's a real bank tile. I'm simplifying the detection logic: when a touch lands on a bank hole, I'll check if there's actually a tile there by looking for `data-tile-bank-hole` in the elements at that point, then pass a callback to handle swaps versus drops on empty holes. The caller can then check if the bank tile ID exists in `bankTileIds` to decide whether to swap or just remove the tile, which means `useSlotTileDrag` needs access to that state. Now I'm working through the priority order for what happens when the pointer releases—checking if it's over a specific bank tile with an ID versus a generic bank area, and deciding whether to call the tile-specific callback or the generic bank drop handler. Continuing with the desktop HTML5 drag-and-drop approach, I need to make individual bank tile buttons droppable targets. Each one should register with its own `bankTileId` so the drop handler can distinguish between swapping with an occupied tile versus dropping into an empty slot. true }`. Then `useSlotTileDrag.onDrop` can check `targets[0]?.data['bankTileId']`.
+To verify the tile is actually in the bank rather than just a hole placeholder, I can check the DOM structure—if the `data-tile-bank-hole` element is nested inside the button wrapper (the `relative size-14` div with its button sibling), then it's a real bank tile. I'm simplifying the detection logic: when a touch lands on a bank hole, I'll check if there's actually a tile there by looking for `data-tile-bank-hole` in the elements at that point, then pass a callback to handle swaps versus drops on empty holes. The caller can then check if the bank tile ID exists in `bankTileIds` to decide whether to swap or just remove the tile, which means `useSlotTileDrag` needs access to that state. Now I'm working through the priority order for what happens when the pointer releases—checking if it's over a specific bank tile with an ID versus a generic bank area, and deciding whether to call the tile-specific callback or the generic bank drop handler. Continuing with the desktop HTML5 drag-and-drop approach, I need to make individual bank tile buttons droppable targets. Each one should register with its own `bankTileId` so the drop handler can distinguish between swapping with an occupied tile versus dropping into an empty slot. true }`. Then`useSlotTileDrag.onDrop` can check `targets[0]?.data['bankTileId']`.
 
 To register bank tile buttons as drop targets, I can modify `useDraggableTile` to also call `dropTargetForElements` on the same button element. Since the button is inside `bankRef` (the bank container), `dropTargetForElements` would detect the innermost drop target first. So `targets[0]` would be the bank tile, not the container.
 
@@ -3848,6 +3926,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:05:01Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/types.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:05:20Z)**_
@@ -3860,7 +3939,7 @@ The user wants me to stop and write the bank-slot swap as a spec, then commit it
 3. Commit the current work (the touch 5-point sampling + priority fix)
 4. Then focus on expanding the slot drop area
 
-Wait, the user says "write that as a spec and commit it" - they want the SWAP feature written as a spec (not implemented) and committed. 
+Wait, the user says "write that as a spec and commit it" - they want the SWAP feature written as a spec (not implemented) and committed.
 
 So the plan is: write a markdown spec document for the bank-slot swap feature, commit that spec along with the current changes (touch 5-point sampling + priority fix), then shift focus to expanding the slot drop area. I'm going back and forth on whether to keep the `SWAP_SLOT_BANK` type—it's not implemented yet, so it's technically dead code, but it does document the intended action shape. I think I'll revert it to keep things clean and write a separate spec document instead. Then I'll commit the spec along with all the bug fixes I've done so far, and move on to implementing the expanded slot drop area.
 </details></think>
@@ -3879,6 +3958,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:05:22Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/types.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:05:27Z)**_
@@ -4043,6 +4123,7 @@ const handleTouchDropOnBankTile = useCallback(
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/docs/spec-swap-slot-bank.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:06:00Z)**_
@@ -4059,6 +4140,7 @@ scope.md 4ms (unchanged)
 src/lib/game-event-bus.md 1ms (unchanged)
 Done in 3.05s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:06:03Z)**_
@@ -4078,6 +4160,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:06:04Z)**_
  src/components/answer-game/useTouchDrag.ts         | 137 ++++++++++++-------
  3 files changed, 240 insertions(+), 48 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:06:10Z)**_
@@ -4088,7 +4171,6 @@ Wait, `Slot.tsx` is not in the staged files. Let me check what changes were made
 Actually, looking at the diff stats: 3 files changed, and Slot.tsx is NOT in the staged files. But I made changes to Slot.tsx (removed the expanded div, restored overflow-hidden, etc.). Let me add it.
 
 Actually wait, looking at the `git add` command I ran - I only added `useSlotBehavior.ts` and `Slot.tsx`... no wait, I DID include `Slot.tsx` in the add command. Let me check if it shows up in status.
-
 
 Hmm, the diff output shows only 3 files changed but Slot.tsx isn't appearing. Let me run git status to see what's actually staged.
 </details></think>
@@ -4110,6 +4192,7 @@ M  src/components/answer-game/useTouchDrag.ts
 ?? .specstory/history/2026-04-07_08-32-53Z-specstory-sync-claude.md
 ?? .specstory/history/2026-04-07_08-54-17Z-this-session-is-being.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:06:16Z)**_
@@ -4119,7 +4202,7 @@ Slot.tsx is showing as not modified (no `M` before it). That means the changes t
 
 Let me check if Slot.tsx was already in a different commit, or if my edits brought it back to its original committed state.
 
-Actually, thinking about this: I added the expanded div and other changes to Slot.tsx, then I removed them all. 
+Actually, thinking about this: I added the expanded div and other changes to Slot.tsx, then I removed them all.
 
 So the net effect is that Slot.tsx is back to its pre-session state.
 </details></think>
@@ -4134,6 +4217,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:06:17Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:06:20Z)**_
@@ -4197,6 +4281,7 @@ Preview (first 2KB):
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:06:39Z)**_
@@ -4211,6 +4296,7 @@ fd4fe83 fix(drag): 5-point touch sampling + correct drop priority + swap spec
 544b2ff docs: add drag improvements context handoff for next session
 5f61208 fix(answer-game): show swap preview on source slot during drag
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:06:51Z)**_
@@ -4237,7 +4323,7 @@ Which approach do you want? And is this for desktop only, or should touch also b
 
 _**User (2026-04-07 20:21:36Z)**_
 
-this example makes desktop friendly https://github.com/alexreardon/pragmatic-board/blob/e49370e53205b7c32f4164823935685bdd95b5cb/src/shared/card.tsx#L60
+this example makes desktop friendly <https://github.com/alexreardon/pragmatic-board/blob/e49370e53205b7c32f4164823935685bdd95b5cb/src/shared/card.tsx#L60>
 
 ---
 
@@ -4274,11 +4360,13 @@ dropTargetForElements({
 ```
 
 **Key Features:**
+
 - `getIsSticky: () => true` - Maintains active drop target state even when dragged item moves away
 - `attachClosestEdge()` - Detects proximity to the card's top or bottom edge
 - `allowedEdges: ['top', 'bottom']` - Restricts hit detection to vertical edges only
 
 **Drag Event Handlers:**
+
 - **onDragEnter**: Initializes edge detection and renders shadow placeholder for visual feedback
 - **onDrag**: Updates closest edge with optimization (shallow equality checking to avoid unnecessary state updates - "Don't update react state if we don't need to")
 - **onDragLeave**: Handles leaving the card, distinguishing between leaving the card itself versus moving to adjacent cards
@@ -4288,10 +4376,12 @@ This architecture creates an expanded hit area for detecting drop positions rela
 ## card.css - Not Found
 
 The CSS file at that GitHub URL returned a 404 error. The file may have been moved, deleted, or the path may be different in that specific commit. If you need the CSS utilities, you might want to:
+
 1. Check if there's a different CSS file in the shared directory
 2. Verify the exact filename and path in that commit
 
 Would you like me to search for alternative CSS files in that repository?
+
 ```
 </details></tool-use>
 
@@ -4348,6 +4438,7 @@ The component tracks edge proximity through three handlers:
 
 This architecture enables visual feedback (shadow insertion) that indicates drop position relative to the hovered card's top or bottom edge.
 [result-id: r1]
+
 ```
 </details></tool-use>
 
@@ -4360,6 +4451,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-07 20:21:50Z)**_
 ```text
 Request failed with status code 404
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-07 20:22:00Z)**_
@@ -4371,6 +4463,7 @@ I successfully fetched the card.tsx file, but the CSS file returned a 404. Let m
 The file contains a React component for draggable/droppable cards with comprehensive drop target logic. Here are the key sections:
 
 **Drop Target Registration (lines 102-114):**
+
 ```typescript
 dropTargetForElements({
   element: outer,
@@ -4384,11 +4477,13 @@ dropTargetForElements({
 ```
 
 **Key Features:**
+
 - `getIsSticky: () => true` - Maintains active drop target state even when dragged item moves away
 - `attachClosestEdge()` - Detects proximity to the card's top or bottom edge
 - `allowedEdges: ['top', 'bottom']` - Restricts hit detection to vertical edges only
 
 **Drag Event Handlers:**
+
 - **onDragEnter**: Initializes edge detection and renders shadow placeholder for visual feedback
 - **onDrag**: Updates closest edge with optimization (shallow equality checking to avoid unnecessary state updates - "Don't update react state if we don't need to")
 - **onDragLeave**: Handles leaving the card, distinguishing between leaving the card itself versus moving to adjacent cards
@@ -4398,6 +4493,7 @@ This architecture creates an expanded hit area for detecting drop positions rela
 ## card.css - Not Found
 
 The CSS file at that GitHub URL returned a 404 error. The file may have been moved, deleted, or the path may be different in that specific commit. If you need the CSS utilities, you might want to:
+
 1. Check if there's a different CSS file in the shared directory
 2. Verify the exact filename and path in that commit
 
@@ -4411,7 +4507,6 @@ The agent found the key technique: `getIsSticky: () => true`. This is the key fe
 `getIsSticky` in pragmatic DnD: When `true`, the drop target remains "active" (sticky) even when the pointer moves slightly outside its bounds. This effectively expands the hit area — once the pointer enters the drop target, it stays active until the pointer is "far enough" away.
 
 But actually, looking at this more carefully, I need to fetch the actual file content to see what exactly is being done. Let me check what `getIsSticky` does in pragmatic DnD.
-
 
 The user is pointing to line 60 specifically, so I need to look at the actual implementation to understand what's happening there.
 </details></think>
@@ -4636,6 +4731,7 @@ export function Card({ card, columnId }: { card: TCard; columnId: string }) {
   );
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:24:39Z)**_
@@ -4648,7 +4744,7 @@ Now I see the key technique. The pattern is:
 3. `dropTargetForElements` is on `outer` (the larger outer wrapper)
 4. `getIsSticky: () => true` — keeps the drop target active even when pointer leaves it slightly
 
-The key for expanding the drop zone: **the outer div is LARGER than the inner visual element**. 
+The key for expanding the drop zone: **the outer div is LARGER than the inner visual element**.
 
 So for our slot case, the `<Tag>` wrapper acts as the expanded drop target with padding around the button inside, making the entire padded area a valid drop zone rather than just the button itself. The outer wrapper approach mirrors the pragmatic-board pattern—it becomes the expanded drop target with padding, while the inner `<Tag>` element stays as the visual card. This would require moving `slotRef` to the outer wrapper and restructuring both `Slot.tsx` and `useSlotBehavior.ts`. Alternatively, I could try using `getIsSticky: () => true` on the existing slot to expand the drop zone without restructuring. drop target. This keeps the slot as active drop target even when the pointer moves slightly outside. While the pointer is "over" the drop target (moved in from outside), it stays sticky until the pointer enters a better target or the drag ends.
 
@@ -4660,6 +4756,7 @@ The real expansion comes from making the outer element physically larger via pad
 2. Inner div: visual content → draggable source
 
 For slots, the equivalent would be:
+
 1. Add a `data-slot-outer` div around the slot (or use the `<li>` container as outer)
 2. The slot visual element is the inner
 
@@ -4684,6 +4781,7 @@ Let me look at the actual pragmatic-board implementation to see how they handle 
 Then for the actual expansion, use the two-element approach more carefully.
 
 Let me think through what's actually needed here:
+
 - User drags a tile near a slot
 - The ghost visually overlaps the slot
 - They want the drop to register
@@ -4747,7 +4845,6 @@ Now I see the key technique. Looking at line 60 and around it:
 
 The key pattern: **two nested elements** — an `outer` div and an `inner` div.
 
-
 The draggable is attached to the inner element, but the drop target is registered on the outer wrapper, which has extra padding that extends the hit zone beyond the visual card itself. With `getIsSticky: () => true`, the drop zone stays active even when the pointer drifts slightly outside its bounds.
 
 For the `Slot` component, I need to flip the approach—instead of trying to expand a child element inside the slot, I should wrap the slot in a parent container that's physically larger, then register the drop target on that outer wrapper instead.
@@ -4773,6 +4870,7 @@ The technique: the drop target element (`outer`) is larger than the visual eleme
 In card.tsx, the outer div has `px-3 py-1` which gives it 12px horizontal and 4px vertical margin beyond the inner card.
 
 For our slot: we could restructure so that:
+
 - The `<Tag>` element (outer, drop target) has NO visual styling — just a wrapper
 - A new inner `<div>` has all the visual slot styling (border, background, etc.)
 - The `<Tag>` extends 8-12px beyond the inner visual div via padding
@@ -4819,6 +4917,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:25:47Z)**_
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.stories.tsx:129:        <Slot index={2} className="size-14 rounded-lg">
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.stories.tsx:151:      <SlotRow className="gap-2">
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:25:51Z)**_
@@ -4835,6 +4934,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:25:51Z)**_
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/number-match/NumberMatch/NumberMatch.tsx
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/sort-numbers/SortNumbers/SortNumbers.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:25:54Z)**_
@@ -4844,41 +4944,44 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:25:54Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/SlotRow.tsx`
 
 ```text
-1	import type { ReactNode } from 'react';
-2	
-3	interface SlotRowProps {
-4	  className?: string;
-5	  children: ReactNode;
-6	}
-7	
-8	export const SlotRow = ({ className, children }: SlotRowProps) => (
-9	  <ol
-10	    className={['flex flex-wrap items-center justify-center', className]
-11	      .filter(Boolean)
-12	      .join(' ')}
-13	  >
-14	    {children}
-15	  </ol>
-16	);
+1 import type { ReactNode } from 'react';
+2 
+3 interface SlotRowProps {
+4   className?: string;
+5   children: ReactNode;
+6 }
+7 
+8 export const SlotRow = ({ className, children }: SlotRowProps) => (
+9   <ol
+10     className={['flex flex-wrap items-center justify-center', className]
+11       .filter(Boolean)
+12       .join(' ')}
+13   >
+14     {children}
+15   </ol>
+16 );
 17
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:27:42Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I understand the layout:
+
 - `SlotRow` is an `<ol>` with `flex flex-wrap items-center justify-center`
 - `Slot` renders as `<li>` (default `as='li'`) inside the `<ol>`
 - The `className` prop on each `Slot` provides `size-14 rounded-lg` (the visual sizing/shape)
 
 The card.tsx pattern uses `outer` and `inner` where:
+
 - `outer` = the drop target element (larger, with padding)
 - `inner` = the visual card element
 
 For our Slot:
-- Current: `<li>` = both the drop target and visual element
 
+- Current: `<li>` = both the drop target and visual element
 
 - Proposed: `<li>` = outer wrapper (drop target, larger area) + inner `<div>` = visual slot
 
@@ -4894,9 +4997,10 @@ The negative margin approach is creating complications though. If I use both `ga
 
 The simplest solution is to keep the `<Tag>` as the drop target, enable stickiness with `getIsSticky: () => true`, and then expand its hit area using CSS tricks like a transparent border with `background-clip: padding-box` to extend the clickable zone without changing the visual appearance or layout. I see the key insight now — the whitespace between slots in the horizontal row is intentional, just like the padding in the card layout. If I add padding to each `<Tag>` element and keep the visual border on an inner div, the hit area naturally extends into that gap without disrupting the layout. Each slot would expand 4px into the surrounding space, making the drop target more forgiving while maintaining the visual design.
 
-Implementing the slot wrapper... size-14 rounded-lg`) goes on the inner div. The outer `<li>` has no explicit size, just padding.
+Implementing the slot wrapper... size-14 rounded-lg`) goes on the inner div. The outer`<li>` has no explicit size, just padding.
 
 For the flex layout in `SlotRow` (`flex flex-wrap items-center justify-center gap-2`):
+
 - The `gap-2` provides 8px between adjacent `<li>` elements
 - Each `<li>` has `p-1.5` (6px padding), so it extends 6px beyond the inner div on each side
 - With the 8px gap and 6px padding on each side, adjacent hit areas overlap by 4px in the middle of the gap
@@ -4921,6 +5025,7 @@ Now I'm updating the type annotations — `slotRef` can be simplified to just `R
 _**Agent (claude-sonnet-4-6 2026-04-07 20:27:44Z)**_
 
 The technique is clear:
+
 - `outer` element = the drop target, physically larger (with padding)
 - `inner` element = the visual slot
 - `getIsSticky: () => true` — stays active once the pointer enters, even if it briefly leaves
@@ -4934,52 +5039,53 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:27:45Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useCallback, useEffect, useRef } from 'react';
-3	import { useAnswerGameContext } from '../useAnswerGameContext';
-4	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
-5	import { useSlotTileDrag } from '../useSlotTileDrag';
-6	import { useTileEvaluation } from '../useTileEvaluation';
-7	import {
-8	  triggerEjectReturn,
-9	  triggerPop,
-10	  triggerShake,
-11	} from './slot-animations';
-12	import type { RefObject } from 'react';
-13	import { playSound } from '@/lib/audio/AudioFeedback';
-14	
-15	export interface SlotRenderProps {
-16	  label: string | null;
-17	  tileId: string | null;
-18	  isActive: boolean;
-19	  isWrong: boolean;
-20	  isLocked: boolean;
-21	  isEmpty: boolean;
-22	  showCursor: boolean;
-23	  isPreview: boolean;
-24	  previewLabel: string | null;
-25	}
-26	
-27	export interface UseSlotBehaviorReturn {
-28	  renderProps: SlotRenderProps;
-29	  slotRef: RefObject<HTMLElement | null>;
-30	  dragRef: RefObject<HTMLButtonElement | null>;
-31	  handleClick: () => void;
-32	  isBeingDragged: boolean;
-33	  pointerHandlers: {
-34	    onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
-35	    onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
-36	    onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
-37	    onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
-38	  };
-39	}
-40	
-41	export const useSlotBehavior = (
-42	  index: number,
-43	): UseSlotBehaviorReturn => {
-44	  const {
-45	    zones,
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useCallback, useEffect, useRef } from 'react';
+3 import { useAnswerGameContext } from '../useAnswerGameContext';
+4 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+5 import { useSlotTileDrag } from '../useSlotTileDrag';
+6 import { useTileEvaluation } from '../useTileEvaluation';
+7 import {
+8   triggerEjectReturn,
+9   triggerPop,
+10   triggerShake,
+11 } from './slot-animations';
+12 import type { RefObject } from 'react';
+13 import { playSound } from '@/lib/audio/AudioFeedback';
+14 
+15 export interface SlotRenderProps {
+16   label: string | null;
+17   tileId: string | null;
+18   isActive: boolean;
+19   isWrong: boolean;
+20   isLocked: boolean;
+21   isEmpty: boolean;
+22   showCursor: boolean;
+23   isPreview: boolean;
+24   previewLabel: string | null;
+25 }
+26 
+27 export interface UseSlotBehaviorReturn {
+28   renderProps: SlotRenderProps;
+29   slotRef: RefObject<HTMLElement | null>;
+30   dragRef: RefObject<HTMLButtonElement | null>;
+31   handleClick: () => void;
+32   isBeingDragged: boolean;
+33   pointerHandlers: {
+34     onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
+35     onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
+36     onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
+37     onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
+38   };
+39 }
+40 
+41 export const useSlotBehavior = (
+42   index: number,
+43 ): UseSlotBehaviorReturn => {
+44   const {
+45     zones,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:27:48Z)**_
@@ -4994,6 +5100,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:27:51Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:27:55Z)**_
@@ -5010,12 +5117,14 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:27:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:28:00Z)**_
 
 <think><details><summary>Thought Process</summary>
 I need to:
+
 1. Update the drop target registration to use `outerRef` instead of `slotRef`
 2. Add `getIsSticky: () => true`
 3. Add `outerRef` to the return statement
@@ -5035,6 +5144,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:28:07Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:28:12Z)**_
@@ -5045,6 +5155,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:28:12Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:28:17Z)**_
@@ -5055,6 +5166,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:28:17Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:28:23Z)**_
@@ -5068,125 +5180,126 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:28:24Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-1	import { skeuoStyle } from '../styles';
-2	import { useSlotBehavior } from './useSlotBehavior';
-3	import type { SlotRenderProps } from './useSlotBehavior';
-4	import type { ReactNode, Ref } from 'react';
-5	
-6	interface SlotProps {
-7	  index: number;
-8	  as?: 'li' | 'span' | 'div';
-9	  className?: string;
-10	  children: (props: SlotRenderProps) => ReactNode;
-11	}
-12	
-13	export const Slot = ({
-14	  index,
-15	  as: Tag = 'li',
-16	  className,
-17	  children,
-18	}: SlotProps) => {
-19	  const {
-20	    renderProps,
-21	    slotRef,
-22	    dragRef,
-23	    handleClick,
-24	    pointerHandlers,
-25	    isBeingDragged,
-26	  } = useSlotBehavior(index);
-27	
-28	  const {
-29	    label,
-30	    isEmpty,
-31	    isWrong,
-32	    isActive,
-33	    showCursor,
-34	    isPreview,
-35	    previewLabel,
-36	  } = renderProps;
-37	
-38	  const ariaLabel = isEmpty
-39	    ? `Slot ${index + 1}, empty`
-40	    : `Slot ${index + 1}, filled with ${label}`;
-41	
-42	  const stateClasses = [
-43	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-44	    isPreview
-45	      ? 'border-dashed border-primary'
-46	      : isEmpty && !isActive
-47	        ? 'border-border'
-48	        : isEmpty && isActive
-49	          ? 'border-primary ring-2 ring-primary ring-offset-2'
-50	          : isWrong
-51	            ? 'border-destructive bg-destructive/10 text-destructive'
-52	            : 'border-primary bg-primary/10 text-primary',
-53	  ]
-54	    .filter(Boolean)
-55	    .join(' ');
-56	
-57	  return (
-58	    <Tag
-59	      ref={
-60	        slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
-61	      }
-62	      aria-label={ariaLabel}
-63	      data-zone-index={index}
-64	      className={[stateClasses, className].filter(Boolean).join(' ')}
-65	      style={
-66	        isPreview
-67	          ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
-68	          : undefined
-69	      }
-70	    >
-71	      {isEmpty ? (
-72	        <>
-73	          {isPreview && previewLabel !== null ? (
-74	            <span className="text-xl font-bold opacity-50">
-75	              {previewLabel}
-76	            </span>
-77	          ) : (
-78	            children(renderProps)
-79	          )}
-80	          {showCursor ? (
-81	            <span
-82	              aria-hidden="true"
-83	              className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
-84	            />
-85	          ) : null}
-86	        </>
-87	      ) : (
-88	        <>
-89	          <div
-90	            className="absolute inset-0 bg-muted/60 shadow-inner"
-91	            aria-hidden="true"
-92	          />
-93	          <button
-94	            ref={dragRef}
-95	            type="button"
-96	            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
-97	            aria-hidden={
-98	              isBeingDragged && !isPreview ? 'true' : undefined
-99	            }
-100	            style={skeuoStyle}
-101	            onClick={handleClick}
-102	            onPointerDown={pointerHandlers.onPointerDown}
-103	            onPointerMove={pointerHandlers.onPointerMove}
-104	            onPointerUp={pointerHandlers.onPointerUp}
-105	            onPointerCancel={pointerHandlers.onPointerCancel}
-106	          >
-107	            {isPreview && previewLabel !== null ? (
-108	              <span className="text-xl font-bold">{previewLabel}</span>
-109	            ) : (
-110	              children(renderProps)
-111	            )}
-112	          </button>
-113	        </>
-114	      )}
-115	    </Tag>
-116	  );
-117	};
+1 import { skeuoStyle } from '../styles';
+2 import { useSlotBehavior } from './useSlotBehavior';
+3 import type { SlotRenderProps } from './useSlotBehavior';
+4 import type { ReactNode, Ref } from 'react';
+5 
+6 interface SlotProps {
+7   index: number;
+8   as?: 'li' | 'span' | 'div';
+9   className?: string;
+10   children: (props: SlotRenderProps) => ReactNode;
+11 }
+12 
+13 export const Slot = ({
+14   index,
+15   as: Tag = 'li',
+16   className,
+17   children,
+18 }: SlotProps) => {
+19   const {
+20     renderProps,
+21     slotRef,
+22     dragRef,
+23     handleClick,
+24     pointerHandlers,
+25     isBeingDragged,
+26   } = useSlotBehavior(index);
+27 
+28   const {
+29     label,
+30     isEmpty,
+31     isWrong,
+32     isActive,
+33     showCursor,
+34     isPreview,
+35     previewLabel,
+36   } = renderProps;
+37 
+38   const ariaLabel = isEmpty
+39     ? `Slot ${index + 1}, empty`
+40     : `Slot ${index + 1}, filled with ${label}`;
+41 
+42   const stateClasses = [
+43     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+44     isPreview
+45       ? 'border-dashed border-primary'
+46       : isEmpty && !isActive
+47         ? 'border-border'
+48         : isEmpty && isActive
+49           ? 'border-primary ring-2 ring-primary ring-offset-2'
+50           : isWrong
+51             ? 'border-destructive bg-destructive/10 text-destructive'
+52             : 'border-primary bg-primary/10 text-primary',
+53   ]
+54     .filter(Boolean)
+55     .join(' ');
+56 
+57   return (
+58     <Tag
+59       ref={
+60         slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
+61       }
+62       aria-label={ariaLabel}
+63       data-zone-index={index}
+64       className={[stateClasses, className].filter(Boolean).join(' ')}
+65       style={
+66         isPreview
+67           ? { animation: 'pulse-ring 1.5s ease-in-out infinite' }
+68           : undefined
+69       }
+70     >
+71       {isEmpty ? (
+72         <>
+73           {isPreview && previewLabel !== null ? (
+74             <span className="text-xl font-bold opacity-50">
+75               {previewLabel}
+76             </span>
+77           ) : (
+78             children(renderProps)
+79           )}
+80           {showCursor ? (
+81             <span
+82               aria-hidden="true"
+83               className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+84             />
+85           ) : null}
+86         </>
+87       ) : (
+88         <>
+89           <div
+90             className="absolute inset-0 bg-muted/60 shadow-inner"
+91             aria-hidden="true"
+92           />
+93           <button
+94             ref={dragRef}
+95             type="button"
+96             className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged && !isPreview ? ' invisible pointer-events-none' : ''}${isPreview ? ' opacity-50' : ''}`}
+97             aria-hidden={
+98               isBeingDragged && !isPreview ? 'true' : undefined
+99             }
+100             style={skeuoStyle}
+101             onClick={handleClick}
+102             onPointerDown={pointerHandlers.onPointerDown}
+103             onPointerMove={pointerHandlers.onPointerMove}
+104             onPointerUp={pointerHandlers.onPointerUp}
+105             onPointerCancel={pointerHandlers.onPointerCancel}
+106           >
+107             {isPreview && previewLabel !== null ? (
+108               <span className="text-xl font-bold">{previewLabel}</span>
+109             ) : (
+110               children(renderProps)
+111             )}
+112           </button>
+113         </>
+114       )}
+115     </Tag>
+116   );
+117 };
 118
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:28:41Z)**_
@@ -5328,6 +5441,7 @@ export const Slot = ({
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:29:00Z)**_
@@ -5340,6 +5454,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:29:00Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:29:04Z)**_
@@ -5363,6 +5478,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:29:05Z)**_
 195:    expect(screen.getByRole('listitem')).toHaveAttribute(
 196:      'aria-label',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:29:08Z)**_
@@ -5408,6 +5524,7 @@ Received:
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:29:19Z)**_
@@ -5416,7 +5533,6 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:29:19Z)**_
 One test fails: `applies className to the slot element` — it queries `getByRole('listitem')` and expects it to have `size-14`, but the listitem is now the outer wrapper (`p-1.5`). The `className` prop now goes to the inner div.
 
 The test needs to be updated: it should query the inner div, not the listitem. But actually, since the test is checking `className` application, and `className` now goes to the inner visual div (not the outer wrapper), we should update the test to check the inner div.
-
 
 Let me look at the actual test to see what it's verifying.
 </details></think>
@@ -5428,22 +5544,23 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:29:19Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.test.tsx`
 
 ```text
-158	      <Wrapper>
-159	        <ol>
-160	          <Slot index={0} className="size-14 rounded-lg">
-161	            {() => null}
-162	          </Slot>
-163	        </ol>
-164	      </Wrapper>,
-165	    );
-166	    const el = screen.getByRole('listitem');
-167	    expect(el).toHaveClass('size-14');
-168	    expect(el).toHaveClass('rounded-lg');
-169	  });
-170	
-171	  it('has correct aria-label when empty', () => {
-172	    const Wrapper = createWrapper(baseConfig, emptyZones);
+158       <Wrapper>
+159         <ol>
+160           <Slot index={0} className="size-14 rounded-lg">
+161             {() => null}
+162           </Slot>
+163         </ol>
+164       </Wrapper>,
+165     );
+166     const el = screen.getByRole('listitem');
+167     expect(el).toHaveClass('size-14');
+168     expect(el).toHaveClass('rounded-lg');
+169   });
+170 
+171   it('has correct aria-label when empty', () => {
+172     const Wrapper = createWrapper(baseConfig, emptyZones);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:29:22Z)**_
@@ -5458,6 +5575,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:29:24Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:29:36Z)**_
@@ -5479,6 +5597,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:29:36Z)**_
 
 Done in 5.81s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:29:38Z)**_
@@ -5509,6 +5628,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:30:02Z)**_
 
 Done in 22.88s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:30:05Z)**_
@@ -5566,6 +5686,7 @@ Preview (first 2KB):
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:30:34Z)**_
@@ -5581,6 +5702,7 @@ fd4fe83 fix(drag): 5-point touch sampling + correct drop priority + swap spec
 544b2ff docs: add drag improvements context handoff for next session
 5f61208 fix(answer-game): show swap preview on source slot during drag
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:30:42Z)**_
@@ -5588,12 +5710,14 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:30:42Z)**_
 Committed. Here's what's now in place:
 
 **Expanded slot drop area (desktop HTML5 DnD)**
+
 - The `<Tag>` outer wrapper gets `p-1.5` — its rendered hit area extends ~6 px beyond the visible slot on all sides
 - `dropTargetForElements` is registered on this outer wrapper
 - `getIsSticky: () => true` keeps the slot active once entered, preventing jitter at boundaries
 - `data-zone-index` is on the outer wrapper, so touch `elementsFromPoint` also covers the expanded region
 
 **Inner/outer split**
+
 - Inner `<div ref={slotRef}>` carries the visual styling (border, background, `className` prop)
 - Outer `<Tag ref={outerRef}>` is the semantic list element and the physical drop target
 
@@ -5621,6 +5745,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:35:01Z)**_
 ```text
 Launching skill: superpowers:finishing-a-development-branch
 ```
+
 </details></tool-use>
 
 ---
@@ -5651,6 +5776,7 @@ npm test / cargo test / pytest / go test ./...
 ```
 
 **If tests fail:**
+
 ```
 Tests failing (<N> failures). Must fix before completing:
 
@@ -5740,6 +5866,7 @@ Report: "Keeping branch <name>. Worktree preserved at <path>."
 #### Option 4: Discard
 
 **Confirm first:**
+
 ```
 This will permanently delete:
 - Branch <name>
@@ -5752,6 +5879,7 @@ Type 'discard' to confirm.
 Wait for exact confirmation.
 
 If confirmed:
+
 ```bash
 git checkout <base-branch>
 git branch -D <feature-branch>
@@ -5764,11 +5892,13 @@ Then: Cleanup worktree (Step 5)
 **For Options 1, 2, 4:**
 
 Check if in worktree:
+
 ```bash
 git worktree list | grep $(git branch --show-current)
 ```
 
 If yes:
+
 ```bash
 git worktree remove <worktree-path>
 ```
@@ -5787,30 +5917,36 @@ git worktree remove <worktree-path>
 ## Common Mistakes
 
 **Skipping test verification**
+
 - **Problem:** Merge broken code, create failing PR
 - **Fix:** Always verify tests before offering options
 
 **Open-ended questions**
+
 - **Problem:** "What should I do next?" → ambiguous
 - **Fix:** Present exactly 4 structured options
 
 **Automatic worktree cleanup**
+
 - **Problem:** Remove worktree when might need it (Option 2, 3)
 - **Fix:** Only cleanup for Options 1 and 4
 
 **No confirmation for discard**
+
 - **Problem:** Accidentally delete work
 - **Fix:** Require typed "discard" confirmation
 
 ## Red Flags
 
 **Never:**
+
 - Proceed with failing tests
 - Merge without verifying tests on result
 - Delete work without confirmation
 - Force-push without explicit request
 
 **Always:**
+
 - Verify tests before offering options
 - Present exactly 4 options
 - Get typed confirmation for Option 4
@@ -5819,12 +5955,13 @@ git worktree remove <worktree-path>
 ## Integration
 
 **Called by:**
+
 - **subagent-driven-development** (Step 7) - After all tasks complete
 - **executing-plans** (Step 5) - After all batches complete
 
 **Pairs with:**
-- **using-git-worktrees** - Cleans up worktree created by that skill
 
+- **using-git-worktrees** - Cleans up worktree created by that skill
 
 ---
 
@@ -5858,6 +5995,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:35:12Z)**_
 
 Done in 6.02s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:35:15Z)**_
@@ -5955,6 +6093,7 @@ d874ef5 fix: clean up ghost element on all touch terminal events
 f3b7fc7 feat: add shake and pop CSS keyframes for slot feedback
 af8a0b5 feat: add slotInteraction config and GapDefinition type
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:36:47Z)**_
@@ -6162,6 +6301,7 @@ stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak defers via v
 Done in 5.27s.
 -e
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:37:35Z)**_
@@ -6170,6 +6310,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:37:35Z)**_
 There's a test failure! The pre-push hook is running and a test is failing. Let me look at the specific failure.
 
 Looking at the output:
+
 ```
  <p className="text-lg leading-relaxed">
             <span>
@@ -6202,87 +6343,88 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:37:35Z)**_
  `/Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/33d3f6e7-b0a2-4a46-84a4-db28f14b5052/tool-results/b63lw68mm.txt`
 
 ```text
-350	/* assert on the output */
-351	
-352	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-353	
-354	 ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 296ms
-355	 ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 195ms
-356	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides stable dispatch via useGameDispatch
-357	An update to DbProvider inside a test was not wrapped in act(...).
-358	
-359	When testing, code that causes React state updates should be wrapped into act(...):
-360	
-361	act(() => {
-362	  /* fire events that update state */
-363	});
-364	/* assert on the output */
-365	
-366	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-367	
-368	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides stable dispatch via useGameDispatch
-369	An update to DbProvider inside a test was not wrapped in act(...).
-370	
-371	When testing, code that causes React state updates should be wrapped into act(...):
-372	
-373	act(() => {
-374	  /* fire events that update state */
-375	});
-376	/* assert on the output */
-377	
-378	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-379	
-380	stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx > NumeralTileBank > placed tile renders as a hole, not a button
-381	Cannot update a component (`AnswerGameProvider`) while rendering a different component (`TestWithPlace`). To locate the bad setState() call inside `TestWithPlace`, follow the stack trace as described in https://react.dev/link/setstate-in-render
-382	
-383	 ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (9 tests) 334ms
-384	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
-385	An update to DbProvider inside a test was not wrapped in act(...).
-386	
-387	When testing, code that causes React state updates should be wrapped into act(...):
-388	
-389	act(() => {
-390	  /* fire events that update state */
-391	});
-392	/* assert on the output */
-393	
-394	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-395	
-396	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
-397	An update to DbProvider inside a test was not wrapped in act(...).
-398	
-399	When testing, code that causes React state updates should be wrapped into act(...):
-400	
-401	act(() => {
-402	  /* fire events that update state */
-403	});
-404	/* assert on the output */
-405	
-406	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-407	
-408	 ✓ src/components/answer-game/AnswerGameProvider.test.tsx (5 tests) 208ms
-409	 ✓ src/lib/game-engine/session-finder.test.ts (6 tests) 385ms
-410	 ✓ src/components/answer-game/Slot/Slot.test.tsx (7 tests) 269ms
-411	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > UNDO rolls back to previous state
-412	An update to DbProvider inside a test was not wrapped in act(...).
-413	
-414	When testing, code that causes React state updates should be wrapped into act(...):
-415	
-416	act(() => {
-417	  /* fire events that update state */
-418	});
-419	/* assert on the output */
-420	
-421	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-422	
-423	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > UNDO rolls back to previous state
-424	An update to DbProvider inside a test was not wrapped in act(...).
-425	
-426	When testing, code that causes React state updates should be wrapped into act(...):
-427	
-428	act(() => {
-429	  /* fire events that update state */
+350 /* assert on the output */
+351 
+352 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+353 
+354  ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 296ms
+355  ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 195ms
+356 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides stable dispatch via useGameDispatch
+357 An update to DbProvider inside a test was not wrapped in act(...).
+358 
+359 When testing, code that causes React state updates should be wrapped into act(...):
+360 
+361 act(() => {
+362   /* fire events that update state */
+363 });
+364 /* assert on the output */
+365 
+366 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+367 
+368 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides stable dispatch via useGameDispatch
+369 An update to DbProvider inside a test was not wrapped in act(...).
+370 
+371 When testing, code that causes React state updates should be wrapped into act(...):
+372 
+373 act(() => {
+374   /* fire events that update state */
+375 });
+376 /* assert on the output */
+377 
+378 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+379 
+380 stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx > NumeralTileBank > placed tile renders as a hole, not a button
+381 Cannot update a component (`AnswerGameProvider`) while rendering a different component (`TestWithPlace`). To locate the bad setState() call inside `TestWithPlace`, follow the stack trace as described in https://react.dev/link/setstate-in-render
+382 
+383  ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (9 tests) 334ms
+384 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
+385 An update to DbProvider inside a test was not wrapped in act(...).
+386 
+387 When testing, code that causes React state updates should be wrapped into act(...):
+388 
+389 act(() => {
+390   /* fire events that update state */
+391 });
+392 /* assert on the output */
+393 
+394 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+395 
+396 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
+397 An update to DbProvider inside a test was not wrapped in act(...).
+398 
+399 When testing, code that causes React state updates should be wrapped into act(...):
+400 
+401 act(() => {
+402   /* fire events that update state */
+403 });
+404 /* assert on the output */
+405 
+406 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+407 
+408  ✓ src/components/answer-game/AnswerGameProvider.test.tsx (5 tests) 208ms
+409  ✓ src/lib/game-engine/session-finder.test.ts (6 tests) 385ms
+410  ✓ src/components/answer-game/Slot/Slot.test.tsx (7 tests) 269ms
+411 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > UNDO rolls back to previous state
+412 An update to DbProvider inside a test was not wrapped in act(...).
+413 
+414 When testing, code that causes React state updates should be wrapped into act(...):
+415 
+416 act(() => {
+417   /* fire events that update state */
+418 });
+419 /* assert on the output */
+420 
+421 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+422 
+423 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > UNDO rolls back to previous state
+424 An update to DbProvider inside a test was not wrapped in act(...).
+425 
+426 When testing, code that causes React state updates should be wrapped into act(...):
+427 
+428 act(() => {
+429   /* fire events that update state */
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:37:40Z)**_
@@ -6374,6 +6516,7 @@ Done in 8.94s.
 [claude/bold-chatelet 0984f5d] feat(drag): expand slot drop area using outer/inner wrapper pattern
  3 files changed, 77 insertions(+), 55 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:38:21Z)**_
@@ -6389,7 +6532,6 @@ The push actually succeeded! Looking at the last few lines:
 The exit code 1 from the Bash was wrong — the push actually succeeded. This is confusing. Let me check the actual git log and if the branch was pushed to origin.
 
 Actually, looking at the `Bash` result more carefully: the `error` field says "Exit code 1" but then the actual git output shows the commit was pushed:
-
 
 I'm seeing the commit output in the results, but I need to verify whether the branch actually made it to origin or if this is just the local commit message. The issue is that `<Tag as="span">` creates a `<span>` wrapper around a `<div>` slot, which violates HTML nesting rules when placed inside a `<p>` element like in SentenceWithGaps—React's warning is valid. Looking back at the terminal output, the exit code 1 might be from the pre-push hook writing to stderr even though checks passed, or git might return 1 if the hook outputs anything to stderr regardless of its own exit status.
 
@@ -6414,6 +6556,7 @@ d10f2c7 fix: skeuomorphic drag, bank/slot holes, eject animation, race condition
 ab06a5b fix: correct sentence template in InlineSentenceGap story
 5b9b7d5 feat: add Storybook stories for unified Slot component
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:38:30Z)**_
@@ -6424,9 +6567,9 @@ The remote branch doesn't have our new commits (the latest commit on the remote 
 The issue is the `<p> cannot contain a nested <div>` HTML nesting error. When `as="span"`, the outer Tag is `<span>` but the inner visual element is a `<div>`. `<div>` inside `<span>` inside `<p>` is invalid HTML.
 
 I need to fix this:
+
 1. When `as="span"`, the inner visual element should be `<span>` too
 2. Fix the HTML nesting issue
-
 
 3. The pre-push hook likely failed due to either the HTML nesting breaking Storybook tests or a visual regression from the padding change
 
@@ -6449,6 +6592,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:38:36Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:38:40Z)**_
@@ -6464,42 +6608,43 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:38:41Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-13	export const Slot = ({
-14	  index,
-15	  as: Tag = 'li',
-16	  className,
-17	  children,
-18	}: SlotProps) => {
-19	  // When the slot is used inline (as="span", e.g. SentenceWithGaps inside <p>),
-20	  // the inner visual element must also be a <span> to avoid invalid block-in-inline
-21	  // HTML nesting. For list/block contexts, <div> is correct.
-22	  const InnerTag = as === 'span' ? 'span' : 'div';
-23	
-24	  const {
-25	    renderProps,
-26	    outerRef,
-27	    slotRef,
-28	    dragRef,
-29	    handleClick,
-30	    pointerHandlers,
-31	    isBeingDragged,
-32	  } = useSlotBehavior(index);
-33	
-34	  const {
-35	    label,
-36	    isEmpty,
-37	    isWrong,
-38	    isActive,
-39	    showCursor,
-40	    isPreview,
-41	    previewLabel,
-42	  } = renderProps;
-43	
-44	  const ariaLabel = isEmpty
-45	    ? `Slot ${index + 1}, empty`
-46	    : `Slot ${index + 1}, filled with ${label}`;
+13 export const Slot = ({
+14   index,
+15   as: Tag = 'li',
+16   className,
+17   children,
+18 }: SlotProps) => {
+19   // When the slot is used inline (as="span", e.g. SentenceWithGaps inside <p>),
+20   // the inner visual element must also be a <span> to avoid invalid block-in-inline
+21   // HTML nesting. For list/block contexts, <div> is correct.
+22   const InnerTag = as === 'span' ? 'span' : 'div';
+23 
+24   const {
+25     renderProps,
+26     outerRef,
+27     slotRef,
+28     dragRef,
+29     handleClick,
+30     pointerHandlers,
+31     isBeingDragged,
+32   } = useSlotBehavior(index);
+33 
+34   const {
+35     label,
+36     isEmpty,
+37     isWrong,
+38     isActive,
+39     showCursor,
+40     isPreview,
+41     previewLabel,
+42   } = renderProps;
+43 
+44   const ariaLabel = isEmpty
+45     ? `Slot ${index + 1}, empty`
+46     : `Slot ${index + 1}, filled with ${label}`;
 47
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:38:44Z)**_
@@ -6518,6 +6663,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:38:46Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:38:50Z)**_
@@ -6532,6 +6678,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:38:53Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:38:56Z)**_
@@ -6552,6 +6699,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:38:58Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:39:03Z)**_
@@ -6562,6 +6710,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:39:03Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:39:13Z)**_
@@ -6583,6 +6732,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:39:13Z)**_
 
 Done in 1.32s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:39:17Z)**_
@@ -7194,6 +7344,7 @@ Done in 5.07s.
 [claude/bold-chatelet bf34c28] fix(slot): use span inner tag when as="span" to fix block-in-inline HTML
  1 file changed, 7 insertions(+), 2 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:39:38Z)**_
@@ -7202,7 +7353,6 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:39:38Z)**_
 Good, commit succeeded. Now let me push with VR updates. The VR baselines likely need updating due to the layout change (p-1.5 on the outer wrapper changes the visual sizing).
 
 But I need to know what caused the push to fail. The VR tests use Docker and need to be run. Let me try pushing with `SKIP_VR=1 SKIP_E2E=1 START_STORYBOOK=1` or check if Docker is running and update VR baselines first.
-
 
 Actually, let me first try running the VR tests directly to see what's failing, then decide whether to skip them or update the baselines. According to the docs, Docker is required for VR tests to run properly—if it's not available, the tests get skipped with a warning. Let me check if Docker is running and whether that's what's blocking the push.
 </details></think>
@@ -7240,6 +7390,7 @@ If the change is intentional, run: yarn test:vr:update
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:39:55Z)**_
@@ -7260,6 +7411,7 @@ npm notice To update run: npm install -g npm@11.12.1
 npm notice
 Done in 12.52s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:40:12Z)**_
@@ -7280,6 +7432,7 @@ EOF
 Exit code 128
 fatal: pathspec 'tests/' did not match any files
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:40:15Z)**_
@@ -7299,6 +7452,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:40:15Z)**_
  M e2e/__snapshots__/visual.spec.ts/word-spell-picture-mode-chromium.png
  M e2e/__snapshots__/visual.spec.ts/word-spell-picture-mode-dark-chromium.png
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:40:18Z)**_
@@ -7314,4 +7468,5 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 EOF
 )"
 ```
+
 </details></tool-use>

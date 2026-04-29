@@ -3785,91 +3785,98 @@ _**Agent (claude-sonnet-4-6 2026-04-01 01:51:06Z)**_
 ```
 </details></tool-use>
 
-_**Agent (claude-sonnet-4-6 2026-04-01 02:00:20Z)**_
+_**Agent (claude-sonnet-4-6 2026-04-01 01:51:09Z)**_
 
 <tool-use data-tool-type="generic" data-tool-name="ExitPlanMode"><details>
 <summary>Tool use: **ExitPlanMode**</summary>
 
-```text
-The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). The user provided the following reason for the rejection:  I just merged the milestone2 branch which was part of our git worktrees. check milestone 2 again.
+**Input:**
+
+- allowedPrompts: `[map[prompt:run tests, typecheck, lint tool:Bash] map[prompt:install dependencies with yarn tool:Bash]]`
+- plan:
+
 ```
-</details></tool-use>
+# Context
 
-_**Agent (claude-sonnet-4-6 2026-04-01 02:00:27Z)**_
+The user wants to audit the completion state of Milestones 1 and 2 of the BaseSkill project, identify what is missing, and understand what needs to happen to close both milestones.
 
-<think><details><summary>Thought Process</summary>
-The user merged a milestone 2 branch that was worked on in git worktrees. Let me re-check the current state of M2.
-</details></think>
-
-_**Agent (claude-sonnet-4-6 2026-04-01 02:00:29Z)**_
-
-<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
-<summary>Tool use: **Bash**</summary>
-Re-check src structure after M2 merge
-
-`ls /Users/leocaseiro/Sites/base-skill/src/ && echo "---" && ls /Users/leocaseiro/Sites/base-skill/src/db 2>/dev/null && echo "---" && ls /Users/leocaseiro/Sites/base-skill/src/providers 2>/dev/null && echo "---" && ls /Users/leocaseiro/Sites/base-skill/src/lib 2>/dev/null && echo "---" && ls /Users/leocaseiro/Sites/base-skill/src/games 2>/dev/null`
-
-```text
-components
-db
-games
-lib
-providers
-routeTree.gen.ts
-router.tsx
-routes
-styles.css
-test-setup.ts
-types
-vite-env.d.ts
 ---
-create-database.test.ts
-create-database.ts
-hooks
-index.ts
-migrations.test.ts
-migrations.ts
-schemas
-seed-themes.ts
-setup-validation.test.ts
-types.ts
+
+## Milestone 1 — Status: COMPLETE ✅
+
+All 12 M1 deliverables are implemented:
+
+| Item | Status | Evidence |
+|------|--------|----------|
+| TanStack Start + Router scaffold | ✅ | `vite.config.ts`, `src/routes/` |
+| TypeScript strict mode | ✅ | `tsconfig.json`: `strict`, `noImplicitAny`, `strictNullChecks` |
+| ESLint `no-explicit-any` as error | ✅ | `eslint.config.js` |
+| Nested layouts (app / game / settings) | ✅ | `src/routes/_app/`, `game/`, `parent/` |
+| shadcn/ui | ✅ | `package.json`, `components.json`, `src/components/ui/` |
+| GPL v3 LICENSE | ✅ | `LICENSE` |
+| Prettier | ✅ | `prettier.config.js` |
+| Vitest + React Testing Library | ✅ | `vitest.config.ts`, devDeps |
+| Playwright E2E | ✅ | `e2e/`, `playwright.config.ts` |
+| GitHub Actions CI/CD | ✅ | `.github/workflows/` (ci, deploy, e2e, visual-regression) |
+| Static SPA output | ✅ | `vite.config.ts`: `spa: { enabled: true }` |
+| vite-plugin-pwa | ✅ | `vite.config.ts`, devDeps |
+| App versioning | ✅ | `VITE_APP_VERSION` injected from `package.json` |
+
+**No action needed for M1.**
+
 ---
-DbProvider.test.tsx
-DbProvider.tsx
-ThemeRuntimeProvider.tsx
+
+## Milestone 2 — Status: NOT STARTED ❌
+
+A detailed 17-task implementation plan already exists at:
+`docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md`
+
+### What is missing (everything):
+
+**SYNC track (blocking):**
+- [ ] Task 1: Add deps — `rxdb`, `dexie`, `react-i18next`, `i18next`, `nanoid`; devDep `fake-indexeddb`; register `fake-indexeddb/auto` in `src/test-setup.ts`
+- [ ] Task 2: RxDB database factory (`src/db/create-database.ts`) with memory storage for tests, `app_meta` schema + collection
+- [ ] Task 3: All 9 remaining schemas (`profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`) in `src/db/schemas/`
+- [ ] Task 4: Migration framework (`src/db/migrations.ts`) — `app_meta` singleton bootstrap, RxDB migration strategies
+- [ ] Task 5: Production DB entry (`src/db/index.ts`) with Dexie storage (`wrappedDexieStorage`)
+- [ ] Task 6: `DbProvider` (`src/providers/DbProvider.tsx`) + `useRxDB` hook
+- [ ] Task 7: `useRxQuery` reactive hook
+- [ ] Task 8: ADR doc — `docs/adrs/0001-rxdb-without-tanstack-query.md`; update `docs/architecture.md`
+
+**ASYNC track (after DB stable):**
+- [ ] Task 9: Game event bus (`src/lib/game-event-bus.ts`, `src/types/game-events.ts`)
+- [ ] Task 10: i18n setup (`src/lib/i18n/`) — `react-i18next`, `en` + `pt-BR` namespace JSON files
+- [ ] Task 11: Locale route segment — add `src/routes/$locale/route.tsx`; move `_app` tree under `$locale`; root redirect `/` → `/en`
+- [ ] Task 12: Wire `I18nextProvider` + `DbProvider` in app shell
+- [ ] Task 13: Theme seed + runtime CSS variables (`src/db/seed-themes.ts`, `src/lib/theme/`, `src/providers/ThemeRuntimeProvider.tsx`); remove localStorage theme mirror
+- [ ] Task 14: Speech wrappers (`src/lib/speech/SpeechOutput.ts`, `SpeechInput.ts`, `voices.ts`)
+- [ ] Task 15: Static game registry (`src/games/registry.ts`)
+- [ ] Task 16: Homepage uses catalog + i18n (minimal M2 vertical slice)
+- [ ] Task 17: Update E2E tests for locale-prefixed routes; full lint + typecheck + test + e2e gate
+
+### Current src/ gaps:
+- `src/db/` — does not exist
+- `src/providers/` — does not exist
+- `src/lib/` — only has `utils.ts`; missing `i18n/`, `theme/`, `speech/`
+- `src/games/` — does not exist
+- `src/routes/$locale/` — does not exist (routes still flat)
+
 ---
-game-event-bus.md
-game-event-bus.test.ts
-game-event-bus.ts
-i18n
-speech
-theme
-utils.ts
----
-registry.test.ts
-registry.ts
+
+## Recommended Next Step
+
+The M2 plan is complete and ready. Invoke the `superpowers:executing-plans` or `superpowers:subagent-driven-development` skill to begin executing `docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md` task by task.
+
+**Critical files to keep open during execution:**
+- `docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md` — the execution plan
+- `docs/data-model.md` — RxDB schema source of truth
+- `docs/ui-ux.md` — theme token names
+- `docs/game-engine.md` §3 — event bus spec
+- `docs/i18n.md` — i18n namespace structure
+- `docs/testing-strategy.md` — test approach
+
 ```
-</details></tool-use>
 
-_**Agent (claude-sonnet-4-6 2026-04-01 02:01:56Z)**_
+- planFilePath: `/Users/leocaseiro/.claude/plans/wiggly-hopping-moonbeam.md`
 
-<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
-<summary>Tool use: **Bash**</summary>
-Check routes and new dependencies
-
-`ls /Users/leocaseiro/Sites/base-skill/src/routes/ && echo "---" && cat /Users/leocaseiro/Sites/base-skill/package.json | grep -E '"rxdb|dexie|react-i18next|i18next|nanoid|fake-indexeddb"'`
-
-```text
-The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). The user provided the following reason for the rejection:  yes, and add those commands to allowlist
-```
-</details></tool-use>
-
-_**Agent (claude-sonnet-4-6 2026-04-01 04:05:08Z)**_
-
-<tool-use data-tool-type="generic" data-tool-name="ExitPlanMode"><details>
-<summary>Tool use: **ExitPlanMode**</summary>
-
-```text
-Tool permission request failed: Error: Tool permission stream closed before response received
-```
 </details></tool-use>

@@ -11,6 +11,7 @@ Implement **Task 11** (home route) in `/Users/leocaseiro/Sites/base-skill/worktr
 **Current state:** `src/routes/$locale/_app/index.tsx` already has `catalogSearchValidator` (ValidatorAdapter) for optional search params — **keep this validator**; do not replace with the plan’s simpler inline `validateSearch` unless you must (prefer extending parse to use `Math.max(1, page)` for page normalization).
 
 **Replace** the `HomeCatalog` component with the plan’s **HomeScreen**:
+
 - `Route.useSearch()`, `useParams({ from: '/$locale' })`, `useNavigate({ from: '/$locale/_app/' })` — if `from` fails types, use the route id string that matches this repo’s generated types.
 - `useBookmarks()`, `filterCatalog`, `paginateCatalog`, `PAGE_SIZE = 12`, `LevelRow` + `GameGrid`.
 - `handlePlay`: navigate to game route. Public `to` path is **`'/$locale/game/$gameId'`** (see `routeTree.gen.ts` `fullPath`), with `params: { locale, gameId }`.
@@ -20,6 +21,7 @@ Implement **Task 11** (home route) in `/Users/leocaseiro/Sites/base-skill/worktr
 Run `yarn typecheck` and `yarn test --run`.
 
 Commit:
+
 ```
 git add src/routes/\$locale/_app/index.tsx src/routes/\$locale/_app/index.test.tsx
 git commit -m "feat(home): game grid with search params, level filter, and pagination"

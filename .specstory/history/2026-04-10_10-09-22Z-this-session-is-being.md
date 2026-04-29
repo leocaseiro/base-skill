@@ -9,6 +9,7 @@ _**User (2026-04-10 10:09:22Z)**_
 This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
+
 1. Primary Request and Intent:
    The user began with a continuation handoff from a prior session covering PR #41, #43, #40 status and requested executing the following plan:
    1. Verify PR #41 merged
@@ -16,7 +17,7 @@ Summary:
    3. Fix VR determinism per PR #43's Option A (seed IndexedDB with fixed game configs)
    4. Rebase PR #40 onto master with stable baselines
    5. Dispatch Wave 3 Agent E (hover-preview-fix)
-   
+
    User confirmed with "Y" to proceed. After the VR fix was merged (PR #46), user said "Merged now, can we continue with the wave 3 and beyond?" — directing me to implement Wave 3 Agent E (hover-preview-fix) and continue beyond if applicable.
 
 2. Key Technical Concepts:
@@ -37,7 +38,7 @@ Summary:
 
    **PR #43 VR determinism plan read:**
    - `/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-10-vr-determinism-fix.md` — full plan explaining root cause analysis and 3 options
-   
+
    **VR determinism root cause investigation:**
    - `/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/game/$gameId.tsx` — identified `makeDefaultNumberMatchConfig` using `Math.random()` and loader generating `seed = nanoid()` passed into `buildRoundOrder`
    - `/Users/leocaseiro/Sites/base-skill/e2e/seed-math-random.ts` — Lehmer PRNG pinning Math.random
@@ -45,10 +46,11 @@ Summary:
    - `/Users/leocaseiro/Sites/base-skill/src/games/build-round-order.ts` — uses seed via seededRandom (mulberry32)
    - `/Users/leocaseiro/Sites/base-skill/src/games/number-match/build-numeral-round.ts` — shuffleInPlace uses Math.random
    - `/Users/leocaseiro/Sites/base-skill/src/db/create-database.ts` — DB_NAME "baseskill-data"
-   
+
    **VR determinism fix (committed at 69c1cbb on branch fix/vr-determinism-v2):**
-   
+
    `/Users/leocaseiro/Sites/base-skill/worktrees/fix/vr-determinism-v2/src/routes/$locale/_app/game/$gameId.tsx`:
+
    ```typescript
    const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
      // ...
@@ -77,16 +79,18 @@ Summary:
      return next;
    };
    ```
+
    This removed the randomness causing VR baseline drift. Also regenerated 19 baseline PNGs. `yarn test:vr` ran 3 times consecutively with all 21 tests passing.
 
    **Wave 3 orchestration context:**
    - `/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-10-orchestration-prompt.md` — Wave 3 is single Agent E
    - `/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-10-hover-preview-fix.md` — Agent E plan with 5 steps
    - `/Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-10-match-number-improvements-design.md` — Section 4 Hover Preview Fix spec
-   
+
    **Wave 3 Hover Preview Fix implementation (in progress on branch feat/hover-preview-fix):**
-   
+
    `/Users/leocaseiro/Sites/base-skill/worktrees/feat/hover-preview-fix/src/components/answer-game/Slot/Slot.tsx` — Added `renderPreview` prop:
+
    ```typescript
    interface SlotProps {
      index: number;
@@ -103,7 +107,9 @@ Summary:
      renderPreview?: (previewLabel: string) => ReactNode;
    }
    ```
+
    Both the empty slot branch (around line 90) and filled slot branch (around line 126) now check:
+
    ```typescript
    {isPreview && previewLabel !== null ? (
      renderPreview ? (
@@ -115,8 +121,9 @@ Summary:
      children(renderProps)
    )}
    ```
-   
+
    `/Users/leocaseiro/Sites/base-skill/worktrees/feat/hover-preview-fix/src/games/number-match/NumberMatch/NumberMatch.tsx` — Added `renderPreview` callback to the Slot in the zones.map:
+
    ```typescript
    <Slot
      key={zone.id}
@@ -153,8 +160,9 @@ Summary:
      {({ label }) => { /* existing render logic preserved */ }}
    </Slot>
    ```
-   
+
    `/Users/leocaseiro/Sites/base-skill/worktrees/feat/hover-preview-fix/src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` — Updated bank hole hover preview (empty hole, around line 244):
+
    ```typescript
    {isHoverTarget &&
      (showDomino ? (
@@ -174,6 +182,7 @@ Summary:
        </span>
      ))}
    ```
+
    Uses existing `showDomino`, `isWordTile`, `numericValue` variables already computed above in the same map iteration.
 
 4. Errors and fixes:
@@ -187,7 +196,7 @@ Summary:
    **Solved:**
    - VR test non-determinism root cause: nanoid seed using crypto.getRandomValues bypassing Math.random pin, combined with Math.random in default config generation. Fix: remove randomness from defaults entirely (fixed round values + roundsInOrder: true).
    - Slot.tsx preview rendering limitation: extended with optional renderPreview prop so NumberMatch can render DominoTile instead of plain text during hover preview.
-   
+
    **In progress:**
    - Wave 3 Agent E (hover-preview-fix) implementation: typecheck and lint pass; unit tests, storybook, VR tests, commit, and push pending.
 
@@ -209,16 +218,16 @@ Summary:
 
 8. Current Work:
    Immediately before this summary, I was implementing Wave 3 Agent E (hover-preview-fix) in the worktree at `/Users/leocaseiro/Sites/base-skill/worktrees/feat/hover-preview-fix/` (branch `feat/hover-preview-fix` off origin/master at b0a7c81).
-   
+
    **Implementation complete:**
    - Slot.tsx: added optional `renderPreview?: (previewLabel: string) => ReactNode` prop, wired into both empty and filled slot branches with fallback to default `<span>`
    - NumberMatch.tsx: wired `renderPreview` callback that renders DominoTile in dotsDominoMode, word text in wordMode, or plain numeric text otherwise, all at opacity-50
    - NumeralTileBank.tsx: updated empty bank hole hover preview to render DominoTile (showDomino), word text (isWordTile), or default text
-   
+
    **Verification so far:**
    - `yarn typecheck` ✅ passed (3.21s) — "Done in 3.21s."
    - `yarn lint` ✅ passed (13.21s) — "Done in 13.21s."
-   
+
    **Still pending for verification:**
    - `yarn test` (unit tests)
    - Storybook interaction tests
@@ -226,11 +235,11 @@ Summary:
 
 9. Optional Next Step:
    Continue the verification gate for the hover-preview-fix implementation by running `yarn test` (unit tests) to complete the "Run typecheck + lint + unit tests" todo step that was marked in_progress. Per the hover-preview-fix plan Step 5: "`yarn typecheck` passes, `yarn lint` passes, `yarn test` passes".
-   
+
    Direct quote from user's most recent message: "Merged now, can we continue with the wave 3 and beyond?"
-   
+
    My todo list currently reflects: "Run typecheck + lint + unit tests" (in_progress — typecheck and lint complete, unit tests pending), followed by "Run Storybook + VR tests", "Commit and confirm before push", and "Clarify what's next after Wave 3".
-   
+
    Next action: run `yarn test` in the hover-preview-fix worktree, then proceed with Storybook/VR tests, then commit, then ask user for push confirmation (per memory feedback_confirm_before_push.md: "Commit freely, confirm before push").
 
 If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/5f33e475-4baf-4a6b-ab57-18ff7f521e29.jsonl
@@ -314,6 +323,7 @@ AssertionError: expected '' to contain '3'
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:09:38Z)**_
@@ -329,215 +339,216 @@ _**Agent (claude-opus-4-6 2026-04-10 10:09:38Z)**_
  `./src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx`
 
 ```text
-1	import { render, screen } from '@testing-library/react';
-2	import userEvent from '@testing-library/user-event';
-3	import { useEffect } from 'react';
-4	import { beforeEach, describe, expect, it, vi } from 'vitest';
-5	import { DominoTile, NumeralTileBank } from './NumeralTileBank';
-6	import type {
-7	  AnswerGameConfig,
-8	  AnswerZone,
-9	  TileItem,
-10	} from '@/components/answer-game/types';
-11	import type { ReactNode } from 'react';
-12	import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
-13	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-14	
-15	import { speak } from '@/lib/speech/SpeechOutput';
-16	
-17	vi.mock('@/lib/speech/SpeechOutput', () => ({
-18	  speak: vi.fn(),
-19	  cancelSpeech: vi.fn(),
-20	  isSpeechActive: vi.fn().mockReturnValue(false),
-21	}));
-22	vi.mock('@/lib/game-event-bus', () => ({
-23	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-24	}));
-25	vi.mock('@/lib/audio/AudioFeedback', () => ({
-26	  playSound: vi.fn(),
-27	}));
-28	vi.mock('@/db/hooks/useSettings', () => ({
-29	  useSettings: () => ({
-30	    settings: {
-31	      speechRate: 1,
-32	      volume: 0.8,
-33	      preferredVoiceURI: undefined,
-34	    },
-35	    update: vi.fn(),
-36	  }),
-37	}));
-38	vi.mock('react-i18next', () => ({
-39	  useTranslation: () => ({
-40	    t: (key: string) => key,
-41	    i18n: { language: 'en' },
-42	  }),
-43	}));
-44	
-45	const bankDropState = vi.hoisted(() => ({ isDragOver: false }));
-46	
-47	vi.mock('@/components/answer-game/useBankDropTarget', () => ({
-48	  useBankDropTarget: () => ({
-49	    bankRef: { current: null },
-50	    get isDragOver() {
-51	      return bankDropState.isDragOver;
-52	    },
-53	  }),
-54	}));
-55	
-56	const config: AnswerGameConfig = {
-57	  gameId: 'test',
-58	  inputMethod: 'drag',
-59	  wrongTileBehavior: 'lock-auto-eject',
-60	  tileBankMode: 'exact',
-61	  totalRounds: 1,
-62	  ttsEnabled: true,
-63	};
-64	
-65	const tiles: TileItem[] = [
-66	  { id: 't1', label: '3', value: '3' },
-67	  { id: 't2', label: '5', value: '5' },
-68	];
-69	
-70	const zones: AnswerZone[] = [
-71	  {
-72	    id: 'z0',
-73	    index: 0,
-74	    expectedValue: '3',
-75	    placedTileId: null,
-76	    isWrong: false,
-77	    isLocked: false,
-78	  },
-79	];
-80	
-81	const Initialiser = ({ children }: { children: ReactNode }) => {
-82	  const dispatch = useAnswerGameDispatch();
-83	  dispatch({ type: 'INIT_ROUND', tiles, zones });
-84	  return <>{children}</>;
-85	};
-86	
-87	function wrapper({ children }: { children: ReactNode }) {
-88	  return (
-89	    <AnswerGameProvider config={config}>
-90	      <Initialiser>{children}</Initialiser>
-91	    </AnswerGameProvider>
-92	  );
-93	}
-94	
-95	describe('DominoTile', () => {
-96	  it('renders 1 pip for value 1 (1+0 split)', () => {
-97	    const { container } = render(<DominoTile value={1} />);
-98	    expect(container.querySelectorAll('[data-pip]')).toHaveLength(1);
-99	  });
-100	
-101	  it('renders 6 pips for value 6 (6+0 split)', () => {
-102	    const { container } = render(<DominoTile value={6} />);
-103	    expect(container.querySelectorAll('[data-pip]')).toHaveLength(6);
-104	  });
-105	
-106	  it('renders 18 cells (two 3×3 grids) for any value', () => {
-107	    const { container } = render(<DominoTile value={1} />);
-108	    expect(container.querySelectorAll('[data-cell]')).toHaveLength(18);
-109	  });
-110	
-111	  it('renders 7 pips for value 7 (2+5 split)', () => {
-112	    const { container } = render(<DominoTile value={7} />);
-113	    expect(container.querySelectorAll('[data-pip]')).toHaveLength(7);
-114	  });
-115	
-116	  it('renders 12 pips for value 12 (6+6 split)', () => {
-117	    const { container } = render(<DominoTile value={12} />);
-118	    expect(container.querySelectorAll('[data-pip]')).toHaveLength(12);
-119	  });
-120	
-121	  it('has a visible centre divider', () => {
-122	    const { container } = render(<DominoTile value={8} />);
-123	    expect(
-124	      container.querySelector('[data-divider]'),
-125	    ).toBeInTheDocument();
-126	  });
-127	
-128	  it('renders 0 pips on bottom half for values 1-6', () => {
-129	    const { container } = render(<DominoTile value={3} />);
-130	    // Two DiceFace grids: top has 3 pips, bottom has 0 pips
-131	    expect(container.querySelectorAll('[data-pip]')).toHaveLength(3);
-132	  });
-133	});
-134	
-135	describe('NumeralTileBank', () => {
-136	  beforeEach(() => {
-137	    vi.clearAllMocks();
-138	    bankDropState.isDragOver = false;
-139	  });
-140	
-141	  it('shows dashed hole preview when dragging a placed tile over the bank', () => {
-142	    bankDropState.isDragOver = true;
-143	    const Preview = () => {
-144	      const dispatch = useAnswerGameDispatch();
-145	      useEffect(() => {
-146	        dispatch({ type: 'INIT_ROUND', tiles, zones });
-147	        dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
-148	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't1' });
-149	      }, [dispatch]);
-150	      return <NumeralTileBank tileStyle="dots" tilesShowGroup={true} />;
-151	    };
-152	    const { container } = render(
-153	      <AnswerGameProvider config={config}>
-154	        <Preview />
-155	      </AnswerGameProvider>,
-156	    );
-157	    const hole = container.querySelector('[data-tile-bank-hole="t1"]');
-158	    expect(hole?.className).toMatch(/border-dashed/);
-159	    expect(hole?.textContent).toContain('3');
-160	  });
-161	
-162	  it('renders tiles for all bank tile IDs', () => {
-163	    render(<NumeralTileBank tileStyle="dots" tilesShowGroup={true} />, {
-164	      wrapper,
-165	    });
-166	    expect(
-167	      screen.getByRole('button', { name: /3/i }),
-168	    ).toBeInTheDocument();
-169	    expect(
-170	      screen.getByRole('button', { name: /5/i }),
-171	    ).toBeInTheDocument();
-172	  });
-173	
-174	  it('calls speak() with the tile label on click when ttsEnabled', async () => {
-175	    render(<NumeralTileBank tileStyle="dots" tilesShowGroup={true} />, {
-176	      wrapper,
-177	    });
-178	    await userEvent.click(screen.getByRole('button', { name: /3/i }));
-179	    expect(speak).toHaveBeenCalledWith(
-180	      '3',
-181	      expect.objectContaining({ rate: 1 }),
-182	    );
-183	  });
-184	
-185	  it('placed tile renders as a hole, not a button', () => {
-186	    const TestWithPlace = () => {
-187	      const dispatch = useAnswerGameDispatch();
-188	      dispatch({ type: 'INIT_ROUND', tiles, zones });
-189	      dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
-190	      return <NumeralTileBank tileStyle="dots" tilesShowGroup={true} />;
-191	    };
-192	    const { container } = render(
-193	      <AnswerGameProvider config={config}>
-194	        <TestWithPlace />
-195	      </AnswerGameProvider>,
-196	    );
-197	    expect(
-198	      screen.queryByRole('button', { name: /3/i }),
-199	    ).not.toBeInTheDocument();
-200	    expect(
-201	      screen.getByRole('button', { name: /5/i }),
-202	    ).toBeInTheDocument();
-203	    expect(
-204	      container.querySelectorAll('[aria-hidden="true"]').length,
-205	    ).toBeGreaterThan(0);
-206	  });
-207	});
+1 import { render, screen } from '@testing-library/react';
+2 import userEvent from '@testing-library/user-event';
+3 import { useEffect } from 'react';
+4 import { beforeEach, describe, expect, it, vi } from 'vitest';
+5 import { DominoTile, NumeralTileBank } from './NumeralTileBank';
+6 import type {
+7   AnswerGameConfig,
+8   AnswerZone,
+9   TileItem,
+10 } from '@/components/answer-game/types';
+11 import type { ReactNode } from 'react';
+12 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+13 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+14 
+15 import { speak } from '@/lib/speech/SpeechOutput';
+16 
+17 vi.mock('@/lib/speech/SpeechOutput', () => ({
+18   speak: vi.fn(),
+19   cancelSpeech: vi.fn(),
+20   isSpeechActive: vi.fn().mockReturnValue(false),
+21 }));
+22 vi.mock('@/lib/game-event-bus', () => ({
+23   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+24 }));
+25 vi.mock('@/lib/audio/AudioFeedback', () => ({
+26   playSound: vi.fn(),
+27 }));
+28 vi.mock('@/db/hooks/useSettings', () => ({
+29   useSettings: () => ({
+30     settings: {
+31       speechRate: 1,
+32       volume: 0.8,
+33       preferredVoiceURI: undefined,
+34     },
+35     update: vi.fn(),
+36   }),
+37 }));
+38 vi.mock('react-i18next', () => ({
+39   useTranslation: () => ({
+40     t: (key: string) => key,
+41     i18n: { language: 'en' },
+42   }),
+43 }));
+44 
+45 const bankDropState = vi.hoisted(() => ({ isDragOver: false }));
+46 
+47 vi.mock('@/components/answer-game/useBankDropTarget', () => ({
+48   useBankDropTarget: () => ({
+49     bankRef: { current: null },
+50     get isDragOver() {
+51       return bankDropState.isDragOver;
+52     },
+53   }),
+54 }));
+55 
+56 const config: AnswerGameConfig = {
+57   gameId: 'test',
+58   inputMethod: 'drag',
+59   wrongTileBehavior: 'lock-auto-eject',
+60   tileBankMode: 'exact',
+61   totalRounds: 1,
+62   ttsEnabled: true,
+63 };
+64 
+65 const tiles: TileItem[] = [
+66   { id: 't1', label: '3', value: '3' },
+67   { id: 't2', label: '5', value: '5' },
+68 ];
+69 
+70 const zones: AnswerZone[] = [
+71   {
+72     id: 'z0',
+73     index: 0,
+74     expectedValue: '3',
+75     placedTileId: null,
+76     isWrong: false,
+77     isLocked: false,
+78   },
+79 ];
+80 
+81 const Initialiser = ({ children }: { children: ReactNode }) => {
+82   const dispatch = useAnswerGameDispatch();
+83   dispatch({ type: 'INIT_ROUND', tiles, zones });
+84   return <>{children}</>;
+85 };
+86 
+87 function wrapper({ children }: { children: ReactNode }) {
+88   return (
+89     <AnswerGameProvider config={config}>
+90       <Initialiser>{children}</Initialiser>
+91     </AnswerGameProvider>
+92   );
+93 }
+94 
+95 describe('DominoTile', () => {
+96   it('renders 1 pip for value 1 (1+0 split)', () => {
+97     const { container } = render(<DominoTile value={1} />);
+98     expect(container.querySelectorAll('[data-pip]')).toHaveLength(1);
+99   });
+100 
+101   it('renders 6 pips for value 6 (6+0 split)', () => {
+102     const { container } = render(<DominoTile value={6} />);
+103     expect(container.querySelectorAll('[data-pip]')).toHaveLength(6);
+104   });
+105 
+106   it('renders 18 cells (two 3×3 grids) for any value', () => {
+107     const { container } = render(<DominoTile value={1} />);
+108     expect(container.querySelectorAll('[data-cell]')).toHaveLength(18);
+109   });
+110 
+111   it('renders 7 pips for value 7 (2+5 split)', () => {
+112     const { container } = render(<DominoTile value={7} />);
+113     expect(container.querySelectorAll('[data-pip]')).toHaveLength(7);
+114   });
+115 
+116   it('renders 12 pips for value 12 (6+6 split)', () => {
+117     const { container } = render(<DominoTile value={12} />);
+118     expect(container.querySelectorAll('[data-pip]')).toHaveLength(12);
+119   });
+120 
+121   it('has a visible centre divider', () => {
+122     const { container } = render(<DominoTile value={8} />);
+123     expect(
+124       container.querySelector('[data-divider]'),
+125     ).toBeInTheDocument();
+126   });
+127 
+128   it('renders 0 pips on bottom half for values 1-6', () => {
+129     const { container } = render(<DominoTile value={3} />);
+130     // Two DiceFace grids: top has 3 pips, bottom has 0 pips
+131     expect(container.querySelectorAll('[data-pip]')).toHaveLength(3);
+132   });
+133 });
+134 
+135 describe('NumeralTileBank', () => {
+136   beforeEach(() => {
+137     vi.clearAllMocks();
+138     bankDropState.isDragOver = false;
+139   });
+140 
+141   it('shows dashed hole preview when dragging a placed tile over the bank', () => {
+142     bankDropState.isDragOver = true;
+143     const Preview = () => {
+144       const dispatch = useAnswerGameDispatch();
+145       useEffect(() => {
+146         dispatch({ type: 'INIT_ROUND', tiles, zones });
+147         dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+148         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: 't1' });
+149       }, [dispatch]);
+150       return <NumeralTileBank tileStyle="dots" tilesShowGroup={true} />;
+151     };
+152     const { container } = render(
+153       <AnswerGameProvider config={config}>
+154         <Preview />
+155       </AnswerGameProvider>,
+156     );
+157     const hole = container.querySelector('[data-tile-bank-hole="t1"]');
+158     expect(hole?.className).toMatch(/border-dashed/);
+159     expect(hole?.textContent).toContain('3');
+160   });
+161 
+162   it('renders tiles for all bank tile IDs', () => {
+163     render(<NumeralTileBank tileStyle="dots" tilesShowGroup={true} />, {
+164       wrapper,
+165     });
+166     expect(
+167       screen.getByRole('button', { name: /3/i }),
+168     ).toBeInTheDocument();
+169     expect(
+170       screen.getByRole('button', { name: /5/i }),
+171     ).toBeInTheDocument();
+172   });
+173 
+174   it('calls speak() with the tile label on click when ttsEnabled', async () => {
+175     render(<NumeralTileBank tileStyle="dots" tilesShowGroup={true} />, {
+176       wrapper,
+177     });
+178     await userEvent.click(screen.getByRole('button', { name: /3/i }));
+179     expect(speak).toHaveBeenCalledWith(
+180       '3',
+181       expect.objectContaining({ rate: 1 }),
+182     );
+183   });
+184 
+185   it('placed tile renders as a hole, not a button', () => {
+186     const TestWithPlace = () => {
+187       const dispatch = useAnswerGameDispatch();
+188       dispatch({ type: 'INIT_ROUND', tiles, zones });
+189       dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+190       return <NumeralTileBank tileStyle="dots" tilesShowGroup={true} />;
+191     };
+192     const { container } = render(
+193       <AnswerGameProvider config={config}>
+194         <TestWithPlace />
+195       </AnswerGameProvider>,
+196     );
+197     expect(
+198       screen.queryByRole('button', { name: /3/i }),
+199     ).not.toBeInTheDocument();
+200     expect(
+201       screen.getByRole('button', { name: /5/i }),
+202     ).toBeInTheDocument();
+203     expect(
+204       container.querySelectorAll('[aria-hidden="true"]').length,
+205     ).toBeGreaterThan(0);
+206   });
+207 });
 208
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:09:46Z)**_
@@ -560,6 +571,7 @@ _**Agent (claude-opus-4-6 2026-04-10 10:09:50Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat/hover-preview-fix/src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:09:56Z)**_
@@ -591,6 +603,7 @@ Cannot update a component (`AnswerGameProvider`) while rendering a different com
 
 Done in 1.18s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:09:58Z)**_
@@ -627,6 +640,7 @@ Full unit test suite
 
 Done in 5.95s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:10:07Z)**_
@@ -644,6 +658,7 @@ Check if Storybook is running
 ```text
 not running
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:10:11Z)**_
@@ -657,6 +672,7 @@ Start storybook in background
 ```text
 Command running in background with ID: bgdf6rebn. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/5f33e475-4baf-4a6b-ab57-18ff7f521e29/tasks/bgdf6rebn.output
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:10:14Z)**_
@@ -674,6 +690,7 @@ _**Agent (claude-opus-4-6 2026-04-10 10:10:14Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:10:24Z)**_
@@ -704,6 +721,7 @@ Wait for Storybook readiness
 ```text
 ready after 1s
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:10:32Z)**_
@@ -742,6 +760,7 @@ Check storybook log
 │
 ●  177 ms for manager and 160 ms for preview
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:11:06Z)**_
@@ -784,6 +803,7 @@ Message:
 Ran all test suites**.**
 Done in 30.57s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:11:10Z)**_
@@ -801,6 +821,7 @@ Check Docker availability
 ```text
 docker running
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:11:44Z)**_
@@ -873,6 +894,7 @@ npm notice To update run: npm install -g npm@11.12.1
 npm notice
 Done in 30.52s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:11:47Z)**_
@@ -890,6 +912,7 @@ Stop storybook background
 ```text
 killed
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:11:52Z)**_
@@ -907,10 +930,10 @@ Your branch is up to date with 'origin/master'.
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   src/components/answer-game/Slot/Slot.tsx
-	modified:   src/games/number-match/NumberMatch/NumberMatch.tsx
-	modified:   src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
-	modified:   src/games/number-match/NumeralTileBank/NumeralTileBank.tsx
+ modified:   src/components/answer-game/Slot/Slot.tsx
+ modified:   src/games/number-match/NumberMatch/NumberMatch.tsx
+ modified:   src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
+ modified:   src/games/number-match/NumeralTileBank/NumeralTileBank.tsx
 
 no changes added to commit (use "git add" and/or "git commit -a")
  src/components/answer-game/Slot/Slot.tsx           | 27 ++++++++++++----
@@ -919,6 +942,7 @@ no changes added to commit (use "git add" and/or "git commit -a")
  .../NumeralTileBank/NumeralTileBank.tsx            | 24 +++++++++++---
  4 files changed, 79 insertions(+), 13 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:11:59Z)**_
@@ -939,6 +963,7 @@ Confirm working directory
 /Users/leocaseiro/Sites/base-skill/worktrees/feat/hover-preview-fix
 /Users/leocaseiro/Sites/base-skill/worktrees/feat/hover-preview-fix
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:12:04Z)**_
@@ -974,6 +999,7 @@ a7e45f8 fix(gh-pages): add .nojekyll to disable Jekyll underscore stripping
 627a0de Merge branch 'master' of github.com:leocaseiro/base-skill into fix/ci-pre-push-hook
 32a95b8 docs(plan): VR test determinism fix handoff (#43)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:12:33Z)**_
@@ -1033,6 +1059,7 @@ Preview (first 2KB):
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:12:36Z)**_
@@ -1053,6 +1080,7 @@ Your branch is ahead of 'origin/master' by 1 commit.
 
 nothing to commit, working tree clean
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:12:39Z)**_
@@ -1086,6 +1114,7 @@ _**Agent (claude-opus-4-6 2026-04-10 10:12:56Z)**_
 **Commit:** `25c8950 feat(number-match): render visual hover preview in slots and bank`
 
 **Verification passed:**
+
 - `yarn typecheck` ✅
 - `yarn lint` ✅
 - `yarn test` ✅ 548 / 548 (updated 1 test to assert new DominoTile preview instead of legacy text)
@@ -1093,6 +1122,7 @@ _**Agent (claude-opus-4-6 2026-04-10 10:12:56Z)**_
 - `yarn test:vr` (Docker) ✅ 21 / 21 — baselines unchanged, so the preview rendering doesn't affect the current VR coverage (no hover-preview screenshot in the suite yet)
 
 **Changes:**
+
 - [Slot.tsx](worktrees/feat/hover-preview-fix/src/components/answer-game/Slot/Slot.tsx) — new optional `renderPreview?: (previewLabel: string) => ReactNode` prop honoured in both empty and filled slot branches
 - [NumberMatch.tsx](worktrees/feat/hover-preview-fix/src/games/number-match/NumberMatch/NumberMatch.tsx) — wires `renderPreview` to a DominoTile (dots+group), long-word text (word modes), or numeric text
 - [NumeralTileBank.tsx](worktrees/feat/hover-preview-fix/src/games/number-match/NumeralTileBank/NumeralTileBank.tsx) — empty bank-hole hover target renders the same domino/word/numeric preview
@@ -1176,6 +1206,7 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 husky - pre-push script failed (code 1)
 error: failed to push some refs to 'github.com:leocaseiro/base-skill.git'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:21:42Z)**_
@@ -1199,6 +1230,7 @@ Check if my commit touched number-words.ts
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:21:48Z)**_
@@ -1210,6 +1242,7 @@ _**Agent (claude-opus-4-6 2026-04-10 10:21:48Z)**_
 ```text
 worktrees/feat/hover-preview-fix/src/games/number-match/number-words.ts:4:} from 'n2words/en-AU';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:21:53Z)**_
@@ -1238,6 +1271,7 @@ import {
 
 /**
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:21:56Z)**_
@@ -1257,6 +1291,7 @@ ls: node_modules/n2words/: No such file or directory
 ---
 cat: node_modules/n2words/package.json: No such file or directory
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:22:01Z)**_
@@ -1278,6 +1313,7 @@ dotenvx
 ---
     "n2words": "^4.0.0",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:22:06Z)**_
@@ -1297,6 +1333,7 @@ Check master repo n2words install
 ```text
 ls: /Users/leocaseiro/Sites/base-skill/node_modules/n2words/: No such file or directory
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:22:09Z)**_
@@ -1310,6 +1347,7 @@ Locate n2words by pattern
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:22:12Z)**_
@@ -1330,6 +1368,7 @@ _**Agent (claude-opus-4-6 2026-04-10 10:22:13Z)**_
 10012-  resolved "https://registry.yarnpkg.com/n2words/-/n2words-4.0.0.tgz#eb5b836fb7d948c85ff32e9a8ed922b1fa6fe545"
 10013-  integrity sha512-y0TJuqz5IaDYAjhmiqKGM4C20/fNeOuPGIE+AM5v5mMO9G/lYJ9tee45NYR7lwF9bquwP6WW6YVxh3XTwq4xPg==
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:22:19Z)**_
@@ -1362,6 +1401,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 2.90s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:22:21Z)**_
@@ -1380,6 +1420,7 @@ dist
 package.json
 src
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:22:23Z)**_
@@ -1442,6 +1483,7 @@ Inspect n2words exports
   "files": [
     "src/**/*.js",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:22:27Z)**_
@@ -1458,6 +1500,7 @@ en-AU.js
 pt-PT.d.ts
 pt-PT.js
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:22:30Z)**_
@@ -1504,6 +1547,7 @@ Done in 15.82s.
 husky - pre-push script failed (code 1)
 error: failed to push some refs to 'github.com:leocaseiro/base-skill.git'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:23:43Z)**_
@@ -2102,6 +2146,7 @@ error: failed to push some refs to 'github.com:leocaseiro/base-skill.git'
 -e **──────────────────────────────────────────
 husky - pre-push script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:24:53Z)**_
@@ -2150,6 +2195,7 @@ Find failing check in push log
  ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (4 tests) 350ms
  ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (3 tests) 206ms
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:24:59Z)**_
@@ -2198,6 +2244,7 @@ Run lint directly
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:25:25Z)**_
@@ -2224,6 +2271,7 @@ drwxr-xr-x@ 51 leocaseiro  staff  1632 Apr 10 20:24 ..
 -rw-------@  1 leocaseiro  staff     2 Apr 10 09:46 .gitignore
 -rw-------@  1 leocaseiro  staff   417 Apr 10 09:46 README.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:25:31Z)**_
@@ -2244,6 +2292,7 @@ Inspect .wt dir
 README.md
 branch
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:25:35Z)**_
@@ -2262,6 +2311,7 @@ drwxr-xr-x@  6 leocaseiro  staff     192 Apr 10 09:46 .claude
 -rw-r--r--@  1 leocaseiro  staff     329 Apr 10 09:46 .cta.json
 not a symlink
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:25:37Z)**_
@@ -2271,17 +2321,18 @@ _**Agent (claude-opus-4-6 2026-04-10 10:25:37Z)**_
  `/Users/leocaseiro/Sites/base-skill/.wt/README.md`
 
 ```text
-1	# Git worktrees added by `git wt`
-2	
-3	This directory contains Git worktrees created with `git wt`.
-4	
-5	- Do NOT edit files here from parent directory contexts.
-6	- Each subdirectory is an independent Git worktree and should be opened
-7	  and operated on directly.
-8	- Depending on your configuration, this directory may be placed under a Git repository.
-9	  A `.gitignore` file ensures everything under it is ignored in that case.
+1 # Git worktrees added by `git wt`
+2 
+3 This directory contains Git worktrees created with `git wt`.
+4 
+5 - Do NOT edit files here from parent directory contexts.
+6 - Each subdirectory is an independent Git worktree and should be opened
+7   and operated on directly.
+8 - Depending on your configuration, this directory may be placed under a Git repository.
+9   A `.gitignore` file ensures everything under it is ignored in that case.
 10
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:25:47Z)**_
@@ -2306,6 +2357,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 13.91s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:26:07Z)**_
@@ -2381,6 +2433,7 @@ act(() => {
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:27:18Z)**_
@@ -2419,6 +2472,7 @@ Summary of hook results
  ✓ src/components/game/GameShell.test.tsx (13 tests) 1220ms
  ✓ src/components/LevelRow.test.tsx (4 tests) 295ms
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:27:22Z)**_
@@ -2436,6 +2490,7 @@ Summary lines only
 -e   ✓ Visual regression tests
 -e   ✓ End-to-end tests (playwright)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:27:27Z)**_
@@ -2455,6 +2510,7 @@ Check storybook check + push result
 ```text
 -e   ⚠ Storybook tests — server not running on port 6006. Start it with 'yarn storybook' or set START_STORYBOOK=1 (skipped)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:27:31Z)**_
@@ -2477,6 +2533,7 @@ Look for actual push result
 -e **──────────────────────────────────────────
 branch 'feat/hover-preview-fix' set up to track 'origin/feat/hover-preview-fix'.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:27:33Z)**_
@@ -2490,6 +2547,7 @@ Confirm push completed
 ```text
 branch 'feat/hover-preview-fix' set up to track 'origin/feat/hover-preview-fix'.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:27:39Z)**_
@@ -2501,8 +2559,9 @@ Confirm branch exists on remote
 `git ls-remote origin feat/hover-preview-fix 2>&1`
 
 ```text
-25c89504d27d768232ee86f3c5f48b9086fe89b6	refs/heads/feat/hover-preview-fix
+25c89504d27d768232ee86f3c5f48b9086fe89b6 refs/heads/feat/hover-preview-fix
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:27:43Z)**_
@@ -2544,11 +2603,12 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/47
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:28:00Z)**_
 
-PR #47 open: https://github.com/leocaseiro/base-skill/pull/47
+PR #47 open: <https://github.com/leocaseiro/base-skill/pull/47>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:28:05Z)**_
 
@@ -2579,213 +2639,214 @@ _**Agent (claude-opus-4-6 2026-04-10 10:28:10Z)**_
  `/Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-10-orchestration-prompt.md`
 
 ```text
-1	# Match Number Improvements — Orchestration Prompt
-2	
-3	Use this prompt in a new Claude Code session to execute the implementation
-4	plans. Copy everything below the `---` line.
-5	
-6	---
-7	
-8	## Task
-9	
-10	Implement the MatchNumber game improvements across 5 plans, using parallel
-11	sub-agents where dependencies allow. Each agent works in its own git worktree
-12	branched from `match-number-improvements` and raises a PR back into
-13	`match-number-improvements` when done.
-14	
-15	## Source branch
-16	
-17	All worktrees branch from `match-number-improvements` (NOT `master`). PRs
-18	target `match-number-improvements`.
-19	
-20	## Plans location
-21	
-22	All plans live in `docs/superpowers/plans/` and follow the checkbox step
-23	format. Each agent must follow its plan exactly — tick off each step as it
-24	completes.
-25	
-26	## Dependency graph
-27	
-28	```text
-29	Wave 1 (parallel, no dependencies):
-30	  ├── Agent A: 2026-04-10-number-words-utility.md     → branch: feat/number-words-utility
-31	  └── Agent B: 2026-04-10-domino-tile-overhaul.md      → branch: feat/domino-tile-overhaul
-32	
-33	  ⏳ Merge both Wave 1 PRs before starting Wave 2
-34	
-35	Wave 2 (parallel, depends on Wave 1 merges):
-36	  ├── Agent C: 2026-04-10-countable-dots.md             → branch: feat/countable-dots
-37	  └── Agent D: 2026-04-10-mode-bugfix-new-modes.md      → branch: feat/mode-bugfix-new-modes
-38	
-39	  ⏳ Merge both Wave 2 PRs before starting Wave 3
-40	
-41	Wave 3 (single agent, depends on Wave 2 merges):
-42	  └── Agent E: 2026-04-10-hover-preview-fix.md          → branch: feat/hover-preview-fix
-43	```
-44	
-45	## Agent instructions (applies to every agent)
-46	
-47	Each agent must:
-48	
-49	1. Create a worktree from the current state of `match-number-improvements`:
-50	
-51	   ```bash
-52	   cd /Users/leocaseiro/Sites/base-skill
-53	   git worktree add ./worktrees/<branch-name> -b <branch-name> match-number-improvements
-54	   cd ./worktrees/<branch-name>
-55	   yarn install
-56	   ```
-57	
-58	2. Read its assigned plan from `docs/superpowers/plans/`.
-59	3. Implement each step, ticking off checkboxes as it goes.
-60	4. After all steps pass, run the verification gate:
-61	
-62	   ```bash
-63	   yarn typecheck && yarn lint && yarn test
-64	   ```
-65	
-66	5. Commit with a descriptive message (no `--amend`).
-67	6. Push the branch and create a PR targeting `match-number-improvements`:
-68	
-69	   ```bash
-70	   git push -u origin <branch-name>
-71	   gh pr create --base match-number-improvements \
-72	     --title "<short title>" \
-73	     --body "$(cat <<'EOF'
-74	   ## Summary
-75	   <what this PR does, 1-3 bullets>
-76	
-77	   ## Plan
-78	   Implements `docs/superpowers/plans/<plan-file>.md`
-79	
-80	   ## Verification
-81	   - [ ] `yarn typecheck` passes
-82	   - [ ] `yarn lint` passes
-83	   - [ ] `yarn test` passes
-84	
-85	   🤖 Generated with [Claude Code](https://claude.com/claude-code)
-86	   EOF
-87	   )"
-88	   ```
-89	
-90	7. Do NOT merge the PR — leave it for review.
-91	
-92	## Execution flow
-93	
-94	### Wave 1 — dispatch agents A and B in parallel
-95	
-96	Dispatch two sub-agents simultaneously using the Agent tool with
-97	`isolation: "worktree"`. Both are independent and can run at the same time.
-98	
-99	**Agent A prompt:**
-100	
-101	> You are implementing the Number Words Utility for the MatchNumber game.
-102	>
-103	> Working directory: `/Users/leocaseiro/Sites/base-skill`
-104	>
-105	> 1. Create a worktree: `git worktree add ./worktrees/feat/number-words-utility -b feat/number-words-utility match-number-improvements`
-106	> 2. `cd ./worktrees/feat/number-words-utility && yarn install`
-107	> 3. Read and follow every step in `docs/superpowers/plans/2026-04-10-number-words-utility.md`
-108	> 4. Run `yarn typecheck && yarn lint && yarn test` — all must pass
-109	> 5. Commit, push, and create a PR targeting `match-number-improvements`
-110	> 6. Do NOT merge the PR
-111	>
-112	> Follow the plan exactly. Use named exports only (no default exports).
-113	> Analyse `eslint.config.js` for code style (const arrow functions, not
-114	> function declarations).
-115	
-116	**Agent B prompt:**
-117	
-118	> You are implementing the Domino Tile Overhaul for the MatchNumber game.
-119	>
-120	> Working directory: `/Users/leocaseiro/Sites/base-skill`
-121	>
-122	> 1. Create a worktree: `git worktree add ./worktrees/feat/domino-tile-overhaul -b feat/domino-tile-overhaul match-number-improvements`
-123	> 2. `cd ./worktrees/feat/domino-tile-overhaul && yarn install`
-124	> 3. Read and follow every step in `docs/superpowers/plans/2026-04-10-domino-tile-overhaul.md`
-125	> 4. Run `yarn typecheck && yarn lint && yarn test` — all must pass
-126	> 5. Commit, push, and create a PR targeting `match-number-improvements`
-127	> 6. Do NOT merge the PR
-128	>
-129	> Follow the plan exactly. Use named exports only (no default exports).
-130	> Analyse `eslint.config.js` for code style (const arrow functions, not
-131	> function declarations).
-132	
-133	**After both PRs are reviewed and merged**, proceed to Wave 2.
-134	
-135	### Wave 2 — dispatch agents C and D in parallel
-136	
-137	After Wave 1 merges are on `match-number-improvements`, dispatch two more
-138	sub-agents simultaneously.
-139	
-140	**Agent C prompt:**
-141	
-142	> You are implementing Countable Dots for the MatchNumber game.
-143	>
-144	> Working directory: `/Users/leocaseiro/Sites/base-skill`
-145	>
-146	> 1. Create a worktree: `git worktree add ./worktrees/feat/countable-dots -b feat/countable-dots match-number-improvements`
-147	> 2. `cd ./worktrees/feat/countable-dots && yarn install`
-148	> 3. Read and follow every step in `docs/superpowers/plans/2026-04-10-countable-dots.md`
-149	> 4. The `number-words.ts` utility is already merged — import `toCardinalText` from it
-150	> 5. Run `yarn typecheck && yarn lint && yarn test` — all must pass
-151	> 6. Commit, push, and create a PR targeting `match-number-improvements`
-152	> 7. Do NOT merge the PR
-153	>
-154	> Follow the plan exactly. Use named exports only (no default exports).
-155	> Analyse `eslint.config.js` for code style (const arrow functions, not
-156	> function declarations).
-157	
-158	**Agent D prompt:**
-159	
-160	> You are implementing Mode Bug Fix + New Modes for the MatchNumber game.
-161	>
-162	> Working directory: `/Users/leocaseiro/Sites/base-skill`
-163	>
-164	> 1. Create a worktree: `git worktree add ./worktrees/feat/mode-bugfix-new-modes -b feat/mode-bugfix-new-modes match-number-improvements`
-165	> 2. `cd ./worktrees/feat/mode-bugfix-new-modes && yarn install`
-166	> 3. Read and follow every step in `docs/superpowers/plans/2026-04-10-mode-bugfix-new-modes.md`
-167	> 4. Both the `number-words.ts` utility and Domino Tile Overhaul are already merged — build on them
-168	> 5. Run `yarn typecheck && yarn lint && yarn test` — all must pass
-169	> 6. Commit, push, and create a PR targeting `match-number-improvements`
-170	> 7. Do NOT merge the PR
-171	>
-172	> Follow the plan exactly. Use named exports only (no default exports).
-173	> Analyse `eslint.config.js` for code style (const arrow functions, not
-174	> function declarations).
-175	
-176	**After both PRs are reviewed and merged**, proceed to Wave 3.
-177	
-178	### Wave 3 — dispatch agent E
-179	
-180	**Agent E prompt:**
-181	
-182	> You are implementing the Hover Preview Fix for the MatchNumber game.
-183	>
-184	> Working directory: `/Users/leocaseiro/Sites/base-skill`
-185	>
-186	> 1. Create a worktree: `git worktree add ./worktrees/feat/hover-preview-fix -b feat/hover-preview-fix match-number-improvements`
-187	> 2. `cd ./worktrees/feat/hover-preview-fix && yarn install`
-188	> 3. Read and follow every step in `docs/superpowers/plans/2026-04-10-hover-preview-fix.md`
-189	> 4. The Domino Overhaul and Mode Bug Fix are already merged — `tilesShowGroup` and the new `DominoTile` are available
-190	> 5. Run `yarn typecheck && yarn lint && yarn test` — all must pass
-191	> 6. Commit, push, and create a PR targeting `match-number-improvements`
-192	> 7. Do NOT merge the PR
-193	>
-194	> Follow the plan exactly. Use named exports only (no default exports).
-195	> Analyse `eslint.config.js` for code style (const arrow functions, not
-196	> function declarations).
-197	
-198	## Between waves
-199	
-200	After each wave's PRs are created:
-201	
-202	1. Review the PRs (or ask the user to review)
-203	2. Merge them into `match-number-improvements`
-204	3. Clean up worktrees: `git worktree remove ./worktrees/feat/<name>`
-205	4. Then dispatch the next wave
+1 # Match Number Improvements — Orchestration Prompt
+2 
+3 Use this prompt in a new Claude Code session to execute the implementation
+4 plans. Copy everything below the `---` line.
+5 
+6 ---
+7 
+8 ## Task
+9 
+10 Implement the MatchNumber game improvements across 5 plans, using parallel
+11 sub-agents where dependencies allow. Each agent works in its own git worktree
+12 branched from `match-number-improvements` and raises a PR back into
+13 `match-number-improvements` when done.
+14 
+15 ## Source branch
+16 
+17 All worktrees branch from `match-number-improvements` (NOT `master`). PRs
+18 target `match-number-improvements`.
+19 
+20 ## Plans location
+21 
+22 All plans live in `docs/superpowers/plans/` and follow the checkbox step
+23 format. Each agent must follow its plan exactly — tick off each step as it
+24 completes.
+25 
+26 ## Dependency graph
+27 
+28 ```text
+29 Wave 1 (parallel, no dependencies):
+30   ├── Agent A: 2026-04-10-number-words-utility.md     → branch: feat/number-words-utility
+31   └── Agent B: 2026-04-10-domino-tile-overhaul.md      → branch: feat/domino-tile-overhaul
+32 
+33   ⏳ Merge both Wave 1 PRs before starting Wave 2
+34 
+35 Wave 2 (parallel, depends on Wave 1 merges):
+36   ├── Agent C: 2026-04-10-countable-dots.md             → branch: feat/countable-dots
+37   └── Agent D: 2026-04-10-mode-bugfix-new-modes.md      → branch: feat/mode-bugfix-new-modes
+38 
+39   ⏳ Merge both Wave 2 PRs before starting Wave 3
+40 
+41 Wave 3 (single agent, depends on Wave 2 merges):
+42   └── Agent E: 2026-04-10-hover-preview-fix.md          → branch: feat/hover-preview-fix
+43 ```
+44 
+45 ## Agent instructions (applies to every agent)
+46 
+47 Each agent must:
+48 
+49 1. Create a worktree from the current state of `match-number-improvements`:
+50 
+51    ```bash
+52    cd /Users/leocaseiro/Sites/base-skill
+53    git worktree add ./worktrees/<branch-name> -b <branch-name> match-number-improvements
+54    cd ./worktrees/<branch-name>
+55    yarn install
+56    ```
+57 
+58 2. Read its assigned plan from `docs/superpowers/plans/`.
+59 3. Implement each step, ticking off checkboxes as it goes.
+60 4. After all steps pass, run the verification gate:
+61 
+62    ```bash
+63    yarn typecheck && yarn lint && yarn test
+64    ```
+65 
+66 5. Commit with a descriptive message (no `--amend`).
+67 6. Push the branch and create a PR targeting `match-number-improvements`:
+68 
+69    ```bash
+70    git push -u origin <branch-name>
+71    gh pr create --base match-number-improvements \
+72      --title "<short title>" \
+73      --body "$(cat <<'EOF'
+74    ## Summary
+75    <what this PR does, 1-3 bullets>
+76 
+77    ## Plan
+78    Implements `docs/superpowers/plans/<plan-file>.md`
+79 
+80    ## Verification
+81    - [ ] `yarn typecheck` passes
+82    - [ ] `yarn lint` passes
+83    - [ ] `yarn test` passes
+84 
+85    🤖 Generated with [Claude Code](https://claude.com/claude-code)
+86    EOF
+87    )"
+88    ```
+89 
+90 7. Do NOT merge the PR — leave it for review.
+91 
+92 ## Execution flow
+93 
+94 ### Wave 1 — dispatch agents A and B in parallel
+95 
+96 Dispatch two sub-agents simultaneously using the Agent tool with
+97 `isolation: "worktree"`. Both are independent and can run at the same time.
+98 
+99 **Agent A prompt:**
+100 
+101 > You are implementing the Number Words Utility for the MatchNumber game.
+102 >
+103 > Working directory: `/Users/leocaseiro/Sites/base-skill`
+104 >
+105 > 1. Create a worktree: `git worktree add ./worktrees/feat/number-words-utility -b feat/number-words-utility match-number-improvements`
+106 > 2. `cd ./worktrees/feat/number-words-utility && yarn install`
+107 > 3. Read and follow every step in `docs/superpowers/plans/2026-04-10-number-words-utility.md`
+108 > 4. Run `yarn typecheck && yarn lint && yarn test` — all must pass
+109 > 5. Commit, push, and create a PR targeting `match-number-improvements`
+110 > 6. Do NOT merge the PR
+111 >
+112 > Follow the plan exactly. Use named exports only (no default exports).
+113 > Analyse `eslint.config.js` for code style (const arrow functions, not
+114 > function declarations).
+115 
+116 **Agent B prompt:**
+117 
+118 > You are implementing the Domino Tile Overhaul for the MatchNumber game.
+119 >
+120 > Working directory: `/Users/leocaseiro/Sites/base-skill`
+121 >
+122 > 1. Create a worktree: `git worktree add ./worktrees/feat/domino-tile-overhaul -b feat/domino-tile-overhaul match-number-improvements`
+123 > 2. `cd ./worktrees/feat/domino-tile-overhaul && yarn install`
+124 > 3. Read and follow every step in `docs/superpowers/plans/2026-04-10-domino-tile-overhaul.md`
+125 > 4. Run `yarn typecheck && yarn lint && yarn test` — all must pass
+126 > 5. Commit, push, and create a PR targeting `match-number-improvements`
+127 > 6. Do NOT merge the PR
+128 >
+129 > Follow the plan exactly. Use named exports only (no default exports).
+130 > Analyse `eslint.config.js` for code style (const arrow functions, not
+131 > function declarations).
+132 
+133 **After both PRs are reviewed and merged**, proceed to Wave 2.
+134 
+135 ### Wave 2 — dispatch agents C and D in parallel
+136 
+137 After Wave 1 merges are on `match-number-improvements`, dispatch two more
+138 sub-agents simultaneously.
+139 
+140 **Agent C prompt:**
+141 
+142 > You are implementing Countable Dots for the MatchNumber game.
+143 >
+144 > Working directory: `/Users/leocaseiro/Sites/base-skill`
+145 >
+146 > 1. Create a worktree: `git worktree add ./worktrees/feat/countable-dots -b feat/countable-dots match-number-improvements`
+147 > 2. `cd ./worktrees/feat/countable-dots && yarn install`
+148 > 3. Read and follow every step in `docs/superpowers/plans/2026-04-10-countable-dots.md`
+149 > 4. The `number-words.ts` utility is already merged — import `toCardinalText` from it
+150 > 5. Run `yarn typecheck && yarn lint && yarn test` — all must pass
+151 > 6. Commit, push, and create a PR targeting `match-number-improvements`
+152 > 7. Do NOT merge the PR
+153 >
+154 > Follow the plan exactly. Use named exports only (no default exports).
+155 > Analyse `eslint.config.js` for code style (const arrow functions, not
+156 > function declarations).
+157 
+158 **Agent D prompt:**
+159 
+160 > You are implementing Mode Bug Fix + New Modes for the MatchNumber game.
+161 >
+162 > Working directory: `/Users/leocaseiro/Sites/base-skill`
+163 >
+164 > 1. Create a worktree: `git worktree add ./worktrees/feat/mode-bugfix-new-modes -b feat/mode-bugfix-new-modes match-number-improvements`
+165 > 2. `cd ./worktrees/feat/mode-bugfix-new-modes && yarn install`
+166 > 3. Read and follow every step in `docs/superpowers/plans/2026-04-10-mode-bugfix-new-modes.md`
+167 > 4. Both the `number-words.ts` utility and Domino Tile Overhaul are already merged — build on them
+168 > 5. Run `yarn typecheck && yarn lint && yarn test` — all must pass
+169 > 6. Commit, push, and create a PR targeting `match-number-improvements`
+170 > 7. Do NOT merge the PR
+171 >
+172 > Follow the plan exactly. Use named exports only (no default exports).
+173 > Analyse `eslint.config.js` for code style (const arrow functions, not
+174 > function declarations).
+175 
+176 **After both PRs are reviewed and merged**, proceed to Wave 3.
+177 
+178 ### Wave 3 — dispatch agent E
+179 
+180 **Agent E prompt:**
+181 
+182 > You are implementing the Hover Preview Fix for the MatchNumber game.
+183 >
+184 > Working directory: `/Users/leocaseiro/Sites/base-skill`
+185 >
+186 > 1. Create a worktree: `git worktree add ./worktrees/feat/hover-preview-fix -b feat/hover-preview-fix match-number-improvements`
+187 > 2. `cd ./worktrees/feat/hover-preview-fix && yarn install`
+188 > 3. Read and follow every step in `docs/superpowers/plans/2026-04-10-hover-preview-fix.md`
+189 > 4. The Domino Overhaul and Mode Bug Fix are already merged — `tilesShowGroup` and the new `DominoTile` are available
+190 > 5. Run `yarn typecheck && yarn lint && yarn test` — all must pass
+191 > 6. Commit, push, and create a PR targeting `match-number-improvements`
+192 > 7. Do NOT merge the PR
+193 >
+194 > Follow the plan exactly. Use named exports only (no default exports).
+195 > Analyse `eslint.config.js` for code style (const arrow functions, not
+196 > function declarations).
+197 
+198 ## Between waves
+199 
+200 After each wave's PRs are created:
+201 
+202 1. Review the PRs (or ask the user to review)
+203 2. Merge them into `match-number-improvements`
+204 3. Clean up worktrees: `git worktree remove ./worktrees/feat/<name>`
+205 4. Then dispatch the next wave
 206
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:28:22Z)**_
@@ -2820,6 +2881,7 @@ List current worktrees
 /Users/leocaseiro/Sites/base-skill/worktrees/hotfix-gh-pages-nojekyll       6efe96d [gh-pages]
 /Users/leocaseiro/Sites/base-skill/worktrees/match-number-improvements      9c652d4 [match-number-improvements]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 10:28:36Z)**_
@@ -2849,6 +2911,7 @@ What remains is cleanup, and it's yours to decide:
    - `.claude/worktrees/bold-chatelet`, `.claude/worktrees/hopeful-cartwright` — prior claude sub-agent worktrees
 
 **Want me to:**
+
 - (a) wait on PR #47 review/merge and then clean up the four Match Number worktrees, or
 - (b) take a broader look at the pre-existing stale worktrees while we wait, or
 - (c) stop here — Wave 3 done, rest is up to you?
@@ -2886,804 +2949,805 @@ _**Agent (claude-opus-4-6 2026-04-10 11:00:05Z)**_
  `/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useState } from 'react';
-4	import { useTranslation } from 'react-i18next';
-5	import type { AnswerGameDraftState } from '@/components/answer-game/types';
-6	import type {
-7	  NumberMatchConfig,
-8	  NumberMatchRound,
-9	} from '@/games/number-match/types';
-10	import type { SortNumbersConfig } from '@/games/sort-numbers/types';
-11	import type {
-12	  WordSpellConfig,
-13	  WordSpellRound,
-14	} from '@/games/word-spell/types';
-15	import type { BookmarkColorKey } from '@/lib/bookmark-colors';
-16	import type { InProgressSession } from '@/lib/game-engine/session-finder';
-17	import type {
-18	  GameEngineState,
-19	  MoveLog,
-20	  ResolvedContent,
-21	  ResolvedGameConfig,
-22	  SessionMeta,
-23	} from '@/lib/game-engine/types';
-24	import type { JSX } from 'react';
-25	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-26	import { GameShell } from '@/components/game/GameShell';
-27	import { getOrCreateDatabase } from '@/db/create-database';
-28	import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
-29	import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
-30	import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
-31	import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
-32	import { numberMatchConfigFields } from '@/games/number-match/types';
-33	import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
-34	import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
-35	import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
-36	import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
-37	import { SortNumbersConfigForm } from '@/games/sort-numbers/SortNumbersConfigForm/SortNumbersConfigForm';
-38	import { wordSpellConfigFields } from '@/games/word-spell/types';
-39	import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
-40	import { loadGameConfig } from '@/lib/game-engine/config-loader';
-41	import { findInProgressSession } from '@/lib/game-engine/session-finder';
-42	
-43	const STUB_CONTENT: ResolvedContent = {
-44	  rounds: [
-45	    { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
-46	    { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
-47	    { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
-48	  ],
-49	};
-50	
-51	const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
-52	  gameId,
-53	  title: { en: gameId },
-54	  gradeBand: 'year1-2',
-55	  maxRounds: 3,
-56	  maxRetries: 1,
-57	  maxUndoDepth: 3,
-58	  timerVisible: false,
-59	  timerDurationSeconds: null,
-60	  difficulty: 'medium',
-61	});
-62	
-63	interface GameRouteLoaderData {
-64	  config: ResolvedGameConfig;
-65	  initialLog: MoveLog | null;
-66	  draftState: AnswerGameDraftState | null;
-67	  sessionId: string;
-68	  seed: string;
-69	  meta: SessionMeta;
-70	  gameSpecificConfig: Record<string, unknown> | null;
-71	  bookmarkId: string | null;
-72	  bookmarkName: string | null;
-73	  bookmarkColor: string | null;
-74	}
-75	
-76	const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
-77	  { word: 'cat', emoji: '🐱' },
-78	  { word: 'dog', emoji: '🐶' },
-79	  { word: 'sun', emoji: '☀️' },
-80	  { word: 'pin', emoji: '📌' },
-81	  { word: 'sad', emoji: '☹️' },
-82	  { word: 'ant', emoji: '🐜' },
-83	  { word: 'can', emoji: '🥫' },
-84	  { word: 'mum', emoji: '🤱' },
-85	];
-86	
-87	const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
-88	  const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
-89	  return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
-90	};
-91	
-92	const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
-93	  gameId: 'word-spell',
-94	  component: 'WordSpell',
-95	  inputMethod: 'drag',
-96	  wrongTileBehavior: 'lock-auto-eject',
-97	  tileBankMode: 'exact',
-98	  totalRounds: 8,
-99	  // Deterministic order by default. `buildRoundOrder` shuffles when this is
-100	  // false using a nanoid-based seed (crypto.getRandomValues) which VR tests
-101	  // cannot pin, causing baseline drift. Users can still opt into shuffling
-102	  // via the settings panel.
-103	  roundsInOrder: true,
-104	  ttsEnabled: true,
-105	  mode: 'picture',
-106	  tileUnit: 'letter',
-107	  rounds: sliceWordSpellRounds(8),
-108	};
-109	
-110	/**
-111	 * Deterministic default round values for NumberMatch. Using a fixed sequence
-112	 * (rather than `Math.random`) keeps VR baselines stable across runs — nanoid
-113	 * seeds in the route loader bypass any Math.random pin, so the only reliable
-114	 * fix is to remove randomness from the default config entirely. Users still
-115	 * customise via the settings panel.
-116	 */
-117	const DEFAULT_NUMBER_MATCH_ROUND_VALUES: readonly number[] = [5, 8, 3];
-118	
-119	const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
-120	  gameId: 'number-match',
-121	  component: 'NumberMatch',
-122	  inputMethod: 'drag',
-123	  wrongTileBehavior: 'lock-auto-eject',
-124	  tileBankMode: 'distractors',
-125	  distractorCount: 2,
-126	  totalRounds: 3,
-127	  // Deterministic order by default — see DEFAULT_WORD_SPELL_CONFIG comment.
-128	  roundsInOrder: true,
-129	  ttsEnabled: true,
-130	  mode: 'numeral-to-group',
-131	  tileStyle: 'dots',
-132	  range: { min: 1, max: 12 },
-133	  rounds: DEFAULT_NUMBER_MATCH_ROUND_VALUES.map((value) => ({ value })),
-134	});
-135	
-136	const resizeNumberMatchRounds = (
-137	  prev: NumberMatchRound[],
-138	  count: number,
-139	  range: { min: number; max: number },
-140	): NumberMatchRound[] => {
-141	  const n = Math.max(1, Math.min(count, 50));
-142	  const span = Math.max(1, range.max - range.min + 1);
-143	  // Deterministic fill: cycle through the range starting at `range.min`. This
-144	  // avoids `Math.random` so defaults stay stable (see note above) and is
-145	  // simple enough for users to understand at a glance. They can override any
-146	  // round value via the settings panel.
-147	  const fillValueAt = (index: number): number =>
-148	    range.min + (index % span);
-149	  const next = prev.slice(0, n).map((r, i) => {
-150	    if (r.value >= range.min && r.value <= range.max) return { ...r };
-151	    return { value: fillValueAt(i) };
-152	  });
-153	  while (next.length < n) {
-154	    next.push({ value: fillValueAt(next.length) });
-155	  }
-156	  return next;
-157	};
-158	
-159	const makeDefaultSortNumbersConfig = (): SortNumbersConfig =>
-160	  resolveSimpleConfig({
-161	    configMode: 'simple',
-162	    direction: 'ascending',
-163	    start: 2,
-164	    step: 2,
-165	    quantity: 5,
-166	    distractors: false,
-167	  });
-168	
-169	const resolveWordSpellConfig = (
-170	  saved: Record<string, unknown> | null,
-171	): WordSpellConfig => {
-172	  const base: WordSpellConfig = {
-173	    ...DEFAULT_WORD_SPELL_CONFIG,
-174	    rounds: DEFAULT_WORD_SPELL_CONFIG.rounds.map((r) => ({ ...r })),
-175	  };
-176	  if (!saved || saved.component !== 'WordSpell') return base;
-177	  const merged: WordSpellConfig = {
-178	    ...base,
-179	    ...(saved as Partial<WordSpellConfig>),
-180	    gameId: 'word-spell',
-181	    component: 'WordSpell',
-182	  };
-183	  const targetTotal = Math.max(
-184	    1,
-185	    Math.min(
-186	      merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
-187	      WORD_SPELL_ROUND_POOL.length,
-188	    ),
-189	  );
-190	  if (
-191	    !Array.isArray(merged.rounds) ||
-192	    merged.rounds.length === 0 ||
-193	    merged.rounds.length !== targetTotal
-194	  ) {
-195	    merged.rounds = sliceWordSpellRounds(targetTotal);
-196	  }
-197	  merged.totalRounds = merged.rounds.length;
-198	  return merged;
-199	};
-200	
-201	const resolveNumberMatchConfig = (
-202	  saved: Record<string, unknown> | null,
-203	): NumberMatchConfig => {
-204	  const base = makeDefaultNumberMatchConfig();
-205	  if (!saved || saved.component !== 'NumberMatch') return base;
-206	  const merged: NumberMatchConfig = {
-207	    ...base,
-208	    ...(saved as Partial<NumberMatchConfig>),
-209	    gameId: 'number-match',
-210	    component: 'NumberMatch',
-211	  };
-212	  const targetLen =
-213	    merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds;
-214	  merged.rounds = resizeNumberMatchRounds(
-215	    Array.isArray(merged.rounds) ? merged.rounds : [],
-216	    targetLen,
-217	    merged.range,
-218	  );
-219	  return merged;
-220	};
-221	
-222	const resolveSortNumbersConfig = (
-223	  saved: Record<string, unknown> | null,
-224	): SortNumbersConfig => {
-225	  const base = makeDefaultSortNumbersConfig();
-226	  if (!saved || saved.component !== 'SortNumbers') return base;
-227	
-228	  // Simple mode: resolve from 5 fields
-229	  if (saved.configMode === 'simple') {
-230	    const skip = saved.skip as
-231	      | { step?: number; start?: number }
-232	      | undefined;
-233	    return resolveSimpleConfig({
-234	      configMode: 'simple',
-235	      direction:
-236	        saved.direction === 'descending' ? 'descending' : 'ascending',
-237	      start: typeof skip?.start === 'number' ? skip.start : 2,
-238	      step: typeof skip?.step === 'number' ? skip.step : 2,
-239	      quantity: typeof saved.quantity === 'number' ? saved.quantity : 5,
-240	      distractors: saved.tileBankMode === 'distractors',
-241	    });
-242	  }
-243	
-244	  // Advanced mode (existing logic)
-245	  // Migrate legacy allowSkips: boolean → skip: SkipConfig
-246	  let migratedSaved = saved;
-247	  if (!saved.skip && typeof saved.allowSkips === 'boolean') {
-248	    migratedSaved = {
-249	      ...saved,
-250	      skip: saved.allowSkips
-251	        ? { mode: 'random' }
-252	        : { mode: 'consecutive' },
-253	    };
-254	  }
-255	
-256	  const merged: SortNumbersConfig = {
-257	    ...base,
-258	    ...(migratedSaved as Partial<SortNumbersConfig>),
-259	    gameId: 'sort-numbers',
-260	    component: 'SortNumbers',
-261	  };
-262	
-263	  // Existing saved configs without configMode are treated as advanced
-264	  if (saved.configMode !== 'simple') {
-265	    merged.configMode = 'advanced';
-266	  }
-267	
-268	  const tr = Math.max(1, merged.totalRounds);
-269	  merged.totalRounds = tr;
-270	
-271	  // Normalize skip: mode 'by' requires step and start.
-272	  if (merged.skip.mode === 'by') {
-273	    const partial = merged.skip as {
-274	      mode: 'by';
-275	      step?: number;
-276	      start?: 'range-min' | 'random' | number;
-277	    };
-278	    merged.skip = {
-279	      mode: 'by',
-280	      step: typeof partial.step === 'number' ? partial.step : 2,
-281	      start: partial.start ?? 'range-min',
-282	    };
-283	  }
-284	
-285	  const roundsStale =
-286	    Array.isArray(merged.rounds) &&
-287	    isRoundsStale(merged.rounds, {
-288	      quantity: merged.quantity,
-289	      range: merged.range,
-290	      skip: merged.skip,
-291	    });
-292	
-293	  if (
-294	    !Array.isArray(merged.rounds) ||
-295	    merged.rounds.length === 0 ||
-296	    merged.rounds.length !== tr ||
-297	    roundsStale
-298	  ) {
-299	    merged.rounds = generateSortRounds({
-300	      range: merged.range,
-301	      quantity: merged.quantity,
-302	      skip: merged.skip,
-303	      totalRounds: tr,
-304	    });
-305	  }
-306	
-307	  // Advanced configs don't support level mode — clear the leaked base default.
-308	  merged.levelMode = undefined;
-309	
-310	  return merged;
-311	};
-312	
-313	const WordSpellGameBody = ({
-314	  gameId,
-315	  sessionId,
-316	  seed,
-317	  draftState,
-318	  gameSpecificConfig,
-319	  bookmarkId,
-320	  bookmarkName,
-321	  bookmarkColor,
-322	}: {
-323	  gameId: string;
-324	  sessionId: string;
-325	  seed: string;
-326	  draftState: AnswerGameDraftState | null;
-327	  gameSpecificConfig: Record<string, unknown> | null;
-328	  bookmarkId: string | null;
-329	  bookmarkName: string | null;
-330	  bookmarkColor: string | null;
-331	}): JSX.Element => {
-332	  const { t } = useTranslation('games');
-333	  const { save, updateConfig } = useSavedConfigs();
-334	  const initial = useMemo(
-335	    () => resolveWordSpellConfig(gameSpecificConfig),
-336	    [gameSpecificConfig],
-337	  );
-338	  const [cfg, setCfg] = useState(initial);
-339	  const [showInstructions, setShowInstructions] = useState(
-340	    draftState === null,
-341	  );
-342	  useEffect(() => {
-343	    setCfg(initial);
-344	  }, [initial]);
-345	  usePersistLastGameConfig(
-346	    gameId,
-347	    cfg as unknown as Record<string, unknown>,
-348	  );
-349	
-350	  if (showInstructions) {
-351	    return (
-352	      <InstructionsOverlay
-353	        text={t('instructions.word-spell')}
-354	        onStart={() => setShowInstructions(false)}
-355	        ttsEnabled={cfg.ttsEnabled}
-356	        gameTitle={t('word-spell')}
-357	        bookmarkName={bookmarkName ?? undefined}
-358	        bookmarkColor={
-359	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-360	        }
-361	        subject="reading"
-362	        config={cfg as unknown as Record<string, unknown>}
-363	        onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-364	        onSaveBookmark={async (name, color) => {
-365	          await save({
-366	            gameId,
-367	            name,
-368	            color,
-369	            config: cfg as unknown as Record<string, unknown>,
-370	          });
-371	        }}
-372	        onUpdateBookmark={
-373	          bookmarkId
-374	            ? async (name, config) => {
-375	                await updateConfig(bookmarkId, config, name);
-376	              }
-377	            : undefined
-378	        }
-379	        configFields={wordSpellConfigFields}
-380	      />
-381	    );
-382	  }
-383	
-384	  return (
-385	    <WordSpell
-386	      key={cfg.inputMethod}
-387	      config={cfg}
-388	      initialState={draftState ?? undefined}
-389	      sessionId={sessionId}
-390	      seed={seed}
-391	    />
-392	  );
-393	};
-394	
-395	const NumberMatchGameBody = ({
-396	  gameId,
-397	  sessionId,
-398	  seed,
-399	  draftState,
-400	  gameSpecificConfig,
-401	  bookmarkId,
-402	  bookmarkName,
-403	  bookmarkColor,
-404	}: {
-405	  gameId: string;
-406	  sessionId: string;
-407	  seed: string;
-408	  draftState: AnswerGameDraftState | null;
-409	  gameSpecificConfig: Record<string, unknown> | null;
-410	  bookmarkId: string | null;
-411	  bookmarkName: string | null;
-412	  bookmarkColor: string | null;
-413	}): JSX.Element => {
-414	  const { t } = useTranslation('games');
-415	  const { save, updateConfig } = useSavedConfigs();
-416	  const initial = useMemo(
-417	    () => resolveNumberMatchConfig(gameSpecificConfig),
-418	    [gameSpecificConfig],
-419	  );
-420	  const [cfg, setCfg] = useState(initial);
-421	  const [showInstructions, setShowInstructions] = useState(
-422	    draftState === null,
-423	  );
-424	  useEffect(() => {
-425	    setCfg(initial);
-426	  }, [initial]);
-427	  usePersistLastGameConfig(
-428	    gameId,
-429	    cfg as unknown as Record<string, unknown>,
-430	  );
-431	
-432	  if (showInstructions) {
-433	    return (
-434	      <InstructionsOverlay
-435	        text={t('instructions.number-match')}
-436	        onStart={() => setShowInstructions(false)}
-437	        ttsEnabled={cfg.ttsEnabled}
-438	        gameTitle={t('number-match')}
-439	        bookmarkName={bookmarkName ?? undefined}
-440	        bookmarkColor={
-441	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-442	        }
-443	        subject="math"
-444	        config={cfg as unknown as Record<string, unknown>}
-445	        onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
-446	        onSaveBookmark={async (name, color) => {
-447	          await save({
-448	            gameId,
-449	            name,
-450	            color,
-451	            config: cfg as unknown as Record<string, unknown>,
-452	          });
-453	        }}
-454	        onUpdateBookmark={
-455	          bookmarkId
-456	            ? async (name, config) => {
-457	                await updateConfig(bookmarkId, config, name);
-458	              }
-459	            : undefined
-460	        }
-461	        configFields={numberMatchConfigFields}
-462	      />
-463	    );
-464	  }
-465	
-466	  return (
-467	    <NumberMatch
-468	      key={cfg.inputMethod}
-469	      config={cfg}
-470	      initialState={draftState ?? undefined}
-471	      sessionId={sessionId}
-472	      seed={seed}
-473	    />
-474	  );
-475	};
-476	
-477	const SortNumbersGameBody = ({
-478	  gameId,
-479	  sessionId,
-480	  seed,
-481	  draftState,
-482	  gameSpecificConfig,
-483	  bookmarkId,
-484	  bookmarkName,
-485	  bookmarkColor,
-486	}: {
-487	  gameId: string;
-488	  sessionId: string;
-489	  seed: string;
-490	  draftState: AnswerGameDraftState | null;
-491	  gameSpecificConfig: Record<string, unknown> | null;
-492	  bookmarkId: string | null;
-493	  bookmarkName: string | null;
-494	  bookmarkColor: string | null;
-495	}): JSX.Element => {
-496	  const { t } = useTranslation('games');
-497	  const { save, updateConfig } = useSavedConfigs();
-498	  const initial = useMemo(
-499	    () => resolveSortNumbersConfig(gameSpecificConfig),
-500	    [gameSpecificConfig],
-501	  );
-502	  const [cfg, setCfg] = useState(initial);
-503	  const [showInstructions, setShowInstructions] = useState(
-504	    draftState === null,
-505	  );
-506	  useEffect(() => {
-507	    setCfg(initial);
-508	  }, [initial]);
-509	  usePersistLastGameConfig(
-510	    gameId,
-511	    cfg as unknown as Record<string, unknown>,
-512	  );
-513	
-514	  if (showInstructions) {
-515	    return (
-516	      <InstructionsOverlay
-517	        text={t('instructions.sort-numbers')}
-518	        onStart={() => setShowInstructions(false)}
-519	        ttsEnabled={cfg.ttsEnabled}
-520	        gameTitle={t('sort-numbers')}
-521	        bookmarkName={bookmarkName ?? undefined}
-522	        bookmarkColor={
-523	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-524	        }
-525	        subject="math"
-526	        config={cfg as unknown as Record<string, unknown>}
-527	        onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
-528	        onSaveBookmark={async (name, color) => {
-529	          await save({
-530	            gameId,
-531	            name,
-532	            color,
-533	            config: cfg as unknown as Record<string, unknown>,
-534	          });
-535	        }}
-536	        onUpdateBookmark={
-537	          bookmarkId
-538	            ? async (name, config) => {
-539	                await updateConfig(bookmarkId, config, name);
-540	              }
-541	            : undefined
-542	        }
-543	        renderConfigForm={({ config: c, onChange: oc }) => (
-544	          <SortNumbersConfigForm config={c} onChange={oc} />
-545	        )}
-546	      />
-547	    );
-548	  }
-549	
-550	  return (
-551	    <SortNumbers
-552	      key={cfg.inputMethod}
-553	      config={cfg}
-554	      initialState={draftState ?? undefined}
-555	      sessionId={sessionId}
-556	      seed={seed}
-557	    />
-558	  );
-559	};
-560	
-561	const GameBody = ({
-562	  gameId,
-563	  sessionId,
-564	  seed,
-565	  draftState,
-566	  gameSpecificConfig,
-567	  bookmarkId,
-568	  bookmarkName,
-569	  bookmarkColor,
-570	}: {
-571	  gameId: string;
-572	  sessionId: string;
-573	  seed: string;
-574	  draftState: AnswerGameDraftState | null;
-575	  gameSpecificConfig: Record<string, unknown> | null;
-576	  bookmarkId: string | null;
-577	  bookmarkName: string | null;
-578	  bookmarkColor: string | null;
-579	}): JSX.Element => {
-580	  if (gameId === 'sort-numbers') {
-581	    return (
-582	      <SortNumbersGameBody
-583	        gameId={gameId}
-584	        sessionId={sessionId}
-585	        seed={seed}
-586	        draftState={draftState}
-587	        gameSpecificConfig={gameSpecificConfig}
-588	        bookmarkId={bookmarkId}
-589	        bookmarkName={bookmarkName}
-590	        bookmarkColor={bookmarkColor}
-591	      />
-592	    );
-593	  }
-594	
-595	  if (gameId === 'word-spell') {
-596	    return (
-597	      <WordSpellGameBody
-598	        gameId={gameId}
-599	        sessionId={sessionId}
-600	        seed={seed}
-601	        draftState={draftState}
-602	        gameSpecificConfig={gameSpecificConfig}
-603	        bookmarkId={bookmarkId}
-604	        bookmarkName={bookmarkName}
-605	        bookmarkColor={bookmarkColor}
-606	      />
-607	    );
-608	  }
-609	
-610	  if (gameId === 'number-match') {
-611	    return (
-612	      <NumberMatchGameBody
-613	        gameId={gameId}
-614	        sessionId={sessionId}
-615	        seed={seed}
-616	        draftState={draftState}
-617	        gameSpecificConfig={gameSpecificConfig}
-618	        bookmarkId={bookmarkId}
-619	        bookmarkName={bookmarkName}
-620	        bookmarkColor={bookmarkColor}
-621	      />
-622	    );
-623	  }
-624	
-625	  return (
-626	    <div className="flex h-full items-center justify-center text-muted-foreground">
-627	      <p>Game not found</p>
-628	    </div>
-629	  );
-630	};
-631	
-632	export const GameRoute = ({
-633	  config,
-634	  initialLog,
-635	  draftState,
-636	  sessionId,
-637	  seed,
-638	  meta,
-639	  gameSpecificConfig,
-640	  bookmarkId,
-641	  bookmarkName,
-642	  bookmarkColor,
-643	}: GameRouteLoaderData): JSX.Element => (
-644	  <GameShell
-645	    config={config}
-646	    moves={{}}
-647	    initialState={meta.initialState}
-648	    sessionId={sessionId}
-649	    meta={meta}
-650	    initialLog={initialLog ?? undefined}
-651	  >
-652	    <GameBody
-653	      gameId={config.gameId}
-654	      sessionId={sessionId}
-655	      seed={seed}
-656	      draftState={draftState}
-657	      gameSpecificConfig={gameSpecificConfig}
-658	      bookmarkId={bookmarkId}
-659	      bookmarkName={bookmarkName}
-660	      bookmarkColor={bookmarkColor}
-661	    />
-662	  </GameShell>
-663	);
-664	
-665	const RouteComponent = (): JSX.Element => {
-666	  const data = Route.useLoaderData();
-667	  return <GameRoute {...data} />;
-668	};
-669	
-670	export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-671	  validateSearch: (search: Record<string, unknown>) => ({
-672	    configId:
-673	      typeof search.configId === 'string' ? search.configId : undefined,
-674	  }),
-675	  loaderDeps: ({ search }) => ({ configId: search.configId }),
-676	  loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
-677	    const { gameId } = params;
-678	    const profileId = 'default';
-679	    const defaultConfig = makeDefaultConfig(gameId);
-680	
-681	    // Route loaders run server-side (SSR) where IndexedDB is unavailable.
-682	    // Return minimal defaults so the client hydrates and re-runs on the client.
-683	    if (typeof indexedDB === 'undefined') {
-684	      const sessionId = nanoid();
-685	      const seed = nanoid();
-686	      const initialState: GameEngineState = {
-687	        phase: 'instructions',
-688	        roundIndex: 0,
-689	        score: 0,
-690	        streak: 0,
-691	        retryCount: 0,
-692	        content: STUB_CONTENT,
-693	        currentRound: {
-694	          roundId: STUB_CONTENT.rounds[0]?.id ?? '',
-695	          answer: null,
-696	          hintsUsed: 0,
-697	        },
-698	      };
-699	      return {
-700	        config: defaultConfig,
-701	        initialLog: null,
-702	        draftState: null,
-703	        sessionId,
-704	        seed,
-705	        meta: {
-706	          profileId,
-707	          gameId,
-708	          gradeBand: defaultConfig.gradeBand,
-709	          seed,
-710	          initialContent: STUB_CONTENT,
-711	          initialState,
-712	        },
-713	        gameSpecificConfig: null,
-714	        bookmarkId: null,
-715	        bookmarkName: null,
-716	        bookmarkColor: null,
-717	      };
-718	    }
-719	
-720	    const db = await getOrCreateDatabase();
-721	    const config = await loadGameConfig(
-722	      gameId,
-723	      profileId,
-724	      defaultConfig.gradeBand,
-725	      db,
-726	      defaultConfig,
-727	    );
-728	
-729	    const inProgressSession: InProgressSession | null =
-730	      await findInProgressSession(profileId, gameId, db);
-731	    const initialLog = inProgressSession?.log ?? null;
-732	    const draftState = inProgressSession?.draftState ?? null;
-733	
-734	    let gameSpecificConfig: Record<string, unknown> | null = null;
-735	    let bookmarkId: string | null = null;
-736	    let bookmarkName: string | null = null;
-737	    let bookmarkColor: string | null = null;
-738	
-739	    if (deps.configId) {
-740	      const savedDoc = await db.saved_game_configs
-741	        .findOne(deps.configId)
-742	        .exec();
-743	      if (savedDoc) {
-744	        gameSpecificConfig = savedDoc.config;
-745	        bookmarkId = savedDoc.id;
-746	        bookmarkName = savedDoc.name;
-747	        bookmarkColor = savedDoc.color;
-748	      }
-749	    } else {
-750	      const lastDoc = await db.saved_game_configs
-751	        .findOne(lastSessionSavedConfigId(gameId))
-752	        .exec();
-753	      if (lastDoc) gameSpecificConfig = lastDoc.config;
-754	    }
-755	
-756	    const sessionId = initialLog?.sessionId ?? nanoid();
-757	    const seed = initialLog?.seed ?? nanoid();
-758	    const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
-759	    const initialState: GameEngineState = initialLog?.initialState ?? {
-760	      phase: 'instructions',
-761	      roundIndex: 0,
-762	      score: 0,
-763	      streak: 0,
-764	      retryCount: 0,
-765	      content: initialContent,
-766	      currentRound: {
-767	        roundId: initialContent.rounds[0]?.id ?? '',
-768	        answer: null,
-769	        hintsUsed: 0,
-770	      },
-771	    };
-772	
-773	    const meta: SessionMeta = {
-774	      profileId,
-775	      gameId,
-776	      gradeBand: config.gradeBand,
-777	      seed,
-778	      initialContent,
-779	      initialState,
-780	    };
-781	
-782	    return {
-783	      config,
-784	      initialLog,
-785	      draftState,
-786	      sessionId,
-787	      seed,
-788	      meta,
-789	      gameSpecificConfig,
-790	      bookmarkId,
-791	      bookmarkName,
-792	      bookmarkColor,
-793	    };
-794	  },
-795	  component: RouteComponent,
-796	});
+1 import { createFileRoute } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useState } from 'react';
+4 import { useTranslation } from 'react-i18next';
+5 import type { AnswerGameDraftState } from '@/components/answer-game/types';
+6 import type {
+7   NumberMatchConfig,
+8   NumberMatchRound,
+9 } from '@/games/number-match/types';
+10 import type { SortNumbersConfig } from '@/games/sort-numbers/types';
+11 import type {
+12   WordSpellConfig,
+13   WordSpellRound,
+14 } from '@/games/word-spell/types';
+15 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+16 import type { InProgressSession } from '@/lib/game-engine/session-finder';
+17 import type {
+18   GameEngineState,
+19   MoveLog,
+20   ResolvedContent,
+21   ResolvedGameConfig,
+22   SessionMeta,
+23 } from '@/lib/game-engine/types';
+24 import type { JSX } from 'react';
+25 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+26 import { GameShell } from '@/components/game/GameShell';
+27 import { getOrCreateDatabase } from '@/db/create-database';
+28 import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
+29 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
+30 import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
+31 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+32 import { numberMatchConfigFields } from '@/games/number-match/types';
+33 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
+34 import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
+35 import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
+36 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+37 import { SortNumbersConfigForm } from '@/games/sort-numbers/SortNumbersConfigForm/SortNumbersConfigForm';
+38 import { wordSpellConfigFields } from '@/games/word-spell/types';
+39 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
+40 import { loadGameConfig } from '@/lib/game-engine/config-loader';
+41 import { findInProgressSession } from '@/lib/game-engine/session-finder';
+42 
+43 const STUB_CONTENT: ResolvedContent = {
+44   rounds: [
+45     { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
+46     { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
+47     { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
+48   ],
+49 };
+50 
+51 const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
+52   gameId,
+53   title: { en: gameId },
+54   gradeBand: 'year1-2',
+55   maxRounds: 3,
+56   maxRetries: 1,
+57   maxUndoDepth: 3,
+58   timerVisible: false,
+59   timerDurationSeconds: null,
+60   difficulty: 'medium',
+61 });
+62 
+63 interface GameRouteLoaderData {
+64   config: ResolvedGameConfig;
+65   initialLog: MoveLog | null;
+66   draftState: AnswerGameDraftState | null;
+67   sessionId: string;
+68   seed: string;
+69   meta: SessionMeta;
+70   gameSpecificConfig: Record<string, unknown> | null;
+71   bookmarkId: string | null;
+72   bookmarkName: string | null;
+73   bookmarkColor: string | null;
+74 }
+75 
+76 const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
+77   { word: 'cat', emoji: '🐱' },
+78   { word: 'dog', emoji: '🐶' },
+79   { word: 'sun', emoji: '☀️' },
+80   { word: 'pin', emoji: '📌' },
+81   { word: 'sad', emoji: '☹️' },
+82   { word: 'ant', emoji: '🐜' },
+83   { word: 'can', emoji: '🥫' },
+84   { word: 'mum', emoji: '🤱' },
+85 ];
+86 
+87 const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
+88   const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
+89   return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
+90 };
+91 
+92 const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
+93   gameId: 'word-spell',
+94   component: 'WordSpell',
+95   inputMethod: 'drag',
+96   wrongTileBehavior: 'lock-auto-eject',
+97   tileBankMode: 'exact',
+98   totalRounds: 8,
+99   // Deterministic order by default. `buildRoundOrder` shuffles when this is
+100   // false using a nanoid-based seed (crypto.getRandomValues) which VR tests
+101   // cannot pin, causing baseline drift. Users can still opt into shuffling
+102   // via the settings panel.
+103   roundsInOrder: true,
+104   ttsEnabled: true,
+105   mode: 'picture',
+106   tileUnit: 'letter',
+107   rounds: sliceWordSpellRounds(8),
+108 };
+109 
+110 /**
+111  * Deterministic default round values for NumberMatch. Using a fixed sequence
+112  * (rather than `Math.random`) keeps VR baselines stable across runs — nanoid
+113  * seeds in the route loader bypass any Math.random pin, so the only reliable
+114  * fix is to remove randomness from the default config entirely. Users still
+115  * customise via the settings panel.
+116  */
+117 const DEFAULT_NUMBER_MATCH_ROUND_VALUES: readonly number[] = [5, 8, 3];
+118 
+119 const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
+120   gameId: 'number-match',
+121   component: 'NumberMatch',
+122   inputMethod: 'drag',
+123   wrongTileBehavior: 'lock-auto-eject',
+124   tileBankMode: 'distractors',
+125   distractorCount: 2,
+126   totalRounds: 3,
+127   // Deterministic order by default — see DEFAULT_WORD_SPELL_CONFIG comment.
+128   roundsInOrder: true,
+129   ttsEnabled: true,
+130   mode: 'numeral-to-group',
+131   tileStyle: 'dots',
+132   range: { min: 1, max: 12 },
+133   rounds: DEFAULT_NUMBER_MATCH_ROUND_VALUES.map((value) => ({ value })),
+134 });
+135 
+136 const resizeNumberMatchRounds = (
+137   prev: NumberMatchRound[],
+138   count: number,
+139   range: { min: number; max: number },
+140 ): NumberMatchRound[] => {
+141   const n = Math.max(1, Math.min(count, 50));
+142   const span = Math.max(1, range.max - range.min + 1);
+143   // Deterministic fill: cycle through the range starting at `range.min`. This
+144   // avoids `Math.random` so defaults stay stable (see note above) and is
+145   // simple enough for users to understand at a glance. They can override any
+146   // round value via the settings panel.
+147   const fillValueAt = (index: number): number =>
+148     range.min + (index % span);
+149   const next = prev.slice(0, n).map((r, i) => {
+150     if (r.value >= range.min && r.value <= range.max) return { ...r };
+151     return { value: fillValueAt(i) };
+152   });
+153   while (next.length < n) {
+154     next.push({ value: fillValueAt(next.length) });
+155   }
+156   return next;
+157 };
+158 
+159 const makeDefaultSortNumbersConfig = (): SortNumbersConfig =>
+160   resolveSimpleConfig({
+161     configMode: 'simple',
+162     direction: 'ascending',
+163     start: 2,
+164     step: 2,
+165     quantity: 5,
+166     distractors: false,
+167   });
+168 
+169 const resolveWordSpellConfig = (
+170   saved: Record<string, unknown> | null,
+171 ): WordSpellConfig => {
+172   const base: WordSpellConfig = {
+173     ...DEFAULT_WORD_SPELL_CONFIG,
+174     rounds: DEFAULT_WORD_SPELL_CONFIG.rounds.map((r) => ({ ...r })),
+175   };
+176   if (!saved || saved.component !== 'WordSpell') return base;
+177   const merged: WordSpellConfig = {
+178     ...base,
+179     ...(saved as Partial<WordSpellConfig>),
+180     gameId: 'word-spell',
+181     component: 'WordSpell',
+182   };
+183   const targetTotal = Math.max(
+184     1,
+185     Math.min(
+186       merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
+187       WORD_SPELL_ROUND_POOL.length,
+188     ),
+189   );
+190   if (
+191     !Array.isArray(merged.rounds) ||
+192     merged.rounds.length === 0 ||
+193     merged.rounds.length !== targetTotal
+194   ) {
+195     merged.rounds = sliceWordSpellRounds(targetTotal);
+196   }
+197   merged.totalRounds = merged.rounds.length;
+198   return merged;
+199 };
+200 
+201 const resolveNumberMatchConfig = (
+202   saved: Record<string, unknown> | null,
+203 ): NumberMatchConfig => {
+204   const base = makeDefaultNumberMatchConfig();
+205   if (!saved || saved.component !== 'NumberMatch') return base;
+206   const merged: NumberMatchConfig = {
+207     ...base,
+208     ...(saved as Partial<NumberMatchConfig>),
+209     gameId: 'number-match',
+210     component: 'NumberMatch',
+211   };
+212   const targetLen =
+213     merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds;
+214   merged.rounds = resizeNumberMatchRounds(
+215     Array.isArray(merged.rounds) ? merged.rounds : [],
+216     targetLen,
+217     merged.range,
+218   );
+219   return merged;
+220 };
+221 
+222 const resolveSortNumbersConfig = (
+223   saved: Record<string, unknown> | null,
+224 ): SortNumbersConfig => {
+225   const base = makeDefaultSortNumbersConfig();
+226   if (!saved || saved.component !== 'SortNumbers') return base;
+227 
+228   // Simple mode: resolve from 5 fields
+229   if (saved.configMode === 'simple') {
+230     const skip = saved.skip as
+231       | { step?: number; start?: number }
+232       | undefined;
+233     return resolveSimpleConfig({
+234       configMode: 'simple',
+235       direction:
+236         saved.direction === 'descending' ? 'descending' : 'ascending',
+237       start: typeof skip?.start === 'number' ? skip.start : 2,
+238       step: typeof skip?.step === 'number' ? skip.step : 2,
+239       quantity: typeof saved.quantity === 'number' ? saved.quantity : 5,
+240       distractors: saved.tileBankMode === 'distractors',
+241     });
+242   }
+243 
+244   // Advanced mode (existing logic)
+245   // Migrate legacy allowSkips: boolean → skip: SkipConfig
+246   let migratedSaved = saved;
+247   if (!saved.skip && typeof saved.allowSkips === 'boolean') {
+248     migratedSaved = {
+249       ...saved,
+250       skip: saved.allowSkips
+251         ? { mode: 'random' }
+252         : { mode: 'consecutive' },
+253     };
+254   }
+255 
+256   const merged: SortNumbersConfig = {
+257     ...base,
+258     ...(migratedSaved as Partial<SortNumbersConfig>),
+259     gameId: 'sort-numbers',
+260     component: 'SortNumbers',
+261   };
+262 
+263   // Existing saved configs without configMode are treated as advanced
+264   if (saved.configMode !== 'simple') {
+265     merged.configMode = 'advanced';
+266   }
+267 
+268   const tr = Math.max(1, merged.totalRounds);
+269   merged.totalRounds = tr;
+270 
+271   // Normalize skip: mode 'by' requires step and start.
+272   if (merged.skip.mode === 'by') {
+273     const partial = merged.skip as {
+274       mode: 'by';
+275       step?: number;
+276       start?: 'range-min' | 'random' | number;
+277     };
+278     merged.skip = {
+279       mode: 'by',
+280       step: typeof partial.step === 'number' ? partial.step : 2,
+281       start: partial.start ?? 'range-min',
+282     };
+283   }
+284 
+285   const roundsStale =
+286     Array.isArray(merged.rounds) &&
+287     isRoundsStale(merged.rounds, {
+288       quantity: merged.quantity,
+289       range: merged.range,
+290       skip: merged.skip,
+291     });
+292 
+293   if (
+294     !Array.isArray(merged.rounds) ||
+295     merged.rounds.length === 0 ||
+296     merged.rounds.length !== tr ||
+297     roundsStale
+298   ) {
+299     merged.rounds = generateSortRounds({
+300       range: merged.range,
+301       quantity: merged.quantity,
+302       skip: merged.skip,
+303       totalRounds: tr,
+304     });
+305   }
+306 
+307   // Advanced configs don't support level mode — clear the leaked base default.
+308   merged.levelMode = undefined;
+309 
+310   return merged;
+311 };
+312 
+313 const WordSpellGameBody = ({
+314   gameId,
+315   sessionId,
+316   seed,
+317   draftState,
+318   gameSpecificConfig,
+319   bookmarkId,
+320   bookmarkName,
+321   bookmarkColor,
+322 }: {
+323   gameId: string;
+324   sessionId: string;
+325   seed: string;
+326   draftState: AnswerGameDraftState | null;
+327   gameSpecificConfig: Record<string, unknown> | null;
+328   bookmarkId: string | null;
+329   bookmarkName: string | null;
+330   bookmarkColor: string | null;
+331 }): JSX.Element => {
+332   const { t } = useTranslation('games');
+333   const { save, updateConfig } = useSavedConfigs();
+334   const initial = useMemo(
+335     () => resolveWordSpellConfig(gameSpecificConfig),
+336     [gameSpecificConfig],
+337   );
+338   const [cfg, setCfg] = useState(initial);
+339   const [showInstructions, setShowInstructions] = useState(
+340     draftState === null,
+341   );
+342   useEffect(() => {
+343     setCfg(initial);
+344   }, [initial]);
+345   usePersistLastGameConfig(
+346     gameId,
+347     cfg as unknown as Record<string, unknown>,
+348   );
+349 
+350   if (showInstructions) {
+351     return (
+352       <InstructionsOverlay
+353         text={t('instructions.word-spell')}
+354         onStart={() => setShowInstructions(false)}
+355         ttsEnabled={cfg.ttsEnabled}
+356         gameTitle={t('word-spell')}
+357         bookmarkName={bookmarkName ?? undefined}
+358         bookmarkColor={
+359           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+360         }
+361         subject="reading"
+362         config={cfg as unknown as Record<string, unknown>}
+363         onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
+364         onSaveBookmark={async (name, color) => {
+365           await save({
+366             gameId,
+367             name,
+368             color,
+369             config: cfg as unknown as Record<string, unknown>,
+370           });
+371         }}
+372         onUpdateBookmark={
+373           bookmarkId
+374             ? async (name, config) => {
+375                 await updateConfig(bookmarkId, config, name);
+376               }
+377             : undefined
+378         }
+379         configFields={wordSpellConfigFields}
+380       />
+381     );
+382   }
+383 
+384   return (
+385     <WordSpell
+386       key={cfg.inputMethod}
+387       config={cfg}
+388       initialState={draftState ?? undefined}
+389       sessionId={sessionId}
+390       seed={seed}
+391     />
+392   );
+393 };
+394 
+395 const NumberMatchGameBody = ({
+396   gameId,
+397   sessionId,
+398   seed,
+399   draftState,
+400   gameSpecificConfig,
+401   bookmarkId,
+402   bookmarkName,
+403   bookmarkColor,
+404 }: {
+405   gameId: string;
+406   sessionId: string;
+407   seed: string;
+408   draftState: AnswerGameDraftState | null;
+409   gameSpecificConfig: Record<string, unknown> | null;
+410   bookmarkId: string | null;
+411   bookmarkName: string | null;
+412   bookmarkColor: string | null;
+413 }): JSX.Element => {
+414   const { t } = useTranslation('games');
+415   const { save, updateConfig } = useSavedConfigs();
+416   const initial = useMemo(
+417     () => resolveNumberMatchConfig(gameSpecificConfig),
+418     [gameSpecificConfig],
+419   );
+420   const [cfg, setCfg] = useState(initial);
+421   const [showInstructions, setShowInstructions] = useState(
+422     draftState === null,
+423   );
+424   useEffect(() => {
+425     setCfg(initial);
+426   }, [initial]);
+427   usePersistLastGameConfig(
+428     gameId,
+429     cfg as unknown as Record<string, unknown>,
+430   );
+431 
+432   if (showInstructions) {
+433     return (
+434       <InstructionsOverlay
+435         text={t('instructions.number-match')}
+436         onStart={() => setShowInstructions(false)}
+437         ttsEnabled={cfg.ttsEnabled}
+438         gameTitle={t('number-match')}
+439         bookmarkName={bookmarkName ?? undefined}
+440         bookmarkColor={
+441           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+442         }
+443         subject="math"
+444         config={cfg as unknown as Record<string, unknown>}
+445         onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
+446         onSaveBookmark={async (name, color) => {
+447           await save({
+448             gameId,
+449             name,
+450             color,
+451             config: cfg as unknown as Record<string, unknown>,
+452           });
+453         }}
+454         onUpdateBookmark={
+455           bookmarkId
+456             ? async (name, config) => {
+457                 await updateConfig(bookmarkId, config, name);
+458               }
+459             : undefined
+460         }
+461         configFields={numberMatchConfigFields}
+462       />
+463     );
+464   }
+465 
+466   return (
+467     <NumberMatch
+468       key={cfg.inputMethod}
+469       config={cfg}
+470       initialState={draftState ?? undefined}
+471       sessionId={sessionId}
+472       seed={seed}
+473     />
+474   );
+475 };
+476 
+477 const SortNumbersGameBody = ({
+478   gameId,
+479   sessionId,
+480   seed,
+481   draftState,
+482   gameSpecificConfig,
+483   bookmarkId,
+484   bookmarkName,
+485   bookmarkColor,
+486 }: {
+487   gameId: string;
+488   sessionId: string;
+489   seed: string;
+490   draftState: AnswerGameDraftState | null;
+491   gameSpecificConfig: Record<string, unknown> | null;
+492   bookmarkId: string | null;
+493   bookmarkName: string | null;
+494   bookmarkColor: string | null;
+495 }): JSX.Element => {
+496   const { t } = useTranslation('games');
+497   const { save, updateConfig } = useSavedConfigs();
+498   const initial = useMemo(
+499     () => resolveSortNumbersConfig(gameSpecificConfig),
+500     [gameSpecificConfig],
+501   );
+502   const [cfg, setCfg] = useState(initial);
+503   const [showInstructions, setShowInstructions] = useState(
+504     draftState === null,
+505   );
+506   useEffect(() => {
+507     setCfg(initial);
+508   }, [initial]);
+509   usePersistLastGameConfig(
+510     gameId,
+511     cfg as unknown as Record<string, unknown>,
+512   );
+513 
+514   if (showInstructions) {
+515     return (
+516       <InstructionsOverlay
+517         text={t('instructions.sort-numbers')}
+518         onStart={() => setShowInstructions(false)}
+519         ttsEnabled={cfg.ttsEnabled}
+520         gameTitle={t('sort-numbers')}
+521         bookmarkName={bookmarkName ?? undefined}
+522         bookmarkColor={
+523           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+524         }
+525         subject="math"
+526         config={cfg as unknown as Record<string, unknown>}
+527         onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
+528         onSaveBookmark={async (name, color) => {
+529           await save({
+530             gameId,
+531             name,
+532             color,
+533             config: cfg as unknown as Record<string, unknown>,
+534           });
+535         }}
+536         onUpdateBookmark={
+537           bookmarkId
+538             ? async (name, config) => {
+539                 await updateConfig(bookmarkId, config, name);
+540               }
+541             : undefined
+542         }
+543         renderConfigForm={({ config: c, onChange: oc }) => (
+544           <SortNumbersConfigForm config={c} onChange={oc} />
+545         )}
+546       />
+547     );
+548   }
+549 
+550   return (
+551     <SortNumbers
+552       key={cfg.inputMethod}
+553       config={cfg}
+554       initialState={draftState ?? undefined}
+555       sessionId={sessionId}
+556       seed={seed}
+557     />
+558   );
+559 };
+560 
+561 const GameBody = ({
+562   gameId,
+563   sessionId,
+564   seed,
+565   draftState,
+566   gameSpecificConfig,
+567   bookmarkId,
+568   bookmarkName,
+569   bookmarkColor,
+570 }: {
+571   gameId: string;
+572   sessionId: string;
+573   seed: string;
+574   draftState: AnswerGameDraftState | null;
+575   gameSpecificConfig: Record<string, unknown> | null;
+576   bookmarkId: string | null;
+577   bookmarkName: string | null;
+578   bookmarkColor: string | null;
+579 }): JSX.Element => {
+580   if (gameId === 'sort-numbers') {
+581     return (
+582       <SortNumbersGameBody
+583         gameId={gameId}
+584         sessionId={sessionId}
+585         seed={seed}
+586         draftState={draftState}
+587         gameSpecificConfig={gameSpecificConfig}
+588         bookmarkId={bookmarkId}
+589         bookmarkName={bookmarkName}
+590         bookmarkColor={bookmarkColor}
+591       />
+592     );
+593   }
+594 
+595   if (gameId === 'word-spell') {
+596     return (
+597       <WordSpellGameBody
+598         gameId={gameId}
+599         sessionId={sessionId}
+600         seed={seed}
+601         draftState={draftState}
+602         gameSpecificConfig={gameSpecificConfig}
+603         bookmarkId={bookmarkId}
+604         bookmarkName={bookmarkName}
+605         bookmarkColor={bookmarkColor}
+606       />
+607     );
+608   }
+609 
+610   if (gameId === 'number-match') {
+611     return (
+612       <NumberMatchGameBody
+613         gameId={gameId}
+614         sessionId={sessionId}
+615         seed={seed}
+616         draftState={draftState}
+617         gameSpecificConfig={gameSpecificConfig}
+618         bookmarkId={bookmarkId}
+619         bookmarkName={bookmarkName}
+620         bookmarkColor={bookmarkColor}
+621       />
+622     );
+623   }
+624 
+625   return (
+626     <div className="flex h-full items-center justify-center text-muted-foreground">
+627       <p>Game not found</p>
+628     </div>
+629   );
+630 };
+631 
+632 export const GameRoute = ({
+633   config,
+634   initialLog,
+635   draftState,
+636   sessionId,
+637   seed,
+638   meta,
+639   gameSpecificConfig,
+640   bookmarkId,
+641   bookmarkName,
+642   bookmarkColor,
+643 }: GameRouteLoaderData): JSX.Element => (
+644   <GameShell
+645     config={config}
+646     moves={{}}
+647     initialState={meta.initialState}
+648     sessionId={sessionId}
+649     meta={meta}
+650     initialLog={initialLog ?? undefined}
+651   >
+652     <GameBody
+653       gameId={config.gameId}
+654       sessionId={sessionId}
+655       seed={seed}
+656       draftState={draftState}
+657       gameSpecificConfig={gameSpecificConfig}
+658       bookmarkId={bookmarkId}
+659       bookmarkName={bookmarkName}
+660       bookmarkColor={bookmarkColor}
+661     />
+662   </GameShell>
+663 );
+664 
+665 const RouteComponent = (): JSX.Element => {
+666   const data = Route.useLoaderData();
+667   return <GameRoute {...data} />;
+668 };
+669 
+670 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+671   validateSearch: (search: Record<string, unknown>) => ({
+672     configId:
+673       typeof search.configId === 'string' ? search.configId : undefined,
+674   }),
+675   loaderDeps: ({ search }) => ({ configId: search.configId }),
+676   loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
+677     const { gameId } = params;
+678     const profileId = 'default';
+679     const defaultConfig = makeDefaultConfig(gameId);
+680 
+681     // Route loaders run server-side (SSR) where IndexedDB is unavailable.
+682     // Return minimal defaults so the client hydrates and re-runs on the client.
+683     if (typeof indexedDB === 'undefined') {
+684       const sessionId = nanoid();
+685       const seed = nanoid();
+686       const initialState: GameEngineState = {
+687         phase: 'instructions',
+688         roundIndex: 0,
+689         score: 0,
+690         streak: 0,
+691         retryCount: 0,
+692         content: STUB_CONTENT,
+693         currentRound: {
+694           roundId: STUB_CONTENT.rounds[0]?.id ?? '',
+695           answer: null,
+696           hintsUsed: 0,
+697         },
+698       };
+699       return {
+700         config: defaultConfig,
+701         initialLog: null,
+702         draftState: null,
+703         sessionId,
+704         seed,
+705         meta: {
+706           profileId,
+707           gameId,
+708           gradeBand: defaultConfig.gradeBand,
+709           seed,
+710           initialContent: STUB_CONTENT,
+711           initialState,
+712         },
+713         gameSpecificConfig: null,
+714         bookmarkId: null,
+715         bookmarkName: null,
+716         bookmarkColor: null,
+717       };
+718     }
+719 
+720     const db = await getOrCreateDatabase();
+721     const config = await loadGameConfig(
+722       gameId,
+723       profileId,
+724       defaultConfig.gradeBand,
+725       db,
+726       defaultConfig,
+727     );
+728 
+729     const inProgressSession: InProgressSession | null =
+730       await findInProgressSession(profileId, gameId, db);
+731     const initialLog = inProgressSession?.log ?? null;
+732     const draftState = inProgressSession?.draftState ?? null;
+733 
+734     let gameSpecificConfig: Record<string, unknown> | null = null;
+735     let bookmarkId: string | null = null;
+736     let bookmarkName: string | null = null;
+737     let bookmarkColor: string | null = null;
+738 
+739     if (deps.configId) {
+740       const savedDoc = await db.saved_game_configs
+741         .findOne(deps.configId)
+742         .exec();
+743       if (savedDoc) {
+744         gameSpecificConfig = savedDoc.config;
+745         bookmarkId = savedDoc.id;
+746         bookmarkName = savedDoc.name;
+747         bookmarkColor = savedDoc.color;
+748       }
+749     } else {
+750       const lastDoc = await db.saved_game_configs
+751         .findOne(lastSessionSavedConfigId(gameId))
+752         .exec();
+753       if (lastDoc) gameSpecificConfig = lastDoc.config;
+754     }
+755 
+756     const sessionId = initialLog?.sessionId ?? nanoid();
+757     const seed = initialLog?.seed ?? nanoid();
+758     const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
+759     const initialState: GameEngineState = initialLog?.initialState ?? {
+760       phase: 'instructions',
+761       roundIndex: 0,
+762       score: 0,
+763       streak: 0,
+764       retryCount: 0,
+765       content: initialContent,
+766       currentRound: {
+767         roundId: initialContent.rounds[0]?.id ?? '',
+768         answer: null,
+769         hintsUsed: 0,
+770       },
+771     };
+772 
+773     const meta: SessionMeta = {
+774       profileId,
+775       gameId,
+776       gradeBand: config.gradeBand,
+777       seed,
+778       initialContent,
+779       initialState,
+780     };
+781 
+782     return {
+783       config,
+784       initialLog,
+785       draftState,
+786       sessionId,
+787       seed,
+788       meta,
+789       gameSpecificConfig,
+790       bookmarkId,
+791       bookmarkName,
+792       bookmarkColor,
+793     };
+794   },
+795   component: RouteComponent,
+796 });
 797
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:00:29Z)**_
@@ -3699,136 +3763,137 @@ _**Agent (claude-opus-4-6 2026-04-10 11:00:29Z)**_
  `/Users/leocaseiro/Sites/base-skill/src/games/number-match/types.ts`
 
 ```text
-1	import type { AnswerGameConfig } from '@/components/answer-game/types';
-2	import type { ConfigField } from '@/lib/config-fields';
-3	
-4	export interface NumberMatchRound {
-5	  value: number;
-6	  /** Fluent Emoji path for object-style tiles (e.g. "fluent-emoji/red-apple.svg") */
-7	  objectImage?: string;
-8	}
-9	
-10	export type NumberMatchMode =
-11	  | 'numeral-to-group'
-12	  | 'group-to-numeral'
-13	  | 'cardinal-number-to-text'
-14	  | 'cardinal-text-to-number'
-15	  | 'ordinal-number-to-text'
-16	  | 'ordinal-text-to-number'
-17	  | 'cardinal-to-ordinal'
-18	  | 'ordinal-to-cardinal';
-19	
-20	export interface NumberMatchConfig extends AnswerGameConfig {
-21	  component: 'NumberMatch';
-22	  mode: NumberMatchMode;
-23	  /** Visual style for quantity/group tiles */
-24	  tileStyle: 'dots' | 'objects' | 'fingers';
-25	  range: { min: number; max: number };
-26	  rounds: NumberMatchRound[];
-27	}
-28	
-29	export const numberMatchConfigFields: ConfigField[] = [
-30	  {
-31	    type: 'select',
-32	    key: 'inputMethod',
-33	    label: 'Input method',
-34	    options: [
-35	      { value: 'drag', label: 'drag' },
-36	      { value: 'type', label: 'type' },
-37	      { value: 'both', label: 'both' },
-38	    ],
-39	  },
-40	  {
-41	    type: 'select',
-42	    key: 'wrongTileBehavior',
-43	    label: 'Wrong tile behaviour',
-44	    options: [
-45	      { value: 'reject', label: 'reject' },
-46	      { value: 'lock-manual', label: 'lock-manual' },
-47	      { value: 'lock-auto-eject', label: 'lock-auto-eject' },
-48	    ],
-49	  },
-50	  {
-51	    type: 'select',
-52	    key: 'mode',
-53	    label: 'Mode',
-54	    options: [
-55	      { value: 'numeral-to-group', label: 'numeral → group' },
-56	      { value: 'group-to-numeral', label: 'group → numeral' },
-57	      {
-58	        value: 'cardinal-number-to-text',
-59	        label: 'cardinal number → text',
-60	      },
-61	      {
-62	        value: 'cardinal-text-to-number',
-63	        label: 'cardinal text → number',
-64	      },
-65	      {
-66	        value: 'ordinal-number-to-text',
-67	        label: 'ordinal number → text',
-68	      },
-69	      {
-70	        value: 'ordinal-text-to-number',
-71	        label: 'ordinal text → number',
-72	      },
-73	      { value: 'cardinal-to-ordinal', label: 'cardinal → ordinal' },
-74	      { value: 'ordinal-to-cardinal', label: 'ordinal → cardinal' },
-75	    ],
-76	  },
-77	  {
-78	    type: 'select',
-79	    key: 'tileStyle',
-80	    label: 'Tile style',
-81	    options: [
-82	      { value: 'dots', label: 'dots' },
-83	      { value: 'objects', label: 'objects' },
-84	      { value: 'fingers', label: 'fingers' },
-85	    ],
-86	  },
-87	  {
-88	    type: 'select',
-89	    key: 'tileBankMode',
-90	    label: 'Tile bank mode',
-91	    options: [
-92	      { value: 'exact', label: 'exact' },
-93	      { value: 'distractors', label: 'distractors' },
-94	    ],
-95	  },
-96	  {
-97	    type: 'number',
-98	    key: 'distractorCount',
-99	    label: 'Distractor count',
-100	    min: 1,
-101	    max: 10,
-102	  },
-103	  {
-104	    type: 'number',
-105	    key: 'totalRounds',
-106	    label: 'Total rounds',
-107	    min: 1,
-108	    max: 50,
-109	  },
-110	  { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
-111	  {
-112	    type: 'nested-number',
-113	    key: 'range',
-114	    subKey: 'min',
-115	    label: 'Range min',
-116	    min: 1,
-117	    max: 100,
-118	  },
-119	  {
-120	    type: 'nested-number',
-121	    key: 'range',
-122	    subKey: 'max',
-123	    label: 'Range max',
-124	    min: 1,
-125	    max: 100,
-126	  },
-127	  { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
-128	];
+1 import type { AnswerGameConfig } from '@/components/answer-game/types';
+2 import type { ConfigField } from '@/lib/config-fields';
+3 
+4 export interface NumberMatchRound {
+5   value: number;
+6   /** Fluent Emoji path for object-style tiles (e.g. "fluent-emoji/red-apple.svg") */
+7   objectImage?: string;
+8 }
+9 
+10 export type NumberMatchMode =
+11   | 'numeral-to-group'
+12   | 'group-to-numeral'
+13   | 'cardinal-number-to-text'
+14   | 'cardinal-text-to-number'
+15   | 'ordinal-number-to-text'
+16   | 'ordinal-text-to-number'
+17   | 'cardinal-to-ordinal'
+18   | 'ordinal-to-cardinal';
+19 
+20 export interface NumberMatchConfig extends AnswerGameConfig {
+21   component: 'NumberMatch';
+22   mode: NumberMatchMode;
+23   /** Visual style for quantity/group tiles */
+24   tileStyle: 'dots' | 'objects' | 'fingers';
+25   range: { min: number; max: number };
+26   rounds: NumberMatchRound[];
+27 }
+28 
+29 export const numberMatchConfigFields: ConfigField[] = [
+30   {
+31     type: 'select',
+32     key: 'inputMethod',
+33     label: 'Input method',
+34     options: [
+35       { value: 'drag', label: 'drag' },
+36       { value: 'type', label: 'type' },
+37       { value: 'both', label: 'both' },
+38     ],
+39   },
+40   {
+41     type: 'select',
+42     key: 'wrongTileBehavior',
+43     label: 'Wrong tile behaviour',
+44     options: [
+45       { value: 'reject', label: 'reject' },
+46       { value: 'lock-manual', label: 'lock-manual' },
+47       { value: 'lock-auto-eject', label: 'lock-auto-eject' },
+48     ],
+49   },
+50   {
+51     type: 'select',
+52     key: 'mode',
+53     label: 'Mode',
+54     options: [
+55       { value: 'numeral-to-group', label: 'numeral → group' },
+56       { value: 'group-to-numeral', label: 'group → numeral' },
+57       {
+58         value: 'cardinal-number-to-text',
+59         label: 'cardinal number → text',
+60       },
+61       {
+62         value: 'cardinal-text-to-number',
+63         label: 'cardinal text → number',
+64       },
+65       {
+66         value: 'ordinal-number-to-text',
+67         label: 'ordinal number → text',
+68       },
+69       {
+70         value: 'ordinal-text-to-number',
+71         label: 'ordinal text → number',
+72       },
+73       { value: 'cardinal-to-ordinal', label: 'cardinal → ordinal' },
+74       { value: 'ordinal-to-cardinal', label: 'ordinal → cardinal' },
+75     ],
+76   },
+77   {
+78     type: 'select',
+79     key: 'tileStyle',
+80     label: 'Tile style',
+81     options: [
+82       { value: 'dots', label: 'dots' },
+83       { value: 'objects', label: 'objects' },
+84       { value: 'fingers', label: 'fingers' },
+85     ],
+86   },
+87   {
+88     type: 'select',
+89     key: 'tileBankMode',
+90     label: 'Tile bank mode',
+91     options: [
+92       { value: 'exact', label: 'exact' },
+93       { value: 'distractors', label: 'distractors' },
+94     ],
+95   },
+96   {
+97     type: 'number',
+98     key: 'distractorCount',
+99     label: 'Distractor count',
+100     min: 1,
+101     max: 10,
+102   },
+103   {
+104     type: 'number',
+105     key: 'totalRounds',
+106     label: 'Total rounds',
+107     min: 1,
+108     max: 50,
+109   },
+110   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
+111   {
+112     type: 'nested-number',
+113     key: 'range',
+114     subKey: 'min',
+115     label: 'Range min',
+116     min: 1,
+117     max: 100,
+118   },
+119   {
+120     type: 'nested-number',
+121     key: 'range',
+122     subKey: 'max',
+123     label: 'Range max',
+124     min: 1,
+125     max: 100,
+126   },
+127   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
+128 ];
 129
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:01:20Z)**_
@@ -3846,47 +3911,48 @@ _**Agent (claude-opus-4-6 2026-04-10 11:01:20Z)**_
  `/Users/leocaseiro/Sites/base-skill/src/games/sort-numbers/is-rounds-stale.ts`
 
 ```text
-1	import type { SkipConfig, SortNumbersRound } from './types';
-2	
-3	interface StaleCheckOptions {
-4	  quantity: number;
-5	  range: { min: number; max: number };
-6	  skip: SkipConfig;
-7	}
-8	
-9	export const isRoundsStale = (
-10	  rounds: SortNumbersRound[],
-11	  options: StaleCheckOptions,
-12	): boolean => {
-13	  const { quantity, range, skip } = options;
-14	
-15	  return rounds.some((r) => {
-16	    // Check quantity
-17	    if (r.sequence.length !== quantity) return true;
-18	
-19	    // Check range
-20	    if (r.sequence.some((v) => v < range.min || v > range.max))
-21	      return true;
-22	
-23	    // Check skip pattern
-24	    if (skip.mode === 'by') {
-25	      const sorted = [...r.sequence].toSorted((a, b) => a - b);
-26	      const diffs = sorted.slice(1).map((n, i) => n - (sorted[i] ?? 0));
-27	      if (!diffs.every((d) => d === skip.step)) return true;
-28	    }
-29	
-30	    if (skip.mode === 'consecutive') {
-31	      const sorted = [...r.sequence].toSorted((a, b) => a - b);
-32	      const diffs = sorted.slice(1).map((n, i) => n - (sorted[i] ?? 0));
-33	      if (!diffs.every((d) => d === 1)) return true;
-34	    }
-35	
-36	    // mode 'random': quantity + range check is sufficient
-37	    return false;
-38	  });
-39	};
+1 import type { SkipConfig, SortNumbersRound } from './types';
+2 
+3 interface StaleCheckOptions {
+4   quantity: number;
+5   range: { min: number; max: number };
+6   skip: SkipConfig;
+7 }
+8 
+9 export const isRoundsStale = (
+10   rounds: SortNumbersRound[],
+11   options: StaleCheckOptions,
+12 ): boolean => {
+13   const { quantity, range, skip } = options;
+14 
+15   return rounds.some((r) => {
+16     // Check quantity
+17     if (r.sequence.length !== quantity) return true;
+18 
+19     // Check range
+20     if (r.sequence.some((v) => v < range.min || v > range.max))
+21       return true;
+22 
+23     // Check skip pattern
+24     if (skip.mode === 'by') {
+25       const sorted = [...r.sequence].toSorted((a, b) => a - b);
+26       const diffs = sorted.slice(1).map((n, i) => n - (sorted[i] ?? 0));
+27       if (!diffs.every((d) => d === skip.step)) return true;
+28     }
+29 
+30     if (skip.mode === 'consecutive') {
+31       const sorted = [...r.sequence].toSorted((a, b) => a - b);
+32       const diffs = sorted.slice(1).map((n, i) => n - (sorted[i] ?? 0));
+33       if (!diffs.every((d) => d === 1)) return true;
+34     }
+35 
+36     // mode 'random': quantity + range check is sufficient
+37     return false;
+38   });
+39 };
 40
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:01:51Z)**_
@@ -3912,187 +3978,188 @@ _**Agent (claude-opus-4-6 2026-04-10 11:01:51Z)**_
  `/Users/leocaseiro/Sites/base-skill/e2e/visual.spec.ts`
 
 ```text
-100	    },
-101	  );
-102	});
-103	
-104	// ── NumberMatch ──────────────────────────────────────────────────────────────
-105	
-106	test('@visual NumberMatch numeral-to-group layout', async ({
-107	  page,
-108	}) => {
-109	  await page.goto('/en/game/number-match');
-110	  await page.getByRole('button', { name: /let's go/i }).click();
-111	  await page
-112	    .getByRole('button', { name: 'Hear the question' })
-113	    .waitFor({ state: 'visible' });
-114	  await expect(page).toHaveScreenshot(
-115	    'number-match-numeral-to-group.png',
-116	    { fullPage: true },
-117	  );
-118	});
-119	
-120	test('@visual NumberMatch numeral-to-group layout dark', async ({
-121	  page,
-122	}) => {
-123	  await page.goto('/en/game/number-match');
-124	  await page.getByRole('button', { name: /let's go/i }).click();
-125	  await page
-126	    .getByRole('button', { name: 'Hear the question' })
-127	    .waitFor({ state: 'visible' });
-128	  await setDarkMode(page);
-129	  await expect(page).toHaveScreenshot(
-130	    'number-match-numeral-to-group-dark.png',
-131	    { fullPage: true },
-132	  );
-133	});
-134	
-135	async function selectNumberMatchMode(
-136	  page: Page,
-137	  mode: string,
-138	): Promise<void> {
-139	  await page.goto('/en/game/number-match');
-140	  await page
-141	    .getByRole('button', { name: /let's go/i })
-142	    .waitFor({ state: 'visible' });
-143	  // Open settings panel and switch the mode before starting the round.
-144	  await page.getByRole('button', { name: /settings/i }).click();
-145	  await page.getByLabel('Mode', { exact: true }).selectOption(mode);
-146	  await page.getByRole('button', { name: /let's go/i }).click();
-147	  await page
-148	    .getByRole('button', { name: 'Hear the question' })
-149	    .waitFor({ state: 'visible' });
-150	}
-151	
-152	// Fixes the `group-to-numeral` regression: dot-group shown as question,
-153	// numeric tiles in the bank, square slot matching the numeric answer style.
-154	test('@visual NumberMatch group-to-numeral layout', async ({
-155	  page,
-156	}) => {
-157	  await selectNumberMatchMode(page, 'group-to-numeral');
-158	  await expect(page).toHaveScreenshot(
-159	    'number-match-group-to-numeral.png',
-160	    { fullPage: true },
-161	  );
-162	});
-163	
-164	// One cardinal word-tile mode — verifies word rendering in tiles/slots.
-165	test('@visual NumberMatch cardinal-number-to-text layout', async ({
-166	  page,
-167	}) => {
-168	  await selectNumberMatchMode(page, 'cardinal-number-to-text');
-169	  await expect(page).toHaveScreenshot(
-170	    'number-match-cardinal-number-to-text.png',
-171	    { fullPage: true },
-172	  );
-173	});
-174	
-175	// One ordinal mode — exercises ordinal word conversion path.
-176	test('@visual NumberMatch ordinal-number-to-text layout', async ({
-177	  page,
-178	}) => {
-179	  await selectNumberMatchMode(page, 'ordinal-number-to-text');
-180	  await expect(page).toHaveScreenshot(
-181	    'number-match-ordinal-number-to-text.png',
-182	    { fullPage: true },
-183	  );
-184	});
-185	
-186	// Focused domino tile bank shots — isolate the vertical pip-based tiles
-187	// (top/bottom 3x3 pip grids, horizontal divider, unified 72x136px size) from
-188	// unrelated layout so regressions in the DominoTile are easy to spot.
-189	test('@visual NumberMatch domino tile bank', async ({ page }) => {
-190	  await page.goto('/en/game/number-match');
-191	  await page.getByRole('button', { name: /let's go/i }).click();
-192	  await page
-193	    .getByRole('button', { name: 'Hear the question' })
-194	    .waitFor({ state: 'visible' });
-195	  const tileBank = page.locator('[data-tile-bank]');
-196	  await tileBank.waitFor({ state: 'visible' });
-197	  await expect(tileBank).toHaveScreenshot(
-198	    'number-match-domino-tile-bank.png',
-199	  );
-200	});
-201	
-202	test('@visual NumberMatch domino tile bank dark', async ({ page }) => {
-203	  await page.goto('/en/game/number-match');
-204	  await page.getByRole('button', { name: /let's go/i }).click();
-205	  await page
-206	    .getByRole('button', { name: 'Hear the question' })
-207	    .waitFor({ state: 'visible' });
-208	  const tileBank = page.locator('[data-tile-bank]');
-209	  await tileBank.waitFor({ state: 'visible' });
-210	  await setDarkMode(page);
-211	  await expect(tileBank).toHaveScreenshot(
-212	    'number-match-domino-tile-bank-dark.png',
-213	  );
-214	});
-215	
-216	// Countable dots — the DotGroupQuestion renders individually tappable dots
-217	// that assign sequential counts when tapped. Switch to group-to-numeral mode
-218	// via the Settings panel before starting so dots are the question.
-219	// Math.random is pinned to a constant so the round value (and therefore the
-220	// dot count) is reproducible across runs, independent of how many times the
-221	// config resolver consumes random state while the Settings panel opens.
-222	async function openNumberMatchWithDots(page: Page): Promise<void> {
-223	  await page.addInitScript(() => {
-224	    Math.random = () => 0.37;
-225	  });
-226	  await page.goto('/en/game/number-match');
-227	  await page
-228	    .getByRole('button', { name: /settings/i })
-229	    .first()
-230	    .click();
-231	  await page
-232	    .getByLabel('Mode', { exact: true })
-233	    .selectOption('group-to-numeral');
-234	  await page.getByRole('button', { name: /let's go/i }).click();
-235	  await page
-236	    .getByRole('button', { name: /^Dot 1 of/i })
-237	    .waitFor({ state: 'visible' });
-238	}
-239	
-240	test('@visual NumberMatch countable dots initial', async ({ page }) => {
-241	  await openNumberMatchWithDots(page);
-242	  const dotGroup = page
-243	    .getByRole('button', { name: /^Dot 1 of/i })
-244	    .locator('..');
-245	  await expect(dotGroup).toHaveScreenshot(
-246	    'number-match-countable-dots-initial.png',
-247	  );
-248	});
-249	
-250	test('@visual NumberMatch countable dots partially tapped', async ({
-251	  page,
-252	}) => {
-253	  await openNumberMatchWithDots(page);
-254	  await page.getByRole('button', { name: /^Dot 1 of/i }).click();
-255	  await page.getByRole('button', { name: /^Dot 2 of/i }).click();
-256	  const dotGroup = page
-257	    .getByRole('button', { name: /^Dot 1 of/i })
-258	    .locator('..');
-259	  await expect(dotGroup).toHaveScreenshot(
-260	    'number-match-countable-dots-partial.png',
-261	  );
-262	});
-263	
-264	// ── SortNumbers ──────────────────────────────────────────────────────────────
-265	
-266	test('@visual SortNumbers mid-game layout', async ({ page }) => {
-267	  await page.goto('/en/game/sort-numbers');
-268	  await page.getByRole('button', { name: /let's go/i }).click();
-269	  await page
-270	    .getByRole('button', { name: /^Number /i })
-271	    .first()
-272	    .waitFor({ state: 'visible' });
-273	  await expect(page).toHaveScreenshot('sort-numbers.png', {
-274	    fullPage: true,
-275	  });
-276	});
-277	
-278	test('@visual SortNumbers mid-game layout dark', async ({ page }) => {
-279	  await page.goto('/en/game/sort-numbers');
+100     },
+101   );
+102 });
+103 
+104 // ── NumberMatch ──────────────────────────────────────────────────────────────
+105 
+106 test('@visual NumberMatch numeral-to-group layout', async ({
+107   page,
+108 }) => {
+109   await page.goto('/en/game/number-match');
+110   await page.getByRole('button', { name: /let's go/i }).click();
+111   await page
+112     .getByRole('button', { name: 'Hear the question' })
+113     .waitFor({ state: 'visible' });
+114   await expect(page).toHaveScreenshot(
+115     'number-match-numeral-to-group.png',
+116     { fullPage: true },
+117   );
+118 });
+119 
+120 test('@visual NumberMatch numeral-to-group layout dark', async ({
+121   page,
+122 }) => {
+123   await page.goto('/en/game/number-match');
+124   await page.getByRole('button', { name: /let's go/i }).click();
+125   await page
+126     .getByRole('button', { name: 'Hear the question' })
+127     .waitFor({ state: 'visible' });
+128   await setDarkMode(page);
+129   await expect(page).toHaveScreenshot(
+130     'number-match-numeral-to-group-dark.png',
+131     { fullPage: true },
+132   );
+133 });
+134 
+135 async function selectNumberMatchMode(
+136   page: Page,
+137   mode: string,
+138 ): Promise<void> {
+139   await page.goto('/en/game/number-match');
+140   await page
+141     .getByRole('button', { name: /let's go/i })
+142     .waitFor({ state: 'visible' });
+143   // Open settings panel and switch the mode before starting the round.
+144   await page.getByRole('button', { name: /settings/i }).click();
+145   await page.getByLabel('Mode', { exact: true }).selectOption(mode);
+146   await page.getByRole('button', { name: /let's go/i }).click();
+147   await page
+148     .getByRole('button', { name: 'Hear the question' })
+149     .waitFor({ state: 'visible' });
+150 }
+151 
+152 // Fixes the `group-to-numeral` regression: dot-group shown as question,
+153 // numeric tiles in the bank, square slot matching the numeric answer style.
+154 test('@visual NumberMatch group-to-numeral layout', async ({
+155   page,
+156 }) => {
+157   await selectNumberMatchMode(page, 'group-to-numeral');
+158   await expect(page).toHaveScreenshot(
+159     'number-match-group-to-numeral.png',
+160     { fullPage: true },
+161   );
+162 });
+163 
+164 // One cardinal word-tile mode — verifies word rendering in tiles/slots.
+165 test('@visual NumberMatch cardinal-number-to-text layout', async ({
+166   page,
+167 }) => {
+168   await selectNumberMatchMode(page, 'cardinal-number-to-text');
+169   await expect(page).toHaveScreenshot(
+170     'number-match-cardinal-number-to-text.png',
+171     { fullPage: true },
+172   );
+173 });
+174 
+175 // One ordinal mode — exercises ordinal word conversion path.
+176 test('@visual NumberMatch ordinal-number-to-text layout', async ({
+177   page,
+178 }) => {
+179   await selectNumberMatchMode(page, 'ordinal-number-to-text');
+180   await expect(page).toHaveScreenshot(
+181     'number-match-ordinal-number-to-text.png',
+182     { fullPage: true },
+183   );
+184 });
+185 
+186 // Focused domino tile bank shots — isolate the vertical pip-based tiles
+187 // (top/bottom 3x3 pip grids, horizontal divider, unified 72x136px size) from
+188 // unrelated layout so regressions in the DominoTile are easy to spot.
+189 test('@visual NumberMatch domino tile bank', async ({ page }) => {
+190   await page.goto('/en/game/number-match');
+191   await page.getByRole('button', { name: /let's go/i }).click();
+192   await page
+193     .getByRole('button', { name: 'Hear the question' })
+194     .waitFor({ state: 'visible' });
+195   const tileBank = page.locator('[data-tile-bank]');
+196   await tileBank.waitFor({ state: 'visible' });
+197   await expect(tileBank).toHaveScreenshot(
+198     'number-match-domino-tile-bank.png',
+199   );
+200 });
+201 
+202 test('@visual NumberMatch domino tile bank dark', async ({ page }) => {
+203   await page.goto('/en/game/number-match');
+204   await page.getByRole('button', { name: /let's go/i }).click();
+205   await page
+206     .getByRole('button', { name: 'Hear the question' })
+207     .waitFor({ state: 'visible' });
+208   const tileBank = page.locator('[data-tile-bank]');
+209   await tileBank.waitFor({ state: 'visible' });
+210   await setDarkMode(page);
+211   await expect(tileBank).toHaveScreenshot(
+212     'number-match-domino-tile-bank-dark.png',
+213   );
+214 });
+215 
+216 // Countable dots — the DotGroupQuestion renders individually tappable dots
+217 // that assign sequential counts when tapped. Switch to group-to-numeral mode
+218 // via the Settings panel before starting so dots are the question.
+219 // Math.random is pinned to a constant so the round value (and therefore the
+220 // dot count) is reproducible across runs, independent of how many times the
+221 // config resolver consumes random state while the Settings panel opens.
+222 async function openNumberMatchWithDots(page: Page): Promise<void> {
+223   await page.addInitScript(() => {
+224     Math.random = () => 0.37;
+225   });
+226   await page.goto('/en/game/number-match');
+227   await page
+228     .getByRole('button', { name: /settings/i })
+229     .first()
+230     .click();
+231   await page
+232     .getByLabel('Mode', { exact: true })
+233     .selectOption('group-to-numeral');
+234   await page.getByRole('button', { name: /let's go/i }).click();
+235   await page
+236     .getByRole('button', { name: /^Dot 1 of/i })
+237     .waitFor({ state: 'visible' });
+238 }
+239 
+240 test('@visual NumberMatch countable dots initial', async ({ page }) => {
+241   await openNumberMatchWithDots(page);
+242   const dotGroup = page
+243     .getByRole('button', { name: /^Dot 1 of/i })
+244     .locator('..');
+245   await expect(dotGroup).toHaveScreenshot(
+246     'number-match-countable-dots-initial.png',
+247   );
+248 });
+249 
+250 test('@visual NumberMatch countable dots partially tapped', async ({
+251   page,
+252 }) => {
+253   await openNumberMatchWithDots(page);
+254   await page.getByRole('button', { name: /^Dot 1 of/i }).click();
+255   await page.getByRole('button', { name: /^Dot 2 of/i }).click();
+256   const dotGroup = page
+257     .getByRole('button', { name: /^Dot 1 of/i })
+258     .locator('..');
+259   await expect(dotGroup).toHaveScreenshot(
+260     'number-match-countable-dots-partial.png',
+261   );
+262 });
+263 
+264 // ── SortNumbers ──────────────────────────────────────────────────────────────
+265 
+266 test('@visual SortNumbers mid-game layout', async ({ page }) => {
+267   await page.goto('/en/game/sort-numbers');
+268   await page.getByRole('button', { name: /let's go/i }).click();
+269   await page
+270     .getByRole('button', { name: /^Number /i })
+271     .first()
+272     .waitFor({ state: 'visible' });
+273   await expect(page).toHaveScreenshot('sort-numbers.png', {
+274     fullPage: true,
+275   });
+276 });
+277 
+278 test('@visual SortNumbers mid-game layout dark', async ({ page }) => {
+279   await page.goto('/en/game/sort-numbers');
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:03:16Z)**_
@@ -4155,6 +4222,7 @@ src/routes/$locale/_app/game/$gameId.tsx
 .specstory/history/2026-04-05_13-58-14Z-critical-respond-with-text.md
 .specstory/history/2026-04-05_13-24-31Z-i-want-to-make.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:03:26Z)**_
@@ -4204,6 +4272,7 @@ Preparing worktree (new branch 'fix/numbermatch-stuck-rounds')
 branch 'fix/numbermatch-stuck-rounds' set up to track 'origin/master'.
 HEAD is now at b0a7c81 fix(vr): stabilise VR baselines by removing nondeterminism in default configs (#46)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:04:01Z)**_
@@ -4221,6 +4290,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 11.54s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:04:04Z)**_
@@ -4234,32 +4304,33 @@ _**Agent (claude-opus-4-6 2026-04-10 11:04:06Z)**_
  `/Users/leocaseiro/Sites/base-skill/worktrees/fix/numbermatch-stuck-rounds/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-136	const resizeNumberMatchRounds = (
-137	  prev: NumberMatchRound[],
-138	  count: number,
-139	  range: { min: number; max: number },
-140	): NumberMatchRound[] => {
-141	  const n = Math.max(1, Math.min(count, 50));
-142	  const span = Math.max(1, range.max - range.min + 1);
-143	  // Deterministic fill: cycle through the range starting at `range.min`. This
-144	  // avoids `Math.random` so defaults stay stable (see note above) and is
-145	  // simple enough for users to understand at a glance. They can override any
-146	  // round value via the settings panel.
-147	  const fillValueAt = (index: number): number =>
-148	    range.min + (index % span);
-149	  const next = prev.slice(0, n).map((r, i) => {
-150	    if (r.value >= range.min && r.value <= range.max) return { ...r };
-151	    return { value: fillValueAt(i) };
-152	  });
-153	  while (next.length < n) {
-154	    next.push({ value: fillValueAt(next.length) });
-155	  }
-156	  return next;
-157	};
-158	
-159	const makeDefaultSortNumbersConfig = (): SortNumbersConfig =>
-160	  resolveSimpleConfig({
+136 const resizeNumberMatchRounds = (
+137   prev: NumberMatchRound[],
+138   count: number,
+139   range: { min: number; max: number },
+140 ): NumberMatchRound[] => {
+141   const n = Math.max(1, Math.min(count, 50));
+142   const span = Math.max(1, range.max - range.min + 1);
+143   // Deterministic fill: cycle through the range starting at `range.min`. This
+144   // avoids `Math.random` so defaults stay stable (see note above) and is
+145   // simple enough for users to understand at a glance. They can override any
+146   // round value via the settings panel.
+147   const fillValueAt = (index: number): number =>
+148     range.min + (index % span);
+149   const next = prev.slice(0, n).map((r, i) => {
+150     if (r.value >= range.min && r.value <= range.max) return { ...r };
+151     return { value: fillValueAt(i) };
+152   });
+153   while (next.length < n) {
+154     next.push({ value: fillValueAt(next.length) });
+155   }
+156   return next;
+157 };
+158 
+159 const makeDefaultSortNumbersConfig = (): SortNumbersConfig =>
+160   resolveSimpleConfig({
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:04:23Z)**_
@@ -4270,6 +4341,7 @@ _**Agent (claude-opus-4-6 2026-04-10 11:04:23Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix/numbermatch-stuck-rounds/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:04:31Z)**_
@@ -4288,6 +4360,7 @@ List game route files
 $gameId.test.tsx
 $gameId.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:04:36Z)**_
@@ -4297,140 +4370,141 @@ _**Agent (claude-opus-4-6 2026-04-10 11:04:36Z)**_
  `/Users/leocaseiro/Sites/base-skill/worktrees/fix/numbermatch-stuck-rounds/src/routes/$locale/_app/game/$gameId.test.tsx`
 
 ```text
-1	// src/routes/$locale/_app/game/$gameId.test.tsx
-2	import { render, screen, waitFor } from '@testing-library/react';
-3	import {
-4	  afterEach,
-5	  beforeEach,
-6	  describe,
-7	  expect,
-8	  it,
-9	  vi,
-10	} from 'vitest';
-11	import { GameRoute } from './$gameId';
-12	import type { BaseSkillDatabase } from '@/db/types';
-13	import type {
-14	  GameEngineState,
-15	  ResolvedContent,
-16	  ResolvedGameConfig,
-17	  SessionMeta,
-18	} from '@/lib/game-engine/types';
-19	import type { ReactNode } from 'react';
-20	import {
-21	  createTestDatabase,
-22	  destroyTestDatabase,
-23	} from '@/db/create-database';
-24	import { DbProvider } from '@/providers/DbProvider';
-25	
-26	vi.mock('@tanstack/react-router', async (importOriginal) => {
-27	  const actual =
-28	    // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
-29	    await importOriginal<typeof import('@tanstack/react-router')>();
-30	  return {
-31	    ...actual,
-32	    useNavigate: () => vi.fn(),
-33	    useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
-34	  };
-35	});
-36	
-37	const content: ResolvedContent = {
-38	  rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }],
-39	};
-40	
-41	const testConfig: ResolvedGameConfig = {
-42	  gameId: 'word-builder',
-43	  title: { en: 'Word Builder' },
-44	  gradeBand: 'year1-2',
-45	  maxRounds: 3,
-46	  maxRetries: 1,
-47	  maxUndoDepth: 3,
-48	  timerVisible: false,
-49	  timerDurationSeconds: null,
-50	  difficulty: 'medium',
-51	};
-52	
-53	const testState: GameEngineState = {
-54	  phase: 'instructions',
-55	  roundIndex: 0,
-56	  score: 0,
-57	  streak: 0,
-58	  retryCount: 0,
-59	  content,
-60	  currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
-61	};
-62	
-63	const testMeta: SessionMeta = {
-64	  profileId: 'prof-route',
-65	  gameId: 'word-builder',
-66	  gradeBand: 'year1-2',
-67	  seed: 'seed-route',
-68	  initialContent: content,
-69	  initialState: testState,
-70	};
-71	
-72	let db: BaseSkillDatabase;
-73	
-74	beforeEach(async () => {
-75	  db = await createTestDatabase();
-76	});
-77	
-78	afterEach(async () => {
-79	  await destroyTestDatabase(db);
-80	});
-81	
-82	function wrapper({ children }: { children: ReactNode }) {
-83	  return (
-84	    <DbProvider openDatabase={() => Promise.resolve(db)}>
-85	      {children}
-86	    </DbProvider>
-87	  );
-88	}
-89	
-90	describe('GameRoute', () => {
-91	  it('renders the game shell with title from loaderData', async () => {
-92	    render(
-93	      <GameRoute
-94	        config={testConfig}
-95	        initialLog={null}
-96	        draftState={null}
-97	        sessionId="sess-route-001"
-98	        seed="seed-route"
-99	        meta={testMeta}
-100	        gameSpecificConfig={null}
-101	        bookmarkId={null}
-102	        bookmarkName={null}
-103	        bookmarkColor={null}
-104	      />,
-105	      { wrapper },
-106	    );
-107	    await waitFor(() => {
-108	      expect(screen.getByText('Word Builder')).toBeInTheDocument();
-109	    });
-110	  });
-111	
-112	  it('renders instructions phase placeholder', async () => {
-113	    render(
-114	      <GameRoute
-115	        config={testConfig}
-116	        initialLog={null}
-117	        draftState={null}
-118	        sessionId="sess-route-001"
-119	        seed="seed-route"
-120	        meta={testMeta}
-121	        gameSpecificConfig={null}
-122	        bookmarkId={null}
-123	        bookmarkName={null}
-124	        bookmarkColor={null}
-125	      />,
-126	      { wrapper },
-127	    );
-128	    await waitFor(() => {
-129	      expect(screen.getByTestId('game-round')).toBeInTheDocument();
-130	    });
-131	  });
-132	});
+1 // src/routes/$locale/_app/game/$gameId.test.tsx
+2 import { render, screen, waitFor } from '@testing-library/react';
+3 import {
+4   afterEach,
+5   beforeEach,
+6   describe,
+7   expect,
+8   it,
+9   vi,
+10 } from 'vitest';
+11 import { GameRoute } from './$gameId';
+12 import type { BaseSkillDatabase } from '@/db/types';
+13 import type {
+14   GameEngineState,
+15   ResolvedContent,
+16   ResolvedGameConfig,
+17   SessionMeta,
+18 } from '@/lib/game-engine/types';
+19 import type { ReactNode } from 'react';
+20 import {
+21   createTestDatabase,
+22   destroyTestDatabase,
+23 } from '@/db/create-database';
+24 import { DbProvider } from '@/providers/DbProvider';
+25 
+26 vi.mock('@tanstack/react-router', async (importOriginal) => {
+27   const actual =
+28     // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
+29     await importOriginal<typeof import('@tanstack/react-router')>();
+30   return {
+31     ...actual,
+32     useNavigate: () => vi.fn(),
+33     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+34   };
+35 });
+36 
+37 const content: ResolvedContent = {
+38   rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }],
+39 };
+40 
+41 const testConfig: ResolvedGameConfig = {
+42   gameId: 'word-builder',
+43   title: { en: 'Word Builder' },
+44   gradeBand: 'year1-2',
+45   maxRounds: 3,
+46   maxRetries: 1,
+47   maxUndoDepth: 3,
+48   timerVisible: false,
+49   timerDurationSeconds: null,
+50   difficulty: 'medium',
+51 };
+52 
+53 const testState: GameEngineState = {
+54   phase: 'instructions',
+55   roundIndex: 0,
+56   score: 0,
+57   streak: 0,
+58   retryCount: 0,
+59   content,
+60   currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
+61 };
+62 
+63 const testMeta: SessionMeta = {
+64   profileId: 'prof-route',
+65   gameId: 'word-builder',
+66   gradeBand: 'year1-2',
+67   seed: 'seed-route',
+68   initialContent: content,
+69   initialState: testState,
+70 };
+71 
+72 let db: BaseSkillDatabase;
+73 
+74 beforeEach(async () => {
+75   db = await createTestDatabase();
+76 });
+77 
+78 afterEach(async () => {
+79   await destroyTestDatabase(db);
+80 });
+81 
+82 function wrapper({ children }: { children: ReactNode }) {
+83   return (
+84     <DbProvider openDatabase={() => Promise.resolve(db)}>
+85       {children}
+86     </DbProvider>
+87   );
+88 }
+89 
+90 describe('GameRoute', () => {
+91   it('renders the game shell with title from loaderData', async () => {
+92     render(
+93       <GameRoute
+94         config={testConfig}
+95         initialLog={null}
+96         draftState={null}
+97         sessionId="sess-route-001"
+98         seed="seed-route"
+99         meta={testMeta}
+100         gameSpecificConfig={null}
+101         bookmarkId={null}
+102         bookmarkName={null}
+103         bookmarkColor={null}
+104       />,
+105       { wrapper },
+106     );
+107     await waitFor(() => {
+108       expect(screen.getByText('Word Builder')).toBeInTheDocument();
+109     });
+110   });
+111 
+112   it('renders instructions phase placeholder', async () => {
+113     render(
+114       <GameRoute
+115         config={testConfig}
+116         initialLog={null}
+117         draftState={null}
+118         sessionId="sess-route-001"
+119         seed="seed-route"
+120         meta={testMeta}
+121         gameSpecificConfig={null}
+122         bookmarkId={null}
+123         bookmarkName={null}
+124         bookmarkColor={null}
+125       />,
+126       { wrapper },
+127     );
+128     await waitFor(() => {
+129       expect(screen.getByTestId('game-round')).toBeInTheDocument();
+130     });
+131   });
+132 });
 133
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:04:48Z)**_
@@ -4451,6 +4525,7 @@ _**Agent (claude-opus-4-6 2026-04-10 11:04:50Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix/numbermatch-stuck-rounds/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:04:57Z)**_
@@ -4545,6 +4620,7 @@ describe('resizeNumberMatchRounds', () => {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/fix/numbermatch-stuck-rounds/src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:05:21Z)**_
@@ -4570,6 +4646,7 @@ $ vitest run 'src/routes/$locale/_app/game/resize-number-match-rounds.test.ts'
 
 Done in 1.87s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:05:24Z)**_
@@ -4589,6 +4666,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.53s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:05:41Z)**_
@@ -4604,6 +4682,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 10.93s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:05:51Z)**_
@@ -4628,6 +4707,7 @@ Full unit test suite
 
 Done in 5.70s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:05:54Z)**_
@@ -4663,9 +4743,10 @@ Your branch is up to date with 'origin/master'.
 
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-	modified:   src/routes/$locale/_app/game/$gameId.tsx
-	new file:   src/routes/$locale/_app/game/resize-number-match-rounds.test.ts
+ modified:   src/routes/$locale/_app/game/$gameId.tsx
+ new file:   src/routes/$locale/_app/game/resize-number-match-rounds.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:06:24Z)**_
@@ -4717,6 +4798,7 @@ Done in 5.60s.
  2 files changed, 84 insertions(+), 1 deletion(-)
  create mode 100644 src/routes/$locale/_app/game/resize-number-match-rounds.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:06:37Z)**_
@@ -4733,6 +4815,7 @@ Commit `44a76f6` landed. Summary:
 **Fix:** detect the collapsed state (`prev.length ≥ 2 && span > 1 && every round same value`) and regenerate from scratch via the existing deterministic cycle. Also handle empty `prev`.
 
 **Verification:**
+
 - `yarn typecheck` ✓
 - `yarn lint` ✓
 - `yarn test` ✓ 556 / 556 (8 new tests in `resize-number-match-rounds.test.ts` — including the regression case from your five-fifths scenario)
@@ -4816,6 +4899,7 @@ act(() => {
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:15:30Z)**_
@@ -4835,6 +4919,7 @@ Pre-push summary
 -e   ✓ End-to-end tests (playwright)
 -e **  All pre-push checks passed.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:15:36Z)**_
@@ -4846,8 +4931,9 @@ Confirm remote branch exists
 `git ls-remote origin fix/numbermatch-stuck-rounds 2>&1`
 
 ```text
-44a76f60197e68eb96d5a6b6dba90506a118c083	refs/heads/fix/numbermatch-stuck-rounds
+44a76f60197e68eb96d5a6b6dba90506a118c083 refs/heads/fix/numbermatch-stuck-rounds
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:15:41Z)**_
@@ -4906,6 +4992,7 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/48
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:16:04Z)**_
@@ -4925,6 +5012,7 @@ X Pull request leocaseiro/base-skill#48 is not mergeable: the head branch is not
 To have the pull request merged after all the requirements have been met, add the `--auto` flag.
 To use administrator privileges to immediately merge the pull request, add the `--admin` flag.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:16:12Z)**_
@@ -4965,6 +5053,7 @@ From github.com:leocaseiro/base-skill
 44a76f6 fix(number-match): regenerate rounds when saved values collapse to one
 25c8950 feat(number-match): render visual hover preview in slots and bank
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:16:33Z)**_
@@ -4994,6 +5083,7 @@ b0a7c81 fix(vr): stabilise VR baselines by removing nondeterminism in default co
 7f13ef9 fix(ci): unblock bot version-bump push in deploy workflow (#45)
 a7e45f8 fix(gh-pages): add .nojekyll to disable Jekyll underscore stripping
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:16:43Z)**_
@@ -5030,6 +5120,7 @@ Graph view of master
 | * | 79b1398 docs(plan): VR test determinism fix handoff
 |/ /
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:16:49Z)**_
@@ -5047,8 +5138,10 @@ Rebase onto updated master
 `git rebase origin/master 2>&1 | tail -10`
 
 ```text
-Rebasing (1/1)Successfully rebased and updated refs/heads/fix/numbermatch-stuck-rounds.
+Rebasing (1/1)
+Successfully rebased and updated refs/heads/fix/numbermatch-stuck-rounds.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:16:53Z)**_
@@ -5064,6 +5157,7 @@ Verify rebase
 6aef56f feat(number-match): render visual hover preview in slots and bank (#47)
 25c8950 feat(number-match): render visual hover preview in slots and bank
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-10 11:16:59Z)**_

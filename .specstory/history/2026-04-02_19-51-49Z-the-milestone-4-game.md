@@ -8,7 +8,7 @@ _**User (2026-04-02 19:51:49Z)**_
 
 <ide_opened_file>The user opened the file /Users/leocaseiro/Sites/base-skill/docs/baseskill_milestone_breakdown_85146c93.plan.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
 
-The milestone 4 Game Shell is 99% complete, and we are about to merge the PR. M5 has multiple games, let's start brainstorming one by one. I want to start with the drag and drop games which should use https://atlassian.design/components/pragmatic-drag-and-drop with the shadow effect.
+The milestone 4 Game Shell is 99% complete, and we are about to merge the PR. M5 has multiple games, let's start brainstorming one by one. I want to start with the drag and drop games which should use <https://atlassian.design/components/pragmatic-drag-and-drop> with the shadow effect.
 
 Let's start with the Word Builder. What is your suggestion for the game UI/UX?
 Use /brainstorming
@@ -29,6 +29,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:51:52Z)**_
 ```text
 Launching skill: brainstorming
 ```
+
 </details></tool-use>
 
 ---
@@ -197,7 +198,6 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:51:55Z)**_
@@ -233,6 +233,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:51:56Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:51:58Z)**_
@@ -286,6 +287,7 @@ docs/data-model.md
 docs/superpowers/plans/2026-04-02-vr-docker-baselines.md
 docs/baseskill_milestone_breakdown_85146c93.plan.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:07Z)**_
@@ -308,6 +310,7 @@ dbd6414 fix(storybook): restore MDX interactive demos in static builds
 95daab4 Merge pull request #7 from leocaseiro/fix/use-rx-query-demo-increment
 90c1c55 fix(db): keep useRxQuery demo increment controls visible in docs
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:11Z)**_
@@ -317,448 +320,449 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:52:11Z)**_
  `./docs/prd.md`
 
 ```text
-1	# BaseSkill — Product Requirements Document
-2	
-3	> **Source of truth for product decisions.** All other design documents reference this PRD for requirements, scope, and constraints.
-4	
-5	---
-6	
-7	## 1. Product Vision
-8	
-9	**BaseSkill** is a free, open-source, offline-first educational PWA for children from Pre-K through Year 6+. It delivers gamified learning across subjects — letters, reading, and math — with a kid-first UX that adapts to the child's grade level. The app runs on any device browser, works without an internet connection, and syncs progress to cloud storage (e.g., Google Drive, OneDrive) at no cost to the family.
-10	
-11	**One-liner:** _A free, open-source educational game platform that children love and parents trust._
-12	
-13	### Design Philosophy
-14	
-15	- **Child-first, always.** Every interaction is designed for the child's grade level, not the parent's convenience.
-16	- **Offline by default.** The app never requires connectivity to play a game.
-17	- **Encouraging, never punitive.** Feedback is always positive. Children always progress.
-18	- **No ads, no tracking, no accounts.** Privacy is non-negotiable.
-19	- **Open source and community-driven.** GPL v3 — the community can verify, extend, and trust the code.
-20	
-21	---
-22	
-23	## 2. License
-24	
-25	**GPL v3.** All source code in this repository is open-source under the GNU General Public License v3.0. Any derivative work must also be published under GPL v3.
-26	
-27	### Premium/Server Feature Separation Strategy
-28	
-29	Future premium features (server-side authentication, multiplayer coordination, paid content gating, cloud syncing) will live in **separate private repositories** under proprietary licenses. These communicate with the open-source app over **network boundaries only** (REST APIs, WebSockets) and contain zero GPL code. The open-source app is designed with explicit extension points (event bus, plugin hooks, configuration-driven features) so premium integrations require no fork of GPL code.
-30	
-31	A `LICENSE` file containing the full GPL v3 text will be added to the repository root.
-32	
-33	---
-34	
-35	## 3. Target Personas
-36	
-37	### Persona 1: Child (Pre-K through Year 6+)
-38	
-39	**Primary user.** The child interacts with games directly.
-40	
-41	| Attribute    | Description                                                                |
-42	| ------------ | -------------------------------------------------------------------------- |
-43	| Age range    | ~3–12 years old                                                            |
-44	| Literacy     | Pre-readers (Pre-K/K) through fluent readers (Year 3+)                     |
-45	| Device usage | Supervised tablet or desktop; occasional unsupervised mobile               |
-46	| Tech comfort | Varies widely; Pre-K/K needs icon-only navigation and TTS (text-to-speech) |
-47	| Motivation   | Play, earn stars, see progress, hear encouragement                         |
-48	
-49	**UX adaptation by grade level:**
-50	
-51	- **Pre-K/K:** Full TTS for all instructions and labels. Icon-driven navigation only, but text labels are also shown. Large touch targets. No reading required to navigate.
-52	- **Year 1–2:** TTS available but text labels also shown. Simple word navigation.
-53	- **Year 3+:** Standard text navigation. TTS is still available for game content.
-54	
-55	### Persona 2: Parent/Guardian
-56	
-57	**Configurator and supervisor.** Sets up profiles, customises game settings, and monitors progress.
-58	
-59	| Attribute    | Description                                                          |
-60	| ------------ | -------------------------------------------------------------------- |
-61	| Tech comfort | Average smartphone/tablet user                                       |
-62	| Goals        | See child's progress, customise difficulty, manage data, set up sync |
-63	| Pain points  | Complicated settings, confusing data, sync failures                  |
-64	| Access       | Behind a PIN gate in the app, and/or behind math/wording puzzles     |
-65	
-66	**Key needs:**
-67	
-68	- Review session history timelines to understand a child's performance
-69	- Customise game difficulty, retries, and timer per game or per grade band
-70	- Select TTS voices per language per child
-71	- Sync data to cloud or manage device storage independently
-72	- Clear session history (for storage) without resetting learning progress
-73	
-74	### Persona 3: Family (Shared Device)
-75	
-76	**Multi-child household on a single device.** Quick profile switching without separate accounts.
-77	
-78	| Attribute  | Description                                                                                                         |
-79	| ---------- | ------------------------------------------------------------------------------------------------------------------- |
-80	| Scenario   | Multiple children share one tablet/laptop (no limit on number of profiles)                                          |
-81	| Goals      | Each child has their own progress, themes, and settings; settings can optionally be shared across the entire family |
-82	| Key flows  | Switch profiles from the home screen; no login required                                                             |
-83	| Constraint | Parent PIN protects settings from children                                                                          |
-84	
-85	---
-86	
-87	## 4. User Stories
-88	
-89	### Child Stories
-90	
-91	| ID   | As a child… | I want to…                                   | So that…                                                                                      |
-92	| ---- | ----------- | -------------------------------------------- | --------------------------------------------------------------------------------------------- |
-93	| C-01 | Pre-K child | Hear the instructions read aloud             | I can play even if I can't read                                                               |
-94	| C-02 | Any child   | Pick a game from pictures/icons              | I can find a game without reading                                                             |
-95	| C-03 | Any child   | See my stars and progress                    | I feel rewarded for learning                                                                  |
-96	| C-04 | Any child   | Bookmark my favorite games                   | I can find them quickly next time                                                             |
-97	| C-05 | Any child   | See my recently played games                 | I can continue where I left off                                                               |
-98	| C-06 | Any child   | Choose my theme (ocean, space, etc.)         | The app feels like mine                                                                       |
-99	| C-07 | Any child   | Play games offline on a plane                | Learning doesn't stop without Wi-Fi (games may require individual download depending on size) |
-100	| C-08 | Any child   | Hear "Great job!" when I get it right        | I stay motivated                                                                              |
-101	| C-09 | Any child   | Try again after a wrong answer               | I don't feel punished for mistakes                                                            |
-102	| C-10 | Any child   | Read instructions as text or listen to audio | I can choose how I learn; parents can disable audio to encourage reading practice             |
-103	
-104	### Parent/Guardian Stories
-105	
-106	| ID   | As a parent… | I want to…                                              | So that…                                     |
-107	| ---- | ------------ | ------------------------------------------------------- | -------------------------------------------- |
-108	| P-01 | Parent       | Set up separate profiles per child                      | Each child has independent progress          |
-109	| P-02 | Parent       | Protect settings with a PIN                             | Children can't change the difficulty         |
-110	| P-03 | Parent       | Review my child's session history                       | I understand their learning patterns         |
-111	| P-04 | Parent       | Set retries, timer, and difficulty per game             | I customise for each child's needs           |
-112	| P-05 | Parent       | Connect to cloud storage (e.g., Google Drive, OneDrive) | Progress syncs across our devices            |
-113	| P-06 | Parent       | Select a TTS voice per language                         | I can pick a voice that my child responds to |
-114	| P-07 | Parent       | Clear old session history                               | I free up cloud storage space                |
-115	| P-08 | Parent       | Reset a child's progress independently                  | Without losing session event history         |
-116	| P-09 | Parent       | See when data was last synced                           | I know sync is working                       |
-117	| P-10 | Parent       | Change a child's theme                                  | I help my child personalise their app        |
-118	
-119	### Family (Shared Device) Stories
-120	
-121	| ID   | As a family… | We want to…                                 | So that…                                  |
-122	| ---- | ------------ | ------------------------------------------- | ----------------------------------------- |
-123	| F-01 | Family       | Switch profiles from the home screen        | Each child goes directly to their profile |
-124	| F-02 | Family       | Share one device without separate accounts  | Setup is simple                           |
-125	| F-03 | Family       | Each child has their own theme and settings | The app feels personalised per child      |
-126	
-127	---
-128	
-129	## 5. Feature Requirements (Functional)
-130	
-131	### 5.1 Profile System
-132	
-133	- **Device-local profiles**: No server account required. Profiles are stored in RxDB and optionally synced to cloud storage.
-134	- **Multi-profile (family sharing)**: Up to N profiles per device (no hard limit). The profile picker is the app's home screen.
-135	- **Profile attributes**: name, avatar (pre-set choices), grade level (Pre-K, K, Year 1–6+), active language, theme, parent PIN (per device).
-136	- **Profile switching**: Tap profile on home screen. No password required to switch between child profiles.
-137	- **Parent PIN**: Required to access `/parent` settings routes. PIN is per-device, stored hashed locally.
-138	- **Avatar picker**: Selection of pre-drawn colorful avatars (not photos).
-139	
-140	### 5.2 Game Catalog
-141	
-142	- **Categories**: Organized by **grade** (Pre-K, K, Year 1–2, Year 3–4, Year 5–6+) and **subject** (Letters, Reading, Math, etc.).
-143	- **Game cards**: Each game shown as a large card with illustration, title (TTS-readable), subject badge, and grade badge.
-144	- **Filtering/browsing**: Grade filter on dashboard; subject filter; search (text + TTS for younger children).
-145	- **Game catalog format**: Games are defined by JSON config files that describe the game's metadata and content, **not** the game logic itself. The JSON config specifies: game ID, title, description, subject, grade band, asset references (images, audio), content data (word lists, number ranges, sentences per locale), difficulty levels, evaluation criteria, and default settings (retries, timer, win-mode). The actual game **logic and UI** lives in reusable React game components (e.g., `LetterTracer`, `MultipleChoice`, `DragAndDrop`, `WordBuilder`). A JSON config tells an existing component _what content to render_. This means the community can add new games that use existing mechanics (e.g., a new spelling word list) by contributing only a JSON file and assets. Truly new game _mechanics_ require a new React component, but new _content variations_ within existing mechanics are JSON-only contributions.
-146	
-147	### 5.3 Bookmarks and Recents
-148	
-149	- **Bookmarks**: Child can bookmark any game from the game card or in-game. Bookmarked games appear in a dedicated row at the top of the dashboard.
-150	- **Recently played**: Last-played games tracked per profile. A "Recently Played" row appears below bookmarks on the dashboard.
-151	- **Persistence**: Bookmarks and recents stored in RxDB and synced to cloud.
-152	
-153	### 5.4 Offline-First Gameplay
-154	
-155	- **Per-game asset download**: Each game is its own bundle (code-split). The app shell loads instantly; individual game assets (images, audio, JS) are downloaded on first play or when the parent explicitly triggers a download. This keeps the initial install lightweight.
-156	- **Preload / prefetch**: Games can be preloaded in the background after the app shell is cached. A parent setting allows triggering "Download All Games", but this is an expensive operation and is **not** performed on first load to avoid blocking the initial experience.
-157	- **Download prompt**: If a game's assets are not yet cached, the parent is prompted to confirm the download (especially on metered connections or when the game bundle is large).
-158	- **RxDB as local database**: All user data persists in IndexedDB via RxDB. No network request required for gameplay.
-159	- **Sync on reconnect**: RxDB replication plugins queue mutations while offline and sync automatically when connectivity returns.
-160	- **No degraded mode**: Once a game's assets are cached, it behaves identically online and offline from the child's perspective.
-161	
-162	### 5.5 Offline/Online Indicator
-163	
-164	- **Detection**: Uses `navigator.onLine` plus `online`/`offline` event listeners for real-time detection.
-165	- **Indicator**: A persistent but non-intrusive banner appears at the top of the screen when offline.
-166	- **Auto-dismiss**: Banner automatically disappears when connectivity is restored.
-167	- **Last sync timestamp**: Optionally shown in the offline banner and in parent sync settings.
-168	
-169	### 5.6 Speech Integration
-170	
-171	- **Text-to-Speech (TTS)**: All game instructions, labels, encouragements, and UI hints are TTS-readable via the [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API). TTS is enabled by default for all children. Parents can disable TTS per profile (e.g., to encourage older children to practise reading independently).
-172	- **Speech-to-Text (STT)**: Used for Read Aloud game and other speaking exercises. Simple animated visual indicator (e.g., animated GIF) shown during listening — no complex waveform rendering required.
-173	- **Voice selection**: Parents choose the TTS voice per language per profile from available `speechSynthesis.getVoices()`. Default voice is the browser/OS default for the profile language.
-174	- **Device-aware voices**: Available voices differ per device/OS. Voice preferences are tagged with the device ID. On a different device, the app falls back to the default voice if the selected voice is unavailable.
-175	- **STT language**: Speech recognition language matches the profile's active language setting.
-176	
-177	### 5.7 Progress Tracking and Gamification
-178	
-179	- **Stars**: Earned per game completion. Displayed on game cards and profile summary.
-180	- **Streaks**: Daily play streaks tracked per profile.
-181	- **Badges**: Achievement badges for milestones (first game, 10 games, subject mastery, etc.).
-182	- **Score history**: Last N scores per game visible to child and parent.
-183	- **All progress stored in RxDB `progress` collection**, synced to cloud.
-184	
-185	### 5.8 Parent Game Customization (Override System)
-186	
-187	Parents can override per-game defaults at three levels (most specific wins):
-188	
-189	| Level                       | Scope                                                                           |
-190	| --------------------------- | ------------------------------------------------------------------------------- |
-191	| **Per-game override**       | Settings for one specific game                                                  |
-192	| **Per-grade-band override** | Settings for all games in a grade band (Pre-K, K, Year 1–2, Year 3–4, Year 5–6) |
-193	| **Global override**         | Settings for all games                                                          |
-194	
-195	**Override fields:**
-196	
-197	- **Retries**: Number of attempts before moving on (default: game-defined)
-198	- **Timer duration**: Time limit in seconds (or disabled)
-199	- **Always-win mode**: Child always progresses regardless of score
-200	- **Difficulty level**: easy / medium / hard / adaptive
-201	
-202	**Resolution order:** per-game override > grade-band override > global override > game default
-203	
-204	Overrides stored in `game_config_overrides` collection, per profile.
-205	
-206	### 5.9 Customizable Themes
-207	
-208	- **4–6 pre-defined themes**: Ocean, Forest, Space, Rainbow, Sunset, Night. Each defines color palette, typography weight, icon style, and background pattern.
-209	- **Default typography**: [Edu NSW ACT Foundation](https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation) — a handwriting font designed for Australian school children. Young children can be confused by unfamiliar letterforms, so the default font is consistent with what they learn in school. All games use this font by default to maintain visual consistency.
-210	  - **Alternative fonts**: (TODO: verify license)
-211	    - [Andika](https://fonts.google.com/specimen/Andika)
-212	    - [All Australian fonts from Tina Anderson and Corey Anderson](https://fonts.google.com/?preview.script=Latn&query=Corey+Anderson)
-213	    - Brazil (<https://primarium.info/countries/brazil/>)
-214	      - <https://fonts.google.com/specimen/Playwrite+BR?preview.script=Latn>
-215	    - [Chilanka](https://fonts.google.com/specimen/Chilanka)
-216	    - Comic Sans
-217	    - [Comic Neue](https://fonts.google.com/specimen/Comic+Neue)
-218	    - Century Gothic
-219	    - [Delius](https://fonts.google.com/specimen/Delius?preview.text=Ardijup%20kans%20queby&preview.lang=en_Latn&lang=en_Latn)
-220	    - [Playpen Sans](https://fonts.google.com/specimen/Playpen+Sans)
-221	    - [Farsan](https://fonts.google.com/specimen/Farsan)
-222	    - KG Neatly Printed
-223	    - [Open Sans](https://fonts.google.com/specimen/Open+Sans)
-224	    - [Gill Sans Infant](https://freefonts.co/fonts/gill-sans-infant-std-regular)
-225	    - [OpenDyslexic](https://opendyslexic.org/#)
-226	    - [Sylexiad](https://www.sylexiad.com/)
-227	    - [Lexend](https://fonts.google.com/specimen/Lexend?preview.script=Latn)
-228	- **Parent font override**: Parents can change the font family per profile or per family from a curated list of child-friendly fonts. This is useful for families in regions with different handwriting standards.
-229	- **Clone and modify**: Any pre-defined theme can be cloned. Clone owner can change colors and fonts.
-230	- **Scope**: Theme can be set per child profile or per family (shared across all profiles).
-231	- **Storage**: Themes stored in RxDB `themes` collection, synced to cloud storage.
-232	- **Colorblind safety**: All pre-defined themes use colorblind-safe palettes. Color is never the sole differentiator for game mechanics.
-233	
-234	### 5.10 Multi-Language Support
-235	
-236	- **Default language**: English (`en`)
-237	- **Initial second language**: Portuguese-Brazilian (`pt-BR`)
-238	- **Architecture**: Extensible — new languages can be added by adding a translation file and game content.
-239	- **Per-profile language**: Each child profile has an active language setting.
-240	- **Game content localization**: Word lists, sentences, and instructions are per-language. Math games are mostly language-neutral (only instructions change).
-241	- **i18n framework**: react-i18next (see `docs/i18n.md` for full spec).
-242	
-243	### 5.11 Gameplay Session History
-244	
-245	Every gameplay session records a **chronological event timeline** per profile:
-246	
-247	**Recorded events include:**
-248	
-249	- `game:start` — game loaded, config resolved
-250	- `game:instructions_shown` — TTS instructions triggered
-251	- `game:action` — child interaction (answer, drag, trace, speak)
-252	- `game:hint` — hint requested or auto-triggered
-253	- `game:evaluate` — answer evaluated (correct/incorrect/near-miss)
-254	- `game:score` — score awarded
-255	- `game:retry` — retry triggered
-256	- `game:end` — session ended (completed or exited)
-257	
-258	**Purposes:**
-259	
-260	- Parent/teacher review of performance patterns (time, mistakes, hints, retries)
-261	- Developer troubleshooting during game development
-262	- Future analytics integration
-263	
-264	**Chunked storage**: Session history documents are bounded at ~200 events or ~50KB per document. The recorder rolls over to a new chunk automatically. A `session_history_index` document per session holds a lightweight summary for listing/filtering without loading full event data.
-265	
-266	### 5.12 Data Cleanup Controls
-267	
-268	Accessed via Parent Settings > Data Management:
-269	
-270	- **Clear Session History**: Deletes `session_history` + `session_history_index` records. Does NOT affect `progress`.
-271	- **Clear Progress**: Resets scores, streaks, badges. Does NOT affect session history.
-272	- **Date-range filter**: Optional "clear older than X days" filter for selective cleanup.
-273	- **Cascade delete**: Deleting a session index deletes all its chunks.
-274	- **Storage usage**: Display estimated storage usage per collection (progress, session history, settings).
-275	- **Confirmation dialogs**: Required before any destructive action.
-276	
-277	### 5.13 PWA Install and Service Worker
-278	
-279	- **PWA manifest**: `manifest.json` with icons, name, theme color, display mode (`standalone`).
-280	- **Service worker**: Workbox-based via `vite-plugin-pwa`. Pre-caches app shell + game assets on install.
-281	- **Install prompt**: Custom install banner (not browser default). Handles iOS (no native prompt) and Android.
-282	- **Version-based cache invalidation**: On SW update, stale caches are purged by version prefix.
-283	- **SW migration**: On version mismatch, new SW activates with `skipWaiting` + `clientsClaim`. RxDB schema migration runs before app renders if schema version changed.
-284	- **Zoom controls**: Users can zoom in/out of the game UI to accommodate different screen sizes and resolutions. A visible zoom control (or pinch-to-zoom support) ensures the app is usable even on devices where the default layout doesn't fit well.
-285	
-286	### 5.14 Analytics (Deferred Decision)
-287	
-288	Analytics provider selection is deferred. The requirement is to build an **analytics abstraction layer** — a typed interface — so the provider can be swapped without code changes.
-289	
-290	**Options evaluated:**
-291	
-292	| Provider                  | Cost                           | Privacy | Notes                                          |
-293	| ------------------------- | ------------------------------ | ------- | ---------------------------------------------- |
-294	| Google Analytics 4        | Free                           | Low     | Blocked by ~30–40% of users in 2026            |
-295	| Cloudflare Web Analytics  | Free                           | High    | Privacy-first, rarely blocked, traffic-focused |
-296	| PostHog Cloud (free tier) | Free up to 1M events/month     | Medium  | Open source, product analytics + errors        |
-297	| Plausible Analytics       | Free self-hosted / $9/mo cloud | High    | GDPR-compliant, ~1KB script                    |
-298	
-299	**Recommendation**: Implement a `AnalyticsAdapter` interface. Ship with a no-op implementation. Connect a provider via config without touching core logic. See `docs/architecture.md` for the interface spec.
-300	
-301	### 5.15 Extension Points
-302	
-303	The app exposes an **event bus and plugin hook system** so future premium features (from separate private repos) can:
-304	
-305	- Subscribe to app events (game events, profile changes, sync events)
-306	- Inject UI components at designated slots (dashboard banners, game overlays)
-307	- Contribute configuration without modifying GPL source
-308	
-309	No GPL code flows into plugin implementations. Plugins communicate only through the public event/hook API.
-310	
-311	---
-312	
-313	## 6. Non-Functional Requirements
-314	
-315	### 6.1 Performance
-316	
-317	| Metric                                       | Target                                                           |
-318	| -------------------------------------------- | ---------------------------------------------------------------- |
-319	| Time to Interactive (first load, warm cache) | < 2 seconds                                                      |
-320	| Time to Interactive (cold cache, 3G)         | < 5 seconds                                                      |
-321	| Game frame rate                              | 60fps animations (CSS/DOM for UI, canvas only for drawing games) |
-322	| Bundle size (initial JS, gzipped)            | < 200KB                                                          |
-323	| Lighthouse Performance score                 | ≥ 90                                                             |
-324	
-325	- Lazy-load game assets (images, audio) at game load time, not app start.
-326	- CSS/DOM animations for rewards (confetti, stars). No heavy animation libraries.
-327	- **Why CSS/DOM over Canvas for UI?** Canvas is faster for complex real-time rendering (e.g., 2D games with many moving sprites), but CSS/DOM is the better choice for this app's UI because: (1) **Accessibility** — DOM elements work natively with screen readers, ARIA labels, and keyboard navigation; canvas requires a parallel invisible DOM for accessibility, doubling complexity. (2) **Responsive layout** — CSS flexbox/grid handles screen adaptation automatically; canvas requires manual layout math. (3) **Browser GPU acceleration** — CSS transforms and animations are GPU-composited and achieve 60fps for the types of animations we need (transitions, confetti, star bursts). (4) **SEO and tooling** — React DevTools, testing libraries, and linting all work with DOM. Canvas is reserved for the `LetterTracer` component where actual drawing/tracing input is required.
-328	
-329	### 6.2 Accessibility
-330	
-331	- **WCAG 2.1 AA compliance** for all screens and games.
-332	- All interactive elements have ARIA labels and are keyboard-navigable.
-333	- Screen reader support for game state changes (ARIA live regions).
-334	- Minimum touch target size: 48x48px.
-335	- Color is never the sole indicator for any game mechanic.
-336	- Full TTS for instructions (pre-reader support).
-337	- See `docs/accessibility.md` for full checklist.
-338	
-339	### 6.3 TypeScript Strictness
-340	
-341	- `"strict": true` in `tsconfig.json` (implies `noImplicitAny`, `strictNullChecks`, etc.).
-342	- ESLint rule `@typescript-eslint/no-explicit-any` set to `error`.
-343	- CI fails on any `any` usage — no exceptions, no `// eslint-disable` workarounds.
-344	- No type assertions (`as any`, `as unknown`) that bypass type safety.
-345	
-346	### 6.4 Compatibility
-347	
-348	| Platform         | Requirement                                                                            |
-349	| ---------------- | -------------------------------------------------------------------------------------- |
-350	| Desktop browsers | Chrome 100+, Firefox 100+, Safari 15+, Edge 100+                                       |
-351	| Mobile browsers  | iOS Safari 15+, Android Chrome 100+                                                    |
-352	| Screen sizes     | 320px wide minimum; optimized for 768px+                                               |
-353	| Zoom             | Users can zoom in/out via pinch or UI controls if game layout doesn't fit their device |
-354	| Touch            | Pointer Events API for consistent mouse + touch                                        |
-355	
-356	### 6.5 Privacy and Data
-357	
-358	- No user accounts, no server-side storage of personal data.
-359	- All data lives in the device's IndexedDB via RxDB.
-360	- Cloud sync is opt-in. User controls which cloud provider (if any).
-361	- OAuth tokens stored encrypted in IndexedDB (never in `localStorage` or cookies).
-362	- No third-party scripts except the opted-in analytics provider.
-363	- No ads, ever.
-364	
-365	### 6.6 Open Source Quality
-366	
-367	- All public APIs documented with JSDoc.
-368	- README with setup, development, and contribution instructions.
-369	- CONTRIBUTING.md with code style, PR, and commit conventions.
-370	- Every incremental feature is a standalone commit with passing CI.
-371	
-372	---
-373	
-374	## 7. Constraints
-375	
-376	| Constraint                 | Detail                                                                                                                                                                              |
-377	| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-378	| **JAMstack only**          | No backend server. All logic runs client-side.                                                                                                                                      |
-379	| **Static hosting**         | Primary deployment target: GitHub Pages. Output is static HTML/JS/CSS.                                                                                                              |
-380	| **No server-side auth**    | OAuth2 via PKCE only. OneDrive: MSAL.js client-side. Google Drive: Cloudflare Worker proxy for `client_secret` (see `docs/architecture.md`).                                        |
-381	| **Free cloud sync only**   | Cloud storage providers with free personal tiers (initially Google Drive and OneDrive). No paid sync service.                                                                       |
-382	| **GPL v3**                 | All app code in this repo must remain GPL v3.                                                                                                                                       |
-383	| **No ads**                 | Hard requirement. No advertising SDK, no monetization via ads.                                                                                                                      |
-384	| **No `any` in TypeScript** | Strict TypeScript everywhere. CI enforces this.                                                                                                                                     |
-385	| **CSS/DOM for UI**         | No canvas/WebGL for UI — CSS/DOM is preferred for accessibility, responsive layout, and tooling. Canvas reserved for drawing-input games (e.g., `LetterTracer`). See 6.1 rationale. |
-386	
-387	---
-388	
-389	## 8. Competitors Analysis
-390	
-391	| Product                        | Strengths                                                                   | Weaknesses                                        | Differentiation                                 |
-392	| ------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------- |
-393	| **ABCya**                      | Large game library, free tier, has offline app, ads removed for subscribers | Subscription-based for ad-free/offline experience | BaseSkill: fully free, no ads ever, open-source |
-394	| **Starfall**                   | Structured reading curriculum                                               | Subscription required for full access             | BaseSkill: fully free                           |
-395	| **Khan Academy Kids**          | High quality, structured                                                    | Requires account, cloud-dependent                 | BaseSkill: no account, offline-first            |
-396	| **Duolingo Kids / LingoKids**  | Fun UX, gamified                                                            | Language learning only, subscription              | BaseSkill: broader subjects, free               |
-397	| **ABC Education (abc.net.au)** | Australian curriculum-aligned                                               | Browser-only, no offline, limited                 | BaseSkill: offline, sync, customizable          |
-398	| **readabilitytutor.com**       | AI-powered reading assessment                                               | Paid, requires connectivity                       | BaseSkill: STT-based reading, offline           |
-399	| **iTrace**                     | Excellent letter tracing on iOS                                             | iOS only, paid                                    | BaseSkill: web-based, free, cross-platform      |
-400	
-401	**BaseSkill's unique position:** The only free, open-source, offline-first, privacy-respecting educational PWA with family sharing, cloud sync, and full accessibility support.
-402	
-403	> **TODO:** Conduct proper hands-on research of each competitor (install apps, test free/paid tiers, verify offline support, check ad behavior) before finalising this table. Current entries are based on general knowledge and may be inaccurate. We do not want to misrepresent competitors.
-404	
-405	---
-406	
-407	## 9. Out of Scope (Initial Release)
-408	
-409	- Server-side multiplayer or real-time features
-410	- Teacher/classroom accounts (future premium feature)
-411	- AI-powered adaptive difficulty (future feature; difficulty is config-driven today)
-412	- In-app content creator (new games via external JSON only for now)
-413	- Push notifications
-414	- Social features (leaderboards, sharing)
-415	- Premium content gating
-416	- Analytics provider selection (interface abstracted; no-op default)
-417	- Game asset specifications (art, sound — separate asset pipeline)
-418	- RTL language support (placeholder consideration only)
-419	
-420	---
-421	
-422	## 10. Glossary
-423	
-424	| Term                | Definition                                                                                      |
-425	| ------------------- | ----------------------------------------------------------------------------------------------- |
-426	| **Profile**         | A child's local account. Stored in RxDB. No server account.                                     |
-427	| **Session**         | One play session of one game by one profile. Has a unique `sessionId`.                          |
-428	| **Session History** | Chronological event timeline for a session, stored in bounded chunks.                           |
-429	| **Session Index**   | Lightweight summary document per session used for listing/filtering.                            |
-430	| **Chunk**           | One RxDB document holding up to ~200 events or ~50KB of a session history.                      |
-431	| **Override**        | A parent-defined customization of a game's default settings.                                    |
-432	| **Grade Band**      | A grouping of grades: Pre-K, K, Year 1–2, Year 3–4, Year 5–6.                                   |
-433	| **Theme**           | A named set of colors, typography, and background patterns defining the app's visual style.     |
-434	| **TTS**             | Text-to-Speech via the Web Speech API.                                                          |
-435	| **STT**             | Speech-to-Text via the Web Speech API.                                                          |
-436	| **PWA**             | Progressive Web App — installable, offline-capable web application.                             |
-437	| **RxDB**            | Reactive offline-first database built on IndexedDB.                                             |
-438	| **PKCE**            | Proof Key for Code Exchange — OAuth2 extension for SPAs without client secrets.                 |
-439	| **BFF**             | Backend-for-Frontend — a lightweight proxy (Cloudflare Worker) for Google OAuth token exchange. |
-440	| **Event Bus**       | Pub/sub system for in-app events, used by session recorder and plugin hooks.                    |
+1 # BaseSkill — Product Requirements Document
+2 
+3 > **Source of truth for product decisions.** All other design documents reference this PRD for requirements, scope, and constraints.
+4 
+5 ---
+6 
+7 ## 1. Product Vision
+8 
+9 **BaseSkill** is a free, open-source, offline-first educational PWA for children from Pre-K through Year 6+. It delivers gamified learning across subjects — letters, reading, and math — with a kid-first UX that adapts to the child's grade level. The app runs on any device browser, works without an internet connection, and syncs progress to cloud storage (e.g., Google Drive, OneDrive) at no cost to the family.
+10 
+11 **One-liner:** _A free, open-source educational game platform that children love and parents trust._
+12 
+13 ### Design Philosophy
+14 
+15 - **Child-first, always.** Every interaction is designed for the child's grade level, not the parent's convenience.
+16 - **Offline by default.** The app never requires connectivity to play a game.
+17 - **Encouraging, never punitive.** Feedback is always positive. Children always progress.
+18 - **No ads, no tracking, no accounts.** Privacy is non-negotiable.
+19 - **Open source and community-driven.** GPL v3 — the community can verify, extend, and trust the code.
+20 
+21 ---
+22 
+23 ## 2. License
+24 
+25 **GPL v3.** All source code in this repository is open-source under the GNU General Public License v3.0. Any derivative work must also be published under GPL v3.
+26 
+27 ### Premium/Server Feature Separation Strategy
+28 
+29 Future premium features (server-side authentication, multiplayer coordination, paid content gating, cloud syncing) will live in **separate private repositories** under proprietary licenses. These communicate with the open-source app over **network boundaries only** (REST APIs, WebSockets) and contain zero GPL code. The open-source app is designed with explicit extension points (event bus, plugin hooks, configuration-driven features) so premium integrations require no fork of GPL code.
+30 
+31 A `LICENSE` file containing the full GPL v3 text will be added to the repository root.
+32 
+33 ---
+34 
+35 ## 3. Target Personas
+36 
+37 ### Persona 1: Child (Pre-K through Year 6+)
+38 
+39 **Primary user.** The child interacts with games directly.
+40 
+41 | Attribute    | Description                                                                |
+42 | ------------ | -------------------------------------------------------------------------- |
+43 | Age range    | ~3–12 years old                                                            |
+44 | Literacy     | Pre-readers (Pre-K/K) through fluent readers (Year 3+)                     |
+45 | Device usage | Supervised tablet or desktop; occasional unsupervised mobile               |
+46 | Tech comfort | Varies widely; Pre-K/K needs icon-only navigation and TTS (text-to-speech) |
+47 | Motivation   | Play, earn stars, see progress, hear encouragement                         |
+48 
+49 **UX adaptation by grade level:**
+50 
+51 - **Pre-K/K:** Full TTS for all instructions and labels. Icon-driven navigation only, but text labels are also shown. Large touch targets. No reading required to navigate.
+52 - **Year 1–2:** TTS available but text labels also shown. Simple word navigation.
+53 - **Year 3+:** Standard text navigation. TTS is still available for game content.
+54 
+55 ### Persona 2: Parent/Guardian
+56 
+57 **Configurator and supervisor.** Sets up profiles, customises game settings, and monitors progress.
+58 
+59 | Attribute    | Description                                                          |
+60 | ------------ | -------------------------------------------------------------------- |
+61 | Tech comfort | Average smartphone/tablet user                                       |
+62 | Goals        | See child's progress, customise difficulty, manage data, set up sync |
+63 | Pain points  | Complicated settings, confusing data, sync failures                  |
+64 | Access       | Behind a PIN gate in the app, and/or behind math/wording puzzles     |
+65 
+66 **Key needs:**
+67 
+68 - Review session history timelines to understand a child's performance
+69 - Customise game difficulty, retries, and timer per game or per grade band
+70 - Select TTS voices per language per child
+71 - Sync data to cloud or manage device storage independently
+72 - Clear session history (for storage) without resetting learning progress
+73 
+74 ### Persona 3: Family (Shared Device)
+75 
+76 **Multi-child household on a single device.** Quick profile switching without separate accounts.
+77 
+78 | Attribute  | Description                                                                                                         |
+79 | ---------- | ------------------------------------------------------------------------------------------------------------------- |
+80 | Scenario   | Multiple children share one tablet/laptop (no limit on number of profiles)                                          |
+81 | Goals      | Each child has their own progress, themes, and settings; settings can optionally be shared across the entire family |
+82 | Key flows  | Switch profiles from the home screen; no login required                                                             |
+83 | Constraint | Parent PIN protects settings from children                                                                          |
+84 
+85 ---
+86 
+87 ## 4. User Stories
+88 
+89 ### Child Stories
+90 
+91 | ID   | As a child… | I want to…                                   | So that…                                                                                      |
+92 | ---- | ----------- | -------------------------------------------- | --------------------------------------------------------------------------------------------- |
+93 | C-01 | Pre-K child | Hear the instructions read aloud             | I can play even if I can't read                                                               |
+94 | C-02 | Any child   | Pick a game from pictures/icons              | I can find a game without reading                                                             |
+95 | C-03 | Any child   | See my stars and progress                    | I feel rewarded for learning                                                                  |
+96 | C-04 | Any child   | Bookmark my favorite games                   | I can find them quickly next time                                                             |
+97 | C-05 | Any child   | See my recently played games                 | I can continue where I left off                                                               |
+98 | C-06 | Any child   | Choose my theme (ocean, space, etc.)         | The app feels like mine                                                                       |
+99 | C-07 | Any child   | Play games offline on a plane                | Learning doesn't stop without Wi-Fi (games may require individual download depending on size) |
+100 | C-08 | Any child   | Hear "Great job!" when I get it right        | I stay motivated                                                                              |
+101 | C-09 | Any child   | Try again after a wrong answer               | I don't feel punished for mistakes                                                            |
+102 | C-10 | Any child   | Read instructions as text or listen to audio | I can choose how I learn; parents can disable audio to encourage reading practice             |
+103 
+104 ### Parent/Guardian Stories
+105 
+106 | ID   | As a parent… | I want to…                                              | So that…                                     |
+107 | ---- | ------------ | ------------------------------------------------------- | -------------------------------------------- |
+108 | P-01 | Parent       | Set up separate profiles per child                      | Each child has independent progress          |
+109 | P-02 | Parent       | Protect settings with a PIN                             | Children can't change the difficulty         |
+110 | P-03 | Parent       | Review my child's session history                       | I understand their learning patterns         |
+111 | P-04 | Parent       | Set retries, timer, and difficulty per game             | I customise for each child's needs           |
+112 | P-05 | Parent       | Connect to cloud storage (e.g., Google Drive, OneDrive) | Progress syncs across our devices            |
+113 | P-06 | Parent       | Select a TTS voice per language                         | I can pick a voice that my child responds to |
+114 | P-07 | Parent       | Clear old session history                               | I free up cloud storage space                |
+115 | P-08 | Parent       | Reset a child's progress independently                  | Without losing session event history         |
+116 | P-09 | Parent       | See when data was last synced                           | I know sync is working                       |
+117 | P-10 | Parent       | Change a child's theme                                  | I help my child personalise their app        |
+118 
+119 ### Family (Shared Device) Stories
+120 
+121 | ID   | As a family… | We want to…                                 | So that…                                  |
+122 | ---- | ------------ | ------------------------------------------- | ----------------------------------------- |
+123 | F-01 | Family       | Switch profiles from the home screen        | Each child goes directly to their profile |
+124 | F-02 | Family       | Share one device without separate accounts  | Setup is simple                           |
+125 | F-03 | Family       | Each child has their own theme and settings | The app feels personalised per child      |
+126 
+127 ---
+128 
+129 ## 5. Feature Requirements (Functional)
+130 
+131 ### 5.1 Profile System
+132 
+133 - **Device-local profiles**: No server account required. Profiles are stored in RxDB and optionally synced to cloud storage.
+134 - **Multi-profile (family sharing)**: Up to N profiles per device (no hard limit). The profile picker is the app's home screen.
+135 - **Profile attributes**: name, avatar (pre-set choices), grade level (Pre-K, K, Year 1–6+), active language, theme, parent PIN (per device).
+136 - **Profile switching**: Tap profile on home screen. No password required to switch between child profiles.
+137 - **Parent PIN**: Required to access `/parent` settings routes. PIN is per-device, stored hashed locally.
+138 - **Avatar picker**: Selection of pre-drawn colorful avatars (not photos).
+139 
+140 ### 5.2 Game Catalog
+141 
+142 - **Categories**: Organized by **grade** (Pre-K, K, Year 1–2, Year 3–4, Year 5–6+) and **subject** (Letters, Reading, Math, etc.).
+143 - **Game cards**: Each game shown as a large card with illustration, title (TTS-readable), subject badge, and grade badge.
+144 - **Filtering/browsing**: Grade filter on dashboard; subject filter; search (text + TTS for younger children).
+145 - **Game catalog format**: Games are defined by JSON config files that describe the game's metadata and content, **not** the game logic itself. The JSON config specifies: game ID, title, description, subject, grade band, asset references (images, audio), content data (word lists, number ranges, sentences per locale), difficulty levels, evaluation criteria, and default settings (retries, timer, win-mode). The actual game **logic and UI** lives in reusable React game components (e.g., `LetterTracer`, `MultipleChoice`, `DragAndDrop`, `WordBuilder`). A JSON config tells an existing component _what content to render_. This means the community can add new games that use existing mechanics (e.g., a new spelling word list) by contributing only a JSON file and assets. Truly new game _mechanics_ require a new React component, but new _content variations_ within existing mechanics are JSON-only contributions.
+146 
+147 ### 5.3 Bookmarks and Recents
+148 
+149 - **Bookmarks**: Child can bookmark any game from the game card or in-game. Bookmarked games appear in a dedicated row at the top of the dashboard.
+150 - **Recently played**: Last-played games tracked per profile. A "Recently Played" row appears below bookmarks on the dashboard.
+151 - **Persistence**: Bookmarks and recents stored in RxDB and synced to cloud.
+152 
+153 ### 5.4 Offline-First Gameplay
+154 
+155 - **Per-game asset download**: Each game is its own bundle (code-split). The app shell loads instantly; individual game assets (images, audio, JS) are downloaded on first play or when the parent explicitly triggers a download. This keeps the initial install lightweight.
+156 - **Preload / prefetch**: Games can be preloaded in the background after the app shell is cached. A parent setting allows triggering "Download All Games", but this is an expensive operation and is **not** performed on first load to avoid blocking the initial experience.
+157 - **Download prompt**: If a game's assets are not yet cached, the parent is prompted to confirm the download (especially on metered connections or when the game bundle is large).
+158 - **RxDB as local database**: All user data persists in IndexedDB via RxDB. No network request required for gameplay.
+159 - **Sync on reconnect**: RxDB replication plugins queue mutations while offline and sync automatically when connectivity returns.
+160 - **No degraded mode**: Once a game's assets are cached, it behaves identically online and offline from the child's perspective.
+161 
+162 ### 5.5 Offline/Online Indicator
+163 
+164 - **Detection**: Uses `navigator.onLine` plus `online`/`offline` event listeners for real-time detection.
+165 - **Indicator**: A persistent but non-intrusive banner appears at the top of the screen when offline.
+166 - **Auto-dismiss**: Banner automatically disappears when connectivity is restored.
+167 - **Last sync timestamp**: Optionally shown in the offline banner and in parent sync settings.
+168 
+169 ### 5.6 Speech Integration
+170 
+171 - **Text-to-Speech (TTS)**: All game instructions, labels, encouragements, and UI hints are TTS-readable via the [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API). TTS is enabled by default for all children. Parents can disable TTS per profile (e.g., to encourage older children to practise reading independently).
+172 - **Speech-to-Text (STT)**: Used for Read Aloud game and other speaking exercises. Simple animated visual indicator (e.g., animated GIF) shown during listening — no complex waveform rendering required.
+173 - **Voice selection**: Parents choose the TTS voice per language per profile from available `speechSynthesis.getVoices()`. Default voice is the browser/OS default for the profile language.
+174 - **Device-aware voices**: Available voices differ per device/OS. Voice preferences are tagged with the device ID. On a different device, the app falls back to the default voice if the selected voice is unavailable.
+175 - **STT language**: Speech recognition language matches the profile's active language setting.
+176 
+177 ### 5.7 Progress Tracking and Gamification
+178 
+179 - **Stars**: Earned per game completion. Displayed on game cards and profile summary.
+180 - **Streaks**: Daily play streaks tracked per profile.
+181 - **Badges**: Achievement badges for milestones (first game, 10 games, subject mastery, etc.).
+182 - **Score history**: Last N scores per game visible to child and parent.
+183 - **All progress stored in RxDB `progress` collection**, synced to cloud.
+184 
+185 ### 5.8 Parent Game Customization (Override System)
+186 
+187 Parents can override per-game defaults at three levels (most specific wins):
+188 
+189 | Level                       | Scope                                                                           |
+190 | --------------------------- | ------------------------------------------------------------------------------- |
+191 | **Per-game override**       | Settings for one specific game                                                  |
+192 | **Per-grade-band override** | Settings for all games in a grade band (Pre-K, K, Year 1–2, Year 3–4, Year 5–6) |
+193 | **Global override**         | Settings for all games                                                          |
+194 
+195 **Override fields:**
+196 
+197 - **Retries**: Number of attempts before moving on (default: game-defined)
+198 - **Timer duration**: Time limit in seconds (or disabled)
+199 - **Always-win mode**: Child always progresses regardless of score
+200 - **Difficulty level**: easy / medium / hard / adaptive
+201 
+202 **Resolution order:** per-game override > grade-band override > global override > game default
+203 
+204 Overrides stored in `game_config_overrides` collection, per profile.
+205 
+206 ### 5.9 Customizable Themes
+207 
+208 - **4–6 pre-defined themes**: Ocean, Forest, Space, Rainbow, Sunset, Night. Each defines color palette, typography weight, icon style, and background pattern.
+209 - **Default typography**: [Edu NSW ACT Foundation](https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation) — a handwriting font designed for Australian school children. Young children can be confused by unfamiliar letterforms, so the default font is consistent with what they learn in school. All games use this font by default to maintain visual consistency.
+210   - **Alternative fonts**: (TODO: verify license)
+211     - [Andika](https://fonts.google.com/specimen/Andika)
+212     - [All Australian fonts from Tina Anderson and Corey Anderson](https://fonts.google.com/?preview.script=Latn&query=Corey+Anderson)
+213     - Brazil (<https://primarium.info/countries/brazil/>)
+214       - <https://fonts.google.com/specimen/Playwrite+BR?preview.script=Latn>
+215     - [Chilanka](https://fonts.google.com/specimen/Chilanka)
+216     - Comic Sans
+217     - [Comic Neue](https://fonts.google.com/specimen/Comic+Neue)
+218     - Century Gothic
+219     - [Delius](https://fonts.google.com/specimen/Delius?preview.text=Ardijup%20kans%20queby&preview.lang=en_Latn&lang=en_Latn)
+220     - [Playpen Sans](https://fonts.google.com/specimen/Playpen+Sans)
+221     - [Farsan](https://fonts.google.com/specimen/Farsan)
+222     - KG Neatly Printed
+223     - [Open Sans](https://fonts.google.com/specimen/Open+Sans)
+224     - [Gill Sans Infant](https://freefonts.co/fonts/gill-sans-infant-std-regular)
+225     - [OpenDyslexic](https://opendyslexic.org/#)
+226     - [Sylexiad](https://www.sylexiad.com/)
+227     - [Lexend](https://fonts.google.com/specimen/Lexend?preview.script=Latn)
+228 - **Parent font override**: Parents can change the font family per profile or per family from a curated list of child-friendly fonts. This is useful for families in regions with different handwriting standards.
+229 - **Clone and modify**: Any pre-defined theme can be cloned. Clone owner can change colors and fonts.
+230 - **Scope**: Theme can be set per child profile or per family (shared across all profiles).
+231 - **Storage**: Themes stored in RxDB `themes` collection, synced to cloud storage.
+232 - **Colorblind safety**: All pre-defined themes use colorblind-safe palettes. Color is never the sole differentiator for game mechanics.
+233 
+234 ### 5.10 Multi-Language Support
+235 
+236 - **Default language**: English (`en`)
+237 - **Initial second language**: Portuguese-Brazilian (`pt-BR`)
+238 - **Architecture**: Extensible — new languages can be added by adding a translation file and game content.
+239 - **Per-profile language**: Each child profile has an active language setting.
+240 - **Game content localization**: Word lists, sentences, and instructions are per-language. Math games are mostly language-neutral (only instructions change).
+241 - **i18n framework**: react-i18next (see `docs/i18n.md` for full spec).
+242 
+243 ### 5.11 Gameplay Session History
+244 
+245 Every gameplay session records a **chronological event timeline** per profile:
+246 
+247 **Recorded events include:**
+248 
+249 - `game:start` — game loaded, config resolved
+250 - `game:instructions_shown` — TTS instructions triggered
+251 - `game:action` — child interaction (answer, drag, trace, speak)
+252 - `game:hint` — hint requested or auto-triggered
+253 - `game:evaluate` — answer evaluated (correct/incorrect/near-miss)
+254 - `game:score` — score awarded
+255 - `game:retry` — retry triggered
+256 - `game:end` — session ended (completed or exited)
+257 
+258 **Purposes:**
+259 
+260 - Parent/teacher review of performance patterns (time, mistakes, hints, retries)
+261 - Developer troubleshooting during game development
+262 - Future analytics integration
+263 
+264 **Chunked storage**: Session history documents are bounded at ~200 events or ~50KB per document. The recorder rolls over to a new chunk automatically. A `session_history_index` document per session holds a lightweight summary for listing/filtering without loading full event data.
+265 
+266 ### 5.12 Data Cleanup Controls
+267 
+268 Accessed via Parent Settings > Data Management:
+269 
+270 - **Clear Session History**: Deletes `session_history` + `session_history_index` records. Does NOT affect `progress`.
+271 - **Clear Progress**: Resets scores, streaks, badges. Does NOT affect session history.
+272 - **Date-range filter**: Optional "clear older than X days" filter for selective cleanup.
+273 - **Cascade delete**: Deleting a session index deletes all its chunks.
+274 - **Storage usage**: Display estimated storage usage per collection (progress, session history, settings).
+275 - **Confirmation dialogs**: Required before any destructive action.
+276 
+277 ### 5.13 PWA Install and Service Worker
+278 
+279 - **PWA manifest**: `manifest.json` with icons, name, theme color, display mode (`standalone`).
+280 - **Service worker**: Workbox-based via `vite-plugin-pwa`. Pre-caches app shell + game assets on install.
+281 - **Install prompt**: Custom install banner (not browser default). Handles iOS (no native prompt) and Android.
+282 - **Version-based cache invalidation**: On SW update, stale caches are purged by version prefix.
+283 - **SW migration**: On version mismatch, new SW activates with `skipWaiting` + `clientsClaim`. RxDB schema migration runs before app renders if schema version changed.
+284 - **Zoom controls**: Users can zoom in/out of the game UI to accommodate different screen sizes and resolutions. A visible zoom control (or pinch-to-zoom support) ensures the app is usable even on devices where the default layout doesn't fit well.
+285 
+286 ### 5.14 Analytics (Deferred Decision)
+287 
+288 Analytics provider selection is deferred. The requirement is to build an **analytics abstraction layer** — a typed interface — so the provider can be swapped without code changes.
+289 
+290 **Options evaluated:**
+291 
+292 | Provider                  | Cost                           | Privacy | Notes                                          |
+293 | ------------------------- | ------------------------------ | ------- | ---------------------------------------------- |
+294 | Google Analytics 4        | Free                           | Low     | Blocked by ~30–40% of users in 2026            |
+295 | Cloudflare Web Analytics  | Free                           | High    | Privacy-first, rarely blocked, traffic-focused |
+296 | PostHog Cloud (free tier) | Free up to 1M events/month     | Medium  | Open source, product analytics + errors        |
+297 | Plausible Analytics       | Free self-hosted / $9/mo cloud | High    | GDPR-compliant, ~1KB script                    |
+298 
+299 **Recommendation**: Implement a `AnalyticsAdapter` interface. Ship with a no-op implementation. Connect a provider via config without touching core logic. See `docs/architecture.md` for the interface spec.
+300 
+301 ### 5.15 Extension Points
+302 
+303 The app exposes an **event bus and plugin hook system** so future premium features (from separate private repos) can:
+304 
+305 - Subscribe to app events (game events, profile changes, sync events)
+306 - Inject UI components at designated slots (dashboard banners, game overlays)
+307 - Contribute configuration without modifying GPL source
+308 
+309 No GPL code flows into plugin implementations. Plugins communicate only through the public event/hook API.
+310 
+311 ---
+312 
+313 ## 6. Non-Functional Requirements
+314 
+315 ### 6.1 Performance
+316 
+317 | Metric                                       | Target                                                           |
+318 | -------------------------------------------- | ---------------------------------------------------------------- |
+319 | Time to Interactive (first load, warm cache) | < 2 seconds                                                      |
+320 | Time to Interactive (cold cache, 3G)         | < 5 seconds                                                      |
+321 | Game frame rate                              | 60fps animations (CSS/DOM for UI, canvas only for drawing games) |
+322 | Bundle size (initial JS, gzipped)            | < 200KB                                                          |
+323 | Lighthouse Performance score                 | ≥ 90                                                             |
+324 
+325 - Lazy-load game assets (images, audio) at game load time, not app start.
+326 - CSS/DOM animations for rewards (confetti, stars). No heavy animation libraries.
+327 - **Why CSS/DOM over Canvas for UI?** Canvas is faster for complex real-time rendering (e.g., 2D games with many moving sprites), but CSS/DOM is the better choice for this app's UI because: (1) **Accessibility** — DOM elements work natively with screen readers, ARIA labels, and keyboard navigation; canvas requires a parallel invisible DOM for accessibility, doubling complexity. (2) **Responsive layout** — CSS flexbox/grid handles screen adaptation automatically; canvas requires manual layout math. (3) **Browser GPU acceleration** — CSS transforms and animations are GPU-composited and achieve 60fps for the types of animations we need (transitions, confetti, star bursts). (4) **SEO and tooling** — React DevTools, testing libraries, and linting all work with DOM. Canvas is reserved for the `LetterTracer` component where actual drawing/tracing input is required.
+328 
+329 ### 6.2 Accessibility
+330 
+331 - **WCAG 2.1 AA compliance** for all screens and games.
+332 - All interactive elements have ARIA labels and are keyboard-navigable.
+333 - Screen reader support for game state changes (ARIA live regions).
+334 - Minimum touch target size: 48x48px.
+335 - Color is never the sole indicator for any game mechanic.
+336 - Full TTS for instructions (pre-reader support).
+337 - See `docs/accessibility.md` for full checklist.
+338 
+339 ### 6.3 TypeScript Strictness
+340 
+341 - `"strict": true` in `tsconfig.json` (implies `noImplicitAny`, `strictNullChecks`, etc.).
+342 - ESLint rule `@typescript-eslint/no-explicit-any` set to `error`.
+343 - CI fails on any `any` usage — no exceptions, no `// eslint-disable` workarounds.
+344 - No type assertions (`as any`, `as unknown`) that bypass type safety.
+345 
+346 ### 6.4 Compatibility
+347 
+348 | Platform         | Requirement                                                                            |
+349 | ---------------- | -------------------------------------------------------------------------------------- |
+350 | Desktop browsers | Chrome 100+, Firefox 100+, Safari 15+, Edge 100+                                       |
+351 | Mobile browsers  | iOS Safari 15+, Android Chrome 100+                                                    |
+352 | Screen sizes     | 320px wide minimum; optimized for 768px+                                               |
+353 | Zoom             | Users can zoom in/out via pinch or UI controls if game layout doesn't fit their device |
+354 | Touch            | Pointer Events API for consistent mouse + touch                                        |
+355 
+356 ### 6.5 Privacy and Data
+357 
+358 - No user accounts, no server-side storage of personal data.
+359 - All data lives in the device's IndexedDB via RxDB.
+360 - Cloud sync is opt-in. User controls which cloud provider (if any).
+361 - OAuth tokens stored encrypted in IndexedDB (never in `localStorage` or cookies).
+362 - No third-party scripts except the opted-in analytics provider.
+363 - No ads, ever.
+364 
+365 ### 6.6 Open Source Quality
+366 
+367 - All public APIs documented with JSDoc.
+368 - README with setup, development, and contribution instructions.
+369 - CONTRIBUTING.md with code style, PR, and commit conventions.
+370 - Every incremental feature is a standalone commit with passing CI.
+371 
+372 ---
+373 
+374 ## 7. Constraints
+375 
+376 | Constraint                 | Detail                                                                                                                                                                              |
+377 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+378 | **JAMstack only**          | No backend server. All logic runs client-side.                                                                                                                                      |
+379 | **Static hosting**         | Primary deployment target: GitHub Pages. Output is static HTML/JS/CSS.                                                                                                              |
+380 | **No server-side auth**    | OAuth2 via PKCE only. OneDrive: MSAL.js client-side. Google Drive: Cloudflare Worker proxy for `client_secret` (see `docs/architecture.md`).                                        |
+381 | **Free cloud sync only**   | Cloud storage providers with free personal tiers (initially Google Drive and OneDrive). No paid sync service.                                                                       |
+382 | **GPL v3**                 | All app code in this repo must remain GPL v3.                                                                                                                                       |
+383 | **No ads**                 | Hard requirement. No advertising SDK, no monetization via ads.                                                                                                                      |
+384 | **No `any` in TypeScript** | Strict TypeScript everywhere. CI enforces this.                                                                                                                                     |
+385 | **CSS/DOM for UI**         | No canvas/WebGL for UI — CSS/DOM is preferred for accessibility, responsive layout, and tooling. Canvas reserved for drawing-input games (e.g., `LetterTracer`). See 6.1 rationale. |
+386 
+387 ---
+388 
+389 ## 8. Competitors Analysis
+390 
+391 | Product                        | Strengths                                                                   | Weaknesses                                        | Differentiation                                 |
+392 | ------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------- |
+393 | **ABCya**                      | Large game library, free tier, has offline app, ads removed for subscribers | Subscription-based for ad-free/offline experience | BaseSkill: fully free, no ads ever, open-source |
+394 | **Starfall**                   | Structured reading curriculum                                               | Subscription required for full access             | BaseSkill: fully free                           |
+395 | **Khan Academy Kids**          | High quality, structured                                                    | Requires account, cloud-dependent                 | BaseSkill: no account, offline-first            |
+396 | **Duolingo Kids / LingoKids**  | Fun UX, gamified                                                            | Language learning only, subscription              | BaseSkill: broader subjects, free               |
+397 | **ABC Education (abc.net.au)** | Australian curriculum-aligned                                               | Browser-only, no offline, limited                 | BaseSkill: offline, sync, customizable          |
+398 | **readabilitytutor.com**       | AI-powered reading assessment                                               | Paid, requires connectivity                       | BaseSkill: STT-based reading, offline           |
+399 | **iTrace**                     | Excellent letter tracing on iOS                                             | iOS only, paid                                    | BaseSkill: web-based, free, cross-platform      |
+400 
+401 **BaseSkill's unique position:** The only free, open-source, offline-first, privacy-respecting educational PWA with family sharing, cloud sync, and full accessibility support.
+402 
+403 > **TODO:** Conduct proper hands-on research of each competitor (install apps, test free/paid tiers, verify offline support, check ad behavior) before finalising this table. Current entries are based on general knowledge and may be inaccurate. We do not want to misrepresent competitors.
+404 
+405 ---
+406 
+407 ## 9. Out of Scope (Initial Release)
+408 
+409 - Server-side multiplayer or real-time features
+410 - Teacher/classroom accounts (future premium feature)
+411 - AI-powered adaptive difficulty (future feature; difficulty is config-driven today)
+412 - In-app content creator (new games via external JSON only for now)
+413 - Push notifications
+414 - Social features (leaderboards, sharing)
+415 - Premium content gating
+416 - Analytics provider selection (interface abstracted; no-op default)
+417 - Game asset specifications (art, sound — separate asset pipeline)
+418 - RTL language support (placeholder consideration only)
+419 
+420 ---
+421 
+422 ## 10. Glossary
+423 
+424 | Term                | Definition                                                                                      |
+425 | ------------------- | ----------------------------------------------------------------------------------------------- |
+426 | **Profile**         | A child's local account. Stored in RxDB. No server account.                                     |
+427 | **Session**         | One play session of one game by one profile. Has a unique `sessionId`.                          |
+428 | **Session History** | Chronological event timeline for a session, stored in bounded chunks.                           |
+429 | **Session Index**   | Lightweight summary document per session used for listing/filtering.                            |
+430 | **Chunk**           | One RxDB document holding up to ~200 events or ~50KB of a session history.                      |
+431 | **Override**        | A parent-defined customization of a game's default settings.                                    |
+432 | **Grade Band**      | A grouping of grades: Pre-K, K, Year 1–2, Year 3–4, Year 5–6.                                   |
+433 | **Theme**           | A named set of colors, typography, and background patterns defining the app's visual style.     |
+434 | **TTS**             | Text-to-Speech via the Web Speech API.                                                          |
+435 | **STT**             | Speech-to-Text via the Web Speech API.                                                          |
+436 | **PWA**             | Progressive Web App — installable, offline-capable web application.                             |
+437 | **RxDB**            | Reactive offline-first database built on IndexedDB.                                             |
+438 | **PKCE**            | Proof Key for Code Exchange — OAuth2 extension for SPAs without client secrets.                 |
+439 | **BFF**             | Backend-for-Frontend — a lightweight proxy (Cloudflare Worker) for Google OAuth token exchange. |
+440 | **Event Bus**       | Pub/sub system for in-app events, used by session recorder and plugin hooks.                    |
 441
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:11Z)**_
@@ -768,275 +772,276 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:52:11Z)**_
  `./docs/baseskill_milestone_breakdown_85146c93.plan.md`
 
 ```text
-1	---
-2	name: BaseSkill Milestone Breakdown
-3	overview: Break the BaseSkill PRD into sequential milestones and identify which work streams within each milestone can proceed in parallel (async) versus which must be completed sequentially (sync).
-4	todos:
-5	  - id: m0-design-docs
-6	    content: 'Milestone 0: Author all 8+ design docs in docs/ folder (prd.md, architecture.md, data-model.md, game-engine.md, ui-ux.md, i18n.md, accessibility.md, testing-strategy.md, ci-cd.md)'
-7	    status: pending
-8	  - id: m1-scaffolding
-9	    content: 'Milestone 1: TanStack Start + TanStack Router + React + TS strict + shadcn/ui + Tailwind v4 + ESLint + Vitest + Playwright + GitHub Actions CI/CD + static SPA output + vite-plugin-pwa + GPL v3 LICENSE'
-10	    status: pending
-11	  - id: m2-data-layer
-12	    content: 'Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services'
-13	    status: completed
-14	  - id: m3-app-shell
-15	    content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents'
-16	    status: pending
-17	  - id: m4-game-engine
-18	    content: 'Milestone 4: Game lifecycle, game shell UI, config loader + override merging, session recorder, 7 reusable game components'
-19	    status: pending
-20	  - id: m5-reference-games
-21	    content: 'Milestone 5: 5 reference games (Letter Tracing, Number Match, Word Builder, Read Aloud, Math Facts)'
-22	    status: pending
-23	  - id: m6-cloud-sync
-24	    content: 'Milestone 6: OneDrive MSAL.js PKCE, Google Drive PKCE + CF Worker proxy, token management, device-aware sync, conflict resolution'
-25	    status: pending
-26	  - id: m7-parent-features
-27	    content: 'Milestone 7: Parent settings (game overrides, session history viewer, data management, cloud sync config, TTS voice selector)'
-28	    status: pending
-29	  - id: m8-polish
-30	    content: 'Milestone 8: Accessibility audit, offline hardening, visual regression, i18n verification, performance, analytics abstraction, PWA install prompt, SW migration testing'
-31	    status: pending
-32	isProject: false
-33	---
-34	
-35	# BaseSkill: PRD to Completion Milestone Breakdown
-36	
-37	**Meta Framework: TanStack Start** -- chosen for its Vite-native architecture, fully type-safe routing (TanStack Router), and full-stack upgrade path for future cloud/server features (auth, multiplayer, premium APIs) without a framework migration. Currently deployed as a static SPA to GitHub Pages; when server features are needed, TanStack Start's server functions and API routes activate without restructuring the app.
-38	
-39	This plan organizes the project into 8 milestones. Within each milestone, work streams are labeled **ASYNC** (can be developed in parallel by different agents/developers) or **SYNC** (must be completed before the next step starts).
-40	
-41	---
-42	
-43	## Milestone 0 -- Design Documents (SYNC prerequisite)
-44	
-45	Before any code is written, the 8 design docs outlined in [docs/prd-plan.md](docs/prd-plan.md) must be authored. Several can be written in parallel.
-46	
-47	**ASYNC work streams:**
-48	
-49	- `docs/prd.md` -- full PRD with user stories, feature requirements, constraints
-50	- `docs/architecture.md` -- system diagram, TanStack Start app structure, TanStack Router route tree, component tree, state management, data flow, OAuth architecture, extension points
-51	- `docs/data-model.md` -- RxDB schemas (JSON Schema), relationships, sync strategy, conflict resolution, chunking rules, token storage
-52	- `docs/game-engine.md` -- game lifecycle, session recorder spec, config schema, parent override merging logic, 5 reference game specs
-53	- `docs/ui-ux.md` -- design system, 4-6 theme definitions, core layouts, navigation, responsive strategy, encouragement system, session history viewer, data management screen
-54	- `docs/i18n.md` -- i18n setup (react-i18next or TanStack-compatible alternative), translation file structure, TTS voice selection, device-aware voice sync
-55	- `docs/accessibility.md` -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech API fallbacks
-56	- `docs/testing-strategy.md` -- Vitest + RTL + Playwright plan, coverage targets, test data fixtures
-57	- `docs/ci-cd.md` -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection
-58	
-59	**SYNC dependency:** `prd.md` and `architecture.md` should be drafted first (or at least outlined) since the other docs reference decisions made there.
-60	
-61	---
-62	
-63	## Milestone 1 -- Project Scaffolding and CI/CD
-64	
-65	Bootstrap the repository and get a green CI pipeline on an empty app shell.
-66	
-67	**SYNC (sequential):**
-68	
-69	1. Scaffold project via `npx @tanstack/cli@latest create` (select Tailwind + ESLint options from the interactive prompts); this generates TanStack Start + TanStack Router with file-based routing pre-configured
-70	2. Configure TypeScript strict mode (`noImplicitAny`, no `any` ESLint rule) on top of the generated config
-71	3. Set up TanStack Router nested layouts for app shell / game shell / settings
-72	4. Add `shadcn/ui` on top of the Tailwind CSS setup from the CLI scaffold
-73	5. Add `LICENSE` (GPL v3)
-74	6. Configure ESLint, Prettier, `@typescript-eslint/no-explicit-any` as error
-75	7. Set up Vitest + React Testing Library
-76	8. Set up Playwright (empty E2E suite)
-77	9. GitHub Actions: lint, type-check, unit test, E2E, build, deploy to GitHub Pages
-78	10. Configure static SPA output (TanStack Start with `server.preset: 'static'` or equivalent Nitro static preset) for GitHub Pages deployment
-79	11. PWA manifest (`manifest.json`) + basic Workbox service worker via `vite-plugin-pwa` (pre-cache app shell only)
-80	12. App versioning: semver stamp in build output
-81	
-82	**Key TanStack decisions:**
-83	
-84	- Use TanStack Router's file-based routing convention (`routes/` directory)
-85	- Use TanStack Router's `beforeLoad` / `loader` for client-side data loading from RxDB
-86	- Consider TanStack Query alongside RxDB for async state management (evaluate in M2)
-87	- Static preset for now; switch to Cloudflare/Vercel/Node preset when server features are added
-88	
-89	**Deliverable:** A deployable blank PWA on GitHub Pages with passing CI, type-safe routing, and nested layout structure.
-90	
-91	---
-92	
-93	## Milestone 2 -- Data Layer and Core Infrastructure
-94	
-95	Set up RxDB and the foundational systems that everything else depends on.
-96	
-97	**SYNC (must complete in order):**
-98	
-99	1. RxDB database initialization and schema definitions for all collections (`profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`)
-100	2. Schema migration framework (version tracking via `app_meta`)
-101	3. React hooks for reactive RxDB queries
-102	4. Evaluate TanStack Query integration -- determine if TanStack Query should wrap RxDB observables for cache management, or if RxDB's reactive queries are sufficient via custom hooks. Decision impacts all downstream data access patterns.
-103	
-104	**ASYNC (can proceed in parallel once RxDB is up):**
-105	
-106	- **Event bus / plugin hook system** -- pub/sub for app events, extension point registration
-107	- **i18n setup** -- react-i18next (or lighter alternative), `en` + `pt-BR` translation files, namespace structure (common, games, settings, encouragements); integrate with TanStack Router for locale-aware routes if needed
-108	- **Theme engine** -- load themes from RxDB `themes` collection, **two** pre-defined theme seeds for M2 (more presets later), CSS variable injection, clone-and-modify logic
-109	- **Speech services** -- TTS wrapper (`SpeechOutput`), STT wrapper (`SpeechInput`), voice enumeration, fallback handling
-110	
-111	---
-112	
-113	## Milestone 3 -- Profile System and App Shell UI
-114	
-115	Build the user-facing shell: navigation, profile management, and dashboard. TanStack Router's nested layouts and type-safe routes drive the structure.
-116	
-117	**SYNC (sequential):**
-118	
-119	1. **Route tree structure** -- define TanStack Router file-based routes: `_app` (root layout), `_app/index` (profile picker), `_app/dashboard` (game grid), `_app/game/$gameId` (game shell), `_app/settings` (child settings), `_app/parent` (parent settings with nested routes)
-120	2. **Profile picker / home screen** -- create profile, select profile, avatar picker, grade-level selector; use `beforeLoad` guard to redirect to profile picker if no active profile
-121	3. **Family sharing** -- quick profile switching, parent PIN gate for settings (route guard on `/parent` routes)
-122	4. **App layout shell** -- root layout with header, back button, breadcrumbs (parent view), grade-adaptive navigation (icons for Pre-K, text+icons for older)
-123	5. **Dashboard** -- game grid by subject/grade, bookmarked games row, recently played row; use route `loader` to pre-fetch game catalog + bookmarks from RxDB
-124	6. **Settings screen** -- volume, speech rate, active language, theme selector per profile
-125	7. **Offline indicator** -- `navigator.onLine` listener, banner component, last-sync timestamp
-126	
-127	**ASYNC (can start once profile + layout exist):**
-128	
-129	- **Bookmark system** -- bookmark/unbookmark games, persist to `bookmarks` collection
-130	- **Recents tracking** -- update `progress` collection with last-played timestamps, query for dashboard
-131	
-132	---
-133	
-134	## Milestone 4 -- Game Engine Framework
-135	
-136	Build the reusable game infrastructure (no specific games yet).
-137	
-138	**SYNC (sequential):**
-139	
-140	1. **Game lifecycle manager** -- load, instructions (TTS), play, evaluate, score, next/retry state machine
-141	2. **Game shell UI** -- consistent header, game area, controls, back/exit
-142	3. **Game config loader** -- read game JSON config, merge with parent overrides (override > grade-band > global > default)
-143	4. **Session recorder middleware** -- subscribe to event bus, write to `session_history`, automatic chunking (200 events / 50KB cap), write `session_history_index` summary on session end
-144	
-145	**ASYNC (reusable components, independent of each other):**
-146	
-147	- `DragAndDrop` -- pointer events, magnetic/snap, ghost preview, visual pulse on drop zones
-148	- `LetterTracer` -- canvas-based tracing with touch/mouse, tap-to-place alternative
-149	- `MultipleChoice` -- tap/click answer selection
-150	- `Timer` -- configurable, hideable per parent settings
-151	- `ScoreAnimation` -- confetti, stars, CSS-only reward animations
-152	- `EncouragementAnnouncer` -- contextual TTS + visual popup, triggered by game events
-153	- `ProgressBar` / `ScoreBoard` -- in-game progress display
-154	
-155	---
-156	
-157	## Milestone 5 -- Reference Games
-158	
-159	Implement the 5 reference games. Each game is independent and can be built in parallel.
-160	
-161	**ASYNC (all 5 are independent):**
-162	
-163	- **Word Builder** (K-Year 2, Reading) -- uses `DragAndDrop` + TTS hints, per-language word lists
-164	- **Number Match** (Pre-K/K, Math) -- uses `DragAndDrop` with snap, object-group visuals
-165	- **Math Facts** (Year 1-4, Math) -- uses `MultipleChoice` + `Timer`, visual number line
-166	- **Read Aloud** (Year 1-3, Reading) -- uses `SpeechInput` (STT), sentence display, evaluation
-167	- **Letter Tracing** (Pre-K/K, Letters) -- uses `LetterTracer`, TTS for letter names
-168	
-169	Each game should include: unit tests for game logic, integration test for full lifecycle, i18n content for `en` + `pt-BR`.
-170	
-171	---
-172	
-173	## Milestone 6 -- Cloud Sync and OAuth
-174	
-175	Can begin in parallel with Milestones 4-5 (data layer is ready from Milestone 2).
-176	
-177	**SYNC (sequential):**
-178	
-179	1. **OneDrive sync** -- MSAL.js PKCE flow (no backend needed), RxDB replication plugin for OneDrive
-180	2. **Google Drive sync** -- PKCE flow with Cloudflare Worker BFF proxy for token exchange, RxDB replication plugin for Google Drive
-181	3. **Token management** -- encrypted IndexedDB storage, refresh token handling
-182	4. **Device-aware sync** -- `deviceId` field on synced records, device-local voice preferences excluded from cross-device apply
-183	5. **Conflict resolution** -- last-write-wins with merge for `progress`, append-only for `session_history`
-184	
-185	**ASYNC (within this milestone):**
-186	
-187	- Cloudflare Worker OAuth proxy (separate repo, non-GPL) can be developed independently
-188	- OneDrive and Google Drive replication plugins can be developed in parallel once the replication interface is defined
-189	
-190	---
-191	
-192	## Milestone 7 -- Parent/Guardian Features
-193	
-194	Depends on: profiles (M3), game engine (M4), session recorder (M4), data model (M2).
-195	
-196	**ASYNC (independent screens):**
-197	
-198	- **Parent settings: game overrides UI** -- per-game, per-grade-band, and global override controls (retries, timer, always-win, difficulty)
-199	- **Parent settings: session history viewer** -- timeline view, filter by game/date/grade, expandable session detail with lazy-loaded chunks
-200	- **Parent settings: data management** -- storage usage display, separate "Clear History" / "Clear Progress" buttons, date-range picker, confirmation dialogs, cascade delete
-201	- **Parent settings: cloud sync config** -- connect/disconnect Google Drive / OneDrive, sync status, last sync timestamp
-202	- **Parent settings: TTS voice selector** -- per-language voice picker from `speechSynthesis.getVoices()`, device-aware
-203	
-204	---
-205	
-206	## Milestone 8 -- Polish, Accessibility, and Testing
-207	
-208	Final hardening pass. Most of this is ASYNC.
-209	
-210	**ASYNC work streams:**
-211	
-212	- **Accessibility audit** -- axe-core integration in component tests, Playwright accessibility audits on all pages, ARIA labels, focus management, keyboard navigation for all games, screen reader testing
-213	- **Offline hardening** -- E2E tests for offline/online transitions, SW cache validation, RxDB queue-and-replay verification
-214	- **Visual regression** -- Playwright screenshot baselines for all key screens across all 4-6 themes
-215	- **i18n verification** -- snapshot tests for `en` and `pt-BR` on all screens, RTL placeholder if needed
-216	- **Performance** -- Lighthouse audit, bundle analysis, lazy-load game assets, ensure CSS-only animations
-217	- **Analytics abstraction** -- define analytics interface/adapter, implement one provider (decision deferred per PRD), ensure provider is swappable
-218	- **PWA install prompt** -- custom install banner, iOS/Android handling
-219	- **SW migration testing** -- version mismatch detection, cache purge, RxDB schema migration on upgrade
-220	
-221	---
-222	
-223	## Dependency Graph
-224	
-225	```mermaid
-226	graph TD
-227	    M0[M0: Design Docs] --> M1[M1: Scaffolding and CICD]
-228	    M1 --> M2[M2: Data Layer and Core Infra]
-229	    M2 --> M3[M3: Profile System and App Shell]
-230	    M2 --> M4[M4: Game Engine Framework]
-231	    M2 --> M6[M6: Cloud Sync and OAuth]
-232	    M3 --> M5[M5: Reference Games]
-233	    M4 --> M5
-234	    M3 --> M7[M7: Parent Features]
-235	    M4 --> M7
-236	    M6 --> M7
-237	    M5 --> M8[M8: Polish and Testing]
-238	    M7 --> M8
-239	```
-240	
-241	---
-242	
-243	## Summary: What Can Run in Parallel
-244	
-245	| Phase | Parallel Streams                                |
-246	| ----- | ----------------------------------------------- |
-247	| M0    | Most design docs can be written concurrently    |
-248	| M2    | Event bus, i18n, theme engine, speech services  |
-249	| M3    | Bookmarks, recents (after shell exists)         |
-250	| M4    | All 7 reusable game components                  |
-251	| M5    | All 5 reference games                           |
-252	| M6    | OneDrive plugin, Google Drive plugin, CF Worker |
-253	| M7    | All 5 parent settings screens                   |
-254	| M8    | All 8 polish work streams                       |
-255	
-256	The critical path is: **M0 -> M1 -> M2 -> M4 -> M5 -> M8**, with M3, M6, and M7 as parallel branches off M2.
-257	
-258	---
-259	
-260	## Future: Server Upgrade Path (post-M8)
-261	
-262	When premium/server features are needed, TanStack Start enables a smooth transition:
-263	
-264	- Switch from static preset to Cloudflare Workers / Vercel / Node preset
-265	- Add server functions for auth, multiplayer WebSocket coordination, premium content gating
-266	- TanStack Start's server functions and API routes activate without restructuring the client-side app
-267	- The GPL-licensed SPA remains unchanged; server features live in separate private repos communicating over network boundaries (per PRD licensing strategy)
+1 ---
+2 name: BaseSkill Milestone Breakdown
+3 overview: Break the BaseSkill PRD into sequential milestones and identify which work streams within each milestone can proceed in parallel (async) versus which must be completed sequentially (sync).
+4 todos:
+5   - id: m0-design-docs
+6     content: 'Milestone 0: Author all 8+ design docs in docs/ folder (prd.md, architecture.md, data-model.md, game-engine.md, ui-ux.md, i18n.md, accessibility.md, testing-strategy.md, ci-cd.md)'
+7     status: pending
+8   - id: m1-scaffolding
+9     content: 'Milestone 1: TanStack Start + TanStack Router + React + TS strict + shadcn/ui + Tailwind v4 + ESLint + Vitest + Playwright + GitHub Actions CI/CD + static SPA output + vite-plugin-pwa + GPL v3 LICENSE'
+10     status: pending
+11   - id: m2-data-layer
+12     content: 'Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services'
+13     status: completed
+14   - id: m3-app-shell
+15     content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents'
+16     status: pending
+17   - id: m4-game-engine
+18     content: 'Milestone 4: Game lifecycle, game shell UI, config loader + override merging, session recorder, 7 reusable game components'
+19     status: pending
+20   - id: m5-reference-games
+21     content: 'Milestone 5: 5 reference games (Letter Tracing, Number Match, Word Builder, Read Aloud, Math Facts)'
+22     status: pending
+23   - id: m6-cloud-sync
+24     content: 'Milestone 6: OneDrive MSAL.js PKCE, Google Drive PKCE + CF Worker proxy, token management, device-aware sync, conflict resolution'
+25     status: pending
+26   - id: m7-parent-features
+27     content: 'Milestone 7: Parent settings (game overrides, session history viewer, data management, cloud sync config, TTS voice selector)'
+28     status: pending
+29   - id: m8-polish
+30     content: 'Milestone 8: Accessibility audit, offline hardening, visual regression, i18n verification, performance, analytics abstraction, PWA install prompt, SW migration testing'
+31     status: pending
+32 isProject: false
+33 ---
+34 
+35 # BaseSkill: PRD to Completion Milestone Breakdown
+36 
+37 **Meta Framework: TanStack Start** -- chosen for its Vite-native architecture, fully type-safe routing (TanStack Router), and full-stack upgrade path for future cloud/server features (auth, multiplayer, premium APIs) without a framework migration. Currently deployed as a static SPA to GitHub Pages; when server features are needed, TanStack Start's server functions and API routes activate without restructuring the app.
+38 
+39 This plan organizes the project into 8 milestones. Within each milestone, work streams are labeled **ASYNC** (can be developed in parallel by different agents/developers) or **SYNC** (must be completed before the next step starts).
+40 
+41 ---
+42 
+43 ## Milestone 0 -- Design Documents (SYNC prerequisite)
+44 
+45 Before any code is written, the 8 design docs outlined in [docs/prd-plan.md](docs/prd-plan.md) must be authored. Several can be written in parallel.
+46 
+47 **ASYNC work streams:**
+48 
+49 - `docs/prd.md` -- full PRD with user stories, feature requirements, constraints
+50 - `docs/architecture.md` -- system diagram, TanStack Start app structure, TanStack Router route tree, component tree, state management, data flow, OAuth architecture, extension points
+51 - `docs/data-model.md` -- RxDB schemas (JSON Schema), relationships, sync strategy, conflict resolution, chunking rules, token storage
+52 - `docs/game-engine.md` -- game lifecycle, session recorder spec, config schema, parent override merging logic, 5 reference game specs
+53 - `docs/ui-ux.md` -- design system, 4-6 theme definitions, core layouts, navigation, responsive strategy, encouragement system, session history viewer, data management screen
+54 - `docs/i18n.md` -- i18n setup (react-i18next or TanStack-compatible alternative), translation file structure, TTS voice selection, device-aware voice sync
+55 - `docs/accessibility.md` -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech API fallbacks
+56 - `docs/testing-strategy.md` -- Vitest + RTL + Playwright plan, coverage targets, test data fixtures
+57 - `docs/ci-cd.md` -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection
+58 
+59 **SYNC dependency:** `prd.md` and `architecture.md` should be drafted first (or at least outlined) since the other docs reference decisions made there.
+60 
+61 ---
+62 
+63 ## Milestone 1 -- Project Scaffolding and CI/CD
+64 
+65 Bootstrap the repository and get a green CI pipeline on an empty app shell.
+66 
+67 **SYNC (sequential):**
+68 
+69 1. Scaffold project via `npx @tanstack/cli@latest create` (select Tailwind + ESLint options from the interactive prompts); this generates TanStack Start + TanStack Router with file-based routing pre-configured
+70 2. Configure TypeScript strict mode (`noImplicitAny`, no `any` ESLint rule) on top of the generated config
+71 3. Set up TanStack Router nested layouts for app shell / game shell / settings
+72 4. Add `shadcn/ui` on top of the Tailwind CSS setup from the CLI scaffold
+73 5. Add `LICENSE` (GPL v3)
+74 6. Configure ESLint, Prettier, `@typescript-eslint/no-explicit-any` as error
+75 7. Set up Vitest + React Testing Library
+76 8. Set up Playwright (empty E2E suite)
+77 9. GitHub Actions: lint, type-check, unit test, E2E, build, deploy to GitHub Pages
+78 10. Configure static SPA output (TanStack Start with `server.preset: 'static'` or equivalent Nitro static preset) for GitHub Pages deployment
+79 11. PWA manifest (`manifest.json`) + basic Workbox service worker via `vite-plugin-pwa` (pre-cache app shell only)
+80 12. App versioning: semver stamp in build output
+81 
+82 **Key TanStack decisions:**
+83 
+84 - Use TanStack Router's file-based routing convention (`routes/` directory)
+85 - Use TanStack Router's `beforeLoad` / `loader` for client-side data loading from RxDB
+86 - Consider TanStack Query alongside RxDB for async state management (evaluate in M2)
+87 - Static preset for now; switch to Cloudflare/Vercel/Node preset when server features are added
+88 
+89 **Deliverable:** A deployable blank PWA on GitHub Pages with passing CI, type-safe routing, and nested layout structure.
+90 
+91 ---
+92 
+93 ## Milestone 2 -- Data Layer and Core Infrastructure
+94 
+95 Set up RxDB and the foundational systems that everything else depends on.
+96 
+97 **SYNC (must complete in order):**
+98 
+99 1. RxDB database initialization and schema definitions for all collections (`profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`)
+100 2. Schema migration framework (version tracking via `app_meta`)
+101 3. React hooks for reactive RxDB queries
+102 4. Evaluate TanStack Query integration -- determine if TanStack Query should wrap RxDB observables for cache management, or if RxDB's reactive queries are sufficient via custom hooks. Decision impacts all downstream data access patterns.
+103 
+104 **ASYNC (can proceed in parallel once RxDB is up):**
+105 
+106 - **Event bus / plugin hook system** -- pub/sub for app events, extension point registration
+107 - **i18n setup** -- react-i18next (or lighter alternative), `en` + `pt-BR` translation files, namespace structure (common, games, settings, encouragements); integrate with TanStack Router for locale-aware routes if needed
+108 - **Theme engine** -- load themes from RxDB `themes` collection, **two** pre-defined theme seeds for M2 (more presets later), CSS variable injection, clone-and-modify logic
+109 - **Speech services** -- TTS wrapper (`SpeechOutput`), STT wrapper (`SpeechInput`), voice enumeration, fallback handling
+110 
+111 ---
+112 
+113 ## Milestone 3 -- Profile System and App Shell UI
+114 
+115 Build the user-facing shell: navigation, profile management, and dashboard. TanStack Router's nested layouts and type-safe routes drive the structure.
+116 
+117 **SYNC (sequential):**
+118 
+119 1. **Route tree structure** -- define TanStack Router file-based routes: `_app` (root layout), `_app/index` (profile picker), `_app/dashboard` (game grid), `_app/game/$gameId` (game shell), `_app/settings` (child settings), `_app/parent` (parent settings with nested routes)
+120 2. **Profile picker / home screen** -- create profile, select profile, avatar picker, grade-level selector; use `beforeLoad` guard to redirect to profile picker if no active profile
+121 3. **Family sharing** -- quick profile switching, parent PIN gate for settings (route guard on `/parent` routes)
+122 4. **App layout shell** -- root layout with header, back button, breadcrumbs (parent view), grade-adaptive navigation (icons for Pre-K, text+icons for older)
+123 5. **Dashboard** -- game grid by subject/grade, bookmarked games row, recently played row; use route `loader` to pre-fetch game catalog + bookmarks from RxDB
+124 6. **Settings screen** -- volume, speech rate, active language, theme selector per profile
+125 7. **Offline indicator** -- `navigator.onLine` listener, banner component, last-sync timestamp
+126 
+127 **ASYNC (can start once profile + layout exist):**
+128 
+129 - **Bookmark system** -- bookmark/unbookmark games, persist to `bookmarks` collection
+130 - **Recents tracking** -- update `progress` collection with last-played timestamps, query for dashboard
+131 
+132 ---
+133 
+134 ## Milestone 4 -- Game Engine Framework
+135 
+136 Build the reusable game infrastructure (no specific games yet).
+137 
+138 **SYNC (sequential):**
+139 
+140 1. **Game lifecycle manager** -- load, instructions (TTS), play, evaluate, score, next/retry state machine
+141 2. **Game shell UI** -- consistent header, game area, controls, back/exit
+142 3. **Game config loader** -- read game JSON config, merge with parent overrides (override > grade-band > global > default)
+143 4. **Session recorder middleware** -- subscribe to event bus, write to `session_history`, automatic chunking (200 events / 50KB cap), write `session_history_index` summary on session end
+144 
+145 **ASYNC (reusable components, independent of each other):**
+146 
+147 - `DragAndDrop` -- pointer events, magnetic/snap, ghost preview, visual pulse on drop zones
+148 - `LetterTracer` -- canvas-based tracing with touch/mouse, tap-to-place alternative
+149 - `MultipleChoice` -- tap/click answer selection
+150 - `Timer` -- configurable, hideable per parent settings
+151 - `ScoreAnimation` -- confetti, stars, CSS-only reward animations
+152 - `EncouragementAnnouncer` -- contextual TTS + visual popup, triggered by game events
+153 - `ProgressBar` / `ScoreBoard` -- in-game progress display
+154 
+155 ---
+156 
+157 ## Milestone 5 -- Reference Games
+158 
+159 Implement the 5 reference games. Each game is independent and can be built in parallel.
+160 
+161 **ASYNC (all 5 are independent):**
+162 
+163 - **Word Builder** (K-Year 2, Reading) -- uses `DragAndDrop` + TTS hints, per-language word lists
+164 - **Number Match** (Pre-K/K, Math) -- uses `DragAndDrop` with snap, object-group visuals
+165 - **Math Facts** (Year 1-4, Math) -- uses `MultipleChoice` + `Timer`, visual number line
+166 - **Read Aloud** (Year 1-3, Reading) -- uses `SpeechInput` (STT), sentence display, evaluation
+167 - **Letter Tracing** (Pre-K/K, Letters) -- uses `LetterTracer`, TTS for letter names
+168 
+169 Each game should include: unit tests for game logic, integration test for full lifecycle, i18n content for `en` + `pt-BR`.
+170 
+171 ---
+172 
+173 ## Milestone 6 -- Cloud Sync and OAuth
+174 
+175 Can begin in parallel with Milestones 4-5 (data layer is ready from Milestone 2).
+176 
+177 **SYNC (sequential):**
+178 
+179 1. **OneDrive sync** -- MSAL.js PKCE flow (no backend needed), RxDB replication plugin for OneDrive
+180 2. **Google Drive sync** -- PKCE flow with Cloudflare Worker BFF proxy for token exchange, RxDB replication plugin for Google Drive
+181 3. **Token management** -- encrypted IndexedDB storage, refresh token handling
+182 4. **Device-aware sync** -- `deviceId` field on synced records, device-local voice preferences excluded from cross-device apply
+183 5. **Conflict resolution** -- last-write-wins with merge for `progress`, append-only for `session_history`
+184 
+185 **ASYNC (within this milestone):**
+186 
+187 - Cloudflare Worker OAuth proxy (separate repo, non-GPL) can be developed independently
+188 - OneDrive and Google Drive replication plugins can be developed in parallel once the replication interface is defined
+189 
+190 ---
+191 
+192 ## Milestone 7 -- Parent/Guardian Features
+193 
+194 Depends on: profiles (M3), game engine (M4), session recorder (M4), data model (M2).
+195 
+196 **ASYNC (independent screens):**
+197 
+198 - **Parent settings: game overrides UI** -- per-game, per-grade-band, and global override controls (retries, timer, always-win, difficulty)
+199 - **Parent settings: session history viewer** -- timeline view, filter by game/date/grade, expandable session detail with lazy-loaded chunks
+200 - **Parent settings: data management** -- storage usage display, separate "Clear History" / "Clear Progress" buttons, date-range picker, confirmation dialogs, cascade delete
+201 - **Parent settings: cloud sync config** -- connect/disconnect Google Drive / OneDrive, sync status, last sync timestamp
+202 - **Parent settings: TTS voice selector** -- per-language voice picker from `speechSynthesis.getVoices()`, device-aware
+203 
+204 ---
+205 
+206 ## Milestone 8 -- Polish, Accessibility, and Testing
+207 
+208 Final hardening pass. Most of this is ASYNC.
+209 
+210 **ASYNC work streams:**
+211 
+212 - **Accessibility audit** -- axe-core integration in component tests, Playwright accessibility audits on all pages, ARIA labels, focus management, keyboard navigation for all games, screen reader testing
+213 - **Offline hardening** -- E2E tests for offline/online transitions, SW cache validation, RxDB queue-and-replay verification
+214 - **Visual regression** -- Playwright screenshot baselines for all key screens across all 4-6 themes
+215 - **i18n verification** -- snapshot tests for `en` and `pt-BR` on all screens, RTL placeholder if needed
+216 - **Performance** -- Lighthouse audit, bundle analysis, lazy-load game assets, ensure CSS-only animations
+217 - **Analytics abstraction** -- define analytics interface/adapter, implement one provider (decision deferred per PRD), ensure provider is swappable
+218 - **PWA install prompt** -- custom install banner, iOS/Android handling
+219 - **SW migration testing** -- version mismatch detection, cache purge, RxDB schema migration on upgrade
+220 
+221 ---
+222 
+223 ## Dependency Graph
+224 
+225 ```mermaid
+226 graph TD
+227     M0[M0: Design Docs] --> M1[M1: Scaffolding and CICD]
+228     M1 --> M2[M2: Data Layer and Core Infra]
+229     M2 --> M3[M3: Profile System and App Shell]
+230     M2 --> M4[M4: Game Engine Framework]
+231     M2 --> M6[M6: Cloud Sync and OAuth]
+232     M3 --> M5[M5: Reference Games]
+233     M4 --> M5
+234     M3 --> M7[M7: Parent Features]
+235     M4 --> M7
+236     M6 --> M7
+237     M5 --> M8[M8: Polish and Testing]
+238     M7 --> M8
+239 ```
+240 
+241 ---
+242 
+243 ## Summary: What Can Run in Parallel
+244 
+245 | Phase | Parallel Streams                                |
+246 | ----- | ----------------------------------------------- |
+247 | M0    | Most design docs can be written concurrently    |
+248 | M2    | Event bus, i18n, theme engine, speech services  |
+249 | M3    | Bookmarks, recents (after shell exists)         |
+250 | M4    | All 7 reusable game components                  |
+251 | M5    | All 5 reference games                           |
+252 | M6    | OneDrive plugin, Google Drive plugin, CF Worker |
+253 | M7    | All 5 parent settings screens                   |
+254 | M8    | All 8 polish work streams                       |
+255 
+256 The critical path is: **M0 -> M1 -> M2 -> M4 -> M5 -> M8**, with M3, M6, and M7 as parallel branches off M2.
+257 
+258 ---
+259 
+260 ## Future: Server Upgrade Path (post-M8)
+261 
+262 When premium/server features are needed, TanStack Start enables a smooth transition:
+263 
+264 - Switch from static preset to Cloudflare Workers / Vercel / Node preset
+265 - Add server functions for auth, multiplayer WebSocket coordination, premium content gating
+266 - TanStack Start's server functions and API routes activate without restructuring the client-side app
+267 - The GPL-licensed SPA remains unchanged; server features live in separate private repos communicating over network boundaries (per PRD licensing strategy)
 268
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:16Z)**_
@@ -1054,6 +1059,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:52:17Z)**_
 ```text
 File content (14369 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:17Z)**_
@@ -1063,107 +1069,108 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:52:17Z)**_
  `./docs/ui-ux.md`
 
 ```text
-1	# BaseSkill — UI/UX Design Document
-2	
-3	> **Audience**: AI agents and human developers implementing the BaseSkill frontend.
-4	> **Stack**: TanStack Start + TanStack Router + React + TypeScript + shadcn/ui + Tailwind CSS v4
-5	> **App type**: Free, open-source, offline-first educational PWA — Pre-K through Year 6+
-6	
-7	---
-8	
-9	## Table of Contents
-10	
-11	1. [Design Principles](#1-design-principles)
-12	2. [Design System Foundation](#2-design-system-foundation)
-13	3. [Pre-Defined Themes](#3-pre-defined-themes)
-14	4. [Theme Customization System](#4-theme-customization-system)
-15	5. [Core Layouts](#5-core-layouts)
-16	6. [Navigation Patterns](#6-navigation-patterns)
-17	7. [Game Card Design](#7-game-card-design)
-18	8. [Drag-and-Drop UX Helpers](#8-drag-and-drop-ux-helpers)
-19	9. [Encouragement System](#9-encouragement-system)
-20	10. [Session History Viewer](#10-session-history-viewer)
-21	11. [Data Management Screen](#11-data-management-screen)
-22	12. [Responsive Strategy](#12-responsive-strategy)
-23	13. [Animation Guidelines](#13-animation-guidelines)
-24	14. [Color Accessibility](#14-color-accessibility)
-25	
-26	---
-27	
-28	## 1. Design Principles
-29	
-30	### 1.1 Child-First Interactions
-31	
-32	Every screen, gesture, and piece of copy is designed for the child's current grade level. Pre-K children interact primarily through large tap targets and listen to spoken instructions (TTS). Year 3+ children can read menus and use search. The UI automatically adapts its affordances based on the active profile's grade band.
-33	
-34	Grade bands and their UX tier:
-35	
-36	| Grade Band   | Ages (approx.) | UX Tier                        |
-37	| ------------ | -------------- | ------------------------------ |
-38	| Pre-K / Prep | 3–5            | Icon + TTS only                |
-39	| Year 1–2     | 5–8            | Icon + short text label        |
-40	| Year 3–4     | 8–10           | Text navigation, simple search |
-41	| Year 5–6+    | 10–12          | Full text UI, advanced filters |
-42	
-43	### 1.2 Touch Target Sizes
-44	
-45	- **Minimum**: 48×48px (WCAG 2.5.5 AA)
-46	- **Preferred**: 64×64px for Pre-K and Kindergarten
-47	- **Game drop zones**: minimum 80×80px
-48	- **Interactive cards**: minimum 160×200px
-49	- **Never place two tappable elements closer than 8px apart**
-50	
-51	### 1.3 Encouraging, Never Punitive
-52	
-53	- Wrong answers receive supportive feedback ("Almost! Try again") — never a buzzer, red X alone, or harsh animation
-54	- Correct answers receive celebration (animation + sound + mascot message)
-55	- Scores display as stars or badges — no numeric failure states shown to the child
-56	- The word "wrong" never appears in child-facing copy
-57	
-58	### 1.4 Distraction-Free Environment
-59	
-60	- Zero advertisements
-61	- Zero external links in child-facing screens
-62	- No push notifications
-63	- No social features or leaderboards
-64	- Parent Settings is PIN-gated and separated from child UI
-65	- No cookie consent banners or modals during gameplay
-66	
-67	### 1.5 Offline by Default
-68	
-69	- All core game assets and logic are bundled or cached via Service Worker
-70	- No loading spinners appear during gameplay for cached content
-71	- Sync indicators (when cloud sync is enabled) appear only in Parent Settings, never in child UI
-72	- App shell loads instantly from cache; data hydrates from RxDB (IndexedDB) synchronously on mount
-73	
-74	### 1.6 Accessibility (WCAG 2.1 AA)
-75	
-76	- All interactive elements have visible focus rings (2px outline, offset 2px, theme primary color)
-77	- `aria-label` on all icon-only buttons
-78	- Color is never the sole differentiator for game mechanics — always paired with shape, pattern, icon, or label
-79	- TTS available for all game instructions, question text, and answer options
-80	- Keyboard navigation fully supported; logical tab order maintained
-81	- `prefers-reduced-motion` respected for all animations
-82	- Minimum contrast ratio: 4.5:1 for body text, 3:1 for large text and UI components
-83	
-84	---
-85	
-86	## 2. Design System Foundation
-87	
-88	### 2.1 Component Base: shadcn/ui
-89	
-90	BaseSkill uses [shadcn/ui](https://ui.shadcn.com/) as its component library — Radix UI primitives styled with Tailwind CSS v4. Components are copied into `src/components/ui/` and modified for child-friendly defaults.
-91	
-92	**Key modifications to shadcn defaults**:
-93	
-94	| Token          | shadcn default     | BaseSkill override                                                                                                                                                     |
-95	| -------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-96	| Border radius  | `rounded-md` (6px) | `rounded-3xl` (24px) for cards, `rounded-2xl` for buttons                                                                                                              |
-97	| Button height  | 36px               | 48px minimum, 56px for primary actions                                                                                                                                 |
-98	| Font family    | system-ui          | [Edu NSW ACT Foundation](https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation) (Google Fonts), fallback: Nunito, system-ui. Parents can override font per profile. |
-99	| Font size base | 14px               | 16px (mobile), 18px (tablet), 20px (desktop)                                                                                                                           |
-100	| Shadow         | `shadow-sm`        | `shadow-md` with softer spread for card depth                                                                                                                          |
+1 # BaseSkill — UI/UX Design Document
+2 
+3 > **Audience**: AI agents and human developers implementing the BaseSkill frontend.
+4 > **Stack**: TanStack Start + TanStack Router + React + TypeScript + shadcn/ui + Tailwind CSS v4
+5 > **App type**: Free, open-source, offline-first educational PWA — Pre-K through Year 6+
+6 
+7 ---
+8 
+9 ## Table of Contents
+10 
+11 1. [Design Principles](#1-design-principles)
+12 2. [Design System Foundation](#2-design-system-foundation)
+13 3. [Pre-Defined Themes](#3-pre-defined-themes)
+14 4. [Theme Customization System](#4-theme-customization-system)
+15 5. [Core Layouts](#5-core-layouts)
+16 6. [Navigation Patterns](#6-navigation-patterns)
+17 7. [Game Card Design](#7-game-card-design)
+18 8. [Drag-and-Drop UX Helpers](#8-drag-and-drop-ux-helpers)
+19 9. [Encouragement System](#9-encouragement-system)
+20 10. [Session History Viewer](#10-session-history-viewer)
+21 11. [Data Management Screen](#11-data-management-screen)
+22 12. [Responsive Strategy](#12-responsive-strategy)
+23 13. [Animation Guidelines](#13-animation-guidelines)
+24 14. [Color Accessibility](#14-color-accessibility)
+25 
+26 ---
+27 
+28 ## 1. Design Principles
+29 
+30 ### 1.1 Child-First Interactions
+31 
+32 Every screen, gesture, and piece of copy is designed for the child's current grade level. Pre-K children interact primarily through large tap targets and listen to spoken instructions (TTS). Year 3+ children can read menus and use search. The UI automatically adapts its affordances based on the active profile's grade band.
+33 
+34 Grade bands and their UX tier:
+35 
+36 | Grade Band   | Ages (approx.) | UX Tier                        |
+37 | ------------ | -------------- | ------------------------------ |
+38 | Pre-K / Prep | 3–5            | Icon + TTS only                |
+39 | Year 1–2     | 5–8            | Icon + short text label        |
+40 | Year 3–4     | 8–10           | Text navigation, simple search |
+41 | Year 5–6+    | 10–12          | Full text UI, advanced filters |
+42 
+43 ### 1.2 Touch Target Sizes
+44 
+45 - **Minimum**: 48×48px (WCAG 2.5.5 AA)
+46 - **Preferred**: 64×64px for Pre-K and Kindergarten
+47 - **Game drop zones**: minimum 80×80px
+48 - **Interactive cards**: minimum 160×200px
+49 - **Never place two tappable elements closer than 8px apart**
+50 
+51 ### 1.3 Encouraging, Never Punitive
+52 
+53 - Wrong answers receive supportive feedback ("Almost! Try again") — never a buzzer, red X alone, or harsh animation
+54 - Correct answers receive celebration (animation + sound + mascot message)
+55 - Scores display as stars or badges — no numeric failure states shown to the child
+56 - The word "wrong" never appears in child-facing copy
+57 
+58 ### 1.4 Distraction-Free Environment
+59 
+60 - Zero advertisements
+61 - Zero external links in child-facing screens
+62 - No push notifications
+63 - No social features or leaderboards
+64 - Parent Settings is PIN-gated and separated from child UI
+65 - No cookie consent banners or modals during gameplay
+66 
+67 ### 1.5 Offline by Default
+68 
+69 - All core game assets and logic are bundled or cached via Service Worker
+70 - No loading spinners appear during gameplay for cached content
+71 - Sync indicators (when cloud sync is enabled) appear only in Parent Settings, never in child UI
+72 - App shell loads instantly from cache; data hydrates from RxDB (IndexedDB) synchronously on mount
+73 
+74 ### 1.6 Accessibility (WCAG 2.1 AA)
+75 
+76 - All interactive elements have visible focus rings (2px outline, offset 2px, theme primary color)
+77 - `aria-label` on all icon-only buttons
+78 - Color is never the sole differentiator for game mechanics — always paired with shape, pattern, icon, or label
+79 - TTS available for all game instructions, question text, and answer options
+80 - Keyboard navigation fully supported; logical tab order maintained
+81 - `prefers-reduced-motion` respected for all animations
+82 - Minimum contrast ratio: 4.5:1 for body text, 3:1 for large text and UI components
+83 
+84 ---
+85 
+86 ## 2. Design System Foundation
+87 
+88 ### 2.1 Component Base: shadcn/ui
+89 
+90 BaseSkill uses [shadcn/ui](https://ui.shadcn.com/) as its component library — Radix UI primitives styled with Tailwind CSS v4. Components are copied into `src/components/ui/` and modified for child-friendly defaults.
+91 
+92 **Key modifications to shadcn defaults**:
+93 
+94 | Token          | shadcn default     | BaseSkill override                                                                                                                                                     |
+95 | -------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+96 | Border radius  | `rounded-md` (6px) | `rounded-3xl` (24px) for cards, `rounded-2xl` for buttons                                                                                                              |
+97 | Button height  | 36px               | 48px minimum, 56px for primary actions                                                                                                                                 |
+98 | Font family    | system-ui          | [Edu NSW ACT Foundation](https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation) (Google Fonts), fallback: Nunito, system-ui. Parents can override font per profile. |
+99 | Font size base | 14px               | 16px (mobile), 18px (tablet), 20px (desktop)                                                                                                                           |
+100 | Shadow         | `shadow-sm`        | `shadow-md` with softer spread for card depth                                                                                                                          |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:20Z)**_
@@ -1203,6 +1210,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:52:21Z)**_
 792-### 8.1 Magnetic Snap
 793-
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:23Z)**_
@@ -1214,6 +1222,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:52:23Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:27Z)**_
@@ -1223,107 +1232,108 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:52:27Z)**_
  `./docs/ui-ux.md`
 
 ```text
-788	## 8. Drag-and-Drop UX Helpers
-789	
-790	All drag-and-drop interactions use the **Pointer Events API** (`onPointerDown`, `onPointerMove`, `onPointerUp`) — not separate mouse + touch handlers. This provides unified behavior across mouse, touch, and stylus.
-791	
-792	### 8.1 Magnetic Snap
-793	
-794	**Behavior**: When a draggable item enters the activation threshold of a valid drop zone, it "snaps" toward the drop zone center — giving children tactile feedback that they are in the right area.
-795	
-796	**Threshold**: configurable per game (default: 60px radius from the drop zone center).
-797	
-798	**Visual**: the dragged item's CSS `transform: translate()` values interpolate toward the drop zone center using a lerp (linear interpolation) applied on each `pointermove` event:
-799	
-800	```
-801	// Pseudocode
-802	if (distanceToZoneCenter < SNAP_THRESHOLD) {
-803	  const t = 1 - (distanceToZoneCenter / SNAP_THRESHOLD); // 0 → 1 as closer
-804	  itemX = lerp(currentX, zoneCenter.x, t * 0.3);
-805	  itemY = lerp(currentY, zoneCenter.y, t * 0.3);
-806	}
-807	```
-808	
-809	The `0.3` multiplier creates a "pull" feeling without fully locking the item until drop.
-810	
-811	### 8.2 Ghost Preview
-812	
-813	**Behavior**: While dragging, a semi-transparent copy of the item (the "ghost") appears at the current drop zone target position, showing where the item will land if released.
-814	
-815	**Implementation**:
-816	
-817	- Ghost element is a clone of the draggable item with `opacity: 0.4` and `pointer-events: none`
-818	- Ghost is rendered inside the drop zone, positioned at the zone's snap target point
-819	- Ghost appears only when the dragged item is within `SNAP_THRESHOLD` of a valid zone
-820	- Ghost disappears when item leaves the zone or is dropped
-821	
-822	### 8.3 Visual Pulse on Drop Zones
-823	
-824	**Behavior**: All valid drop zones pulsate (scale + opacity animation) while a drag is in progress, guiding young children to the correct areas.
-825	
-826	**CSS animation**:
-827	
-828	```css
-829	@keyframes drop-zone-pulse {
-830	  0%,
-831	  100% {
-832	    transform: scale(1);
-833	    opacity: 0.7;
-834	  }
-835	  50% {
-836	    transform: scale(1.06);
-837	    opacity: 1;
-838	  }
-839	}
-840	
-841	.drop-zone--active {
-842	  animation: drop-zone-pulse 1.2s ease-in-out infinite;
-843	}
-844	```
-845	
-846	Animation starts when drag begins (`onPointerDown` on any draggable), stops when drag ends.
-847	
-848	**Accessibility**: `aria-dropeffect="move"` on drop zones, `aria-grabbed="true"` on the dragged item.
-849	
-850	### 8.4 Pointer Events Implementation
-851	
-852	```typescript
-853	// Shared drag state managed via React ref (not state — avoids re-renders during drag)
-854	interface DragState {
-855	  isDragging: boolean;
-856	  itemId: string | null;
-857	  startX: number;
-858	  startY: number;
-859	  currentX: number;
-860	  currentY: number;
-861	  activeZoneId: string | null;
-862	}
-863	```
-864	
-865	- `onPointerDown`: capture pointer (`element.setPointerCapture(e.pointerId)`), initialize drag state
-866	- `onPointerMove`: update drag position, check zone proximity, apply magnetic snap
-867	- `onPointerUp`: check if over valid zone, fire drop handler, clean up state
-868	- `onPointerCancel`: clean up state (handles interruptions like phone calls on mobile)
-869	
-870	### 8.5 Drag Handles and Accessibility
-871	
-872	- **Young children (Pre-K/K)**: the entire item is the drag handle (no separate grab area)
-873	- **Older children**: optional grab handle icon (⠿ or similar) in top-left corner, 32×32px
-874	- All draggable items have `role="button"` with `aria-label="Drag [item name]"`
-875	- **Keyboard drag simulation**:
-876	  - Space/Enter: "pick up" item (announces "Picked up [item]")
-877	  - Arrow keys: move item (announces proximity to zones)
-878	  - Space/Enter again: drop at current position
-879	  - Escape: cancel drag, return item to origin
-880	
-881	---
-882	
-883	## 9. Encouragement System
-884	
-885	### 9.1 Mascot
-886	
-887	- Character: friendly owl (default) — round eyes, exaggerated smile, sitting pose. Illustrative vector style matching the active theme's color palette (accent color used for feather highlights).
+788 ## 8. Drag-and-Drop UX Helpers
+789 
+790 All drag-and-drop interactions use the **Pointer Events API** (`onPointerDown`, `onPointerMove`, `onPointerUp`) — not separate mouse + touch handlers. This provides unified behavior across mouse, touch, and stylus.
+791 
+792 ### 8.1 Magnetic Snap
+793 
+794 **Behavior**: When a draggable item enters the activation threshold of a valid drop zone, it "snaps" toward the drop zone center — giving children tactile feedback that they are in the right area.
+795 
+796 **Threshold**: configurable per game (default: 60px radius from the drop zone center).
+797 
+798 **Visual**: the dragged item's CSS `transform: translate()` values interpolate toward the drop zone center using a lerp (linear interpolation) applied on each `pointermove` event:
+799 
+800 ```
+801 // Pseudocode
+802 if (distanceToZoneCenter < SNAP_THRESHOLD) {
+803   const t = 1 - (distanceToZoneCenter / SNAP_THRESHOLD); // 0 → 1 as closer
+804   itemX = lerp(currentX, zoneCenter.x, t * 0.3);
+805   itemY = lerp(currentY, zoneCenter.y, t * 0.3);
+806 }
+807 ```
+808 
+809 The `0.3` multiplier creates a "pull" feeling without fully locking the item until drop.
+810 
+811 ### 8.2 Ghost Preview
+812 
+813 **Behavior**: While dragging, a semi-transparent copy of the item (the "ghost") appears at the current drop zone target position, showing where the item will land if released.
+814 
+815 **Implementation**:
+816 
+817 - Ghost element is a clone of the draggable item with `opacity: 0.4` and `pointer-events: none`
+818 - Ghost is rendered inside the drop zone, positioned at the zone's snap target point
+819 - Ghost appears only when the dragged item is within `SNAP_THRESHOLD` of a valid zone
+820 - Ghost disappears when item leaves the zone or is dropped
+821 
+822 ### 8.3 Visual Pulse on Drop Zones
+823 
+824 **Behavior**: All valid drop zones pulsate (scale + opacity animation) while a drag is in progress, guiding young children to the correct areas.
+825 
+826 **CSS animation**:
+827 
+828 ```css
+829 @keyframes drop-zone-pulse {
+830   0%,
+831   100% {
+832     transform: scale(1);
+833     opacity: 0.7;
+834   }
+835   50% {
+836     transform: scale(1.06);
+837     opacity: 1;
+838   }
+839 }
+840 
+841 .drop-zone--active {
+842   animation: drop-zone-pulse 1.2s ease-in-out infinite;
+843 }
+844 ```
+845 
+846 Animation starts when drag begins (`onPointerDown` on any draggable), stops when drag ends.
+847 
+848 **Accessibility**: `aria-dropeffect="move"` on drop zones, `aria-grabbed="true"` on the dragged item.
+849 
+850 ### 8.4 Pointer Events Implementation
+851 
+852 ```typescript
+853 // Shared drag state managed via React ref (not state — avoids re-renders during drag)
+854 interface DragState {
+855   isDragging: boolean;
+856   itemId: string | null;
+857   startX: number;
+858   startY: number;
+859   currentX: number;
+860   currentY: number;
+861   activeZoneId: string | null;
+862 }
+863 ```
+864 
+865 - `onPointerDown`: capture pointer (`element.setPointerCapture(e.pointerId)`), initialize drag state
+866 - `onPointerMove`: update drag position, check zone proximity, apply magnetic snap
+867 - `onPointerUp`: check if over valid zone, fire drop handler, clean up state
+868 - `onPointerCancel`: clean up state (handles interruptions like phone calls on mobile)
+869 
+870 ### 8.5 Drag Handles and Accessibility
+871 
+872 - **Young children (Pre-K/K)**: the entire item is the drag handle (no separate grab area)
+873 - **Older children**: optional grab handle icon (⠿ or similar) in top-left corner, 32×32px
+874 - All draggable items have `role="button"` with `aria-label="Drag [item name]"`
+875 - **Keyboard drag simulation**:
+876   - Space/Enter: "pick up" item (announces "Picked up [item]")
+877   - Arrow keys: move item (announces proximity to zones)
+878   - Space/Enter again: drop at current position
+879   - Escape: cancel drag, return item to origin
+880 
+881 ---
+882 
+883 ## 9. Encouragement System
+884 
+885 ### 9.1 Mascot
+886 
+887 - Character: friendly owl (default) — round eyes, exaggerated smile, sitting pose. Illustrative vector style matching the active theme's color palette (accent color used for feather highlights).
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:30Z)**_
@@ -1408,6 +1418,7 @@ src/components/Header.tsx
 src/routes/$locale/_app/index.tsx
 src/db/hooks/useRxQuery.demo.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:31Z)**_
@@ -1417,87 +1428,88 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:52:31Z)**_
  `./docs/superpowers/specs/2026-04-02-milestone-4-game-engine-design.md`
 
 ```text
-1	# M4 Game Engine Framework — Design Spec
-2	
-3	**Date:** 2026-04-02
-4	**Status:** Approved
-5	**Milestone:** 4 — Game Engine Framework
-6	**Depends on:** M2 (RxDB, event bus, speech services), M3 (app shell, routing)
-7	
-8	---
-9	
-10	## 1. Overview
-11	
-12	M4 builds the reusable game infrastructure that all 5 reference games (M5) run on. Reusable interaction components (DragAndDrop, LetterTracer, etc.) are **deferred to M5**, built alongside the games that need them.
-13	
-14	The defining requirement beyond the milestone plan: the engine supports **parent-watchable replay**. Parents can scrub through every step their child took — including every undo — to see real learning behaviour (e.g. repeated undo to fake a better score). This is achieved via an append-only move log and a standalone replay function, similar in spirit to boardgame.io's move history and Redux DevTools.
-15	
-16	---
-17	
-18	## 2. Architecture
-19	
-20	Three layers, cleanly separated:
-21	
-22	```
-23	Route loader (/$locale/_app/game/$gameId)
-24	  ├── loadGameConfig()           ← override merging (RxDB read, runs once)
-25	  └── findInProgressSession()    ← silent resume check (RxDB read, runs once)
-26	        │
-27	        ▼
-28	GameShell
-29	└── GameEngineProvider           ← Redux-style context provider
-30	    ├── GameStateContext          ← state only (re-renders consumers)
-31	    ├── GameDispatchContext       ← stable dispatch ref (no re-renders)
-32	    ├── useGameLifecycle          ← state machine, no RxDB
-33	    ├── useMoveLog                ← in-memory append-only log, no RxDB
-34	    ├── useSessionRecorder        ← RxDB writes on every move + flush on hide/unload
-35	    └── <game component>         ← useGameState() + useGameDispatch()
-36	
-37	replayToStep(log, stepIndex)     ← standalone pure fn, no React
-38	                                    used by: live undo + silent resume + M7 viewer
-39	```
-40	
-41	### Provider internals — three composed hooks
-42	
-43	| Hook                        | Responsibility                                                                                                                          |
-44	| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-45	| `useGameLifecycle(config)`  | Lifecycle state machine (8 phases, 9 transitions). No RxDB, no move log.                                                                |
-46	| `useMoveLog(maxUndoDepth)`  | Append-only in-memory move log + undo enforcement. No RxDB — fast synchronous access only.                                              |
-47	| `useSessionRecorder(moves)` | Writes to RxDB **on every move** and on `visibilitychange`/`beforeunload`. Chunks at 200 moves / 50 KB. Emits `game:end` on bus at end. |
-48	
-49	---
-50	
-51	## 3. Types
-52	
-53	```ts
-54	// src/lib/game-engine/types.ts
-55	
-56	export type GamePhase =
-57	  | 'idle'
-58	  | 'loading'
-59	  | 'instructions'
-60	  | 'playing'
-61	  | 'evaluating'
-62	  | 'scoring'
-63	  | 'next-round'
-64	  | 'retry'
-65	  | 'game-over';
-66	
-67	export interface GameEngineState {
-68	  phase: GamePhase;
-69	  roundIndex: number;
-70	  score: number;
-71	  streak: number;
-72	  retryCount: number;
-73	  content: ResolvedContent; // pre-materialized at session start
-74	  currentRound: RoundState;
-75	}
-76	
-77	export type MoveType =
-78	  | 'SUBMIT_ANSWER'
-79	  | 'REQUEST_HINT'
-80	  | 'SKIP_INSTRUCTIONS'
+1 # M4 Game Engine Framework — Design Spec
+2 
+3 **Date:** 2026-04-02
+4 **Status:** Approved
+5 **Milestone:** 4 — Game Engine Framework
+6 **Depends on:** M2 (RxDB, event bus, speech services), M3 (app shell, routing)
+7 
+8 ---
+9 
+10 ## 1. Overview
+11 
+12 M4 builds the reusable game infrastructure that all 5 reference games (M5) run on. Reusable interaction components (DragAndDrop, LetterTracer, etc.) are **deferred to M5**, built alongside the games that need them.
+13 
+14 The defining requirement beyond the milestone plan: the engine supports **parent-watchable replay**. Parents can scrub through every step their child took — including every undo — to see real learning behaviour (e.g. repeated undo to fake a better score). This is achieved via an append-only move log and a standalone replay function, similar in spirit to boardgame.io's move history and Redux DevTools.
+15 
+16 ---
+17 
+18 ## 2. Architecture
+19 
+20 Three layers, cleanly separated:
+21 
+22 ```
+23 Route loader (/$locale/_app/game/$gameId)
+24   ├── loadGameConfig()           ← override merging (RxDB read, runs once)
+25   └── findInProgressSession()    ← silent resume check (RxDB read, runs once)
+26         │
+27         ▼
+28 GameShell
+29 └── GameEngineProvider           ← Redux-style context provider
+30     ├── GameStateContext          ← state only (re-renders consumers)
+31     ├── GameDispatchContext       ← stable dispatch ref (no re-renders)
+32     ├── useGameLifecycle          ← state machine, no RxDB
+33     ├── useMoveLog                ← in-memory append-only log, no RxDB
+34     ├── useSessionRecorder        ← RxDB writes on every move + flush on hide/unload
+35     └── <game component>         ← useGameState() + useGameDispatch()
+36 
+37 replayToStep(log, stepIndex)     ← standalone pure fn, no React
+38                                     used by: live undo + silent resume + M7 viewer
+39 ```
+40 
+41 ### Provider internals — three composed hooks
+42 
+43 | Hook                        | Responsibility                                                                                                                          |
+44 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+45 | `useGameLifecycle(config)`  | Lifecycle state machine (8 phases, 9 transitions). No RxDB, no move log.                                                                |
+46 | `useMoveLog(maxUndoDepth)`  | Append-only in-memory move log + undo enforcement. No RxDB — fast synchronous access only.                                              |
+47 | `useSessionRecorder(moves)` | Writes to RxDB **on every move** and on `visibilitychange`/`beforeunload`. Chunks at 200 moves / 50 KB. Emits `game:end` on bus at end. |
+48 
+49 ---
+50 
+51 ## 3. Types
+52 
+53 ```ts
+54 // src/lib/game-engine/types.ts
+55 
+56 export type GamePhase =
+57   | 'idle'
+58   | 'loading'
+59   | 'instructions'
+60   | 'playing'
+61   | 'evaluating'
+62   | 'scoring'
+63   | 'next-round'
+64   | 'retry'
+65   | 'game-over';
+66 
+67 export interface GameEngineState {
+68   phase: GamePhase;
+69   roundIndex: number;
+70   score: number;
+71   streak: number;
+72   retryCount: number;
+73   content: ResolvedContent; // pre-materialized at session start
+74   currentRound: RoundState;
+75 }
+76 
+77 export type MoveType =
+78   | 'SUBMIT_ANSWER'
+79   | 'REQUEST_HINT'
+80   | 'SKIP_INSTRUCTIONS'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:42Z)**_
@@ -1506,14 +1518,15 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:52:42Z)**_
 Now I have a solid understanding of the project. Let me mark the "Explore project context" task as completed and move to offering the visual companion.
 
 Key context I've gathered:
+
 - **Word Builder** is for K-Year 2, Reading, uses `DragAndDrop` + TTS hints, per-language word lists
 - The game engine (M4) is 99% complete - has GameEngineProvider, useGameLifecycle, useMoveLog, useSessionRecorder
 - The DragAndDrop component is to be built in M5 alongside the games
 
-
 - The drag-and-drop UX spec calls for magnetic snap, ghost preview, and visual pulse on drop zones using Pragmatic Drag and Drop
 - Touch targets need to be 48x48px minimum (64x64px preferred for younger kids), and the design system uses shadcn/ui with Tailwind v4, rounded-3xl cards, and Edu NSW ACT Foundation font
 - Word Builder targets K-Year 2 (ages 5-8), so I should present a visual companion mockup first rather than jumping into clarifying questions, since the game's interface is inherently visual
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:52:44Z)**_
@@ -1569,6 +1582,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:54:33Z)**_
 ```text
 <tool_use_error>Unknown skill: brainstorming/visual-companion</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:54:36Z)**_
@@ -1580,6 +1594,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:54:36Z)**_
 ```text
 /Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/visual-companion.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:54:39Z)**_
@@ -1589,295 +1604,296 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:54:39Z)**_
  `/Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/visual-companion.md`
 
 ```text
-1	# Visual Companion Guide
-2	
-3	Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
-4	
-5	## When to Use
-6	
-7	Decide per-question, not per-session. The test: **would the user understand this better by seeing it than reading it?**
-8	
-9	**Use the browser** when the content itself is visual:
-10	
-11	- **UI mockups** — wireframes, layouts, navigation structures, component designs
-12	- **Architecture diagrams** — system components, data flow, relationship maps
-13	- **Side-by-side visual comparisons** — comparing two layouts, two color schemes, two design directions
-14	- **Design polish** — when the question is about look and feel, spacing, visual hierarchy
-15	- **Spatial relationships** — state machines, flowcharts, entity relationships rendered as diagrams
-16	
-17	**Use the terminal** when the content is text or tabular:
-18	
-19	- **Requirements and scope questions** — "what does X mean?", "which features are in scope?"
-20	- **Conceptual A/B/C choices** — picking between approaches described in words
-21	- **Tradeoff lists** — pros/cons, comparison tables
-22	- **Technical decisions** — API design, data modeling, architectural approach selection
-23	- **Clarifying questions** — anything where the answer is words, not a visual preference
-24	
-25	A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the terminal. "Which of these wizard layouts feels right?" is visual — use the browser.
-26	
-27	## How It Works
-28	
-29	The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, the user sees it in their browser and can click to select options. Selections are recorded to `state_dir/events` that you read on your next turn.
-30	
-31	**Content fragments vs full documents:** If your HTML file starts with `<!DOCTYPE` or `<html`, the server serves it as-is (just injects the helper script). Otherwise, the server automatically wraps your content in the frame template — adding the header, CSS theme, selection indicator, and all interactive infrastructure. **Write content fragments by default.** Only write full documents when you need complete control over the page.
-32	
-33	## Starting a Session
-34	
-35	```bash
-36	# Start server with persistence (mockups saved to project)
-37	scripts/start-server.sh --project-dir /path/to/project
-38	
-39	# Returns: {"type":"server-started","port":52341,"url":"http://localhost:52341",
-40	#           "screen_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/content",
-41	#           "state_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/state"}
-42	```
-43	
-44	Save `screen_dir` and `state_dir` from the response. Tell user to open the URL.
-45	
-46	**Finding connection info:** The server writes its startup JSON to `$STATE_DIR/server-info`. If you launched the server in the background and didn't capture stdout, read that file to get the URL and port. When using `--project-dir`, check `<project>/.superpowers/brainstorm/` for the session directory.
-47	
-48	**Note:** Pass the project root as `--project-dir` so mockups persist in `.superpowers/brainstorm/` and survive server restarts. Without it, files go to `/tmp` and get cleaned up. Remind the user to add `.superpowers/` to `.gitignore` if it's not already there.
-49	
-50	**Launching the server by platform:**
-51	
-52	**Claude Code (macOS / Linux):**
-53	```bash
-54	# Default mode works — the script backgrounds the server itself
-55	scripts/start-server.sh --project-dir /path/to/project
-56	```
-57	
-58	**Claude Code (Windows):**
-59	```bash
-60	# Windows auto-detects and uses foreground mode, which blocks the tool call.
-61	# Use run_in_background: true on the Bash tool call so the server survives
-62	# across conversation turns.
-63	scripts/start-server.sh --project-dir /path/to/project
-64	```
-65	When calling this via the Bash tool, set `run_in_background: true`. Then read `$STATE_DIR/server-info` on the next turn to get the URL and port.
-66	
-67	**Codex:**
-68	```bash
-69	# Codex reaps background processes. The script auto-detects CODEX_CI and
-70	# switches to foreground mode. Run it normally — no extra flags needed.
-71	scripts/start-server.sh --project-dir /path/to/project
-72	```
-73	
-74	**Gemini CLI:**
-75	```bash
-76	# Use --foreground and set is_background: true on your shell tool call
-77	# so the process survives across turns
-78	scripts/start-server.sh --project-dir /path/to/project --foreground
-79	```
-80	
-81	**Other environments:** The server must keep running in the background across conversation turns. If your environment reaps detached processes, use `--foreground` and launch the command with your platform's background execution mechanism.
-82	
-83	If the URL is unreachable from your browser (common in remote/containerized setups), bind a non-loopback host:
-84	
-85	```bash
-86	scripts/start-server.sh \
-87	  --project-dir /path/to/project \
-88	  --host 0.0.0.0 \
-89	  --url-host localhost
-90	```
-91	
-92	Use `--url-host` to control what hostname is printed in the returned URL JSON.
-93	
-94	## The Loop
-95	
-96	1. **Check server is alive**, then **write HTML** to a new file in `screen_dir`:
-97	   - Before each write, check that `$STATE_DIR/server-info` exists. If it doesn't (or `$STATE_DIR/server-stopped` exists), the server has shut down — restart it with `start-server.sh` before continuing. The server auto-exits after 30 minutes of inactivity.
-98	   - Use semantic filenames: `platform.html`, `visual-style.html`, `layout.html`
-99	   - **Never reuse filenames** — each screen gets a fresh file
-100	   - Use Write tool — **never use cat/heredoc** (dumps noise into terminal)
-101	   - Server automatically serves the newest file
-102	
-103	2. **Tell user what to expect and end your turn:**
-104	   - Remind them of the URL (every step, not just first)
-105	   - Give a brief text summary of what's on screen (e.g., "Showing 3 layout options for the homepage")
-106	   - Ask them to respond in the terminal: "Take a look and let me know what you think. Click to select an option if you'd like."
-107	
-108	3. **On your next turn** — after the user responds in the terminal:
-109	   - Read `$STATE_DIR/events` if it exists — this contains the user's browser interactions (clicks, selections) as JSON lines
-110	   - Merge with the user's terminal text to get the full picture
-111	   - The terminal message is the primary feedback; `state_dir/events` provides structured interaction data
-112	
-113	4. **Iterate or advance** — if feedback changes current screen, write a new file (e.g., `layout-v2.html`). Only move to the next question when the current step is validated.
-114	
-115	5. **Unload when returning to terminal** — when the next step doesn't need the browser (e.g., a clarifying question, a tradeoff discussion), push a waiting screen to clear the stale content:
-116	
-117	   ```html
-118	   <!-- filename: waiting.html (or waiting-2.html, etc.) -->
-119	   <div style="display:flex;align-items:center;justify-content:center;min-height:60vh">
-120	     <p class="subtitle">Continuing in terminal...</p>
-121	   </div>
-122	   ```
-123	
-124	   This prevents the user from staring at a resolved choice while the conversation has moved on. When the next visual question comes up, push a new content file as usual.
-125	
-126	6. Repeat until done.
-127	
-128	## Writing Content Fragments
-129	
-130	Write just the content that goes inside the page. The server wraps it in the frame template automatically (header, theme CSS, selection indicator, and all interactive infrastructure).
-131	
-132	**Minimal example:**
-133	
-134	```html
-135	<h2>Which layout works better?</h2>
-136	<p class="subtitle">Consider readability and visual hierarchy</p>
-137	
-138	<div class="options">
-139	  <div class="option" data-choice="a" onclick="toggleSelect(this)">
-140	    <div class="letter">A</div>
-141	    <div class="content">
-142	      <h3>Single Column</h3>
-143	      <p>Clean, focused reading experience</p>
-144	    </div>
-145	  </div>
-146	  <div class="option" data-choice="b" onclick="toggleSelect(this)">
-147	    <div class="letter">B</div>
-148	    <div class="content">
-149	      <h3>Two Column</h3>
-150	      <p>Sidebar navigation with main content</p>
-151	    </div>
-152	  </div>
-153	</div>
-154	```
-155	
-156	That's it. No `<html>`, no CSS, no `<script>` tags needed. The server provides all of that.
-157	
-158	## CSS Classes Available
-159	
-160	The frame template provides these CSS classes for your content:
-161	
-162	### Options (A/B/C choices)
-163	
-164	```html
-165	<div class="options">
-166	  <div class="option" data-choice="a" onclick="toggleSelect(this)">
-167	    <div class="letter">A</div>
-168	    <div class="content">
-169	      <h3>Title</h3>
-170	      <p>Description</p>
-171	    </div>
-172	  </div>
-173	</div>
-174	```
-175	
-176	**Multi-select:** Add `data-multiselect` to the container to let users select multiple options. Each click toggles the item. The indicator bar shows the count.
-177	
-178	```html
-179	<div class="options" data-multiselect>
-180	  <!-- same option markup — users can select/deselect multiple -->
-181	</div>
-182	```
-183	
-184	### Cards (visual designs)
-185	
-186	```html
-187	<div class="cards">
-188	  <div class="card" data-choice="design1" onclick="toggleSelect(this)">
-189	    <div class="card-image"><!-- mockup content --></div>
-190	    <div class="card-body">
-191	      <h3>Name</h3>
-192	      <p>Description</p>
-193	    </div>
-194	  </div>
-195	</div>
-196	```
-197	
-198	### Mockup container
-199	
-200	```html
-201	<div class="mockup">
-202	  <div class="mockup-header">Preview: Dashboard Layout</div>
-203	  <div class="mockup-body"><!-- your mockup HTML --></div>
-204	</div>
-205	```
-206	
-207	### Split view (side-by-side)
-208	
-209	```html
-210	<div class="split">
-211	  <div class="mockup"><!-- left --></div>
-212	  <div class="mockup"><!-- right --></div>
-213	</div>
-214	```
-215	
-216	### Pros/Cons
-217	
-218	```html
-219	<div class="pros-cons">
-220	  <div class="pros"><h4>Pros</h4><ul><li>Benefit</li></ul></div>
-221	  <div class="cons"><h4>Cons</h4><ul><li>Drawback</li></ul></div>
-222	</div>
-223	```
-224	
-225	### Mock elements (wireframe building blocks)
-226	
-227	```html
-228	<div class="mock-nav">Logo | Home | About | Contact</div>
-229	<div style="display: flex;">
-230	  <div class="mock-sidebar">Navigation</div>
-231	  <div class="mock-content">Main content area</div>
-232	</div>
-233	<button class="mock-button">Action Button</button>
-234	<input class="mock-input" placeholder="Input field">
-235	<div class="placeholder">Placeholder area</div>
-236	```
-237	
-238	### Typography and sections
-239	
-240	- `h2` — page title
-241	- `h3` — section heading
-242	- `.subtitle` — secondary text below title
-243	- `.section` — content block with bottom margin
-244	- `.label` — small uppercase label text
-245	
-246	## Browser Events Format
-247	
-248	When the user clicks options in the browser, their interactions are recorded to `$STATE_DIR/events` (one JSON object per line). The file is cleared automatically when you push a new screen.
-249	
-250	```jsonl
-251	{"type":"click","choice":"a","text":"Option A - Simple Layout","timestamp":1706000101}
-252	{"type":"click","choice":"c","text":"Option C - Complex Grid","timestamp":1706000108}
-253	{"type":"click","choice":"b","text":"Option B - Hybrid","timestamp":1706000115}
-254	```
-255	
-256	The full event stream shows the user's exploration path — they may click multiple options before settling. The last `choice` event is typically the final selection, but the pattern of clicks can reveal hesitation or preferences worth asking about.
-257	
-258	If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser — use only their terminal text.
-259	
-260	## Design Tips
-261	
-262	- **Scale fidelity to the question** — wireframes for layout, polish for polish questions
-263	- **Explain the question on each page** — "Which layout feels more professional?" not just "Pick one"
-264	- **Iterate before advancing** — if feedback changes current screen, write a new version
-265	- **2-4 options max** per screen
-266	- **Use real content when it matters** — for a photography portfolio, use actual images (Unsplash). Placeholder content obscures design issues.
-267	- **Keep mockups simple** — focus on layout and structure, not pixel-perfect design
-268	
-269	## File Naming
-270	
-271	- Use semantic names: `platform.html`, `visual-style.html`, `layout.html`
-272	- Never reuse filenames — each screen must be a new file
-273	- For iterations: append version suffix like `layout-v2.html`, `layout-v3.html`
-274	- Server serves newest file by modification time
-275	
-276	## Cleaning Up
-277	
-278	```bash
-279	scripts/stop-server.sh $SESSION_DIR
-280	```
-281	
-282	If the session used `--project-dir`, mockup files persist in `.superpowers/brainstorm/` for later reference. Only `/tmp` sessions get deleted on stop.
-283	
-284	## Reference
-285	
-286	- Frame template (CSS reference): `scripts/frame-template.html`
-287	- Helper script (client-side): `scripts/helper.js`
+1 # Visual Companion Guide
+2 
+3 Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
+4 
+5 ## When to Use
+6 
+7 Decide per-question, not per-session. The test: **would the user understand this better by seeing it than reading it?**
+8 
+9 **Use the browser** when the content itself is visual:
+10 
+11 - **UI mockups** — wireframes, layouts, navigation structures, component designs
+12 - **Architecture diagrams** — system components, data flow, relationship maps
+13 - **Side-by-side visual comparisons** — comparing two layouts, two color schemes, two design directions
+14 - **Design polish** — when the question is about look and feel, spacing, visual hierarchy
+15 - **Spatial relationships** — state machines, flowcharts, entity relationships rendered as diagrams
+16 
+17 **Use the terminal** when the content is text or tabular:
+18 
+19 - **Requirements and scope questions** — "what does X mean?", "which features are in scope?"
+20 - **Conceptual A/B/C choices** — picking between approaches described in words
+21 - **Tradeoff lists** — pros/cons, comparison tables
+22 - **Technical decisions** — API design, data modeling, architectural approach selection
+23 - **Clarifying questions** — anything where the answer is words, not a visual preference
+24 
+25 A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the terminal. "Which of these wizard layouts feels right?" is visual — use the browser.
+26 
+27 ## How It Works
+28 
+29 The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, the user sees it in their browser and can click to select options. Selections are recorded to `state_dir/events` that you read on your next turn.
+30 
+31 **Content fragments vs full documents:** If your HTML file starts with `<!DOCTYPE` or `<html`, the server serves it as-is (just injects the helper script). Otherwise, the server automatically wraps your content in the frame template — adding the header, CSS theme, selection indicator, and all interactive infrastructure. **Write content fragments by default.** Only write full documents when you need complete control over the page.
+32 
+33 ## Starting a Session
+34 
+35 ```bash
+36 # Start server with persistence (mockups saved to project)
+37 scripts/start-server.sh --project-dir /path/to/project
+38 
+39 # Returns: {"type":"server-started","port":52341,"url":"http://localhost:52341",
+40 #           "screen_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/content",
+41 #           "state_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/state"}
+42 ```
+43 
+44 Save `screen_dir` and `state_dir` from the response. Tell user to open the URL.
+45 
+46 **Finding connection info:** The server writes its startup JSON to `$STATE_DIR/server-info`. If you launched the server in the background and didn't capture stdout, read that file to get the URL and port. When using `--project-dir`, check `<project>/.superpowers/brainstorm/` for the session directory.
+47 
+48 **Note:** Pass the project root as `--project-dir` so mockups persist in `.superpowers/brainstorm/` and survive server restarts. Without it, files go to `/tmp` and get cleaned up. Remind the user to add `.superpowers/` to `.gitignore` if it's not already there.
+49 
+50 **Launching the server by platform:**
+51 
+52 **Claude Code (macOS / Linux):**
+53 ```bash
+54 # Default mode works — the script backgrounds the server itself
+55 scripts/start-server.sh --project-dir /path/to/project
+56 ```
+57 
+58 **Claude Code (Windows):**
+59 ```bash
+60 # Windows auto-detects and uses foreground mode, which blocks the tool call.
+61 # Use run_in_background: true on the Bash tool call so the server survives
+62 # across conversation turns.
+63 scripts/start-server.sh --project-dir /path/to/project
+64 ```
+65 When calling this via the Bash tool, set `run_in_background: true`. Then read `$STATE_DIR/server-info` on the next turn to get the URL and port.
+66 
+67 **Codex:**
+68 ```bash
+69 # Codex reaps background processes. The script auto-detects CODEX_CI and
+70 # switches to foreground mode. Run it normally — no extra flags needed.
+71 scripts/start-server.sh --project-dir /path/to/project
+72 ```
+73 
+74 **Gemini CLI:**
+75 ```bash
+76 # Use --foreground and set is_background: true on your shell tool call
+77 # so the process survives across turns
+78 scripts/start-server.sh --project-dir /path/to/project --foreground
+79 ```
+80 
+81 **Other environments:** The server must keep running in the background across conversation turns. If your environment reaps detached processes, use `--foreground` and launch the command with your platform's background execution mechanism.
+82 
+83 If the URL is unreachable from your browser (common in remote/containerized setups), bind a non-loopback host:
+84 
+85 ```bash
+86 scripts/start-server.sh \
+87   --project-dir /path/to/project \
+88   --host 0.0.0.0 \
+89   --url-host localhost
+90 ```
+91 
+92 Use `--url-host` to control what hostname is printed in the returned URL JSON.
+93 
+94 ## The Loop
+95 
+96 1. **Check server is alive**, then **write HTML** to a new file in `screen_dir`:
+97    - Before each write, check that `$STATE_DIR/server-info` exists. If it doesn't (or `$STATE_DIR/server-stopped` exists), the server has shut down — restart it with `start-server.sh` before continuing. The server auto-exits after 30 minutes of inactivity.
+98    - Use semantic filenames: `platform.html`, `visual-style.html`, `layout.html`
+99    - **Never reuse filenames** — each screen gets a fresh file
+100    - Use Write tool — **never use cat/heredoc** (dumps noise into terminal)
+101    - Server automatically serves the newest file
+102 
+103 2. **Tell user what to expect and end your turn:**
+104    - Remind them of the URL (every step, not just first)
+105    - Give a brief text summary of what's on screen (e.g., "Showing 3 layout options for the homepage")
+106    - Ask them to respond in the terminal: "Take a look and let me know what you think. Click to select an option if you'd like."
+107 
+108 3. **On your next turn** — after the user responds in the terminal:
+109    - Read `$STATE_DIR/events` if it exists — this contains the user's browser interactions (clicks, selections) as JSON lines
+110    - Merge with the user's terminal text to get the full picture
+111    - The terminal message is the primary feedback; `state_dir/events` provides structured interaction data
+112 
+113 4. **Iterate or advance** — if feedback changes current screen, write a new file (e.g., `layout-v2.html`). Only move to the next question when the current step is validated.
+114 
+115 5. **Unload when returning to terminal** — when the next step doesn't need the browser (e.g., a clarifying question, a tradeoff discussion), push a waiting screen to clear the stale content:
+116 
+117    ```html
+118    <!-- filename: waiting.html (or waiting-2.html, etc.) -->
+119    <div style="display:flex;align-items:center;justify-content:center;min-height:60vh">
+120      <p class="subtitle">Continuing in terminal...</p>
+121    </div>
+122    ```
+123 
+124    This prevents the user from staring at a resolved choice while the conversation has moved on. When the next visual question comes up, push a new content file as usual.
+125 
+126 6. Repeat until done.
+127 
+128 ## Writing Content Fragments
+129 
+130 Write just the content that goes inside the page. The server wraps it in the frame template automatically (header, theme CSS, selection indicator, and all interactive infrastructure).
+131 
+132 **Minimal example:**
+133 
+134 ```html
+135 <h2>Which layout works better?</h2>
+136 <p class="subtitle">Consider readability and visual hierarchy</p>
+137 
+138 <div class="options">
+139   <div class="option" data-choice="a" onclick="toggleSelect(this)">
+140     <div class="letter">A</div>
+141     <div class="content">
+142       <h3>Single Column</h3>
+143       <p>Clean, focused reading experience</p>
+144     </div>
+145   </div>
+146   <div class="option" data-choice="b" onclick="toggleSelect(this)">
+147     <div class="letter">B</div>
+148     <div class="content">
+149       <h3>Two Column</h3>
+150       <p>Sidebar navigation with main content</p>
+151     </div>
+152   </div>
+153 </div>
+154 ```
+155 
+156 That's it. No `<html>`, no CSS, no `<script>` tags needed. The server provides all of that.
+157 
+158 ## CSS Classes Available
+159 
+160 The frame template provides these CSS classes for your content:
+161 
+162 ### Options (A/B/C choices)
+163 
+164 ```html
+165 <div class="options">
+166   <div class="option" data-choice="a" onclick="toggleSelect(this)">
+167     <div class="letter">A</div>
+168     <div class="content">
+169       <h3>Title</h3>
+170       <p>Description</p>
+171     </div>
+172   </div>
+173 </div>
+174 ```
+175 
+176 **Multi-select:** Add `data-multiselect` to the container to let users select multiple options. Each click toggles the item. The indicator bar shows the count.
+177 
+178 ```html
+179 <div class="options" data-multiselect>
+180   <!-- same option markup — users can select/deselect multiple -->
+181 </div>
+182 ```
+183 
+184 ### Cards (visual designs)
+185 
+186 ```html
+187 <div class="cards">
+188   <div class="card" data-choice="design1" onclick="toggleSelect(this)">
+189     <div class="card-image"><!-- mockup content --></div>
+190     <div class="card-body">
+191       <h3>Name</h3>
+192       <p>Description</p>
+193     </div>
+194   </div>
+195 </div>
+196 ```
+197 
+198 ### Mockup container
+199 
+200 ```html
+201 <div class="mockup">
+202   <div class="mockup-header">Preview: Dashboard Layout</div>
+203   <div class="mockup-body"><!-- your mockup HTML --></div>
+204 </div>
+205 ```
+206 
+207 ### Split view (side-by-side)
+208 
+209 ```html
+210 <div class="split">
+211   <div class="mockup"><!-- left --></div>
+212   <div class="mockup"><!-- right --></div>
+213 </div>
+214 ```
+215 
+216 ### Pros/Cons
+217 
+218 ```html
+219 <div class="pros-cons">
+220   <div class="pros"><h4>Pros</h4><ul><li>Benefit</li></ul></div>
+221   <div class="cons"><h4>Cons</h4><ul><li>Drawback</li></ul></div>
+222 </div>
+223 ```
+224 
+225 ### Mock elements (wireframe building blocks)
+226 
+227 ```html
+228 <div class="mock-nav">Logo | Home | About | Contact</div>
+229 <div style="display: flex;">
+230   <div class="mock-sidebar">Navigation</div>
+231   <div class="mock-content">Main content area</div>
+232 </div>
+233 <button class="mock-button">Action Button</button>
+234 <input class="mock-input" placeholder="Input field">
+235 <div class="placeholder">Placeholder area</div>
+236 ```
+237 
+238 ### Typography and sections
+239 
+240 - `h2` — page title
+241 - `h3` — section heading
+242 - `.subtitle` — secondary text below title
+243 - `.section` — content block with bottom margin
+244 - `.label` — small uppercase label text
+245 
+246 ## Browser Events Format
+247 
+248 When the user clicks options in the browser, their interactions are recorded to `$STATE_DIR/events` (one JSON object per line). The file is cleared automatically when you push a new screen.
+249 
+250 ```jsonl
+251 {"type":"click","choice":"a","text":"Option A - Simple Layout","timestamp":1706000101}
+252 {"type":"click","choice":"c","text":"Option C - Complex Grid","timestamp":1706000108}
+253 {"type":"click","choice":"b","text":"Option B - Hybrid","timestamp":1706000115}
+254 ```
+255 
+256 The full event stream shows the user's exploration path — they may click multiple options before settling. The last `choice` event is typically the final selection, but the pattern of clicks can reveal hesitation or preferences worth asking about.
+257 
+258 If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser — use only their terminal text.
+259 
+260 ## Design Tips
+261 
+262 - **Scale fidelity to the question** — wireframes for layout, polish for polish questions
+263 - **Explain the question on each page** — "Which layout feels more professional?" not just "Pick one"
+264 - **Iterate before advancing** — if feedback changes current screen, write a new version
+265 - **2-4 options max** per screen
+266 - **Use real content when it matters** — for a photography portfolio, use actual images (Unsplash). Placeholder content obscures design issues.
+267 - **Keep mockups simple** — focus on layout and structure, not pixel-perfect design
+268 
+269 ## File Naming
+270 
+271 - Use semantic names: `platform.html`, `visual-style.html`, `layout.html`
+272 - Never reuse filenames — each screen must be a new file
+273 - For iterations: append version suffix like `layout-v2.html`, `layout-v3.html`
+274 - Server serves newest file by modification time
+275 
+276 ## Cleaning Up
+277 
+278 ```bash
+279 scripts/stop-server.sh $SESSION_DIR
+280 ```
+281 
+282 If the session used `--project-dir`, mockup files persist in `.superpowers/brainstorm/` for later reference. Only `/tmp` sessions get deleted on stop.
+283 
+284 ## Reference
+285 
+286 - Frame template (CSS reference): `scripts/frame-template.html`
+287 - Helper script (client-side): `scripts/helper.js`
 288
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:54:44Z)**_
@@ -1891,6 +1907,7 @@ List brainstorm server scripts
 ```text
 bump-version.sh
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:54:46Z)**_
@@ -1902,6 +1919,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:54:46Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:54:48Z)**_
@@ -1913,6 +1931,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:54:48Z)**_
 ```text
 /Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/scripts/start-server.sh
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:54:54Z)**_
@@ -1926,12 +1945,14 @@ Start visual companion server
 ```text
 {"type":"server-started","port":64703,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:64703","screen_dir":"/Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/84172-1775159692/content","state_dir":"/Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/84172-1775159692/state"}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:55:05Z)**_
 
 <think><details><summary>Thought Process</summary>
 The server is started. Now I need to:
+
 1. Save the screen_dir and state_dir
 2. Tell the user to open the URL
 3. Proceed with asking clarifying questions, using the browser for visual questions
@@ -1940,7 +1961,6 @@ screen_dir: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/84172-177
 state_dir: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/84172-1775159692/state
 
 Also, the user mentioned the game engine should still be in the milestone4 worktree. Let me check that and address it.
-
 
 I need to verify the .gitignore situation and understand the worktree context - the user is clarifying that M4 hasn't been merged yet and is still in the milestone4 worktree, which is important for understanding the current project state.
 </details></think>
@@ -1956,6 +1976,7 @@ Check if .superpowers is in .gitignore
 ```text
 22:.superpowers/
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:55:06Z)**_
@@ -1976,14 +1997,16 @@ fix-use-rx-query-demo
 fix-vr-no-tests
 milestone-4-game-engine
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:55:21Z)**_
 
 <think><details><summary>Thought Process</summary>
-Good. The `milestone-4-game-engine` worktree exists. The `.superpowers/` is already in `.gitignore`. 
+Good. The `milestone-4-game-engine` worktree exists. The `.superpowers/` is already in `.gitignore`.
 
 Now let me:
+
 1. Mark the "Offer visual companion" as completed
 2. Move to the first clarifying question
 3. The first visual question is about the overall layout/approach for Word Builder - this is a great candidate for the browser
@@ -1991,7 +2014,7 @@ Now let me:
 The user confirmed visual companion. Let me start with the first clarifying question. Since Word Builder is clearly a visual topic, I should use the browser for it.
 
 First clarifying question: What's the target age/grade for this particular Word Builder config? (K, Year 1, or Year 2?) This affects layout density and touch target sizes.
- 
+
 Wait, I'm looking back at the milestone plan which already specifies "Word Builder (K-Year 2, Reading)" - so that's settled. But before I jump to layout questions, I need to understand the core mechanics first. What does Word Builder actually do? I'm picturing the child seeing an image, then dragging letter or syllable tiles from a bank to construct the word, but I should confirm this is the right mental model before proposing anything visual.
 
 Let me start with a straightforward clarifying question in the terminal: is the target word presented as a picture the child needs to spell, a scrambled word they need to unscramble, or both modes?
@@ -2001,7 +2024,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 19:55:22Z)**_
 
 Good — `.superpowers/` is already in `.gitignore` and I can see the `milestone-4-game-engine` worktree exists (so M4 is still pending merge — noted).
 
-Server is running at **http://localhost:64703** — open that in your browser now.
+Server is running at **<http://localhost:64703>** — open that in your browser now.
 
 ---
 
@@ -2060,6 +2083,7 @@ D - all of the above. Good. Next clarifying question.
 Next: What happens when the child drops a tile into the wrong slot? I need to understand the error feedback model.
 
 Actually, let me think about what's most important to ask next. I have:
+
 - Target: both picture + scrambled word modes
 - Tiles: letters, sight words, syllables (adapts by grade)
 
@@ -2067,7 +2091,6 @@ Next important thing: where do the empty "answer slots" live relative to the til
 
 Actually, let me ask about the drop zone structure first - is it:
 A) Fixed slots with blank underlines (like a fill-in-the-blanks)
-
 
 B) A single "word tray" where tiles stack in order
 C) Letter slots that highlight/snap in sequence
@@ -2104,11 +2127,11 @@ Now I have enough conceptual info to go visual. Let me think about what the key 
 1. **Layout structure** — where do the tiles bank live vs. the answer slots? This is a key visual question worth showing in the browser.
 
 Key info I have:
+
 - Target: picture OR scrambled word (configurable)
 - Tiles: letters / syllables / whole words (by grade)
 - Evaluation: per-tile feedback + auto-complete when all correct
 - DnD library: Pragmatic Drag and Drop (Atlassian) with shadow effect
-
 
 - Target audience: K-Year 2 (ages 5-8), so large touch targets, friendly UI
 
@@ -2119,7 +2142,7 @@ Writing the HTML mockup...
 
 _**Agent (claude-sonnet-4-6 2026-04-02 19:59:38Z)**_
 
-Per-tile feedback + auto-complete — clean, no extra button. 
+Per-tile feedback + auto-complete — clean, no extra button.
 
 Now I have enough to go visual. Let me show you layout options for the game canvas.
 
@@ -2250,11 +2273,12 @@ _**Agent (claude-sonnet-4-6 2026-04-02 20:00:12Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/84172-1775159692/content/layout.html
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 20:00:24Z)**_
 
-Check **http://localhost:64703** — showing 3 layout options for the Word Builder canvas.
+Check **<http://localhost:64703>** — showing 3 layout options for the Word Builder canvas.
 
 **On glyph/image sources** for kid-friendly royalty-free assets:
 
@@ -2270,7 +2294,7 @@ Check **http://localhost:64703** — showing 3 layout options for the Word Build
 
 ---
 
-Back to the layout — take a look at the 3 options at **http://localhost:64703** and let me know which direction feels right (or if you want to mix elements from multiple options).
+Back to the layout — take a look at the 3 options at **<http://localhost:64703>** and let me know which direction feels right (or if you want to mix elements from multiple options).
 
 ---
 
@@ -2290,8 +2314,8 @@ Now let me think about the next clarifying question. I have enough info to start
 Key question: For the "scrambled word" mode (no image), what does the target area look like? Does it show the word spelled out (for rearranging), or does it show something else?
 
 Actually wait - I need to think about this more carefully. In "scrambled" mode:
-- The child sees letters out of order
 
+- The child sees letters out of order
 
 - They need to rearrange them into the correct word
 
@@ -2302,7 +2326,7 @@ The key thing I need to understand is what the child sees as the prompt — whet
 
 _**Agent (claude-sonnet-4-6 2026-04-02 20:14:27Z)**_
 
-Layout A it is. 
+Layout A it is.
 
 One more conceptual question before I go visual again:
 
@@ -2331,7 +2355,7 @@ So the user wants all 3 scrambled-word modes to be separate game configurations 
 4. **Sentence gap mode** — sentence with a missing word + scene image, child fills in
 
 These can all use the same game component with different config, which fits perfectly with the JSON config approach described in the PRD.
- 
+
 Before I propose the technical approaches, I need to clarify a couple of interaction details. I'm wondering about the mechanics—specifically whether tiles can be dragged back to the bank if the child changes their mind, and whether they can reorder tiles already placed in slots. But actually, the more critical question is what happens when a child places an incorrect tile. Based on what they mentioned earlier about per-tile feedback and auto-complete, I know each tile gives immediate feedback and the game celebrates when all slots are correct, but I need to understand the behavior for wrong placements before I finalize the approach.
 </details></think>
 
@@ -2361,14 +2385,14 @@ _**Agent (claude-sonnet-4-6 2026-04-02 20:18:14Z)**_
 <think><details><summary>Thought Process</summary>
 C — tile locks in red, then auto-ejects after ~1s. This gives the child visual feedback of the error without punishing them by making them drag it back.
 
-Now I have all the info I need. Let me move to proposing approaches. 
+Now I have all the info I need. Let me move to proposing approaches.
 
 Summary of what I know:
+
 - **Layout**: Stacked A (image top, slots middle, tile bank bottom)
 - **Modes**: picture, scramble, recall, sentence-gap (configurable per round/game)
 - **Tiles**: letters, syllables, or whole words (adapts by grade K-Y2)
 - **Evaluation**: per-tile immediate + auto-complete when all correct
-
 
 - **Tech stack**: Pragmatic Drag and Drop for smooth interactions, Edu NSW ACT Foundation font, Fluent Emoji for visuals, with optional text-to-speech for hints
 - **Target**: K-Year 2 learners (ages 5-8)
@@ -2401,6 +2425,7 @@ Check server is still alive
 ```text
 {"type":"server-started","port":64703,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:64703","screen_dir":"/Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/84172-1775159692/content","state_dir":"/Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/84172-1775159692/state"}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 20:18:20Z)**_
@@ -2412,7 +2437,6 @@ Now let me create the approaches visual. I'll show 3 interaction model approache
 
 1. **Sequential slot-filling** — fixed ordered slots, drag to specific position
 2. **Tap-or-drag + auto-next-slot** — tiles can be tapped OR dragged, fill left-to-right automatically  
-
 
 3. **Free placement with swap** — drag to any slot, tiles swap if occupied
 
@@ -2590,11 +2614,12 @@ _**Agent (claude-sonnet-4-6 2026-04-02 20:19:09Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/84172-1775159692/content/approaches.html
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 20:19:15Z)**_
 
-Check **http://localhost:64703** — showing 3 interaction model approaches for placing tiles.
+Check **<http://localhost:64703>** — showing 3 interaction model approaches for placing tiles.
 
 **My recommendation is B + C hybrid**: B (tap-or-drag auto-next-slot) as the default for picture/recall/sentence-gap modes, and C (free swap) enabled automatically for scramble mode where rearranging already-placed tiles is the whole point.
 
@@ -2611,15 +2636,15 @@ B+C lgtm, also child doesn't need to drag perfectly on top, we can use magnet/sn
 _**Agent (claude-sonnet-4-6 2026-04-02 20:23:10Z)**_
 
 <think><details><summary>Thought Process</summary>
-The user confirmed B+C hybrid and also wants the magnetic snap effect (which was already documented in ui-ux.md section 8.1). This is already part of the design system. 
+The user confirmed B+C hybrid and also wants the magnetic snap effect (which was already documented in ui-ux.md section 8.1). This is already part of the design system.
 
 Now I have enough information to move to presenting the full design. Let me mark the approaches step as completed and move to presenting the design sections.
 
 Let me summarize what we have:
+
 - **Layout**: Stacked A (image top → slots middle → tile bank bottom)
 - **Modes** (configurable): `picture`, `scramble`, `recall`, `sentence-gap`
 - **Tiles**: letters, syllables, whole words (adapts by grade K-Y2)
-
 
 - **Interaction**: B+C hybrid with tap-or-drag defaulting to auto-next-slot, free drop with swap in scramble mode, and magnetic snap across all drag interactions
 - **Feedback**: immediate per-tile evaluation with auto-complete when correct, plus configurable wrong tile behavior (reject, lock-manual, or lock-auto-eject)
@@ -2814,11 +2839,12 @@ _**Agent (claude-sonnet-4-6 2026-04-02 20:24:02Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/84172-1775159692/content/design-screen.html
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 20:24:12Z)**_
 
-Check **http://localhost:64703** — showing the full game screen in two states: mid-game and wrong-tile-ejecting.
+Check **<http://localhost:64703>** — showing the full game screen in two states: mid-game and wrong-tile-ejecting.
 
 Key design decisions in this mockup:
 
@@ -2845,6 +2871,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 20:29:29Z)**_
 
 <think><details><summary>Thought Process</summary>
 Two additions:
+
 1. TTS speaks the letter name when the child taps/clicks a tile in the bank
 2. Celebration sound/song on game-over (all rounds complete successfully)
 
@@ -2853,7 +2880,6 @@ These are good additions. Let me confirm I understand them correctly and ask if 
 Let me also think about whether there's anything worth clarifying about the celebration sound - like do they want a specific duration, or just a short jingle? I can just note these in the design and move on.
 
 The user seems happy with the design direction. Let me incorporate these two points and ask if everything looks good before moving to the scramble mode mockup.
-
 
 ---
 
@@ -2899,7 +2925,6 @@ Actually, let me think about whether I need more visual mockups or if I can now 
 1. ✅ Layout (stacked A)
 2. ✅ Interaction model (B+C hybrid)
 3. ✅ Picture mode screen (full mockup)
-
 
 4. ✅ Wrong tile behavior
 5. ✅ TTS on tile tap
@@ -3060,6 +3085,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 20:31:02Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/84172-1775159692/content/modes.html
 ```
+
 </details></tool-use>
 
 _**Agent (<synthetic> 2026-04-02 20:31:04Z)**_
@@ -3071,6 +3097,7 @@ You've hit your limit · resets 9am (Australia/Sydney)
 _**User (2026-04-02 20:36:22Z)**_
 
 we should also have an option to:
+
 1. select between type or drag for all the game modes
 2. for drag/drop. we can choose to display only the exacly number of letters (e.g. C, A, T for CAT), or extra words to make it more difficult (e.g. C, A, T, X, S).
 
@@ -3196,12 +3223,12 @@ The user has added several more config options and features:
 3. **Prompt type**: show image OR audio only (not always both) - configurable per mode/game
 4. **Game presets/bookmarks**: child/parent can bookmark specific game configurations (settings presets) to quickly switch between difficulty settings for the same game
 
-
 Now I'm ready to move forward with the design spec, incorporating all four of these new config options into the modes mockup and then consolidating everything into the full design document. decisions and write the spec.
 
 Let me compile all the design decisions:
 
 **Game Config options:**
+
 - `mode`: `"picture"` | `"scramble"` | `"recall"` | `"sentence-gap"`
 - `inputMethod`: `"drag"` | `"type"` | `"both"` (default: `"drag"`)
 - `tileUnit`: `"letter"` | `"syllable"` | `"word"`
@@ -3212,6 +3239,7 @@ Let me compile all the design decisions:
 - `rounds`: array of round configs
 
 **Interaction model:**
+
 - B+C hybrid: auto-next-slot (B) for picture/recall/sentence-gap, free-swap (C) for scramble
 - Tap OR drag for all modes (when inputMethod is "drag" or "both")
 - Type mode: keyboard input fills slots left-to-right
@@ -3220,6 +3248,7 @@ Let me compile all the design decisions:
 - Wrong tile: locks red → auto-ejects after ~1s (configurable)
 
 **Celebration:**
+
 - Per-word: inline confetti burst (ScoreAnimation component from M4)
 - Game-over: full celebration screen with owl mascot + jingle + stars
 
@@ -3341,11 +3370,12 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:06:20Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/84172-1775159692/content/config-schema.html
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:06:32Z)**_
 
-Check **http://localhost:64703** — showing the full config schema with all options.
+Check **<http://localhost:64703>** — showing the full config schema with all options.
 
 Design is now complete. Here's the full summary before I write the spec:
 
@@ -3383,15 +3413,16 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:08:45Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants to:
+
 1. Change owl mascot to koala
 2. Write the spec via /writing-plans
 
 Wait - the user said "lets writing the specs via /writing-plans" - but actually the brainstorming flow says:
+
 1. Write design doc first (spec) → commit
 2. Then invoke writing-plans
 
 The user might be saying "let's do /writing-plans" directly, but the brainstorming skill says I should first write the spec doc, then invoke writing-plans. Let me clarify: the brainstorming skill says to write a design doc spec first, then invoke writing-plans. The user might be conflating the two, or might want to skip the spec doc and go directly to writing-plans.
-
 
 Actually, looking at the brainstorming skill flow more carefully, I need to write the design spec doc first, then writing-plans creates the implementation plan. The user's phrasing is a bit ambiguous, but I should follow the proper sequence: write the design doc, commit it, get reviews, then invoke writing-plans. Let me proceed with that approach and note the koala mascot change. I'm going to write out the design spec document now, following the brainstorming skill's requirements for the format and structure.
 </details></think>
@@ -3429,6 +3460,7 @@ List existing specs
 2026-04-02-milestone-4-game-engine-design.md
 2026-04-02-storybook-setup-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:10:21Z)**_
@@ -3775,12 +3807,14 @@ Each action payload includes: `{ tileValue, slotIndex, word, roundIndex, inputMe
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-builder-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:10:40Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I need to do the spec self-review. Let me check for:
+
 1. Placeholder scan — any TBD, TODO, incomplete sections?
 2. Internal consistency — any contradictions?
 3. Scope check — focused enough for a single implementation plan?
@@ -3789,8 +3823,9 @@ Now I need to do the spec self-review. Let me check for:
 Let me read the spec quickly.
 
 Looking at it:
+
 1. No TBD or TODO placeholders - clean
-2. Internal consistency: 
+2. Internal consistency:
    - The mascot is koala everywhere ✓
    - The modes are consistent across sections ✓
    - Config schema matches the modes description ✓
@@ -3812,37 +3847,38 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:10:40Z)**_
  `./docs/superpowers/specs/2026-04-03-word-builder-design.md`
 
 ```text
-85	- Backspace removes the last-placed letter.
-86	- Wrong key: slot flashes red.
-87	- Compatible with all four game modes.
-88	
-89	### 4.4 Magnetic Snap (drag only)
-90	
-91	Drag interactions use Pragmatic DnD with the shadow effect. Additionally, a CSS lerp-based magnetic pull activates within 60px of any valid drop zone (per [ui-ux.md §8.1](../../../ui-ux.md)):
-92	
-93	```
-94	if (distanceToZoneCenter < 60px) {
-95	  t = 1 - (distance / 60);
-96	  itemX = lerp(currentX, zoneCenter.x, t * 0.3);
-97	  itemY = lerp(currentY, zoneCenter.y, t * 0.3);
-98	}
-99	```
-100	
-101	Drop zones pulse (scale + opacity animation) while any drag is in progress (per ui-ux.md §8.3).
-102	
-103	---
-104	
-105	## 5. Per-Tile Feedback & Evaluation
-106	
-107	### 5.1 TTS on tile interaction
-108	
-109	- **Tile tap/drag-start:** TTS speaks the letter/syllable name immediately (`SpeechOutput`, no delay).
-110	- **Image tap (picture mode):** TTS reads the full word.
-111	- **Hint button (header):** TTS spells the word letter-by-letter with a short pause between letters.
-112	- **Recall mode:** TTS auto-reads the word on round start; child can tap the TTS button to hear it again.
-113	
-114	### 5.2 Correct tile placement
+85 - Backspace removes the last-placed letter.
+86 - Wrong key: slot flashes red.
+87 - Compatible with all four game modes.
+88 
+89 ### 4.4 Magnetic Snap (drag only)
+90 
+91 Drag interactions use Pragmatic DnD with the shadow effect. Additionally, a CSS lerp-based magnetic pull activates within 60px of any valid drop zone (per [ui-ux.md §8.1](../../../ui-ux.md)):
+92 
+93 ```
+94 if (distanceToZoneCenter < 60px) {
+95   t = 1 - (distance / 60);
+96   itemX = lerp(currentX, zoneCenter.x, t * 0.3);
+97   itemY = lerp(currentY, zoneCenter.y, t * 0.3);
+98 }
+99 ```
+100 
+101 Drop zones pulse (scale + opacity animation) while any drag is in progress (per ui-ux.md §8.3).
+102 
+103 ---
+104 
+105 ## 5. Per-Tile Feedback & Evaluation
+106 
+107 ### 5.1 TTS on tile interaction
+108 
+109 - **Tile tap/drag-start:** TTS speaks the letter/syllable name immediately (`SpeechOutput`, no delay).
+110 - **Image tap (picture mode):** TTS reads the full word.
+111 - **Hint button (header):** TTS spells the word letter-by-letter with a short pause between letters.
+112 - **Recall mode:** TTS auto-reads the word on round start; child can tap the TTS button to hear it again.
+113 
+114 ### 5.2 Correct tile placement
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:10:43Z)**_
@@ -3857,6 +3893,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:10:45Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-builder-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:10:51Z)**_
@@ -3867,6 +3904,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:10:51Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-builder-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:10:54Z)**_
@@ -3941,6 +3979,7 @@ docs/superpowers/specs/2026-04-03-word-builder-design.md:313:5 error MD060/table
 docs/superpowers/specs/2026-04-03-word-builder-design.md:313:9 error MD060/table-column-style Table column style [Table pipe is missing space to the left for style "compact"]
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:11:06Z)**_
@@ -3951,10 +3990,11 @@ The markdownlint is complaining about table formatting - tables need spaces arou
 Actually, the markdownlint --fix flag should have fixed them automatically, but it seems it failed. Let me look at the tables in question.
 
 Looking at my spec:
+
 - Line 27 area: the modes table has `|---|---|---|---|` which needs spaces
 - Lines 296 and 313 area: other tables
 
-The issue is that I used `|---|` style separators without spaces. 
+The issue is that I used `|---|` style separators without spaces.
 
 I need to update the separator rows to use the correct format with spaces around the dashes, then read through the file to make sure all the tables are properly formatted.
 </details></think>
@@ -3970,19 +4010,20 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:11:06Z)**_
  `./docs/superpowers/specs/2026-04-03-word-builder-design.md`
 
 ```text
-22	## 2. Game Modes
-23	
-24	Four modes, all using the same stacked layout and tile bank:
-25	
-26	| Mode | Prompt shown | Interaction model | Best for |
-27	|---|---|---|---|
-28	| `picture` | Image of the word's referent + optional TTS button | Auto-next-slot (B) | K–Year 1 |
-29	| `scramble` | Jumbled reference tiles above slots + "hear it" TTS | Free-swap (C) | Year 1–2 |
-30	| `recall` | TTS auto-plays on round start; word-length underscores shown | Auto-next-slot (B) | Year 1–2 |
-31	| `sentence-gap` | Scene image + sentence with blank (e.g. "The ___ sat on the mat.") | Auto-next-slot (B) | Year 1–2 |
-32	
-33	Modes are set per game config. Individual rounds within a session all use the same mode.
+22 ## 2. Game Modes
+23 
+24 Four modes, all using the same stacked layout and tile bank:
+25 
+26 | Mode | Prompt shown | Interaction model | Best for |
+27 |---|---|---|---|
+28 | `picture` | Image of the word's referent + optional TTS button | Auto-next-slot (B) | K–Year 1 |
+29 | `scramble` | Jumbled reference tiles above slots + "hear it" TTS | Free-swap (C) | Year 1–2 |
+30 | `recall` | TTS auto-plays on round start; word-length underscores shown | Auto-next-slot (B) | Year 1–2 |
+31 | `sentence-gap` | Scene image + sentence with blank (e.g. "The ___ sat on the mat.") | Auto-next-slot (B) | Year 1–2 |
+32 
+33 Modes are set per game config. Individual rounds within a session all use the same mode.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:11:09Z)**_
@@ -3992,37 +4033,38 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:11:09Z)**_
  `./docs/superpowers/specs/2026-04-03-word-builder-design.md`
 
 ```text
-290	
-291	Word Builder emits standard game events via the M4 event bus — no custom recording logic needed:
-292	
-293	| Event | When |
-294	|---|---|
-295	| `game:start` | Component mounts with config |
-296	| `game:instructions_shown` | TTS instructions fire on round start |
-297	| `game:action` | Every tile placement attempt (correct or wrong) |
-298	| `game:evaluate` | Per-tile evaluation result |
-299	| `game:hint` | Hint TTS button tapped |
-300	| `game:score` | Word completed (round score) |
-301	| `game:retry` | Wrong tile auto-ejected (retry signal) |
-302	| `game:end` | All rounds complete or child exits |
-303	
-304	Each action payload includes: `{ tileValue, slotIndex, word, roundIndex, inputMethod, correct }`.
-305	
-306	---
-307	
-308	## 13. Testing
-309	
-310	| Layer | What to test |
-311	|---|---|
-312	| Unit | Config validation, tile-bank generation (exact vs distractors), distractor deduplication, round sequencing |
-313	| Unit | Evaluation logic: correct/wrong detection, auto-eject timer, word-complete detection |
-314	| Unit | TTS trigger conditions (tile tap, image tap, hint, round start) |
-315	| Integration | Full round lifecycle via GameEngineProvider: start → place tiles → complete word → next round → game-over |
-316	| Integration | Scramble mode: free-swap reorder leads to correct evaluation |
-317	| Integration | Type mode: keystrokes fill slots, backspace removes, wrong key flashes |
-318	| Storybook | All 4 modes × `exact`/`distractors` × `inputMethod` variants |
-319	| Storybook | Wrong-tile states (`reject`, `lock-manual`, `lock-auto-eject`) |
+290 
+291 Word Builder emits standard game events via the M4 event bus — no custom recording logic needed:
+292 
+293 | Event | When |
+294 |---|---|
+295 | `game:start` | Component mounts with config |
+296 | `game:instructions_shown` | TTS instructions fire on round start |
+297 | `game:action` | Every tile placement attempt (correct or wrong) |
+298 | `game:evaluate` | Per-tile evaluation result |
+299 | `game:hint` | Hint TTS button tapped |
+300 | `game:score` | Word completed (round score) |
+301 | `game:retry` | Wrong tile auto-ejected (retry signal) |
+302 | `game:end` | All rounds complete or child exits |
+303 
+304 Each action payload includes: `{ tileValue, slotIndex, word, roundIndex, inputMethod, correct }`.
+305 
+306 ---
+307 
+308 ## 13. Testing
+309 
+310 | Layer | What to test |
+311 |---|---|
+312 | Unit | Config validation, tile-bank generation (exact vs distractors), distractor deduplication, round sequencing |
+313 | Unit | Evaluation logic: correct/wrong detection, auto-eject timer, word-complete detection |
+314 | Unit | TTS trigger conditions (tile tap, image tap, hint, round start) |
+315 | Integration | Full round lifecycle via GameEngineProvider: start → place tiles → complete word → next round → game-over |
+316 | Integration | Scramble mode: free-swap reorder leads to correct evaluation |
+317 | Integration | Type mode: keystrokes fill slots, backspace removes, wrong key flashes |
+318 | Storybook | All 4 modes × `exact`/`distractors` × `inputMethod` variants |
+319 | Storybook | Wrong-tile states (`reject`, `lock-manual`, `lock-auto-eject`) |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:11:13Z)**_
@@ -4033,6 +4075,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:11:13Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-builder-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:11:17Z)**_
@@ -4043,6 +4086,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:11:17Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-builder-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:11:21Z)**_
@@ -4053,6 +4097,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:11:21Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-builder-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:11:32Z)**_
@@ -4146,15 +4191,18 @@ Done in 2.41s.
  1 file changed, 351 insertions(+)
  create mode 100644 docs/superpowers/specs/2026-04-03-word-builder-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:11:36Z)**_
 
 <think><details><summary>Thought Process</summary>
 Committed successfully. Now let me:
+
 1. Mark the "Write design doc and commit" and "Spec self-review" as completed
 2. Ask user to review the spec
 3. Then invoke writing-plans
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:11:37Z)**_
@@ -4200,15 +4248,16 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:25:16Z)**_
 The user is asking about reusability between Word Builder and Number Match. This is a great architectural question. Let me think about this before answering.
 
 Looking at the milestone plan:
+
 - **Word Builder** (K-Year 2, Reading) — uses `DragAndDrop` + TTS hints, per-language word lists
 - **Number Match** (Pre-K/K, Math) — uses `DragAndDrop` with snap, object-group visuals
 
 What do they have in common?
 
 **Shared mechanics:**
+
 1. **Drag-and-drop core** — both use Pragmatic DnD with magnetic snap
 2. **Tile bank** — both have a source area with draggable items
-
 
 3. **Drop zones/slots** — both have target areas
 4. **Per-item feedback** — correct/wrong evaluation on placement
@@ -4306,14 +4355,15 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:29:39Z)**_
 The user is making an excellent architectural point. They want to use **React composition with the slot pattern** to build a flexible, composable game system. This is a key architectural decision that will affect how all drag-drop games are built.
 
 The insight is:
+
 - Word Builder: tiles → ordered letter slots
 - Number Match: tiles → matching pair zones  
 - Sort Numbers: tiles → ordered numeric sequence (ascending/descending)
 - Future games: other drag-drop variations
 
 All of these share drag-drop mechanics but have different:
-- Target zone layouts/behaviors
 
+- Target zone layouts/behaviors
 
 - Evaluation logic
 - Visual presentation of tiles
@@ -4345,32 +4395,33 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:29:42Z)**_
  `./docs/superpowers/specs/2026-04-03-word-builder-design.md`
 
 ```text
-1	# Word Builder — Design Spec
-2	
-3	**Date:** 2026-04-03
-4	**Status:** Approved
-5	**Milestone:** 5 — Reference Games
-6	**Depends on:** M4 (GameEngineProvider, DragAndDrop component, ScoreAnimation, EncouragementAnnouncer, SpeechOutput)
-7	
-8	---
-9	
-10	## 1. Overview
-11	
-12	Word Builder is a drag-and-drop (or keyboard-type) spelling game for children in Kindergarten through Year 2. The child is given a prompt (image, scrambled tiles, audio, or sentence gap) and must assemble the correct word by placing letter/syllable/word tiles into answer slots.
-13	
-14	The game is implemented as a single `WordBuilder` React component driven entirely by a JSON config file. The same component renders all four modes and all difficulty variants — no new component is needed per game variation.
-15	
-16	**Target audience:** K–Year 2 (ages 5–8)  
-17	**Subject:** Reading / Spelling  
-18	**DnD library:** [Pragmatic Drag and Drop](https://atlassian.design/components/pragmatic-drag-and-drop) (shadow effect enabled during drag)
-19	
-20	---
-21	
-22	## 2. Game Modes
-23	
-24	Four modes, all using the same stacked layout and tile bank:
+1 # Word Builder — Design Spec
+2 
+3 **Date:** 2026-04-03
+4 **Status:** Approved
+5 **Milestone:** 5 — Reference Games
+6 **Depends on:** M4 (GameEngineProvider, DragAndDrop component, ScoreAnimation, EncouragementAnnouncer, SpeechOutput)
+7 
+8 ---
+9 
+10 ## 1. Overview
+11 
+12 Word Builder is a drag-and-drop (or keyboard-type) spelling game for children in Kindergarten through Year 2. The child is given a prompt (image, scrambled tiles, audio, or sentence gap) and must assemble the correct word by placing letter/syllable/word tiles into answer slots.
+13 
+14 The game is implemented as a single `WordBuilder` React component driven entirely by a JSON config file. The same component renders all four modes and all difficulty variants — no new component is needed per game variation.
+15 
+16 **Target audience:** K–Year 2 (ages 5–8)  
+17 **Subject:** Reading / Spelling  
+18 **DnD library:** [Pragmatic Drag and Drop](https://atlassian.design/components/pragmatic-drag-and-drop) (shadow effect enabled during drag)
+19 
+20 ---
+21 
+22 ## 2. Game Modes
+23 
+24 Four modes, all using the same stacked layout and tile bank:
 25
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:30:05Z)**_
@@ -4381,6 +4432,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:30:05Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-builder-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:30:09Z)**_
@@ -4402,6 +4454,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:30:10Z)**_
 255-```ts
 256-interface WordBuilderConfig {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:30:17Z)**_
@@ -4412,6 +4465,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:30:17Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-builder-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:30:20Z)**_
@@ -4508,6 +4562,7 @@ Done in 2.40s.
 [master ccd8a6b] docs(spec): add DragDropGame composition primitive to Word Builder spec
  1 file changed, 94 insertions(+), 2 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:30:34Z)**_
@@ -4543,10 +4598,10 @@ The user is questioning the location `src/games/drag-drop/` for the shared primi
 The question is: where should the `DragDropGame` composition primitive live?
 
 Options:
+
 1. `src/games/drag-drop/` — treats it as a "game" itself, but it's not a game, it's a primitive
 2. `src/components/drag-drop/` or `src/components/games/` — treats it as a UI component
 3. `src/lib/drag-drop/` — treats it as a library/utility
-
 
 4. `src/games/shared/` — explicitly shared game infrastructure
 5. `src/games/_primitives/` or `src/games/_shared/` — underscore prefix signals it's shared/internal
@@ -4555,7 +4610,7 @@ The real issue is that `src/games/drag-drop/` misleadingly suggests drag-drop is
 
 I'm weighing a few approaches: putting it in `src/components/game-primitives/` treats it as a React component primitive but feels a bit verbose; `src/lib/drag-drop/` fits the library pattern but doesn't quite capture that it's UI-heavy; `src/games/shared/` is explicit about shared game infrastructure; or `src/components/games/` could house game shell components that aren't full games themselves. I'm leaning toward one of the clearer options that doesn't misrepresent what drag-drop actually is.
 
-Looking at the M4 spec, `DragAndDrop` is meant to be a reusable component, which suggests it belongs in `src/components/` rather than buried in the games directory. The real issue is whether this shared primitive should live inside games or somewhere more foundational—and I think the answer is that it's a component or library that games *use*, not a peer to them. So `src/games/drag-drop/` would be misleading; I'm thinking `src/components/game-shell/` for game-level UI primitives, or splitting it with logic hooks in `src/lib/drag-drop/` and the component in `src/components/`.
+Looking at the M4 spec, `DragAndDrop` is meant to be a reusable component, which suggests it belongs in `src/components/` rather than buried in the games directory. The real issue is whether this shared primitive should live inside games or somewhere more foundational—and I think the answer is that it's a component or library that games _use_, not a peer to them. So `src/games/drag-drop/` would be misleading; I'm thinking `src/components/game-shell/` for game-level UI primitives, or splitting it with logic hooks in `src/lib/drag-drop/` and the component in `src/components/`.
 
 Actually, the cleanest approach is probably keeping everything together in `src/lib/drag-drop/` since the hooks and component are tightly coupled and that's where game-agnostic infrastructure naturally lives.
 </details></think>
@@ -4584,6 +4639,7 @@ Keeps it with React components since `DragDropGame` is UI-heavy (layout, animati
 **My take:** `src/lib/drag-drop/` is the better fit. The `lib/` convention in this repo already means "shared infrastructure that feature code depends on" — which is exactly what this is. `components/` is for UI building blocks that are composed into pages/routes, not for game-level composition primitives.
 
 So the structure becomes:
+
 ```
 src/
   lib/
@@ -4612,19 +4668,22 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:51:57Z)**_
 The user makes a good point — `lib/` shouldn't have UI components. They prefer `ui/` or inside `components/`.
 
 Looking at the existing structure:
+
 - `src/components/` — UI components (GameCard, GameGrid, Header, etc.)
 - `src/lib/` — non-UI library code (game-event-bus, speech, theme, i18n)
 
 The `DragDropGame` primitive is UI-heavy (it renders layout, slots, animations). So it should go in `components/` or a new `ui/` directory.
 
-Since the project already uses `src/components/`, I'd recommend putting it there. 
+Since the project already uses `src/components/`, I'd recommend putting it there.
 
 Now looking at how to organize it within `components/`, I see the existing components like `GameCard`, `GameGrid`, `Header`, `LevelRow`, `OfflineIndicator`, `ThemeToggle`, and `Footer` are all flat in `src/components/`, with `ui/` reserved for shadcn/ui primitives. So I should probably keep `DragDropGame` flat there too rather than nesting it in a subdirectory. — app-specific components
 
 For game-specific primitives that are more complex, a subfolder makes sense:
+
 - `src/components/drag-drop-game/` — the DragDropGame composition primitive
 
 But wait — should the hooks (`useDragDropContext`, `useTileEvaluation`, etc.) live in `lib/` since they're non-UI? That would split the primitive:
+
 - `src/lib/drag-drop/` — hooks + types (no JSX)
 - `src/components/drag-drop-game/` — the React component that uses those hooks
 
@@ -4663,6 +4722,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:52:11Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-builder-design.md has been updated. All occurrences were successfully replaced.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:52:15Z)**_
@@ -4677,6 +4737,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:52:16Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-builder-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:52:20Z)**_
@@ -4687,6 +4748,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:52:20Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-builder-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:52:29Z)**_
@@ -4778,20 +4840,22 @@ Done in 2.17s.
 [master 0460fed] docs(spec): move DragDropGame primitive to src/components/drag-drop-game/
  1 file changed, 21 insertions(+), 20 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:52:42Z)**_
 
 <think><details><summary>Thought Process</summary>
-The user also said "we should rename Word Builder from the specs". I need to address this. What does "rename Word Builder from the specs" mean? 
+The user also said "we should rename Word Builder from the specs". I need to address this. What does "rename Word Builder from the specs" mean?
 
 Options:
+
 1. Rename the spec file itself (2026-04-03-word-builder-design.md → something else)
 2. Rename "Word Builder" as a concept/game name
 3. Rename some component inside the spec
 
 I think the user wants to rename "Word Builder" to something else — perhaps because the `DragDropGame` primitive spec is now embedded in the Word Builder spec, and it should be more broadly named to reflect that it covers both the primitive AND the Word Builder game.
- 
+
 Actually, they might want to split the spec into two separate documents, or they could be asking for the spec title itself to change to something broader like "Drag-Drop Games — Design Spec" since it now encompasses both the primitive and the game. I should probably ask for clarification on whether they want to rename the file, rename the game component, or restructure the spec entirely. I'm realizing the request is ambiguous and I should ask for clarification about what they're actually looking for—whether they want me to rename the spec file itself, split it into separate specs, or rename the Word Builder component to better reflect the broader scope.
 </details></think>
 
@@ -4819,15 +4883,16 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:53:54Z)**_
 The user wants to rename the "Word Builder" game component to something else. I should ask what they want to rename it to. Or maybe they want me to suggest some alternatives?
 
 Let me think about what "Word Builder" does:
+
 - Spell words by dragging letter/syllable/word tiles into slots
 - Multiple modes: picture, scramble, recall, sentence-gap
 
 Alternative names:
+
 - `SpellingGame` — generic but clear
 - `SpellIt` — action-oriented, kid-friendly
 - `LetterSpell` — describes what it does
 - `SpellBuilder` — similar to Word Builder but more specific
-
 
 - `WordSpell` — combines word + spell
 - `SpellDrop` — references the drag-drop mechanic
@@ -4864,9 +4929,9 @@ The user chose `SpellDrop`. Let me rename "Word Builder" / "WordBuilder" to "Spe
 Wait - actually the user said "B" which corresponds to "**`SpellDrop`** — nods to the drag-drop mechanic". Yes, SpellDrop.
 
 I need to:
+
 1. Rename the spec file from `2026-04-03-word-builder-design.md` to `2026-04-03-spell-drop-design.md`
 2. Update all references inside the spec: "Word Builder" → "SpellDrop", "WordBuilder" → "SpellDrop", "word-builder" → "spell-drop"
-
 
 3. Commit the changes.
 
@@ -4884,12 +4949,13 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:54:28Z)**_
  `./docs/superpowers/specs/2026-04-03-word-builder-design.md`
 
 ```text
-1	# Word Builder — Design Spec
-2	
-3	**Date:** 2026-04-03
-4	**Status:** Approved
-5	**Milestone:** 5 — Reference Games
+1 # Word Builder — Design Spec
+2 
+3 **Date:** 2026-04-03
+4 **Status:** Approved
+5 **Milestone:** 5 — Reference Games
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:54:32Z)**_
@@ -4910,6 +4976,7 @@ cat /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-bu
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:54:36Z)**_
@@ -4923,6 +4990,7 @@ Verify rename: old names gone, new names present
 ```text
 0
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:54:41Z)**_
@@ -4952,6 +5020,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 21:56:39Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants:
+
 1. **B from the earlier question** — split into two separate specs:
    - Spec 1: `DragDropGame` primitive (shared component)
    - Spec 2: Game specs (WordSpell + NumberMatch combined, since they're similar, with JSON configs)
@@ -4961,6 +5030,7 @@ The user wants:
 3. The combined game spec covers both WordSpell AND NumberMatch since they're very similar (both use tiles, both have similar mechanics)
 
 So I need to:
+
 1. Delete or repurpose the current `2026-04-03-word-builder-design.md` → split into two files:
    - `2026-04-03-drag-drop-game-design.md` — the shared `DragDropGame` primitive spec
    - `2026-04-03-word-spell-number-match-design.md` — combined spec for WordSpell + NumberMatch games (with JSON configs for each)
@@ -4977,6 +5047,7 @@ The WordSpell and NumberMatch spec will cover the game-specific implementations,
 _**Agent (claude-sonnet-4-6 2026-04-02 21:56:39Z)**_
 
 Got it — **WordSpell** as the game name, split into:
+
 1. `2026-04-03-drag-drop-game-design.md` — the `DragDropGame` primitive
 2. `2026-04-03-word-spell-number-match-design.md` — WordSpell + NumberMatch combined (similar enough to share one spec + JSON configs)
 
@@ -4993,6 +5064,7 @@ Remove accidental spell-drop file
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:56:42Z)**_
@@ -5279,6 +5351,7 @@ Payload includes: `{ tileValue, slotIndex, roundIndex, inputMethod, correct }`.
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-drag-drop-game-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:58:35Z)**_
@@ -5588,6 +5661,7 @@ Both games support named presets (difficulty variants of the same `gameId`):
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-spell-number-match-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:58:39Z)**_
@@ -5690,6 +5764,7 @@ Done in 2.11s.
  delete mode 100644 docs/superpowers/specs/2026-04-03-word-builder-design.md
  create mode 100644 docs/superpowers/specs/2026-04-03-word-spell-number-match-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 21:58:51Z)**_
@@ -5716,6 +5791,7 @@ _**User (2026-04-02 22:41:02Z)**_
 can we use composition without props?
 
 Like so?
+
 ```tsx
 <DragDropGame config={config}>
   <DragDropGame.Prompt />
@@ -5731,10 +5807,11 @@ _**Agent (claude-sonnet-4-6 2026-04-02 22:41:44Z)**_
 The user wants to use the compound component pattern (dot notation) instead of named slot props. This is a valid React composition pattern.
 
 The difference:
+
 - **Named slot props** (current spec): `<DragDropGame prompt={<WordPrompt />} dropZones={<OrderedSlots />} />`
 - **Compound components** (user wants): `<DragDropGame config={config}><DragDropGame.Prompt /><DragDropGame.DropZones /></DragDropGame>`
 
-With compound components, the sub-components (`DragDropGame.Prompt`, `DragDropGame.DropZones`, `DragDropGame.TileBank`) are attached as static properties on the `DragDropGame` function. 
+With compound components, the sub-components (`DragDropGame.Prompt`, `DragDropGame.DropZones`, `DragDropGame.TileBank`) are attached as static properties on the `DragDropGame` function.
 
 Each game provides its own implementations by nesting custom content inside the compound sub-components—so `WordSpell` would wrap `WordSpellPrompt` inside `DragDropGame.Prompt`, and the game-specific drop zones inside `DragDropGame.DropZones`.
 
@@ -5803,6 +5880,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 22:42:02Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-drag-drop-game-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:42:06Z)**_
@@ -5817,6 +5895,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 22:42:10Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-spell-number-match-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:42:16Z)**_
@@ -5827,6 +5906,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 22:42:16Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-word-spell-number-match-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:42:24Z)**_
@@ -5877,8 +5957,8 @@ Exit code 1
 yarn run v1.22.22
 $ vitest run
 /Users/leocaseiro/Sites/base-skill/node_modules/vite/node_modules/rollup/dist/native.js:115
-		throw new Error(
-		      ^
+  throw new Error(
+        ^
 
 Error: Cannot find module @rollup/rollup-darwin-arm64. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.
     at requireWithFriendlyError (/Users/leocaseiro/Sites/base-skill/node_modules/vite/node_modules/rollup/dist/native.js:115:9)
@@ -5916,6 +5996,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:42:28Z)**_
@@ -5943,6 +6024,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 9.74s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:42:49Z)**_
@@ -6035,6 +6117,7 @@ Done in 2.27s.
 [master 4c37204] docs(spec): adopt compound component pattern for DragDropGame slot API
  2 files changed, 113 insertions(+), 47 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:42:54Z)**_
@@ -6059,6 +6142,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 22:42:59Z)**_
 Committed. 53 tests green.
 
 Two final specs:
+
 - [docs/superpowers/specs/2026-04-03-drag-drop-game-design.md](docs/superpowers/specs/2026-04-03-drag-drop-game-design.md)
 - [docs/superpowers/specs/2026-04-03-word-spell-number-match-design.md](docs/superpowers/specs/2026-04-03-word-spell-number-match-design.md)
 
@@ -6072,6 +6156,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 22:42:59Z)**_
 ```text
 Launching skill: superpowers:writing-plans
 ```
+
 </details></tool-use>
 
 ---
@@ -6093,6 +6178,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -6113,6 +6199,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
+
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -6183,6 +6270,7 @@ git commit -m "feat: add specific feature"
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
@@ -6191,6 +6279,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 
 ## Remember
+
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
@@ -6221,13 +6310,14 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
 - Batch execution with checkpoints for review
-
 
 ---
 
@@ -6237,12 +6327,13 @@ _**Agent (claude-sonnet-4-6 2026-04-02 22:44:35Z)**_
 I'm using the writing-plans skill to create the implementation plan. Let me start by announcing this and then mapping out the plan.
 
 I need to create implementation plans for:
+
 1. `DragDropGame` primitive (from `2026-04-03-drag-drop-game-design.md`)
 2. WordSpell + NumberMatch games (from `2026-04-03-word-spell-number-match-design.md`)
 
 These are two separate subsystems, and the skill says to check if the spec covers multiple independent subsystems. In this case:
-- `DragDropGame` primitive must be built first (dependency)
 
+- `DragDropGame` primitive must be built first (dependency)
 
 - WordSpell + NumberMatch depend on `DragDropGame`
 
@@ -6302,6 +6393,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 22:44:35Z)**_
 I'm using the writing-plans skill to create the implementation plan.
 
 The two specs cover two distinct build phases — I'll write a plan for each:
+
 1. `DragDropGame` primitive (dependency for everything else)
 2. WordSpell + NumberMatch games
 
@@ -6318,6 +6410,7 @@ Check if Pragmatic DnD is already installed
 ```text
 not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:44:41Z)**_
@@ -6331,6 +6424,7 @@ Check M4 worktree package.json for DnD deps
 ```text
 not found in m4 worktree
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:44:45Z)**_
@@ -6363,6 +6457,7 @@ Check key dependencies
     "@storybook/react-vite": "10.3.3",
     "@tailwindcss/typography": "^0.5.16",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:44:49Z)**_
@@ -6385,6 +6480,7 @@ Check test dependencies
     "@vitest/coverage-v8": "3.2.4",
     "vitest": "^3.0.5",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:44:53Z)**_
@@ -6437,6 +6533,7 @@ export class TypedGameEventBus implements GameEventBus {
     }
     bucket.add(handler);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:44:57Z)**_
@@ -6464,6 +6561,7 @@ session-recorder.test.tsx
 session-recorder.ts
 types.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:45:00Z)**_
@@ -6536,6 +6634,7 @@ export interface MoveLog {
   initialContent: ResolvedContent;
   initialState: GameEngineState;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:45:03Z)**_
@@ -6568,6 +6667,7 @@ ThemeToggle.tsx
 game
 ui
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:45:06Z)**_
@@ -6583,6 +6683,7 @@ GameShell.stories.tsx
 GameShell.test.tsx
 GameShell.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:45:09Z)**_
@@ -6746,6 +6847,7 @@ export const GameShell = ({
   </GameEngineProvider>
 );
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:45:18Z)**_
@@ -6754,16 +6856,17 @@ _**Agent (claude-sonnet-4-6 2026-04-02 22:45:18Z)**_
 Now I have enough context to write the plans. Let me note what exists in M4:
 
 From M4 worktree:
+
 - `GameShell` — wraps `GameEngineProvider` with chrome (header, progress bar, footer)
 - `GameEngineProvider` — from `@/lib/game-engine/index`
 - `useGameState()`, `useGameDispatch()` — game engine hooks
 - `TypedGameEventBus` — event bus
 - `GamePhase`, `GameEngineState`, `MoveType`, `Move`, `MoveLog` — types
 
-
 - `ResolvedGameConfig`, `SessionMeta`, `MoveHandler` — additional type definitions
 
 M4 is still missing:
+
 - `DragAndDrop` component (deferred to M5)
 - `ScoreAnimation` (deferred to M5)
 - `EncouragementAnnouncer` (deferred to M5)
@@ -6797,6 +6900,7 @@ SpeechOutput.test.ts
 SpeechOutput.ts
 voices.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 22:45:27Z)**_
@@ -6805,9 +6909,9 @@ _**Agent (claude-sonnet-4-6 2026-04-02 22:45:27Z)**_
 The user wants me to write a quick prompt so they can start a new session for writing the plans. This makes sense - the plans will be written in a new session. Let me write a concise, complete prompt that captures all the context needed.
 
 I'll quickly note what I know about M4:
+
 - `SpeechOutput` exists at `src/lib/speech/SpeechOutput.ts`
 - No `ScoreAnimation` in M4 (it was in the M4 spec as "to be built in M5")
-
 
 - No `EncouragementAnnouncer` in M4 either - both are deferred to M5 along with DragAndDrop, LetterTracer, MultipleChoice, Timer, and ProgressBar / ScoreBoard
 - `GameShell` wraps `GameEngineProvider`
