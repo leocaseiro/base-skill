@@ -4,6 +4,37 @@ import type {
 } from '@/games/sort-numbers/types';
 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
 
+export interface NumberMatchPreview {
+  range: { min: number; max: number };
+  mode: string;
+  tileStyle: string;
+  pool: number[];
+}
+
+const NUMBER_MATCH_POOL_CAP = 200;
+
+export const buildNumberMatchPreview = (
+  resolvedConfig: Record<string, unknown>,
+): NumberMatchPreview | null => {
+  const range = resolvedConfig.range;
+  const mode = resolvedConfig.mode;
+  const tileStyle = resolvedConfig.tileStyle;
+
+  if (
+    !isRange(range) ||
+    typeof mode !== 'string' ||
+    typeof tileStyle !== 'string'
+  ) {
+    return null;
+  }
+
+  const span = range.max - range.min + 1;
+  const length = Math.min(Math.max(0, span), NUMBER_MATCH_POOL_CAP);
+  const pool = Array.from({ length }, (_, i) => range.min + i);
+
+  return { range, mode, tileStyle, pool };
+};
+
 export interface SortNumbersPreviewSample extends SortNumbersRound {
   id: string;
 }

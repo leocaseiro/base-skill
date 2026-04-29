@@ -125,6 +125,29 @@ describe('DebugPanel', () => {
     expect(screen.getByText('sat')).toBeInTheDocument();
   });
 
+  it('renders Round Pool Preview for number-match listing the integer range', () => {
+    render(
+      <DebugPanel
+        {...baseProps}
+        gameId="number-match"
+        resolvedConfig={{
+          mode: 'numeral-to-group',
+          tileStyle: 'dots',
+          range: { min: 3, max: 7 },
+        }}
+        rounds={[]}
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: /open debug panel/i }),
+    );
+
+    expect(
+      screen.getByText(/Round Pool Preview \(5 values\)/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText('3, 4, 5, 6, 7')).toBeInTheDocument();
+  });
+
   it('renders Round Pool Preview for sort-numbers using its generator rules', () => {
     render(
       <DebugPanel

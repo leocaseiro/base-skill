@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { formatRounds } from './format-rounds';
-import { buildSortNumbersPreview } from './sort-numbers-preview';
+import {
+  buildNumberMatchPreview,
+  buildSortNumbersPreview,
+} from './numeric-game-previews';
 import { useLibraryPreview } from './useLibraryPreview';
 import { useStorageSnapshot } from './useStorageSnapshot';
 import type { WordFilter } from '@/data/words';
@@ -219,6 +222,13 @@ export const DebugPanel = ({
         : null,
     [gameId, resolvedConfig],
   );
+  const numberMatchPreview = useMemo(
+    () =>
+      gameId === 'number-match'
+        ? buildNumberMatchPreview(resolvedConfig)
+        : null,
+    [gameId, resolvedConfig],
+  );
   const libraryPreview = useLibraryPreview(
     open && librarySource.filter !== null,
     librarySource.filter,
@@ -293,6 +303,26 @@ export const DebugPanel = ({
                 <RoundsTable gameId={gameId} rounds={liveRounds} />
               </Section>
             ) : null}
+            {numberMatchPreview ? (
+              <Section
+                title={`Round Pool Preview (${numberMatchPreview.pool.length} values)`}
+              >
+                <p className="mb-1 text-zinc-400">
+                  All values that NumberMatch can pick from this
+                  config&apos;s range.
+                </p>
+                <JsonBlock
+                  label="numberMatchPreview"
+                  value={numberMatchPreview}
+                />
+                <p className="mb-1 mt-2 font-semibold text-zinc-300">
+                  Pool
+                </p>
+                <p className="rounded bg-zinc-950 p-2 font-mono text-[11px] text-zinc-100">
+                  {numberMatchPreview.pool.join(', ')}
+                </p>
+              </Section>
+            ) : null}
             {sortPreview ? (
               <Section
                 title={`Round Pool Preview (${sortPreview.samples.length} samples)`}
@@ -358,8 +388,16 @@ export const DebugPanel = ({
                       label="libraryHits"
                       value={libraryPreview.hits}
                     />
+                    <p
+                      data-testid="debug-word-preview-bar"
+                      className="mb-2 rounded bg-zinc-950 p-2 font-mono text-[11px] text-zinc-100"
+                    >
+                      {libraryPreview.hits
+                        .map((h) => h.word)
+                        .join(', ')}
+                    </p>
                     <ul className="space-y-0.5 font-mono text-[11px]">
-                      {libraryPreview.hits.slice(0, 50).map((h) => (
+                      {libraryPreview.hits.slice(0, 100).map((h) => (
                         <li
                           key={h.word}
                           className="flex justify-between text-zinc-200"
@@ -370,9 +408,9 @@ export const DebugPanel = ({
                           </span>
                         </li>
                       ))}
-                      {libraryPreview.hitCount > 50 ? (
+                      {libraryPreview.hitCount > 100 ? (
                         <li className="italic text-zinc-500">
-                          …and {libraryPreview.hitCount - 50} more
+                          …and {libraryPreview.hitCount - 100} more
                         </li>
                       ) : null}
                     </ul>

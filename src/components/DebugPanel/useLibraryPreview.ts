@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { WordFilter } from '@/data/words';
-import { filterWords } from '@/data/words';
+import { filterSignature, filterWords } from '@/data/words';
 
 export interface LibraryPreview {
   loading: boolean;
@@ -26,9 +26,14 @@ export const useLibraryPreview = (
     enabled && filter ? { ...EMPTY, loading: true } : EMPTY,
   );
 
+  const signature = filter ? filterSignature(filter) : null;
+
   useEffect(() => {
     if (!enabled || !filter) return;
     const abort = new AbortController();
+    setState((prev) =>
+      prev.loading ? prev : { ...prev, loading: true },
+    );
     void (async () => {
       try {
         const result = await filterWords(filter);
@@ -57,7 +62,8 @@ export const useLibraryPreview = (
     return () => {
       abort.abort();
     };
-  }, [enabled, filter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- signature replaces filter object identity, matching useFilteredWords pattern
+  }, [enabled, signature]);
 
   return state;
 };
