@@ -24,6 +24,7 @@ import type {
 } from '@/lib/game-engine/types';
 import type { JSX } from 'react';
 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+import { DebugPanel } from '@/components/DebugPanel';
 import { GameShell } from '@/components/game/GameShell';
 import { getOrCreateDatabase } from '@/db/create-database';
 import { useBookmarks } from '@/db/hooks/useBookmarks';
@@ -386,6 +387,7 @@ const WordSpellGameBody = ({
   customGameColor,
   customGameCover,
   persistedContent,
+  debug,
 }: {
   gameId: string;
   sessionId: string;
@@ -397,6 +399,7 @@ const WordSpellGameBody = ({
   customGameColor: string | null;
   customGameCover: Cover | null;
   persistedContent: Record<string, unknown> | null;
+  debug: boolean;
 }): JSX.Element => {
   const { t } = useTranslation('games');
   const { save, update, remove, customGames } = useCustomGames();
@@ -426,64 +429,94 @@ const WordSpellGameBody = ({
     cfg as unknown as Record<string, unknown>,
   );
 
+  const debugPanel = debug ? (
+    <DebugPanel
+      gameId={gameId}
+      resolvedConfig={cfg as unknown as Record<string, unknown>}
+      rawSavedConfig={gameSpecificConfig}
+      customGame={{
+        id: customGameId,
+        name: customGameName,
+        color: customGameColor,
+        cover: customGameCover,
+      }}
+      session={{
+        sessionId,
+        seed,
+        hasDraftState: draftState !== null,
+        hasPersistedContent: persistedContent !== null,
+      }}
+      rounds={cfg.rounds as unknown[]}
+    />
+  ) : null;
+
   if (showInstructions) {
     return (
-      <InstructionsOverlay
-        text={t('instructions.word-spell')}
-        onStart={() => setShowInstructions(false)}
-        ttsEnabled={cfg.ttsEnabled}
-        gameTitle={t('word-spell')}
-        gameId={gameId}
-        cover={customGameCover ?? undefined}
-        customGameId={customGameId ?? undefined}
-        customGameName={customGameName ?? undefined}
-        customGameColor={
-          (customGameColor ?? undefined) as GameColorKey | undefined
-        }
-        config={cfg as unknown as Record<string, unknown>}
-        onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-        onSaveCustomGame={async ({ name, color, config, cover }) =>
-          save({
-            gameId,
-            name,
-            color,
-            config,
-            cover,
-          })
-        }
-        onUpdateCustomGame={
-          customGameId
-            ? async (name, config, extras) => {
-                await update(customGameId, config, name, extras);
-              }
-            : undefined
-        }
-        onDeleteCustomGame={
-          customGameId
-            ? async (id) => {
-                await remove(id);
-                await navigate({
-                  search: (prev) => ({ ...prev, configId: undefined }),
-                });
-              }
-            : undefined
-        }
-        existingCustomGameNames={existingCustomGameNames}
-        isBookmarked={isBookmarked(bookmarkTarget)}
-        onToggleBookmark={() => void toggle(bookmarkTarget)}
-      />
+      <>
+        <InstructionsOverlay
+          text={t('instructions.word-spell')}
+          onStart={() => setShowInstructions(false)}
+          ttsEnabled={cfg.ttsEnabled}
+          gameTitle={t('word-spell')}
+          gameId={gameId}
+          cover={customGameCover ?? undefined}
+          customGameId={customGameId ?? undefined}
+          customGameName={customGameName ?? undefined}
+          customGameColor={
+            (customGameColor ?? undefined) as GameColorKey | undefined
+          }
+          config={cfg as unknown as Record<string, unknown>}
+          onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
+          onSaveCustomGame={async ({ name, color, config, cover }) =>
+            save({
+              gameId,
+              name,
+              color,
+              config,
+              cover,
+            })
+          }
+          onUpdateCustomGame={
+            customGameId
+              ? async (name, config, extras) => {
+                  await update(customGameId, config, name, extras);
+                }
+              : undefined
+          }
+          onDeleteCustomGame={
+            customGameId
+              ? async (id) => {
+                  await remove(id);
+                  await navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      configId: undefined,
+                    }),
+                  });
+                }
+              : undefined
+          }
+          existingCustomGameNames={existingCustomGameNames}
+          isBookmarked={isBookmarked(bookmarkTarget)}
+          onToggleBookmark={() => void toggle(bookmarkTarget)}
+        />
+        {debugPanel}
+      </>
     );
   }
 
   return (
-    <WordSpell
-      key={cfg.inputMethod}
-      config={cfg}
-      initialState={draftState ?? undefined}
-      sessionId={sessionId}
-      seed={seed}
-      persistedContent={persistedContent}
-    />
+    <>
+      <WordSpell
+        key={cfg.inputMethod}
+        config={cfg}
+        initialState={draftState ?? undefined}
+        sessionId={sessionId}
+        seed={seed}
+        persistedContent={persistedContent}
+      />
+      {debugPanel}
+    </>
   );
 };
 
@@ -497,6 +530,7 @@ const NumberMatchGameBody = ({
   customGameName,
   customGameColor,
   customGameCover,
+  debug,
 }: {
   gameId: string;
   sessionId: string;
@@ -507,6 +541,7 @@ const NumberMatchGameBody = ({
   customGameName: string | null;
   customGameColor: string | null;
   customGameCover: Cover | null;
+  debug: boolean;
 }): JSX.Element => {
   const { t } = useTranslation('games');
   const { save, update, remove, customGames } = useCustomGames();
@@ -536,63 +571,93 @@ const NumberMatchGameBody = ({
     cfg as unknown as Record<string, unknown>,
   );
 
+  const debugPanel = debug ? (
+    <DebugPanel
+      gameId={gameId}
+      resolvedConfig={cfg as unknown as Record<string, unknown>}
+      rawSavedConfig={gameSpecificConfig}
+      customGame={{
+        id: customGameId,
+        name: customGameName,
+        color: customGameColor,
+        cover: customGameCover,
+      }}
+      session={{
+        sessionId,
+        seed,
+        hasDraftState: draftState !== null,
+        hasPersistedContent: false,
+      }}
+      rounds={cfg.rounds as unknown[]}
+    />
+  ) : null;
+
   if (showInstructions) {
     return (
-      <InstructionsOverlay
-        text={t('instructions.number-match')}
-        onStart={() => setShowInstructions(false)}
-        ttsEnabled={cfg.ttsEnabled}
-        gameTitle={t('number-match')}
-        gameId={gameId}
-        cover={customGameCover ?? undefined}
-        customGameId={customGameId ?? undefined}
-        customGameName={customGameName ?? undefined}
-        customGameColor={
-          (customGameColor ?? undefined) as GameColorKey | undefined
-        }
-        config={cfg as unknown as Record<string, unknown>}
-        onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
-        onSaveCustomGame={async ({ name, color, config, cover }) =>
-          save({
-            gameId,
-            name,
-            color,
-            config,
-            cover,
-          })
-        }
-        onUpdateCustomGame={
-          customGameId
-            ? async (name, config, extras) => {
-                await update(customGameId, config, name, extras);
-              }
-            : undefined
-        }
-        onDeleteCustomGame={
-          customGameId
-            ? async (id) => {
-                await remove(id);
-                await navigate({
-                  search: (prev) => ({ ...prev, configId: undefined }),
-                });
-              }
-            : undefined
-        }
-        existingCustomGameNames={existingCustomGameNames}
-        isBookmarked={isBookmarked(bookmarkTarget)}
-        onToggleBookmark={() => void toggle(bookmarkTarget)}
-      />
+      <>
+        <InstructionsOverlay
+          text={t('instructions.number-match')}
+          onStart={() => setShowInstructions(false)}
+          ttsEnabled={cfg.ttsEnabled}
+          gameTitle={t('number-match')}
+          gameId={gameId}
+          cover={customGameCover ?? undefined}
+          customGameId={customGameId ?? undefined}
+          customGameName={customGameName ?? undefined}
+          customGameColor={
+            (customGameColor ?? undefined) as GameColorKey | undefined
+          }
+          config={cfg as unknown as Record<string, unknown>}
+          onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
+          onSaveCustomGame={async ({ name, color, config, cover }) =>
+            save({
+              gameId,
+              name,
+              color,
+              config,
+              cover,
+            })
+          }
+          onUpdateCustomGame={
+            customGameId
+              ? async (name, config, extras) => {
+                  await update(customGameId, config, name, extras);
+                }
+              : undefined
+          }
+          onDeleteCustomGame={
+            customGameId
+              ? async (id) => {
+                  await remove(id);
+                  await navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      configId: undefined,
+                    }),
+                  });
+                }
+              : undefined
+          }
+          existingCustomGameNames={existingCustomGameNames}
+          isBookmarked={isBookmarked(bookmarkTarget)}
+          onToggleBookmark={() => void toggle(bookmarkTarget)}
+        />
+        {debugPanel}
+      </>
     );
   }
 
   return (
-    <NumberMatch
-      key={cfg.inputMethod}
-      config={cfg}
-      initialState={draftState ?? undefined}
-      sessionId={sessionId}
-      seed={seed}
-    />
+    <>
+      <NumberMatch
+        key={cfg.inputMethod}
+        config={cfg}
+        initialState={draftState ?? undefined}
+        sessionId={sessionId}
+        seed={seed}
+      />
+      {debugPanel}
+    </>
   );
 };
 
@@ -606,6 +671,7 @@ const SortNumbersGameBody = ({
   customGameName,
   customGameColor,
   customGameCover,
+  debug,
 }: {
   gameId: string;
   sessionId: string;
@@ -616,6 +682,7 @@ const SortNumbersGameBody = ({
   customGameName: string | null;
   customGameColor: string | null;
   customGameCover: Cover | null;
+  debug: boolean;
 }): JSX.Element => {
   const { t } = useTranslation('games');
   const { save, update, remove, customGames } = useCustomGames();
@@ -645,63 +712,93 @@ const SortNumbersGameBody = ({
     cfg as unknown as Record<string, unknown>,
   );
 
+  const debugPanel = debug ? (
+    <DebugPanel
+      gameId={gameId}
+      resolvedConfig={cfg as unknown as Record<string, unknown>}
+      rawSavedConfig={gameSpecificConfig}
+      customGame={{
+        id: customGameId,
+        name: customGameName,
+        color: customGameColor,
+        cover: customGameCover,
+      }}
+      session={{
+        sessionId,
+        seed,
+        hasDraftState: draftState !== null,
+        hasPersistedContent: false,
+      }}
+      rounds={cfg.rounds as unknown[]}
+    />
+  ) : null;
+
   if (showInstructions) {
     return (
-      <InstructionsOverlay
-        text={t('instructions.sort-numbers')}
-        onStart={() => setShowInstructions(false)}
-        ttsEnabled={cfg.ttsEnabled}
-        gameTitle={t('sort-numbers')}
-        gameId={gameId}
-        cover={customGameCover ?? undefined}
-        customGameId={customGameId ?? undefined}
-        customGameName={customGameName ?? undefined}
-        customGameColor={
-          (customGameColor ?? undefined) as GameColorKey | undefined
-        }
-        config={cfg as unknown as Record<string, unknown>}
-        onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
-        onSaveCustomGame={async ({ name, color, config, cover }) =>
-          save({
-            gameId,
-            name,
-            color,
-            config,
-            cover,
-          })
-        }
-        onUpdateCustomGame={
-          customGameId
-            ? async (name, config, extras) => {
-                await update(customGameId, config, name, extras);
-              }
-            : undefined
-        }
-        onDeleteCustomGame={
-          customGameId
-            ? async (id) => {
-                await remove(id);
-                await navigate({
-                  search: (prev) => ({ ...prev, configId: undefined }),
-                });
-              }
-            : undefined
-        }
-        existingCustomGameNames={existingCustomGameNames}
-        isBookmarked={isBookmarked(bookmarkTarget)}
-        onToggleBookmark={() => void toggle(bookmarkTarget)}
-      />
+      <>
+        <InstructionsOverlay
+          text={t('instructions.sort-numbers')}
+          onStart={() => setShowInstructions(false)}
+          ttsEnabled={cfg.ttsEnabled}
+          gameTitle={t('sort-numbers')}
+          gameId={gameId}
+          cover={customGameCover ?? undefined}
+          customGameId={customGameId ?? undefined}
+          customGameName={customGameName ?? undefined}
+          customGameColor={
+            (customGameColor ?? undefined) as GameColorKey | undefined
+          }
+          config={cfg as unknown as Record<string, unknown>}
+          onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
+          onSaveCustomGame={async ({ name, color, config, cover }) =>
+            save({
+              gameId,
+              name,
+              color,
+              config,
+              cover,
+            })
+          }
+          onUpdateCustomGame={
+            customGameId
+              ? async (name, config, extras) => {
+                  await update(customGameId, config, name, extras);
+                }
+              : undefined
+          }
+          onDeleteCustomGame={
+            customGameId
+              ? async (id) => {
+                  await remove(id);
+                  await navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      configId: undefined,
+                    }),
+                  });
+                }
+              : undefined
+          }
+          existingCustomGameNames={existingCustomGameNames}
+          isBookmarked={isBookmarked(bookmarkTarget)}
+          onToggleBookmark={() => void toggle(bookmarkTarget)}
+        />
+        {debugPanel}
+      </>
     );
   }
 
   return (
-    <SortNumbers
-      key={cfg.inputMethod}
-      config={cfg}
-      initialState={draftState ?? undefined}
-      sessionId={sessionId}
-      seed={seed}
-    />
+    <>
+      <SortNumbers
+        key={cfg.inputMethod}
+        config={cfg}
+        initialState={draftState ?? undefined}
+        sessionId={sessionId}
+        seed={seed}
+      />
+      {debugPanel}
+    </>
   );
 };
 
@@ -716,6 +813,7 @@ const GameBody = ({
   customGameColor,
   customGameCover,
   persistedContent,
+  debug,
 }: {
   gameId: string;
   sessionId: string;
@@ -727,6 +825,7 @@ const GameBody = ({
   customGameColor: string | null;
   customGameCover: Cover | null;
   persistedContent: Record<string, unknown> | null;
+  debug: boolean;
 }): JSX.Element => {
   if (gameId === 'sort-numbers') {
     return (
@@ -740,6 +839,7 @@ const GameBody = ({
         customGameName={customGameName}
         customGameColor={customGameColor}
         customGameCover={customGameCover}
+        debug={debug}
       />
     );
   }
@@ -757,6 +857,7 @@ const GameBody = ({
         customGameColor={customGameColor}
         customGameCover={customGameCover}
         persistedContent={persistedContent}
+        debug={debug}
       />
     );
   }
@@ -773,6 +874,7 @@ const GameBody = ({
         customGameName={customGameName}
         customGameColor={customGameColor}
         customGameCover={customGameCover}
+        debug={debug}
       />
     );
   }
@@ -797,7 +899,8 @@ export const GameRoute = ({
   customGameColor,
   customGameCover,
   persistedContent,
-}: GameRouteLoaderData): JSX.Element => (
+  debug = false,
+}: GameRouteLoaderData & { debug?: boolean }): JSX.Element => (
   <GameShell
     config={config}
     moves={{}}
@@ -817,20 +920,33 @@ export const GameRoute = ({
       customGameColor={customGameColor}
       customGameCover={customGameCover}
       persistedContent={persistedContent}
+      debug={debug}
     />
   </GameShell>
 );
 
 const RouteComponent = (): JSX.Element => {
   const data = Route.useLoaderData();
-  return <GameRoute {...data} />;
+  const search = Route.useSearch();
+  return <GameRoute {...data} debug={search.debug === true} />;
 };
 
 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-  validateSearch: (search: Record<string, unknown>) => ({
-    configId:
-      typeof search.configId === 'string' ? search.configId : undefined,
-  }),
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { configId: string | undefined; debug?: true } => {
+    const debug =
+      search.debug === '1' ||
+      search.debug === 'true' ||
+      search.debug === true;
+    return {
+      configId:
+        typeof search.configId === 'string'
+          ? search.configId
+          : undefined,
+      ...(debug ? { debug: true as const } : {}),
+    };
+  },
   loaderDeps: ({ search }) => ({ configId: search.configId }),
   loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
     const { gameId } = params;
