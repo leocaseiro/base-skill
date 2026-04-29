@@ -82,7 +82,7 @@ describe('DebugPanel', () => {
       screen.getByRole('button', { name: /open debug panel/i }),
     );
     expect(
-      screen.getByText(/library or generator returned 0/i),
+      screen.getByText(/library or generator samples at runtime/i),
     ).toBeInTheDocument();
   });
 
