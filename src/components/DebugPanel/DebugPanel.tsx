@@ -350,13 +350,7 @@ export const DebugPanel = ({
               </Section>
             ) : null}
             {librarySource.source ? (
-              <Section
-                title={`Library Source${
-                  libraryPreview.loading
-                    ? ' (loading…)'
-                    : ` (${libraryPreview.hitCount} matches)`
-                }`}
-              >
+              <Section title="Library Source">
                 <JsonBlock
                   label="librarySource"
                   value={{
@@ -366,9 +360,17 @@ export const DebugPanel = ({
                     roundsInOrder: librarySource.roundsInOrder,
                   }}
                 />
-                <p className="mb-1 mt-2 font-semibold text-zinc-300">
-                  Matched words from library
-                </p>
+              </Section>
+            ) : null}
+            {librarySource.source ? (
+              <Section
+                title={`Library Words${
+                  libraryPreview.loading
+                    ? ' (loading…)'
+                    : ` (${libraryPreview.hitCount} matches)`
+                }`}
+                defaultOpen
+              >
                 {libraryPreview.error ? (
                   <Empty label={`(error: ${libraryPreview.error})`} />
                 ) : libraryPreview.loading ? (
@@ -397,7 +399,7 @@ export const DebugPanel = ({
                         .join(', ')}
                     </p>
                     <ul className="space-y-0.5 font-mono text-[11px]">
-                      {libraryPreview.hits.slice(0, 100).map((h) => (
+                      {libraryPreview.hits.map((h) => (
                         <li
                           key={h.word}
                           className="flex justify-between text-zinc-200"
@@ -408,11 +410,6 @@ export const DebugPanel = ({
                           </span>
                         </li>
                       ))}
-                      {libraryPreview.hitCount > 100 ? (
-                        <li className="italic text-zinc-500">
-                          …and {libraryPreview.hitCount - 100} more
-                        </li>
-                      ) : null}
                     </ul>
                   </>
                 )}
