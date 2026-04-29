@@ -6,7 +6,16 @@ import type { DebugPanelProps } from './DebugPanel';
 vi.mock('./useStorageSnapshot', () => ({
   useStorageSnapshot: () => ({
     localStorage: [{ key: 'app:setting', size: 12, preview: 'abc' }],
-    collections: [{ name: 'custom_games', count: 2 }],
+    collections: [
+      {
+        name: 'custom_games',
+        count: 2,
+        docs: [
+          { id: 'cg-1', name: 'Game 1' },
+          { id: 'cg-2', name: 'Game 2' },
+        ],
+      },
+    ],
     loading: false,
     error: null,
   }),
@@ -193,6 +202,20 @@ describe('DebugPanel', () => {
     );
 
     log.mockRestore();
+  });
+
+  it('dumps IndexedDB collection documents in the Storage section', () => {
+    render(<DebugPanel {...baseProps} />);
+    fireEvent.click(
+      screen.getByRole('button', { name: /open debug panel/i }),
+    );
+    expect(screen.getByText(/cg-1/)).toBeInTheDocument();
+    expect(screen.getByText(/Game 1/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {
+        name: /copy idb:custom_games to clipboard/i,
+      }),
+    ).toBeInTheDocument();
   });
 
   it('collapses back when the close button is clicked', () => {

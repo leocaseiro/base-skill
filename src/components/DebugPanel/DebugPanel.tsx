@@ -368,17 +368,36 @@ export const DebugPanel = ({
                   ) : storage.collections.length === 0 ? (
                     <Empty label="(none)" />
                   ) : (
-                    <ul className="mb-3 space-y-0.5">
+                    <div className="mb-3 space-y-1">
                       {storage.collections.map((c) => (
-                        <li
+                        <details
                           key={c.name}
-                          className="flex justify-between font-mono text-[11px]"
+                          className="rounded bg-zinc-950"
                         >
-                          <span>{c.name}</span>
-                          <span>{c.count}</span>
-                        </li>
+                          <summary className="flex cursor-pointer select-none justify-between px-2 py-1 font-mono text-[11px] text-zinc-200 hover:bg-zinc-900">
+                            <span>{c.name}</span>
+                            <span className="text-zinc-400">
+                              {c.count}
+                            </span>
+                          </summary>
+                          <div className="px-2 pb-2">
+                            {c.count === 0 ? (
+                              <Empty label="(empty)" />
+                            ) : (
+                              <>
+                                <JsonActions
+                                  label={`idb:${c.name}`}
+                                  value={c.docs}
+                                />
+                                <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-zinc-900 p-2 font-mono text-[11px] leading-snug text-zinc-100">
+                                  {JSON.stringify(c.docs, null, 2)}
+                                </pre>
+                              </>
+                            )}
+                          </div>
+                        </details>
                       ))}
-                    </ul>
+                    </div>
                   )}
                   <p className="mb-1 font-semibold text-zinc-300">
                     localStorage ({storage.localStorage.length} keys)
