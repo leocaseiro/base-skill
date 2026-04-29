@@ -153,6 +153,22 @@ const RoundsTable = ({
   );
 };
 
+const extractLiveRounds = (
+  gameId: string,
+  persistedContent: unknown,
+): unknown[] | null => {
+  if (gameId !== 'word-spell') return null;
+  if (
+    typeof persistedContent !== 'object' ||
+    persistedContent === null
+  ) {
+    return null;
+  }
+  const live = (persistedContent as { wordSpellRounds?: unknown })
+    .wordSpellRounds;
+  return Array.isArray(live) ? live : null;
+};
+
 const extractLibrarySource = (
   resolvedConfig: Record<string, unknown>,
 ): {
@@ -190,6 +206,10 @@ export const DebugPanel = ({
   const librarySource = useMemo(
     () => extractLibrarySource(resolvedConfig),
     [resolvedConfig],
+  );
+  const liveRounds = useMemo(
+    () => extractLiveRounds(gameId, session.persistedContent),
+    [gameId, session.persistedContent],
   );
   const libraryPreview = useLibraryPreview(
     open && librarySource.filter !== null,
@@ -256,6 +276,15 @@ export const DebugPanel = ({
             <Section title="Session">
               <JsonBlock label="session" value={session} />
             </Section>
+            {liveRounds && liveRounds.length > 0 ? (
+              <Section
+                title={`Live Rounds in session (${liveRounds.length})`}
+                defaultOpen
+              >
+                <JsonActions label="liveRounds" value={liveRounds} />
+                <RoundsTable gameId={gameId} rounds={liveRounds} />
+              </Section>
+            ) : null}
             {librarySource.source ? (
               <Section
                 title={`Library Source${
