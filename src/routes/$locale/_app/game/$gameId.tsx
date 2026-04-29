@@ -970,7 +970,8 @@ export const GameRoute = ({
 const RouteComponent = (): JSX.Element => {
   const data = Route.useLoaderData();
   const search = Route.useSearch();
-  return <GameRoute {...data} debug={search.debug === true} />;
+  const debug = search.debug === true || import.meta.env.DEV;
+  return <GameRoute {...data} debug={debug} />;
 };
 
 export const Route = createFileRoute('/$locale/_app/game/$gameId')({

@@ -244,7 +244,7 @@ export const DebugPanel = ({
   const node = (
     <div
       data-testid="debug-panel"
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-end p-4 sm:inset-x-auto sm:right-4"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-start p-4 sm:inset-x-auto sm:left-4"
     >
       {open ? (
         <div className="pointer-events-auto flex max-h-[80vh] w-full flex-col overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-100 shadow-xl sm:w-[480px]">
