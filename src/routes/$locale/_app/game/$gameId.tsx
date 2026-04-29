@@ -111,7 +111,10 @@ const DEFAULT_RECALL_CONFIG: WordSpellConfig = {
     filter: {
       region: 'aus',
       graphemesAllowed: cumulativeGraphemes(1),
-      phonemesRequired: defaultSelection().map((u) => u.p),
+      graphemesRequired: defaultSelection().map((u) => ({
+        g: u.g,
+        p: u.p,
+      })),
     },
   },
 };
@@ -229,7 +232,12 @@ export const resolveWordSpellConfig = (
   if (!saved || saved.component !== 'WordSpell') return baseClone;
 
   // Simple-mode: delegate to word-spell's library-source resolver.
-  if (saved.configMode === 'simple') {
+  // Any config with selectedUnits was produced by the picker and must be
+  // re-resolved so source.filter stays in sync with the selection.
+  if (
+    saved.configMode === 'simple' ||
+    Array.isArray(saved.selectedUnits)
+  ) {
     const savedInput = saved.inputMethod;
     return resolveWordSpellSimpleConfig({
       configMode: 'simple',

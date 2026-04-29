@@ -95,6 +95,54 @@ describe('resolveWordSpellConfig — mode-driven defaults', () => {
     expect(resolved.rounds ?? []).toEqual([]);
   });
 
+  it('regression: re-derives source.filter from selectedUnits when saved has stale L1 filter', () => {
+    const saved = {
+      component: 'WordSpell',
+      inputMethod: 'drag',
+      mode: 'recall',
+      selectedUnits: [
+        { g: 'sh', p: 'ʃ' },
+        { g: 'ch', p: 'tʃ' },
+        { g: 'th', p: 'θ' },
+        { g: 'th', p: 'ð' },
+        { g: 'qu', p: 'kw' },
+        { g: 'ng', p: 'ŋ' },
+        { g: 'wh', p: 'w' },
+        { g: 'ph', p: 'f' },
+        { g: 'g', p: 'dʒ' },
+        { g: 'c', p: 's' },
+      ],
+      source: {
+        type: 'word-library',
+        filter: {
+          region: 'aus',
+          graphemesAllowed: [
+            { g: 's', p: 's' },
+            { g: 'a', p: 'æ' },
+            { g: 't', p: 't' },
+            { g: 'p', p: 'p' },
+            { g: 'i', p: 'ɪ' },
+            { g: 'n', p: 'n' },
+          ],
+          phonemesRequired: ['s', 'æ', 't', 'p', 'ɪ', 'n'],
+        },
+      },
+    };
+
+    const resolved = resolveWordSpellConfig(saved);
+
+    const required = resolved.source?.filter.graphemesRequired ?? [];
+    expect(required.some((u) => u.g === 'sh' && u.p === 'ʃ')).toBe(
+      true,
+    );
+    expect(required.some((u) => u.g === 'c' && u.p === 's')).toBe(true);
+
+    expect(resolved.source?.filter.phonemesRequired).toBeUndefined();
+
+    const allowed = resolved.source?.filter.graphemesAllowed ?? [];
+    expect(allowed.some((u) => u.g === 'sh' && u.p === 'ʃ')).toBe(true);
+  });
+
   it('drops source when picture mode is explicitly chosen', () => {
     const saved = {
       component: 'WordSpell',
