@@ -533,6 +533,7 @@ const FiltersPanel = ({
               graphemesRequired: next.length > 0 ? next : undefined,
             }))
           }
+
           phonemesAllowed={filter.phonemesAllowed ?? []}
           onPhonemesAllowedChange={(next) =>
             setFilter((f) => ({
@@ -548,6 +549,7 @@ const FiltersPanel = ({
             }))
           }
         />
+
       </CardContent>
     </Card>
   );
@@ -663,7 +665,7 @@ export const WordLibraryExplorer = () => {
   // Reset to page 1 when any pagination input changes. Using React's
   // "adjust state during render" pattern instead of an effect to avoid
   // cascading re-renders (react-hooks/set-state-in-effect).
-  const resetKey = `${filter.region}|${(filter.levels ?? []).join(',')}|${(filter.levelRange ?? []).join('-')}|${filter.syllableCountEq ?? ''}|${(filter.syllableCountRange ?? []).join('-')}|${filter.fallbackToAus}|${(filter.graphemesAllowed ?? []).join(',')}|${(filter.graphemesRequired ?? []).join(',')}|${(filter.phonemesAllowed ?? []).join(',')}|${(filter.phonemesRequired ?? []).join(',')}|${graphemePairs.map((p) => p.label).join(',')}|${wordPrefix.trim().toLowerCase()}|${pageSize}`;
+  const resetKey = `${filter.region}|${(filter.levels ?? []).join(',')}|${(filter.levelRange ?? []).join('-')}|${filter.syllableCountEq ?? ''}|${(filter.syllableCountRange ?? []).join('-')}|${filter.fallbackToAus}|${(filter.graphemesAllowed ?? []).map((u) => `${u.g}|${u.p}`).join(',')}|${(filter.graphemesRequired ?? []).map((u) => `${u.g}|${u.p}`).join(',')}|${(filter.phonemesAllowed ?? []).join(',')}|${(filter.phonemesRequired ?? []).join(',')}|${graphemePairs.map((p) => p.label).join(',')}|${wordPrefix.trim().toLowerCase()}|${pageSize}`;
   const [prevResetKey, setPrevResetKey] = useState(resetKey);
   if (resetKey !== prevResetKey) {
     setPrevResetKey(resetKey);
@@ -1002,19 +1004,22 @@ interface AdvancedSectionProps {
   phonemeOptions: readonly string[];
   graphemePairs: readonly GraphemePair[];
   onGraphemePairsChange: (next: GraphemePair[]) => void;
-  graphemesAllowed: readonly string[];
-  onGraphemesAllowedChange: (next: string[]) => void;
-  graphemesRequired: readonly string[];
-  onGraphemesRequiredChange: (next: string[]) => void;
+  graphemesAllowed: readonly { g: string; p: string }[];
+  onGraphemesAllowedChange: (next: GraphemePair[]) => void;
+  graphemesRequired: readonly { g: string; p: string }[];
+  onGraphemesRequiredChange: (next: GraphemePair[]) => void;
   phonemesAllowed: readonly string[];
   onPhonemesAllowedChange: (next: string[]) => void;
   phonemesRequired: readonly string[];
   onPhonemesRequiredChange: (next: string[]) => void;
 }
 
+const toPairs = (xs: readonly { g: string; p: string }[]): GraphemePair[] =>
+  xs.map((u) => ({ g: u.g, p: u.p, label: pairLabel(u.g, u.p) }));
+
 const AdvancedSection = ({
   pairOptions,
-  graphemeOptions,
+  graphemeOptions: _graphemeOptions,
   phonemeOptions,
   graphemePairs,
   onGraphemePairsChange,
@@ -1039,18 +1044,18 @@ const AdvancedSection = ({
         selected={graphemePairs}
         onChange={onGraphemePairsChange}
       />
-      <MultiSelectString
+      <MultiSelectPairs
         label="Graphemes allowed"
-        helper="Hit's graphemes must all be in this set."
-        options={graphemeOptions}
-        selected={graphemesAllowed}
+        helper="Hit's grapheme-phoneme pairs must all be in this set."
+        options={pairOptions}
+        selected={toPairs(graphemesAllowed)}
         onChange={onGraphemesAllowedChange}
       />
-      <MultiSelectString
+      <MultiSelectPairs
         label="Graphemes required"
-        helper="Hit must contain at least one of these."
-        options={graphemeOptions}
-        selected={graphemesRequired}
+        helper="Hit must contain at least one of these pairs."
+        options={pairOptions}
+        selected={toPairs(graphemesRequired)}
         onChange={onGraphemesRequiredChange}
       />
       <MultiSelectString
