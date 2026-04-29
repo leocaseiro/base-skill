@@ -96,13 +96,13 @@ const headerBgClass = (
       return 'bg-primary text-primary-foreground';
     }
     case 'partial': {
-      return 'bg-primary/40 text-primary-foreground';
+      return 'bg-primary/40 text-foreground';
     }
     case 'tiles-only': {
-      return 'bg-muted text-foreground/80';
+      return 'bg-muted text-foreground';
     }
     case 'not-in-scope': {
-      return 'bg-muted/40 text-foreground/50';
+      return 'bg-muted/40 text-muted-foreground';
     }
   }
 };
@@ -149,7 +149,7 @@ const LevelRow = ({
         className={`flex items-center justify-between rounded-md px-3 py-2 text-sm font-semibold ${headerBgClass(state)}`}
       >
         <span>Level {level}</span>
-        <span className="text-xs font-normal opacity-80">
+        <span className="text-xs font-normal">
           {headerSubtitle(state)}
         </span>
       </button>
