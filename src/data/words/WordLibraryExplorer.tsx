@@ -533,7 +533,6 @@ const FiltersPanel = ({
               graphemesRequired: next.length > 0 ? next : undefined,
             }))
           }
-
           phonemesAllowed={filter.phonemesAllowed ?? []}
           onPhonemesAllowedChange={(next) =>
             setFilter((f) => ({
@@ -549,7 +548,6 @@ const FiltersPanel = ({
             }))
           }
         />
-
       </CardContent>
     </Card>
   );
@@ -1014,7 +1012,9 @@ interface AdvancedSectionProps {
   onPhonemesRequiredChange: (next: string[]) => void;
 }
 
-const toPairs = (xs: readonly { g: string; p: string }[]): GraphemePair[] =>
+const toPairs = (
+  xs: readonly { g: string; p: string }[],
+): GraphemePair[] =>
   xs.map((u) => ({ g: u.g, p: u.p, label: pairLabel(u.g, u.p) }));
 
 const AdvancedSection = ({
