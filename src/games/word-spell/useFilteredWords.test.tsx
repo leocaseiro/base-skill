@@ -1,18 +1,20 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { useFilteredWords } from './useFilteredWords';
-import { __resetChunkCacheForTests } from '@/data/words';
+import { __resetChunkCacheForTests, GRAPHEMES_BY_LEVEL } from '@/data/words';
 
 afterEach(() => {
   __resetChunkCacheForTests();
 });
+
+const L1_PAIRS = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
 
 describe('useFilteredWords', () => {
   it('returns isLoading=true on first render and resolves to hits', async () => {
     const { result } = renderHook(() =>
       useFilteredWords({
         region: 'aus',
-        graphemesAllowed: ['s', 'a', 't', 'p', 'i', 'n'],
+        graphemesAllowed: L1_PAIRS,
         phonemesRequired: ['s'],
       }),
     );
@@ -31,7 +33,7 @@ describe('useFilteredWords', () => {
       ({ phonemesRequired }: { phonemesRequired: string[] }) =>
         useFilteredWords({
           region: 'aus',
-          graphemesAllowed: ['s', 'a', 't', 'p', 'i', 'n'],
+          graphemesAllowed: L1_PAIRS,
           phonemesRequired,
         }),
       { initialProps: { phonemesRequired: ['s'] } },
@@ -54,7 +56,7 @@ describe('useFilteredWords', () => {
     const { result } = renderHook(() =>
       useFilteredWords({
         region: 'aus',
-        graphemesAllowed: ['s'],
+        graphemesAllowed: [{ g: 's', p: 's' }],
         phonemesRequired: ['xx_nonexistent'],
       }),
     );

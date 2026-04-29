@@ -51,7 +51,7 @@ describe('mode-default invariant', () => {
         type: 'word-library',
         filter: {
           region: 'aus',
-          graphemesAllowed: ['s'],
+          graphemesAllowed: [{ g: 's', p: 's' }],
           phonemesRequired: ['s'],
         },
       },
@@ -66,7 +66,7 @@ describe('mode-default invariant', () => {
       mode: 'picture',
       source: {
         type: 'word-library',
-        filter: { region: 'aus', graphemesAllowed: ['s'] },
+        filter: { region: 'aus', graphemesAllowed: [{ g: 's', p: 's' }] },
       },
       rounds: [{ word: 'cat', emoji: '🐱' }],
     });

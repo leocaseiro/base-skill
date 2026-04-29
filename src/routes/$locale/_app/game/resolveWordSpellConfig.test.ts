@@ -74,7 +74,14 @@ describe('resolveWordSpellConfig — mode-driven defaults', () => {
         type: 'word-library',
         filter: {
           region: 'aus',
-          graphemesAllowed: ['s', 'a', 't', 'p', 'i', 'n'],
+          graphemesAllowed: [
+            { g: 's', p: 's' },
+            { g: 'a', p: 'æ' },
+            { g: 't', p: 't' },
+            { g: 'p', p: 'p' },
+            { g: 'i', p: 'ɪ' },
+            { g: 'n', p: 'n' },
+          ],
           phonemesRequired: ['s'],
         },
       },
@@ -94,7 +101,7 @@ describe('resolveWordSpellConfig — mode-driven defaults', () => {
       mode: 'picture',
       source: {
         type: 'word-library',
-        filter: { region: 'aus', graphemesAllowed: ['s'] },
+        filter: { region: 'aus', graphemesAllowed: [{ g: 's', p: 's' }] },
       },
       totalRounds: 4,
     };
