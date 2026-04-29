@@ -226,15 +226,25 @@ test('WordSpell resume discards a drifted draft and recovers to round 0', async 
     return labels.map((label) => label.toLowerCase()).toSorted();
   };
 
-  // Drag the `c` tile into slot 1 so we have a realistic mid-round draft
-  // before we inject drift. This proves the reset path actually clears
-  // placements (not just tile labels) on recovery — a clean-slate test
-  // would pass even if the safety net forgot to reset zones.
-  const cTile = page.getByRole('button', { name: 'Letter c' });
+  // Capture the initial round 0 letters before we tamper with state. The
+  // default mode (recall + library) is no longer pinned to `cat`, so the
+  // assertion has to be mode-agnostic: whatever letters round 0 has, the
+  // safety net must restore exactly those.
+  const round0Letters = await sortedLabels();
+  expect(round0Letters.length).toBeGreaterThan(0);
+
+  // Drag any tile into slot 1 so we have a realistic mid-round draft before
+  // we inject drift. This proves the reset path actually clears placements
+  // (not just tile labels) on recovery — a clean-slate test would pass even
+  // if the safety net forgot to reset zones.
+  const firstLetter = round0Letters[0]!;
+  const firstTile = page.getByRole('button', {
+    name: `Letter ${firstLetter}`,
+  });
   const slot1Empty = page.getByRole('listitem', {
     name: /^Slot 1, empty/i,
   });
-  const tileBox = await cTile.boundingBox();
+  const tileBox = await firstTile.boundingBox();
   const slotBox = await slot1Empty.boundingBox();
   if (!tileBox || !slotBox) {
     throw new Error('tile or slot bounding box not resolved');
@@ -252,7 +262,9 @@ test('WordSpell resume discards a drifted draft and recovers to round 0', async 
   await page.mouse.up();
 
   await expect(
-    page.getByRole('listitem', { name: /^Slot 1, filled with c/i }),
+    page.getByRole('listitem', {
+      name: new RegExp(`^Slot 1, filled with ${firstLetter}`, 'i'),
+    }),
   ).toBeVisible();
 
   // Wait past useAnswerGameDraftSync's 500 ms debounce + the initialContent
@@ -270,14 +282,14 @@ test('WordSpell resume discards a drifted draft and recovers to round 0', async 
   await page.getByRole('main').waitFor({ state: 'visible' });
   await expect(tiles.first()).toBeVisible();
 
-  // Round 0 of the default pool is `cat` → sorted letters [a, c, t]. The
-  // drifted draft carried [a, n, p, t] at roundIndex 2 — if the safety net
-  // failed we would see those letters on the bank instead.
+  // The drifted draft carried [a, n, p, t] at roundIndex 2 — if the safety
+  // net failed we would see those letters on the bank instead. After the
+  // safety net fires, tiles must return to whatever round 0 was originally.
   await expect
     .poll(async () => await sortedLabels(), {
       message: 'tiles should recover to round 0 letters after drift',
     })
-    .toEqual(['a', 'c', 't']);
+    .toEqual(round0Letters);
 
   // Every slot must be empty — the safety net has to drop the drifted
   // placements, not just relabel them.
