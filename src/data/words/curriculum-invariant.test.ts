@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { filterWords } from './filter';
-import { ALL_REGIONS, GRAPHEMES_BY_LEVEL, cumulativeGraphemes } from './levels';
+import {
+  ALL_REGIONS,
+  GRAPHEMES_BY_LEVEL,
+  cumulativeGraphemes,
+} from './levels';
 import type { GraphemePairFilter } from './types';
 
 const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;

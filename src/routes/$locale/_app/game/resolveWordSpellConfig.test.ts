@@ -101,7 +101,10 @@ describe('resolveWordSpellConfig — mode-driven defaults', () => {
       mode: 'picture',
       source: {
         type: 'word-library',
-        filter: { region: 'aus', graphemesAllowed: [{ g: 's', p: 's' }] },
+        filter: {
+          region: 'aus',
+          graphemesAllowed: [{ g: 's', p: 's' }],
+        },
       },
       totalRounds: 4,
     };

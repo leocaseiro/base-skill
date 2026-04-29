@@ -17,7 +17,6 @@ const maxLevelOf = (units: readonly LevelGraphemeUnit[]): number => {
   return max;
 };
 
-
 const unitsFromLegacy = (
   raw: Record<string, unknown>,
 ): LevelGraphemeUnit[] => {

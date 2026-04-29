@@ -213,9 +213,8 @@ describe('filterWords (integration against seeded chunks)', () => {
   });
 
   it('Tier-2 filter excludes Tier-1-only words', async () => {
-    const { GRAPHEMES_BY_LEVEL, cumulativeGraphemes } = await import(
-      './levels'
-    );
+    const { GRAPHEMES_BY_LEVEL, cumulativeGraphemes } =
+      await import('./levels');
     const allowedPairs = cumulativeGraphemes(2);
     const result = await filterWords({
       region: 'aus',
