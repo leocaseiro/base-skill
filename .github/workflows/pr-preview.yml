@@ -37,6 +37,9 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.build == 'true'
     runs-on: ubuntu-latest
+    concurrency:
+      group: gh-pages-deploy
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v6
         with:
@@ -111,6 +114,9 @@ jobs:
           folder: preview-staging
           target-folder: pr/${{ steps.version.outputs.pr_number }}
           clean: true
+          clean-exclude: |
+            pr/**
+            !pr/${{ steps.version.outputs.pr_number }}/**
           commit-message: 'deploy: PR #${{ steps.version.outputs.pr_number }} preview (${{ steps.version.outputs.version }})'
 
       - name: Comment PR with preview URLs
